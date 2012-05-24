@@ -1,0 +1,118 @@
+\name{Analyse_SAR.OSLdata}
+\alias{Analyse_SAR.OSLdata}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{Analyse SAR CW-OSL measurements.}
+\description{
+Function analyses SAR CW-OSL curve data and provides a summary of the measured data for 
+every position. 
+}
+\usage{
+Analyse_SAR.OSLdata(input.data, signal.integral, background.integral, 
+                position, run, set, 
+                info.measurement="unkown measurement",
+                output.plot = FALSE,
+                cex.global = 1)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{input.data}{\link{Risoe.BINfileData-class} (\bold{required}): input data from a Risoe BIN file, produced 
+  by the function \link{readBIN2R}.
+}
+
+  \item{signal.integral}{\link{vector} (\bold{required}): channels used for the signal integral, 
+  	
+  e.g. \code{signal.integral=c(1:2)}
+
+}
+  \item{background.integral}{\link{vector} (\bold{required}): channels used for the background integral,
+  	 
+  e.g. \code{background.integral=c(85:100)}
+
+}
+  \item{position}{\link{vector} (optional): reader positions that have to be analysed (e.g. \code{position=c(1:48)}. 
+  Empty positions are automatically omitted.  If no value is given all positions are analysed by default.
+
+}
+  \item{run}{\link{vector} (optional): range of runs used for the analysis. If no value is given the range of the
+  runs in the sequence is deduced from the Risoe.BINfileData object.
+
+}
+  \item{set}{\link{vector} (optional): range of sets used for the analysis. If no value is given the range of the
+  sets in the sequence is deduced from the Risoe.BINfileData object.
+
+}
+
+  \item{info.measurement}{\link{character} (with default): option to provide information on the measurement 
+  which is plotted on the plot output (e.g. name of the BIN file).
+
+
+}
+
+  \item{output.plot}{\link{logical} (with default): plot output (\code{TRUE/FALSE})
+
+}
+
+  \item{cex.global}{\link{numeric} (with default): global scaling factor. 
+
+}
+}
+\details{
+The functions works only for standard SAR protocol measurements introduced by Murray and Wintle (2000)
+with CW-OSL curves. 
+For the calculation of the Lx/Tx value the function \link{Calc_OSLLxTxRatio} is used. \cr
+
+\bold{provided rejection criteria}\cr
+
+\sQuote{recyling ratio}: calculated for every repeated regeneration dose point.\cr
+
+\sQuote{recuperation}: recuperation rate calculated by comparing the Lx/Tx values of the zero regeneration point with the 
+Ln/Tn value (the Lx/Tx ratio of the natural signal). For methodological background see Aitken and Smith (1988)\cr
+
+\sQuote{IRSL/BOSL}: the integrated counts (\code{signal.integral}) of a IRSL curve are compared with the integrated 
+counts of the first regenerated dose point. It is assumed that IRSL curves got the same dose as the first 
+regenerated dose point. \strong{Note:} This is not the IR depletation ratio described by Duller (2003).
+
+}
+\value{
+A plot (optional) and \link{list} is returned containing the following elements: 
+\item{LnLxTnTx}{\link{data.frame} of all calculated Lx/Tx values including signal, background counts and the dose points.}
+\item{RejectionCriteria}{\link{data.frame} with values that might by used as rejection criteria. NA is produced if no R0 dose point 
+exists.}
+\item{SARParameters}{\link{data.frame} of additional measurement parameters obtained from the BIN file,
+e.g. preheat or reard temperature (not valid for all types of measurements).}
+}
+\references{
+Aitken, M.J. & Smith, B.W. (1988): Optical dating: recuperation after bleaching. Quaternary Science Reviews, 7, 387-393.
+
+Duller, G. (2003): Distinguishing quartz and feldspar in single grain luminescence measurements. Radiation Measurements, 37 (2), 161-165. 
+
+Murray, A.S. & Wintle, A.G. (2000): Luminescence dating of quartz using an improved single-aliquot regenerative-dose protocol. Radiation Measurements, 32, 57-73. 
+}
+\author{
+Sebastian Kreutzer, JLU Giessen, Germany 
+}
+\note{
+Rejection criteria are calculated but not considered during the analysis to discard values.
+}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+\link{Calc_OSLLxTxRatio}, \link{Risoe.BINfileData-class}, \link{readBIN2R} and for further analysis
+\link{plot_GrowthCurve}
+}
+\examples{
+data(ExampleData.BINfileData)
+output<-Analyse_SAR.OSLdata(input.data=BINfileData, 
+                    signal.integral=c(1:5), 
+                    background.integral=c(900:1000),
+                    position=c(1:1),output.plot=TRUE
+                    )
+
+
+
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{datagen}
+\keyword{dplot}
