@@ -37,12 +37,12 @@ Return a S4 \link{Risoe.BINfileData-class} object containing two slots:
 }
 \references{
 %% ~put references to the literature/web site here ~
-Duller, G. (2007). Analyst. 
+Duller, G., 2007. Analyst. 
 }
 \author{Sebastian Kreutzer, JLU Giessen, Germany}
 \note{
 %%  ~~further notes~~
-Function have been tested for BIN-file version 3 and 4. The version depends on used the Sequence Editor. 
+Function has been tested for BIN-file version 3 and 4. The version depends on used the Sequence Editor. 
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -52,7 +52,7 @@ Function have been tested for BIN-file version 3 and 4. The version depends on u
 \code{\link{readBin}}
 }
 \examples{
-##
+##readBIN2R("~/Desktop/Example.bin")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -29,7 +29,7 @@ plot_DeDistribution(values,main=expression(paste(D[e], " Distribution")),
  }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-##
+For details on the calculation of the bin-width (parameter \code{bw}) see \code{\link{density}}.
 }
 \value{
 %%  ~Describe the value returned
@@ -41,13 +41,13 @@ Returns a plot.
 }
 \references{
 %% ~put references to the literature/web site here ~
-Berger, G.W., 2010. An alternate form of probability-distribution plot for De values. Ancient TL 28, 11-21.
+Berger, G.W., 2010. An alternate form of probability-distribution plot for De values. Ancient TL 28, pp. 11-21.
 
-Berger, G.W., 2011. Response to Galbraith. Ancient TL 29, 48-50.
+Berger, G.W., 2011. Response to Galbraith. Ancient TL 29, pp. 48-50.
 
-Galbraith, R.F., 2011. Some comments arising from Berger (2010). Ancient TL 29, 41-47.
+Galbraith, R.F., 2011. Some comments arising from Berger (2010). Ancient TL 29, pp. 41-47.
 
-Galbraith, R.F., Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology 1-71.
+Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1-27.
 
 
 

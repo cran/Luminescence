@@ -13,7 +13,7 @@ ExampleData.DeValues
 }
 %- maybe also 'usage' for other objects documented here.
 \format{
-A data.frame with two columns.
+A data.frame with two columns (De and De.Error).
 } 
 
 \source{

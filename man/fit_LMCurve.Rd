@@ -6,7 +6,7 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Determine the nonlinear (weighted) least-squares estimates of the parameters of a LM curve (Bulur 1996) 
 for a given number of components and returns various component parameters.
-For the fitting procedure the \code{\link{nls}} function settling the \code{port} algorithm is used. 
+For the fitting procedure the \code{\link{nls}} function using the \code{port} algorithm is used. 
 }
 \usage{
 fit_LMCurve(values, values.bg, n.components=3, start_values,input.dataType="LM",
@@ -86,7 +86,7 @@ is used for the background subtraction:
 
 \deqn{y = a*x + b}
 
-\code{channel}: the background is subtracted channel by channel.\cr
+\code{channel}: the measured background signal is channelwise subtracted from the measured signal.\cr
 
 \bold{start values}
 
@@ -95,11 +95,11 @@ may mainly fail due to ill chosen start parameters. Here two options are provide
 
 \bold{(a)} If no start values (\code{start_values}) are provided by the user a cheap guess is tried by using 
 the detrapping values found by Jain et al. (2003) for quartz for a maximum of 7 components. Based
-on this values the pseudo start parameters xm and Im have been recalculated for the given data set. 
+on these values the pseudo start parameters xm and Im are recalculated for the given data set. 
 In all cases the fitting starts with the ultra-fast component and (deppending on \code{n.components})
-steps several times through the following values. If no fit could be achieved an error plot 
-(for \code{output.plot=TRUE}) with the pseudo curve (based on the pseudo start parameters) are provided.
-This may give the opportunity to search for the start parameters graphically.
+steps through the following values. If no fit could be achieved, an error plot 
+(for \code{output.plot=TRUE}) with the pseudo curve (based on the pseudo start parameters) is provided.
+This may give the opportunity to identify appropriate start parameters visually.
 
 \bold{(b)} If start values are prodided the function works like a simple \code{\link{nls}} fitting approach.
 
@@ -119,13 +119,13 @@ and \eqn{TSS = Total~Sum~of~Squares}
 
 \bold{error of fitted component parameters}
 
-The 1-sigma error for the components is calculated using the function \link{confint}. Due to the
-needed calculation time this option is deactived by default. In addition the error for the components 
-can be further estimated by using the internal R functions like \link{summary}.
+The 1-sigma error for the components is calculated using the function \link{confint}. Due to considerable
+calculation time this option is deactived by default. In addition the error for the components 
+can be estimated by using internal R functions like \link{summary}.
 See the \link{nls} help page for more information.
 
 
-\emph{For more details on the nonlinear regression in R see Ritz, C., Streibig, J.C. (2008).}
+\emph{For more details on the nonlinear regression in R see Ritz & Streibig (2008).}
 }
 \value{
 %%  ~Describe the value returned
@@ -139,7 +139,7 @@ if the \code{output.path} is set.}
 \item{\code{list} object}{beside the plot and table output options a \link{list} is returned. 
 The list contains: \cr
 
-(a) a \code{nls} object (\code{$fit}) for that generic methods are provided
+(a) a \code{nls} object (\code{$fit}) for which generic R functions are provided
 e.g. \link{summary}, \link{confint}, \link{profile} for more details see \link{nls}. \cr
 
 (b) a \link{data.frame} containing the summarized parameters including the 
@@ -149,20 +149,22 @@ error (\code{$output.table}).
 }
 \references{
 %% ~put references to the literature/web site here ~
-Bulur, E. (1996). An Alternative Technique For Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements, 26 (5), 701-709.
+Bulur, E., 1996. An Alternative Technique For Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements, 26 (5), 
+pp. 701-709.
 
-Jain, M., Murray, A.S., Boetter-Jensen, L. (2003). Characterisation of blue-light stimulated luminescence components in different quartz samples: implications for dose measurement. Radiation Measurements, 37 (4-5), 441-449. 
+Jain, M., Murray, A.S., Boetter-Jensen, L., 2003. Characterisation of blue-light stimulated luminescence components in different quartz samples: implications for dose measurement. Radiation Measurements, 37 (4-5), pp. 441-449. 
 
-Kitis, G., Pagonis, V. (2008). Computerized curve deconvolution analysis for LM-OSL. Radiation Measurements, 43, 737-741. 
+Kitis, G. & Pagonis, V., 2008. Computerized curve deconvolution analysis for LM-OSL. Radiation Measurements, 43, pp. 737-741. 
 
-Lave, C.A.T. (1970). The Demand for Urban Mass Transportation. The Review of Economics and Statistics, 52 (3), 320-323. 
+Lave, C.A.T., 1970. The Demand for Urban Mass Transportation. The Review of Economics and Statistics, 52 (3), pp. 320-323. 
 
-Ritz, C., Streibig, J.C. (2008). Nonlinear Regression with R. 1-150. 
+Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R R. Gentleman, K. Hornik, & G. Parmigiani, eds., Springer.
+
 }
 \author{Sebastian Kreutzer, JLU Giessen, Germany}
 \note{
 %%  ~~further notes~~
-The pseudo-R^2 may not the best coefficient to describe the goodness of the fit. The trade off 
+The pseudo-R^2 may not the best parameter to describe the goodness of the fit. The trade off 
 between the \code{n.components} and the pseudo-R^2 value has not yet been considered. 
 
 The function \bold{does not} ensure that the fitting procedure has reached a global minimum 

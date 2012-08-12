@@ -10,6 +10,7 @@ every position.
 Analyse_SAR.OSLdata(input.data, signal.integral, background.integral, 
                 position, run, set, 
                 info.measurement="unkown measurement",
+                log="",
                 output.plot = FALSE,
                 cex.global = 1)
 }
@@ -43,8 +44,12 @@ Analyse_SAR.OSLdata(input.data, signal.integral, background.integral,
 }
 
   \item{info.measurement}{\link{character} (with default): option to provide information on the measurement 
-  which is plotted on the plot output (e.g. name of the BIN file).
+  on the plot output (e.g. name of the BIN file).
 
+
+}
+
+  \item{log}{\link{character} (with default): a character string which contains "x" if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}).
 
 }
 
@@ -82,11 +87,11 @@ exists.}
 e.g. preheat or reard temperature (not valid for all types of measurements).}
 }
 \references{
-Aitken, M.J. & Smith, B.W. (1988): Optical dating: recuperation after bleaching. Quaternary Science Reviews, 7, 387-393.
+Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after bleaching. Quaternary Science Reviews, 7, pp. 387-393.
 
-Duller, G. (2003): Distinguishing quartz and feldspar in single grain luminescence measurements. Radiation Measurements, 37 (2), 161-165. 
+Duller, G., 2003. Distinguishing quartz and feldspar in single grain luminescence measurements. Radiation Measurements, 37 (2), pp. 161-165. 
 
-Murray, A.S. & Wintle, A.G. (2000): Luminescence dating of quartz using an improved single-aliquot regenerative-dose protocol. Radiation Measurements, 32, 57-73. 
+Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an improved single-aliquot regenerative-dose protocol. Radiation Measurements, 32, pp. 57-73. 
 }
 \author{
 Sebastian Kreutzer, JLU Giessen, Germany 

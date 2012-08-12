@@ -4,8 +4,8 @@
 ##======================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen
-#vers.: 0.1.4
-#date: 24/04/2012
+#vers.: 0.2
+#date: 30/07/2012
 ##======================================
 ##
 ## plot luminescence curves from bin file
@@ -14,6 +14,7 @@ plot_BINfileData<-function(BINfileData, #input BIN file
                           position, #set 
                           sorter="POSITION", #sort by POSITION or RUN
                           ltype=c("IRSL","OSL","TL","RIR","RBR"),
+                          dose_rate,
                           cex.global=1
                         ){
   
@@ -88,7 +89,20 @@ plot_BINfileData<-function(BINfileData, #input BIN file
       mtext(side=3, 
             if(temp@METADATA[i,"LTYPE"]=="TL"){paste("TL to ",temp@METADATA[i,"HIGH"], " deg. C",sep="")}
             else{paste(temp@METADATA[i,"LTYPE"],"@",temperature," deg. C",sep="")},          
-            cex=0.9*cex.global)             
+            cex=0.9*cex.global)      
+      
+     ##add mtext for irradiation
+     mtext(side=4,cex=0.8*cex.global, line=0.5,
+           if(temp@METADATA[i, "IRR_TIME"]!=0){
+             
+             if(missing("dose_rate")==TRUE){
+               paste("dose = ",temp@METADATA[i, "IRR_TIME"], " s", sep="") 
+             }else{
+               paste("dose = ",temp@METADATA[i, "IRR_TIME"]*dose_rate, " Gy", sep="") 
+             }
+           }
+         )#end mtext
+      
      }#endif::selection            
    }#endforloop
 }#EOF

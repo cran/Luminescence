@@ -4,8 +4,7 @@
 \title{Calculate Lx/Tx ratio for OSL curves.}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Calculate Lx/Tx ratios from two given OSL curves. The Lx/Tx values can be
-used for further analysis.
+Calculate Lx/Tx ratios from two given OSL curves. 
 
 }
 \usage{
@@ -39,19 +38,20 @@ Returns a \link{data.frame}.
 }
 \references{
 %% ~put references to the literature/web site here ~
-Galbraith, R.F. (2002): A note on the variance of a background-corrected OSL count. Ancient TL, 20 (2), 49-51. 
+Duller, G., 2007. Analyst.
+
+Galbraith, R.F., 2002. A note on the variance of a background-corrected OSL count. Ancient TL, 20 (2), 49-51.
 }
 \author{Sebastian Kreutzer, JLU Giessen, Germany}
 \note{
 %%  ~~further notes~~
-The results of this function have been tested with the Analyst software 3.24b
+The results of this function have been cross-checked with the Analyst (ves. 3.24b).
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-The output of this function can be further used by other functions: 
 
 \code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}}
 }

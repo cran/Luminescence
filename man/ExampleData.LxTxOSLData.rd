@@ -4,7 +4,7 @@
 \title{Example Lx and Tx curve data from a artificially OSL measurement.}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Lx and Tx curve.
+Lx and Tx data of continous wave (CW) signal curves.
 
 }
 \usage{

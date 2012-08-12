@@ -35,7 +35,7 @@ Returns a \link{data.frame} with converted values.
 %% ~put references to the literature/web site here ~
 ##
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany}
+\author{Sebastian Kreutzer, JLU Giessen (Germany), 2012}
 \note{
 %%  ~~further notes~~
 ##

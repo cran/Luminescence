@@ -1,16 +1,32 @@
-Changes for R-package Lumninescence
+Changes for R-package Luminescence
 
+Version 0.1.8 (August 12th, 2012)
+	- fit_LMCurve(): correct ignored global scaling factor for the optional background plot
+	- plot_GrowthCurve(): fix an error that occurred when Lx/Tx values are 0
+	- plot_GrowthCurve(): fix an error that occurred during the iteration process for the EXP+EXP and the EXP+LIN fit
+	- plot_GrowthCurve(): stabilize fitting for EXP+LIN and EXP+EXP functions
+	- plot_GrowthCurve(): add type of fit as well as D01 and D02 values as return values (additional columns within the output data.frame)
+	- plot_GrowthCurve(): minor graphical adjustments
+	- plot_BINfileData(): add irradiation time as mtext to the plots if IRR_TIME is set in the sequence
+	- plot_BINfileData(): introduce 'dose_rate' argument to show the dose in Gy instead the irradiation time
+	- Analyse_SAR.OSLdata(): fix an error that occurred for non zero-dose reg. points 
+	- Analyse_SAR.OSLdata(): fix an error for rare cases with wrong reg. point recognition
+	- Analyse_SAR.OSLdata(): increase number of allowed curves for plotting
+	- Analyse_SAR.OSLdata(): minor graphical output adjustments for the legends
+	- Analyse_SAR.OSLdata(): introduce "log" argument for the plot output
+	- Calc_FadingCorr(): introduce 'n.MCrun'" argument to control number of Monte Carlo runs for the error estimation
+	
 Version 0.1.7 (May 24th, 2012)
 	- Analyse_SAR.OSLdata(): correct error for cases in that a cutheat was not applied as TL
 	- Calc_OSLLxTxRatio(): correct consistency check for Tx.data producing warnings
 	- Analyse_SAR.OSLdata(): correct function call, causing unexpected behavior 
 	- plot_Histogram(): unify xlab behaviour
 	- plot_Histogram(): error correction causes by different column selection
-	- plot_GrowthCurve(): Add D0 value as output in De list element
-	- plot_GrowthCurve(): Correction - remove third digit for De value and minor error correction
-	- plot_DeDistribution(): Minor correction for the graphical output
-	- fit_LMCurve(): Update examples
-	- ExampleData.FittingLM: Replace sample and update sample information
+	- plot_GrowthCurve(): add D0 value as output in De list element
+	- plot_GrowthCurve(): correction - remove third digit for De value and minor error correction
+	- plot_DeDistribution(): minor correction for the graphical output
+	- fit_LMCurve(): update examples
+	- ExampleData.FittingLM: replace sample and update sample information
 
 Version 0.1.6 (April 27th, 2012)
 	- add function: Calc_FuchsLang2001()

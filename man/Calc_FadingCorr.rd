@@ -9,7 +9,7 @@ Runs the iteration that are needed to calculate the corrected age including the 
 for a given g-value according to Huntley & Lamothe (2001).
 }
 \usage{
-Calc_FadingCorr(g_value, tc, age.faded)
+Calc_FadingCorr(g_value, tc, age.faded, n.MCruns=500)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,18 +21,21 @@ Calc_FadingCorr(g_value, tc, age.faded)
 }
   \item{age.faded}{\link{numeric} \link{vector} (\bold{required}): uncorrected age with error in ka (see example)
 }
+
+ \item{n.MCruns}{\link{integer} (with default): number of Monte Carlo simulation runs for error estimation
+}
 }
 \details{
-The error of the fading corrected age is determined using a Monte Carlo simulatin approach. This takes 
-some time. 
+The error of the fading-corrected age is determined using a Monte Carlo simulation approach. 
+Hugh values for n.MCruns will significantly increase the computation time.
 }
 \value{
-A \link{data.frame} containing the corrected age is returned.
+A \link{data.frame} containing the fading-corrected age is returned.
 }
 \references{
-Huntley, D.J. & Lamothe, M. (2001). Ubiquity of anomalous fading in K-feldspars and the measurement and correction for it in optical dating. Canadian Journal of Earth Sciences, 38, 1093-1106.}
+Huntley, D.J. & Lamothe, M., 2001. Ubiquity of anomalous fading in K-feldspars and the measurement and correction for it in optical dating. Canadian Journal of Earth Sciences, 38, pp. 1093-1106.}
 \author{
-Sebastian Kreutzer, JLU Giessen, 2012.
+Sebastian Kreutzer, JLU Giessen, 2012
 }
 \note{
 The upper age limit is set to 500 ka!

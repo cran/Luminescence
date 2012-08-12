@@ -11,6 +11,7 @@ Plot single luminescence curves from an object returned by the \link{readBIN2R} 
 plot_BINfileData(BINfileData, position, 
                  sorter="POSITION", 
                  ltype=c("IRSL","OSL","TL","RIR","RBR"),
+                 dose_rate,
                  cex.global=1)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -21,13 +22,20 @@ plot_BINfileData(BINfileData, position,
     \item{sorter}{\link{character} (with default): the plot output can ordered by "POSITION","SET" or "RUN". POSITION, SET and RUN are options defined in the Risoe Sequence Editor.}
     \item{ltype}{\link{character} (with default):  option to limit the plotted curves by the type of luminescence stimulation. 
     Allowed values: "IRSL","OSL","TL","RIR" and "RBR". All type of curves are plotted by default.}
-    \item{cex.global}{\link{numeric} (with default): global scale factor.}
+    \item{dose_rate}{\link{numeric} (optional): dose rate of the irradition source at the measurement date. If set, the given irradiation
+    dose will be shown in Gy. See details.}
+    \item{cex.global}{\link{numeric} (with default): global scaling factor.}
  
     
  }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-The nomenclature used for the function (e.g. ltype, position) are taken from the Analyst manual (Duller, 2007). 
+The nomenclature used for the function (e.g. ltype, position) are taken from the Analyst manual (Duller, 2007). \cr
+
+\bold{irradiation time}\cr
+
+Plotting the irradiation time (s) or the given dose (Gy) requires that the variable IRR_TIME has been set within the 
+BIN-file. This is normally done by using the 'Run Info' option within the Sequence Editor.
 }
 \value{
 %%  ~Describe the value returned
@@ -39,12 +47,14 @@ Returns a plot.
 }
 \references{
 %% ~put references to the literature/web site here ~
-Duller, G. (2007): Analyst. 1-45. 
+Duller, G., 2007. Analyst. pp. 1-45. 
+
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany}
+\author{Sebastian Kreutzer, JLU Giessen (Germany), 2012}
 \note{
 %%  ~~further notes~~
-The function have only been tested for the Sequence Editor file output version 3 and 4. 
+
+The function has only been tested for the Sequence Editor file output version 3 and 4. 
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -62,7 +72,7 @@ The function have only been tested for the Sequence Editor file output version 3
 ##plot all curves from the first position to the desktop
 #pdf(file="~/Desktop/CurveOutput.pdf",paper="a4", height=11, onefile=TRUE)
   
-  ##example - load from *.bin fiel
+  ##example - load from *.bin file
   #BINfile<-"[your path]"
   #BINfileData<-readBIN2R(BINfile)
 

@@ -78,23 +78,25 @@ Returns a plot.
 }
 \references{
 
-Galbraith, R.F. (1988): Graphical Display of Estimates Having Differing Standard Errors. Technometrics, 30 (3), 271-281.
+Galbraith, R.F., 1988. Graphical Display of Estimates Having Differing Standard Errors. Technometrics, 30 (3), pp. 271-281.
 
-Galbraith, R.F. (1990): The radial plot: Graphical assessment of spread in ages. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3), 207-214.
+Galbraith, R.F., 1990. The radial plot: Graphical assessment of spread in ages. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3), pp. 207-214.
 
-Galbraith, R. & Green, P. (1990): Estimating the component ages in a finite mixture. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3), 197-206. 
+Galbraith, R. & Green, P., 1990. Estimating the component ages in a finite mixture. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3), pp. 197-206. 
 
-Galbraith, R.F. & Laslett, G.M. (1993): Statistical models for mixed fission track ages. Nuclear Tracks And Radiation Measurements, 21 (4), 459-470.
+Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission track ages. Nuclear Tracks And Radiation Measurements, 21 (4), pp. 459-470.
 
-Galbraith, R.F. (1994): Some Applications of Radial Plots. Journal of the American Statistical Association, 89 (428), 1232-1242.
+Galbraith, R.F., 1994. Some Applications of Radial Plots. Journal of the American Statistical Association, 89 (428), pp. 1232-1242.
 
-Galbraith, R.F. (2010): On plotting OSL equivalent doses. Ancient TL, 28 (1), 1-10. 
+Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL, 28 (1), pp. 1-10. 
 
-Galbraith, R. F., Roberts, R. G.  (in press), Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations, Quaternary Geochronology  doi:10.1016/j.quageo.2012.04.020.
+Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1-27.
 
 }
 \author{
-Sebastian Kreutzer, JLU Giessen (Germany), 2012 
+Original S script: Rex Gablraith, University College London (UK)
+
+Revised R script: Sebastian Kreutzer, JLU Giessen (Germany), 2012 
 }
 \note{
 This function based on a S script of Rex Galbraith. To reduce the manual adjustments the function 

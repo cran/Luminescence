@@ -5,8 +5,8 @@
 ##======================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen, Germany
-#vers.: 0.2.7
-#date: 23/04/2012
+#vers.: 0.2.8
+#date: 27/05/2012
 ##======================================
 ##+++++++++++++++++++++++Preface+++++++++++++++++++++++(START)
 ##  --LM fitting procedure for LM curves
@@ -58,11 +58,14 @@ fit_LMCurve <- function(
 ##=================================================================================================##  	
 ##  BACKGROUND SUBTRACTION
 ##=================================================================================================##
-    
+ 
 #   ##perform background subtraction if background LM measurment exists
        
        if(missing(values.bg)==FALSE){
               
+          #set graphical parameters
+          par(mfrow=c(1,1), cex=1.5*cex.global)
+         
           ##check if length of bg and signal is consistent
           if(length(values[,2])!=length(values.bg[,2])){stop("Error: Length of values and values.bg differs!")}
          
@@ -79,7 +82,7 @@ fit_LMCurve <- function(
            
            ##plot Background measurement if needed
            if(output.plotBG==TRUE){
-             par(cex=1.5*cex.global, mfrow=c(1,1))
+             
              plot(values.bg, ylab="LM-OSL [a.u.]", xlab="time [s]", main="Background")
              curve((glm.coef[4]*x^3+glm.coef[3]*x^2+glm.coef[2]*x+glm.coef[1]),add=TRUE,col="red",lwd=2)
              text(0,max(values.bg[,2]),paste("y = ", round(glm.coef[4],digits=2),
@@ -105,7 +108,7 @@ fit_LMCurve <- function(
            
            ##plot Background measurement if needed
            if(output.plotBG==TRUE){
-             par(cex=1.5*cex.global, mfrow=c(1,1))
+           
              plot(values.bg, ylab="LM-OSL [a.u.]", xlab="time [s]", main="Background")
              curve((glm.coef[2]*x+glm.coef[1]),add=TRUE,col="red",lwd=1.5)
              text(0,max(values.bg[,2]),paste("y = ",
@@ -123,7 +126,7 @@ fit_LMCurve <- function(
            writeLines("[fit_LMCurve.R] >> Background subtracted (method=\"channel\")!")
         
            if(output.plotBG==TRUE){
-           par(cex=1.5*cex.global, mfrow=c(1,1))
+          
            plot(values.bg, ylab="LM-OSL [a.u.]", xlab="time [s]", main="Background")
            mtext(side=3,sample_code,cex=.8*cex.global)
            }
@@ -360,7 +363,7 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
      }#end for loop 
     writeLines(paste(
     "\n(stimulation intensity values used for calculation: ",format(stimulation_intensity,scientific=TRUE)," 1/s 1/cm^2)",sep=""))
-    writeLines("(errors are 1-sigma uncertainty)")
+    writeLines("(errors quoted as 1-sigma uncertainties)")
     writeLines("------------------------------------------------------------------------------\n")
 	
     #sum of squares

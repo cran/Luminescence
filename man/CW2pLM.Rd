@@ -5,8 +5,7 @@
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Transform a conventional measured continuous-wave (CW)curve in a pseudo linearly modulated (pLM)
-curve using the equations given in Bulur (2000). The transformed 
-values may be used for further LM fitting analysis. 
+curve using the equations given in Bulur (2000). 
 }
 \usage{CW2pLM(values)}
 %- maybe also 'usage' for other objects documented here.
@@ -40,12 +39,12 @@ Returns a \code{data.frame} of the same form as the input of the transformed cur
 }
 \references{
 %% ~put references to the literature/web site here ~
-Bulur, E. (2000). A simple transformation for converting CW-OSL curves to LM-OSL curves. Radiation Measurements, 32, 141-145. 
+Bulur, E., 2000. A simple transformation for converting CW-OSL curves to LM-OSL curves. Radiation Measurements, 32, 141-145. 
 }
 \author{Sebastian Kreutzer, JLU Giessen, Germany}
 \note{
 %%  ~~further notes~~
-The transformation makes just sense if the channel resolution of the measurement is at least 0.05 s/channel.
+The transformation is recommended for curves recorded with a channel resolution of at least 0.05 s/channel only.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

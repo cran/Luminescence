@@ -20,8 +20,8 @@ plot_GrowthCurve(sample,main="Growth Curve",mtext="",
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-    \item{sample}{\link{data.frame} (\bold{required}): data.frame(x=dose,y=LxTx,z=LxTx_Error, y1=TnTx).
-                  The column for the test dose response is optional.}
+    \item{sample}{\link{data.frame} (\bold{required}): data frame with colums for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx.
+                  The column for the test dose response is optional, but requires 'TnTx' as column name if used.}
     \item{main}{\link{character} (with default): header of the plot.}
     \item{mtext}{\link{character} (optional): additional text on the right side of the plot.}
     \item{fit.method}{\link{character} (with default): functions used for fitting. Possible options are:
@@ -46,13 +46,13 @@ plot_GrowthCurve(sample,main="Growth Curve",mtext="",
 %%  ~~ If necessary, more details than the description above ~~
 \bold{fitting methods} \cr
 
-For all options (except the \code{LIN} in the option the \code{EXP OR LIN}) \link{nls} function with the \code{port} algorithm is used. 
+For all options (except for the \code{LIN} and the \code{EXP OR LIN}) the \link{nls} function with the \code{port} algorithm is used. 
 
 \code{LIN}: fit a linear function to the data using \link{lm}:
             \deqn{y = mx+n} \cr
 
 \code{EXP}: try to fit a function of the form \deqn{y = a*(1-exp(-(x+c)/b))} 
-Parameter b and c are approximated by a linear fit using \link{lm}.\cr
+Parameters b and c are approximated by a linear fit using \link{lm}.\cr
 
 \code{EXP OR LIN}: works for some cases where a \code{EXP} fit failes. If the \code{EXP} fit failes a \code{LIN} 
 fit is done instead. \cr
@@ -68,9 +68,9 @@ fit is done instead. \cr
 
 \code{EXP+EXP}: try to fit a double exponential function of the form
 \deqn{y = (a1*(1-exp(-(x)/b1)))+(a2*(1-exp(-(x)/b2)))}
-This fitting is highly resilent against wrong start parameters and should be further improved.\cr
+This fitting is highly robust against wrong start parameters and should be further improved.\cr
 
-\bold{fit weighting} (suggest by Michael Dietze and Margret Fuchs)\cr
+\bold{fit weighting} (suggested by Michael Dietze and Margret Fuchs)\cr
 
 If the option \code{fit.weights=TRUE} weights are calculated using provided signal errors (Lx/Tx error) using the equation:
 
@@ -90,7 +90,7 @@ Every error estimation is done with the function of the chosen fitting method.
 \value{
 %%  ~Describe the value returned
 %%  If it is a LIST, use
-\item{list}{a list containing the De (De, De Error and D0 value) and Fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} and \code{EXP+EXP}. In case of a linear
+\item{list}{a list containing the De (De, De Error, D01 value, D02 value and Fit type) and Fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} and \code{EXP+EXP}. In case of a linear
 fit \code{EXP OR LIN} a \link{lm} object is returned.}
 \item{Plot}{A plot of the growth curve. A histogram for the error calculation and a test dose response plot.}
 %% ...
@@ -98,14 +98,15 @@ fit \code{EXP OR LIN} a \link{lm} object is returned.}
 }
 \references{
 %% ~put references to the literature/web site here ~
-Duller, G.A.T., 2007. Assessing the error on equivalent dose estimates derived from single aliquot regenerative dose measurements. Ancient TL 25, 15-24.
+Duller, G.A.T., 2007. Assessing the error on equivalent dose estimates derived from single aliquot regenerative dose measurements. Ancient TL 25, pp. 15-24.
 
-Galbraith, R.F., Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology 1-71, doi: 10.1016/j.quageo.2012.04.020
+Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1-27.
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany}
+\author{Sebastian Kreutzer, JLU Giessen (Germany), 2012}
 \note{
 %%  ~~further notes~~
-The function has beta status. 
+No D01 is returned for the fit functions \code{EXP+LIN} and \code{LIN}. A D02 value is provided for
+the function \code{EXP+EXP} only.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

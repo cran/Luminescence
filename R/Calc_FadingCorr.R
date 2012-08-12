@@ -15,7 +15,9 @@
 ##
 Calc_FadingCorr<-function(g_value,    #g-value in $
                   tc,         #tc in seconds
-                  age.faded)  #Age.faded in ka
+                  age.faded,  #Age.faded in ka
+                  n.MCruns=500 #MC runs for error        
+                         )  
 {
   
 ##=================================================================================================##
@@ -37,13 +39,14 @@ Calc_FadingCorr<-function(g_value,    #g-value in $
   ##-----------------------------------------------------------------------------------------------##
   ##Monte Carlo simulation for error estimation
       
-      g_valueMC<-rnorm(500,mean=g_value[1],sd=g_value[2])
-      age.fadedMC<-rnorm(500,mean=age.faded[1],sd=age.faded[2])
+      g_valueMC<-rnorm(n.MCruns,mean=g_value[1],sd=g_value[2])
+      age.fadedMC<-rnorm(n.MCruns,mean=age.faded[1],sd=age.faded[2])
       kappaMC<-g_valueMC/log(10)/100
-  
-      ##calculate all values for 1:500 in a step of 0.01
-      tempMC<-sapply(1:500,function(x){
-            which(round(age.fadedMC[x]/z,digits=2)==round(1-kappaMC[x]*(log(z/tc)-1),digits=2))})
+    
+      ##calculate all values 
+      tempMC<-sapply(1:length(age.fadedMC),function(x){
+            which(round(age.fadedMC[x]/z,digits=2)==round(1-kappaMC[x]*(log(z/tc)-1),digits=2))
+            })
   ##-----------------------------------------------------------------------------------------------##
   
   ##obtain corrected age

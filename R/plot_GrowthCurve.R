@@ -4,56 +4,39 @@
 ##======================================
 ##author: Sebastian Kreutzer
 ##organisation: JLU Giessen, Germany
-##version: 0.9.2
-##date: 03/05/2012
+##version: 0.9.6
+##date: 23/07/2012
 ##======================================
-##>>description<<
-##	
-##		-- function plot data an try to fit a choosen function on them
-##			error calcuation is done by a Monte Carlo simulation
-##			
-##			--	Input format
-##				data.frame(x=dose,y=LxTx,z=LxTx_Error) if available also 
-##				data.frame(x=dose,y=LxTx,z=LxTx_Error, y1=TnTx)
-##		
-##		
-##			--	Ouptut format
-##				- output is De +/- De.Error
-##				- output is a plot (optional)
-##			
-##>>improvments task list<<
-##
-##	--reduce computing time for Monte Carlo simulation avoiding for-loops
-##	--fitting with weights; suggested by Maggi Fuchs
-##
-##>>known problems in this version<<
 
-##++++++++++++++++++++++++++++++++++
-##TEST function at end of this file! 
-##++++++++++++++++++++++++++++++++++
-
-##========================>>
 plot_GrowthCurve<-function(
-									sample, #expect data frame
-									main="Growth Curve", #title of chart,
+									sample, 
+									main="Growth Curve", 
                   mtext="",
-									fit.method="EXP", #  equation for fitting: "EXP", "EXP OR LIN","EXP+LIN" or "EXP+EXP"
+									fit.method="EXP", 
                   fit.weights=TRUE, 
-									fit.includingRepeatedRegPoints=TRUE, #possibility to exclude reg points from fitting!
-									fit.NumberRegPoints, # including Reg0, Reg1 again; automatic calc. if not set
-									fit.NumberRegPointsReal, #without any Reg0, Reg1 again...; automatic calc. if not set
-									NumberIterations.MC=100, #number of Monte Carlo Iterations
-									xlab="s", #insert xaxis value manually valid values "Gy" or "s"
-									output.plot=TRUE, #if FALSE output is a return of the fitted De
-                  output.plotExtended=TRUE, # if false just the growth curve will be plotted
-									cex.global=1 #global scale factor
+									fit.includingRepeatedRegPoints=TRUE, 
+									fit.NumberRegPoints, 
+									fit.NumberRegPointsReal, 
+									NumberIterations.MC=100, 
+									xlab="s", 
+									output.plot=TRUE, 
+                  output.plotExtended=TRUE, 
+									cex.global=1 
 								)
 						{
-
-##==================================================================================================##
-##DO NOT ALTER THE FOLLOWING CODE##
-##==================================================================================================##
-
+##=================================================================================================##
+##  
+##  
+##0. Error capturing
+  
+  ##NULL values in the data.frame are not allowed for the y-column
+    if(length(sample[sample[,2]==0,2])>0){
+     
+      cat("\n[plot_GrowthCurve.R] >> Warning:",
+          length(sample[sample[,2]==0,2]),"values with 0 for Lx/Tx detected; replaced by 0.0001.\n")
+      sample[sample[,2]==0,2]<-0.0001 
+    }
+  
 ##1. INPUT
   
   #1.0.1 calculate number of reg points if not set
@@ -73,8 +56,7 @@ plot_GrowthCurve<-function(
     fit.weights<-NULL
   }
   
-  
- 
+
 	#1.2 Prepare datasets for Monte Carlo Simulation
 	
 		data.MC<-t(matrix(sapply(seq(2,fit.NumberRegPoints+1,by=1), 
@@ -86,8 +68,9 @@ plot_GrowthCurve<-function(
 	#1.3 set x.natural
 		x.natural<-as.vector(seq(1:NumberIterations.MC))
  
-##>>--------------------------------------------------------------------------<<
-##>>---------FITTING----------------------------------------------------------<<
+##=================================================================================================##
+# FITTING ------------------------------------------------------------------------------------
+##=================================================================================================##
 ##3. Fitting values with nonlinear least-squares estimation of the parameters
  
   ##set functions for fitting
@@ -106,17 +89,18 @@ plot_GrowthCurve<-function(
     data<-data.frame(x=xy[-which(duplicated(xy[,1])),1],y=xy[-which(duplicated(xy[,1])),2])
    }else{data<-data.frame(xy)}
   
+
   ##START PARAMETER ESTIMATION
   ##-----------------------------------------------------------------------------------------------##
   ##general setting of start parameters for fitting
   
 	   ##a - estimation for a a the maxium of the y-values (Lx/Tx)
      a<-max(data[,2])
-     
+
      ##b - get start parameters from a linear fit of the log(y) data
      fit.lm<-lm(log(data$y)~data$x)
      b<-as.numeric(1/fit.lm$coefficients[2])
-  
+     
 	   ##c - get start parameters from a linear fit - offset on x-axis
 	   fit.lm<-lm(data$y~data$x)
      c<-as.numeric(abs(fit.lm$coefficients[1]/fit.lm$coefficients[2]))
@@ -124,24 +108,22 @@ plot_GrowthCurve<-function(
      #take slope from x - y scaling
 		 g<-max(data[,2]/max(data[,1]))
   
-     #set D0 
-     D0<-NA
+     #set D01 and D02 (in case of EXp+EXP)
+     D01<-NA; D02<-NA
   
   ##-----------------------------------------------------------------------------------------------##
   ##to be a little bit more flexible the start parameters varries within a normal distribution
   
-      ##draw 10 start values from a normal distribution a start values
-      a.MC<-rnorm(25,mean=a,sd=a/100)
-      b.MC<-rnorm(25,mean=b,sd=b/100)
-      c.MC<-rnorm(25,mean=c,sd=c/100)
-      g.MC<-rnorm(25,mean=g,sd=g/100)
-  
+      ##draw 50 start values from a normal distribution a start values
+      a.MC<-rnorm(50,mean=a,sd=a/100)
+      b.MC<-rnorm(50,mean=b,sd=b/100)
+      c.MC<-rnorm(50,mean=c,sd=c/100)
+      g.MC<-rnorm(50,mean=g,sd=g/1)
+    
       ##set start vector (to avoid errors witin the loop)
       a.start<-NA; b.start<-NA; c.start<-NA; g.start<-NA
   
-  
-  
-  
+
   
   ##-----------------------------------------------------------------------------------------------##
     
@@ -156,7 +138,7 @@ plot_GrowthCurve<-function(
 					#	--use classic R fitting routine to fit the curve
           
           ##try to create some start parameters from the input values to make the fitting more stable
-          for(i in 1:25){
+          for(i in 1:50){
             
             a<-a.MC[i];b<-b.MC[i];c<-c.MC[i]
             
@@ -203,9 +185,9 @@ plot_GrowthCurve<-function(
 							  a<-as.vector((parameters["a"])) 
 							  c<-as.vector((parameters["c"]))
 							
-              #print D0 value
-              writeLines(paste("[plot_GrowthCurve.R] >> D0 = ",round(b,digits=2),sep=""))
-              D0<-round(b,digits=2)  
+              #print D01 value
+              writeLines(paste("[plot_GrowthCurve.R] >> D01 = ",round(b,digits=2),sep=""))
+              D01<-round(b,digits=2)  
             
 							#calculate De 
 							De<-round(-c-b*log(1-sample[1,2]/a), digits=2)
@@ -290,31 +272,61 @@ plot_GrowthCurve<-function(
       
              
             ##try some start parameters from the input values to makes the fitting more stable
-		        for(i in 1:25){
+		        for(i in 1:length(a.MC)){
                     
                    a<-a.MC[i];b<-b.MC[i];c<-c.MC[i];g<-g.MC[i]
-                
-                   fit<-try(nls(y~fit.functionEXPLIN(a,b,c,g,x),
-		               data=data,
-		               start=c(a=a,b=b,c=c,g=g),
-		               trace=FALSE,
-		               algorithm="port",
-		               lower=c(a=0,b>10,c=0,g=0),
-		               nls.control(maxiter=500,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
-		               ),silent=TRUE)
                    
-                   if(class(fit)!="try-error"){
-                   #get parameters out of it
-                   parameters<-(coef(fit)) 
-                   b.start[i]<-as.vector((parameters["b"]))
-                   a.start[i]<-as.vector((parameters["a"])) 
-                   c.start[i]<-as.vector((parameters["c"]))
-                   g.start[i]<-as.vector((parameters["g"])) 
+                   ##------------------------------------------------------------------------------##
+                   ##start: with EXP function
+                   fit.EXP<-try(nls(y~fit.functionEXP(a,b,c,x),
+                                data=data,
+                                start=c(a=a,b=b,c=c),
+                                trace=FALSE,
+                                algorithm="port",
+                                lower=c(a=0,b>10,c=0),
+                                nls.control(maxiter=100,warnOnly=FALSE,minFactor=1/1048)
+                   ),silent=TRUE)
+                 
+                   
+                    if(class(fit.EXP)!="try-error"){
+                       #get parameters out of it
+                       parameters<-(coef(fit.EXP)) 
+                       b<-as.vector((parameters["b"]))
+                       a<-as.vector((parameters["a"])) 
+                       c<-as.vector((parameters["c"]))
+                      
+                   ##end: with EXP function
+                   ##------------------------------------------------------------------------------##
                    }
-		        }
+                    
+                   
+                    fit<-try(nls(y~fit.functionEXPLIN(a,b,c,g,x),
+		                  data=data,
+		                  start=c(a=a,b=b,c=c,g=g),
+		                  trace=FALSE,
+		                  algorithm="port",
+		                  lower=c(a=0,b>10,c=0,g=0),
+		                  nls.control(maxiter=500,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
+		                 ),silent=TRUE)
+                   
+                     if(class(fit)!="try-error"){
+                     #get parameters out of it
+                     parameters<-(coef(fit)) 
+                     b.start[i]<-as.vector((parameters["b"]))
+                     a.start[i]<-as.vector((parameters["a"])) 
+                     c.start[i]<-as.vector((parameters["c"]))
+                     g.start[i]<-as.vector((parameters["g"])) 
+                     }
+                
+    
+                   
+             }##end for loop
+            
            
             ##used mean as start parameters for the final fitting
-            a<-median(na.exclude(a.start));b<-median(na.exclude(b.start));c<-median(na.exclude(c.start));
+            a<-median(na.exclude(a.start))
+            b<-median(na.exclude(b.start))
+            c<-median(na.exclude(c.start))
             g<-median(na.exclude(g.start))
                     
             
@@ -345,8 +357,8 @@ plot_GrowthCurve<-function(
                 (round(fit.functionEXPLIN(a,b,c,g,x=xy$x),digits=3))))
 		         
 							#set upper and lower boundary for searching (really timesaving)
-							boundary.upper<-differences[differences[,2]==max(differences[differences[,2]<=0,2]),]
-							boundary.lower<-differences[differences[,2]==min(differences[differences[,2]>=0,2]),]
+							boundary.upper<-unique(differences[differences[,2]==max(differences[differences[,2]<=0,2]),])
+							boundary.lower<-unique(differences[differences[,2]==min(differences[differences[,2]>=0,2]),])
             
 							#case that there is no upper regeneration point...set a artificial point 20% above the highest reg Point 
 							if (length(boundary.upper[,1])==0){
@@ -413,8 +425,8 @@ plot_GrowthCurve<-function(
                                differences=(sample[1,2]-(round(fit.functionEXPLIN(a=var.a[i],b=var.b[i],c=var.c[i],g=var.g[i],x=xy$x),digits=3))))
 					
 							#set upper and lower boundary for searching (really timesaving)
-							boundary.upper<-differences[differences[,2]==max(differences[differences[,2]<=0,2]),]
-							boundary.lower<-differences[differences[,2]==min(differences[differences[,2]>=0,2]),]
+							boundary.upper<-unique(differences[differences[,2]==max(differences[differences[,2]<=0,2]),])
+							boundary.lower<-unique(differences[differences[,2]==min(differences[differences[,2]>=0,2]),])
 
 							#case that there is no upper regeneration point...set a artificial point 20% above the highest reg Point 
 							if (length(boundary.upper[,1])==0){
@@ -446,14 +458,44 @@ plot_GrowthCurve<-function(
 		#================================================================================================
 		#EXP+EXP#
 		else if (fit.method=="EXP+EXP") {
-    
-        #modifiy start values for EXP+EXP function
-        a1<-a/2
-        a2<-a
-        b1<-b/2
-        b2<-b
-             
-  
+      
+      a1.start<-NA
+      a2.start<-NA
+      b1.start<-NA
+      b2.start<-NA
+      
+		  ## try to create some start parameters from the input values to make the fitting more stable
+		  for(i in 1:50){
+		    
+		    a1<-a.MC[i];b1<-b.MC[i];
+        a2<-a.MC[i]/2; b2<-b.MC[i]/2
+		    
+		    fit<-try(nls(y~fit.functionEXPEXP(a1,a2,b1,b2,x),
+		                 data=data,
+		                 start=c(a1=a1,a2=a2,b1=b1,b2=b2),
+		                 trace=FALSE,
+		                 algorithm="port",
+		                 lower=c(a1>0,a2>0,b1>0,b2>0),
+		                 nls.control(maxiter=500,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
+		    ),silent=TRUE)
+		    
+		     if(class(fit)!="try-error"){
+		        #get parameters out of it
+		        parameters<-(coef(fit)) 
+		        a1.start[i]<-as.vector((parameters["a1"]))
+		        b1.start[i]<-as.vector((parameters["b1"])) 
+		        a2.start[i]<-as.vector((parameters["a2"]))
+		        b2.start[i]<-as.vector((parameters["b2"]))
+		     }        
+        }
+      
+        ##use obtained parameters for fit input
+		    a1<-median(na.exclude(a1.start))
+        b1<-median(na.exclude(b1.start))
+		    a2<-median(na.exclude(a2.start))
+		    b2<-median(na.exclude(b2.start))
+   
+ 
 							#Fit curve on given values
 							fit<-try(nls(y~fit.functionEXPEXP(a1,a2,b1,b2,x),
 									data=data,
@@ -474,10 +516,14 @@ plot_GrowthCurve<-function(
               b2<-as.vector((parameters["b2"]))
 							a1<-as.vector((parameters["a1"])) 
               a2<-as.vector((parameters["a2"]))
+              
+              ##set D0 values
+              D01<-round(b1,digits=2)
+              D02<-round(b2,digits=2)
        
               #print D0 values
-              writeLines(paste(">> D01 = ",round(b1,digits=2),sep=""))
-              writeLines(paste(">> D02 = ",round(b2,digits=2),sep=""))
+              writeLines(paste(">> D01 = ",D01,sep=""))
+              writeLines(paste(">> D02 = ",D02,sep=""))
                             
         #problem: analytic it is not easy to calculat x, here an simple approximation is made
 						
@@ -485,10 +531,11 @@ plot_GrowthCurve<-function(
 							differences <- data.frame(dose=xy$x,differences=(sample[1,2]-
                 (round(fit.functionEXPEXP(a1,a2,b1,b2,x=xy$x),digits=3))))
 		
+              
 							#set upper and lower boundary for searching (really timesaving)
-							boundary.upper<-differences[differences[,2]==max(differences[differences[,2]<=0,2]),]
-							boundary.lower<-differences[differences[,2]==min(differences[differences[,2]>=0,2]),]
-
+							boundary.upper<-unique(differences[differences[,2]==max(differences[differences[,2]<=0,2]),])
+							boundary.lower<-unique(differences[differences[,2]==min(differences[differences[,2]>=0,2]),])
+						 
 							#case that there is no upper regeneration point...set a artificial point 20% above the highest reg Point 
 							if (length(boundary.upper[,1])==0){
 											artificialRegPoint<-max(xy$x)+max(xy$x)*0.2
@@ -500,11 +547,11 @@ plot_GrowthCurve<-function(
 									
 							#produce an iteration matrix 
 							 iteration.matrix<-matrix(c(i,(round(fit.functionEXPEXP(a1,a2,b1,b2,x=i),digits=3))),ncol=2)
-		
-              
+		              
 							#select dose if Ln/Tn fits the values in the matrix
-							De<-mean(iteration.matrix[iteration.matrix[,2]==sample[1,2],1])
-            
+							De<-mean(iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1])
+							De<-round(De,digits=2)
+              
             ##Monte Carlo Simulation for error estimation
 						#	--Fit many curves and calculate a new De +/- De_Error
 						#	--take De_Error from the simulation
@@ -565,8 +612,8 @@ plot_GrowthCurve<-function(
                 x=xy$x),digits=3))))
 					
 							#set upper and lower boundary for searching (really timesaving)
-							boundary.upper<-differences[differences[,2]==max(differences[differences[,2]<=0,2]),]
-							boundary.lower<-differences[differences[,2]==min(differences[differences[,2]>=0,2]),]
+							boundary.upper<-unique(differences[differences[,2]==max(differences[differences[,2]<=0,2]),])
+							boundary.lower<-unique(differences[differences[,2]==min(differences[differences[,2]>=0,2]),])
 
 							#case that there is no upper regeneration point...set a artificial point 20% above the highest reg Point 
 							if (length(boundary.upper[,1])==0){
@@ -584,7 +631,7 @@ plot_GrowthCurve<-function(
                                            digits=3))),ncol=2)
 					
 							#select dose if Ln/Tn fits the values in the matrix
-							x.natural[i]<-mean(iteration.matrix[iteration.matrix[,2]==sample[1,2],1])
+							x.natural[i]<-mean(iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1])
               
               
 							} #end if "try-error" MC simulation
@@ -607,10 +654,13 @@ plot_GrowthCurve<-function(
 					
 			#De.Error is Error of the whole De (ignore NaN values)
 			De.Error<-round(sd(na.exclude(x.natural)),digits=2)
+    
 
 ##=================================================================================================##
-##PLOTTING
+# PLOTTING ------------------------------------------------------------------------------------
 ##=================================================================================================##
+
+
 ##5. Plotting if plotOutput=TRUE
 if(output.plot==TRUE) {
   
@@ -626,8 +676,8 @@ if(output.plot==TRUE) {
 #PLOT		#Plot input values
 			plot(xy[1:fit.NumberRegPointsReal,1],xy[1:fit.NumberRegPointsReal,2],
 				main=main,
-				ylim=c(0,(max(xy$y)+max(xy$y)*0.2)),
-				xlim=c(0,(max(xy$x)+max(xy$x)*0.4)),
+				ylim=c(0,(max(xy$y)+if(max(xy$y)*0.1>1.5){1.5}else{max(xy$y)*0.2})),
+				xlim=c(0,(max(xy$x)+if(max(xy$x)*0.4>50){50}else{max(xy$x)*0.4})),
 				pch=19,
 				xlab=if(xlab=="Gy"){"Dose [Gy]"}else{"Dose [s]"},
 				ylab=expression(L[x]/T[x]))
@@ -683,20 +733,20 @@ if(output.plot==TRUE) {
           border="white",
           xlab="",
           xaxt="n",
-          main=""        
+          main="" 
       ))
-            
-      par(new=TRUE)
-			try(histogram<-hist(
-				x.natural,
-				xlab=if(xlab=="Gy"){"Dose [Gy]"}else{"Dose [s]"},
-				main=expression(paste(D[e], " from Monte Carlo simulation")),
-        freq=FALSE,
-				sub=paste("n.iterations = ", NumberIterations.MC,", valid fits =",length(na.exclude(x.natural))),
-				col="grey",
-        ylab="",
-        yaxt="n"
-			))#end plot hist
+                  
+        par(new=TRUE)
+  			try(histogram<-hist(
+  				x.natural,
+  				xlab=if(xlab=="Gy"){"Dose [Gy]"}else{"Dose [s]"},
+  				main=expression(paste(D[e], " from Monte Carlo simulation")),
+          freq=FALSE,
+  				sub=paste("n.iterations = ", NumberIterations.MC,", valid fits =",length(na.exclude(x.natural))),
+  				col="grey",
+          ylab="",
+          yaxt="n",
+  			))#end plot hist
 			      
 			#to avoid errors plot only if histogram exists
 			if (exists("histogram")) {
@@ -741,13 +791,14 @@ if(output.plot==TRUE) {
 
 ##Additional mtext
 mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
-			
+		
 	
 ##END lines
   }#endif::output.plotExtended
 }#end if plotOutput	
 
     ##RETURN - return De values an parameter
-	  output<-try(data.frame(De=De,De.Error=De.Error, D0=D0),silent=TRUE)
-		return(list(De=output,Fit=fit))	
+	  output<-try(data.frame(De=De,De.Error=De.Error, D01=D01, D02=D02, Fit=fit.method),silent=TRUE)
+    return(list(De=output,Fit=fit))	
+  
 }#EOF

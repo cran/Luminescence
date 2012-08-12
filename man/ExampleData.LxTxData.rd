@@ -27,7 +27,7 @@ Material: \tab middle grain quartz measured on a Risoe DA-15 reader.\cr
 
 \references{
 %% ~put references to the literature/web site here ~
-unpublished data
+##
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

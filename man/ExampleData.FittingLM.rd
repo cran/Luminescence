@@ -4,7 +4,7 @@
 \title{Example data for fit_LMCurve() in package Luminescence }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Lineraly modulated (LM) measurement data from a randomly chosen quartz sample including background 
+Lineraly modulated (LM) measurement data from a quartz sample including background 
 measurement.
 
 }
@@ -29,7 +29,7 @@ Material: \tab beach deposit, coarse grain quartz measured on aluminum discs on 
 
 \references{
 %% ~put references to the literature/web site here ~
-Fuchs, M., Kreutzer, S., Fischer, M., Sauer, D., Soerensen, R., 2011. OSL and IRSL dating of raised beach sand deposits along the southeastern coast of Norway. Quaternary Geochronology. doi: 10.1016/j.quageo.2011.11.009
+Fuchs, M. et al., 2012. OSL and IRSL dating of raised beach sand deposits along the southeastern coast of Norway. Quaternary Geochronology, 10(0), pp.195-200.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -37,7 +37,7 @@ Fuchs, M., Kreutzer, S., Fischer, M., Sauer, D., Soerensen, R., 2011. OSL and IR
 \examples{
 ##show LM data 
 data(ExampleData.FittingLM)
-plot(values.curve,xlog="x")
+plot(values.curve,log="x")
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

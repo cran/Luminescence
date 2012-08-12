@@ -1,10 +1,10 @@
 \name{Calc_FuchsLang2001}
 \alias{Calc_FuchsLang2001}
 \title{
-Calculate De/Age applying the method according to Fuchs/Lang 2001
+Calculate De/Age applying the method according to Fuchs & Lang (2001)
 }
 \description{
-Applying the Fuchs/Lang 2001 method for heterogeneously bleached samples for a 
+Applying a method for heterogeneously bleached samples for a 
 given coefficient of variation threshold.
 }
 \usage{
@@ -14,7 +14,7 @@ Calc_FuchsLang2001(sample,
                    cvThreshold = 5, 
                    startDeValue = 1, 
                    output.plot = TRUE, output.terminal = TRUE, 
-                   main = "Fuchs/Lang 2001", 
+                   main = "Fuchs & Lang (2001)", 
                    xlab = expression(paste(D[e], " [Gy]")), 
                    cex.global = 1)
 }
@@ -22,7 +22,7 @@ Calc_FuchsLang2001(sample,
 \arguments{
   \item{sample}{\link{data.frame} (\bold{required}): two column data.frame, e.g. De and De Error
 }
-  \item{sample.mtext}{\link{character} (optional): mtext for optional plot
+  \item{sample.mtext}{\link{character} (optional): mtext for optional plot (top)
 }
   \item{sample.id}{\link{character} (with default): sample id, with default the sample.mtext is used.
 }
@@ -46,20 +46,19 @@ Calc_FuchsLang2001(sample,
 
 \bold{used values} \cr
 
-If the cv of the first two values > cvThreshold, the frist value is skipped. If you want to use only values
-above the 2nd or 3th values use the \code{startDeValue} parameter\cr
+If the coefficient of variation (cv) of the first two values > cvThreshold, the frist value is skipped. 
+Use the \code{startDeValue} parameter to define a start value for calculation (e.g. 2nd or 3th value).\cr
 
 
-\bold{how the method works} \cr
+\bold{Basic steps of the approach} \cr
 
 	
-(1) Estimate natural relative variation of your sample via a dose recovery test
+(1) Estimate natural relative variation of the sample using a dose recovery test
 
-(2) The input values are orderd in ascending order
+(2) Order the input values ascendingly
 
-(3) A running mean is calculated, starting with the lowermost two values, subsequent one value is added at each
-step
-
+(3) Calculate a running mean, starting with the lowermost two values. Iteratively, values are 
+added at each step. 
 
 (4) Stop if the calculated c[v] exceeds the specified \code{cvThreshold}
 }
@@ -72,18 +71,18 @@ elements:
 
 }
 \references{
-Fuchs, M.,Lang, A. (2001): OSL dating of coarse-grain fluvial quartz using single-aliqout
-protocols on sediments from NE Peloponnese, Greece. In: Quaternary Science Reviews (20), p. 783-787
+Fuchs, M. & Lang, A., 2001. OSL dating of coarse-grain fluvial quartz using single-aliqout
+protocols on sediments from NE Peloponnese, Greece. In: Quaternary Science Reviews (20), pp. 783-787.
 
-Fuchs, M. & Wagner, G.A. (2003). Recognition of insufficient bleaching by small aliquots of quartz 
-for reconstructing soil erosion in Greece. Quaternary Science Reviews, 22, 1161-1167. 
+Fuchs, M. & Wagner, G.A., 2003. Recognition of insufficient bleaching by small aliquots of quartz 
+for reconstructing soil erosion in Greece. Quaternary Science Reviews, 22, pp. 1161-1167. 
 
 }
 \author{
 Sebastian Kreutzer, JLU Giessen, 2012
 }
 \note{
-Before using: Please carefully consider the requirments and the constraints of this method!
+Please consider the requirments and the constraints of this method (see Fuchs & Lang, 2001)
 }
 
 \seealso{

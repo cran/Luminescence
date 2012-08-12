@@ -4,7 +4,7 @@
 \title{Plot a histogram with a separate error plot.}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Plot a predefined histogram with an accompanying error plot suggested
+Plot a predefined histogram with an accompanying error plot as suggested
 by Rex Galbraith on the UK LED in Oxford 2010.
 }
 \usage{
@@ -30,7 +30,6 @@ plot_Histogram(values,
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 If the normal curve is added, the y-axis in the histogram will show the probability density. 
-\bold{Notice:} The added curve is not a kernel density function!
 }
 \value{
 %%  ~Describe the value returned
@@ -42,17 +41,16 @@ Returns a plot.
 }
 \references{
 %% ~put references to the literature/web site here ~
-Galbraith, R. (2010). Statistics in OSL: Some Current Questions; Ask Rex. Oral presentation during the
+Galbraith, R., 2010. Statistics in OSL: Some Current Questions; Ask Rex. Oral presentation during the
 UK TL/OSL/ESR Meeting at the School of Geography and the Environment, University of Oxford,8-10 September 2010.
 
-Galbraith, R. F., Roberts, R. G.  (in press), Statistical aspects of equivalent dose and error calculation and display in OSL dating: 
-An overview and some recommendations, Quaternary Geochronology  doi:10.1016/j.quageo.2012.04.020.
+Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1-27.
 
 }
 \author{Sebastian Kreutzer, JLU Giessen, Germany}
 \note{
 %%  ~~further notes~~
-The function does not look for the nature of the input data!
+The input data is not restricted to special type of input data.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

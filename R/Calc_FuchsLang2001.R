@@ -41,7 +41,7 @@ Calc_FuchsLang2001 <- function(
                         output.plot=TRUE,
                         output.terminal=TRUE,
 											
-												main="Fuchs/Lang 2001",#alternative name for title 
+												main="Fuchs & Lang (2001)",#alternative name for title 
 												xlab=expression(paste(D[e]," [Gy]")),
                         cex.global=1
 									) {
