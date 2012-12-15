@@ -4,17 +4,20 @@
 ##======================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen
-#vers.: 0.2
-#date: 30/07/2012
+#vers.: 0.3
+#date: 25/08/2012
 ##======================================
 ##
 ## plot luminescence curves from bin file
 
 plot_BINfileData<-function(BINfileData, #input BIN file
-                          position, #set 
+                          position, 
+                          run,
+                          set,
                           sorter="POSITION", #sort by POSITION or RUN
                           ltype=c("IRSL","OSL","TL","RIR","RBR"),
                           dose_rate,
+                          temp.lab="deg. C", 
                           cex.global=1
                         ){
   
@@ -24,9 +27,16 @@ plot_BINfileData<-function(BINfileData, #input BIN file
   
     temp<-BINfileData
     
+# Missing check -------------------------------------------------------------------------------  
+
     ##set plot position if missing
-    if(missing(position)==TRUE){position<-c(min(temp@METADATA[,"POSITION"]):max(temp@METADATA[,"POSITION"]))}
+    if(missing(position)==TRUE){position<-c(min(temp@METADATA[,"POSITION"]):max(temp@METADATA[,"POSITION"]))}    
+    if(missing(run)==TRUE){run<-c(min(temp@METADATA[,"RUN"]):max(temp@METADATA[,"RUN"]))}    
+    if(missing(set)==TRUE){set<-c(min(temp@METADATA[,"SET"]):max(temp@METADATA[,"SET"]))}
     
+
+# Ordering ------------------------------------------------------------------------------------
+
     ##(1) order by RUN, SET OR BY POSITION
     if(sorter=="RUN"){
       temp@METADATA<-temp@METADATA[order(temp@METADATA[,"RUN"]),]
@@ -36,6 +46,10 @@ plot_BINfileData<-function(BINfileData, #input BIN file
       temp@METADATA<-temp@METADATA[order(temp@METADATA[,"POSITION"]),]      
     }
 
+
+
+# Select values for plotting ------------------------------------------------------------------
+
     ##(2) set SEL for selected position
     
         ##set all to FALSE
@@ -43,6 +57,8 @@ plot_BINfileData<-function(BINfileData, #input BIN file
     
         ##set TRUE 
         temp@METADATA[(temp@METADATA[,"POSITION"] %in% position)==TRUE & 
+                      (temp@METADATA[,"RUN"] %in% run)==TRUE &
+                      (temp@METADATA[,"SET"] %in% set)==TRUE &
                       (temp@METADATA[,"LTYPE"] %in% ltype)==TRUE,"SEL"]<-TRUE
        
     ##---------------------------------------------------------------------------------------------##
@@ -69,7 +85,7 @@ plot_BINfileData<-function(BINfileData, #input BIN file
            type="l",
            ylab=paste(temp@METADATA[i,"LTYPE"]," [cts/",round(temp@METADATA[i,"HIGH"]/temp@METADATA[i,"NPOINTS"],digits=3)," ",
                       measured_unit,"]",sep=""),
-           xlab=if(measured_unit==" deg. C"){"temp. [deg. C]"}else{"time [s]"},
+           xlab=if(measured_unit==" deg. C"){paste("temp. [",temp.lab,"]",sep="")}else{"time [s]"},
            col=if(temp@METADATA[i,"LTYPE"]=="IRSL" | temp@METADATA[i,"LTYPE"]=="RIR"){"red"}
                else if(temp@METADATA[i,"LTYPE"]=="OSL" | temp@METADATA[i,"LTYPE"]=="RBR"){"blue"}
                else{"black"},
@@ -87,8 +103,8 @@ plot_BINfileData<-function(BINfileData, #input BIN file
       
       ##mtext
       mtext(side=3, 
-            if(temp@METADATA[i,"LTYPE"]=="TL"){paste("TL to ",temp@METADATA[i,"HIGH"], " deg. C",sep="")}
-            else{paste(temp@METADATA[i,"LTYPE"],"@",temperature," deg. C",sep="")},          
+            if(temp@METADATA[i,"LTYPE"]=="TL"){paste("TL to ",temp@METADATA[i,"HIGH"], " ",temp.lab,sep="")}
+            else{paste(temp@METADATA[i,"LTYPE"],"@",temperature," ",temp.lab ,sep="")},          
             cex=0.9*cex.global)      
       
      ##add mtext for irradiation

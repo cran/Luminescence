@@ -13,7 +13,7 @@ ExampleData.DeValues
 }
 %- maybe also 'usage' for other objects documented here.
 \format{
-A data.frame with two columns (De and De.Error).
+A data.frame with two columns (De and De_Error).
 } 
 
 \source{
@@ -22,9 +22,9 @@ A data.frame with two columns (De and De.Error).
 Lab: \tab Luminescence Laboratory Bayreuth\cr
 Lab-Code: \tab BT998\cr
 Location: \tab Rottewitz (Saxony/Germany)\cr
-Material: \tab fine grain quartz measured on aluminum discs on a Risoe DA-15 reader.\cr
-Units:    \tab values are given in seconds. \cr
-Dose Rate: \tab dose rate of the beta-source ca. 0.0438 +/- 0.0019 Gy/s
+Material: \tab Fine grain quartz measured on aluminum discs on a Risoe DA-15 reader\cr
+Units:    \tab Values are given in seconds \cr
+Dose Rate: \tab Dose rate of the beta-source ca. 0.0438 +/- 0.0019 Gy/s
 }
 }
 

@@ -4,8 +4,8 @@
 ##======================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen
-#vers.: 0.3
-#date: 01/03/2012
+#vers.: 0.3.1
+#date: 10/12/2012
 ##======================================
 ##
 
@@ -35,7 +35,7 @@ ID<-0
 
 ##start loop for import BIN data
 while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
-
+  
       #empty byte position
       EMPTY<-readBin(con, what="raw", 1, size=1, endian="litte")
  
@@ -63,30 +63,41 @@ while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
 
   #TIME
   TIME_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+  
+  ##time size corrections for wrong time formats; set n to 6 for all values 
+  ##accoording the handbook of Geoff Duller, 2007
+  TIME_SIZE<-6
+  
   TIME<-readChar(con, TIME_SIZE, useBytes=TRUE)
   TIME<-format(strptime(as.character(TIME),"%H%M%S"),"%H:%M:%S")    
-
+       
   #DATE
   DATE_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+      
+  ##date size corrections for wrong date formats; set n to 6 for all values 
+  ##accoording the handbook of Geoff Duller, 2007  
+  DATE_SIZE<-6    
+      
   DATE<-readChar(con, DATE_SIZE, useBytes=TRUE)
-             
+        
   #DATE<-as.Date(as.character(DATE),"%d%m%y")   #no data conversion due to missing year value
 
-      
   #SEQUENCE
   SEQUENCE_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
   SEQUENCE<-readChar(con, SEQUENCE_SIZE, useBytes=TRUE)
-  
+    
      #step forward in con
-     STEPPING<-readBin(con, what="raw", (8-c(SEQUENCE_SIZE)), size=1, endian="little")
-
+     STEPPING<-readBin(con, what="raw", (8-c(SEQUENCE_SIZE)),size=1, endian="little")
+     
+     
   #USER
   USER_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
   USER<-readChar(con, USER_SIZE, useBytes=FALSE)
 
     #step forward in con
     STEPPING<-readBin(con, what="raw", (8-c(USER_SIZE)), size=1, endian="little")
- 
+    
+    
   #DTYPE
   DTYPE<-readBin(con, what="int", 1, size=1, endian="little")
       
@@ -112,10 +123,10 @@ while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
   #SAMPLE
   SAMPLE_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
   SAMPLE<-readChar(con, SAMPLE_SIZE, useBytes=TRUE) #however it should be set to 20
-  
+      
     #step forward in con
     STEPPING<-readBin(con, what="raw", (20-c(SAMPLE_SIZE)), size=1, endian="little")
- 
+
   #COMMENT
   COMMENT_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
   COMMENT<-readChar(con, COMMENT_SIZE, useBytes=TRUE) #set to 80 (manual)

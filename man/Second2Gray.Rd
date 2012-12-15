@@ -4,8 +4,8 @@
 \title{Converting values from seconds (s) to gray (Gy)}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Convertion of absorbed radiation dose in seconds (s) to the SI unit gray (Gy) 
-using the Gaussian-Error Propagation. Normally used for equivalent dose data.
+Conversion of absorbed radiation dose in seconds (s) to the SI unit gray (Gy) 
+using the Gaussian error propagation. Normally used for equivalent dose data.
 
 }
 \usage{
@@ -20,7 +20,7 @@ Second2Gray(values,dose_rate)}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-The functions uses the Gaussian error propagation to convert values with errors from Seconds to Gray.
+The functions uses the Gaussian error propagation to convert values with errors from seconds to gray.
 
 }
 \value{

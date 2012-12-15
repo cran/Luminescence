@@ -1,10 +1,10 @@
 \name{CW2pLM}
 \alias{CW2pLM}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Transforms a CW curve in a pLM curve}
+\title{Transform a CW-OSL curve into a pLM-OSL curve}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Transform a conventional measured continuous-wave (CW)curve in a pseudo linearly modulated (pLM)
+Transforms a conventionally measured continuous-wave (CW) curve into a pseudo linearly modulated (pLM)
 curve using the equations given in Bulur (2000). 
 }
 \usage{CW2pLM(values)}
@@ -17,8 +17,8 @@ curve using the equations given in Bulur (2000).
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-According to Bulur (2000) the curve data are transformed by introducing two 
-new parameters P and u:
+According to Bulur (2000), the curve data are transformed by introducing two 
+new parameters P (stimulation period) and u (transformed time):
 
  \deqn{P=2*max(t)}
  \deqn{u=\sqrt{(2*t*P)}}
@@ -44,19 +44,21 @@ Bulur, E., 2000. A simple transformation for converting CW-OSL curves to LM-OSL 
 \author{Sebastian Kreutzer, JLU Giessen, Germany}
 \note{
 %%  ~~further notes~~
-The transformation is recommended for curves recorded with a channel resolution of at least 0.05 s/channel only.
+The transformation is recommended for curves recorded with a channel resolution of at least 0.05 s/channel.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
+\link{CW2pLM}\cr
+
 The output of the function can be further used for LM-OSL fitting: 
 
-\code{\link{fit_LMCurve}}
+\code{\link{CW2pLMi}}, \code{\link{CW2pHMi}}, \code{\link{CW2pPMi}}, \code{\link{fit_LMCurve}}
+
 }
 \examples{
-##(1)
 ##read curve from BINfileData transform curve an plot values
 data(ExampleData.BINfileData)
 

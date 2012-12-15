@@ -3,17 +3,18 @@
 ##/////////////////////////////////////////////
 ##
 ##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-#vers.: 0.2.5
-#date: 19/07/2012
+#author: Sebastian Kreutzer*, Margret C. Fuchs**
+#organisation: *JLU Giessen, **TU Bergakademie Freiberg
+#vers.: 0.2.6
+#date: 14/12/2012
 ##======================================
-##script analysis OSL data from a SAR measurement
-##  --Input: RisoeBINfile object
+##script analyses OSL data from a SAR measurement
+##  --Input: RisoeBINfile object (as provided by readBIN2R())
 ##  --the script should work for all types of SAR measurements 
 
 ##ToDo
 ##  --IRSL Signal might be triggered not optimal 
+
 
 ##==================================================================================================
 ##function - self start model at the end of this file 
@@ -45,7 +46,7 @@ Analyse_SAR.OSLdata<-function(input.data,
                                 }else{sample.data<-input.data}
     
   if(missing(signal.integral)==TRUE){stop("[Analyse_SAR.OSLdata.R] >> No signal integral is given!")}
-  if(missing(signal.integral)==TRUE){stop("[Analyse_SAR.OSLdata.R] >> No background integral is given!")}
+  if(missing(background.integral)==TRUE){stop("[Analyse_SAR.OSLdata.R] >> No background integral is given!")}
                                      
   ##set values for run and set if they are not defined by the user 
   if(missing(position)==TRUE){position<-min(sample.data@METADATA[,"POSITION"]):max(sample.data@METADATA[,"POSITION"])}
@@ -255,7 +256,7 @@ if(output.plot==TRUE){
           ylab=if(log=="y" | log=="xy"){
                  paste("log OSL [cts/",HIGH/NPOINTS," s]",sep="")
                }else{
-                 paste("log OSL [cts/",HIGH/NPOINTS," s]",sep="")                 
+                 paste("OSL [cts/",HIGH/NPOINTS," s]",sep="")                 
                },
           xlim=c(HIGH/NPOINTS,HIGH),
           ylim=c(1,max(unlist(sample.data@DATA[LnLx.curveID]))),
@@ -288,7 +289,7 @@ if(output.plot==TRUE){
           ylab=if(log=="y" | log=="xy"){
              paste("log OSL [cts/",HIGH/NPOINTS," s]",sep="")
            }else{
-             paste("log OSL [cts/",HIGH/NPOINTS," s]",sep="")                 
+             paste("OSL [cts/",HIGH/NPOINTS," s]",sep="")                 
            },
           xlim=c(HIGH/NPOINTS,HIGH),
           ylim=c(1,max(unlist(sample.data@DATA[TnTx.curveID]))),
@@ -347,7 +348,7 @@ if(output.plot==TRUE){
         ##get heating rate
         RATE<-unique(sample.data@METADATA[sample.data@METADATA["ID"]==TL.curveID[1],"RATE"])
     
-        ##open plot TL curves
+        ##open plot area for TL curves
         plot(NA,NA,
              xlab="T [deg. C]",
              ylab=if(log=="xy" | log=="y"){
@@ -413,7 +414,11 @@ if(output.plot==TRUE){
       mtext(side=3,paste("IRSL/BOSL = ",IRSL_BOSL*100,"%",sep=""),
             cex=.8*cex.global
             )
-      
+    }
+ 
+   if(((is.na(IRSL_BOSL)==TRUE) & length(IRSL.curveID)>0) |
+      ((is.na(IRSL_BOSL)==FALSE) & length(IRSL.curveID)>0)){
+        
       ##plot only IRSL curve
       plot(xaxt.values,unlist(sample.data@DATA[IRSL.curveID]),
            xlab="t [s]",
@@ -427,7 +432,7 @@ if(output.plot==TRUE){
       }else{
         plot(NA,NA,xlim=c(0,10), ylim=c(0,10), main="IRSL curve")
         text(5,5,"no IRSL curve detected")      
-      }  
+      }
      ##============================================================================================
      ##Plot header
      mtext(side=3,paste("ALQ Pos. ",i,sep=""),outer=TRUE,line=-2.5)
@@ -439,6 +444,8 @@ if(output.plot==TRUE){
  
     ##reset mfrow
     par(mfrow=c(1,1))
+
+
  
 }#endif for output.plot    
 ##preprate output of values
@@ -468,7 +475,7 @@ if(output.plot==TRUE){
     if(length(cutheat)==0){cutheat=NA}
     
     systemID<-unique(sample.data@METADATA[sample.data@METADATA[,"POSITION"]==min(position),"SYSTEMID"])
-  
+
     SARParameters<-data.frame(readTemp=readTemp,cutheat=cutheat,systemID=systemID)
    
 return(list(LnLxTnTx=LnLxTnTx_List,RejectionCriteria=RejectionCriteria,SARParameters=SARParameters)) 

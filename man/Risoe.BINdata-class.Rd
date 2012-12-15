@@ -7,7 +7,7 @@
 \title{Class \code{"Risoe.BINfileData"}}
 \description{
 S4 class object for luminescence data in R. The object is produced by the 
-function \code{\link{readBIN2R}}.
+function \link{readBIN2R}.
 
 %%  ~~ A concise (1-5 lines) description of what the class is. ~~
 }
@@ -44,7 +44,7 @@ Sebastian Kreutzer, JLU Giessen/Germany
 \seealso{
 %%  ~~objects to See Also as \code{\link{~~fun~~}}, ~~~
 %%  ~~or \code{\linkS4class{CLASSNAME}} for links to other classes ~~~
-\code{\link{plot_BINfileData}}, \code{\link{readBIN2R}}
+\code{\link{plot_BINfileData}}
 }
 \examples{
 showClass("Risoe.BINfileData")

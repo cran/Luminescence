@@ -1,10 +1,10 @@
 \name{ExampleData.LxTxData}
 \alias{ExampleData.LxTxData}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Example Lx/Tx data from SAR measurement}
+\title{Example Lx/Tx data from CW-OSL SAR measurement}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-LxTx data from a measurement
+LxTx data from a SAR measurement
 
 }
 \usage{
@@ -12,7 +12,7 @@ ExampleData.LxTxData
 }
 %- maybe also 'usage' for other objects documented here.
 \format{
-A \code{data.frame} with 4 columns (Dose,LxTx,LxTx.Error,TnTx).
+A \code{data.frame} with 4 columns (Dose, LxTx, LxTx.Error, TnTx).
 } 
 
 \source{
@@ -27,7 +27,7 @@ Material: \tab middle grain quartz measured on a Risoe DA-15 reader.\cr
 
 \references{
 %% ~put references to the literature/web site here ~
-##
+unpublished data
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

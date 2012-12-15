@@ -5,8 +5,8 @@
 ##======================================
 #author: Sebastian Kreutzer
 #organisation: University of Bayreuth
-#vers.: 0.3
-#date: 16/04/2012
+#vers.: 0.3.1
+#date: 10/12/2012
 ##======================================
 ##+++++++++++++++++++++++Preface+++++++++++++++++++++++(START)
 ## (A) Input is data.frame() with two columns De and De_Error
@@ -152,7 +152,7 @@ Calc_FuchsLang2001 <- function(
 	  cat(paste("\n sd:                     ",sd))
 	  cat(paste("\n weighted mean:          ",weighted_mean))
 	  cat(paste("\n weighted sd:            ",weighted_sd))
-	  cat(paste("\n ---------------------------------"))
+	  cat(paste("\n ---------------------------------\n\n"))
   }
 ##=================================================================================================##
 ##PLOTTING

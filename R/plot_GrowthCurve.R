@@ -4,30 +4,37 @@
 ##======================================
 ##author: Sebastian Kreutzer
 ##organisation: JLU Giessen, Germany
-##version: 0.9.6
-##date: 23/07/2012
+##version: 0.9.8
+##date: 05/12/2012
 ##======================================
 
 plot_GrowthCurve<-function(
 									sample, 
-									main="Growth Curve", 
-                  mtext="",
-									fit.method="EXP", 
-                  fit.weights=TRUE, 
-									fit.includingRepeatedRegPoints=TRUE, 
+									main = "Growth Curve", 
+                  mtext = "",
+									fit.method = "EXP", 
+                  fit.weights = TRUE, 
+									fit.includingRepeatedRegPoints = TRUE, 
 									fit.NumberRegPoints, 
 									fit.NumberRegPointsReal, 
-									NumberIterations.MC=100, 
-									xlab="s", 
-									output.plot=TRUE, 
-                  output.plotExtended=TRUE, 
-									cex.global=1 
+                  fit.bounds = TRUE,
+									NumberIterations.MC = 100, 
+									xlab = "s", 
+									output.plot = TRUE, 
+                  output.plotExtended = TRUE, 
+									cex.global = 1 
 								)
 						{
 ##=================================================================================================##
 ##  
 ##  
 ##0. Error capturing
+  
+  ##1. check if sample is data.frame
+  if(is.data.frame(sample)==FALSE){stop("\n [plot_GrowthCurve] >> sample has to be of type data.fame!")}
+  
+  ##Exclude NA values in data.frame (if )
+  sample<-na.exclude(sample)
   
   ##NULL values in the data.frame are not allowed for the y-column
     if(length(sample[sample[,2]==0,2])>0){
@@ -68,7 +75,7 @@ plot_GrowthCurve<-function(
 	#1.3 set x.natural
 		x.natural<-as.vector(seq(1:NumberIterations.MC))
  
-##=================================================================================================##
+##=================================================================================================
 # FITTING ------------------------------------------------------------------------------------
 ##=================================================================================================##
 ##3. Fitting values with nonlinear least-squares estimation of the parameters
@@ -162,7 +169,7 @@ plot_GrowthCurve<-function(
           
           ##used mean as start parameters for the final fitting
           a<-median(na.exclude(a.start));b<-median(na.exclude(b.start));c<-median(na.exclude(c.start))
-       							
+          
           #FINAL Fit curve on given values
 					fit<-try(nls(y~fit.functionEXP(a,b,c,x),
 									data=data,
@@ -170,7 +177,7 @@ plot_GrowthCurve<-function(
                   weights=fit.weights,
 									trace=FALSE,
 									algorithm="port",
-                  lower=c(a=0,b=0,c=0),
+                  lower = if(fit.bounds==TRUE){lower=c(a=0,b=0,c=0)}else{c()},
 									nls.control(maxiter=500)
           				))#end nls
               
@@ -305,7 +312,7 @@ plot_GrowthCurve<-function(
 		                  start=c(a=a,b=b,c=c,g=g),
 		                  trace=FALSE,
 		                  algorithm="port",
-		                  lower=c(a=0,b>10,c=0,g=0),
+                      lower = if(fit.bounds==TRUE){lower=c(a=0,b>10,c=0,g=0)}else{c()},             
 		                  nls.control(maxiter=500,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
 		                 ),silent=TRUE)
                    
@@ -336,7 +343,7 @@ plot_GrowthCurve<-function(
 						  trace=FALSE,
               weights=fit.weights,
 						  algorithm="port",
-              lower=c(a=0,b>10,c=0,g=0),
+              lower = if(fit.bounds==TRUE){lower=c(a=0,b>10,c=0,g=0)}else{c()},           
 						  nls.control(maxiter=500,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
 						  ))
 
@@ -659,7 +666,6 @@ plot_GrowthCurve<-function(
 ##=================================================================================================##
 # PLOTTING ------------------------------------------------------------------------------------
 ##=================================================================================================##
-
 
 ##5. Plotting if plotOutput=TRUE
 if(output.plot==TRUE) {

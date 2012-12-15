@@ -1,10 +1,10 @@
 \name{plot_RadialPlot}
 \alias{plot_RadialPlot}
 \title{
-Function produces a Galbraith's radial plot. 
+Produce a Galbraith's radial plot. 
 }
 \description{
-A Galbraith radial plot is produced on a log(De) or a linear scale. The function 
+A Galbraith radial plot is produced on a logarithmic or a linear De scale. The function is
 based on a rewritten S script of Rex Galbraith. 
 }
 \usage{
@@ -25,30 +25,27 @@ plot_RadialPlot(sample,
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{sample}{\link{data.frame} (\bold{required}): two column data.frame with the input values, e.g. 'de' and 'se'.
+  \item{sample}{\link{data.frame} (\bold{required}): two column data frame with the input values, e.g. 'de' and 'se'.
 }
-  \item{sample.groups}{\link{list} (optional): option to group the input data.set like: 
+  \item{sample.groups}{\link{list} (optional): option to group the input data set like: 
   
-  \code{sample.groups=list(c(1:14),c(15:26),c(27:40))}
+  \code{sample.groups = list(c(1:14), c(15:26), c(27:40))}
 }
-  \item{sample.legend}{\link{character} (optional): character vector for a legend. This option is provided for the parameter \code{sample.groups} 
-  but can also be used for one sample.  
+  \item{sample.legend}{\link{character} (optional): character vector for a legend. This option is provided for the parameter \code{sample.groups}, but can also be used for one sample.  
 }
-  \item{sample.lty}{\link{vector} (with default): line type for the central value (see \link{par}. If the sample is grouped a line type can be defined 
-  for every dataset. )
+  \item{sample.lty}{\link{vector} (with default): line type for the central value (see \link{par}. If the sample is grouped, a line type can be defined for each data set. )
 }
-  \item{sample.pch}{\link{vector} (with default): point type for the presented data (see \link{par}. If the sample is grouped a point type can be defined 
-  for every data.set
+  \item{sample.pch}{\link{vector} (with default): point type for the presented data (see \link{par}. If the sample is grouped, a point type can be defined for each data.set
 }
-  \item{sample.col}{\link{vector} or \link{character} (with default): color of the points and lines (see \link{colors}). If the sample is grouped a color can be defined for every group.
+  \item{sample.col}{\link{vector} or \link{character} (with default): colour of the points and lines (see \link{colors}). If the sample is grouped, a colour can be defined for each group.
 }
-  \item{sample.mtext}{\link{character} (optional): \link{mtext} on the top of the plot. This option is only availabe if the grouping option is used. Instead information on the distribution is shown normally.
+  \item{sample.mtext}{\link{character} (optional): \link{mtext} on the top of the plot. This option is only availabe if the grouping option is used. Otherwise information on the distribution is shown.
 }
   \item{zscale.log}{\link{logical} (with default): log De scale (\code{TRUE/FALSE})
 }
   \item{zaxis.scale}{\link{numeric} (optional): option to set the z-scale manually. 
   
-  Example: \code{zaxis.scale=seq(50,120,by=10)}
+  Example: \code{zaxis.scale = seq(50,120, by = 10)}
 }
   \item{zaxis.group_circle}{\link{logical} (with default): shows additional group circles for the 2-sigma uncertainties on the z-scale.
 }
@@ -99,19 +96,22 @@ Original S script: Rex Gablraith, University College London (UK)
 Revised R script: Sebastian Kreutzer, JLU Giessen (Germany), 2012 
 }
 \note{
-This function based on a S script of Rex Galbraith. To reduce the manual adjustments the function 
+This function is based on an S script of Rex Galbraith. To reduce the manual adjustments, the function 
 has been rewritten. Thanks to Rex Galbraith for useful comments on this function.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\link{plot}, \link{legend}, \link{par}
+\link{plot}, \link{legend}
 }
 \examples{
+##load data
 data(ExampleData.DeValues)
-plot_RadialPlot(ExampleData.DeValues,zscale.log=TRUE, zaxis.scale=seq(1995,4250,by=500), 
-                zlab=expression(paste(D[e], " [s]")))
+
+##plot
+plot_RadialPlot(ExampleData.DeValues,zscale.log = TRUE, zaxis.scale = seq(1995,4250, by = 500), 
+                zlab = expression(paste(D[e], " [s]")))
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

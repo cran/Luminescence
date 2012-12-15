@@ -1,10 +1,10 @@
 \name{ExampleData.LxTxOSLData}
 \alias{ExampleData.LxTxOSLData}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Example Lx and Tx curve data from a artificially OSL measurement.}
+\title{Example Lx and Tx curve data from an artificial OSL measurement}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Lx and Tx data of continous wave (CW) signal curves.
+Lx and Tx data of continous wave (CW-) OSL signal curves.
 
 }
 \usage{
@@ -23,7 +23,7 @@ Artificial OSL measurement.
 
 \references{
 %% ~put references to the literature/web site here ~
-##
+unpublished data
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -31,7 +31,6 @@ Artificial OSL measurement.
 \examples{
 ##load data
 data(ExampleData.LxTxOSLData)
-
 
 ##plot data
 plot(Lx.data)

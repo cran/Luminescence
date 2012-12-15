@@ -1,10 +1,10 @@
 \name{Calc_FuchsLang2001}
 \alias{Calc_FuchsLang2001}
 \title{
-Calculate De/Age applying the method according to Fuchs & Lang (2001)
+Apply the model after Fuchs & Lang (2001) to a given De distribution.
 }
 \description{
-Applying a method for heterogeneously bleached samples for a 
+This function applies the method according to Fuchs & Lang (2001) for heterogeneously bleached samples with a 
 given coefficient of variation threshold.
 }
 \usage{
@@ -20,34 +20,33 @@ Calc_FuchsLang2001(sample,
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{sample}{\link{data.frame} (\bold{required}): two column data.frame, e.g. De and De Error
+  \item{sample}{\link{data.frame} (\bold{required}): two column data frame, e.g. De and De error
 }
   \item{sample.mtext}{\link{character} (optional): mtext for optional plot (top)
 }
   \item{sample.id}{\link{character} (with default): sample id, with default the sample.mtext is used.
 }
-  \item{cvThreshold}{\link{numeric} (with default): coefficient of variation as threshold for the method 
-  in percentage, e.g. \code{cvThreshold=3}. See details.
+  \item{cvThreshold}{\link{numeric} (with default): coefficient of variation in percent, as threshold for the method, e.g. \code{cvThreshold = 3}. See details.
 }
   \item{startDeValue}{\link{numeric} (with default): number of the first aliquot that is used for the calculations
 }
-  \item{output.plot}{\link{logical} (with default): plot output \code{TRUE} or \code{FALSE}
+  \item{output.plot}{\link{logical} (with default): plot output \code{TRUE}/\code{FALSE}
 }
-  \item{output.terminal}{\link{logical} (with default): terminal output \code{TRUE} or \code{FALSE}
+  \item{output.terminal}{\link{logical} (with default): terminal output \code{TRUE}/\code{FALSE}
 }
   \item{main}{\link{character} (with default): title of the plot (works as in \link{plot})
 }
-  \item{xlab}{\link{character} (with default): xlab works as in \link{plot}.
+  \item{xlab}{\link{character} (with default): xlab works as in \link{plot}
 }
-  \item{cex.global}{\link{numeric} (with default): global scaling factor.
+  \item{cex.global}{\link{numeric} (with default): global scaling factor
 }
 }
 \details{
 
-\bold{used values} \cr
+\bold{Used values} \cr
 
-If the coefficient of variation (cv) of the first two values > cvThreshold, the frist value is skipped. 
-Use the \code{startDeValue} parameter to define a start value for calculation (e.g. 2nd or 3th value).\cr
+If the coefficient of variation (c[v]) of the first two values is larger than the threshold c[v_treshold], the frist value is skipped. 
+Use the \code{startDeValue} parameter to define a start value for calculation (e.g. 2nd or 3rd value).\cr
 
 
 \bold{Basic steps of the approach} \cr
@@ -57,17 +56,16 @@ Use the \code{startDeValue} parameter to define a start value for calculation (e
 
 (2) Order the input values ascendingly
 
-(3) Calculate a running mean, starting with the lowermost two values. Iteratively, values are 
-added at each step. 
+(3) Calculate a running mean, starting with the lowermost two values and add values iteratively. 
 
 (4) Stop if the calculated c[v] exceeds the specified \code{cvThreshold}
 }
 \value{
-A plot and terminal output is provided if wanted. In addition a list is returned containing two
+A plot and terminal output is provided if desired. In addition, a list is returned containing two
 elements:
 
 \item{results}{\link{data.frame} with stastical parameters, e.g. mean, sd,...}
-\item{usedDeValues}{\link{data.frame} containing the used values for the calculation.}
+\item{usedDeValues}{\link{data.frame} containing the used values for the calculation}
 
 }
 \references{
@@ -90,8 +88,11 @@ Please consider the requirments and the constraints of this method (see Fuchs & 
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
+##load example data
 data(ExampleData.DeValues)
-Calc_FuchsLang2001(ExampleData.DeValues,cvThreshold=5)
+
+##calculate De according to Fuchs & Lang (2001)
+Calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

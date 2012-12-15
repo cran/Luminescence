@@ -3,16 +3,18 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Analyse SAR CW-OSL measurements.}
 \description{
-Function analyses SAR CW-OSL curve data and provides a summary of the measured data for 
-every position. 
+The function analyses SAR CW-OSL curve data and provides a summary of the measured data for 
+every position. The output of the function is optimized for SAR OSL measurements on quartz.
 }
 \usage{
-Analyse_SAR.OSLdata(input.data, signal.integral, background.integral, 
-                position, run, set, 
-                info.measurement="unkown measurement",
-                log="",
-                output.plot = FALSE,
-                cex.global = 1)
+Analyse_SAR.OSLdata(input.data, 
+                    signal.integral, 
+                    background.integral, 
+                    position, run, set, 
+                    info.measurement = "unkown measurement",
+                    log = "",
+                    output.plot = FALSE,
+                    cex.global = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -66,7 +68,7 @@ The functions works only for standard SAR protocol measurements introduced by Mu
 with CW-OSL curves. 
 For the calculation of the Lx/Tx value the function \link{Calc_OSLLxTxRatio} is used. \cr
 
-\bold{provided rejection criteria}\cr
+\bold{Provided rejection criteria}\cr
 
 \sQuote{recyling ratio}: calculated for every repeated regeneration dose point.\cr
 
@@ -93,9 +95,8 @@ Duller, G., 2003. Distinguishing quartz and feldspar in single grain luminescenc
 
 Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an improved single-aliquot regenerative-dose protocol. Radiation Measurements, 32, pp. 57-73. 
 }
-\author{
-Sebastian Kreutzer, JLU Giessen, Germany 
-}
+\author{Sebastian Kreutzer (JLU Giessen, Germany),\cr 
+Margret C. Fuchs (TU Bergakadmie Freiberg, Germany)}
 \note{
 Rejection criteria are calculated but not considered during the analysis to discard values.
 }
@@ -107,14 +108,19 @@ Rejection criteria are calculated but not considered during the analysis to disc
 \link{plot_GrowthCurve}
 }
 \examples{
+##load data
 data(ExampleData.BINfileData)
+
+##analyse data
 output<-Analyse_SAR.OSLdata(input.data=BINfileData, 
                     signal.integral=c(1:5), 
                     background.integral=c(900:1000),
                     position=c(1:1),output.plot=TRUE
                     )
-
-
+                    
+##combine results relvant for further analysis
+output.SAR <- cbind(output$LnLxTnTx[[1]]$Dose, output$LnLxTnTx[[1]]$LxTx, output$LnLxTnTx[[1]]$LxTx.Error)
+output.SAR
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

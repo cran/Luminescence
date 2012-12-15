@@ -1,11 +1,11 @@
 \name{ExampleData.BINfileData}
 \alias{ExampleData.BINfileData}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Example data from a SAR luminescence measurement}
+\title{Example data from a SAR OSL measurement for package Luminescence}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Example data from a SAR luminescence measurement diretly extracted from
-a Risoe BIN file provided in an object of type \link{Risoe.BINfileData-class}
+Example data from a SAR OSL measurement for package Luminescence diretly extracted from
+a Risoe BIN file and provided in an object of type \link{Risoe.BINfileData-class}
 }
 \usage{
 ExampleData.BINfileData
@@ -20,10 +20,11 @@ stored in the BIN file of the measurements and (b) \code{DATA} contains a list o
 \source{
 %%  ~~ If necessary, more details than the description above ~~
 \tabular{ll}{
+
 Lab: \tab Luminescence Laboratory Bayreuth\cr
 Lab-Code: \tab BT607\cr
 Location: \tab Saxony/Germany\cr
-Material: \tab middle grain quartz measured on aluminum cups on a Risoe DA-15 reader.\cr
+Material: \tab Middle grain quartz measured on aluminum cups on a Risoe DA-15 reader\cr
 }
 }
 
@@ -35,7 +36,7 @@ unpublished data
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-##show first 5 elements of the METADATA and DATA elelement in the terminal
+##show first 5 elements of the METADATA and DATA elements in the terminal
 data(ExampleData.BINfileData)
 BINfileData@METADATA[1:5,]
 BINfileData@DATA[1:5]

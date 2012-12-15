@@ -2,22 +2,22 @@
 \alias{Calc_FadingCorr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Applying a fading correction according to Huntley & Lamothe (2001) for a given g-value.
+Apply a fading correction according to Huntley & Lamothe (2001) for a given g-value.
 }
 \description{
-Runs the iteration that are needed to calculate the corrected age including the error 
+This function runs the itrerations that are needed to calculate the corrected age including the error 
 for a given g-value according to Huntley & Lamothe (2001).
 }
 \usage{
-Calc_FadingCorr(g_value, tc, age.faded, n.MCruns=500)
+Calc_FadingCorr(g_value, tc, age.faded, n.MCruns = 500)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{g_value}{\link{numeric} \link{vector} (\bold{required}): g-value and error obtained from separate 
+  \item{g_value}{\link{vector} (\bold{required}): g-value and error obtained from separate 
   fading measurements (see example)
 }
-  \item{tc}{\link{numeric} (\bold{required}): arbitrary time in seconds, e.g. time between irradiation and
-  the prompt measurement (see Huntely & Lamothe 2001).
+  \item{tc}{\link{numeric} (\bold{required}): time in seconds (time between irradiation and
+  the prompt measurement, cf. Huntely & Lamothe 2001).
 }
   \item{age.faded}{\link{numeric} \link{vector} (\bold{required}): uncorrected age with error in ka (see example)
 }
@@ -48,7 +48,7 @@ The upper age limit is set to 500 ka!
 ##
 }
 \examples{
-Calc_FadingCorr(g_value=c(3.3,0.03),tc=752,age.faded=c(100,10))
+Calc_FadingCorr(g_value = c(3.3,0.03), tc = 752, age.faded = c(100,10))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

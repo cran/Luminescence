@@ -5,8 +5,8 @@
 ##======================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen, Germany
-#vers.: 0.2.8
-#date: 27/05/2012
+#vers.: 0.2.8.1
+#date: 28/08/2012
 ##======================================
 ##+++++++++++++++++++++++Preface+++++++++++++++++++++++(START)
 ##  --LM fitting procedure for LM curves
@@ -289,7 +289,7 @@ fit_LMCurve <- function(
     print(parameters)
    
     #print some additional information    
-    writeLines("\n(equation used according Kitis & Pagonis (2008))")
+    writeLines("\n(equation used for fitting according Kitis & Pagonis, 2008)")
     }#end if
   
 ##=================================================================================================##   
@@ -300,7 +300,7 @@ fit_LMCurve <- function(
          
       ##Energy - E = h*v
       h<-6.62606957e-34 #in W*s^2 - Planck constant
-      ny<-299792458/(LED.wavelength/10^9) #fequency of light
+      ny<-299792458/(LED.wavelength/10^9) #frequency of light
       E<-h*ny
     
       ##transform LED.power in W/cm^2
@@ -349,7 +349,7 @@ fit_LMCurve <- function(
 if (output.terminaladvanced==TRUE && output.terminal==TRUE){    
     ##write fill lines
     writeLines("------------------------------------------------------------------------------")
-  	writeLines("(1) Corresponding values according the equation in Bulur (1996) for b and n0:\n")
+  	writeLines("(1) Corresponding values according the equation in Bulur, 1996 for b and n0:\n")
     for (i in 1:length(b)){
       writeLines(paste("b",i," = ",format(b[i],scientific=TRUE)," +/- ",format(b.error[i],scientific=TRUE),sep=""))
       writeLines(paste("n0",i," = ",format(n0[i],scientific=TRUE)," +/- ",format(n0.error[i],scientific=TRUE),"\n",sep=""))    
@@ -362,7 +362,7 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
     
      }#end for loop 
     writeLines(paste(
-    "\n(stimulation intensity values used for calculation: ",format(stimulation_intensity,scientific=TRUE)," 1/s 1/cm^2)",sep=""))
+    "\n(stimulation intensity value used for calculation: ",format(stimulation_intensity,scientific=TRUE)," 1/s 1/cm^2)",sep=""))
     writeLines("(errors quoted as 1-sigma uncertainties)")
     writeLines("------------------------------------------------------------------------------\n")
 	
@@ -432,7 +432,7 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
        colnames(output.table)<-c("ID","sample_code","n.components",output.tableColNames,"pseudo-R^2")
   
 ##=================================================================================================##   
-## TABLE OUTPUT (CVV)
+## TABLE OUTPUT (CVS)
 ##=================================================================================================##       
        
       if(missing(output.path)==FALSE){
