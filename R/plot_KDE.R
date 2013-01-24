@@ -40,7 +40,9 @@ plot_KDE <- function(
 	colours   <- if("col" %in% names(extraArgs)) {extraArgs$col} else # assign colours
                  {c("#3F489D", "black", "black", "gray86")}
 	cex       <- if("cex" %in% names(extraArgs)) {extraArgs$cex} else {1} # assign scaling factor
-	 
+  
+  fun       <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE} # fun
+  
   # Create empty plot with defined format -----------------------------------------------------------------------
   par(oma = c(0,0,0,2), cex = cex) # adjust plot area properties
   plot(NA, # create empty plot to set plot dimensions
@@ -195,6 +197,10 @@ plot_KDE <- function(
            col = "black", adj = 0.025, cex = 0.8 * cex)
     ypos <- ypos + 1.5 # move vertical text position down one increment
   }
+  
+  ##FUN by R Luminescence Team
+  if(fun==TRUE){sTeve()}
+  
 }#EndOf function
 ##==================================================================================================##
 ##EOF##

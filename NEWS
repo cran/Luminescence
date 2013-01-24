@@ -1,5 +1,9 @@
 Changes for R-package Luminescence
 
+Version 0.2.1 (January 24th, 2013)
+	- added function: sTeve()
+	- correct critical error in Calc_OSLLxTxRatio(): due to an error the uncorrected LnLx and TnTx values for LxTx calculation were used 
+
 Version 0.2 (December 15th, 2012)
 	- added function: fit_CWCurve()
 	- added function: CW2pLMi()

@@ -5,8 +5,8 @@
 ##======================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen
-#vers.: 0.2
-#date: 18/03/2012
+#vers.: 0.2.1
+#date: 24/01/2013
 ##======================================
 ##calculation of the LxTx ratio including error calculation
 
@@ -137,7 +137,7 @@ Calc_OSLLxTxRatio<-function(Lx.data,
   colnames(LnLxTnTx)<-c("LnLx","LnLx.BG","TnTx","TnTx.BG","Net_LnLx","Net_LnLx.Error","Net_TnTx","Net_TnTx.Error")
   
   ##calculate Ln/Tx
-  LxTx<-LnLxTnTx$LnLx/LnLxTnTx$TnTx
+  LxTx<-LnLxTnTx$Net_LnLx/LnLxTnTx$Net_TnTx
 
   ##calculate Ln/Tx error
   LxTx.Error<-sqrt(((1/LnLxTnTx$Net_TnTx)*LnLxTnTx$Net_LnLx.Error)^2+((LnLxTnTx$Net_LnLx/-LnLxTnTx$Net_TnTx^2)*LnLxTnTx$Net_TnTx.Error)^2)

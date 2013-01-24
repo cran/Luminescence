@@ -383,7 +383,7 @@ if(output.plot==TRUE){
         
       ##===========================================================================================##
       ##Print IRSL Curves if IRSL curve is set
-
+print("test")
       if(is.na(IRSL_BOSL)==FALSE){        
       ##get channel resolution (it should be the same for all values)
       HIGH<-unique(sample.data@METADATA[sample.data@METADATA["ID"]==IRSL.curveID ,"HIGH"])

@@ -553,7 +553,7 @@ plot_GrowthCurve<-function(
 							i<-seq(boundary.lower[,1],boundary.upper[,1],by=0.01)
 									
 							#produce an iteration matrix 
-							 iteration.matrix<-matrix(c(i,(round(fit.functionEXPEXP(a1,a2,b1,b2,x=i),digits=3))),ncol=2)
+							iteration.matrix<-matrix(c(i,(round(fit.functionEXPEXP(a1,a2,b1,b2,x=i),digits=3))),ncol=2)
 		              
 							#select dose if Ln/Tn fits the values in the matrix
 							De<-mean(iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1])
