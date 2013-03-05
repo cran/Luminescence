@@ -5,8 +5,8 @@
 ##======================================
 #author: Sebastian Kreutzer*, Margret C. Fuchs**
 #organisation: *JLU Giessen, **TU Bergakademie Freiberg
-#vers.: 0.2.6
-#date: 14/12/2012
+#vers.: 0.2.7
+#date: 27/01/2012
 ##======================================
 ##script analyses OSL data from a SAR measurement
 ##  --Input: RisoeBINfile object (as provided by readBIN2R())
@@ -171,12 +171,13 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
             
               ##set column names
               temp.ColNames<-sapply(1:length(temp.Repeated[,1]),function(x){
-                     paste(temp.Previous[temp.Previous[,"Dose"]==temp.Repeated[x,"Dose"],"Name"],"/",
-                                    temp.Repeated[x,"Name"],sep="")
+                     paste(temp.Repeated[x,"Name"],"/",
+                           temp.Previous[temp.Previous[,"Dose"]==temp.Repeated[x,"Dose"],"Name"]
+                            ,sep="")
                       })
                                             
               ##Calculate Recycling Ratio
-              RecyclingRatio<-as.numeric(temp.Previous[,"LxTx"])/as.numeric(temp.Repeated[,"LxTx"])
+              RecyclingRatio<-as.numeric(temp.Repeated[,"LxTx"])/as.numeric(temp.Previous[,"LxTx"])
               
               ##Just transform the matrix and add column names
               RecyclingRatio<-t(RecyclingRatio)

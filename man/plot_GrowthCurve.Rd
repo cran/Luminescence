@@ -104,12 +104,15 @@ Duller, G.A.T., 2007. Assessing the error on equivalent dose estimates derived f
 
 Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1-27.
 }
-\author{Sebastian Kreutzer, JLU Giessen (Germany), 2012}
+\author{Sebastian Kreutzer, JLU Giessen (Germany), 
+Michael Dietze, TU Dresden (Germany)}
 \note{
 %%  ~~further notes~~
 No D01 is returned for the fit functions \code{EXP+LIN} and \code{LIN}. A D02 value is provided for
 the function \code{EXP+EXP} only.
 }
+
+\section{Version}{0.9.8 [2012-12-05]}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 

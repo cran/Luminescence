@@ -14,7 +14,9 @@ plot_RadialPlot(sample,
                 sample.lty = 1, 
                 sample.pch = 1, 
                 sample.col = "black", 
-                sample.mtext = "default", 
+                sample.min = FALSE,
+                sample.max = FALSE,
+                sample.mtext, 
                 zscale.log = TRUE, 
                 zaxis.scale, zaxis.group_circle = FALSE, yaxis.scale, 
                 plot.2sigmaRange = TRUE, 
@@ -39,7 +41,12 @@ plot_RadialPlot(sample,
 }
   \item{sample.col}{\link{vector} or \link{character} (with default): colour of the points and lines (see \link{colors}). If the sample is grouped, a colour can be defined for each group.
 }
-  \item{sample.mtext}{\link{character} (optional): \link{mtext} on the top of the plot. This option is only availabe if the grouping option is used. Otherwise information on the distribution is shown.
+\item{sample.min}{\link{logical} (with default): add minimum value to respective data point in plot.
+}
+\item{sample.max}{\link{logical} (with default): add maximum value to respective data point in plot.
+}
+\item{sample.mtext}{\link{character} (optional): \link{mtext} on the top of the plot. By default, a statistical summary of the sample(s) is plotted. To prevent
+any text set this parameter to \code{""}.
 }
   \item{zscale.log}{\link{logical} (with default): log De scale (\code{TRUE/FALSE})
 }
@@ -90,15 +97,16 @@ Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL, 28 (1), pp.
 Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1-27.
 
 }
-\author{
-Original S script: Rex Gablraith, University College London (UK)
-
-Revised R script: Sebastian Kreutzer, JLU Giessen (Germany), 2012 
+\author{Original S script: Rex Gablraith, University College London (UK), 
+Revised R script: Sebastian Kreutzer, JLU Giessen (Germany),
+Michael Dietze, TU Dresden (Germany)
 }
 \note{
 This function is based on an S script of Rex Galbraith. To reduce the manual adjustments, the function 
 has been rewritten. Thanks to Rex Galbraith for useful comments on this function.
 }
+
+\section{Version}{0.4 [2013-03-03]}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
@@ -109,9 +117,52 @@ has been rewritten. Thanks to Rex Galbraith for useful comments on this function
 ##load data
 data(ExampleData.DeValues)
 
-##plot
-plot_RadialPlot(ExampleData.DeValues,zscale.log = TRUE, zaxis.scale = seq(1995,4250, by = 500), 
-                zlab = expression(paste(D[e], " [s]")))
+##plot the example data set the easiest way
+plot_RadialPlot(ExampleData.DeValues)
+
+##Notice that a statistical summary is provided by default.
+##However, a sample ID is missing. Notice also that the z-scale
+##units are sub-optimally spaced and not (yet) logarithmically
+##scaled. To take care of this, look at the following code:
+
+## a) plot a user-defined sample text
+usertext <- "Example data set"
+
+## b) define an evenly-spaced z-axis between min and max
+zscale <- seq(from = min(ExampleData.DeValues$ED),
+              to = max(ExampleData.DeValues$ED),
+              by = 500)
+              
+##plot the same data set a bit more user-adjusted
+plot_RadialPlot(sample = ExampleData.DeValues,
+                zscale.log = TRUE,
+                zaxis.scale = zscale,
+                zlab = expression(paste(D[e], " [s]")),
+                sample.mtext = usertext,
+                sample.pch = 4)
+
+##Now let us assume that the data set consists of two
+##different groups of samples that should however be
+##plotted in one graph. The function can handle grouped
+##data by specifying a group agument:
+
+group.indices <- list(c(1:10),  # group 1 with samples 1 to 10
+                      c(11:20)) # group 2 with samples 11 to 20
+
+##plot the data.set grouped 
+plot_RadialPlot(ExampleData.DeValues,
+                zscale.log = TRUE, 
+                zaxis.scale = seq(2000, 4000, by = 500), 
+                zlab = expression(paste(D[e], " [s]")),
+                sample.groups = group.indices,
+                sample.col = c("royalblue", "orange3"),
+                sample.pch = c(3, 4),
+                cex.global = 0.8)
+                
+##Notice that the default statistical summary is provided
+##for each group individually and that z-axis limits were
+##changed from example 1.
+
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

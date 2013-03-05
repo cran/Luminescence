@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Package for Luminescence Dating data analysis
-Version: 0.2.1
-Date: 2013-01-24
+Version: 0.2.2
+Date: 2013-03-05
 Authors@R: c(person("Sebastian", "Kreutzer", role =
         c("aut","trl","cre"), email =
         "sebastian.kreutzer@geogr.uni-giessen.de"), person("Christoph",
@@ -26,9 +26,10 @@ Collate: Analyse_SAR.OSLdata.R CW2pLM.R CW2pLMi.R CW2pHMi.R CW2pPMi.R
         plot_RadialPlot.R readBIN2R.R RisoeBINfileData-class.R
         Calc_CentralDose.R Calc_FiniteMixture.R Calc_MinDose3.R
         Calc_MinDose4.R Calc_CommonDose.R zzz.R
-Packaged: 2013-01-24 20:08:33 UTC; sebastiankreutzer
+Packaged: 2013-03-05 11:22:05 UTC; sebastiankreutzer
 Author: Sebastian Kreutzer [aut, trl, cre], Christoph Schmidt [aut],
         Margret C. Fuchs [aut], Michael Dietze [aut], Manfred Fischer
         [aut, trl], Christoph Burow [aut], Markus Fuchs [ths]
+NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-01-25 07:22:46
+Date/Publication: 2013-03-05 14:30:27

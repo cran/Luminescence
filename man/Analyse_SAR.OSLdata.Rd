@@ -119,7 +119,7 @@ output<-Analyse_SAR.OSLdata(input.data=BINfileData,
                     )
                     
 ##combine results relvant for further analysis
-output.SAR <- cbind(output$LnLxTnTx[[1]]$Dose, output$LnLxTnTx[[1]]$LxTx, output$LnLxTnTx[[1]]$LxTx.Error)
+output.SAR <- data.frame(Dose=output$LnLxTnTx[[1]]$Dose, LxTx=output$LnLxTnTx[[1]]$LxTx, LxTx.Error=output$LnLxTnTx[[1]]$LxTx.Error)
 output.SAR
 
 }

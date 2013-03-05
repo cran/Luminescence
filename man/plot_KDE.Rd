@@ -11,8 +11,9 @@ range can be provided visually and as numeric values.
 }
 \usage{
 plot_KDE(values,
-         distribution.parameters = "", 
-         summary = "", 
+         distribution.parameters, 
+         summary,
+         summary.pos,
          bw = "nrd0",
          ...)
 }
@@ -25,9 +26,11 @@ plot_KDE(values,
           Example: \code{distribution.parameter=c("median","mean","sd")}. Mean and median are potted as a line, the standard 
           deviation is shown as a gray polygon.}
     \item{summary}{\link{character} (optinal): add numerical output to the plot. Can be one or more out of: "n" (number of
-          samples), "mean" (mean De value), "median" (median of the De values), "KDEmax" (maximum value of probability 
+          samples), "mean" (mean De value), "median" (median of the De values), "kdemax" (maximum value of probability 
           density function), "sdrel" (relative standard deviation), "sdabs" (absolute standard deviation), "serel" (relative
           standard error) and "seabs" (absolute standard deviation).}
+    \item{summary.pos}{\link{numeric} (with default): optional position coordinates for the statistical
+    summary. Y-coordinate refers to the right hand y-axis.}
     \item{bw}{\link{character} (with default): bin-width, choose a numeric value for manual setting.}
     \item{...}{further arguments and graphical parameters passed to \code{\link{plot}}}
  }
@@ -57,12 +60,13 @@ dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1
 
 
 }
-\author{Sebastian Kreutzer (JLU Giessen, Germany),\cr 
-Michael Dietze (TU Dresden, Germany)}
+\author{Sebastian Kreutzer, JLU Giessen, (Germany),
+Michael Dietze, TU Dresden, (Germany)}
 \note{
 The plot output is no 'PD' plot (cf. the discussion of Berger and Galbraith in Ancient TL; see references)!
 
 }
+\section{Version}{3.0.2 [2013-03-04]}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 

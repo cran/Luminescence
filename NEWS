@@ -1,5 +1,16 @@
 Changes for R-package Luminescence
 
+Version 0.2.2 (March 5th, 2013)
+	- Analyse_SAR.OSLdata(): Correct wrong recycling ratio calculation; e.g. it was R1/R5 but it should R5/R1
+	- Analyse_SAR.OSLdata(): Correct example in the manual to produce a data.frame instead a matrix object
+	- Second2Gray(): add argument 'method' and function has been rewritten
+	- plot_RadialPlot(): simplified grouping by automatic argument setting for 'sample.lty', 'sample.pch' and 'sample.col'
+	- plot_RadialPlot(): correct for a graphical error when the argument 'cex.global' is used
+	- plot_RadialPlot(): now allows metadata for mtext when the grouping option is used
+	- plot_KDE(): optimize plot output for raw cases in which the par() default values has been previously adjusted
+	- plot_KDE(): new argument 'summary.pos' introduced to allow a free positioning of the statistical summary
+	- plot_Histogram(): function has been completely rewritten to improve the graphical output
+
 Version 0.2.1 (January 24th, 2013)
 	- added function: sTeve()
 	- correct critical error in Calc_OSLLxTxRatio(): due to an error the uncorrected LnLx and TnTx values for LxTx calculation were used 
