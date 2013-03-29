@@ -1,5 +1,23 @@
 Changes for R-package Luminescence
 
+Version 0.2.3 (March 29th, 2013)
+	- plot_Histogram(): change default value for x-axis labeling 
+	- plot_BINfileData(): add argument 'curve.transformation' to allow pseudo curve transformations
+	- plot_Histogram(): change default value for x-axis labeling 
+	- plot_BINfileData(): add argument 'curve.transformation' to allow pseudo curve transformations
+	- readBIN2R(): improve import speed and make it more stable 
+	- readBIN2R(): add support for additional, new LTYPES
+	- readBIN2R(): add argument 'show.raw.values' to prevent translation for LTPYE, DTYPE and LIGHTSOURCE
+	- readBIN2R(): add argument 'txtProgressBar' to enable or disable the progress bar output  
+	- readBIN2R(): add argument 'n.records' to limit the number of read records
+	- readBIN2R(): add argument 'show.record.number' for debugging usage
+	- readBIN2R(): functions now searches for BIN format version and returns an error for unsupported BIN format versions
+	- plot_KDE(): remove some inconsistencies (argument 'KDEmax' now 'kdemax', 'sdrabs' to 'sdabs', 'sebas' to 'seabs', 'sdrabs' to 'sdabs')
+	- plot_KDE(): correction in the calculation of the absolute and relative standard error
+	- Analyse_SAR.OSLdata(): remove unwanted 'test' print output, which has been accidentally introduced in the last version
+	- Analyse_SAR.OSLdata(): add argument 'output.plot.single' to allow single window plot outputs
+	
+
 Version 0.2.2 (March 5th, 2013)
 	- Analyse_SAR.OSLdata(): Correct wrong recycling ratio calculation; e.g. it was R1/R5 but it should R5/R1
 	- Analyse_SAR.OSLdata(): Correct example in the manual to produce a data.frame instead a matrix object

@@ -7,22 +7,63 @@
 Import a *.bin file produced by a Risoe DA15 and DA20 TL/OSL reader into R.
 }
 \usage{
-readBIN2R(file)
+readBIN2R(file,
+          show.raw.values = FALSE,
+          n.records,
+          show.record.number = FALSE,
+          txtProgressBar = TRUE
+)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{file}{
 %%     ~~Describe \code{file} here~~
-  \link{character} (\bold{required}): the bin-file name (including path), e.g. \cr
+  \link{character} (\bold{required}): bin-file name (including path), e.g. \cr
   [WIN]: \code{readBIN2R("C:/Desktop/test.bin")}, \cr  
   [MAC/LINUX]: \code{readBIN2R("/User/test/Desktop/test.bin")}
+  
+
 } 
+
+\item{show.raw.values}{
+  \link{logical} (with default): shows raw values from BIN file for \code{LTYPE}, \code{DTYPE}
+  and \code{LIGHTSOURCE} without translation in characters. 
+  
+  
+}
+
+
+
+ \item{n.records}{
+  \link{integer} (optional): limits the number of imported records. Can be used in 
+  combination with \code{show.record.number} for debugging purposes, e.g. corrupt BIN files.
+
+  
+}
+
+
+ \item{show.record.number}{
+  \link{logical} (with default): shows record number of the imported record, for debugging usage only. 
+  
+  
+  
+}
+
+\item{txtProgressBar}{
+  \link{logical} (with default): enables or disables \code{\link{txtProgressBar}}. 
+  
+  
+}
+
+
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 The binary data file is parsed byte per byte following the data structure published in the Appendices of 
 the Analyst manual p. 42. 
 \cr
+
+\bold{General BIN-file structure}
 
 \tabular{rlll}{
 [,1] \tab ID \tab: Unique record ID (same ID as in slot \code{DATA}) \tab \code{numeric} \cr
@@ -70,6 +111,29 @@ the Analyst manual p. 42.
 [,44] \tab SYSTEMID \tab: System ID \tab \code{integer} 
 }
 
+
+\bold{LTYPES}
+
+\tabular{rll}{
+[,0] \tab TL \tab: Thermoluminescence \cr
+[,1] \tab OSL \tab: Optically stimulated luminescence \cr
+[,2] \tab IRSL \tab: Infrared stimulated luminescence \cr
+[,3] \tab M-IR \tab: Infrared monochromator scan\cr
+[,4] \tab M-VIS \tab: Visible monochromator scan\cr
+[,5] \tab TOL \tab: Thermo-optical luminescence \cr
+[,6] \tab TRPOSL \tab: Time Resolved Pulsed OSL\cr
+[,7] \tab RIR \tab: Ramped IRSL\cr
+[,8] \tab RBR \tab: Ramped Blue LEDs\cr
+[,9] \tab USER \tab: User defined\cr
+[,10] \tab POSL \tab: Pulsed OSL \cr
+[,11] \tab SGOSL \tab: Single Grain OSL\cr
+[,12] \tab RL \tab: Radio Luminescence \cr
+[,13] \tab XRF \tab: X-ray Fluorescence
+}
+
+(information on the \code{LTYPE} kindly provided by Risoe, DTU Nutech)
+
+
 }
 \value{
 %%  ~Describe the value returned
@@ -87,17 +151,22 @@ Returns an S4 \link{Risoe.BINfileData-class} object containing two slots:
 %% ~put references to the literature/web site here ~
 Duller, G., 2007. Analyst. 
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany}
+\author{Sebastian Kreutzer, JLU Giessen (Germany),
+Margret C. Fuchs, TU Bergakademie Freiberg (Germany)}
 \note{
 %%  ~~further notes~~
-Function has been successfully tested for BIN-file version 3 and 4. The version number depends on used the Sequence Editor. 
+Function has been successfully tested for BIN format versions 03 and 04. The version number depends on the used Sequence Editor. 
+
+\bold{Other BIN format versions are currently not supported}.
 }
 
+\section{Version}{0.5.1 [2013-03-10]}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-\code{\link{readBin}}
+\code{\linkS4class{Risoe.BINfileData}},
+\code{\link{readBin}}, \code{\link{txtProgressBar}}
 }
 \examples{
 ##readBIN2R("~/Desktop/Example.bin")

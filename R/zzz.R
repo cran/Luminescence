@@ -1,3 +1,16 @@
+##==============================================================================
+##on Attach
+.onAttach <- function(libname,pkgname){
+  
+  ##set startup message
+  try(packageStartupMessage(paste("Welcome to the R package Luminescence version ",
+                                  packageDescription(pkg="Luminescence")$Version,
+                                  " [Built: ",
+                                  strsplit(packageDescription(pkg="Luminescence")$Packaged, ";")[[1]][1],
+                                  "]", sep="")), silent=TRUE)                        
+}
+
+
 sTeve<- function(n_frames = 20, t_animation = 3) {
 require(shape)
 

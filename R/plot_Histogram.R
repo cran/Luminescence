@@ -45,7 +45,7 @@ plot_Histogram <- function (
  xlab.plot <- if("xlab" %in% names(extraArgs)) {
     extraArgs$xlab
     } else {
-      expression(paste(D[e], " Distribution"))
+      expression(paste(D[e], " [unknown unit]"))
     }
   
   ylab.plot <- if("ylab" %in% names(extraArgs)) {

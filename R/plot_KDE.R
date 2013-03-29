@@ -5,8 +5,8 @@
 #authors: Sebastian Kreutzer (1), Michael Dietze (2)
 ##organisation: 1 - JLU Giessen, Germany
 ##              2 - TU Dresden, Germany
-##version: 3.0.2
-##date: 2013-03-04
+##version: 3.0.4
+##date: 2013-03-13
 ##=============================================================================
 
 plot_KDE <- function(					
@@ -109,7 +109,7 @@ plot_KDE <- function(
   if("kdemax" %in% distribution.parameters == TRUE) {
 	  abline(v = xkdemax) # add KDE max line
 	  text(xkdemax * 1.005, n_De * 0.98, # add text
-	       "KDE max", 
+	       expression(KDE[max]), 
 	       srt = 90, 
 	       pos = 1,
 	       cex = 0.8 * cex)
@@ -191,7 +191,7 @@ plot_KDE <- function(
                                    "\n", 
                                    sep = ""),
                              ""),
-                      ifelse("sdrabs" %in% summary == TRUE,
+                      ifelse("sdabs" %in% summary == TRUE,
                              paste("sd = ", 
                                    round(sd_De, 2),
                                    "\n", 
@@ -199,13 +199,14 @@ plot_KDE <- function(
                              ""),
                       ifelse("serel" %in% summary == TRUE,
                              paste("se = ", 
-                                   round(sd_De/(n_De * mean_De) * 100, 2), 
+                                   round((sd_De / sqrt(n_De)) / 
+                                           mean_De * 100, 2), 
                                    " %\n", 
                                    sep = ""),
                              ""),
-                      ifelse("sebas" %in% summary == TRUE,
+                      ifelse("seabs" %in% summary == TRUE,
                              paste("se = ", 
-                                   round(sd_De/n_De, 2),
+                                   round(sd_De / sqrt(n_De), 2),
                                    "\n", 
                                    sep = ""),
                              ""),

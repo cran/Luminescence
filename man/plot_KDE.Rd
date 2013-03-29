@@ -28,7 +28,7 @@ plot_KDE(values,
     \item{summary}{\link{character} (optinal): add numerical output to the plot. Can be one or more out of: "n" (number of
           samples), "mean" (mean De value), "median" (median of the De values), "kdemax" (maximum value of probability 
           density function), "sdrel" (relative standard deviation), "sdabs" (absolute standard deviation), "serel" (relative
-          standard error) and "seabs" (absolute standard deviation).}
+          standard error) and "seabs" (absolute standard error).}
     \item{summary.pos}{\link{numeric} (with default): optional position coordinates for the statistical
     summary. Y-coordinate refers to the right hand y-axis.}
     \item{bw}{\link{character} (with default): bin-width, choose a numeric value for manual setting.}
@@ -66,7 +66,7 @@ Michael Dietze, TU Dresden, (Germany)}
 The plot output is no 'PD' plot (cf. the discussion of Berger and Galbraith in Ancient TL; see references)!
 
 }
-\section{Version}{3.0.2 [2013-03-04]}
+\section{Version}{3.0.4 [2013-03-13]}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 

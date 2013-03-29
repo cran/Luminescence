@@ -1,12 +1,12 @@
-##//////////////////////////////////////////////
+##/////////////////////////////////////////////////////////////////////////////
 ##//plot_BINfileData.R
-##/////////////////////////////////////////////
-##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-#vers.: 0.3
-#date: 25/08/2012
-##======================================
+##/////////////////////////////////////////////////////////////////////////////
+##=============================================================================#
+##author: Sebastian Kreutzer*, Michael Dietze**
+##organisation: *JLU Giessen, **TU Dresden
+##version: 0.4
+##date: 2013-03-05
+##=============================================================================#
 ##
 ## plot luminescence curves from bin file
 
@@ -16,6 +16,7 @@ plot_BINfileData<-function(BINfileData, #input BIN file
                           set,
                           sorter="POSITION", #sort by POSITION or RUN
                           ltype=c("IRSL","OSL","TL","RIR","RBR"),
+                          curve.transformation,                            
                           dose_rate,
                           temp.lab="deg. C", 
                           cex.global=1
@@ -73,12 +74,43 @@ plot_BINfileData<-function(BINfileData, #input BIN file
       
       ##find measured unit
       measured_unit<-if(temp@METADATA[i,"LTYPE"]=="TL"){" deg. C"}else{"s"} 
-        
       
+      ##set x and y values
+      values.x <- seq(temp@METADATA[i,"HIGH"]/temp@METADATA[i,"NPOINTS"],
+                      temp@METADATA[i,"HIGH"],by=temp@METADATA[i,"HIGH"]/temp@METADATA[i,"NPOINTS"])
+      values.y <- unlist(temp@DATA[temp@METADATA[i,"ID"]])      
+      values.xy <- data.frame(values.x, values.y)
+      
+      ##set curve transformation if wanted
+      if((temp@METADATA[i,"LTYPE"] == "OSL" | temp@METADATA[i,"LTYPE"] == "IRSL") &
+          missing(curve.transformation) == FALSE){    
+  
+        if(curve.transformation=="CW2pLM"){
+          
+          values.xy <- CW2pLM(values.xy)
+          
+        }else if(curve.transformation=="CW2pLMi"){
+          
+          values.xy <- CW2pLMi(values.xy)[,1:2]
+          
+        }else if(curve.transformation=="CW2pHMi"){
+          
+          values.xy <- CW2pHMi(values.xy)[,1:2]
+          
+        }else if(curve.transformation=="CW2pPMi"){
+        
+         values.xy <- CW2pPMi(values.xy)[,1:2]
+        
+        }else{
+          
+         warning("Function for curve.transformation is unknown. No transformation is performed.")
+          
+        }  
+        
+      }
+              
       ##plot graph 
-      plot(seq(temp@METADATA[i,"HIGH"]/temp@METADATA[i,"NPOINTS"],
-               temp@METADATA[i,"HIGH"],by=temp@METADATA[i,"HIGH"]/temp@METADATA[i,"NPOINTS"]),
-           unlist(temp@DATA[temp@METADATA[i,"ID"]]),
+      plot(values.xy,
            main=paste("pos=", temp@METADATA[i,"POSITION"],", run=", temp@METADATA[i,"RUN"],
                       ", set=", temp@METADATA[i,"SET"],sep=""
                       ),

@@ -14,6 +14,7 @@ Analyse_SAR.OSLdata(input.data,
                     info.measurement = "unkown measurement",
                     log = "",
                     output.plot = FALSE,
+                    output.plot.single = FALSE,
                     cex.global = 1)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -59,6 +60,10 @@ Analyse_SAR.OSLdata(input.data,
 
 }
 
+ \item{output.plot.single}{\link{logical} (with default): single plot output (\code{TRUE/FALSE}) to allow for plotting the results in single plot windows. Works only if \code{output.plot = TRUE}.
+    
+}
+
   \item{cex.global}{\link{numeric} (with default): global scaling factor. 
 
 }
@@ -97,6 +102,8 @@ Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an impro
 }
 \author{Sebastian Kreutzer (JLU Giessen, Germany),\cr 
 Margret C. Fuchs (TU Bergakadmie Freiberg, Germany)}
+
+\section{Version}{0.2.8 [2013-03-28]}
 \note{
 Rejection criteria are calculated but not considered during the analysis to discard values.
 }

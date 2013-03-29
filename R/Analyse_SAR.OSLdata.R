@@ -1,13 +1,13 @@
-##//////////////////////////////////////////////
+##//////////////////////////////////////////////////////////////////////////////
 ##//Analyse_SAR.OSLdata.R
-##/////////////////////////////////////////////
+##//////////////////////////////////////////////////////////////////////////////
 ##
-##======================================
+##==============================================================================
 #author: Sebastian Kreutzer*, Margret C. Fuchs**
 #organisation: *JLU Giessen, **TU Bergakademie Freiberg
-#vers.: 0.2.7
-#date: 27/01/2012
-##======================================
+#version: 0.2.8
+#date: 2013-03-28
+##==============================================================================
 ##script analyses OSL data from a SAR measurement
 ##  --Input: RisoeBINfile object (as provided by readBIN2R())
 ##  --the script should work for all types of SAR measurements 
@@ -27,6 +27,7 @@ Analyse_SAR.OSLdata<-function(input.data,
                          info.measurement="unkown measurement",
                          log="",
                          output.plot=FALSE,
+                         output.plot.single=FALSE,
                          cex.global=1                         
                          ){
                       
@@ -231,8 +232,9 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
 ##=================================================================================================##
 if(output.plot==TRUE){
  
- layout(matrix(c(1,2,1,2,3,4,3,5),4,2,byrow=TRUE))
-     
+ if(output.plot.single==FALSE){
+  layout(matrix(c(1,2,1,2,3,4,3,5),4,2,byrow=TRUE))
+ }     
     ##warning if number of curves exceed colour values
     if(length(col)<length(LnLx.curveID)){
       cat("\n[Analyse_OSLCurves.R] Warning: To many curves! Only the first",length(col),"curves are plotted!")
@@ -384,7 +386,7 @@ if(output.plot==TRUE){
         
       ##===========================================================================================##
       ##Print IRSL Curves if IRSL curve is set
-print("test")
+
       if(is.na(IRSL_BOSL)==FALSE){        
       ##get channel resolution (it should be the same for all values)
       HIGH<-unique(sample.data@METADATA[sample.data@METADATA["ID"]==IRSL.curveID ,"HIGH"])
@@ -436,7 +438,12 @@ print("test")
       }
      ##============================================================================================
      ##Plot header
-     mtext(side=3,paste("ALQ Pos. ",i,sep=""),outer=TRUE,line=-2.5)
+     if(output.plot.single==TRUE){
+       mtext(side=3,paste("ALQ Pos. ",i,sep=""))  
+     }else{
+       mtext(side=3,paste("ALQ Pos. ",i,sep=""),outer=TRUE,line=-2.5)       
+     }
+
      ##Plot footer
      mtext(side=4,info.measurement,outer=TRUE,line=-1.5,cex=0.6*cex.global, col="blue")
 
@@ -479,7 +486,7 @@ print("test")
 
     SARParameters<-data.frame(readTemp=readTemp,cutheat=cutheat,systemID=systemID)
    
-return(list(LnLxTnTx=LnLxTnTx_List,RejectionCriteria=RejectionCriteria,SARParameters=SARParameters)) 
+    return(list(LnLxTnTx=LnLxTnTx_List,RejectionCriteria=RejectionCriteria,SARParameters=SARParameters)) 
 }#end function
 ##=================================================================================================##
 ##EOF

@@ -2,7 +2,7 @@
      
      year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
      vers <- paste("R package version", meta$Version)
-	author<-packageDescription("Luminescence", fields="Author")
+	author<-gsub("[[].*","",unlist(strsplit(packageDescription("Luminescence", fields="Author"), "\n")))
      url<-packageDescription("Luminescence", fields="URL")
      
      bibentry(bibtype="Manual",
