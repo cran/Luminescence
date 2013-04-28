@@ -1,5 +1,14 @@
 Changes for R-package Luminescence
 
+Version 0.2.4 (April 28th, 2013)
+	- plot_RadialPlot(): correct for an error that allowed only pre-defined column names for a 2 column data.frame
+	- plot_RadialPlot(): add argument 'zaxis.tck' to allow for a tick length scaling
+	- plot_RadialPlot(): add minor ticks on the zscale 
+	- fit_LMCurve(): change argument 'log_scale' to 'log' for the sake of consistency 
+	- fit_LMCurve(): add '...' argument to pass further arguments to the plot output (e.g. xlab, log, main, xlim, ylim)
+	- fit_LMCurve(): remove argument 'main' from the manual (still available by pass through via '...')
+	- fit_LMCurve(): change start parameter estimation behaviour if the argument 'fit.advanced = TRUE' is used (more stable)
+
 Version 0.2.3 (March 29th, 2013)
 	- plot_Histogram(): change default value for x-axis labeling 
 	- plot_BINfileData(): add argument 'curve.transformation' to allow pseudo curve transformations
@@ -17,7 +26,6 @@ Version 0.2.3 (March 29th, 2013)
 	- Analyse_SAR.OSLdata(): remove unwanted 'test' print output, which has been accidentally introduced in the last version
 	- Analyse_SAR.OSLdata(): add argument 'output.plot.single' to allow single window plot outputs
 	
-
 Version 0.2.2 (March 5th, 2013)
 	- Analyse_SAR.OSLdata(): Correct wrong recycling ratio calculation; e.g. it was R1/R5 but it should R5/R1
 	- Analyse_SAR.OSLdata(): Correct example in the manual to produce a data.frame instead a matrix object

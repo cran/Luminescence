@@ -18,12 +18,16 @@ plot_RadialPlot(sample,
                 sample.max = FALSE,
                 sample.mtext, 
                 zscale.log = TRUE, 
-                zaxis.scale, zaxis.group_circle = FALSE, yaxis.scale, 
+                zaxis.scale, 
+                zaxis.group_circle = FALSE, 
+                zaxis.tck,
+                yaxis.scale, 
                 plot.2sigmaRange = TRUE, 
                 plot.area_ratio = 4.5/6, 
                 zlab = expression(paste(D[e], " [Gy]")), 
                 main = expression(paste(D[e], " Distribution", sep = "")), 
-                cex.global = 1, xscale_factor = 1.01)
+                cex.global = 1, 
+                xscale_factor = 1.01)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -57,6 +61,8 @@ any text set this parameter to \code{""}.
   \item{zaxis.group_circle}{\link{logical} (with default): shows additional group circles for the 2-sigma uncertainties on the z-scale.
 }
   \item{yaxis.scale}{\link{vector} (optional): option for manual y-axis scaling. Example: \code{yaxis.scale=c(-15,15)}
+}
+  \item{zaxis.tck}{\link{numeric} (optional): determines the relative length of ticks on the z-axis. Set to zero disables any ticks. If no value is provided the tick length is calculated automatically. 
 }
   \item{plot.2sigmaRange}{\link{logical} (with default): plot a grey polygon showing the 2-sigma range of the central value.
 }
@@ -106,7 +112,7 @@ This function is based on an S script of Rex Galbraith. To reduce the manual adj
 has been rewritten. Thanks to Rex Galbraith for useful comments on this function.
 }
 
-\section{Version}{0.4 [2013-03-03]}
+\section{Version}{0.4.3 [2013-04-01]}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
@@ -131,7 +137,7 @@ usertext <- "Example data set"
 ## b) define an evenly-spaced z-axis between min and max
 zscale <- seq(from = min(ExampleData.DeValues$ED),
               to = max(ExampleData.DeValues$ED),
-              by = 500)
+              by = 100)
               
 ##plot the same data set a bit more user-adjusted
 plot_RadialPlot(sample = ExampleData.DeValues,
@@ -152,7 +158,7 @@ group.indices <- list(c(1:10),  # group 1 with samples 1 to 10
 ##plot the data.set grouped 
 plot_RadialPlot(ExampleData.DeValues,
                 zscale.log = TRUE, 
-                zaxis.scale = seq(2000, 4000, by = 500), 
+                zaxis.scale = seq(2000, 4000, by = 100), 
                 zlab = expression(paste(D[e], " [s]")),
                 sample.groups = group.indices,
                 sample.col = c("royalblue", "orange3"),

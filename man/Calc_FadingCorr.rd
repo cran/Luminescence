@@ -34,9 +34,11 @@ A \link{data.frame} containing the fading-corrected age is returned.
 }
 \references{
 Huntley, D.J. & Lamothe, M., 2001. Ubiquity of anomalous fading in K-feldspars and the measurement and correction for it in optical dating. Canadian Journal of Earth Sciences, 38, pp. 1093-1106.}
-\author{
-Sebastian Kreutzer, JLU Giessen, 2012
+\author{Sebastian Kreutzer, JLU Giessen (Germany)
 }
+
+\section{Version}{0.1.1}
+
 \note{
 The upper age limit is set to 500 ka!
 }
@@ -48,7 +50,7 @@ The upper age limit is set to 500 ka!
 ##
 }
 \examples{
-Calc_FadingCorr(g_value = c(3.3,0.03), tc = 752, age.faded = c(100,10))
+Calc_FadingCorr(g_value = c(3.3,0.03), tc = 752, age.faded = c(100,10), n.MCruns=50)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

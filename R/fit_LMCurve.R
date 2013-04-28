@@ -1,13 +1,12 @@
-##//////////////////////////////////////////////////////
+##//////////////////////////////////////////////////////////////////////////////
 ##//fit_LMCurve.R
-##//////////////////////////////////////////////////////
-
-##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen, Germany
-#vers.: 0.2.8.1
-#date: 28/08/2012
-##======================================
+##//////////////////////////////////////////////////////////////////////////////
+##==============================================================================
+##author: Sebastian Kreutzer
+##organisation: JLU Giessen, Germany
+##version: 0.2.9
+##date: 2013-04-10
+##==============================================================================
 ##+++++++++++++++++++++++Preface+++++++++++++++++++++++(START)
 ##  --LM fitting procedure for LM curves
 ##+++++++++++++++++++++++Preface+++++++++++++++++++++++(END)
@@ -29,14 +28,12 @@ fit_LMCurve <- function(
                   start_values,
                   input.dataType="LM", #option for pLM curve
                   
-                  main="Default",
                   sample_code="",
                   sample_ID="", #additional ID option
                   
                   LED.power=36, #in mW/cm^2
                   LED.wavelength=470, #in nm
                   
-                  log_scale="", #set log scale
                   cex.global=0.8,                 
                   fit.trace=FALSE,
                   fit.advanced=FALSE,
@@ -51,10 +48,66 @@ fit_LMCurve <- function(
                                                 #only used if output.terminal is TRUE
                   
                   output.plot=TRUE,
-                  output.plotBG=FALSE #plot TRUE or FALSE,                                         
+                  output.plotBG=FALSE, #plot TRUE or FALSE,
+                  ...
                   ) {
                                   			
+  ## Set plot format parameters -----------------------------------------------
+  extraArgs <- list(...) # read out additional arguments list
+  
+  log       <- if("log" %in% names(extraArgs)) {extraArgs$log} 
+               else {""}
+  
+  xlim      <- if("xlim" %in% names(extraArgs)) {extraArgs$xlim} 
+               else {c(min(values[,1]),max(values[,1]))}
+  
+  ylim      <- if("ylim" %in% names(extraArgs)) {extraArgs$ylim} 
+               else {
+                 
+                 if(input.dataType=="pLM"){
+                   c(0,max(values[,2]*1.1))
+                 }else{
+                   c(min(values[,2]),max(values[,2]*1.1))
+                 }
+                 
+               }
+  
+  xlab      <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} 
+               else {
+                 
+                 if(log=="x" | log=="xy"){
+                     if(input.dataType=="LM"){"log time [s]"}else{"log u [s]"}
+                 }
+                 else{if(input.dataType=="LM"){"time [s]"}else{"u [s]"}
+                 }
+                     
+               }
+  
+  ylab     <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} 
+              else {
+                
+                if(log=="y" | log=="xy"){
+                  if(input.dataType=="LM"){
+                    paste("log LM-OSL [cts/",round(max(values[,1])/length(values[,1]),digits=2)," s]",sep="")
+                  }else{"log pLM-OSL [a.u.]"}
+                }
+                else{ if(input.dataType=="LM"){
+                      paste("LM-OSL [cts/",round(max(values[,1])/length(values[,1]),digits=2)," s]",sep="")
+                      }
+                      else{"pLM-OSL [a.u.]"}
+                }
 
+              }
+  
+  main      <- if("main" %in% names(extraArgs)) {extraArgs$main} 
+               else {"Default"}
+    
+  
+  
+  
+  fun       <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE}
+ 
+  
 ##=================================================================================================##  	
 ##  BACKGROUND SUBTRACTION
 ##=================================================================================================##
@@ -190,11 +243,12 @@ fit_LMCurve <- function(
            
              ##sample input parameters values from a normal distribution
              xm.MC<-sapply(1:length(xm),function(x){
-               xm.MC<-sample(rnorm(25,mean=xm[x],sd=xm[x]/100), replace=TRUE)              
+               xm.MC<-sample(rnorm(25,mean=xm[x],sd=xm[x]/10), replace=TRUE)              
              })
-             
+            
              Im.MC<-sapply(1:length(xm),function(x){
-                Im.MC<-sample(rnorm(25,mean=Im[x],sd=Im[x]/100),replace=TRUE)  
+                Im.MC<-sample(rnorm(25,mean=Im[x],sd=Im[x]/10), replace=TRUE)
+                
              })
              ##------------------------------------------------------------------------------------##
      
@@ -209,10 +263,10 @@ fit_LMCurve <- function(
                      nls.control(
                        maxiter=500
                        ),#end nls control
-                     lower=c(xm=0,Im=0)
+                     lower=c(xm=min(values[,1]),Im=0),
+                     upper=c(xm=max(values[,1]),Im=max(values[,2]*1.1))
                     ),# nls
                  silent=TRUE)# end try 
-              
               ##graphical output
               if(i==1){cat(paste("[fit_LMCurve.R] >> advanced fitting attempt (#", 
                                  b.pseudo_start,"): ",sep=""))}
@@ -474,24 +528,13 @@ if(output.plot==TRUE){
      ##==uppper plot==##
      ##open plot area
      plot(NA,NA,
-          xlim=c(min(values[,1]),max(values[,1])),
-          ylim=if(input.dataType=="pLM"){
-                c(0,max(values[,2]*1.1))
-               }else{
-                 c(min(values[,2]),max(values[,2]*1.1))
-               },
+          xlim=xlim,
+          ylim=ylim,
           xlab="",
           xaxt="n",
           main=main,
-          log=log_scale,          
-          ylab=if(log_scale=="y" | log_scale=="xy"){
-            if(input.dataType=="LM"){
-            paste("log LM-OSL [cts/",round(max(values[,1])/length(values[,1]),digits=2)," s]",sep="")
-            }else{"log pLM-OSL [a.u.]"}}              
-            else{if(input.dataType=="LM"){
-            paste("LM-OSL [cts/",round(max(values[,1])/length(values[,1]),digits=2)," s]",sep="")
-            }else{"pLM-OSL [a.u.]"}
-          }
+          log=log,          
+          ylab=ylab
          )#endplot
     
      mtext(side=3,sample_code,cex=0.8*cex.global)
@@ -510,8 +553,7 @@ if(output.plot==TRUE){
       lines(values[,1],eval(fit.function), lwd=2, col="red", lty=2)
     
       axis(side=1)
-      mtext(side=1,if(log_scale=="x" | log_scale=="xy"){"log time [s]"}else{"time [s]"},
-            cex=.9*cex.global,line=2)
+      mtext(side=1,xlab, cex=.9*cex.global,line=2)
      
       mtext(side=4,paste(n.components, " component pseduo function is shown",sep=""),cex=0.7, col="blue")
       
@@ -540,7 +582,7 @@ if(output.plot==TRUE){
           curve.col<-c(curve.col,i+1)
       }              
  		##plot legend
- 		legend(if(log_scale=="x"| log_scale=="xy"){
+ 		legend(if(log=="x"| log=="xy"){
        if(input.dataType=="pLM"){"topright"}else{"topleft"}}else{"topright"},
           legend.caption,lty=1,lwd=2,col=col[curve.col], bty="n")
  		
@@ -548,15 +590,13 @@ if(output.plot==TRUE){
  		##plot residuals	
     par(mar=c(4.2,4,0,0))
     plot(values[,1],residuals(fit), 
-         xlim=c(min(values[,1]),max(values[,1])), 
-         xlab=if(log_scale=="x" | log_scale=="xy"){
-           if(input.dataType=="LM"){"log time [s]"}else{"log u [s]"}}
-           else{if(input.dataType=="LM"){"time [s]"}else{"u [s]"}}, 
+         xlim=xlim, 
+         xlab=xlab, 
          type="l", 
          col="grey", 
          ylab="residual",
          lwd=2,
-         log=log_scale)
+         log=log)
  		
      ##ad 0 line
      abline(h=0)
@@ -565,14 +605,12 @@ if(output.plot==TRUE){
     #open plot area
     par(mar=c(4,4,3.2,0))
     plot(NA,NA,
-        xlim=c(min(values[,1]),max(values[,1])),
+        xlim=xlim,
         ylim=c(0,100),
         ylab="contribution [%]",
-        xlab=if(log_scale=="x" | log_scale=="xy"){
-          if(input.dataType=="LM"){"log time [s]"}else{"log u [s]"}}
-          else{if(input.dataType=="LM"){"time [s]"}else{"u [s]"}},
+        xlab=xlab,
         main="Component Contribution To Sum Curve",
-        log=if(log_scale=="xy"){"x"}else{log_scale}
+        log=if(log=="xy"){"x"}else{log}
          )
     
     ##----------------------------------------------------------------------------------------------##
@@ -619,6 +657,8 @@ if(output.plot==TRUE){
     
     ##--------------------------------------------------------------------------------------------##
     }#end if try-error for fit
+
+    if(fun==TRUE){sTeve()}
 }    
 ##--------------------------------------------------------------------------------------------------
     ##remove objects  

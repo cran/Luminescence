@@ -5,8 +5,8 @@
 ##=============================================================================
 #author: Sebastian Kreutzer*, Michael Dietze** 
 #organisation: *JLU Giessen, **TU Dresden
-#vers.: 0.4
-#date: 2013-03-03
+#vers.: 0.4.3
+#date: 2013-04-01
 #nota bene: based on a rewritten S script of Rex Galbraith, 2010
 ##=============================================================================
 
@@ -26,9 +26,9 @@ plot_RadialPlot <- function (
   sample.mtext,
   
   zscale.log=TRUE,
-  
 	zaxis.scale, #range of z-axis
   zaxis.group_circle=FALSE,
+  zaxis.tck,
 										
   yaxis.scale, #e.g. c(15,-15); if omitted,  yaxis.scale is estimated
   plot.2sigmaRange=TRUE,
@@ -79,6 +79,7 @@ plot_RadialPlot <- function (
       }else{stop(paste("Error: No matching columns found, please specify", 
                        "a data.frame with two columns!"))} 
   }
+  
   
 ##===========================================================================##
 ##PREVIOUS CALCULATIONS                                                      ##
@@ -147,13 +148,14 @@ plot_RadialPlot <- function (
       mkest<-zaxis.scale
       }else{
       if(zscale.log==TRUE){
-        mkest<-round(exp(pretty(z.i)),digits=0)
+        mkest<-round(exp(pretty(z.i, n=20)),digits=0)
                           
         ##recalculate for small scatter
         if(sd(z.i)/mean(z.i)<0.05){
           mkest<-round(exp(pretty(c(min(z.i)-min(z.i)*0.02,
-                                    max(z.i)+max(z.i)*0.02))),
+                                    max(z.i)+max(z.i)*0.02),n=20)),
                            digits=0)}
+        
       }else{
         ##recalculate for small scatter
         mkest<-round(pretty(z.i),digits=0)
@@ -168,6 +170,7 @@ plot_RadialPlot <- function (
   	## choose the range of the circluar scale on the next line,
   	circ.x<- (0:300)/300
     circ.x<- mkr[1]+circ.x*(mkr[2]-mkr[1]) 
+  
     ## convert to z-values
     if(zscale.log==TRUE){circ.z<-log(circ.x)}else{circ.z<-circ.x}
     circ.x<- r.0/(sqrt(1+h^2*(circ.z-z.0)^2)) # convert to x,y values
@@ -178,10 +181,16 @@ plot_RadialPlot <- function (
 
     ##d) 	label for circle
     ## labels on the radial scale
+    if(missing(zaxis.tck)==TRUE) {
+      zaxis.tck <- 1.01
+    } else {
+      zaxis.tck <- (100 + zaxis.tck) / 100
+    }
+  
     if(zscale.log==TRUE){zmkest<-log(mkest)}else{zmkest<-mkest}
       xmk1 <- r.0/sqrt(1+h^2*(zmkest-z.0)^2)
       ymk1 <- (zmkest-z.0)*xmk1
-      xmk2 <- xmk1*xscale_factor
+      xmk2 <- xmk1*zaxis.tck
       ymk2 <- (zmkest-z.0)*xmk2
       xmk3 <- (xscale_factor*1.04)*r.0/sqrt(1+h^2*(zmkest-z.0)^2)
       ymk3 <- (zmkest-z.0)*xmk3
@@ -304,7 +313,7 @@ plot_RadialPlot <- function (
     }#end for loop
  }else{
       
-   ##weightes mean line (central value)
+   ##weighted mean line (central value)
    lines(c(0,r.0),c(0,0),lty=2, col="black", lwd=1.3)
    
  }#endif::for groups or no groups
@@ -315,10 +324,13 @@ plot_RadialPlot <- function (
     ##LINES
 		##semi circle with thickmarks and labels
 		lines(circ.x,circ.y,lwd=1.3)
-		segments(xmk1,ymk1,xmk2,ymk2)
-    
+    segments(xmk1,ymk1,xmk2,ymk2, col="grey")
+    segments(xmk1[seq(1,length(mkest),5)],ymk1[seq(1,length(mkest),5)],
+             xmk2[seq(1,length(mkest),5)],ymk2[seq(1,length(mkest),5)], lwd=1.2)
+
     ##TEXT - labels z-scale
-    text(xmk3,ymk3,round(mkest,digits=2),cex=1.0*cex.global)
+    text(xmk3[seq(1,length(mkest),5)],ymk3[seq(1,length(mkest),5)],
+         round(mkest[seq(1,length(mkest),5)],digits=2),cex=1.0*cex.global)
 	 
     ##TEXT
 		##label z-axis
@@ -467,21 +479,21 @@ plot_RadialPlot <- function (
     sample.mtext <- rep(NA, length(sample.groups))
     for(i in 1:length(sample.groups)){
       ##assign number of samples per group
-      n.plot <- length(sample$ED[sample.groups[[i]]])
+      n.plot <- length(sample[sample.groups[[i]], 1])
       
       ##calculate z
       if(zscale.log==TRUE){
-        z.i.plot<-log(sample$ED[sample.groups[[i]]])
+        z.i.plot<-log(sample[sample.groups[[i]],1])
       }else{
-        z.i.plot<-sample$ED[sample.groups[[i]]]
+        z.i.plot<-sample[sample.groups[[i]],1]
       }
       
       ##calculate standard error
       if(zscale.log==TRUE){
-        se.i.plot<-sample$ED_Error[sample.groups[[i]]]/
-          sample$ED[sample.groups[[i]]]
+        se.i.plot<-sample[sample.groups[[i]],2]/
+          sample[sample.groups[[i]],1]
       }else{
-        se.i.plot<-sample$ED_Error[sample.groups[[i]]]}
+        se.i.plot<-sample[sample.groups[[i]],2]}
       
       ##calculate weighted central value
       z.0.plot<-(sum(z.i.plot/(se.i.plot^2)))/(sum(1/(se.i.plot^2)))
@@ -518,3 +530,4 @@ plot_RadialPlot <- function (
   }
 ##===========================================================================##  
 } #End of function
+  

@@ -14,18 +14,18 @@ fit_LMCurve(values,
             n.components = 3, 
             start_values,
             input.dataType = "LM",
-            main = "Default", 
             sample_code = "",
             sample_ID = "",
             LED.power = 36, LED.wavelength = 470, 
-            log_scale = "", cex.global = 0.8, 
+            cex.global = 0.8, 
             fit.trace = FALSE,
             fit.advanced = FALSE,
             fit.calcError = FALSE,
             bg.subtraction = "polynomial",            
             output.path,                   
             output.terminal = TRUE, output.terminaladvanced = TRUE, 
-            output.plot = TRUE, output.plotBG = FALSE                                         
+            output.plot = TRUE, output.plotBG = FALSE,
+            ...
             )
 }
 %- maybe also 'usage' for other objects documented here.
@@ -36,14 +36,12 @@ fit_LMCurve(values,
     \item{start_values}{\link{data.frame} (optional): start parameters for lm and xm data for the fit. If no start values are given, an automatic start value estimation is attempted (see details).}
     \item{input.dataType}{\link{character} (with default): alter the plot output depending on the input data: "LM" or "pLM" (pseudo-LM). 
     See: \link{CW2pLM}}
-    \item{main}{\link{character} (with default): header for plot output.}
     \item{sample_code}{\link{character} (optional): sample code used for the plot and the optional output table (mtext).}
     \item{sample_ID}{\link{character} (optional): additional identifier used as column for the table output.}
     \item{LED.power}{\link{numeric} (with default): LED power (max.) used for intensity ramping in mW/cm^2. \bold{Note:} The value is used 
     for the calculation of the absolute photoionisation cross section.}
     \item{LED.wavelength}{\link{numeric} (with default): LED wavelength used for stimulation in nm. \bold{Note:} The value is used 
     for the calculation of the absolute photoionisation cross section.}
-    \item{log_scale}{\link{character}: option for logarithm scales on the plot. Works as in \link{plot.default}.}
     \item{cex.global}{\link{numeric} (with default): global scaling factor.}
     \item{fit.trace}{\link{logical} (with default): trace the fitting process on the terminal.}
     \item{fit.advanced}{\link{logical} (with default): enables advanced fitting attempt for automatic start parameter recognition. Works only if no start parameters are provided. \bold{Note:} It may take a while.}
@@ -58,6 +56,7 @@ fit_LMCurve(values,
     \item{output.plot}{\link{logical} (with default): returns a plot of the fitted curves.}
     \item{output.plotBG}{\link{logical} (with default): returns a plot of the background values with the fit used for the
     background subtraction.}
+    \item{...}{Further arguments that may passed to the plot output, e.g. \code{xlab}, \code{xlab}, \code{main}, \code{log}}
     
  }
 \details{
@@ -165,7 +164,9 @@ Lave, C.A.T., 1970. The Demand for Urban Mass Transportation. The Review of Econ
 Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R R. Gentleman, K. Hornik, & G. Parmigiani, eds., Springer.
 
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany, 2011}
+\author{Sebastian Kreutzer, JLU Giessen (Germany)}
+\section{Version}{0.2.9}
+
 \note{
 %%  ~~further notes~~
 The pseudo-R^2 may not be the best parameter to describe the goodness of the fit. The trade off 

@@ -1,22 +1,11 @@
- citHeader("To cite package 'Luminescence' in publications use:")
-     
-     year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
-     vers <- paste("R package version", meta$Version)
-	author<-gsub("[[].*","",unlist(strsplit(packageDescription("Luminescence", fields="Author"), "\n")))
-     url<-packageDescription("Luminescence", fields="URL")
-     
-     bibentry(bibtype="Manual",
-              title = "{Luminescence}: Package for Luminescence Dating data analysis",
-              author = author,
-              year = year,
-              note = vers,
-			url = url
-             )    
+citHeader("To cite the package 'Luminescence' in publications use:")
 
-	bibentry(bibtype = "Article",
-			title = "Introducing an R package for luminescence dating analysis",
-			author = "Sebastian Kreutzer, Christoph Schmidt, Margret C. Fuchs, Michael Dietze, Manfred Fischer, Markus Fuchs",
-			year = "2012",
-			journal = "Ancient TL",
-			volume = "30",
-			pages = "1-8")
+	 citation(auto = meta)
+
+	 bibentry(bibtype = "Article",
+			  	title = "Introducing an R package for luminescence dating analysis",
+				author = "Sebastian Kreutzer, Christoph Schmidt, Margret C. Fuchs, Michael Dietze, Manfred Fischer, Markus Fuchs",
+				year = "2012",
+				journal = "Ancient TL",
+				volume = "30",
+				pages = "1-8")
