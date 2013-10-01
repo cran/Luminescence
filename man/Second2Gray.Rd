@@ -68,7 +68,7 @@ If no or a wrong method is given, the execution of the function is stopped.
 }
 \examples{
 ##(1) for dose rate = 0.14 +/- 0.001
-data(ExampleData.DeValues)
+data(ExampleData.DeValues, envir = environment())
 Second2Gray(ExampleData.DeValues,c(0.14,0.001))
 
 }

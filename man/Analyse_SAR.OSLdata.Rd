@@ -3,8 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Analyse SAR CW-OSL measurements.}
 \description{
-The function analyses SAR CW-OSL curve data and provides a summary of the measured data for 
-every position. The output of the function is optimized for SAR OSL measurements on quartz.
+The function analyses SAR CW-OSL curve data and provides a summary of the measured data for every position. The output of the function is optimized for SAR OSL measurements on quartz.
 }
 \usage{
 Analyse_SAR.OSLdata(input.data, 
@@ -33,7 +32,7 @@ Analyse_SAR.OSLdata(input.data,
   e.g. \code{background.integral=c(85:100)}
 
 }
-  \item{position}{\link{vector} (optional): reader positions that have to be analysed (e.g. \code{position=c(1:48)}. 
+  \item{position}{\link{vector} (optional): reader positions that want to be analysed (e.g. \code{position=c(1:48)}. 
   Empty positions are automatically omitted.  If no value is given all positions are analysed by default.
 
 }
@@ -52,7 +51,7 @@ Analyse_SAR.OSLdata(input.data,
 
 }
 
-  \item{log}{\link{character} (with default): a character string which contains "x" if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}).
+  \item{log}{\link{character} (with default): a character string which contains "x" if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}.
 
 }
 
@@ -60,7 +59,7 @@ Analyse_SAR.OSLdata(input.data,
 
 }
 
- \item{output.plot.single}{\link{logical} (with default): single plot output (\code{TRUE/FALSE}) to allow for plotting the results in single plot windows. Works only if \code{output.plot = TRUE}.
+ \item{output.plot.single}{\link{logical} (with default): single plot output (\code{TRUE/FALSE}) to allow for plotting the results in single plot windows. Requires \code{output.plot = TRUE}.
     
 }
 
@@ -69,9 +68,9 @@ Analyse_SAR.OSLdata(input.data,
 }
 }
 \details{
-The functions works only for standard SAR protocol measurements introduced by Murray and Wintle (2000)
+The function works only for standard SAR protocol measurements introduced by Murray and Wintle (2000)
 with CW-OSL curves. 
-For the calculation of the Lx/Tx value the function \link{Calc_OSLLxTxRatio} is used. \cr
+For the calculation of the Lx/Tx value the function \link{calc_OSLLxTxRatio} is used. \cr
 
 \bold{Provided rejection criteria}\cr
 
@@ -91,7 +90,7 @@ A plot (optional) and \link{list} is returned containing the following elements:
 \item{RejectionCriteria}{\link{data.frame} with values that might by used as rejection criteria. NA is produced if no R0 dose point 
 exists.}
 \item{SARParameters}{\link{data.frame} of additional measurement parameters obtained from the BIN file,
-e.g. preheat or reard temperature (not valid for all types of measurements).}
+e.g. preheat or read temperature (not valid for all types of measurements).}
 }
 \references{
 Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after bleaching. Quaternary Science Reviews, 7, pp. 387-393.
@@ -101,32 +100,40 @@ Duller, G., 2003. Distinguishing quartz and feldspar in single grain luminescenc
 Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an improved single-aliquot regenerative-dose protocol. Radiation Measurements, 32, pp. 57-73. 
 }
 \author{Sebastian Kreutzer (JLU Giessen, Germany),\cr 
-Margret C. Fuchs (TU Bergakadmie Freiberg, Germany)}
+Margret C. Fuchs (TU Bergakadmie Freiberg, Germany), \cr
+R Luminescence Package Team}
 
 \section{Version}{0.2.8 [2013-03-28]}
 \note{
-Rejection criteria are calculated but not considered during the analysis to discard values.
+Rejection criteria are calculated but not considered during the analysis to discard values.\cr\cr
+
+\bold{The development of this function will not be continued and the 
+function at some point replaced by the function \link{analyse_SAR.CWOSL}.}
+
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\link{Calc_OSLLxTxRatio}, \link{Risoe.BINfileData-class}, \link{readBIN2R} and for further analysis
+\link{calc_OSLLxTxRatio}, \link{Risoe.BINfileData-class}, \link{readBIN2R} and for further analysis
 \link{plot_GrowthCurve}
 }
+
 \examples{
 ##load data
-data(ExampleData.BINfileData)
+data(ExampleData.BINfileData, envir = environment())
 
 ##analyse data
-output<-Analyse_SAR.OSLdata(input.data=BINfileData, 
-                    signal.integral=c(1:5), 
-                    background.integral=c(900:1000),
-                    position=c(1:1),output.plot=TRUE
-                    )
+output <- Analyse_SAR.OSLdata(input.data = CWOSL.SAR.Data, 
+                    signal.integral = c(1:5), 
+                    background.integral = c(900:1000),
+                    position = c(1:1),
+                    output.plot = TRUE)
                     
-##combine results relvant for further analysis
-output.SAR <- data.frame(Dose=output$LnLxTnTx[[1]]$Dose, LxTx=output$LnLxTnTx[[1]]$LxTx, LxTx.Error=output$LnLxTnTx[[1]]$LxTx.Error)
+##combine results relevant for further analysis
+output.SAR <- data.frame(Dose = output$LnLxTnTx[[1]]$Dose, 
+                         LxTx = output$LnLxTnTx[[1]]$LxTx, 
+                         LxTx.Error = output$LnLxTnTx[[1]]$LxTx.Error)
 output.SAR
 
 }

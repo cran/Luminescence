@@ -25,29 +25,29 @@ fit_LMCurve(values,
             output.path,                   
             output.terminal = TRUE, output.terminaladvanced = TRUE, 
             output.plot = TRUE, output.plotBG = FALSE,
-            ...
-            )
+            ...)
+            
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-    \item{values}{\link{data.frame} (\bold{required}): x,y data of measured values (time and counts). See examples.}
-    \item{values.bg}{\link{data.frame} (optional): x,y data of measured values (time and counts) for background subtraction}
+    \item{values}{\code{\linkS4class{RLum.Data.Curve}} or \link{data.frame} (\bold{required}): x,y data of measured values (time and counts). See examples.}
+    \item{values.bg}{\code{\linkS4class{RLum.Data.Curve}} or \link{data.frame} (optional): x,y data of measured values (time and counts) for background subtraction}
     \item{n.components}{\link{integer} (with default): fixed number of components that are to be recognised during fitting (min = 1, max = 7).}
     \item{start_values}{\link{data.frame} (optional): start parameters for lm and xm data for the fit. If no start values are given, an automatic start value estimation is attempted (see details).}
     \item{input.dataType}{\link{character} (with default): alter the plot output depending on the input data: "LM" or "pLM" (pseudo-LM). 
     See: \link{CW2pLM}}
     \item{sample_code}{\link{character} (optional): sample code used for the plot and the optional output table (mtext).}
     \item{sample_ID}{\link{character} (optional): additional identifier used as column for the table output.}
-    \item{LED.power}{\link{numeric} (with default): LED power (max.) used for intensity ramping in mW/cm^2. \bold{Note:} The value is used 
+    \item{LED.power}{\link{numeric} (with default): LED power (max.) used for intensity ramping in mW/cm^2. \bold{Note:} This value is used 
     for the calculation of the absolute photoionisation cross section.}
-    \item{LED.wavelength}{\link{numeric} (with default): LED wavelength used for stimulation in nm. \bold{Note:} The value is used 
+    \item{LED.wavelength}{\link{numeric} (with default): LED wavelength used for stimulation in nm. \bold{Note:} This value is used 
     for the calculation of the absolute photoionisation cross section.}
     \item{cex.global}{\link{numeric} (with default): global scaling factor.}
     \item{fit.trace}{\link{logical} (with default): trace the fitting process on the terminal.}
     \item{fit.advanced}{\link{logical} (with default): enables advanced fitting attempt for automatic start parameter recognition. Works only if no start parameters are provided. \bold{Note:} It may take a while.}
     \item{fit.calcError}{\link{logical} (with default): calculate 1-sigma error range of components using \link{confint}}
     \item{bg.subtraction}{\link{character} (with default): specify method for background subraction (\code{polynomial},
-                          \code{linear}, \code{channel}, see Details). \bold{Note:} input for \code{values.bg} is required.}
+                          \code{linear}, \code{channel}, see Details). \bold{Note:} requires input for \code{values.bg}.}
     \item{output.path}{\link{character} (optional): output path for table output containing the results of the fit. The file name is set automatically. If
     the file already exists in the directory, the values are appended.}
     \item{output.terminal}{\link{logical} (with default): terminal output with fitting results.}
@@ -106,10 +106,10 @@ This may give the opportunity to identify appropriate start parameters visually.
 
 \bold{(b)} If start values are provided, the function works like a simple \code{\link{nls}} fitting approach.
 
-\bold{(c)} If no start parameters are provided and the option \code{fit.advanced == TRUE} is chosen, an 
+\bold{(c)} If no start parameters are provided and the option \code{fit.advanced = TRUE} is chosen, an 
 advanced start paramter estimation is applied using a stochastical attempt. Therefore the recalculated start parameters \bold{(a)}
 are used to construct a normal distribution. The start parameters are then sampled randomly from this distribution. 
-A maximum of 100 attempts will be made. \bold{Note:} This process may be really time consuming. \cr
+A maximum of 100 attempts will be made. \bold{Note:} This process may be time consuming. \cr
 
 \bold{Goodness of fit}
 
@@ -136,7 +136,7 @@ See the \link{nls} help page for more information.
 %%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
-\item{plot}{(optional) various types of plots are returned for details see above.}
+\item{plot}{(optional) various types of plots are returned. For details see above.}
 \item{table}{(optional) an output table (*.csv) with the fitted components is provided 
 if the \code{output.path} is set.}
 \item{\code{list} object}{beside the plot and table output options a \link{list} is returned. 
@@ -147,6 +147,9 @@ e.g. \link{summary}, \link{confint}, \link{profile}. For more details, see \link
 
 (b) a \link{data.frame} containing the summarised parameters including the 
 error (\code{$output.table}).
+
+(c) a \link{matrix} containing the values for the component to sum contribution plot 
+(\code{$component.contribution.matrix}).
 }
 
 }
@@ -161,11 +164,11 @@ Kitis, G. & Pagonis, V., 2008. Computerized curve deconvolution analysis for LM-
 
 Lave, C.A.T., 1970. The Demand for Urban Mass Transportation. The Review of Economics and Statistics, 52 (3), pp. 320-323. 
 
-Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R R. Gentleman, K. Hornik, & G. Parmigiani, eds., Springer.
+Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. R. Gentleman, K. Hornik, & G. Parmigiani, eds., Springer.
 
 }
 \author{Sebastian Kreutzer, JLU Giessen (Germany)}
-\section{Version}{0.2.9}
+\section{Version}{0.2.10 [2013-09-27]}
 
 \note{
 %%  ~~further notes~~
@@ -185,21 +188,21 @@ recommended.
 \examples{
 
 ##(1) fit LM data without background subtraction 
-data(ExampleData.FittingLM)
-fit_LMCurve(values = values.curve, n.components = 3, log_scale = "x")
+data(ExampleData.FittingLM, envir = environment())
+fit_LMCurve(values = values.curve, n.components = 3, log = "x")
 
 ##(2) fit LM data with background subtraction and export as JPEG
 ## -alter file path for your prefered system
 ##jpeg(file = "~/Desktop/Fit_Output\%03d.jpg", quality = 100, 
     ## height = 3000, width = 3000, res = 300)
-data(ExampleData.FittingLM)
+data(ExampleData.FittingLM, envir = environment())
 fit_LMCurve(values = values.curve, values.bg = values.curveBG,
-     n.components = 2, log_scale = "x", output.plotBG = TRUE)
+     n.components = 2, log = "x", output.plotBG = TRUE)
 ##dev.off()
 
 ##(3) fit LM data with manual start parameters
-data(ExampleData.FittingLM)
-fit_LMCurve(values = values.curve, values.bg = values.curveBG, n.components = 3, log_scale = "x",
+data(ExampleData.FittingLM, envir = environment())
+fit_LMCurve(values = values.curve, values.bg = values.curveBG, n.components = 3, log = "x",
             start_values = data.frame(Im = c(170,25,400), xm = c(56,200,1500)))
 
 

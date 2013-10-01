@@ -9,6 +9,7 @@ based on a rewritten S script of Rex Galbraith.
 }
 \usage{
 plot_RadialPlot(sample, 
+                na.exclude = TRUE,
                 sample.groups, 
                 sample.legend, 
                 sample.lty = 1, 
@@ -33,6 +34,8 @@ plot_RadialPlot(sample,
 \arguments{
   \item{sample}{\link{data.frame} (\bold{required}): two column data frame with the input values, e.g. 'de' and 'se'.
 }
+        \item{na.exclude}{\link{logical} (with default): exclude NA values
+from the data set prior to any further operations.}
   \item{sample.groups}{\link{list} (optional): option to group the input data set like: 
   
   \code{sample.groups = list(c(1:14), c(15:26), c(27:40))}
@@ -121,7 +124,7 @@ has been rewritten. Thanks to Rex Galbraith for useful comments on this function
 }
 \examples{
 ##load data
-data(ExampleData.DeValues)
+data(ExampleData.DeValues, envir = environment())
 
 ##plot the example data set the easiest way
 plot_RadialPlot(ExampleData.DeValues)

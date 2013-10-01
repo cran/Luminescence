@@ -1,13 +1,13 @@
-##//////////////////////////////////////////////////////
+##//////////////////////////////////////////////////////////////////////////////
 ##//fit_CWCurve.R - for CW - curve fitting 
-##//////////////////////////////////////////////////////
-
-##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU of Giessen
-#vers.: 0.1
-#date: 28/10/2012
-##======================================
+##/////////////////////////////////////////////////////////////////////////////
+##
+##==============================================================================
+##author: Sebastian Kreutzer
+##organisation: JLU of Giessen
+##version: 0.3
+##date: 2013-09-30
+##==============================================================================
 
 fit_CWCurve<- function(
                   values, #values from bin file or what ever
@@ -43,10 +43,34 @@ fit_CWCurve<- function(
       ##switch off warnings of to avoid confusions
       options(warn=-1)
  	
-      ##set x and y values
-      x<-values[,1]
-      y<-values[,2]
+    
+      
+# INTEGRITY CHECKS --------------------------------------------------------
+      
+      ##INPUT OBJECTS
+      if(is(values, "RLum.Data.Curve") == FALSE & is(values, "data.frame") == FALSE){
+        stop("[fit_CWCurve] Error: Input object is not of type 'RLum.Analyis' or 'data.frame'!")
+      } 
         
+      
+      if(is(values, "RLum.Data.Curve") == TRUE){
+        
+        x <- values@data[,1]
+        y <- values@data[,2]
+        
+        ##needed due to inconsistencies in the R code below 
+        values <- data.frame(x,y)
+        
+      }else{
+        
+        ##set x and y values
+        x<-values[,1]
+        y<-values[,2]
+   
+      }
+      
+     
+      
 ##=================================================================================================##		
 ## FITTING
 ##=================================================================================================##
@@ -54,7 +78,7 @@ fit_CWCurve<- function(
 ##////equation used for fitting////(start)
   fit.equation<-function(I0.i,lambda.i){   
                 equation<-parse(
-                text=paste("I0[",I0.i,"]*exp(-lambda[",lambda.i,"]*x)",
+                text=paste("I0[",I0.i,"]*lambda[",lambda.i,"]*exp(-lambda[",lambda.i,"]*x)",
                 collapse="+",sep=""))
                 return(equation)
   }
@@ -67,6 +91,7 @@ fit_CWCurve<- function(
  
   ##if n.components_max is missing, then it is Inf
   if(missing(n.components.max)==TRUE){n.components.max<-Inf}     
+
 
 ##       
 ##
@@ -109,7 +134,7 @@ while(fit.trigger==TRUE & n.components<=n.components.max){
                          minFactor=1/2048,
                          ),
 						    lower=c(I0=0,lambda=0)# set lower boundaries for components
-            )# nls
+            ), silent=TRUE# nls
 		)#end try
    
     ##count failed attempts for fitting 
@@ -296,10 +321,77 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
       
      }#endif::table output
     
+    ##============================================================================##   
+    ## COMPONENT TO SUM CONTRIBUTION PLOT
+    ##============================================================================##                  
+    
+    ##+++++++++++++++++++++++++++++++
+    ##set matrix
+    ##set polygon matrix for optional plot output
+    component.contribution.matrix <- matrix(NA, 
+                                            nrow = length(values[,1]), 
+                                            ncol = (2*length(I0)) + 2)
+    
+    ##set x-values
+    component.contribution.matrix[,1] <- values[,1]
+    component.contribution.matrix[,2] <- rev(values[,1]) 
+    
+    ##+++++++++++++++++++++++++++++++
+    ##set 1st polygon
+    ##1st polygon (calculation)
+    
+    y.contribution_first<-(I0[1]*lambda[1]*exp(-lambda[1]*x))/(eval(fit.function))*100
+    
+    ##avoid NaN values (might happen with synthetic curves)
+    y.contribution_first[is.nan(y.contribution_first)==TRUE] <- 0
+    
+    ##set values in matrix
+    component.contribution.matrix[,3] <- 100
+    component.contribution.matrix[,4] <- 100-rev(y.contribution_first)
+   
+    ##+++++++++++++++++++++++++++++++
+    ##set polygons in between
+    ##polygons in between (calculate and plot)
+    if (length(I0)>2){
+      
+      y.contribution_prev <- y.contribution_first
+      i<-2
+      
+      while (i<=length(I0)-1) {
+        y.contribution_next<-I0[i]*lambda[i]*exp(-lambda[i]*x)/(eval(fit.function))*100
+        
+        ##avoid NaN values
+        y.contribution_next[is.nan(y.contribution_next)==TRUE] <- 0
+        
+        ##set values in matrix
+        component.contribution.matrix[,(3+i)] <- 100-y.contribution_prev
+        component.contribution.matrix[,(4+i)] <- rev(100-y.contribution_prev-
+                                                       y.contribution_next)
+        
+        y.contribution_prev <- y.contribution_prev + y.contribution_next
+        
+        i<-i+1        
+      }#end while loop
+    }#end if
+    
+    ##+++++++++++++++++++++++++++++++
+    ##set last polygon
+    
+    ##last polygon (calculation)  
+    y.contribution_last <- I0[length(I0)]*lambda[length(lambda)]*exp(-lambda[length(lambda)]*x)/
+      (eval(fit.function))*100
+     
+    ##avoid NaN values
+    y.contribution_last[is.nan(y.contribution_last)==TRUE]<-0
+    
+    component.contribution.matrix[,((2*length(I0))+1)] <- y.contribution_last
+    component.contribution.matrix[,((2*length(I0))+2)] <- 0          
+
 }#endif :: (exists("fit"))   
   
 }else{writeLines("[simpleITLCurveFit.R] >> Fitting Error >> Plot without fit produced!")
       output.table<-NA
+      component.contribution.matrix <- NA
       }
    
 ##=================================================================================================##  
@@ -372,56 +464,48 @@ if(output.plot==TRUE){
   
      ##add 0 line
      abline(h=0)
- 		
-    ##plot component contribution to the whole signal
-    #open plot area
-     par(mar=c(4,4,3.2,0))
-     plot(NA,NA,
-         xlim=c(min(x),max(x)),
-         ylim=c(0,100),
-         ylab="contribution [%]",
-         xlab=if(missing(xlab)==TRUE){if(log=="x" | log=="xy"){"log time [s]"}else{"time [s]"}}else{xlab},
-         main="Component Contribution To Sum Curve",
-         log=if(log=="x" | log=="xy"){log="x"}else{""}
-        )
+ 		  
+    ##------------------------------------------------------------------------##
+    ##++component to sum contribution plot ++##
+    ##------------------------------------------------------------------------##
     
-     ##component contribution plot
-       ##calculate first polygon    
-       y.contribution_first<-(I0[1]*exp(-lambda[1]*x))/(eval(fit.function))*100
-       polygon(c(x,rev(x)),c(rep(100,length(x)),100-rev(y.contribution_first)),col=col[2])    
- 
+        ##plot component contribution to the whole signal
+        #open plot area
+         par(mar=c(4,4,3.2,0))
+         plot(NA,NA,
+             xlim=c(min(x),max(x)),
+             ylim=c(0,100),
+             ylab="contribution [%]",
+             xlab=if(missing(xlab)==TRUE){if(log=="x" | log=="xy"){"log time [s]"}else{"time [s]"}}else{xlab},
+             main="Component Contribution To Sum Curve",
+             log=if(log=="x" | log=="xy"){log="x"}else{""})
+  
+    stepping <- seq(3,length(component.contribution.matrix),2)
     
-       ##calculate polygons in between 
-       if (length(I0)>2){
-         y.contribution_prev<-y.contribution_first
-         i<-2
-         while (i<=length(I0)-1) {
-           y.contribution_next<-I0[i]*exp(-lambda[i]*x)/(eval(fit.function))*100
-           polygon(c(x,rev(x)),c(100-y.contribution_prev,rev(100-y.contribution_prev-y.contribution_next)),
-                   col=col[i+1])
-           y.contribution_prev<-y.contribution_prev+y.contribution_next
-           i<-i+1          
-         }#end while loop
-       }#end if
-         
-     ##calculate last polygon    
-     y.contribution_last<-I0[length(I0)]*exp(-lambda[length(lambda)]*x)/(eval(fit.function))*100
-      polygon(c(x,rev(x)),c(y.contribution_last,rep(0,length(x))),col=col[length(I0)+1])
+    for(i in 1:length(I0)){
+      
+      polygon(c(component.contribution.matrix[,1],
+                component.contribution.matrix[,2]),
+              c(component.contribution.matrix[,stepping[i]],
+                component.contribution.matrix[,stepping[i]+1]),
+              col = col[i+1])
+    }
+    rm(stepping)   
+    
     
     }#end if try-error for fit
 } 
           
-##=================================================================================================##  
+##============================================================================##  
 ## Return Values
-##=================================================================================================##   
+##============================================================================##   
       
-     return(list(fit=fit,output.table=output.table))   
-      
-}#Endoffunction
-
-##===========================================================================================
-##STARTING FUNCTION##
-
-
-#EOF
-
+      newRLumResults.fit_CWCurve <- set_RLum.Results(
+        data = list(
+          fit = fit,
+          output.table = output.table,
+          component.contribution.matrix = component.contribution.matrix))
+ 
+      invisible(newRLumResults.fit_CWCurve)
+            
+}#EOF

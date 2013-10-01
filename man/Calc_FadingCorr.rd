@@ -1,15 +1,15 @@
-\name{Calc_FadingCorr}
-\alias{Calc_FadingCorr}
+\name{calc_FadingCorr}
+\alias{calc_FadingCorr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Apply a fading correction according to Huntley & Lamothe (2001) for a given g-value.
 }
 \description{
-This function runs the itrerations that are needed to calculate the corrected age including the error 
+This function runs the iterations that are needed to calculate the corrected age including the error 
 for a given g-value according to Huntley & Lamothe (2001).
 }
 \usage{
-Calc_FadingCorr(g_value, tc, age.faded, n.MCruns = 500)
+calc_FadingCorr(g_value, tc, age.faded, n.MCruns = 500)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,7 +27,7 @@ Calc_FadingCorr(g_value, tc, age.faded, n.MCruns = 500)
 }
 \details{
 The error of the fading-corrected age is determined using a Monte Carlo simulation approach. 
-Hugh values for n.MCruns will significantly increase the computation time.
+Large values for \code{n.MCruns} will significantly increase the computation time.
 }
 \value{
 A \link{data.frame} containing the fading-corrected age is returned.
@@ -38,7 +38,6 @@ Huntley, D.J. & Lamothe, M., 2001. Ubiquity of anomalous fading in K-feldspars a
 }
 
 \section{Version}{0.1.1}
-
 \note{
 The upper age limit is set to 500 ka!
 }
@@ -50,7 +49,8 @@ The upper age limit is set to 500 ka!
 ##
 }
 \examples{
-Calc_FadingCorr(g_value = c(3.3,0.03), tc = 752, age.faded = c(100,10), n.MCruns=50)
+calc_FadingCorr(g_value = c(3.3,0.03), tc = 752, age.faded = c(100,10), n.MCruns=50)
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

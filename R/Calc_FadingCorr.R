@@ -1,19 +1,19 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//Calc_FadingCorr.R
-##//////////////////////////////////////////////////////////////////////////////
+##//////////////////////////////////////////////
+##//calc_FadingCorr.R
+##/////////////////////////////////////////////
 
-##==============================================================================
+##======================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen
 #vers.: 0.1.1
-#date: 2012-05-15
-##==============================================================================
+#date: 15/04/2012
+##======================================
 ##
 ##  --fading correction according Huntely and Lamothe 2001
 ##  --Error estimation by Monte Carlo simulation
 ##
 ##
-Calc_FadingCorr<-function(g_value,    #g-value in $
+calc_FadingCorr<-function(g_value,    #g-value in $
                   tc,         #tc in seconds
                   age.faded,  #Age.faded in ka
                   n.MCruns=500 #MC runs for error        
@@ -38,15 +38,17 @@ Calc_FadingCorr<-function(g_value,    #g-value in $
  
   ##-----------------------------------------------------------------------------------------------##
   ##Monte Carlo simulation for error estimation
-      
+        
+      g_valueMC <- vector("numeric", length=n.MCruns)  
       g_valueMC<-rnorm(n.MCruns,mean=g_value[1],sd=g_value[2])
       age.fadedMC<-rnorm(n.MCruns,mean=age.faded[1],sd=age.faded[2])
       kappaMC<-g_valueMC/log(10)/100
     
-      ##calculate all values 
+      ##calculate all values
       tempMC<-sapply(1:length(age.fadedMC),function(x){
             which(round(age.fadedMC[x]/z,digits=2)==round(1-kappaMC[x]*(log(z/tc)-1),digits=2))
             })
+  
   ##-----------------------------------------------------------------------------------------------##
   
   ##obtain corrected age
@@ -56,7 +58,7 @@ Calc_FadingCorr<-function(g_value,    #g-value in $
 ##OUTPUT
 ##=================================================================================================##
 
-  cat("\n[Calc_FadingCorr]")
+  cat("\n[calc_FadingCorr]")
   cat("\n\t Fading correction according to Huntley & Lamothe (2001):\n")
   cat(paste("\n\t Age (faded): ",age.faded[1]," +/- ",age.faded[2]," ka",sep=""))
   cat(paste("\n\t g-value: ",g_value[1], " +/- ",g_value[2]," %/decade",sep=""))

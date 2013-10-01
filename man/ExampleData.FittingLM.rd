@@ -5,7 +5,7 @@
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Lineraly modulated (LM) measurement data from a quartz sample from Norway including background 
-measurement. Measurements carried out at the luminescence lab at the University of Bayreuth.
+measurement. Measurements carried out at the luminescence laboratory at the University of Bayreuth.
 
 }
 \usage{
@@ -36,7 +36,7 @@ Fuchs, M., Kreutzer, S., Fischer, M., Sauer, D., Soerensen, R., 2012. OSL and IR
 
 \examples{
 ##show LM data 
-data(ExampleData.FittingLM)
+data(ExampleData.FittingLM, envir = environment())
 plot(values.curve,log="x")
 
 }

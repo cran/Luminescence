@@ -13,10 +13,10 @@ CW2pLMi(values, P)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{values}{\code{\link{data.frame}} (\bold{required}): measured curve data of type stimulation time (t)
+  \item{values}{\code{\linkS4class{RLum.Data.Curve}} or \code{\link{data.frame}} (\bold{required}): \code{\linkS4class{RLum.Data.Curve}} or \code{data.frame} with measured curve data of type stimulation time (t)
   (\code{values[,1]}) and measured counts (cts) (\code{values[,2]})}
 
-  \item{P}{\code{\link{vector}} (optional): stimulation time in seconds, if no value is given the optimal value is estimated automatically (see details). Greater values of P produce more points in the
+  \item{P}{\code{\link{vector}} (optional): stimulation time in seconds. If no value is given the optimal value is estimated automatically (see details). Greater values of P produce more points in the
 rising tail of the curve.}
 }
 
@@ -27,7 +27,7 @@ The input \code{data.frame} consists of two columns: time (t) and count values (
 \bold{Nomenclature}
 
 P = stimulation time (s)\cr
-1/P = stimulation rate (1/s)
+1/P = stimulation rate (1/s)\cr
 
 \bold{Internal transformation steps}
 
@@ -58,7 +58,22 @@ on the stimulation rate 1/P. To avoid the production of too many artificial data
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-Returns a \code{\link{data.frame}} with three columns:
+The function returns the same data type as the input data type with the
+transformed curve values.
+
+\item{\code{\linkS4class{RLum.Data.Curve}}}{package \code{\linkS4class{RLum} object} with two additional info elements:
+
+ \tabular{rl}{
+ 
+  $CW2pLMi.x.t  \tab: transformed time values \cr
+  $CW2pLMi.method \tab: used method for the production of the new data points
+ 
+ }
+
+}
+
+\item{\code{\link{data.frame}}}{with three columns:
+
 
  \tabular{rl}{
 
@@ -68,24 +83,26 @@ $x.t  \tab: transformed time values \cr
 $method \tab: used method for the production of the new data points
 }
 
-}
+}}
 \references{
 Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal components. Radiation Measurements, 47, 752-758.
 
-\bold{Further read}
+\bold{Further Reading}
 
 Bulur, E., 1996. An Alternative Technique For Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements 26, 701-709.
 
 Bulur, E., 2000. A simple transformation for converting CW-OSL curves to LM-OSL curves. Radiation Measurements, 32, 141-145.
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany, 2012
+\author{Sebastian Kreutzer, JLU Giessen (Germany)
 
 Based on comments and suggestions from:\cr
 Adrie J.J. Bos, Delft University of Technology, The Netherlands
 }
 
+\section{Version}{0.3 [2013-03-27]}
+
 \note{
-According to Bos & Wallinga (2012), the number of extrapolated points should be limited to avoid 
+According to Bos & Wallinga (2012) the number of extrapolated points should be limited to avoid 
 artificial intensity data. If \code{P} is provided manually and more than two points are extrapolated, 
 a warning message is returned. 
 }
@@ -93,7 +110,8 @@ a warning message is returned.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{CW2pLM}}, \code{\link{CW2pHMi}}, \code{\link{CW2pPMi}}, \code{\link{fit_LMCurve}}
+\code{\link{CW2pLM}}, \code{\link{CW2pHMi}}, \code{\link{CW2pPMi}}, \code{\link{fit_LMCurve}},
+\code{\linkS4class{RLum.Data.Curve}}
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
@@ -103,37 +121,37 @@ a warning message is returned.
 data(ExampleData.CW_OSL_Curve)
 
 ##transform values
-values.transformed<-CW2pLMi(ExampleData.CW_OSL_Curve)
+values.transformed <- CW2pLMi(ExampleData.CW_OSL_Curve)
 
 ##plot
 plot(values.transformed$x, values.transformed$y.t, log = "x")
 
 ##(2) - produce Fig. 4 from Bos & Wallinga (2012)
 ##load data
-data(ExampleData.CW_OSL_Curve)
-values<-CW_Curve.BosWallinga2012
+data(ExampleData.CW_OSL_Curve, envir = environment())
+values <- CW_Curve.BosWallinga2012
 
 ##open plot area
 plot(NA, NA,
-     xlim=c(0.001,10),
-     ylim=c(0,8000),
-     ylab="pseudo OSL (cts/0.01 s)",
-     xlab="t [s]",
-     log="x",
-     main="Fig. 4 - Bos & Wallinga (2012)", 
-     )
+     xlim = c(0.001,10),
+     ylim = c(0,8000),
+     ylab = "pseudo OSL (cts/0.01 s)",
+     xlab = "t [s]",
+     log = "x",
+     main = "Fig. 4 - Bos & Wallinga (2012)") 
+     
 
-values.t<-CW2pLMi(values, P=1/20)
-lines(values[1:length(values.t[,1]),1],CW2pLMi(values, P=1/20)[,2], col="red" ,lwd=1.3)
-text(0.03,4500,"LM", col="red" ,cex=.8)
+values.t <- CW2pLMi(values, P = 1/20)
+lines(values[1:length(values.t[,1]),1],CW2pLMi(values, P = 1/20)[,2], col = "red", lwd = 1.3)
+text(0.03,4500,"LM", col = "red", cex = .8)
 
-values.t<-CW2pHMi(values, delta=40)
-lines(values[1:length(values.t[,1]),1],CW2pHMi(values, delta=40)[,2], col="black", lwd=1.3)
-text(0.005,3000,"HM", cex=.8)
+values.t <- CW2pHMi(values, delta = 40)
+lines(values[1:length(values.t[,1]),1],CW2pHMi(values, delta = 40)[,2], col = "black", lwd = 1.3)
+text(0.005,3000,"HM", cex =.8)
  
-values.t<-CW2pPMi(values, P=1/10)
-lines(values[1:length(values.t[,1]),1],CW2pPMi(values, P=1/10)[,2], col="blue", lwd=1.3)
-text(0.5,6500,"PM", col="blue" ,cex=.8)
+values.t <- CW2pPMi(values, P = 1/10)
+lines(values[1:length(values.t[,1]),1], CW2pPMi(values, P = 1/10)[,2], col = "blue", lwd = 1.3)
+text(0.5,6500,"PM", col = "blue", cex = .8)
 
 
 

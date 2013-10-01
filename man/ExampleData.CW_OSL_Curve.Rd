@@ -45,12 +45,12 @@ Reference: \tab Bos & Wallinga (2012) and Baartman et al. (2011)
 \references{
 Baartman, J.E.M., Veldkamp, A., Schoorl, J.M., Wallinga, J., Cammeraat, L.H., 2011. Unravelling Late Pleistocene and Holocene landscape dynamics: The Upper Guadalentin Basin, SE Spain. Geomorphology, 125, pp. 172-185.
 
-Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal components. Radiation Measurements, 47, 752-758.
+Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal components. Radiation Measurements, 47, pp. 752-758.
 
 %%  ~~ possibly secondary sources and usages ~~
 }
 \examples{
-data(ExampleData.CW_OSL_Curve)
+data(ExampleData.CW_OSL_Curve, envir = environment())
 plot(ExampleData.CW_OSL_Curve) 
 }
 \keyword{datasets}

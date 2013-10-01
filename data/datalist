@@ -1,6 +1,8 @@
+BaseDataSet.CosmicDoseRate
 ExampleData.DeValues
 ExampleData.FittingLM
 ExampleData.LxTxData
 ExampleData.LxTxOSLData
 ExampleData.BINfileData
 ExampleData.CW_OSL_Curve
+ExampleData.RLum.Analysis

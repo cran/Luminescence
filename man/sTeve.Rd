@@ -4,7 +4,7 @@
 sTeve - sophisticated Tool for efficient data validation and evaluation
 }
 \description{
-Function provides a sophisticated routine for comprehensive luminescence dating 
+This function provides a sophisticated routine for comprehensive luminescence dating 
 data analysis}
 \usage{
 sTeve (n_frames = 20, t_animation = 3)
@@ -25,8 +25,7 @@ Validates your data.
 \references{
 # 
 }
-\author{
-R Luminescence Team, Dec. 2012 
+\author{R Luminescence Team, Dec. 2012 
 }
 \note{
 The function should not be taken too seriously. 

@@ -1,86 +1,69 @@
-##//////////////////////////////////////////////
-##//Calc_FiniteMixture.R 
-##/////////////////////////////////////////////
-##
-##======================================
-#author: Christoph Burow 
-#organisation: University of Cologne
-#vers.: 0.1
-#date: 12/10/2012
-#nota bene: Based on a rewritten S script of Rex Galbraith, 2006.
-##          The original script annotation by Rex Galbraith is given
-##          below, only slightly changed to match the scripts current
-##          shape.
-##======================================
+calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) after Galbraith (2005) to a given De distribution
+  ### This function fits a k-component mixture to a De distribution with 
+  ### differing known standard errors. Parameters (doses and mixing proportions)
+  ### are estimated by maximum likelihood assuming that the log dose estimates 
+  ### are from a mixture of normal distributions.
+  
+  # ===========================================================================
+  ##author<< 
+  ## Christoph Burow, University of Cologne (Germany) \cr
+  ## Based on a rewritten S script of Rex Galbraith, 2006. \cr\cr
+  
+  ##section<<
+  ## version 0.2 [2013-09-04] 
+  # ===========================================================================
+  
+  input.data,
+  ### \code{\link{data.frame}} (\bold{required}): two column data frame with De
+  ### values and corresponding De errors
+  sigmab,
+  ### \code{\link{numeric}}  (\bold{required}): spread in De values given as a
+  ### fraction (e.g. 0.2). This value represents the expected overdispersion in
+  ### the data should the sample be well-bleached (Cunningham & Walling 2012, 
+  ### p. 100).
+  n.components, 
+  ### \code{\link{numeric}}  (\bold{required}): number of components to be 
+  ### fitted
+  sample.id="unknown sample",
+  ### \code{\link{character}} (with default): sample id
+  n.iterations = 200, 
+  ### \code{\link{numeric}}  (with default): number of iterations for maximum 
+  ### likelihood estimates
+  grain.probability=FALSE, 
+  ### \code{\link{logical}} (with default): prints the estimated probabilities
+  ### of which component each grain is in
+  output.file=FALSE, 
+  ### \code{\link{logical}} (with default): save results to file. See 
+  ### \code{output.filename}.
+  output.filename="default"
+  ### \code{\link{character}} (with default): desired filename, else results 
+  ### are saved to default.res
+  ){
 
-# This program fits a k component mixture to OSL palaeodoses with
-# differing known standard errors. Parameters (doses and mixing proportions)
-# are estimated by maximum likelihood assuming that the log dose estimates
-# are from a mixture of normal distributions.	
-
-# The data are assumed to be in a data.frame with two columns
-# headed ED and ED_Error.  The file may contain other columns also.
-# Of course the program can be edited to read data in other ways.	 
-
-# The user will be prompted to specify
-#	the name of the file containing the data
-#       the number of components to be fitted, k (2 or greater)
-#       the overdispersion parameter sigmab (zero or greater)
-	
-# a simple approach is to start with k=2 and increase k successively
-# and use the maximum log likelihood and BIC values to choose the
-# final k. BIC should decrease for an improved fit and then increase
-# again when there are signs of over fitting
-	
-# Other signs of overfitting are:	
-#        repeated dose estimates, 
-#        covariance matrix not positive definite, and
-#        convergence problems.
-				
-# The program uses the maximum likelihood formulae and algorithm in Appendix 1
-# of Galbraith (1988), Technometrics, 30, 271-281, but expressed in terms
-# of the actual observations rather than the standardised ones.
-# See also Galbraith (2005) Statistics for Fission Track Analysis pp 88-90.	
-
-# Programmed by Rex Galbraith.  Last modified on 20 Sept 2006. The changes
-# from the 31/08/2005 version are to add in prompts for the data file,
-# k and sigmab and to suppress printing after each iteration. I have also
-# increased the default number of iterations to 200, which is plenty for
-# most data sets.  This can be changed of course. And I have changed the
-# file fmix.var.s to give nicer output.			
-
-##=============================================================================================##
-## start function
-
-Calc_FiniteMixture<- function(input.data, #(REQUIRED) data.frame containing two columns named "ED" and "ED_Error"
-                              sigmab, #(REQUIRED) spread in ages above the minimum
-                              n.components, #(REQUIRED) amount of components to be fitted
-                              sample.id="unknown sample", #sample ID
-                              n.iterations = 200, #number of iterations for estimating the maximum likelihoods
-                              grain.probability=FALSE, #prints (to 2 decimal places) the estimated probabilities of which component each grain is in
-                              output.file=FALSE, #write results in filename.res file
-                              output.filename="default" #set the desired filename, else the output file will be name "default"
-                              ) {
-
-##=============================================================================================##
+##============================================================================##
 ## CONSISTENCY CHECK OF INPUT DATA
-##=============================================================================================##
+##============================================================================##
 
-  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type data.frame",quote=F) 
+  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type 
+                                               data.frame",quote=F) 
                                          stop(domain=NA) } 
   try(colnames(input.data)<- c("ED","ED_Error"),silent=TRUE)
-  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error") { print("Columns must be named 'ED' and 'ED_Error'",quote=F)
+  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error") { 
+    print("Columns must be named 'ED' and 'ED_Error'",quote=F)
                                          stop(domain=NA)}
-  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction between 0 and 1 (e.g. 0.2)",quote=F)
+  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction 
+                                    between 0 and 1 (e.g. 0.2)",quote=F)
                                          stop(domain=NA)}
   if(n.components<2) { print("Atleast two components need to be fitted",quote=F)
                                          stop(domain=NA)}
-  if(n.iterations<1 | n.iterations>10000) { print("Only integers between 1:10000 allowed for n.iterations",quote=F)
+  if(n.iterations<1 | n.iterations>10000) { print("Only integers between 1:10000
+                                                  allowed for n.iterations",
+                                                  quote=F)
                                          stop(domain=NA)}
 
-##=============================================================================================##
+##============================================================================##
 ## CALCULATIONS
-##=============================================================================================##
+##============================================================================##
   
   k<- n.components  
 
@@ -137,13 +120,16 @@ Calc_FiniteMixture<- function(input.data, #(REQUIRED) data.frame containing two 
   Cu<- matrix(0,k,k)
   
   for(i in 1:(k-1)){ for(j in 1:(k-1)){
-  Au[i,j]<- sum( (pui[,i]/pii[i] - pui[,k]/pii[k])*(pui[,j]/pii[j] - pui[,k]/pii[k]) )}} 
+  Au[i,j]<- sum( (pui[,i]/pii[i] - pui[,k]/pii[k])*(pui[,j]/pii[j] - 
+                                                      pui[,k]/pii[k]) )}} 
   
   for(i in 1:(k-1)){ for(j in 1:k){
-  Bu[i,j]<- sum( pui[,j]*aui[,j]*(pui[,i]/pii[i] - pui[,k]/pii[k] - delta[i,j]/pii[i] + delta[k,j]/pii[k] ) )}}
+  Bu[i,j]<- sum( pui[,j]*aui[,j]*(pui[,i]/pii[i] - pui[,k]/pii[k] - 
+                                    delta[i,j]/pii[i] + delta[k,j]/pii[k] ) )}}
   
   for(i in 1:k){ for(j in 1:k){
-  Cu[i,j]<- sum( pui[,i]*pui[,j]*aui[,i]*aui[,j] - delta[i,j]*bui[,i]*pui[,i] ) }}
+  Cu[i,j]<- sum( pui[,i]*pui[,j]*aui[,i]*aui[,j] - delta[i,j]*bui[,i]*
+                   pui[,i] ) }}
   
   invvmat<- rbind(cbind(Au,Bu),cbind(t(Bu),Cu))
   vmat<- solve(invvmat)
@@ -168,12 +154,17 @@ Calc_FiniteMixture<- function(input.data, #(REQUIRED) data.frame containing two 
   estd<- rbind(dose,re,sed)
 
   prop<- pii
-  sep<-  c(sqrt(diag(vmat))[c(1:(k-1))],rek)
-  estp<- rbind(prop,sep)
+  
+  # this calculates the proportional standard error of the proportion of grains
+  # in the fitted components. However, the calculation is most likely erroneous.
+  # sep<-  c(sqrt(diag(vmat))[c(1:(k-1))],rek)
+  
+  estp<- prop
 
   blk<- rep("    ",k)
   comp<- rbind(blk,round(estd,4),blk,round(estp,4))
-  comp<- data.frame(comp,row.names=c("","dose (Gy)    ","rse(dose)    ","se(dose)(Gy)"," ","proportion   ","se(prop)    "))
+  comp<- data.frame(comp,row.names=c("","dose (Gy)    ","rse(dose)    ",
+                                     "se(dose)(Gy)"," ","proportion   "))
 
   cp<- rep("comp",k)
   cn<- c(1:k)
@@ -187,7 +178,9 @@ Calc_FiniteMixture<- function(input.data, #(REQUIRED) data.frame containing two 
   write(c(paste("sample: ", output.filename, "\nsigma: ", sigmab)),lbout)
   
   options(warn=-1)
-  write(c(paste("\nnumber of components:",k,"    Sigma:",sigmab,"    llik:",round(llik,4),"     BIC:  ",round(bic,3))),lbout,append=T)
+  write(c(paste("\nnumber of components:",k,"    Sigma:",sigmab,
+                "    llik:",round(llik,4),"     BIC:  ",round(bic,3))),
+        lbout,append=T)
   write("",lbout,append=T)      
   write.table(comp,lbout,append=T,quote=F,sep="\t\t",na="--NA--")
   options(warn=0)
@@ -222,10 +215,13 @@ Calc_FiniteMixture<- function(input.data, #(REQUIRED) data.frame containing two 
   }
   
   # Prepare return values
-  meta<- data.frame(id=sample.id,n=n,sigmab=sigmab,n.components=k,llik=llik,bic=bic)
-  single.comp<- data.frame(id=sample.id,mu=comp0[1],sigmab=comp0[2],llik=comp0[3],BIC=comp0[4])
+  meta<- data.frame(id=sample.id,n=n,sigmab=sigmab,n.components=k,
+                    llik=llik,bic=bic)
+  single.comp<- data.frame(id=sample.id,mu=comp0[1],sigmab=comp0[2],
+                           llik=comp0[3],BIC=comp0[4])
   comp.re<- rbind(round(estd,4),round(estp,4))
-  comp.re<- data.frame(comp.re,row.names=c("dose (Gy)    ","rse(dose)    ","se(dose)(Gy)","proportion   ","se(prop)    "))
+  comp.re<- data.frame(comp.re,row.names=c("dose (Gy)    ","rse(dose)    ",
+                                           "se(dose)(Gy)","proportion   "))
   names(comp.re)<- paste(cp,cn,sep="")
   
   # Return values
@@ -234,5 +230,65 @@ Calc_FiniteMixture<- function(input.data, #(REQUIRED) data.frame containing two 
                  meta=meta,
                  components=comp.re,
                  single.comp=single.comp))
-}#EndOf function
-#EOF
+  ### Returns a terminal output and a file containing statistical results if 
+  ### wanted. In addition a list is returned containing the following elements:
+  ### \cr\cr
+  ### \code{mle.matrix} covariance matrix of maximum likelihood estimates.\cr
+  ### \code{grain.probability} matrix with estimated probabilities of which 
+  ### component each grain is in.\cr
+  ### \code{meta} data frame containing model parameters (sample.id, sigmab, 
+  ### n.components, llik, bic).\cr
+  ### \code{components} data frame containing fitted components.\cr
+  ### \code{single.comp} data frame containing log likelihood and BIC for a 
+  ### single component.
+  
+  ##details<<
+  ## This model uses the maximum likelihood and Bayesian Information Criterion 
+  ## (BIC) approaches. \cr\cr
+  ## Indications of overfitting are: \cr\cr
+  ## - increasing BIC \cr
+  ## - repeated dose estimates \cr
+  ## - covariance matrix not positive definite \cr
+  ## - convergence problems
+  
+  ##references<<
+  ## Galbraith, R.F. & Green, P.F., 1990. Estimating the component ages in a 
+  ## finite mixture. Nuclear Tracks and Radiation Measurements, 17, pp. 197-206.
+  ## \cr\cr
+  ## Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
+  ## track ages. Nuclear Tracks Radiation Measurements, 4, pp. 459-470.\cr\cr
+  ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
+  ## dose and error calculation and display in OSL dating: An overview and some
+  ## recommendations. Quaternary Geochronology, 11, pp. 1-27.\cr\cr
+  ## Roberts, R.G., Galbraith, R.F., Yoshida, H., Laslett, G.M. & Olley, J.M., 
+  ## 2000. Distinguishing dose populations in sediment mixtures: a test of 
+  ## single-grain optical dating procedures using mixtures of laboratory-dosed
+  ## quartz. Radiation Measurements, 32, pp. 459-465.\cr\cr
+  ## Galbraith, R.F., 2005. Statistics for Fission Track Analysis, Chapman & 
+  ## Hall/CRC, Boca Raton.\cr\cr
+  ## \bold{Further reading}\cr\cr
+  ## Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain 
+  ## equivalent dose (De) distributions: Implications for OSL dating of sediment
+  ## mixtures. Quaternary Geochronology, 4, pp. 204-230.\cr\cr
+  ## Cunningham, A.C. & Wallinga, J., 2012. Realizing the potential of fluvial
+  ## archives using robust OSL chronologies. Quaternary Geochronology, 12, 
+  ## pp. 98-106.\cr\cr
+  ## Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing the
+  ## reproducibility and accuracy of optical dating of fluvial deposits. 
+  ## Quaternary Geochronology, 1, pp. 109-120.\cr\cr
+  ## Rodnight, H. 2008. How many equivalent dose values are needed to obtain a 
+  ## reproducible distribution?. Ancient TL, 26, pp. 3-10.
+  
+  ##seealso<<
+  ## \code{\link{calc_CentralDose}},
+  ## \code{\link{calc_CommonDose}}, \code{\link{calc_FuchsLang2001}},
+  ## \code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}    
+}, ex=function(){
+  ## load example data
+  data(ExampleData.DeValues, envir = environment())
+  
+  ## apply the finite mixture model
+  calc_FiniteMixture(ExampleData.DeValues,
+                     sigmab = 0.08, n.components = 2,
+                     grain.probability = TRUE, output.file = FALSE)
+})#END OF STRUCTURE

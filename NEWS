@@ -1,146 +1,260 @@
-Changes for R-package Luminescence
+NEWS for the R Package Luminescence
 
-Version 0.2.4 (April 28th, 2013)
-	- plot_RadialPlot(): correct for an error that allowed only pre-defined column names for a 2 column data.frame
-	- plot_RadialPlot(): add argument 'zaxis.tck' to allow for a tick length scaling
-	- plot_RadialPlot(): add minor ticks on the zscale 
-	- fit_LMCurve(): change argument 'log_scale' to 'log' for the sake of consistency 
-	- fit_LMCurve(): add '...' argument to pass further arguments to the plot output (e.g. xlab, log, main, xlim, ylim)
-	- fit_LMCurve(): remove argument 'main' from the manual (still available by pass through via '...')
-	- fit_LMCurve(): change start parameter estimation behaviour if the argument 'fit.advanced = TRUE' is used (more stable)
+Changes in version 0.3 (1st October, 2013):
 
-Version 0.2.3 (March 29th, 2013)
-	- plot_Histogram(): change default value for x-axis labeling 
-	- plot_BINfileData(): add argument 'curve.transformation' to allow pseudo curve transformations
-	- plot_Histogram(): change default value for x-axis labeling 
-	- plot_BINfileData(): add argument 'curve.transformation' to allow pseudo curve transformations
-	- readBIN2R(): improve import speed and make it more stable 
-	- readBIN2R(): add support for additional, new LTYPES
-	- readBIN2R(): add argument 'show.raw.values' to prevent translation for LTPYE, DTYPE and LIGHTSOURCE
-	- readBIN2R(): add argument 'txtProgressBar' to enable or disable the progress bar output  
-	- readBIN2R(): add argument 'n.records' to limit the number of read records
-	- readBIN2R(): add argument 'show.record.number' for debugging usage
-	- readBIN2R(): functions now searches for BIN format version and returns an error for unsupported BIN format versions
-	- plot_KDE(): remove some inconsistencies (argument 'KDEmax' now 'kdemax', 'sdrabs' to 'sdabs', 'sebas' to 'seabs', 'sdrabs' to 'sdabs')
-	- plot_KDE(): correction in the calculation of the absolute and relative standard error
-	- Analyse_SAR.OSLdata(): remove unwanted 'test' print output, which has been accidentally introduced in the last version
-	- Analyse_SAR.OSLdata(): add argument 'output.plot.single' to allow single window plot outputs
-	
-Version 0.2.2 (March 5th, 2013)
-	- Analyse_SAR.OSLdata(): Correct wrong recycling ratio calculation; e.g. it was R1/R5 but it should R5/R1
-	- Analyse_SAR.OSLdata(): Correct example in the manual to produce a data.frame instead a matrix object
-	- Second2Gray(): add argument 'method' and function has been rewritten
-	- plot_RadialPlot(): simplified grouping by automatic argument setting for 'sample.lty', 'sample.pch' and 'sample.col'
-	- plot_RadialPlot(): correct for a graphical error when the argument 'cex.global' is used
-	- plot_RadialPlot(): now allows metadata for mtext when the grouping option is used
-	- plot_KDE(): optimize plot output for raw cases in which the par() default values has been previously adjusted
-	- plot_KDE(): new argument 'summary.pos' introduced to allow a free positioning of the statistical summary
-	- plot_Histogram(): function has been completely rewritten to improve the graphical output
+  Substantial Changes:
 
-Version 0.2.1 (January 24th, 2013)
-	- added function: sTeve()
-	- correct critical error in Calc_OSLLxTxRatio(): due to an error the uncorrected LnLx and TnTx values for LxTx calculation were used 
+         • The most substantial changes in this package version are
+           introduced by the usage of S4 objects. Inherited classes
+           have been designed to store input and output data for
+           luminescence dating data analysis. Most of the existing
+           functions now allow for RLum objects as input data along
+           with generic R objects. The S4-class structure in this
+           package is shown in the additional PDF provided with this
+           package. The following S4 object classes are implemented:
 
-Version 0.2 (December 15th, 2012)
-	- added function: fit_CWCurve()
-	- added function: CW2pLMi()
-	- added function: CW2pHMi()
-	- added function: CW2pPMi()
-	- added function: Calc_CentralDose()
-	- added function: Calc_CommonDose()
-	- added function: Calc_FiniteMixture()
-	- added function: Calc_MinDose3()
-	- added function: Calc_MinDose4()
-	- plot_BINfileData(): add argument 'run' and 'set' to provide further options to limit the plot output
-	- plot_BINfileData(): add argument 'temp.lab' to allow a circle instead the character string 'deg.' 
-	- plot_GrowthCurve(): improved error capturing (NA values, no data.frame) 
-	- plot_GrowthCurve(): add argument 'fit.bounds' which allows fitting without bounds for experimental applications
-	- plot_KDE(): former name: plot_DeDistribution() - function has been completely revised; added arguments: 'summary' and '...'. Details see manual.
-	- readBIN2R(): correct for an error occurred during data import using old 3.x Sequence Editor versions 
-	- Analyse_SAR.OSLdata(): correct wrong ylab for log option
+  Added S4-classes:
 
-Version 0.1.8 (August 12th, 2012)
-	- fit_LMCurve(): correct ignored global scaling factor for the optional background plot
-	- plot_GrowthCurve(): fix an error that occurred when Lx/Tx values are 0
-	- plot_GrowthCurve(): fix an error that occurred during the iteration process for the EXP+EXP and the EXP+LIN fit
-	- plot_GrowthCurve(): stabilize fitting for EXP+LIN and EXP+EXP functions
-	- plot_GrowthCurve(): add type of fit as well as D01 and D02 values as return values (additional columns within the output data.frame)
-	- plot_GrowthCurve(): minor graphical adjustments
-	- plot_BINfileData(): add irradiation time as mtext to the plots if IRR_TIME is set in the sequence
-	- plot_BINfileData(): introduce 'dose_rate' argument to show the dose in Gy instead the irradiation time
-	- Analyse_SAR.OSLdata(): fix an error that occurred for non zero-dose reg. points 
-	- Analyse_SAR.OSLdata(): fix an error for rare cases with wrong reg. point recognition
-	- Analyse_SAR.OSLdata(): increase number of allowed curves for plotting
-	- Analyse_SAR.OSLdata(): minor graphical output adjustments for the legends
-	- Analyse_SAR.OSLdata(): introduce "log" argument for the plot output
-	- Calc_FadingCorr(): introduce 'n.MCrun'" argument to control number of Monte Carlo runs for the error estimation
+         • ‘RLum’ (virtual class)
 
-Version 0.1.7 (May 24th, 2012)
-	- Analyse_SAR.OSLdata(): correct error for cases in that a cutheat was not applied as TL
-	- Calc_OSLLxTxRatio(): correct consistency check for Tx.data producing warnings
-	- Analyse_SAR.OSLdata(): correct function call, causing unexpected behavior 
-	- plot_Histogram(): unify xlab behaviour
-	- plot_Histogram(): error correction causes by different column selection
-	- plot_GrowthCurve(): Add D0 value as output in De list element
-	- plot_GrowthCurve(): Correction - remove third digit for De value and minor error correction
-	- plot_DeDistribution(): Minor correction for the graphical output
-	- fit_LMCurve(): Update examples
-	- ExampleData.FittingLM: Replace sample and update sample information
+         • ‘RLum.Data’ (virtual class)
 
-Version 0.1.6 (April 27th, 2012)
-	- addded function: Calc_FuchsLang2001()
-	- added function: Calc_FadingCorr()
-	- fit_LMCurve(): minor error correction for pLM data, log axis was shown for linear scale
-	- fit_LMCurve(): add logical argument fit.calcError for error estimation
-	- fit_LMCurve(): add argument bg.subtraction for different methods of bg subtraction 
-	- fit_LMCurve(): change - the function now returns a list instead the nls() object (see manual)
-	- fit_LMCurve(): minor error handling improvements 
-	- plot_BINfileData(): minor error correction for lab unit - insert round() for unit
-	- plot_BINfileData(): remove non-ascii character for degree celsius for compatibility to windows
-	- plot_BINfileData(): add option SET for argument sorter
-	- plot_GrowthCurve(): remove parameter c from EXP+EXP function to improve fitting stability
-	- Analyse_SAR.OSLdata(): remove non-ascii character for degree celsius for compatibility to windows
-	- plot_DeDistribution(): xlab now requires the full characters
-	- plot_RadialPlot(): introduce argument zlab instead of xlab.unit 
-	- plot_RadialPlot(): replace argument logDe by zscale.log
-	- plot_RadialPlot(): correct text for central value using the log scale option
-	- plot_RadialPlot(): further minor improvements suggested by Rex Galbraith
+         • ‘RLum.Data.Curve’ (object containing one measured curve)
 
-Version 0.1.5 (Apr 08th, 2012)
-	- added function: plot_RadialPlot()
-	- added function: Analyse_SAR.OSLdata()
-	- added function: Calc_OSLLxTxRatio()
-	- added dataset: ExampleData.LxTxOSLData
-	- extent show method for Risoe.BINfileData by position, run and set data
-	- plot_DeDistribtion(): add option for plotting distribution parameters like mean or median (suggested by Margret Fuchs)
-	- fit_GrowthCurve(): add fitting with weights as suggested by Michael Dietze and Margret Fuchs
-	- fit_LMCurve(): add option fit.advance using a stochastic process for start parameter recognition
-	- fit_LMCurve(): correct an error: in a few cases the fitting failed but no pseudo sum function was shown
-	- fit_LMCurve(): correct an error in the automatic start parameter finding routine which results in NA values
-	- fit_LMCurve(): correct y-scaling for log-x plot using pLM data
+         • ‘RLum.Analysis’ (contains RLum.Data (e.g. RLum.Data.Curve)
+           objects for protocol analysis)
 
-Version 0.1.4 (Mar 01th, 2012)
-	- added function plot_BINfiledata() with example data
-	- added function plot_GrowthCurve() with example data
-	- added example data for plot_GrowthCurve()
-	- added function CW2pLM() with example
-	- fit_LMCurve(): add option for pLM data in fit_LMCurve
-	- fit_LMCurve(): legend adjustment for pLM curve plot
-	- fit_LMCurve(): supress error messages for try-errors 
-	- readBIN2R(): now returns an S4 object with two slots
-	- added Risoe.BINfileData-class 
-	- added show method for Risoe.BINfileData-class
-		
-Version 0.1.3 (Feb 10th, 2012)
-	- error corrections on the man files
-	- fit_LMCurve function now returns a nls object
+         • ‘RLum.Results’ (contains output of package functions)
 
-Version 0.1.2 (Feb 09th, 2012)
-	- added beta version of fit_LMCurve() including dataset
+  Added S4-class methods:
 
-Version 0.1.1 (Feb 06th, 2012)
-	- added function: plot_Histogram()
-	- minor error correction in the man pages
+         • ‘set_RLum.Data.Curve()’: Constructor method for
+           ‘RLum.Data.Curve’ objects
 
-Version 0.1 (Feb 04th, 2012)
-	- Initial version
+         • ‘set_RLum.Analysis()’: Constructor method for
+           ‘RLum.Analysis’ objects
+
+         • ‘get_RLum.Analyis()’: Accessor method for ‘RLum.Analysis’
+           objects
+
+         • ‘set_RLum.Results()’: Constructor method for ‘RLum.Results’
+           objects
+
+         • ‘get_RLum.Results()’: Accessor method for ‘RLum.Results’
+           objects
+
+         • ‘merge_RLum.Results()’: Function to merge ‘RLum.Results’
+           objects
+
+         • ‘get_structure.RLum.Analysis()’: to parse the structure of
+           an ‘RLum.Analysis’ object
+
+         • ‘set_Risoe.BINfileData()’: Constructor method for
+           ‘Risoe.BINfileData’ objects
+
+  New Functions:
+
+         • ‘plot_RLum()’: Wrapper function for plotting various
+           ‘RLum’-objects
+
+         • ‘plot_RLum.Data.Curve()’: Plot function for
+           ‘RLum.Data.Curve’ objects. Usually accessed by ‘plot_RLum()’
+
+         • ‘plot_RLum.Analysis()’: Plot function for ‘RLum.Analysis’
+           objects. Usually accessed by ‘plot_RLum()’
+
+         • ‘Risoe.BINfileData2RLum.Analysis()’: Converts parts of an
+           ‘Risoe.BINfileData’ object to an ‘RLum.Analysis’ object,
+           depending on the chosen position, run/set or record id.
+
+         • ‘Risoe.BINfileData2RLum.Data.Curve()’: Lossy conversion of
+           an ‘Risoe.BINfileData’ object to an ‘RLum.Data.Curve’ object
+
+         • ‘writeR2BIN()’: Function to export ‘Risoe.BINfileData’
+           objects to BIN or BINX files
+
+         • ‘merge_Risoe.BINfileData()’: Merge BIN/BINX files or
+           ‘Risoe.BINfileData’ objects
+
+         • ‘analyse_SAR.CWOSL()’: Function to analyse SAR CW-OSL
+           measurements, will at some time replace the exisiting
+           function ‘Analyse_SAR.OSLdata’
+
+         • ‘analyse_SAR.TL()’: Function to analyse SAR TL measurements
+           (beta version)
+
+         • ‘calc_TLLxTxRatio()’: Function to calculate Lx/Tx ratios for
+           TL curves used by ‘analyse_SAR.TL()’ (beta version)
+
+         • ‘analyse_IRSAR.RF()’: Function to analyse IRSAR RF
+           measurements according to Erfurt et al. (2003)
+
+         • ‘calc_CosmicDoseRate()’: Function to calculate the cosmic
+           dose rate
+
+         • ‘calc_HomogeneityTest()’: Function to apply the homogenity
+           test after Galbraith (2003)
+
+         • ‘calc_AliquotSize()’: Function to estimate the amount of
+           grains on an aliquot
+
+         • ‘readXSYG2R()’: Function to support the Freiberg Instruments
+           XSYG file format
+
+  New Data Sets:
+
+         • ‘ExampleData.RLum.Analysis’: Luminescence dating measurement
+           dataset as ‘RLum.Analysis’ object
+
+         • ‘BaseDataSet.CosmicDoseRate’: Data set used by the function
+           ‘calc_CosmicDoseRate()’
+
+         • ‘ExampleData.BINfileData’: dataset now contains two objects
+           ‘CWOSL.SAR.Data’ and ‘TL.SAR.Data’ (depending examples have
+           been modified)
+
+  Function Renaming:
+
+         • ‘Calc_OSLLxTxRatio()’: Function renamed to
+           ‘calc_OSLLxTxRatio()’
+
+         • ‘Calc_CommonDose()’: Function renamed to ‘calc_CommonDose()’
+
+         • ‘Calc_CentralDose()’: Function renamed to
+           ‘calc_CentralDose()’
+
+         • ‘Calc_FiniteMixture()’: Function renamed to
+           ‘calc_FiniteMixture()’
+
+         • ‘Calc_MinDose3()’: Function renamed to ‘calc_MinDose3()’
+
+         • ‘Calc_MinDose4()’: Function renamed to ‘calc_MinDose4()’
+
+         • ‘Calc_FadingCorr()’: Function renamed to ‘calc_FadingCorr()’
+
+         • ‘Calc_FuchsLang2001()’: Function renamed to
+           ‘calc_FuchsLang2001()’
+
+         • ‘plot_BINfileData()’: Function renamed to
+           ‘plot_Risoe.BINfileData()’ for the sake of consistency
+
+  Bug Fixes and Further Changes:
+
+         • ‘calc_OSLLxTxRatio()’: Function now allows for a ‘matrix’ as
+           input object
+
+         • ‘calc_OSLLxTxRatio()’: Function now returns an
+           ‘RLum.Results’ object
+
+         • ‘Analyse_SAR.OSLdata()’: Function modified according to the
+           changes in the function ‘calc_OSLLxTxRatio()’
+
+         • ‘Analyse_SAR.OSLdata()’: Function corrected for an error
+           that occured with more than one recyling point
+
+         • ‘Analyse_SAR.OSLdata()’: Function corrected for an error
+           that occured when the dose of the first recycling point was
+           used twice
+
+         • ‘Risoe.BINfileData-class’: An error in the show method has
+           been corrected
+
+         • ‘plot_GrowthCurve()’: An error occurred if no fitting could
+           be applied. Corrected by setting De to NA
+
+         • ‘plot_GrowthCurve()’: The function now checks if at least
+           two regeneration points are given
+
+         • ‘plot_GrowthCurve()’: Function corrected for an infinite
+           loop error occured using only two dose points and the EXP
+           fit option
+
+         • ‘plot_GrowthCurve()’: The function now provides an extra
+           argument ‘na.exclude’ to exclude ‘NA’ values
+
+         • ‘plot_KDE()’: The function now provides an extra argument
+           ‘na.exclude’ to exclude ‘NA’ values
+
+         • ‘plot_KDE()’: The function now allows for an ‘RLum.Results’
+           object as input object
+
+         • ‘plot_KDE()’: The function now allows for plotting multiple
+           data sets
+
+         • ‘plot_Histogram()’: The function now provides an extra
+           argument ‘na.exclude’ to exclude ‘NA’ values
+
+         • ‘plot_Histogram()’: The function now allows for an
+           ‘RLum.Results’ object as input object
+
+         • ‘plot_RadialPlot()’: The function now provides an extra
+           argument ‘na.exclude’ to exclude ‘NA’ values
+
+         • ‘CW2pLMi()’: A test has been implemented to check if P=0
+           (which is not allowed)
+
+         • ‘CW2pLMi()’: Now an ‘RLum.Data.Curve’ object is allowed as
+           input and an object of the same data type as the input will
+           be returned
+
+         • ‘CW2pHMi()’: Now an ‘RLum.Data.Curve’ object is allowed as
+           input and an object of the same data type as the input will
+           be returned
+
+         • ‘CW2pPMi()’: Now an ‘RLum.Data.Curve’ object is allowed as
+           input and an object of the same data type as the input will
+           be returned
+
+         • ‘CW2pLM()’: Now an ‘RLum.Data.Curve’ object is allowed as
+           input and an object of the same data type as the input will
+           be returned
+
+         • ‘fit_CWCurve()’: The function now returns an ‘RLum.Results’
+           object and as input an ‘RLum.Data.Curve’ object is now
+           allowed
+
+         • ‘fit_CWCure()’: An additional
+           ‘component.contribution.matrix’ is now returned to allow for
+           individual component to sum contribution plots
+
+         • ‘fit_CWCure()’: A critical error has been corrected in the
+           used fitting equation. Now it has been set to f(t) =
+           I0[i]*lambda[i]*exp(-lambda[i]*t)
+
+         • ‘fit_LMCurve()’: The function now returns an ‘RLum.Results’
+           object and as input an ‘RLum.Data.Curve’ object is now
+           allowed
+
+         • ‘fit_LMCure()’: An additional
+           ‘component.contribution.matrix’ is now returned to allow for
+           individual component to sum contribution plots
+
+         • ‘readBIN2R()’: BINX file format support has been added
+
+         • ‘readBIN2R()’: An argument ‘forced.VersionNumber’ has been
+           added to cheat the internal version check routine if needed
+
+         • ‘Risoe.BINfileData-class’: The *.binx file format support
+           has been added
+
+  Internals:
+
+         • We partially started to create package documentation using
+           the R pacakge 'inlinedocs', meaning that the documentation
+           is now be part of the source code itself
+
+         • A namespace .LuminescenceEnv in zzz.R has been added
+
+         • A variable ‘col’ has been added to the namespace
+           ‘.LuminescenceEnv’ in the file zzz.R to define a standard
+           colour palette for graphical output in package
+
+         • NEWS are now provided as *.Rd file; der corresponding ASCII
+           file is produced using the function Rd2txt
+
+         • An unicode character for the temperature degree symbol 'deg.
+           C' has been added
+
+         • The S4-object structure has been added as PDF documentation
+           to the package
+

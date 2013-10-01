@@ -1,0 +1,621 @@
+##//////////////////////////////////////////////////////////////////////////////
+##//analyse_SAR.CWOSL.R
+##//////////////////////////////////////////////////////////////////////////////
+##
+##==============================================================================
+##author: Sebastian Kreutzer
+##organisation: Freiberg Instruments, JLU Giessen
+##version: 0.2.3
+#date: 2013-06-13
+##==============================================================================
+##TODO (sebastian kreutzer): IRSL/OSL - it is no difference
+##TODO (sebastian kreuter): add IRSL as rejection criteria 
+##protocol types:   - SAR CW-OSL 
+
+
+analyse_SAR.CWOSL<-function(
+                         object,
+                         signal.integral.min,
+                         signal.integral.max,
+                         background.integral.min,
+                         background.integral.max,
+                         rejection.criteria = list(recycling.ratio=10,
+                                                   recuperation.rate=10
+                                                   ),
+                         log = "",
+                         output.plot = TRUE,
+                         ... 
+                         ){
+
+  
+  
+# CONFIG  -----------------------------------------------------------------
+  
+  ##set allowed curve types
+  type.curves <- c("OSL")
+
+  ##build signal and background integrals
+  signal.integral <- c(signal.integral.min:signal.integral.max)
+  background.integral <- c(background.integral.min:background.integral.max)
+  
+# General Integrity Checks ---------------------------------------------------
+
+  ##GENERAL 
+
+    ##MISSING INPUT
+    if(missing("object")==TRUE){
+      stop("[analyse_SAR.CWOSL] Error: No value set for 'object'!")
+    }
+
+    if(missing("signal.integral")==TRUE){
+      stop("[analyse_SAR.CWOSL] Error: No value set for 'signal.integral'!")
+    }
+    
+    if(missing("background.integral")==TRUE){
+     stop("[analyse_SAR.CWOSL] Error: No value set for 'background.integral'!")
+    }
+
+    ##INPUT OBJECTS
+    if(is(object, "RLum.Analysis")==FALSE){
+      stop("[analyse_SAR.CWOSL] Error: Input object is not of type 'RLum.Analyis'!")
+    }
+
+    ##INTEGRAL LIMITS
+    if(is(signal.integral, "integer")==FALSE | is(background.integral, "integer")==FALSE){
+      stop("[analyse_SAR.CWOSL] Error: 'signal.integral' or background.integral is not 
+           of type integer!")
+    }
+
+
+
+# Protocol Integrity Checks -------------------------------------------------- 
+  
+  ##check overall structur of the object
+  ##every SAR protocol has to have equal number of curves
+  
+  ##grep curve types from analysis value
+  temp.ltype <- sapply(1:length(object@records), function(x) {
+                object@records[[x]]@recordType
+  })
+  
+  ##check if the wanted curves are a multiple of two
+  if(table(temp.ltype)["OSL"]%%2!=0){
+    stop("[analyse_SAR.CWOSL] Error: Input OSL/IRSL curves are not a multiple of two.")
+  }
+
+  ##check if the curve lengths differ
+  temp.matrix.length <- unlist(sapply(1:length(object@records), function(x) {
+                          if(object@records[[x]]@recordType=="OSL"){                            
+                              length(object@records[[x]]@data[,1])
+                          }
+  }))
+  
+  if(length(unique(temp.matrix.length))!=1){
+    stop("[analyse_SAR.CWOSL] Error: Input curves lengths differ.")
+  }
+
+
+  ##check background integral
+  ##background integral should not longer than curve channel length
+  if(max(background.integral)>temp.matrix.length[1]){
+    
+    background.integral <- c((temp.matrix.length[1]-length(background.integral)):
+                               temp.matrix.length[1])
+    
+    warning("Background integral out of bounds. Set to: c(", 
+            min(background.integral),":", max(background.integral),")")
+    
+  }
+  
+
+# Grep Curves -------------------------------------------------------------
+
+  ##grep relevant curves from RLum.Analyis object
+  OSL.Curves.ID <- unlist(sapply(1:length(object@records), function(x) {
+    if(object@records[[x]]@recordType == "OSL"){x} 
+  }))
+
+  ##separate curves by Lx and Tx (it makes it much easier)
+  OSL.Curves.ID.Lx <- OSL.Curves.ID[seq(1,length(OSL.Curves.ID),by=2)]
+  OSL.Curves.ID.Tx <- OSL.Curves.ID[seq(2,length(OSL.Curves.ID),by=2)]
+
+  TL.Curves.ID <- unlist(sapply(1:length(object@records), function(x) {
+    if(object@records[[x]]@recordType == "TL"){x} 
+  }))
+
+  ##separate TL curves
+  TL.Curves.ID.Lx <- sapply(1:length(OSL.Curves.ID.Lx), function(x) {
+    TL.Curves.ID[which(TL.Curves.ID == (OSL.Curves.ID.Lx[x]-1))]
+  })
+
+  TL.Curves.ID.Tx <- sapply(1:length(OSL.Curves.ID.Tx), function(x) {
+    TL.Curves.ID[which(TL.Curves.ID == (OSL.Curves.ID.Tx[x]-1))]
+  })
+
+
+
+# COMPONENT FITTING -------------------------------------------------------
+
+
+# for(x in seq(1,length(OSL.Curves.ID),by=2)){
+#   
+#   
+#   temp.fit.output <- fit_CWCurve(object@records[[OSL.Curves.ID[x]]], 
+#                 n.components.max=3,
+#                 output.terminal = FALSE, 
+#                 output.terminalAdvanced = FALSE, 
+#                 output.plot = FALSE
+# 
+#               )
+#   if(exists("fit.output") == FALSE){
+#     
+#     fit.output <- get_RLum.Results(temp.fit.output)
+#     
+#   }else{
+#     
+#     fit.output <- rbind(fit.output, get_RLum.Results(temp.fit.output))
+#     
+#   }
+# 
+# }
+
+##TODO
+
+# Calculate LnLxTnTx values  --------------------------------------------------
+
+
+
+  ##calculate LxTx values using external function   
+  for(x in seq(1,length(OSL.Curves.ID),by=2)){
+                
+               temp.LnLxTnTx <- get_RLum.Results(
+                 calc_OSLLxTxRatio(Lx.data=object@records[[OSL.Curves.ID[x]]]@data,
+                                 Tx.data=object@records[[OSL.Curves.ID[x+1]]]@data,
+                                 signal.integral,
+                                 background.integral))
+                             
+               ##grep dose
+               temp.Dose <- object@records[[OSL.Curves.ID[x]]]@info$IRR_TIME
+               
+               temp.LnLxTnTx <- cbind(Dose=temp.Dose, temp.LnLxTnTx)
+               
+               if(exists("LnLxTnTx")==FALSE){
+                 
+                 LnLxTnTx <- data.frame(temp.LnLxTnTx)
+                 
+               }else{
+                 
+                 LnLxTnTx <- rbind(LnLxTnTx,temp.LnLxTnTx)
+                 
+               }
+    }
+
+
+# Set regeneration points -------------------------------------------------
+
+        #generate unique dose id - this are also the # for the generated points
+        temp.DoseID <- c(0:(length(LnLxTnTx$Dose)-1))
+        temp.DoseName <- paste("R",temp.DoseID,sep="")
+        temp.DoseName <- cbind(Name=temp.DoseName,Dose=LnLxTnTx$Dose)
+     
+        
+        ##set natural
+        temp.DoseName[temp.DoseName[,"Name"]=="R0","Name"]<-"Natural"
+      
+        
+        ##set R0
+        temp.DoseName[temp.DoseName[,"Name"]!="Natural" & temp.DoseName[,"Dose"]==0,"Name"]<-"R0"
+          
+        ##find duplicated doses (including 0 dose - which means the Natural) 
+        temp.DoseDuplicated<-duplicated(temp.DoseName[,"Dose"])
+         
+        ##combine temp.DoseName
+        temp.DoseName<-cbind(temp.DoseName,Repeated=temp.DoseDuplicated)
+       
+        ##correct value for R0 (it is not really repeated)
+        temp.DoseName[temp.DoseName[,"Dose"]==0,"Repeated"]<-FALSE
+
+        ##combine in the data frame
+        temp.LnLxTnTx<-data.frame(Name=temp.DoseName[,"Name"],
+                                  Repeated=as.logical(temp.DoseName[,"Repeated"]))
+
+        LnLxTnTx<-cbind(temp.LnLxTnTx,LnLxTnTx)
+        LnLxTnTx[,"Name"]<-as.character(LnLxTnTx[,"Name"])
+
+
+# Calculate Recycling Ratio -----------------------------------------------
+
+      ##Calculate Recycling Ratio 
+   
+      if(length(LnLxTnTx[LnLxTnTx[,"Repeated"]==TRUE,"Repeated"])>0){
+                     
+              ##identify repeated doses
+              temp.Repeated<-LnLxTnTx[LnLxTnTx[,"Repeated"]==TRUE,c("Name","Dose","LxTx")]
+            
+              ##find concering previous dose for the repeated dose
+              temp.Previous<-t(sapply(1:length(temp.Repeated[,1]),function(x){
+                  LnLxTnTx[LnLxTnTx[,"Dose"]==temp.Repeated[x,"Dose"] & 
+                  LnLxTnTx[,"Repeated"]==FALSE,c("Name","Dose","LxTx")]
+                 }))
+             
+              ##convert to data.frame
+              temp.Previous<-as.data.frame(temp.Previous)
+            
+              ##set column names
+              temp.ColNames<-sapply(1:length(temp.Repeated[,1]),function(x){
+                     paste(temp.Repeated[x,"Name"],"/",
+                           temp.Previous[temp.Previous[,"Dose"]==temp.Repeated[x,"Dose"],"Name"],
+                           sep="")
+                      })
+                                            
+              ##Calculate Recycling Ratio
+              RecyclingRatio<-as.numeric(temp.Repeated[,"LxTx"])/as.numeric(temp.Previous[,"LxTx"])
+              
+              ##Just transform the matrix and add column names
+              RecyclingRatio<-t(RecyclingRatio)
+              colnames(RecyclingRatio)<-temp.ColNames
+        
+      }else{RecyclingRatio<-NA}  
+
+
+
+# Calculate Recuperation Rate ---------------------------------------------
+
+        
+         ##Recuperation Rate
+  
+         if("R0" %in% LnLxTnTx[,"Name"]==TRUE){
+         Recuperation<-round(LnLxTnTx[LnLxTnTx[,"Name"]=="R0","LxTx"]/
+                               LnLxTnTx[LnLxTnTx[,"Name"]=="Natural","LxTx"],digits=4)
+         }else{Recuperation<-NA}
+
+
+# Evaluate and Combine Rejection Criteria ---------------------------------
+
+    temp.criteria <- c(colnames(RecyclingRatio), "recuperation rate")
+    temp.value <- c(RecyclingRatio,Recuperation)
+    temp.threshold <- c(rep(paste("+/-", rejection.criteria$recycling.ratio/100),
+                                  length(RecyclingRatio)),
+                        paste("", rejection.criteria$recuperation.rate/100))
+
+  
+    ##RecyclingRatio
+    if(is.na(RecyclingRatio)==FALSE){
+     
+      temp.status.RecyclingRatio <- sapply(1:length(RecyclingRatio), function(x){
+        if(abs(1-RecyclingRatio[x])>(rejection.criteria$recycling.ratio/100)){
+          "FAILED"
+        }else{"OK"}})
+    }else{
+      
+      temp.status.RecyclingRatio <- "OK"
+   
+    }
+
+    ##Recuperation
+    if(is.na(Recuperation)==FALSE){
+      if(Recuperation>rejection.criteria$recuperation.rate){
+      
+        temp.status.Recuperation <- "FAILED"
+    
+      }else{
+      
+        temp.status.Recuperation <- "OK"
+  
+      }
+    }else{
+      
+      temp.status.Recuperation <- "OK"
+      
+    }
+ 
+    RejectionCriteria <- data.frame(
+      citeria = temp.criteria,
+      value = temp.value,
+      threshold = temp.threshold,
+      status = c(temp.status.RecyclingRatio,temp.status.Recuperation)) 
+               
+##============================================================================##
+##PLOTTING
+##============================================================================##
+
+if(output.plot == TRUE){
+
+# Plotting - Config -------------------------------------------------------
+
+  ##colours and double for plotting
+  col <- get("col", pos = .LuminescenceEnv)
+
+  layout(matrix(c(1,1,3,3,
+                  1,1,3,3,
+                  2,2,4,4,
+                  2,2,4,4,
+                  5,5,5,5),5,4,byrow=TRUE))
+  
+   par(oma=c(0,0,0,0), mar=c(4,4,3,3))
+
+    ## 1 -> TL previous LnLx
+    ## 2 -> LnLx
+    ## 3 -> TL previous TnTx
+    ## 4 -> TnTx 
+    ## 5 -> Legend
+  
+
+  ##warning if number of curves exceed colour values
+  if(length(col)<length(OSL.Curves.ID/2)){
+       cat("\n[analyse_SAR.CWOSL.R] Warning: To many curves! Only the first",
+           length(col),"curves are plotted!")
+   }
+
+
+    ##get channel resolution (should be equal for all curves)
+    resolution.OSLCurves <- round(
+      object@records[[OSL.Curves.ID[1]]]@data[2,1]-
+      object@records[[OSL.Curves.ID[1]]]@data[1,1],
+      digits=2)
+
+
+# Plotting TL Curves previous LnLx ----------------------------------------
+
+
+  ##check if TL curves are available
+  if(length(TL.Curves.ID.Lx[[1]]>0)) {
+    
+     resolution.TLCurves <- round(
+       object@records[[TL.Curves.ID[1]]]@data[2,1]-
+       object@records[[TL.Curves.ID[1]]]@data[1,1],
+       digits=2)
+                            
+     
+     ylim.range <- sapply(seq(1,length(TL.Curves.ID),by=2) ,function(x){      
+                          
+                           range(object@records[[TL.Curves.ID[x]]]@data[,2])
+                          
+                          })
+     
+     plot(NA,NA,
+          xlab="T [\u00B0C]",
+          ylab=if(log=="y" | log=="xy"){
+            paste("log TL [cts/",resolution.TLCurves," \u00B0C]",sep="")
+          }else{
+            paste("TL [cts/",resolution.TLCurves," \u00B0C]",sep="")                 
+          },
+          xlim=c(object@records[[TL.Curves.ID[1]]]@data[1,1],
+                 max(object@records[[TL.Curves.ID[1]]]@data[,1])),
+          
+          ylim=c(1,max(ylim.range)),
+          
+          main=expression(paste("TL previous ", L[n],",",L[x]," curves",sep="")),
+          log=if(log=="y" | log=="xy"){"y"}else{""}
+     )
+    
+     ##plot TL curves
+     sapply(1:length(TL.Curves.ID.Lx) ,function(x){
+                  
+            lines(object@records[[TL.Curves.ID.Lx[x]]]@data,col=col[x])
+      
+     })
+     
+     
+
+  }else{
+
+  
+    plot(NA,NA,xlim=c(0,1), ylim=c(0,1), main="",
+        axes=FALSE,
+        ylab="",
+        xlab=""
+         )
+    text(0.5,0.5, "No TL curve detected")
+    
+  }
+
+
+# Plotting LnLx Curves ----------------------------------------------------
+
+
+      ylim.range <- sapply(1:length(OSL.Curves.ID.Lx) ,function(x){
+                      
+                        range(object@records[[OSL.Curves.ID.Lx[x]]]@data[,2])
+      })
+          
+
+      #open plot area LnLx
+      plot(NA,NA,
+          xlab=if(log=="x" | log=="xy"){"log t [s]"}else{"t [s]"},
+          ylab=if(log=="y" | log=="xy"){
+                 paste("log OSL [cts/",resolution.OSLCurves," s]",sep="")
+               }else{
+                 paste("OSL [cts/",resolution.OSLCurves," s]",sep="")                 
+               },
+          xlim=c(object@records[[OSL.Curves.ID.Lx[1]]]@data[1,1],
+                 max(object@records[[OSL.Curves.ID.Lx[1]]]@data[,1])),
+           
+          ylim=range(ylim.range),
+           
+          main=expression(paste(L[n],",",L[x]," curves",sep="")),
+          log=log
+       )
+      
+        ##plot curves
+           sapply(1:length(OSL.Curves.ID.Lx), function(x){
+               
+                  lines(object@records[[OSL.Curves.ID.Lx[[x]]]]@data,col=col[x])
+                  
+                  })
+           
+          ##mark integration limits
+          abline(v=min(signal.integral)*resolution.OSLCurves, lty=2, col="gray")
+          abline(v=max(signal.integral)*resolution.OSLCurves, lty=2, col="gray")
+          abline(v=min(background.integral)*resolution.OSLCurves, lty=2, col="gray")
+          abline(v=max(background.integral)*resolution.OSLCurves, lty=2, col="gray")
+
+
+# Plotting TL Curves previous TnTx ----------------------------------------
+
+##check if TL curves are available
+
+if(length(TL.Curves.ID.Tx[[1]]>0)) {
+  
+  
+  resolution.TLCurves <- round(
+    object@records[[TL.Curves.ID.Tx[1]]]@data[2,1]-
+    object@records[[TL.Curves.ID.Tx[1]]]@data[1,1],
+    digits=2)
+  
+  ylim.range <- sapply(1:length(TL.Curves.ID.Tx) ,function(x){      
+    
+    range(object@records[[TL.Curves.ID.Tx[x]]]@data[,2])
+ 
+  })
+  
+ 
+  
+  plot(NA,NA,
+       xlab="T [\u00B0C]",
+       ylab=if(log=="y" | log=="xy"){
+         paste("log TL [cts/",resolution.TLCurves," \u00B0C]",sep="")
+       }else{
+         paste("TL [cts/",resolution.TLCurves," \u00B0C]",sep="")                 
+       },
+       xlim=c(object@records[[TL.Curves.ID.Tx[1]]]@data[1,1],
+              max(object@records[[TL.Curves.ID.Tx[1]]]@data[,1])),
+       
+       ylim=c(1,max(ylim.range)),
+       
+       main=expression(paste("TL previous ", T[n],",",T[x]," curves",sep="")),
+       log=if(log=="y" | log=="xy"){"y"}else{""}
+  )
+  
+  ##plot TL curves
+  sapply(1:length(TL.Curves.ID.Tx) ,function(x){
+    
+    lines(object@records[[TL.Curves.ID.Tx[x]]]@data,col=col[x])
+    
+  })
+  
+  
+  
+}else{
+  
+  
+  plot(NA,NA,xlim=c(0,1), ylim=c(0,1), main="",
+       axes=FALSE,
+       ylab="",
+       xlab=""
+  )
+  text(0.5,0.5, "No TL curve detected")
+  
+}
+
+
+# Plotting TnTx Curves ----------------------------------------------------
+
+
+    ylim.range <- sapply(1:length(OSL.Curves.ID.Tx) ,function(x){
+  
+                  range(object@records[[OSL.Curves.ID.Tx[x]]]@data[,2])
+                  
+                  })
+
+
+    #open plot area LnLx
+    plot(NA,NA,
+         xlab=if(log=="x" | log=="xy"){"log t [s]"}else{"t [s]"},
+         ylab=if(log=="y" | log=="xy"){
+             paste("log OSL [cts/",resolution.OSLCurves," s]",sep="")
+         }else{
+             paste("OSL [cts/",resolution.OSLCurves," s]",sep="")                 
+         },
+           xlim=c(object@records[[OSL.Curves.ID.Tx[1]]]@data[1,1],
+               max(object@records[[OSL.Curves.ID.Tx[1]]]@data[,1])),
+     
+           ylim=range(ylim.range),
+     
+           main=expression(paste(T[n],",",T[x]," curves",sep="")),
+           log=log
+    )
+
+      ##plot curves and get legend values
+      sapply(1:length(OSL.Curves.ID.Tx) ,function(x){
+  
+         lines(object@records[[OSL.Curves.ID.Tx[[x]]]]@data,col=col[x])
+  
+      })
+
+      ##mark integration limits
+      abline(v=min(signal.integral)*resolution.OSLCurves, lty=2, col="gray")
+      abline(v=max(signal.integral)*resolution.OSLCurves, lty=2, col="gray")
+      abline(v=min(background.integral)*resolution.OSLCurves, lty=2, col="gray")
+      abline(v=max(background.integral)*resolution.OSLCurves, lty=2, col="gray")
+
+
+# Plotting Legend ----------------------------------------
+
+
+plot(c(1:(length(OSL.Curves.ID)/2)),
+     rep(8,length(OSL.Curves.ID)/2),
+     type = "p", 
+     axes=FALSE, 
+     xlab="", 
+     ylab="",
+     pch=15,
+     col=unique(col[1:length(OSL.Curves.ID)]),
+     cex=2,
+     ylim=c(0,10)
+     )
+
+##add text
+text(c(1:(length(OSL.Curves.ID)/2)), 
+     rep(4,length(OSL.Curves.ID)/2),
+     paste(LnLxTnTx$Name,"\n(",LnLxTnTx$Dose,")", sep="")
+
+    )
+
+##add line
+abline(h=10,lwd=0.5)
+
+##set failed text and mark De as failed
+if(length(grep("FAILED",RejectionCriteria$status))>0){
+  
+  mtext("[FAILED]", col="red")
+
+  
+}
+}##end output.plot == TRUE
+
+# Plotting  GC  ----------------------------------------
+
+temp.sample <- data.frame(Dose=LnLxTnTx$Dose, 
+                          LxTx=LnLxTnTx$LxTx,
+                          LxTx.Error=LnLxTnTx$LxTx.Error,
+                          TnTx=LnLxTnTx$Net_TnTx
+                          )
+
+ temp.GC <- get_RLum.Results(plot_GrowthCurve(temp.sample,
+                                              output.plot = output.plot,
+                                              ...))[,c("De","De.Error")]
+
+ ##add recjection status
+ if(length(grep("FAILED",RejectionCriteria$status))>0){
+  
+   temp.GC <- data.frame(temp.GC, RC.Status="FAILED")
+   
+  }else{
+    
+   temp.GC <- data.frame(temp.GC, RC.Status="OK") 
+    
+  }
+
+
+# Return Values -----------------------------------------------------------
+
+  temp.return <- new("RLum.Results",
+                     originator = "analyse_SAR.CWOSL",
+                     data = list(
+                       De.values = temp.GC, 
+                       LnLxTnTx.table = LnLxTnTx, 
+                       rejection.criteria = RejectionCriteria))
+
+  return(temp.return)
+}##EOF

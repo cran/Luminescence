@@ -2,10 +2,10 @@
 ##//readBIN2R.R
 ##//////////////////////////////////////////////////////////////////////////////
 ##=============================================================================#
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-#vers.: 0.5.1
-#date: 2013-03-10
+##author: Sebastian Kreutzer
+##organisation: JLU Giessen
+##version: 0.7
+##date: 2013-09-20
 ##=============================================================================#
 ##
 
@@ -13,7 +13,8 @@ readBIN2R <- function(file,
                       show.raw.values = FALSE,  
                       n.records,
                       show.record.number = FALSE,
-                      txtProgressBar = TRUE
+                      txtProgressBar = TRUE,
+                      forced.VersionNumber
                       ){
 
   
@@ -21,7 +22,7 @@ readBIN2R <- function(file,
 # Config ------------------------------------------------------------------  
   
   ##set supported BIN format version
-  VERSION.supported <- as.raw(c(03,04))
+  VERSION.supported <- as.raw(c(03, 04, 06))
   
 # Set Translation Matrices ------------------------------------------------
 
@@ -64,8 +65,37 @@ LIGHTSOURCE.TranslationMatrix[,2] <- c("None",
                                        "IR laser (single grain)"
                                        ) 
  
+##PRESET VALUES
+  CURVENO <- NA
+  FNAME <- NA  
+  MEASTEMP <- NA
+  IRR_UNIT <- NA
+  IRR_DOSERATE <- NA
+  IRR_DOSERATEERR <- NA
+  TIMESINCEIRR <- NA
+  TIMETICK <- NA     
+  ONTIME <- NA   
+  STIMPERIOD <- NA
+  GATE_ENABLED <- raw(length = 1)      
+  GATE_START <- NA
+  GATE_STOP <- NA
+  PTENABLED <- raw(length = 1)
+  DTENABLED <- raw(length = 1)
+  DEADTIME <- NA   
+  MAXLPOWER <- NA
+  XRF_ACQTIME <- NA
+  XRF_HV <- NA
+  XRF_CURR <- NA
+  XRF_DEADTIMEF <- NA
+  SEQUENCE <- NA
+
 # Open Connection ---------------------------------------------------------
 
+##show warinig of version number check has been cheated
+  
+  if(missing(forced.VersionNumber) == FALSE){
+    warning("[readBIN2R.R]: Argument 'forced.VersionNumber' has been used. BIN-file version might not be supported!")
+  }
 
 #open connection
 con<-file(file, "rb")
@@ -85,36 +115,257 @@ con<-file(file, "rb")
 
 ##set ID
 ID<-0
-
-
+  
 
 # LOOP --------------------------------------------------------------------
 
 ##start loop for import BIN data
 while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
 
+      ##force version number
+      if(missing(forced.VersionNumber) == FALSE){
+        VERSION <- as.raw(forced.VersionNumber)
+      }    
+  
       ##stop input if wrong VERSION    
       if((VERSION%in%VERSION.supported) == FALSE){
-        
+    
         ##close connection 
         close(con)
           
         ##show error message
-        stop("[readBIN2R] Error: This BIN format version is currently not supported! Please check the manual for details.")
+        error.text <- paste("[readBIN2R] Error: The BIN format version (",VERSION,") of this file is currently not supported! Supported version numbers are: ",paste(VERSION.supported,collapse=", "),".",sep="")
+        
+        stop(error.text)
       
       }    
   
       ##print record ID for debugging purposes
       if(show.record.number == TRUE){
-          
-          cat(ID,", ")
-          if(ID%%10==0){
-            cat("\n")    
-          }
-        } 
-  
+        
+        cat(ID,", ")
+        if(ID%%10==0){
+          cat("\n")    
+        }
+      }     
+      
+      
       #empty byte position
       EMPTY<-readBin(con, what="raw", 1, size=1, endian="litte")
+      
+  # ==========================================================================      
+  # BINX FORMAT SUPPORT -----------------------------------------------------
+  if(VERSION==06){
+    
+    ##(1) Header size and strucutre
+    ##LENGTH, PREVIOUS, NPOINTS, LTYPE
+    temp <- readBin(con, what="int", 3, size=4, endian="little") 
+    
+    LENGTH <- temp[1]
+    PREVIOUS <- temp[2]
+    NPOINTS <- temp[3]
+    
+    ##(2) Sample characteristics
+    ##RUN, SET, POSITION, GRAINNUMBER, CURVENO, XCOORD, YCOORD
+    temp <- readBin(con, what="int", 7, size=2, endian="little") 
+    
+      RUN <- temp[1]
+      SET <- temp[2]
+      POSITION <- temp[3]
+      GRAINNUMBER <- temp[4]
+      CURVENO <- temp[5]
+      XCOORD <- temp[6]
+      YCOORD <- temp[7]
+    
+    ##SAMPLE, COMMENT
+    ##SAMPLE
+    SAMPLE_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+    SAMPLE<-readChar(con, SAMPLE_SIZE, useBytes=TRUE) 
+    #however it should be set to 20
+    
+    #step forward in con
+    if(20-c(SAMPLE_SIZE)>0){
+        STEPPING<-readBin(con, what="raw", (20-c(SAMPLE_SIZE)), 
+                          size=1, endian="little")
+    }
+    
+    ##COMMENT
+    COMMENT_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+    COMMENT<-readChar(con, COMMENT_SIZE, useBytes=TRUE) #set to 80 (manual)
+    
+    #step forward in con
+    if(80-c(COMMENT_SIZE)>0){
+      STEPPING<-readBin(con, what="raw", (80-c(COMMENT_SIZE)), 
+                        size=1, endian="little")
+    }
+    
+    ##(3) Instrument and sequence characteristic
+    ##SYSTEMID
+    SYSTEMID <- readBin(con, what="int", 1, size=2, endian="little") 
+    
+    ##FNAME
+    FNAME_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+    FNAME<-readChar(con, FNAME_SIZE, useBytes=TRUE) #set to 100 (manual)
+    
+    #step forward in con
+    if(100-c(FNAME_SIZE)>0){
+      STEPPING<-readBin(con, what="raw", (100-c(FNAME_SIZE)), 
+                        size=1, endian="little")
+    }
+    
+    ##USER
+    USER_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+    USER<-readChar(con, USER_SIZE, useBytes=TRUE) #set to 30 (manual)
+    
+    #step forward in con
+    if(30-c(USER_SIZE)>0){
+      STEPPING<-readBin(con, what="raw", (30-c(USER_SIZE)), 
+                        size=1, endian="little")
+    }
+    
+    ##TIME
+    TIME_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##time size corrections for wrong time formats; set n to 6 for all values 
+    ##accoording the handbook of Geoff Duller, 2007
+    TIME_SIZE<-6
+    TIME<-readChar(con, TIME_SIZE, useBytes=TRUE)
+    
+    
+    ##DATE
+    DATE_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##date size corrections for wrong date formats; set n to 6 for all values 
+    ##accoording the handbook of Geoff Duller, 2007  
+    DATE_SIZE<-6      
+    DATE<-readChar(con, DATE_SIZE, useBytes=TRUE)
+    
+    
+    ##(4) Analysis
+    
+    ##DTYPE
+    DTYPE<-readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##BL_TIME    
+    BL_TIME<-readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##BL_UNIT    
+    BL_UNIT<-readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##NORM1, NORM2, NORM3, BG
+    temp <- readBin(con, what="double", 4, size=4, endian="little") 
+  
+      NORM1 <- temp[1]
+      NORM2 <- temp[2]
+      NORM3 <- temp[3]
+      BG <- temp[4]
+    
+    ##SHIFT    
+    SHIFT<- readBin(con, what="integer", 1, size=2, endian="little")
+    
+    ##TAG
+    TAG <- readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##RESERVED    
+    RESERVED<-readBin(con, what="raw", 20, size=1, endian="little")
+    
+    ##(5) Measurement characteristics
+    
+    ##LTYPE    
+    LTYPE <- readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##LTYPESOURCE    
+    LIGHTSOURCE <- readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##LIGHTPOWER, LOW, HIGH, RATE
+    temp <- readBin(con, what="double", 4, size=4, endian="little")
+      
+      LIGHTPOWER <- temp[1]
+      LOW <- temp[2]
+      HIGH <- temp[3]
+      RATE <- temp[4]
+    
+    ##TEMPERATURE
+    TEMPERATURE <- readBin(con, what="int", 1, size=2, endian="little")
+    
+    ##MEASTEMP
+    MEASTEMP <- readBin(con, what="integer", 1, size=2, endian="little")
+    
+    ##AN_TEMP
+    AN_TEMP <- readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##AN_TIME
+    AN_TIME <- readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##DELAY, ON, OFF
+    temp <- readBin(con, what="int", 3, size=2, endian="little")
+    
+      TOLDELAY <- temp[1]
+      TOLON <- temp[2]
+      TOLOFF <- temp[3]
+    
+    ##IRR_TIME
+    IRR_TIME <- readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##IRR_TYPE
+    IRR_TYPE <- readBin(con, what="int", 1, size=1, endian="little")
+    
+    ##IRR_DOSERATE
+    IRR_DOSERATE <- readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##IRR_DOSERATEERR
+    IRR_DOSERATEERR <- readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##TIMESINCEIRR
+    TIMESINCEIRR <- readBin(con, what="integer", 1, size=4, endian="little")
+    
+    ##TIMETICK
+    TIMETICK <- readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##ONTIME
+    ONTIME <- readBin(con, what="integer", 1, size=4, endian="little")
+    
+    ##STIMPERIOD
+    STIMPERIOD <- readBin(con, what="integer", 1, size=4, endian="little")
+    
+    ##GATE_ENABLED
+    GATE_ENABLED <- readBin(con, what="raw", 1, size=1, endian="little")
+    
+    ##GATE_START
+    GATE_START <- readBin(con, what="integer", 1, size=4, endian="little")
+    
+    ##GATE_STOP
+    GATE_STOP <- readBin(con, what="integer", 1, size=4, endian="little")
+    
+    ##PTENABLED
+    PTENABLED <- readBin(con, what="raw", 1, size=1, endian="little")
+    
+    ##DTENABLED
+    DTENABLED <- readBin(con, what="raw", 1, size=1, endian="little")
+    
+    ##DEADTIME, MAXLPOWER, XRF_ACQTIME, XRF_HV
+    temp <- readBin(con, what="double", 4, size=4, endian="little")
+    
+      DEADTIME <- temp[1]
+      MAXLPOWER <- temp[2]
+      XRF_ACQTIME <- temp[3]
+      XRF_HV <- temp[4]
+    
+    ##XRF_CURR
+    XRF_CURR <- readBin(con, what="integer", 1, size=4, endian="little")
+    
+    ##XRF_DEADTIMEF
+    XRF_DEADTIMEF <- readBin(con, what="double", 1, size=4, endian="little")
+    
+    ##RESERVED    
+    RESERVED<-readBin(con, what="raw", 24, size=1, endian="little")
+    
+    #DPOINTS
+    DPOINTS<-readBin(con, what="integer", NPOINTS, size=4, endian="little")
+    
+  }else{
+  ## =========================================================================    
+  ##START BIN FILE FORMAT SUPPORT  
  
   ##LENGTH, PREVIOUS, NPOINTS, LTYPE
   temp <- readBin(con, what="int", 3, size=2, endian="little") 
@@ -122,10 +373,10 @@ while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
         LENGTH <- temp[1]
         PREVIOUS <- temp[2]
         NPOINTS <- temp[3]
-          
    
   ##LTYPE    
   LTYPE<-readBin(con, what="int", 1, size=1, endian="little")
+
 
   ##LOW, HIGH, RATE
   temp <- readBin(con, what="double", 3, size=4, endian="little")
@@ -262,6 +513,13 @@ while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
   #DPOINTS
   DPOINTS<-readBin(con, what="integer", NPOINTS, size=4, endian="little")
       
+  
+  
+  }#endif:format support       
+  ##END BIN FILE FORMAT SUPPORT
+  ## ==========================================================================#
+  
+  
   #SET UNIQUE ID
   ID<-ID+1    
   
@@ -270,6 +528,13 @@ while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
     setTxtProgressBar(pb, seek(con,origin="current"))
   }
       
+  ##set for equal values with different names
+  if(exists("GRAINNUMBER") == TRUE){GRAIN <- GRAINNUMBER}
+  if(exists("GRAIN") == TRUE){GRAINNUMBER <- GRAIN}
+  
+  if(exists("LIGHTPOWER") == TRUE){LPOWER <- LIGHTPOWER}
+  if(exists("LPOWER") == TRUE){LIGHTPOWER <- LPOWER}    
+           
   ##set data.frame for output or append data on data.frame    
   if(exists("results")==FALSE) {
     results<-data.frame(ID=ID,
@@ -278,43 +543,71 @@ while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
                         LENGTH=LENGTH,
                         PREVIOUS=PREVIOUS,
                         NPOINTS=NPOINTS,
-                        LTYPE=LTYPE,
-                        LOW=LOW,
-                        HIGH=HIGH,
-                        RATE=RATE,
-                        TEMPERATURE=TEMPERATURE,
+                        
+                        RUN=RUN,
+                        SET=SET,
+                        POSITION=POSITION,
+                        GRAIN = GRAIN  ,
+                        GRAINNUMBER = GRAIN,
+                        CURVENO = CURVENO,
                         XCOORD=XCOORD,
                         YCOORD=YCOORD,
-                        TOLDELAY=TOLDELAY,
-                        TOLON=TOLON,
-                        TOLOFF=TOLOFF,
-                        POSITION=POSITION,
-                        RUN=RUN,
+                        SAMPLE=SAMPLE,
+                        COMMENT=COMMENT,
+                        
+                        SYSTEMID=SYSTEMID,
+                        FNAME = FNAME,
+                        USER=USER,
                         TIME=TIME,
                         DATE=DATE,
-                        SEQUENCE=SEQUENCE,
-                        USER=USER,
+                        
                         DTYPE=DTYPE,
-                        IRR_TIME=IRR_TIME,
-                        IRR_TYPE=IRR_TYPE,
-                        IRR_UNIT=IRR_UNIT,
                         BL_TIME=BL_TIME,
                         BL_UNIT=BL_UNIT,
-                        AN_TEMP=AN_TEMP,
-                        AN_TIME=AN_TIME,
                         NORM1=NORM1,
                         NORM2=NORM2,
                         NORM3=NORM3,
                         BG=BG,
                         SHIFT=SHIFT,
-                        SAMPLE=SAMPLE,
-                        COMMENT=COMMENT,
-                        LIGHTSOURCE=LIGHTSOURCE,
-                        SET=SET,
                         TAG=TAG,
-                        GRAIN=GRAIN,
-                        LPOWER=LPOWER,
-                        SYSTEMID=SYSTEMID
+                        
+                        LTYPE = LTYPE,
+                        LIGHTSOURCE = LIGHTSOURCE,
+                        LPOWER = LPOWER,
+                        LIGHTPOWER = LIGHTPOWER,
+                        LOW = LOW,
+                        HIGH = HIGH,
+                        RATE = RATE,
+                        TEMPERATURE = TEMPERATURE,
+                        MEASTEMP = MEASTEMP,
+                        AN_TEMP=AN_TEMP,
+                        AN_TIME=AN_TIME,                        
+                        TOLDELAY=TOLDELAY,
+                        TOLON=TOLON,
+                        TOLOFF=TOLOFF,
+                        IRR_TIME = IRR_TIME,
+                        IRR_TYPE = IRR_TYPE,
+                        IRR_UNIT = IRR_UNIT,
+                        IRR_DOSERATE = IRR_DOSERATE,
+                        IRR_DOSERATEERR = IRR_DOSERATEERR,
+                        TIMESINCEIRR = TIMESINCEIRR,
+                        TIMETICK = TIMETICK, 
+                        ONTIME = ONTIME, 
+                        STIMPERIOD = STIMPERIOD, 
+                        GATE_ENABLED = GATE_ENABLED, 
+                        GATE_START  = GATE_START, 
+                        GATE_STOP = GATE_STOP, 
+                        PTENABLED = PTENABLED, 
+                        DTENABLED = DTENABLED, 
+                        DEADTIME = DEADTIME, 
+                        MAXLPOWER = MAXLPOWER, 
+                        XRF_ACQTIME = XRF_ACQTIME, 
+                        XRF_HV = XRF_HV, 
+                        XRF_CURR = XRF_CURR, 
+                        XRF_DEADTIMEF = XRF_DEADTIMEF,  
+                        
+                        SEQUENCE=SEQUENCE
+                      
                       ) #end set data.frame
                       
                       #set variable for DPOINTS handling
@@ -326,61 +619,86 @@ while(length(VERSION<-readBin(con, what="raw", 1, size=1, endian="litte"))>0) {
                    LENGTH=LENGTH,
                    PREVIOUS=PREVIOUS,
                    NPOINTS=NPOINTS,
-                   LTYPE=LTYPE,
-                   LOW=LOW,
-                   HIGH=HIGH,
-                   RATE=RATE,
-                   TEMPERATURE=TEMPERATURE,
+                   
+                   RUN=RUN,
+                   SET=SET,
+                   POSITION=POSITION,
+                   GRAIN = GRAIN  ,
+                   GRAINNUMBER = GRAIN,
+                   CURVENO = CURVENO,
                    XCOORD=XCOORD,
                    YCOORD=YCOORD,
-                   TOLDELAY=TOLDELAY,
-                   TOLON=TOLON,
-                   TOLOFF=TOLOFF,
-                   POSITION=POSITION,
-                   RUN=RUN,
+                   SAMPLE=SAMPLE,
+                   COMMENT=COMMENT,
+                   
+                   SYSTEMID=SYSTEMID,
+                   FNAME = FNAME,
+                   USER=USER,
                    TIME=TIME,
                    DATE=DATE,
-                   SEQUENCE=SEQUENCE,
-                   USER=USER,
+                   
                    DTYPE=DTYPE,
-                   IRR_TIME=IRR_TIME,
-                   IRR_TYPE=IRR_TYPE,
-                   IRR_UNIT=IRR_UNIT,
                    BL_TIME=BL_TIME,
                    BL_UNIT=BL_UNIT,
-                   AN_TEMP=AN_TEMP,
-                   AN_TIME=AN_TIME,
                    NORM1=NORM1,
                    NORM2=NORM2,
                    NORM3=NORM3,
                    BG=BG,
                    SHIFT=SHIFT,
-                   SAMPLE=SAMPLE,
-                   COMMENT=COMMENT,
-                   LIGHTSOURCE=LIGHTSOURCE,
-                   SET=SET,
                    TAG=TAG,
-                   GRAIN=GRAIN,
-                   LPOWER=LPOWER,
-                   SYSTEMID=SYSTEMID
-                                    
-                                           
                    
-                   )
+                   LTYPE = LTYPE,
+                   LIGHTSOURCE = LIGHTSOURCE,
+                   LPOWER = LPOWER,
+                   LIGHTPOWER = LIGHTPOWER,
+                   LOW = LOW,
+                   HIGH = HIGH,
+                   RATE = RATE,
+                   TEMPERATURE = TEMPERATURE,
+                   MEASTEMP = MEASTEMP,
+                   AN_TEMP=AN_TEMP,
+                   AN_TIME=AN_TIME,                        
+                   TOLDELAY=TOLDELAY,
+                   TOLON=TOLON,
+                   TOLOFF=TOLOFF,
+                   IRR_TIME = IRR_TIME,
+                   IRR_TYPE = IRR_TYPE,
+                   IRR_UNIT = IRR_UNIT,
+                   IRR_DOSERATE = IRR_DOSERATE, 
+                   IRR_DOSERATEERR = IRR_DOSERATEERR,
+                   TIMESINCEIRR = TIMESINCEIRR,
+                   TIMETICK = TIMETICK, 
+                   ONTIME = ONTIME, 
+                   STIMPERIOD = STIMPERIOD, 
+                   GATE_ENABLED = GATE_ENABLED, 
+                   GATE_START  = GATE_START, 
+                   GATE_STOP = GATE_STOP, 
+                   PTENABLED = PTENABLED, 
+                   DTENABLED = DTENABLED, 
+                   DEADTIME = DEADTIME, 
+                   MAXLPOWER = MAXLPOWER, 
+                   XRF_ACQTIME = XRF_ACQTIME, 
+                   XRF_HV = XRF_HV, 
+                   XRF_CURR = XRF_CURR, 
+                   XRF_DEADTIMEF = XRF_DEADTIMEF,  
+                   
+                   SEQUENCE=SEQUENCE)
                 
                 #combine DPOINT values and the rest of the data
                 DATA<-c(DATA,list(DPOINTS))
                 results<-rbind(results,temp)
   }#end else  
   
+      
   ##BREAK    
   ##stop loop if record limit is reached  
   if(missing(n.records)==FALSE){
-    
-    if(n.records==ID){break()}
-    
+        
+      if(n.records==ID){break()}
+        
   }  
       
+  
 }#endwhile::end lopp 
 
 
@@ -391,7 +709,7 @@ close(con)
 if(txtProgressBar==TRUE){close(pb)}
 
 ##output
-cat(paste("\t >> ",ID,"records have been read successfully!\n\n",paste=""))
+cat(paste("\t >> ",ID," records have been read successfully!\n\n", sep=""))
 
 ##produce S4 object for output
 object <- new("Risoe.BINfileData",

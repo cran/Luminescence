@@ -1,5 +1,5 @@
 ##//////////////////////////////////////////////
-##//Calc_FuchsLang2001.R
+##//calc_FuchsLang2001.R
 ##/////////////////////////////////////////////
 
 ##======================================
@@ -31,9 +31,9 @@
 ##
 ##############################################################
 
-Calc_FuchsLang2001 <- function(
+calc_FuchsLang2001 <- function(
                         sample,#data frame 
-                        sample.mtext="unkown sample",
+                        sample.mtext="unknown sample",
                         sample.id=sample.mtext,
                         cvThreshold=5, #variation coefficient in %
                         startDeValue=1, #D[e] value from which the calculation starts
@@ -143,7 +143,7 @@ Calc_FuchsLang2001 <- function(
 	se <- round(sd/sqrt(endDeValue-startDeValue+1), digits=2)
   
   if(output.terminal==TRUE){
-    cat("\n [Calc_FuchsLang2001]")
+    cat("\n [calc_FuchsLang2001]")
 	  cat(paste("\n ---------------------------------"))
 	  cat(paste("\n cvThreshold:            ",cvThreshold,"%"))
 	  cat(paste("\n used values:            ",n.usedDeValues))
@@ -217,13 +217,16 @@ par(cex=cex.global,mfrow=c(1,1))
   
   mtext(side=3,sample.mtext,cex=1.2*cex.global)
 }#endif::output.plot 
-##=================================================================================================##
+##=================================================================================================#
 ##RETURN  VALUES
 ##=================================================================================================##  
   
   ##combine statistic parameters
   results<-data.frame(id=sample.id,
-                      mean=mean,sd=sd,weighted_mean=weighted_mean,weighted_sd=weighted_sd,n.usedDeValues)
+                      mean=mean,sd=sd,
+                      weighted_mean=weighted_mean,
+                      weighted_sd=weighted_sd,
+                      n.usedDeValues)
   
   return(list(results=results,usedDeValues=usedDeValues))  
 }#EndOf function

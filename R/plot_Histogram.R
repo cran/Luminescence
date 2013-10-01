@@ -1,28 +1,73 @@
-##/////////////////////////////////////////////////////////////////////////////
-## plot_Histogram.R
-##/////////////////////////////////////////////////////////////////////////////
-#authors: Sebastian Kreutzer (1), Michael Dietze (2)
-##organisation: 1 - JLU Giessen, Germany
-##              2 - TU Dresden, Germany
-##version: 0.4
-##date: 2013-03-04
-##=============================================================================
-##description:
-##		--	plots histogram with standard error idea from Rex Galbarith
+plot_Histogram <- structure(function(# Plot a histogram with a separate error plot
+  ### Plot a predefined histogram with an accompanying error plot as suggested by 
+  ### Rex Galbraith at the UK LED in Oxford 2010.
 
-plot_Histogram <- function (
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany), Michael Dietze (GFZ Potsdam)
+  
+  ##section<<
+  ##version 0.4.1
+  # ===========================================================================
+  
   values,
-	mtext,
+  ### \code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object (required): 
+  ### for \code{data.frame}: two columns: De 
+  ### (\code{values[,1]}) and De error (\code{values[,2]})
+  na.exclude = TRUE,
+  ### \code{\link{logical}} (with default): exclude NA values from the data set prior 
+  ### to any further operations.
+  mtext,
+  ### \code{\link{character}} (optional): further sample information 
+  ### (\link{mtext}).
   cex.global,
+  ### \code{\link{numeric}} (with default): global scaling factor.
   breaks,
+  ### (with default): set breakpoints for histogram. Works as in \link{hist}.
   se,
+  ### \code{\link{logical}} (optional): plot standard error points over the 
+  ### histogram, default is \code{FALSE}.
   rug,
-  normal_curve, # optionally add a normal curve to the plot
+  ### \code{\link{logical}} (optional): add rugs to the histogram, default is 
+  ### \code{TRUE}.
+  normal_curve,
+  ### \code{\link{logical}} (with default): add a normal curve to the histogram. 
+  ### Mean and sd are calculated from the input data. More see details section.
   summary,
+  ### \code{\link{character}} (optinal): add numerical output to the plot. Can 
+  ### be one or more out of: "n" (number of samples), "mean" (mean De value), 
+  ### "median" (median of the De values), "kdemax" (maximum value of probability 
+  ### density function), "sdrel" (relative standard deviation), "sdabs" 
+  ### (absolute standard deviation), "serel" (relative standard error) and 
+  ### "seabs" (absolute standard deviation).
   summary.pos,
+  ### \code{\link{numeric}} (with default): optional position coordinates for 
+  ### the statistical summary. Y-coordinate refers to the right hand y-axis.
   colour,
+  ### \code{\link{numeric}} or \link{character} (with default): optional vector 
+  ### of length 4 which specifies the colours of the following plot items in 
+  ### exactly this order: histogram bars, rug lines, normal distribution curve 
+  ### and standard error points (e.g. c("grey", "black", "red", "grey")).
   ...
+  ### further arguments and graphical parameters passed to \code{\link{plot}}. 
+  ### If y-axis labels are provided, these must be specified as a vector of 
+  ### length 2 since the plot features two axes (e.g. \code{xlab = c("axis 
+  ### label 1", "axis label 2")}).
 ) {
+  
+  # Integrity tests ---------------------------------------------------------
+  if(is(values, "RLum.Results") == TRUE){
+    
+    values <- get_RLum.Results(values)
+    
+  }else if(is(values, "data.frame") == FALSE){
+    
+    stop("[plot_Histogramm] Error: 'values' has to be an 'RLum.Results' object or 
+         a 'data.frame'.")
+    
+  }
+  
+  
   ## Set general parameters ---------------------------------------------------
   ## Check/set default parameters
   if(missing(cex.global) == TRUE) {cex.global = 1}
@@ -32,6 +77,13 @@ plot_Histogram <- function (
   if(missing(colour) == TRUE) {colour = c("white", "black", "red", "black")}
   if(missing(summary) == TRUE) {summary <- ""}
   if(missing(normal_curve) == TRUE) {normal_curve = FALSE}  
+  
+  ## optionally, count nd exclude NA values and print result
+  if(na.exclude == TRUE) {
+    n.NA <- sum(!complete.cases(values))
+    if(n.NA == 1) {print("1 NA value excluded.")
+    } else if(n.NA > 1) {print(paste(n.NA, "NA values excluded."))}
+    values <- na.exclude(values)}
   
   ## Check/set additional plot parameters
   extraArgs <- list(...) # read out additional arguments list
@@ -198,7 +250,44 @@ plot_Histogram <- function (
        col = "black", 
        cex = 0.8 * cex.global)
   
-}
-##===========================================================================##
-##EOF##
-
+  ##details<<
+  ## If the normal curve is added, the y-axis in the histogram will show 
+  ## the probability density. 
+  
+  ##seealso<<
+  ## \code{\link{hist}}, \code{\link{plot}}
+  
+  ##referencs<<
+  ## Galbraith, R., 2010. Statistics in OSL: Some Current Questions; Ask Rex. 
+  ## Oral presentation during the UK TL/OSL/ESR Meeting at the School of 
+  ## Geography and the Environment, University of Oxford, 8-10 September 
+  ## 2010.\cr
+  ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
+  ## dose and error calculation and display in OSL dating: An overview and 
+  ## some recommendations. Quaternary Geochronology, 11, pp.1-27.
+  
+  ##note<<
+  ## The input data is not restricted to a special type of input data.
+  
+}, ex=function(){
+  ## load data
+  data(ExampleData.DeValues, envir = environment())
+  
+  ## plot histogram the easiest way
+  plot_Histogram(ExampleData.DeValues)
+  
+  ## plot histogram with some more modifications
+  plot_Histogram(ExampleData.DeValues, 
+                 rug = TRUE, 
+                 normal_curve = TRUE, 
+                 cex.global = 0.9, 
+                 pch = 2,
+                 colour = c("grey", "black", "blue", "green"),
+                 summary = c("n", "mean", "sdrel"),
+                 summary.pos = c(3500, 140),
+                 main = "Histogram of De-values",
+                 mtext = "Example data set", 
+                 ylab = c(expression(paste(D[e], " Distribution")),
+                          "Std.-err."),
+                 xlim = c(1800, 4000))
+})

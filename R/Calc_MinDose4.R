@@ -1,123 +1,91 @@
-##//////////////////////////////////////////////
-##//Calc_MinDose4.R 
-##/////////////////////////////////////////////
-##
-##======================================
-#author: Christoph Burow 
-#organisation: University of Cologne
-#vers.: 0.1
-#date: 12/10/2012
-#nota bene: Based on a rewritten S script of Rex Galbraith, 2010.
-##          The original script annotation by Rex Galbraith is given
-##          below, only slightly changed to match the scripts current
-##          shape.
-##======================================
+calc_MinDose4<- structure(function( # Apply the (un-)logged four parameter minimum age model (MAM 4) after Galbraith et al. (1999) to a given De distribution
+  ### Function to fit the (un-)logged four parameter minimum dose model (MAM 4)
+  ### to De data.
 
-# R program to fit the four parameter minimum dose model to
-#	 OSL palaeodose data
-#
-# The data are assumed to be in an ascii file, to be read as a
-# data frame with column headings and with at least two columns:
-#   including one headed  ED,  the calculated dose (Gy) for each grain
-#   and one headed  ER_Error, the corresponding standard error
-#	
-# You will be prompted for the name of the data file and for a
-# value of sigma_b. If this is already included in the value
-# of se then put sigma_b = 0 at the prompt		 	
-#	
-# The program fits a truncated-normal distribution to the log dose
-# estimates with an atom of probability at the truncation point
-#		
-# The model has four parameters:
-#
-#          gamma: this is the minimum dose on the log scale
-#	          --- so exp(gamma) is the minimum dose
-#          mu:	  this is the mean of the non-truncated normal distribution
-#            	  --- if the distribution were not truncated, exp(mu)
-#	          would be the central dose	
-#          p0:    this is the proportion of grains at gamma
-#                 --- if there are many grains at the minimum, 
-#                     p0 should be substantially > 0
-#          sigma: this captures the spread in ages above the 
-#                 minimum. If the distribution of log doses
-#                 were truncated, sigma would be the standard deviation,
-#	          and would correspond to the dispersion parameter in
-#	          the central age model.
-#
-# Further details of this model are given in my book Statistics for
-# Fission Track Analysis, page 107-108, CRC Press, 2005,  and also
-# in Galbraith et al 1999, Archaeometry, 41, 339-364.
-#	
-#   Estimation is by maximum likelihood	using the function nlminb.
-#   This requires the user to specify starting values of the parameters,
-#   given by gamma.init, mu.init, sigma.init and p0.init. The values
-#   given below are suitable for the data sim.dat, but may need to be
-#   changed for other data.
-#	
-#   Also upper and lower bounds for each parameter (gamma, mu, sigma, p0)
-#   need to be specified in the xlb and xub below.  Again, depending on
-#   the data, it may be necessary to change these, especially the bounds
-#   for gamma and mu.  When the program has finished, you should check
-#   that the final estimates of gamma and mu are within the bounds --
-#   i.e., not on the boundary.					  	
-#
-#   Numerical results are printed to the screen and are also stored in a
-#   file called filnam-4R.res, where filnam is the name of the input file.
-#
-#   You will be promted to see if you want to calculate profile log
-#   likelihood functions, and if so, which ones.  The indices of the
-#   paramters are: 1 gamma, 2 mu, 3 sigma and 4 p0.  For example, if you
-#   want all four profiles type 4 at the prompt, if you want just gamma
-#   and mu, type 2, and if you want just gamma, type 1.  If the profiles 
-#   are calculated, they will be plotted in a postscript file called 
-#   filnam-4R.ps
-#
-#   Rex Galbraith, September, 2010
-			
-            #------------------------------------------------#
-
-######################################################################
-# Functions lnnprob.f and neglik.f	
-
-##=============================================================================================##
-## start function
-
-Calc_MinDose4<- function(input.data, #data.frame containing two columns named "ED" and "ED_Error"
-                         sigmab, #spread in ages above the minimum
-                         log=TRUE, #calculate mindose with (un-)logged De values
-                         sample.id="unknown sample", #sample ID
-                         gamma.xlb=0.1, #lower boundary for gamma
-                         gamma.xub=100, #upper boundary for gamma
-                         mu.xlb=1, #lower boundary for mu
-                         mu.xub=100, #upper boundary for mu
-                         sigma.xlb= 0.001, #lower boundary sigma
-                         sigma.xub= 5.00, #upper boundary for sigma
-                         init.gamma=5, #starting value for gamma
-                         init.mu=10, #starting value for mu
-                         init.sigma=0.6, #starting value for sigma
-                         init.p0=0.01, #starting value for p0
-                         calc.ProfileLikelihoods=TRUE, #calculate the profile likelihoods
-                         console.ProfileLikelihoods=FALSE, #print terminal output of profile log likelihoods
-                         console.extendedOutput=FALSE, #if TRUE calculations will be printed
-                         output.file=FALSE, #write results in filename.res file
-                         output.filename="default", #set the desired filename, else the output file will be name "default"
-                         output.plot=FALSE, #plotting of profile log likelihoods for sigma
-                         output.indices=4 #calculate the profile log likelihood functions for gamma, sigma, mu, p0
-                         ) {                     
+  # ===========================================================================
+  ##author<< 
+  ## Christoph Burow, University of Cologne (Germany) \cr
+  ## Based on a rewritten script S script of Rex Galbraith, 2010 \cr\cr
   
+  ##section<<
+  ## version 0.1 [2013-09-04] 
+  # ===========================================================================
+    
+  input.data, 
+  ### \code{\link{data.frame}} (\bold{required}): two column data frame with De
+  ### values and corresponding De errors
+  sigmab, 
+  ### \code{\link{numeric}}  (\bold{required}): spread in De values given as a 
+  ### fraction (e.g. 0.2). This value represents the expected overdispersion in
+  ### the data should the sample be well-bleached (Cunningham & Walling 2012, 
+  ### p. 100).
+  log=TRUE, 
+  ### \code{\link{logical}} (with default): fit the (un-)logged three parameter 
+  ### minimum dose model to De data
+  sample.id="unknown sample",
+  ### \code{\link{character}} (with default): sample id
+  gamma.xlb=0.1, 
+  ### \code{\link{numeric}} (with default): lower boundary of gamma
+  gamma.xub=100,
+  ### \code{\link{numeric}} (with default): upper boundary of gamma
+  mu.xlb=1, 
+  ### \code{\link{numeric}} (with default): lower boundary of mu
+  mu.xub=100,
+  ### \code{\link{numeric}} (with default): upper boundary of mu
+  sigma.xlb= 0.001, 
+  ### \code{\link{numeric}} (with default): lower boundary of sigma 
+  sigma.xub= 5.00, 
+  ### \code{\link{numeric}} (with default): upper boundary of sigma 
+  init.gamma=10, 
+  ### \code{\link{numeric}} (with default): starting value of gamma 
+  init.mu=10, 
+  ### \code{\link{numeric}} (with default): starting value of mu 
+  init.sigma=0.6,
+  ### \code{\link{numeric}} (with default): starting value of sigma
+  init.p0=0.01,
+  ### \code{\link{numeric}} (with default): starting value of p0 
+  calc.ProfileLikelihoods=TRUE, 
+  ### \code{\link{logical}} (with default): calculate profile log likelihood
+  ### functions for gamma, mu, sigma, p0. See \code{output.indices}.
+  console.ProfileLikelihoods=FALSE, 
+  ### \code{\link{logical}} (with default): print profile log likelihood
+  ### functions for gamma, mu, sigma, p0 to console.
+  console.extendedOutput=FALSE, 
+  ### \code{\link{logical}} (with default): extended terminal output
+  output.file=FALSE,
+  ### \code{\link{logical}} (with default): save results to file. See 
+  ### \code{output.filename}.
+  output.filename="default", 
+  ### \code{\link{character}} (with default): desired filename, else results 
+  ### are saved to default-4R(-UL).res 
+  output.plot=FALSE, 
+  ### \code{\link{logical}} (with default): plot output
+  ### (\code{TRUE}/\code{FALSE})
+  output.indices=4 
+  ### \code{\link{numeric}} (with default): requires 
+  ### \code{calc.ProfileLikelihoods}=\code{TRUE}. Indices: 1 = gamma, 
+  ### 2 = gamma/mu, 3 = gamma/mu/sigma, 4 = gamma/mu/sigma/p0
+  ){                     
   
 ##=============================================================================================##
 ## CONSISTENCY CHECK OF INPUT DATA
 ##=============================================================================================##
   
-  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type data.frame",quote=F) 
+  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type
+                                               data.frame",quote=F) 
                                          stop(domain=NA) } 
   try(colnames(input.data)<- c("ED","ED_Error"),silent=TRUE)
-  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error") { print("Columns must be named 'ED' and 'ED_Error'",quote=F)
+  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error") { 
+    print("Columns must be named 'ED' and 'ED_Error'",quote=F)
                                          stop(domain=NA)}
-  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction between 0 and 1 (e.g. 0.2)",quote=F)
+  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction 
+                                    between 0 and 1 (e.g. 0.2)",quote=F)
                                          stop(domain=NA)}
-  if(output.indices >4 | output.indices <1) { print("Invalid number of indices. Only 1, 2, 3 or 4 (gamma, gamma/mu, gamma/mu/sigma, gamma/mu/sigma/p0) allowed.",quote=F)
+  if(output.indices >4 | output.indices <1) { print("Invalid number of indices.
+                                                    Only 1, 2, 3 or 4 (gamma, 
+                                                    gamma/mu, gamma/mu/sigma, 
+                                                    gamma/mu/sigma/p0) 
+                                                    allowed.",quote=F)
                                               stop(domain=NA)}
   
 ##=============================================================================================##
@@ -226,9 +194,9 @@ neglik.f<- function(param,dat,rep){
   return(negll)
 }
 	
-##=============================================================================================##
+##============================================================================##
 ## MAIN PROGRAM
-##=============================================================================================##
+##============================================================================##
   
 
 # read in the data and print the number of grains
@@ -284,7 +252,8 @@ neglik.f<- function(param,dat,rep){
 
 # maximise the likelihood
 	opt.param<- nlminb(start=x0,objective=neglik.f,scale=1,
-	                   lower=xlb,upper=xub,dat=datmat,control=list(iter.max = 1000, eval.max = 1000))
+	                   lower=xlb,upper=xub,dat=datmat,control=list(iter.max = 1000,
+                                                                 eval.max = 1000))
 
 # print out the maxmimum likelihood estimates
 	
@@ -310,10 +279,12 @@ neglik.f<- function(param,dat,rep){
   
 	lbout<- paste(filnam,if(log==TRUE){"-4R.res"}else{"-4R-UL.res"},sep="")
   
-	write(c("Sample: ", filnam, "\nSigma_b: ", sigmab), file=lbout, ncolumns=2,append=F)
+	write(c("Sample: ", filnam, "\nSigma_b: ", sigmab), file=lbout, ncolumns=2,
+        append=F)
 	write(" ",file=lbout,append=T)
   write(paste("Final estimate of model parameters"),lbout,append=T)
-  write(paste("gamma:", round(gamma,3), "sigma:", round(sigma,3), "p0:", round(p0,3),"mu: ",round(mu,3)),lbout,append=T)
+  write(paste("gamma:", round(gamma,3), "sigma:", round(sigma,3), "p0:",
+              round(p0,3),"mu: ",round(mu,3)),lbout,append=T)
   write(" ",file=lbout,append=T)
   write("\nmaximum likelihood estimate of minimum age",lbout, append=T)
   write(" ",file=lbout,append=T)
@@ -337,9 +308,9 @@ neglik.f<- function(param,dat,rep){
 
  }
   
-##=============================================================================================##
+##============================================================================##
 ## PROFILE LOG LIKELIHOODS
-##=============================================================================================##
+##============================================================================##
 
   if(calc.ProfileLikelihoods==TRUE)
     {
@@ -352,7 +323,8 @@ neglik.f<- function(param,dat,rep){
 # open a postscript file called filnam-4R.ps to plot the profiles
 # and set graphical parameters
   if(output.plot==TRUE) {
-	postscript(file=paste(filnam,if(log==TRUE){"-4R.ps"}else{"-4R-UL.ps"},sep=""),horizontal=F)
+	postscript(file=paste(filnam,if(log==TRUE){"-4R.ps"}else{"-4R-UL.ps"},sep=""),
+             horizontal=F)
 	par(mfrow=c(2,2),oma=c(9,2,9,1),mar=c(3.7,3.1,1.1,0.2),
 	       mgp=c(1.75,0.5,0),las=1,cex.axis=1.1,cex.lab=1.3)
   }
@@ -363,7 +335,7 @@ neglik.f<- function(param,dat,rep){
 	for(j in 1:profind)
    {
 
-##=============================================================================================##    
+##============================================================================##    
 ## first pass at the profile likelihood
     
 # this does a broad sweep of the possible parameter values and
@@ -410,15 +382,17 @@ neglik.f<- function(param,dat,rep){
 
 
 # maximise the likelihood
-        opt.param<- nlminb(start=px0,objective=neglik.f,scale=1,
-	                   lower=pxlb,upper=pxub,dat=datmat,control=list(iter.max = 1000, eval.max = 1000))
+  opt.param<- nlminb(start=px0,objective=neglik.f,scale=1, lower=pxlb,
+                     upper=pxub,dat=datmat,control=list(iter.max = 1000,
+                                                        eval.max = 1000))
 
 # save and print the results
 	proflik<- -maxlik-opt.param$objective
 	plk<- c(plk,proflik)
   
 	if(console.ProfileLikelihoods==TRUE){
-	  cat(c("",format(round(j,0)),"   ",format(round(c(par,proflik),3),nsmall=3),"\n"))
+	  cat(c("",format(round(j,0)),"   ",format(round(c(par,proflik),3),nsmall=3),
+          "\n"))
 	}
 }#END OF LOOP
 
@@ -485,13 +459,14 @@ neglik.f<- function(param,dat,rep){
 	plk2<- c(plk2,proflik)
 	
   if(console.ProfileLikelihoods==TRUE){
-	  cat(c("",format(round(j,0)),"   ",format(round(c(par,proflik),3),nsmall=3),"\n"))
+	  cat(c("",format(round(j,0)),"   ",format(round(c(par,proflik),3),nsmall=3),
+          "\n"))
 	}
 }#END OF LOOP
 
-##=============================================================================================##
+##============================================================================##
 ## POOLING & PLOTTING
-##=============================================================================================##  
+##============================================================================##  
   
 # the results from the broad sweep and the fine sweep
 # are pooled, and only the data values near the  maximum likelihood
@@ -562,14 +537,20 @@ neglik.f<- function(param,dat,rep){
 	          try(muu<-u2, silent=TRUE)}
 	if(output.file==TRUE&&c(j==1 | j==2)) {
 	  if(log==TRUE) {
-	    write(paste("\n95% confidence interval",if(j==1){" [exp(gamma)]"}else{" [exp(mu)]"}),lbout,append=T)
+	    write(paste("\n95% confidence interval",if(j==1){" [exp(gamma)]"}
+                  else{" [exp(mu)]"}),lbout,append=T)
       try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-  	  try(write(paste("-",round(exp(if(j==1){gamma}else{mu})-exp(u1),2),"+",round(exp(u2)-exp(if(j==1){gamma}else{mu}),2)),lbout,append=T),silent=TRUE) 
+  	  try(write(paste("-",round(exp(if(j==1){gamma}else{mu})-exp(u1),2),
+                      "+",round(exp(u2)-exp(if(j==1){gamma}else{mu}),2)),
+                lbout,append=T),silent=TRUE) 
 	  }
     else {
-      write(paste("\n95% confidence interval",if(j==1){" [gamma]"}else{" [mu]"}),lbout,append=T)
+      write(paste("\n95% confidence interval",if(j==1){" [gamma]"}
+                  else{" [mu]"}),lbout,append=T)
       try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-      try(write(paste("-",round(if(j==1){gamma}else{mu}-u1,2),"+",round(u2-if(j==1){gamma}else{mu},2)),lbout,append=T),silent=TRUE)
+      try(write(paste("-",round(if(j==1){gamma}else{mu}-u1,2),"+",
+                      round(u2-if(j==1){gamma}else{mu},2)),lbout,append=T),
+          silent=TRUE)
     }
 	}
 
@@ -616,14 +597,20 @@ neglik.f<- function(param,dat,rep){
 	          try(mlu<-u2, silent=TRUE)}
 	if(output.file==TRUE&&c(j==1 | j==2)) {
     if(log==TRUE) {
-  	  write(paste("\n68% confidence interval",if(j==1){" [exp(gamma)]"}else{" [exp(mu)]"}),lbout,append=T)
+  	  write(paste("\n68% confidence interval",if(j==1){" [exp(gamma)]"}
+                  else{" [exp(mu)]"}),lbout,append=T)
   	  try(write(c(exp(u1),exp(u2)),lbout,append=T), silent=TRUE)
-  	  try(write(paste("-",round(exp(if(j==1){gamma}else{mu})-exp(u1),2),"+",round(exp(u2)-exp(if(j==1){gamma}else{mu}),2)),lbout,append=T), silent=TRUE)
+  	  try(write(paste("-",round(exp(if(j==1){gamma}else{mu})-exp(u1),2),
+                      "+",round(exp(u2)-exp(if(j==1){gamma}else{mu}),2)),
+                lbout,append=T), silent=TRUE)
     }
     else {
-      write(paste("\n68% confidence interval",if(j==1){" [gamma]"}else{" [mu]"}),lbout,append=T)
+      write(paste("\n68% confidence interval",if(j==1){" [gamma]"}
+                  else{" [mu]"}),lbout,append=T)
       try(write(c(u1,u2),lbout,append=T), silent=TRUE)
-      try(write(paste("-",round(if(j==1){gamma}else{mu}-u1,2),"+",round(u2-if(j==1){gamma}else{mu},2)),lbout,append=T), silent=TRUE)
+      try(write(paste("-",round(if(j==1){gamma}else{mu}-u1,2),"+",
+                      round(u2-if(j==1){gamma}else{mu},2)),lbout,append=T),
+          silent=TRUE)
     }
 	}
   
@@ -639,7 +626,8 @@ neglik.f<- function(param,dat,rep){
     
   if(output.plot==TRUE) {
   mtext(side=2,line=0,"relative profile log likelihood",cex=1.2,outer=T,las=0) 
-  mtext(side=3,line=0,paste(filnam,if(log==TRUE){"   MAM 4"}else{"   MAM 4-UL"}),cex=1.4,outer=T)
+  mtext(side=3,line=0,paste(filnam,if(log==TRUE){"   MAM 4"}else{"   MAM 4-UL"}),
+        cex=1.4,outer=T)
   }
 
 # Bmess is a message: it is the number of times 
@@ -689,31 +677,35 @@ neglik.f<- function(param,dat,rep){
   
   cat(paste("\n\n--------- final parameter estimates ---------"))
   cat(paste("\n gamma:    ",round(gamma,4)),
-      "\t\t minimum dose: ",if(log==TRUE){round(exp(gamma),3)}else{round(gamma,3)})
+      "\t\t minimum dose: ",if(log==TRUE){round(exp(gamma),3)}
+      else{round(gamma,3)})
   cat(paste("\n mu:       ",round(mu,4)),
-      "\t\t cent dose:    ",if(log==TRUE){round(exp(mu),3)}else{round(mu,3)})
+      "\t\t cent dose:    ",if(log==TRUE){round(exp(mu),3)}
+      else{round(mu,3)})
   cat(paste("\n sigma:    ",round(sigma,4))) 
   cat(paste("\n p0:       ",round(p0,4)))
   
   if(log==TRUE) {
     cat(paste("\n\n------- confidence intervals for gamma -------"))
-    try(cat(paste("\n  95% ci: ", round(exp(gul),3), "-", round(exp(guu),3), " (-",
-                    round(exp(gamma)-exp(gul),2), " +",round(exp(guu)-exp(gamma),2),")")
-              ,sep=""),silent=TRUE)
-    try(cat(paste("\n  68% ci: ", round(exp(gll),3), "-", round(exp(glu),3), " (-",
-                    round(exp(gamma)-exp(gll),2), " +",round(exp(glu)-exp(gamma),2),")")
-              ,sep=""),silent=TRUE)
+    try(cat(paste("\n  95% ci: ", round(exp(gul),3), "-", round(exp(guu),3),
+                  " (-", round(exp(gamma)-exp(gul),2), " +",
+                  round(exp(guu)-exp(gamma),2),")"), sep=""), silent=TRUE)
+    try(cat(paste("\n  68% ci: ", round(exp(gll),3), "-", round(exp(glu),3), 
+                  " (-", round(exp(gamma)-exp(gll),2), " +", 
+                  round(exp(glu)-exp(gamma),2),")"), sep=""),silent=TRUE)
     
     if(any(is.na(results[12:15]))==TRUE){
       cat("\n # Couldn't calculate confidence intervals.")
     }
     
     cat(paste("\n\n------- confidence intervals for mu ----------"))
-    try(cat(paste("\n  95% ci: ", round(exp(mul),3), "-", round(exp(muu),3), " (-",
-                    round(exp(mu)-exp(mul),2), " +",round(exp(muu)-exp(mu),2),")")
+    try(cat(paste("\n  95% ci: ", round(exp(mul),3), "-", round(exp(muu),3),
+                  " (-", round(exp(mu)-exp(mul),2), " +",round(exp(muu)-exp(mu),
+                                                               2),")")
               ,sep=""),silent=TRUE)
-    try(cat(paste("\n  68% ci: ", round(exp(mll),3), "-", round(exp(mlu),3), " (-",
-                    round(exp(mu)-exp(mll),2), " +",round(exp(mlu)-exp(mu),2),")")
+    try(cat(paste("\n  68% ci: ", round(exp(mll),3), "-", round(exp(mlu),3),
+                  " (-", round(exp(mu)-exp(mll),2), " +",round(exp(mlu)-exp(mu),
+                                                               2),")")
               ,sep=""),silent=TRUE)
     
     if(any(is.na(results[16:19]))==TRUE){
@@ -758,10 +750,14 @@ neglik.f<- function(param,dat,rep){
   
   # Print out warnings with regard to parameter boundaries
   
-  bcheck<- data.frame(gamma=c(all.equal(gamma.xub,if(log==TRUE){exp(gamma)}else{gamma})==TRUE,
-                              all.equal(gamma.xlb,if(log==TRUE){exp(gamma)}else{gamma})==TRUE),
-                      mu=c(all.equal(mu.xub,if(log==TRUE){exp(mu)}else{mu})==TRUE,
-                              all.equal(mu.xlb,if(log==TRUE){exp(mu)}else{mu})==TRUE),
+  bcheck<- data.frame(gamma=c(all.equal(gamma.xub,if(log==TRUE){exp(gamma)}
+                                        else{gamma})==TRUE,
+                              all.equal(gamma.xlb,if(log==TRUE){exp(gamma)}
+                                        else{gamma})==TRUE),
+                      mu=c(all.equal(mu.xub,if(log==TRUE){exp(mu)}
+                                     else{mu})==TRUE,
+                              all.equal(mu.xlb,if(log==TRUE){exp(mu)}
+                                        else{mu})==TRUE),
                       sigma=c(all.equal(sigma.xub,sigma)==TRUE,
                               all.equal(sigma.xlb,sigma)==TRUE))
   rownames(bcheck)<- c(".xub",".xlb")
@@ -781,6 +777,97 @@ neglik.f<- function(param,dat,rep){
   
 # return values
   invisible(list(results=results))
+  ### A terminal output is provided. A plot (\link{postscript}) and a file 
+  ### containing statistical results are provided if desired. In addition a list 
+  ### is returned containing the following element: \cr\cr
+  ### \code{results} data frame containing statistical results.
   
-}#EndOf function
-#EOF
+  ##details<<
+  ## \bold{Parameters} \cr\cr
+  ## This model has four parameters:
+  ## \tabular{rl}{
+  ## \code{gamma}: \tab minimum dose on the log scale \cr
+  ## \code{mu}: \tab mean of the non-truncated normal distribution \cr
+  ## \code{sigma}: \tab spread in ages above the minimum \cr
+  ## \code{p0}: \tab proportion of grains at gamma}
+  ## \bold{(Un-)logged model} \cr\cr
+  ## In the original version of the three-parameter minimum dose model, the 
+  ## basic data are the natural logarithms of the De estimates and relative 
+  ## standard errors of the De estimates. This model will be applied if 
+  ## \code{log = TRUE}. \cr\cr
+  ## If \code{log = FALSE}, the modified un-logged model will be applied 
+  ## instead. This has essentially the same form as the original version. 
+  ## \code{gamma} and \code{sigma} are in Gy and \code{gamma} becomes the
+  ## minimum true dose in the population. \cr\cr
+  ## While the original (logged) version of the mimimum dose model may be
+  ## appropriate for most samples (i.e. De distributions), the modified 
+  ## (un-logged) version is specially designed for modern-age and young
+  ## samples containing negative, zero or near-zero De estimates (Arnold 
+  ## et al. 2009, p. 323). \cr\cr
+  ## \bold{Boundaries} \cr\cr  
+  ## Depending on the data, the upper and lower bounds for gamma
+  ## (\code{gamma.xlb} and \code{gamma.xub}) and mu (\code{mu.xlb} and 
+  ## \code{mu.xub}) need to be specified. If the final estimate of gamma or
+  ## mu is on the boundary, \code{gamma.xlb} and \code{gamma.xub} 
+  ## (\code{mu.xlb} and \code{mu.xub} respectively) need to be adjusted 
+  ## appropriately, so that gamma and mu lie within the bounds. The same
+  ## applies for sigma boundaries (\code{sigma.xlb} and \code{sigma.xub})
+  ## \cr\cr
+  ## \bold{Initial values} \cr\cr
+  ## The log likelihood calculations use the \link{nlminb} function. 
+  ## Accordingly, initial values for the four parameters \code{init.gamma},
+  ## \code{init.sigma}, \code{init.mu} and \code{init.p0} need to be specified.
+  
+  ##references<<
+  ## Arnold, L.J., Roberts, R.G., Galbraith, R.F. & DeLong, S.B., 2009. A revised
+  ## burial dose estimation procedure for optical dating of young and modern-age 
+  ## sediments. Quaternary Geochronology, 4, pp. 306-325. \cr\cr
+  ## Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission 
+  ## track ages. Nuclear Tracks Radiation Measurements, 4, pp. 459-470. \cr\cr
+  ## Galbraith, R.F., Roberts, R.G., Laslett, G.M., Yoshida, H. & Olley, J.M., 
+  ## 1999. Optical dating of single grains of quartz from Jinmium rock shelter, 
+  ## northern Australia. Part I: experimental design and statistical models. 
+  ## Archaeometry, 41, pp. 339-364. \cr\cr
+  ## Galbraith, R.F., 2005. Statistics for Fission Track Analysis, Chapman & 
+  ## Hall/CRC, Boca Raton. \cr\cr
+  ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose
+  ## and error calculation and display in OSL dating: An overview and some
+  ## recommendations. Quaternary Geochronology, 11, pp. 1-27. \cr\cr
+  ## \bold{Further reading} \cr\cr
+  ## Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain 
+  ## equivalent dose (De) distributions: Implications for OSL dating of sediment 
+  ## mixtures. Quaternary Geochronology, 4, pp. 204-230. \cr\cr
+  ## Bailey, R.M. & Arnold, L.J., 2006. Statistical modelling of single grain 
+  ## quartz De distributions and an assessment of procedures for estimating burial
+  ## dose. Quaternary Science Reviews, 25, pp. 2475-2502. \cr\cr
+  ## Cunningham, A.C. & Wallinga, J., 2012. Realizing the potential of fluvial
+  ## archives using robust OSL chronologies. Quaternary Geochronology, 12, 
+  ## pp. 98-106. \cr\cr
+  ## Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing the
+  ## reproducibility and accuracy of optical dating of fluvial deposits. 
+  ## Quaternary Geochronology, 1, pp. 109-120. \cr\cr
+  ## Rodnight, H., 2008. How many equivalent dose values are needed to obtain a
+  ## reproducible distribution?. Ancient TL, 26, pp. 3-10. \cr\cr
+  
+  ##note<<
+  ## The default boundary and starting values for \emph{gamma}, \emph{mu}, 
+  ## \emph{sigma} and \emph{p0} may only be appropriate for some De data sets 
+  ## and may need to be changed for other data. This is especially true when
+  ## the un-logged version is applied.
+  
+  ##seealso<<
+  ## \code{\link{nlminb}}, \code{\link{postscript}}, 
+  ## \code{\link{calc_CentralDose}},
+  ## \code{\link{calc_CommonDose}}, \code{\link{calc_FiniteMixture}},
+  ## \code{\link{calc_FuchsLang2001}}, \code{\link{calc_MinDose3}}
+  
+  
+}, ex=function(){
+  ## load example data
+  data(ExampleData.DeValues, envir = environment())
+  
+  ## apply the logged minimum dose model
+  calc_MinDose4(ExampleData.DeValues, 
+                sigmab = 0.05, gamma.xub = 10000, mu.xub = 10000, init.p0 = 0.4,
+                output.file = FALSE,output.plot = FALSE)
+})

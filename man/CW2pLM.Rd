@@ -10,14 +10,15 @@ curve using the equations given in Bulur (2000).
 \usage{CW2pLM(values)}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{values}{\code{\link{data.frame}} (\bold{required}): measured curve data of type stimulation time (t) 
-  (\code{values[,1]}) and measured counts (cts) (\code{values[,2]})}
+  \item{values}{\code{\linkS4class{RLum.Data.Curve}} or \code{\link{data.frame}} (\bold{required}):
+  \code{RLum.Data.Curve} data object. Alternatively, a \code{data.frame} of the 
+  measured curve data of type stimulation time (t) (\code{values[,1]}) and measured counts (cts) (\code{values[,2]}) can be provided.}
   
 
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-According to Bulur (2000), the curve data are transformed by introducing two 
+According to Bulur (2000) the curve data are transformed by introducing two 
 new parameters P (stimulation period) and u (transformed time):
 
  \deqn{P=2*max(t)}
@@ -26,22 +27,24 @@ new parameters P (stimulation period) and u (transformed time):
 The new count values are then calculated by
   \deqn{ctsNEW = cts(u/P)}
 
-And the returned \code{data.frame} is produced by: \code{data.frame(u,ctsNEW)}
+and the returned \code{data.frame} is produced by: \code{data.frame(u,ctsNEW)}
 
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-Returns a \code{data.frame} of the same form as the input of the transformed curve data.
+The function returns the same data type as the input data type with the
+transformed curve values.
+
+\item{\code{\link{data.frame}}}{generic R data structure}
+\item{\code{\linkS4class{RLum.Data.Curve}}}{package \code{\linkS4class{RLum} object}}
 }
 \references{
 %% ~put references to the literature/web site here ~
 Bulur, E., 2000. A simple transformation for converting CW-OSL curves to LM-OSL curves. Radiation Measurements, 32, 141-145. 
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany}
+\author{Sebastian Kreutzer, JLU Giessen (Germany)}
+
+\section{Version}{0.4 [2013-03-27]}
+
 \note{
 %%  ~~further notes~~
 The transformation is recommended for curves recorded with a channel resolution of at least 0.05 s/channel.
@@ -55,25 +58,26 @@ The transformation is recommended for curves recorded with a channel resolution 
 
 The output of the function can be further used for LM-OSL fitting: 
 
-\code{\link{CW2pLMi}}, \code{\link{CW2pHMi}}, \code{\link{CW2pPMi}}, \code{\link{fit_LMCurve}}
+\code{\link{CW2pLMi}}, \code{\link{CW2pHMi}}, \code{\link{CW2pPMi}}, \code{\link{fit_LMCurve}},
+\code{\linkS4class{RLum.Data.Curve}}, \code{\link{plot_RLum}}
 
 }
 \examples{
-##read curve from BINfileData transform curve an plot values
-data(ExampleData.BINfileData)
+##read curve from CWOSL.SAR.Data transform curve and plot values
+data(ExampleData.BINfileData, envir = environment())
 
 ##read id for the 1st OSL curve
-id.OSL<-BINfileData@METADATA[BINfileData@METADATA[,"LTYPE"]=="OSL","ID"]
+id.OSL <- CWOSL.SAR.Data@METADATA[CWOSL.SAR.Data@METADATA[,"LTYPE"] == "OSL","ID"]
 
 ##produce x and y (time and count data for the data set)
-x<-seq(BINfileData@METADATA[id.OSL[1],"HIGH"]/BINfileData@METADATA[id.OSL[1],"NPOINTS"],
-       BINfileData@METADATA[id.OSL[1],"HIGH"],
-       by=BINfileData@METADATA[id.OSL[1],"HIGH"]/BINfileData@METADATA[id.OSL[1],"NPOINTS"])
-y<-unlist(BINfileData@DATA[id.OSL[1]])
-values<-data.frame(x,y)
+x<-seq(CWOSL.SAR.Data@METADATA[id.OSL[1],"HIGH"]/CWOSL.SAR.Data@METADATA[id.OSL[1],"NPOINTS"],
+       CWOSL.SAR.Data@METADATA[id.OSL[1],"HIGH"],
+       by = CWOSL.SAR.Data@METADATA[id.OSL[1],"HIGH"]/CWOSL.SAR.Data@METADATA[id.OSL[1],"NPOINTS"])
+y <- unlist(CWOSL.SAR.Data@DATA[id.OSL[1]])
+values <- data.frame(x,y)
 
 ##transform values
-values.transformed<-CW2pLM(values)
+values.transformed <- CW2pLM(values)
 
 ##plot
 plot(values.transformed)

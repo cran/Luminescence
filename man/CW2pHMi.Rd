@@ -12,8 +12,7 @@ curve under hyperbolic modulation conditions using the interpolation procedure d
 CW2pHMi(values, delta)
 }
 \arguments{
-  \item{values}{\code{\link{data.frame}} (\bold{required}): measured curve data of type stimulation time (t)
-  (\code{values[,1]}) and measured counts (cts) (\code{values[,2]})}
+  \item{values}{\code{\linkS4class{RLum.Data.Curve}} or \code{\link{data.frame}} (\bold{required}): \code{\linkS4class{RLum.Data.Curve}} or \code{data.frame} with measured curve data of type stimulation time (t) (\code{values[,1]}) and measured counts (cts) (\code{values[,2]}).}
 
   \item{delta}{\code{\link{vector}} (optional): stimulation rate parameter, if no value is given, the optimal value is estimated automatically (see details). Smaller values of delta produce more points in the rising tail of the curve.}
 }
@@ -27,7 +26,7 @@ The input \code{data.frame} consists of two columns: time (t) and count values (
 
 (2) Calculate t' which is the transformed time:
 
-\deqn{t' = t-(1/delta)*log(1+delta*t)}
+\deqn{t' = t-(1/\delta)*log(1+\delta*t)}
 
 (3) Interpolate CW(t'), i.e. use the log(CW(t)) to obtain the count values for the transformed time (t').
 Values beyond \code{min(t)} and \code{max(t)} produce \code{NA} values.
@@ -40,8 +39,8 @@ these values for a linear fit using \code{\link{lm}}.
 
 (6) Transform values using 
 
-\deqn{pHM(t) = (delta*t/(1+delta*t))*c*CW(t')}
-\deqn{c = (1+delta*P)/delta*P}
+\deqn{pHM(t) = (\delta*t/(1+\delta*t))*c*CW(t')}
+\deqn{c = (1+\delta*P)/\delta*P}
 \deqn{P = length(stimulation~period)}
 
 (7) Combine all values and truncate all values for t' > \code{max(t)} \cr
@@ -51,7 +50,22 @@ these values for a linear fit using \code{\link{lm}}.
 
 }
 \value{
-Returns a \code{\link{data.frame}} with three columns:
+The function returns the same data type as the input data type with the
+transformed curve values.
+
+\item{\code{\linkS4class{RLum.Data.Curve}}}{package \code{\linkS4class{RLum} object} with two additional info elements:
+
+ \tabular{rl}{
+ 
+  $CW2pHMi.x.t  \tab: transformed time values \cr
+  $CW2pHMi.method \tab: used method for the production of the new data points
+ 
+ }
+
+}
+
+\item{\code{\link{data.frame}}}{with three columns:
+
 
  \tabular{rl}{
 
@@ -60,23 +74,27 @@ $y.t \tab:   transformed count values\cr
 $x.t  \tab: transformed time values \cr
 $method \tab: used method for the production of the new data points
 }
-}
+
+}}
 
 \references{
 Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal components. Radiation Measurements 47, 752-758.
 
-\bold{Further}
+\bold{Further Reading}
 
 Bulur, E., 1996. An Alternative Technique For Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements, 26, 701-709.
 
 Bulur, E., 2000. A simple transformation for converting CW-OSL curves to LM-OSL curves. Radiation Measurements, 32, 141-145.
 
 }
-\author{Sebastian Kreutzer, JLU Giessen, Germany, 2012
+\author{Sebastian Kreutzer, JLU Giessen (Germany)
 
 Based on comments and suggestions from:\cr
 Adrie J.J. Bos, Delft University of Technology, The Netherlands
 }
+
+\section{Version}{0.2 [2013-03-27]}
+
 \note{
 According to Bos & Wallinga (2012), the number of extrapolated points should be limited to avoid 
 artificial intensity data. If \code{delta} is provided manually and more than two points are extrapolated, 
@@ -91,7 +109,7 @@ two invalid values are succeeding, the values are removed and no further interpo
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{CW2pLM}}, \code{\link{CW2pLMi}}, \code{\link{CW2pPMi}}, \code{\link{fit_LMCurve}}, \code{\link{lm}}
+\code{\link{CW2pLM}}, \code{\link{CW2pLMi}}, \code{\link{CW2pPMi}}, \code{\link{fit_LMCurve}}, \code{\link{lm}}, \code{\linkS4class{RLum.Data.Curve}}
 }
 \examples{
 ##(1) - simple transformation
@@ -113,36 +131,36 @@ data(ExampleData.BINfileData)
 
 ##grep first CW-OSL curve from ALQ 1
 
-  curve.ID<-BINfileData@METADATA[BINfileData@METADATA[,"LTYPE"]=="OSL" &
-                                 BINfileData@METADATA[,"POSITION"]==1
+  curve.ID<-CWOSL.SAR.Data@METADATA[CWOSL.SAR.Data@METADATA[,"LTYPE"]=="OSL" &
+                                 CWOSL.SAR.Data@METADATA[,"POSITION"]==1
                                  ,"ID"]
 
-  curve.HIGH<-BINfileData@METADATA[BINfileData@METADATA[,"ID"]==curve.ID[1] 
+  curve.HIGH<-CWOSL.SAR.Data@METADATA[CWOSL.SAR.Data@METADATA[,"ID"]==curve.ID[1] 
                                    ,"HIGH"]
 
-  curve.NPOINTS<-BINfileData@METADATA[BINfileData@METADATA[,"ID"]==curve.ID[1] 
+  curve.NPOINTS<-CWOSL.SAR.Data@METADATA[CWOSL.SAR.Data@METADATA[,"ID"]==curve.ID[1] 
                                       ,"NPOINTS"]
 
 ##combine curve to data set
 
   curve<-data.frame(x = seq(curve.HIGH/curve.NPOINTS,curve.HIGH,
                             by = curve.HIGH/curve.NPOINTS),
-                    y=unlist(BINfileData@DATA[curve.ID[1]])                    
-                    )
+                    y=unlist(CWOSL.SAR.Data@DATA[curve.ID[1]]))                    
+                    
 
 ##transform values 
   
-  curve.transformed<-CW2pHMi(curve)
+  curve.transformed <- CW2pHMi(curve)
 
 ##plot curve
-  plot(curve.transformed$x, curve.transformed$y.t, log="x")
+  plot(curve.transformed$x, curve.transformed$y.t, log = "x")
   
   
 ##(3) - produce Fig. 4 from Bos & Wallinga (2012)
 
 ##load data
-data(ExampleData.CW_OSL_Curve)
-values<-CW_Curve.BosWallinga2012
+data(ExampleData.CW_OSL_Curve, envir = environment())
+values <- CW_Curve.BosWallinga2012
 
 ##open plot area
 plot(NA, NA,
@@ -151,8 +169,7 @@ plot(NA, NA,
      ylab="pseudo OSL (cts/0.01 s)",
      xlab="t [s]",
      log="x",
-     main="Fig. 4 - Bos & Wallinga (2012)", 
-     )
+     main="Fig. 4 - Bos & Wallinga (2012)") 
 
 values.t<-CW2pLMi(values, P=1/20)
 lines(values[1:length(values.t[,1]),1],CW2pLMi(values, P=1/20)[,2], col="red" ,lwd=1.3)
@@ -165,9 +182,6 @@ text(0.005,3000,"HM", cex=.8)
 values.t<-CW2pPMi(values, P=1/10)
 lines(values[1:length(values.t[,1]),1],CW2pPMi(values, P=1/10)[,2], col="blue", lwd=1.3)
 text(0.5,6500,"PM", col="blue" ,cex=.8)
-  
-  
-
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

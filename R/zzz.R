@@ -1,18 +1,41 @@
+##//////////////////////////////////////////////////////////////////////////////
+##//zzz.R
+##//////////////////////////////////////////////////////////////////////////////
+##
+##==============================================================================
+##author: R Luminescence Package Team
+##organisation: 
+##version.: 0.1.1
+##date: 2013-03-11
+##==============================================================================
+# Set namespace .LuminescenceEnv ------------------------------------------
+.LuminescenceEnv <- new.env(parent = emptyenv())  
+ 
+# Assign variables to Namespace -------------------------------------------     
+##variable col to define colours in the functions for output
+assign("col",  
+       unlist(colors())[c(261,552,51,62,76,151,451,474,654,657,100,513,23,612,129,27,551,393)], 
+       pos = ".LuminescenceEnv",
+       envir = .LuminescenceEnv) 
+
+
+
 ##==============================================================================
 ##on Attach
 .onAttach <- function(libname,pkgname){
   
   ##set startup message
   try(packageStartupMessage(paste("Welcome to the R package Luminescence version ",
-                                  packageDescription(pkg="Luminescence")$Version,
-                                  " [Built: ",
-                                  strsplit(packageDescription(pkg="Luminescence")$Packaged, ";")[[1]][1],
-                                  "]", sep="")), silent=TRUE)                        
+                              packageDescription(pkg="Luminescence")$Version,
+                              " [Built: ",
+                              strsplit(packageDescription(pkg="Luminescence")$Packaged, ";")[[1]][1],
+                             "]", sep="")), silent=TRUE)                        
 }
 
+##==============================================================================
+# DO NOT TOUCH! -----------------------------------------------------------
 
 sTeve<- function(n_frames = 20, t_animation = 3) {
-require(shape)
 
 par(new = TRUE)
 plot(NA, xlim = c(0, 10), ylim = c(0, 10), main = "", xlab = "", ylab = "", axes = FALSE, frame.plot = FALSE)

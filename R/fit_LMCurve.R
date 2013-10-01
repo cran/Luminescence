@@ -4,8 +4,8 @@
 ##==============================================================================
 ##author: Sebastian Kreutzer
 ##organisation: JLU Giessen, Germany
-##version: 0.2.9
-##date: 2013-04-10
+##version: 0.2.10
+##date: 2013-09-27
 ##==============================================================================
 ##+++++++++++++++++++++++Preface+++++++++++++++++++++++(START)
 ##  --LM fitting procedure for LM curves
@@ -43,15 +43,57 @@ fit_LMCurve <- function(
                      
                   output.path, #outputname is produced automatically
                   
-                  output.terminal=TRUE, #terminal output TRUE/FALSE
-                  output.terminaladvanced=TRUE, #advanced terminal output TRUE/FALSE
-                                                #only used if output.terminal is TRUE
+                  output.terminal=TRUE, 
+                  output.terminaladvanced=TRUE, 
                   
                   output.plot=TRUE,
                   output.plotBG=FALSE, #plot TRUE or FALSE,
                   ...
                   ) {
-                                  			
+  
+  # (0) Integrity checks -------------------------------------------------------
+  
+  ##(1) data.frame or RLum.Data.Curve object?
+  if(is(values, "data.frame") == FALSE & is(values, "RLum.Data.Curve") == FALSE){
+    
+    stop("[fit_LMCurve] Error: 'values' object has to be of type 
+         'data.frame' or 'RLum.Data.Curve'!")
+    
+  }else{
+    
+    if(is(values, "RLum.Data.Curve") == TRUE && values@recordType!="RBR"){
+      
+      stop("[fit_LMCurve] Error: recordType should be 'RBR'!")
+
+    }else if(is(values, "RLum.Data.Curve") == TRUE){
+      
+      values <- as(values,"data.frame")
+      
+    }
+  }
+  
+  ##(2) data.frame or RLum.Data.Curve object?
+  if(missing(values.bg)==FALSE){
+    
+    if(is(values.bg, "data.frame") == FALSE & is(values.bg,
+                                                 "RLum.Data.Curve") == FALSE){
+    
+    stop("[fit_LMCurve] Error: 'values.bg' object has to be of type 'data.frame' or 'RLum.Data.Curve'!")
+    
+    }else{
+    
+    if(is(values, "RLum.Data.Curve") == TRUE && values@recordType!="RBR"){
+      
+      stop("[fit_LMCurve] Error: recordType should be 'RBR'!")
+      
+    }else if(is(values.bg, "RLum.Data.Curve") == TRUE){
+      
+      values.bg <- as(values.bg,"data.frame")
+      
+    }
+  }
+ }  
+  
   ## Set plot format parameters -----------------------------------------------
   extraArgs <- list(...) # read out additional arguments list
   
@@ -108,9 +150,9 @@ fit_LMCurve <- function(
   fun       <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE}
  
   
-##=================================================================================================##  	
+##============================================================================##  	
 ##  BACKGROUND SUBTRACTION
-##=================================================================================================##
+##============================================================================##
  
 #   ##perform background subtraction if background LM measurment exists
        
@@ -188,12 +230,12 @@ fit_LMCurve <- function(
        }
                         
 	
-##=================================================================================================##		
+##============================================================================##		
 ##  FITTING
-##=================================================================================================##
+##============================================================================##
     
-    ##---------------------------------------------------------------------------------------------##   
-     ##set function for fit equation
+    ##------------------------------------------------------------------------##   
+     ##set function for fit equation (according Kitis and Pagonis, 2008)
      ##////equation used for fitting////(start)
      fit.equation<-function(Im.i,xm.i){   
        equation<-parse(
@@ -202,9 +244,9 @@ fit_LMCurve <- function(
          return(equation)
        }
      ##////equation used for fitting///(end)    
-    ##---------------------------------------------------------------------------------------------##
+    ##------------------------------------------------------------------------##
        
-    ##---------------------------------------------------------------------------------------------##    
+    ##------------------------------------------------------------------------##    
     ##automatic start parameter estimation   
        
     ##set fit function
@@ -237,20 +279,20 @@ fit_LMCurve <- function(
              Im<-Im.pseudo[b.pseudo_start:(n.components+b.pseudo_end)]
             
              if(fit.advanced==TRUE){ 
-             ##------------------------------------------------------------------------------------##
+             ##---------------------------------------------------------------##
              ##MC for fitting parameter
              ##make the fitting more stable by small variations of the parameters 
            
              ##sample input parameters values from a normal distribution
              xm.MC<-sapply(1:length(xm),function(x){
-               xm.MC<-sample(rnorm(25,mean=xm[x],sd=xm[x]/10), replace=TRUE)              
+               xm.MC<-sample(rnorm(30,mean=xm[x],sd=xm[x]/10), replace=TRUE)              
              })
             
              Im.MC<-sapply(1:length(xm),function(x){
-                Im.MC<-sample(rnorm(25,mean=Im[x],sd=Im[x]/10), replace=TRUE)
+                Im.MC<-sample(rnorm(30,mean=Im[x],sd=Im[x]/10), replace=TRUE)
                 
              })
-             ##------------------------------------------------------------------------------------##
+             ##---------------------------------------------------------------##
      
              for(i in 1:length(xm.MC[,1])){       
                  
@@ -307,7 +349,7 @@ fit_LMCurve <- function(
         }#end:whileloop fit trigger
   
     }else{#endif::missing start values
-    ##---------------------------------------------------------------------------------------------##
+    ##------------------------------------------------------------------------##
      
       fit<-try(nls(y~eval(fit.function), trace=fit.trace, data.frame(x=values[,1],y=values[,2]), 
                    algorithm="port", start=list(Im=start_values[,1],xm=start_values[,2]),#end start values input
@@ -318,7 +360,7 @@ fit_LMCurve <- function(
                )# end try
     }#endif::startparameter   
     
-    ##---------------------------------------------------------------------------------------------##  
+    ##------------------------------------------------------------------------##  
    
     ##grep parameters
     if(inherits(fit,"try-error")==FALSE){    
@@ -346,9 +388,9 @@ fit_LMCurve <- function(
     writeLines("\n(equation used for fitting according Kitis & Pagonis, 2008)")
     }#end if
   
-##=================================================================================================##   
+##============================================================================##   
 ##  Additional Calculations
-##=================================================================================================##
+##============================================================================##
   
     ##calculate stimulation intensity Schmidt (2008)
          
@@ -484,10 +526,84 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
      
        ###alter column names
        colnames(output.table)<-c("ID","sample_code","n.components",output.tableColNames,"pseudo-R^2")
-  
-##=================================================================================================##   
+
+       
+##============================================================================##   
+## COMPONENT TO SUM CONTRIBUTION PLOT
+##============================================================================##                  
+       
+       ##+++++++++++++++++++++++++++++++
+       ##set matrix
+       ##set polygon matrix for optional plot output
+       component.contribution.matrix <- matrix(NA, 
+                                               nrow = length(values[,1]), 
+                                               ncol = (2*length(xm)) + 2)
+       
+       ##set x-values
+       component.contribution.matrix[,1] <- values[,1]
+       component.contribution.matrix[,2] <- rev(values[,1]) 
+       
+       ##+++++++++++++++++++++++++++++++
+       ##set 1st polygon
+       ##1st polygon (calculation)
+       y.contribution_first <- (exp(0.5)*Im[1]*values[,1]/
+                                  xm[1]*exp(-values[,1]^2/(2*xm[1]^2))/
+                                  (eval(fit.function))*100) 
+       
+       ##avoid NaN values (might happen with synthetic curves)
+       y.contribution_first[is.nan(y.contribution_first)==TRUE] <- 0
+       
+       ##set values in matrix
+       component.contribution.matrix[,3] <- 100
+       component.contribution.matrix[,4] <- 100-rev(y.contribution_first)
+       
+       ##+++++++++++++++++++++++++++++++
+       ##set polygons in between
+       ##polygons in between (calculate and plot)
+       if (length(xm)>2){
+         
+         y.contribution_prev <- y.contribution_first
+         i<-2
+         
+         while (i<=length(xm)-1) {
+           y.contribution_next<-(exp(0.5)*Im[i]*values[,1]/
+                                   xm[i]*exp(-values[,1]^2/(2*xm[i]^2))/
+                                   (eval(fit.function))*100)
+           
+           ##avoid NaN values
+           y.contribution_next[is.nan(y.contribution_next)==TRUE] <- 0
+           
+           ##set values in matrix
+           component.contribution.matrix[,(3+i)] <- 100-y.contribution_prev
+           component.contribution.matrix[,(4+i)] <- rev(100-y.contribution_prev-
+                                                          y.contribution_next)
+           
+           y.contribution_prev <- y.contribution_prev + y.contribution_next
+           
+           i<-i+1        
+         }#end while loop
+       }#end if
+       
+       ##+++++++++++++++++++++++++++++++
+       ##set last polygon
+       
+       ##last polygon (calculation)  
+       y.contribution_last<-(exp(0.5)*Im[length(xm)]*values[,1]/
+                               xm[length(xm)]*exp(-values[,1]^2/
+                                                    (2*xm[length(xm)]^2))/
+                               (eval(fit.function))*100)
+       
+       ##avoid NaN values
+       y.contribution_last[is.nan(y.contribution_last)==TRUE]<-0
+       
+       component.contribution.matrix[,((2*length(xm))+1)] <- y.contribution_last
+       component.contribution.matrix[,((2*length(xm))+2)] <- 0       
+       
+       
+       
+##============================================================================##   
 ## TABLE OUTPUT (CVS)
-##=================================================================================================##       
+##============================================================================##       
        
       if(missing(output.path)==FALSE){
        
@@ -505,7 +621,8 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
 }#endif::exists fit
 }else{
   
-  output.table<-NA
+  output.table <- NA
+  component.contribution.matrix <- NA
   writeLines("[fit_LMCurve.R] >> Fitting Error: Plot without fit produced!")
   
   }
@@ -601,67 +718,52 @@ if(output.plot==TRUE){
      ##ad 0 line
      abline(h=0)
  		
-    ##plot component contribution to the whole signal
-    #open plot area
-    par(mar=c(4,4,3.2,0))
-    plot(NA,NA,
-        xlim=xlim,
-        ylim=c(0,100),
-        ylab="contribution [%]",
-        xlab=xlab,
-        main="Component Contribution To Sum Curve",
-        log=if(log=="xy"){"x"}else{log}
-         )
     
-    ##----------------------------------------------------------------------------------------------##
-    ##++component contribution plot++##
-    ##----------------------------------------------------------------------------------------------##
-    ##1st polygon (calculation)
-    y.contribution_first<-(exp(0.5)*Im[1]*values[,1]/xm[1]*exp(-values[,1]^2/(2*xm[1]^2))/(eval(fit.function))*100) 
+    ##------------------------------------------------------------------------##
+    ##++component to sum contribution plot ++##
+    ##------------------------------------------------------------------------##
+     ##plot component contribution to the whole signal
+     #open plot area
+     par(mar=c(4,4,3.2,0))
+     plot(NA,NA,
+          xlim=xlim,
+          ylim=c(0,100),
+          ylab="contribution [%]",
+          xlab=xlab,
+          main="Component Contribution To Sum Curve",
+          log=if(log=="xy"){"x"}else{log})
+   
+     stepping <- seq(3,length(component.contribution.matrix),2)
+     
+     for(i in 1:length(xm)){
+       
+       polygon(c(component.contribution.matrix[,1],
+               component.contribution.matrix[,2]),
+               c(component.contribution.matrix[,stepping[i]],
+                 component.contribution.matrix[,stepping[i]+1]),
+               col = col[i+1])
+     }
+     rm(stepping)      
     
-    ##avoid NaN values (might happen with synthetic curves)
-    y.contribution_first[is.nan(y.contribution_first)==TRUE]<-0      
-    
-    ##1st polygon (plot)
-    polygon(c(values[,1],rev(values[,1])),c(rep(100,length(values[,1])),100-rev(y.contribution_first)),col=col[2])    
-    
-    ##polygons in between (calculate and plot)
-    if (length(xm)>2){
-      
-      y.contribution_prev<-y.contribution_first
-      i<-2
-      
-      while (i<=length(xm)-1) {
-        y.contribution_next<-(exp(0.5)*Im[i]*values[,1]/xm[i]*exp(-values[,1]^2/(2*xm[i]^2))/(eval(fit.function))*100)
-        
-        ##avoid NaN values
-        y.contribution_next[is.nan(y.contribution_next)==TRUE]<-0
-        
-        polygon(c(values[,1],rev(values[,1])),c(100-y.contribution_prev,
-                              rev(100-y.contribution_prev-y.contribution_next)),col=col[i+1])
-        y.contribution_prev<-y.contribution_prev+y.contribution_next
-        i<-i+1        
-      }#end while loop
-    }#end if
-    
-    ##last polygon (calculation)  
-    y.contribution_last<-(exp(0.5)*Im[length(xm)]*values[,1]/xm[length(xm)]*exp(-values[,1]^2/(2*xm[length(xm)]^2))/
-      (eval(fit.function))*100)
-    
-    ##avoid NaN values
-    y.contribution_last[is.nan(y.contribution_last)==TRUE]<-0
-    
-    ##last polygon (plot)
-    polygon(c(values[,1],rev(values[,1])),c(y.contribution_last,rep(0,length(values[,1]))),col=col[length(xm)+1])
-      
-    
-    ##--------------------------------------------------------------------------------------------##
+    ##------------------------------------------------------------------------##
     }#end if try-error for fit
 
     if(fun==TRUE){sTeve()}
 }    
-##--------------------------------------------------------------------------------------------------
+##-----------------------------------------------------------------------------
     ##remove objects  
     try(unlist("parameters"))
-    return(list(fit=fit,output.table=output.table))   
+  
+##============================================================================##  
+## Return Values
+##============================================================================##    
+  
+  newRLumResults.fit_LMCurve <- set_RLum.Results(
+    data = list(
+      fit = fit,
+      output.table = output.table,
+      component.contribution.matrix = component.contribution.matrix))
+  
+  invisible(newRLumResults.fit_LMCurve)
+  
 }#Endoffunction

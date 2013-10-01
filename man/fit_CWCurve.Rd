@@ -29,7 +29,7 @@ fit_CWCurve(values,
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{values}{\link{data.frame} (\bold{required}): x,y data of measured values (time and counts). See examples.}
+  \item{values}{\code{\linkS4class{RLum.Data.Curve}} or \link{data.frame} (\bold{required}): x, y data of measured values (time and counts). See examples.}
   \item{n.components.max}{\link{vector} (optional): maximum number of components that are to be used for 
   fitting. The upper limit is 7.
 }
@@ -64,21 +64,24 @@ fit_CWCurve(values,
 
 \bold{Fitting function}
 
-The function for the fitting has the general form :
-\deqn{y = I0_1*exp(-lambda_1*x) + ,\ldots, 
-      + I0_i*exp(-lambda_i*x)
+The function for the CW-OSL fitting has the general form:
+\deqn{y = I0_{1}*\lambda_{1}*exp(-\lambda_1*x) + ,\ldots, 
+      + I0_{i}*\lambda_{i}*exp(-\lambda_i*x)
 }
-      where \eqn{1>= i <= 7}
-
+      where \eqn{1>= i <= 7}\cr\cr
+      and \eqn{\lambda} is the decay constant and \eqn{N0} the intial number of 
+      trapped electrons.
+ 
+(for the used equation e.g. cf. Boetter-Jensen et al., 2003 ) 
 
 \bold{Start values}
 
 Start values are estimated automatically by fitting a linear function on the log input data set. 
 Currently, there is no option to manually provide start parameters. 
 
-\bold{goodness of fit}
+\bold{Goodness of fit}
 
-The goodness of the fit is given by a expression(pseudo-R^2) value (pseudo coefficient of determination). 
+The goodness of the fit is given by as pseudo-R^2 value (pseudo coefficient of determination). 
 According to Lave (1970), the value is calculated as:
 
 \deqn{pseudoR^2 = 1 - RSS/TSS}
@@ -96,26 +99,35 @@ See the \link{nls} help page for more information.
 \item{plot}{(optional) the fitted CW-OSL curves are returned as plot.}
 \item{table}{(optional) an output table (*.csv) with the fitted components is provided 
 if the \code{output.path} is set.}
-\item{\code{list} object}{beside the plot and table output options a \link{list} is returned. 
-The list contains: \cr
 
-(a) a \code{nls} object (\code{$fit}) for which generic R functions are provided,
-e.g. \link{summary}, \link{confint}, \link{profile}. For more details, see \link{nls}. \cr
 
-(b) a \link{data.frame} containing the summarized parameters including the 
-error (\code{$output.table}).
+\item{\code{\linkS4class{RLum.Results}} object}{beside the plot and table output options a \code{\linkS4class{RLum.Results}} is returned.
+
+\code{fit} : a \code{nls} object (\code{$fit}) for which generic R functions are provided
+e.g. \link{summary}, \link{confint}, \link{profile}. For more details, see \link{nls}.
+
+
+\code{output.table}:  a \link{data.frame} containing the summarized parameters including the 
+error
+
+\code{component.contribution.matrix}: \link{matrix} containing the values for the component to sum contribution plot 
+(\code{$component.contribution.matrix}).
 }
 }
 \references{
+Boetter-Jensen, L., McKeever, S.W.S., Wintle, A.G., 2003. Optically Stimulated Luminescence Dosimetry. Elsevier Science B.V.
 
 Lave, C.A.T., 1970. The Demand for Urban Mass Transportation. The Review of Economics and Statistics, 52 (3), pp. 320-323. 
 
-Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R R. Gentleman, K. Hornik, & G. Parmigiani, eds., Springer.
+Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. R. Gentleman, K. Hornik, G. Parmigiani, eds., Springer.
 }
+\author{Sebastian Kreutzer, JLU Giessen (Germany)}
 
-\author{Sebastian Kreutzer, JLU Giessen, Germany, 2012}
+\section{Version}{0.3 [2013-09-30]}
 
 \note{
+\bold{Beta version - This function has not been properly tested yet.}
+
 %%  ~~further notes~~
 The pseudo-R^2 may not be the best parameter to describe the goodness of the fit. The trade off between the \code{n.components} and the pseudo-R^2 value has not yet been considered. 
 
@@ -127,12 +139,16 @@ recommended.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{fit_LMCurve}}, \code{\link{plot}},\code{\link{nls}}
+\code{\link{fit_LMCurve}}, \code{\link{plot}},\code{\link{nls}},
+\code{\linkS4class{RLum.Data.Curve}}, \code{\linkS4class{RLum.Results}},
+\code{\link{get_RLum.Results}}
+
+
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 ##load data
-data(ExampleData.CW_OSL_Curve)
+data(ExampleData.CW_OSL_Curve, envir = environment())
 
 ##fit data
 fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,

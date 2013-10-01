@@ -1,17 +1,14 @@
-##//////////////////////////////////////////////////////////////
+##//////////////////////////////////////////////////////////////////////////////
 ##//RisoeBINfileData-class.R
-##/////////////////////////////////////////////////////////////
-##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-#vers.: 0.1.1
-#date: 16/03/2012
-##======================================
-##
-## S4 class definition
-##=================================================================================================##
-##Risoe.BINdata##
-##=================================================================================================##
+##//////////////////////////////////////////////////////////////////////////////
+##==============================================================================
+##author: Sebastian Kreutzer
+##organisation: JLU Giessen
+##version: 0.3
+##date: 2013-09-20
+##==============================================================================
+##TODO
+
 setClass("Risoe.BINfileData",
          representation(
            METADATA="data.frame",
@@ -24,38 +21,60 @@ setClass("Risoe.BINfileData",
 setMethod("show", signature(object = "Risoe.BINfileData"),
           function(object){
             
-            version<-object@METADATA[1,"VERSION"]
-            systemID<-object@METADATA[1,"SYSTEMID"]
+            version<-paste(unique(object@METADATA[,"VERSION"]), collapse = ", ")
+            systemID<-paste(unique(object@METADATA[,"SYSTEMID"]), collapse = ", ")
+            filename <- as.character(object@METADATA[1,"FNAME"])
             records.overall<-length(object@DATA)
-            records.type<-summary(object@METADATA[,"LTYPE"])
-            user<-as.character(object@METADATA[1,"USER"])
-            date<-as.character(object@METADATA[1,"DATE"])      
+            records.type<-table(object@METADATA[,"LTYPE"])
+            user<-paste(unique(as.character(object@METADATA[,"USER"])), collapse = ", ")
+            date<-paste(unique(as.character(object@METADATA[,"DATE"])), collapse = ", ")      
             run.range<-range(object@METADATA[,"RUN"])
             set.range<-range(object@METADATA[,"SET"])
             pos.range<-range(object@METADATA[,"POSITION"])
             
+            records.type.count <- sapply(1:length(records.type),
+              function(x){paste(
+              names(records.type)[x],"\t(n = ",records.type[x],")",sep="")
+              })
+            
+            records.type.count <- paste(records.type.count, 
+                                        collapse="\n\t                      ")
+ 
             ##print
             cat("\nRisoe.BINfileData Object")
-            cat("\n\tVersion:             ", version)
+            cat("\n\tBIN Format Version:  ", version)
+            if(version>=6){
+              cat("\n\tFile Name:           ", filename)
+            }
             cat("\n\tObject Date:         ", date) 
             cat("\n\tUser:                ", user)
             cat("\n\tSystem ID:           ", systemID)
             cat("\n\tOverall Records:     ", records.overall)
-            cat("\n\tRecords Type:        ", sapply(1:length(records.type),function(x){paste(
-              names(records.type)[x],
-              "=",records.type[x],";",
-              sep=""
-              )
-                                                                                       
-            }
-                                                    )
-                )
+            cat("\n\tRecords Type:        ", records.type.count)
             cat("\n\tPosition Range:      ",pos.range[1],":",pos.range[2])
             cat("\n\tRun Range:           ",run.range[1],":",run.range[2])
             cat("\n\tSet Range:           ",set.range[1],":",set.range[2])
           }#end function          
           )#end setMethod
 
-        
+
+# constructor (set) method for object class -----------------------------------
+
+setGeneric("set_Risoe.BINfileData",
+           function(METADATA, DATA) {standardGeneric("set_Risoe.BINfileData")})
+
+
+setMethod("set_Risoe.BINfileData", 
+          signature = c(METADATA = "data.frame", DATA = "list"), 
+          
+          function(METADATA, DATA){             
+                        
+            new("Risoe.BINfileData", 
+                METADATA = METADATA,
+                DATA = DATA
+            )
+            
+          })
+
 ##-------------------------------------------------------------------------------------------------##
 ##=================================================================================================##

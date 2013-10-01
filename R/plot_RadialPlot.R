@@ -14,7 +14,8 @@
 ##=============================================================================
 ##start function
 plot_RadialPlot <- function (						
-  sample, #sample input as.data.frame (x,y)
+  sample, # sample input as.data.frame (x,y)
+  na.exclude = TRUE,
 
   sample.groups, #group sample data
   sample.legend,
@@ -79,7 +80,13 @@ plot_RadialPlot <- function (
       }else{stop(paste("Error: No matching columns found, please specify", 
                        "a data.frame with two columns!"))} 
   }
-  
+
+  ## optionally, count nd exclude NA values and print result
+  if(na.exclude == TRUE) {
+    n.NA <- sum(!complete.cases(sample))
+    if(n.NA == 1) {print("1 NA value excluded.")
+    } else if(n.NA > 1) {print(paste(n.NA, "NA values excluded."))}
+    sample <- na.exclude(sample)}
   
 ##===========================================================================##
 ##PREVIOUS CALCULATIONS                                                      ##

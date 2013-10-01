@@ -1,5 +1,5 @@
-\name{plot_BINfileData}
-\alias{plot_BINfileData}
+\name{plot_Risoe.BINfileData}
+\alias{plot_Risoe.BINfileData}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Plot single luminescence curves from a BIN file object.}
 \description{
@@ -8,13 +8,12 @@ Plot single luminescence curves from an object returned by the \link{readBIN2R} 
 
 }
 \usage{
-plot_BINfileData(BINfileData, position, run, set,
+plot_Risoe.BINfileData(BINfileData, position, run, set,
                  sorter = "POSITION", 
-                 ltype = c("IRSL","OSL","TL","RIR","RBR"),
+                 ltype = c("IRSL","OSL","TL","RIR","RBR", "RL"),
                  curve.transformation,    
-                 
                  dose_rate,
-                 temp.lab = "deg. C", 
+                 temp.lab = "\u00B0C", 
                  cex.global = 1)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -32,8 +31,8 @@ plot_BINfileData(BINfileData, position, run, set,
     \code{CW2pLM}, \code{CW2pLMi}, \code{CW2pHMi} and \code{CW2pPMi}. See Details.}
   
     \item{dose_rate}{\link{numeric} (optional): dose rate of the irradition source at the measurement date. If set, the given irradiation dose will be shown in Gy. See details.}
-      \item{temp.lab}{\link{character} (optional): option to plot a circle (for degree) before the C (Celsius) instead of 'deg.'.
-      This argument is just a technical issue (s. details).}
+      \item{temp.lab}{\link{character} (optional): option to allow for different temperature units.
+      This argument is just a technical issue (see details).}
     
     \item{cex.global}{\link{numeric} (with default): global scaling factor.}
  
@@ -96,17 +95,14 @@ The nomenclature used for the function (e.g. ltype, position) are taken from the
 This argument allows to transform continuous wave (CW) curves to pseudo (linear)
 modulated curves. For the transformation the functions of the package are used. 
 Currently it is not possible to pass further arguments to the transformation functions.
-The argument works only for ltype \code{OSL} and \code{IRSL}.
+The argument works only for ltype \code{OSL} and \code{IRSL}.\cr
 
 \bold{Irradiation time}\cr
 
 Plotting the irradiation time (s) or the given dose (Gy) requires that the variable \code{IRR_TIME} has been set within the BIN-file. This is normally done by using the 'Run Info' option within the Sequence Editor or by 
 editing in R.\cr
-
-\bold{Circle instead of 'deg.'}\cr
-
-Unfortunately, the circle (for degree) is not an ASCII character and therefore a warning is produced during compiling the R-package. To avoid the warning message the default scale unit is 'deg. C'. 
 }
+
 \value{
 %%  ~Describe the value returned
 %%  If it is a LIST, use
@@ -128,7 +124,7 @@ Michael Dietze, TU Dresden (Germany)}
 The function has been successfully tested for the Sequence Editor file output version 3 and 4. 
 }
 
-\section{Version}{0.4 [2013-03-05]}
+\section{Version}{0.4.1 [2013-07-07]}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
@@ -140,7 +136,7 @@ The function has been successfully tested for the Sequence Editor file output ve
 }
 \examples{
 ##load data
-data(ExampleData.BINfileData)
+data(ExampleData.BINfileData, envir = environment())
 
 ##plot all curves from the first position to the desktop
 #pdf(file = "~/Desktop/CurveOutput.pdf", paper = "a4", height = 11, onefile = TRUE)
@@ -150,7 +146,7 @@ data(ExampleData.BINfileData)
   #BINfileData<-readBIN2R(BINfile)
 
 #par(mfrow = c(4,3), oma = c(0.5,1,0.5,1))
-#plot_BINfileData(CWOSL.SAR.Data,position = 1)
+#plot_Risoe.BINfileData(CWOSL.SAR.Data,position = 1)
 #mtext(side = 4, BINfile, outer = TRUE, col = "blue", cex = .7)
 #dev.off()
 }

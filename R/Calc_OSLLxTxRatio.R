@@ -1,45 +1,56 @@
-##//////////////////////////////////////////////
-##//Calc_OSLLxTxRatio.R
-##/////////////////////////////////////////////
-##
-##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-#vers.: 0.2.1
-#date: 24/01/2013
-##======================================
-##calculation of the LxTx ratio including error calculation
-
-Calc_OSLLxTxRatio<-function(Lx.data,
-                            Tx.data,
-                            signal.integral,
-                            background.integral  
+calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
+  ### Calculate Lx/Tx ratios from two given OSL curves. 
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  
+  ##section<<
+  ## version 0.3
+  # ===========================================================================
+  
+  Lx.data, 
+  ### \link{data.frame} (\bold{required}): requires a CW-OSL shine down curve 
+  ### (x = time, y = counts)
+  
+  Tx.data,
+  ### \link{data.frame} (optional): requires a CW-OSL shine down curve 
+  ### (x = time, y = counts). If no input is given the Tx.data will 
+  ### be treated as \code{NA} and no Lx/Tx ratio is calculated.
+  
+  signal.integral,
+  ### \link{vector} (\bold{required}): vector with the limits 
+  ### for the signal integral.
+  
+  background.integral  
+  ### \link{vector} (\bold{required}): vector with the bounds for the 
+  ### background integral.
   
 ){
    
   
-  ##------------------------------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
   ##(1) - a few integrity check 
   
    if(missing(Tx.data)==FALSE){
      
      ##(a) - check data type
      if(is(Lx.data)[1]!=is(Tx.data)[1]){
-       stop("[Calc_OSLLxTxRatio.R] >> Error: Data type of Lx and Tx data differs!")}
+       stop("[calc_OSLLxTxRatio.R] >> Error: Data type of Lx and Tx data differs!")}
    
      ##(b) - test if data.type is valid in general
-     if(is(Lx.data)[1]!="data.frame" & is(Lx.data)[1]!="numeric"){
-       stop("[Calc_OSLLxTxRatio.R] >> Error: Data type error! Required types are data.frame or numeric vector.")}
+     if((is(Lx.data)[1]!="data.frame" & is(Lx.data)[1]!="numeric") & is(Lx.data)[1]!="matrix"){
+       stop("[calc_OSLLxTxRatio.R] >> Error: Data type error! Required types are data.frame or numeric vector.")}
       
      ##(c) - convert vector to data.frame if nescessary
-     if(is(Lx.data)[1]!="data.frame"){
+     if(is(Lx.data)[1]!="data.frame" & is(Lx.data)[1]!="matrix"){
        Lx.data<-data.frame(x=1:length(Lx.data),y=Lx.data)
        Tx.data<-data.frame(x=1:length(Tx.data),y=Tx.data)
      }
    
      ##(d) - check if Lx and Tx curves have the same channel length
      if(length(Lx.data[,2])!=length(Tx.data[,2])){
-       stop("[Calc_OSLLxTxRatio.R] >> Error: Channel number of Lx and Tx data differs!")}
+       stop("[calc_OSLLxTxRatio.R] >> Error: Channel number of Lx and Tx data differs!")}
    
    }else{
 
@@ -50,15 +61,15 @@ Calc_OSLLxTxRatio<-function(Lx.data,
    
    ##(e) - check if signal integral is valid
    if(min(signal.integral)<1 | max(signal.integral>length(Lx.data[,2]))){
-     stop("[Calc_OSLLxTxRatio.R] >> Error: signal.integral is not valid!")}
+     stop("[calc_OSLLxTxRatio.R] >> Error: signal.integral is not valid!")}
 
    ##(f) - check if background integral is valid
    if(min(background.integral)<1 | max(background.integral>length(Lx.data[,2]))){
-     stop(paste("[Calc_OSLLxTxRatio.R] >> Error: background.integral is not valid! Max: ",length(Lx.data[,2]),sep=""))}
+     stop(paste("[calc_OSLLxTxRatio.R] >> Error: background.integral is not valid! Max: ",length(Lx.data[,2]),sep=""))}
    
    ##(g) - check if signal and background integral overlapping
    if(min(background.integral)<=max(signal.integral)){
-     stop("[Calc_OSLLxTxRatio.R] >> Error: Overlapping of signal.integral and background.integral is not permitted!")}
+     stop("[calc_OSLLxTxRatio.R] >> Error: Overlapping of signal.integral and background.integral is not permitted!")}
    ##
   ##------------------------------------------------------------------------------------------------##
   ##------------------------------------------------------------------------------------------------##
@@ -137,12 +148,69 @@ Calc_OSLLxTxRatio<-function(Lx.data,
   colnames(LnLxTnTx)<-c("LnLx","LnLx.BG","TnTx","TnTx.BG","Net_LnLx","Net_LnLx.Error","Net_TnTx","Net_TnTx.Error")
   
   ##calculate Ln/Tx
-  LxTx<-LnLxTnTx$Net_LnLx/LnLxTnTx$Net_TnTx
+  LxTx<-LnLxTnTx$LnLx/LnLxTnTx$TnTx
 
   ##calculate Ln/Tx error
   LxTx.Error<-sqrt(((1/LnLxTnTx$Net_TnTx)*LnLxTnTx$Net_LnLx.Error)^2+((LnLxTnTx$Net_LnLx/-LnLxTnTx$Net_TnTx^2)*LnLxTnTx$Net_TnTx.Error)^2)
 
   ##return combined values
-  return(cbind(LnLxTnTx,LxTx,LxTx.Error))
+  temp <- cbind(LnLxTnTx,LxTx,LxTx.Error)
+  
+  temp.return <- new("RLum.Results", 
+                     originator = "calc_OSLLxTxRatio",
+                     data = temp
+                     )
+  
    
-}#end function
+  return(temp.return)
+  ### 
+   
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+  
+  ##details<<
+  ## The integrity of the chosen values for the signal and background integral 
+  ## is checked by the function; 
+  ## the signal integral limits have to be lower than the background integral limits. 
+  ## If a \link{vector} is given as input instead of a \link{data.frame}, 
+  ## an artificial \code{data.frame}
+  ## is produced. The error calculation is done according to Galbraith (2002).
+   
+  ##value<<
+  ## Returns an S4 object of type \code{\linkS4class{RLum.Results}}. 
+  ## Slot \code{data} containt a \link{data.frame} with the following structure:\cr 
+  ## $ LnLx  \cr        
+  ## $ LnLx.BG   \cr     
+  ## $ TnTx    \cr       
+  ## $ TnTx.BG    \cr   
+  ## $ Net_LnLx   \cr   
+  ## $ Net_LnLx.Error\cr 
+  ## $ Net_TnTx.Error
+   
+  ##references<<
+  ## Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/Produkter/Dosimetri
+  ## /NUK_instruments/TL_OSL_readers/~/media/Risoe_dk/Erhvervskontakt/NUK/Documents
+  ## /Analyst%20Manual%20v3%2022b.ashx}\cr\cr 
+  ## Galbraith, R.F., 2002. A note on the variance of a background-corrected 
+  ## OSL count. Ancient TL, 20 (2), 49-51. 
+  
+  ##note<<
+  ## The results of this function have been cross-checked with the Analyst (vers. 3.24b).   
+  ## Access to the results object via \code{get_RLum.Results}.
+   
+  ##seealso<<
+  ## \code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}} 
+   
+  ##keyword<<
+  ## datagen
+   
+   
+}, ex=function(){
+
+  ##load data
+  data(ExampleData.LxTxOSLData, envir = environment())
+  
+  ##calculate Lx/Tx ratio
+  results <- calc_OSLLxTxRatio(Lx.data, Tx.data, signal.integral = c(1:2), 
+                             background.integral = c(85:100))
+
+})  

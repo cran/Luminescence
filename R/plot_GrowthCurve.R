@@ -1,40 +1,85 @@
-##//////////////////////////////////////////////
-## plot_GrowthCurve.R
-##//////////////////////////////////////////////
-##======================================
-##author: Sebastian Kreutzer
-##organisation: JLU Giessen, Germany
-##version: 0.9.8
-##date: 05/12/2012
-##======================================
-
-plot_GrowthCurve<-function(
-									sample, 
-									main = "Growth Curve", 
-                  mtext = "",
-									fit.method = "EXP", 
-                  fit.weights = TRUE, 
-									fit.includingRepeatedRegPoints = TRUE, 
-									fit.NumberRegPoints, 
-									fit.NumberRegPointsReal, 
-                  fit.bounds = TRUE,
-									NumberIterations.MC = 100, 
-									xlab = "s", 
-									output.plot = TRUE, 
-                  output.plotExtended = TRUE, 
-									cex.global = 1 
-								)
-						{
-##=================================================================================================##
-##  
-##  
-##0. Error capturing
+plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for luminescence data (Lx/Tx against dose)
+  ### A dose response curve is produced for luminescence measurements using a 
+  ### regenerative protocol.
   
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany), Michael Dietze, GFZ Potsdam (Germany)
+  
+  ##section<<
+  ##version 1.1 [2013-05-20]
+  # ===========================================================================
+  
+  sample,
+  ### \code{\link{data.frame}} (\bold{required}): data frame with three columns
+  ### for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx. The column for the test dose 
+  ### response is optional, but requires 'TnTx' as column name if used.
+  na.exclude = TRUE,
+  ### \code{\link{logical}} (with default): exclude NA values from the data 
+  ### set prior to any further operations.
+  main = "Growth Curve",
+  ### \code{\link{character}} (with default): header of the plot.
+  mtext = "",
+  ### \code{\link{character}} (optional): additional text on the right side 
+  ### of the plot.
+	fit.method = "EXP", 
+  ### \code{\link{character}} (with default): functions used for fitting. 
+  ### Possible options are: \code{LIN}, \code{EXP}, \code{EXP OR LIN}, 
+  ### \code{EXP+LIN} or \code{EXP+EXP}. See details.
+  fit.weights = TRUE,
+  ### \code{\link{logical}} (with default): option whether the fitting is 
+  ### done with or without weights. See details.
+	fit.includingRepeatedRegPoints = TRUE, 
+  ### \code{\link{logical}} (with default): includes repeated points for 
+  ### fitting (\code{TRUE}/\code{FALSE}).
+	fit.NumberRegPoints,
+  ### \code{\link{integer}} (optional): set number of regeneration points 
+  ### manually. By default the number of all(!) regeneration points is 
+  ### grepped automatically.
+	fit.NumberRegPointsReal,
+  ### \code{\link{integer}} (optional): if the number of regeneration points 
+  ### is provided manually the value of the real regenerations points = 
+  ### all points - repeated points - reg 0 has to be inserted.
+  fit.bounds = TRUE,
+  ### \code{\link{logical}} (with default): set lower fit bounds for fitting 
+  ### parameter to 0. Limited for the use with the fit methods \code{EXP}, 
+  ### \code{EXP+LIN} and \code{EXP OR LIN}. Argument to be inserted for 
+  ### experimental application only!
+	NumberIterations.MC = 100, 
+  ### \code{\link{integer}} (with default): number of Monte Carlo simulations 
+  ### for the error estimation. See details.
+	xlab = "s", 
+  ### \code{\link{character}} (with default): unit for x-axis labelling. 
+  ### Possible values are \code{"Gy"} and \code{"s"}.
+	output.plot = TRUE, 
+  ### \code{\link{logical}} (with default): plot output (\code{TRUE/FALSE}).
+  output.plotExtended = TRUE,
+  ### \code{\link{logical}} (with default): If \code{TRUE} 3-plots on one plot 
+  ### area are provided: (1) growth curve, (2) histogram from error Monte 
+  ### Carlo simulation and (3) a test dose response plot. If \code{FALSE}, 
+  ### just the growth curve will be plotted. \bold{Requires:} 
+  ### \code{output.plot = TRUE}.
+  cex.global = 1
+  ### \code{\link{numeric}} (with default): global scaling factor.
+) {
   ##1. check if sample is data.frame
-  if(is.data.frame(sample)==FALSE){stop("\n [plot_GrowthCurve] >> sample has to be of type data.fame!")}
+  if(is.data.frame(sample)==FALSE){
+    stop("\n [plot_GrowthCurve] >> sample has to be of type data.fame!")
+  }
   
-  ##Exclude NA values in data.frame (if )
-  sample<-na.exclude(sample)
+  ##2. check if sample contains a least three rows 
+  if(length(sample[,1])<3){
+    
+    stop("\n [plot_GrowthCurve] Error: At least two regeneration points are needed!")
+    
+  }
+  
+  ## optionally, count nd exclude NA values and print result
+  if(na.exclude == TRUE) {
+    n.NA <- sum(!complete.cases(sample))
+    if(n.NA == 1) {print("1 NA value excluded.")
+    } else if(n.NA > 1) {print(paste(n.NA, "NA values excluded."))}
+    sample <- na.exclude(sample)}
   
   ##NULL values in the data.frame are not allowed for the y-column
     if(length(sample[sample[,2]==0,2])>0){
@@ -74,6 +119,10 @@ plot_GrowthCurve<-function(
 									
 	#1.3 set x.natural
 		x.natural<-as.vector(seq(1:NumberIterations.MC))
+  
+  ##1.4 set initialise variables
+  De <- NA
+  De.Error <- NA
  
 ##=================================================================================================
 # FITTING ------------------------------------------------------------------------------------
@@ -102,21 +151,21 @@ plot_GrowthCurve<-function(
   ##general setting of start parameters for fitting
   
 	   ##a - estimation for a a the maxium of the y-values (Lx/Tx)
-     a<-max(data[,2])
+     a <- max(data[,2])
 
      ##b - get start parameters from a linear fit of the log(y) data
-     fit.lm<-lm(log(data$y)~data$x)
-     b<-as.numeric(1/fit.lm$coefficients[2])
+     fit.lm <- lm(log(data$y)~data$x)
+     b <- as.numeric(1/fit.lm$coefficients[2])
      
 	   ##c - get start parameters from a linear fit - offset on x-axis
 	   fit.lm<-lm(data$y~data$x)
-     c<-as.numeric(abs(fit.lm$coefficients[1]/fit.lm$coefficients[2]))
+     c <- as.numeric(abs(fit.lm$coefficients[1]/fit.lm$coefficients[2]))
        
      #take slope from x - y scaling
-		 g<-max(data[,2]/max(data[,1]))
+		 g <- max(data[,2]/max(data[,1]))
   
      #set D01 and D02 (in case of EXp+EXP)
-     D01<-NA; D02<-NA
+     D01 <- NA; D02 <- NA
   
   ##-----------------------------------------------------------------------------------------------##
   ##to be a little bit more flexible the start parameters varries within a normal distribution
@@ -139,25 +188,25 @@ plot_GrowthCurve<-function(
 
 	if (fit.method=="EXP" | fit.method=="EXP OR LIN" | fit.method=="LIN"){
       
-        if(fit.method!="LIN"){
+        if(fit.method!="LIN" & length(data[,1])>3){
   
 					##FITTING on GIVEN VALUES##
 					#	--use classic R fitting routine to fit the curve
           
           ##try to create some start parameters from the input values to make the fitting more stable
           for(i in 1:50){
-            
+         
             a<-a.MC[i];b<-b.MC[i];c<-c.MC[i]
-            
+          
             fit<-try(nls(y~fit.functionEXP(a,b,c,x),
                          data=data,
                          start=c(a=a,b=b,c=c),
                          trace=FALSE,
                          algorithm="port",
                          lower=c(a=0,b>0,c=0),
-                         nls.control(maxiter=500,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
+                         nls.control(maxiter=100,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
                          ),silent=TRUE)
-            
+           
             if(class(fit)!="try-error"){
               #get parameters out of it
               parameters<-(coef(fit)) 
@@ -249,7 +298,7 @@ plot_GrowthCurve<-function(
          #set fit object, if fit objekt was not set before
          if(exists("fit")==FALSE){fit<-NA}
         
-		   if ((fit.method=="EXP OR LIN" & class(fit)=="try-error") | fit.method=="LIN") {
+		   if ((fit.method=="EXP OR LIN" & class(fit)=="try-error") | fit.method=="LIN" | length(data[,1])<3) {
 		     
             #calculate De 
 					  De<-round((sample[1,2]-fit.lm$coefficients[1])/fit.lm$coefficients[2], digits=2)
@@ -657,8 +706,8 @@ plot_GrowthCurve<-function(
 		#Get De values from Monto Carlo simulation
 		
 			#calculate mean and sd (ignore NaN values)
-			De.MonteCarlo<-round(mean(na.exclude(x.natural)),digits=2)
-					
+			De.MonteCarlo<-round(mean(na.exclude(x.natural)),digits=2)		
+  
 			#De.Error is Error of the whole De (ignore NaN values)
 			De.Error<-round(sd(na.exclude(x.natural)),digits=2)
     
@@ -713,7 +762,7 @@ if(output.plot==TRUE) {
 ##TEXT		#Insert fit and result
 			try(mtext(side=3, substitute(D[e] == De, 
                                 list(De=paste(De,"+/-",De.Error, xlab,
-                                " | fit: ",fit.method))), line=0.3, cex=0.8*cex.global),silent=TRUE)
+                                " | fit: ",fit.method))), line=0, cex=0.8*cex.global),silent=TRUE)
 	
 			#write error message in plot if De is NaN
 			try(if (De=="NaN") {
@@ -803,8 +852,88 @@ mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
   }#endif::output.plotExtended
 }#end if plotOutput	
 
-    ##RETURN - return De values an parameter
-	  output<-try(data.frame(De=De,De.Error=De.Error, D01=D01, D02=D02, Fit=fit.method),silent=TRUE)
-    return(list(De=output,Fit=fit))	
+    ##RETURN - return De values and parameter
+
+	  output <- try(data.frame(De=De,De.Error=De.Error, D01=D01, D02=D02, 
+                             Fit=fit.method),
+                  silent=TRUE)
+    output <- set_RLum.Results(data=list(De=output,Fit=fit))
+    return(output)
+  ### an \code{RLum.Results} object containing the De (De, De Error, D01 value, D02 value and Fit 
+  ### type) and Fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} 
+  ### and \code{EXP+EXP}. In case of a linear fit \code{EXP OR LIN}, a 
+  ### \link{lm} object is returned. A plot is also returned.
   
-}#EOF
+  ##details<<
+  ## \bold{Fitting methods} \cr
+  ## For all options (except for the \code{LIN} and the \code{EXP OR LIN}), 
+  ## the \link{nls} function with the \code{port} algorithm is used. \cr
+  ## \code{LIN}: fit a linear function to the data using \link{lm}:
+  ## \deqn{y = m*x+n}
+  ## \code{EXP}: try to fit a function of the form 
+  ## \deqn{y = a*(1-exp(-(x+c)/b))}
+  ## Parameters b and c are approximated by a linear fit using \link{lm}.\cr
+  ## \code{EXP OR LIN}: works for some cases where an \code{EXP} fit failes. 
+  ## If the \code{EXP} fit failes, a \code{LIN} fit is done instead. \cr
+  ## \code{EXP+LIN}: try to fit an exponential plus linear function of the 
+  ## form: \deqn{y = a*(1-exp(-(x+c)/b)+(g*x))}
+  ## The De is calculated by iteration.\cr
+  ## \bold{Note:} In the context of luminescence dating, this function has 
+  ## no physical meaning. Therefore, no D0 value is returned.\cr
+  ## \code{EXP+EXP}: try to fit a double exponential function of the form
+  ## \deqn{y = (a1*(1-exp(-(x)/b1)))+(a2*(1-exp(-(x)/b2)))}
+  ## This fitting procedure is not robust against wrong start parameters 
+  ## and should be further improved.\cr\cr
+  ## \bold{Fit weighting} (suggested by Michael Dietze and Margret Fuchs)\cr
+  ## If the option \code{fit.weights = TRUE} is chosen weights are calculated 
+  ## using provided signal errors (Lx/Tx error):
+  ## \deqn{fit.weights = 1/error/(sum(1/error))}
+  ## \bold{Error estimation using Monte Carlo simulation}\cr
+  ## Error estimation is done using a Monte Carlo (MC) simulation approach. A 
+  ## set of values is constructed by randomly drawing curve data from a normal 
+  ## distribution. The normal distribution is defined by the input values 
+  ## (mean = value, sd = value.error). Then, a growth curve fit is attempted 
+  ## for each dataset which results in new distribution of values. The 
+  ## \link{sd} of this distribution is the error of the De. With increasing 
+  ## iterations, the error value is becoming more stable. \bold{Note:} It may 
+  ## take some calculation time with increasing MC runs, especially for the 
+  ## composed functions (\code{EXP+LIN} and \code{EXP+EXP}).\cr
+  ## Each error estimation is done with the function of the chosen fitting 
+  ## method. 
+  
+  ##<<seealso
+  ## \code{\link{hist}}, \code{\link{plot}},  \code{\link{nls}}, 
+  ## \code{\link{lm}
+  
+  ##<<references
+  ## Duller, G.A.T., 2007. Assessing the error on equivalent dose estimates 
+  ## derived from single aliquot regenerative dose measurements. Ancient TL, 
+  ## 25, pp. 15-24.\cr
+  ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
+  ## dose and error calculation and display in OSL dating: An overview and 
+  ## some recommendations. Quaternary Geochronology, 11, pp.1-27.
+  
+  ##<<note
+  ## No D01 is returned for the fit functions \code{EXP+LIN} and \code{LIN}. 
+  ## A D02 value is provided for the function \code{EXP+EXP} only.
+
+}, ex=function(){
+  ##(1) plot growth curve for a dummy data.set
+  data(ExampleData.LxTxData, envir = environment())
+  plot_GrowthCurve(LxTxData)
+  
+  
+  ##(2) plot the growth curve only
+  
+  ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
+  data(ExampleData.LxTxData, envir = environment())
+  plot_GrowthCurve(LxTxData)
+  ##dev.off()                                   
+  
+  ##(3) plot growth curve with pdf output on desktop (path works for Mac)
+  
+  ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
+  data(ExampleData.LxTxData, envir = environment())
+  plot_GrowthCurve(LxTxData)
+  ##dev.off()  
+})

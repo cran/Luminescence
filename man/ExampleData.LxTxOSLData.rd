@@ -17,7 +17,7 @@ Two \code{data.frames} containing time and count values.
 
 \source{
 %%  ~~ If necessary, more details than the description above ~~
-Artificial OSL measurement.
+Arbitrary OSL measurement.
 
 }
 
@@ -30,7 +30,7 @@ unpublished data
 
 \examples{
 ##load data
-data(ExampleData.LxTxOSLData)
+data(ExampleData.LxTxOSLData, envir = environment())
 
 ##plot data
 plot(Lx.data)

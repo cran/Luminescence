@@ -1,24 +1,24 @@
 ##/////////////////////////////////////////////////////////////////////////////
-##//plot_BINfileData.R
+##//plot_Risoe.BINfileData.R
 ##/////////////////////////////////////////////////////////////////////////////
 ##=============================================================================#
 ##author: Sebastian Kreutzer*, Michael Dietze**
 ##organisation: *JLU Giessen, **TU Dresden
-##version: 0.4
-##date: 2013-03-05
+##version: 0.4.1
+##date: 2013-07-07
 ##=============================================================================#
 ##
 ## plot luminescence curves from bin file
 
-plot_BINfileData<-function(BINfileData, #input BIN file
+plot_Risoe.BINfileData<-function(BINfileData, #input BIN file
                           position, 
                           run,
                           set,
                           sorter="POSITION", #sort by POSITION or RUN
-                          ltype=c("IRSL","OSL","TL","RIR","RBR"),
+                          ltype=c("IRSL","OSL","TL","RIR","RBR","RL"),
                           curve.transformation,                            
                           dose_rate,
-                          temp.lab="deg. C", 
+                          temp.lab="\u00B0C", 
                           cex.global=1
                         ){
   
@@ -73,7 +73,7 @@ plot_BINfileData<-function(BINfileData, #input BIN file
      {
       
       ##find measured unit
-      measured_unit<-if(temp@METADATA[i,"LTYPE"]=="TL"){" deg. C"}else{"s"} 
+      measured_unit<-if(temp@METADATA[i,"LTYPE"]=="TL"){" \u00B0C"}else{"s"} 
       
       ##set x and y values
       values.x <- seq(temp@METADATA[i,"HIGH"]/temp@METADATA[i,"NPOINTS"],
@@ -117,7 +117,7 @@ plot_BINfileData<-function(BINfileData, #input BIN file
            type="l",
            ylab=paste(temp@METADATA[i,"LTYPE"]," [cts/",round(temp@METADATA[i,"HIGH"]/temp@METADATA[i,"NPOINTS"],digits=3)," ",
                       measured_unit,"]",sep=""),
-           xlab=if(measured_unit==" deg. C"){paste("temp. [",temp.lab,"]",sep="")}else{"time [s]"},
+           xlab=if(measured_unit==" \u00B0C"){paste("temp. [",temp.lab,"]",sep="")}else{"time [s]"},
            col=if(temp@METADATA[i,"LTYPE"]=="IRSL" | temp@METADATA[i,"LTYPE"]=="RIR"){"red"}
                else if(temp@METADATA[i,"LTYPE"]=="OSL" | temp@METADATA[i,"LTYPE"]=="RBR"){"blue"}
                else{"black"},

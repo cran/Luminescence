@@ -1,5 +1,5 @@
-\name{Calc_FuchsLang2001}
-\alias{Calc_FuchsLang2001}
+\name{calc_FuchsLang2001}
+\alias{calc_FuchsLang2001}
 \title{
 Apply the model after Fuchs & Lang (2001) to a given De distribution.
 }
@@ -8,8 +8,8 @@ This function applies the method according to Fuchs & Lang (2001) for heterogene
 given coefficient of variation threshold.
 }
 \usage{
-Calc_FuchsLang2001(sample, 
-                   sample.mtext = "unkown sample", 
+calc_FuchsLang2001(sample, 
+                   sample.mtext = "unknown sample", 
                    sample.id = sample.mtext, 
                    cvThreshold = 5, 
                    startDeValue = 1, 
@@ -45,8 +45,8 @@ Calc_FuchsLang2001(sample,
 
 \bold{Used values} \cr
 
-If the coefficient of variation (c[v]) of the first two values is larger than the threshold c[v_treshold], the frist value is skipped. 
-Use the \code{startDeValue} parameter to define a start value for calculation (e.g. 2nd or 3rd value).\cr
+If the coefficient of variation (c[v]) of the first two values is larger than the threshold c[v_threshold], the first value is skipped. 
+Use the \code{startDeValue} argument to define a start value for calculation (e.g. 2nd or 3rd value).\cr
 
 
 \bold{Basic steps of the approach} \cr
@@ -54,7 +54,7 @@ Use the \code{startDeValue} parameter to define a start value for calculation (e
 	
 (1) Estimate natural relative variation of the sample using a dose recovery test
 
-(2) Order the input values ascendingly
+(2) Sort the input values ascendingly
 
 (3) Calculate a running mean, starting with the lowermost two values and add values iteratively. 
 
@@ -64,7 +64,7 @@ Use the \code{startDeValue} parameter to define a start value for calculation (e
 A plot and terminal output is provided if desired. In addition, a list is returned containing two
 elements:
 
-\item{results}{\link{data.frame} with stastical parameters, e.g. mean, sd,...}
+\item{results}{\link{data.frame} with stastical parameters, e.g. mean, sd, ...}
 \item{usedDeValues}{\link{data.frame} containing the used values for the calculation}
 
 }
@@ -80,7 +80,7 @@ for reconstructing soil erosion in Greece. Quaternary Science Reviews, 22, pp. 1
 Sebastian Kreutzer, JLU Giessen, 2012
 }
 \note{
-Please consider the requirments and the constraints of this method (see Fuchs & Lang, 2001)
+Please consider the requirements and the constraints of this method (see Fuchs & Lang, 2001)
 }
 
 \seealso{
@@ -92,7 +92,7 @@ Please consider the requirments and the constraints of this method (see Fuchs & 
 data(ExampleData.DeValues)
 
 ##calculate De according to Fuchs & Lang (2001)
-Calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
+calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

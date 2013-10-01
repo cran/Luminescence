@@ -1,27 +1,54 @@
-##//////////////////////////////////////////////
-##//pPM Transformation.R with interpolation 
-##/////////////////////////////////////////////
-##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-#vers.: 0.1
-#date: 03/11/2012
-##======================================
+##//////////////////////////////////////////////////////////////////////////////
+##//CW2pPMi.R
+##//////////////////////////////////////////////////////////////////////////////
+##==============================================================================
+##author: Sebastian Kreutzer
+##organisation: JLU Giessen
+##version: 0.2
+##date: 2013-03-27
+##==============================================================================
 ##Based on the paper of Bos and Wallinga, 2012 (Radiation Measurements) and the 
 ##personal comments and suggestions of Adrie Bos via e-mail
 
 CW2pPMi<-function(values, P){
+  
+  # (0) Integrity checks ------------------------------------------------------
+  
+  ##(1) data.frame or RLum.Data.Curve object?
+  if(is(values, "data.frame") == FALSE & is(values, "RLum.Data.Curve") == FALSE){
+    
+    stop("[CW2pPMi] Error: 'values' object has to be of type 'data.frame' or 'RLum.Data.Curve'!")
+    
+  }
+  
+  ##(2) if the input object is an 'RLum.Data.Curve' object check for allowed curves
+  if(is(values, "RLum.Data.Curve") == TRUE){
+    
+    if(values@recordType != "OSL" & values@recordType != "IRSL"){
+      
+      stop(paste("[CW2pPMi] Error: curve type ",values@recordType, "  is not allowed for the transformation!",
+                 sep=""))
+      
+    }else{
+      
+      temp.values <- as(values, "data.frame")
+      
+    }
+    
+  }else{
+    
+    temp.values <- values
+    
+  }
+  
 
-  # (0) Integrity checks ------------------------------------------------------------------------
-  if(is.data.frame(values)==FALSE){stop("[CW2pPMi] >> Input object is not of type data.frame!")}
-
-  # (1) Transform values ------------------------------------------------------------------------                  								
+  # (3) Transform values ------------------------------------------------------                  								
     
     ##log transformation of the CW-OSL count values
-    CW_OSL.log<-log(values[,2])
+    CW_OSL.log<-log(temp.values[,2])
   
     ##time transformation t >> t'
-    t<-values[,1]
+    t<-temp.values[,1]
     
     ##set P
     ##if no values for P is set selected a P value for a maximum of 
@@ -45,7 +72,7 @@ CW2pPMi<-function(values, P){
       
        }  
 
-  # (2) Interpolation ---------------------------------------------------------------------------
+  # (4) Interpolation ---------------------------------------------------------
 
  
    ##interpolate values, values beyond the range return NA values
@@ -55,7 +82,7 @@ CW2pPMi<-function(values, P){
    temp<-data.frame(x=t.transformed, y=unlist(CW_OSL.interpolated$y))
   
     
-  # (3) Extrapolate first values of the curve ---------------------------------------------------
+  # (5) Extrapolate first values of the curve ---------------------------------
     
   ##(a) - find index of first rows which contain NA values (needed for extrapolation)
   temp.sel.id<-min(which(is.na(temp[,2])==FALSE))
@@ -77,7 +104,7 @@ CW2pPMi<-function(values, P){
     ##print a warning message for more than two extrapolation points
     if(temp.sel.id>2){warning("t' is beyond the time resolution. Only two data points have been extrapolated, the first ",temp.sel.id-3, " points have been set to 0!")}
   
-  # (4) Convert, transform and combine values --------------------------------------------------- 
+  # (6) Convert, transform and combine values --------------------------------- 
 
   ##unlog CW-OSL count values, i.e. log(CW) >> CW
   CW_OSL<-exp(temp$y)
@@ -87,14 +114,31 @@ CW2pPMi<-function(values, P){
   pPM<-(t^2/P^2)*CW_OSL
 
   ##combine all values and exclude NA values
-  values<-data.frame(x=t,y.t=pPM,x.t=t.transformed,method=temp.method)
-  values<-na.exclude(values)
+  temp.values <- data.frame(x=t, y.t=pPM, x.t=t.transformed, method=temp.method)
+  temp.values <- na.exclude(temp.values)
 
-  # (5) Return values ---------------------------------------------------------------------------  
+  # (7) Return values ---------------------------------------------------------  
 
-  return(values)
+  ##returns the same data type as the input
+  if(is(values, "data.frame") == TRUE){
+    
+    values <- temp.values
+    return(values)
+    
+  }else{
+    
+    
+    ##add old info elements to new info elements
+    temp.info <- c(values@info, 
+                   CW2pPMi.x.t = list(temp.values$x.t),
+                   CW2pPMi.method = list(temp.values$method)) 
+    
+    newRLumDataCurves.CW2pPMi <- set_RLum.Data.Curve(recordType = values@recordType,
+                                                     data = as.matrix(temp.values[,1:2]),
+                                                     info = temp.info)
+    return(newRLumDataCurves.CW2pPMi)                                                    
+    
+  }
+
 }
 # ##EOF
-
-
-

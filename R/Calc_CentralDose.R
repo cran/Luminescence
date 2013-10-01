@@ -1,66 +1,54 @@
-##//////////////////////////////////////////////
-##//Calc_CentralDose.R 
-##/////////////////////////////////////////////
-##
-##======================================
-#author: Christoph Burow 
-#organisation: University of Cologne
-#vers.: 0.1
-#date: 12/10/2012
-#nota bene: Based on a rewritten S script of Rex Galbraith, 2010.
-##          The original script annotation by Rex Galbraith is given
-##          below, only slightly changed to match the scripts current
-##          shape.
-##======================================
-
-# Program to calculate central dose and dispersion 
-# and their standard errors and the profile log likelihood
-# function for sigma
-#
-# The model and notation are the the same as in the central age
-# model of Galbraith et al (1999) Archaeometry.41, 339--364.
-# The parameter delta is the natural log of the central dose, and
-# its standard error correspondes to the relative standard error
-# of the central dose. The parameter sigma is the standard deviation
-# -- see the above reference for interpretation.
-#	
-# The data are assumed to be in a data.frame  with two columns
-# headed ED and ED_Error.  The data.frame may contain other columns also.
-# Of course the program can be edited to read data in other ways.	 
-#	
-# The program may be edited to include a known value of sigma_b
-# before fitting the central age model. Then the dispersion
-# will be that over and above sigma_b (and sigma_wi).	
-#
-# Programmed by Rex Galbraith, last modified 3 September 2010
-
-##=============================================================================================##
-## start function
-
-Calc_CentralDose<- function(input.data,
-                            sigmab=0, #sigma default 0
-                            sample.id="unknown sample", #sample name
-                            print.iterations=FALSE, #printing of calculation iterations
-                            output.plot=TRUE #plotting of profile log likelihood for sigma
-                            ) {                     
+calc_CentralDose<- structure(function( # Apply the central age model (CAM) after Galbraith et al. (1999) to a given De distribution
+  ### This function calculates the central dose and dispersion of the De 
+  ### distribution, their standard errors and the profile log likelihood
+  ### function for sigma.
+  
+  # ===========================================================================
+  ##author<< 
+  ## Christoph Burow, University of Cologne (Germany) \cr
+  ## Based on a rewritten S script of Rex Galbraith, 2010 \cr \cr
+  
+  ##section<<
+  ## version 1.1 [2013-09-04] 
+  # ===========================================================================
+  
+  input.data,
+  ### \code{\link{data.frame}} (\bold{required}): two column data 
+  ### frame with De values and corresponding De errors                                 
+  sigmab = 0,
+  ### \code{\link{numeric}} (with default): spread in De values given as
+  ### a fraction (e.g. 0.2). This value represents the expected overdispersion
+  ### in the data should the sample be well-bleached (Cunningham & Walling 2012, 
+  ### p. 100).
+  sample.id="unknown sample",
+  ### \code{\link{character}} (with default): sample id
+  print.iterations=FALSE,
+  ### \code{\link{logical}} (with default): terminal output of
+  ### calculation iterations
+  output.plot=TRUE
+  ### \code{\link{logical}} (with default): plot output
+  ) {                     
                               
 
-##=============================================================================================##
+##============================================================================##
 ## CONSISTENCY CHECK OF INPUT DATA
-##=============================================================================================##
+##============================================================================##
   
-  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type data.frame",quote=F) 
+  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type 
+                                               data.frame",quote=F) 
                               stop(domain=NA) }
   try(colnames(input.data)<- c("ED","ED_Error"),silent=TRUE)
   if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error")
-                                             { print("Columns must be named 'ED' and 'ED_Error'",quote=F)
+                                             { print("Columns must be named 'ED'
+                                                     and 'ED_Error'",quote=F)
                               stop(domain=NA)}
-  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction between 0 and 1 (e.g. 0.2)",quote=F)
+  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction 
+                                    between 0 and 1 (e.g. 0.2)",quote=F)
                               stop(domain=NA)}
   
-##=============================================================================================##
+##============================================================================##
 ## CALCULATIONS
-##=============================================================================================##
+##============================================================================##
 		          
 # calculate  yu = log(ED) and su = se(logED)
 	yu<- log(input.data$ED)
@@ -123,9 +111,9 @@ out.sigma<- sigma
   
 	llik<- llik[-1] - Lmax
 
-##=============================================================================================##  
+##============================================================================##  
 ##TERMINAL OUTPUT
-##=============================================================================================##  
+##============================================================================##  
   
   cat("\n [Calc_CentralDose]")
   cat(paste("\n\n ---------------------------------"))
@@ -141,12 +129,13 @@ out.sigma<- sigma
   cat(paste("\n se (sigma):             ",round(out.sesigma,4)))
   cat(paste("\n ---------------------------------\n\n"))  
 
-  results<- data.frame(id=sample.id,n=n,log_ED="TRUE",central_dose=out.delta,rse_delta=out.sedelta,
-                       se_delta=out.delta*out.sedelta,OD=out.sigma,se_sigma=out.sesigma)
+  results<- data.frame(id=sample.id,n=n,log_ED="TRUE",central_dose=out.delta,
+                       rse_delta=out.sedelta, se_delta=out.delta*out.sedelta,
+                       OD=out.sigma,se_sigma=out.sesigma)
   
-##=============================================================================================##  
+##============================================================================##  
 ##PLOTTING
-##=============================================================================================##
+##============================================================================##
   
 if(output.plot==TRUE) {
   
@@ -176,7 +165,53 @@ if(output.plot==TRUE) {
 }#endif::output.plot
   
 #return value
-  invisible(list(results=results))  
+  invisible(list(results=results))
+  ### Returns a plot and terminal output. In addition a list is returned 
+  ### containing the following element:
+  ###
+  ### \code{results} data frame with statistical parameters.
+  
+  ##details<<
+  ## This function uses the equations of Galbraith et al. (1999, pp. 358-359). 
+  ## The parameter \code{sigmab} is estimated using the maximum likelihood 
+  ## approach. A detailed explanation on maximum likelihood estimation can be 
+  ## found in the appendix of Galbraith & Laslett (1993, pp. 468-470)
+  
+  ##references<<
+  ## Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
+  ## track ages. Nuclear Tracks Radiation Measurements, 4, pp. 459-470. \cr \cr
+  ## Galbraith, R.F., Roberts, R.G., Laslett, G.M., Yoshida, H. & Olley, J.M., 
+  ## 1999. Optical dating of single grains of quartz from Jinmium rock shelter, 
+  ## northern Australia. Part I: experimental design and statistical models. 
+  ## Archaeometry, 41, pp. 339-364. \cr \cr
+  ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
+  ## dose and error calculation and display in OSL dating: An overview and some 
+  ## recommendations. Quaternary Geochronology, 11, pp. 1-27. \cr \cr
+  ## \bold{Further reading} \cr \cr
+  ## Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain 
+  ## equivalent dose (De) distributions: Implications for OSL dating of sediment
+  ## mixtures. Quaternary Geochronology, 4, pp. 204-230. \cr \cr
+  ## Bailey, R.M. & Arnold, L.J., 2006. Statistical modelling of single grain 
+  ## quartz De distributions and an assessment of procedures for estimating 
+  ## burial dose. Quaternary Science Reviews, 25, pp. 2475-2502. \cr \cr
+  ## Cunningham, A.C. & Wallinga, J., 2012. Realizing the potential of fluvial 
+  ## archives using robust OSL chronologies. Quaternary Geochronology, 12,
+  ## pp. 98-106. \cr \cr
+  ## Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing 
+  ## the reproducibility and accuracy of optical dating of fluvial deposits. 
+  ## Quaternary Geochronology, 1, pp. 109-120. \cr \cr
+  ## Rodnight, H., 2008. How many equivalent dose values are needed to obtain a 
+  ## reproducible distribution?. Ancient TL, 26, pp. 3-10.
+  
+  ##seealso<<
+  ## \code{\link{plot}}, \code{\link{calc_CommonDose}}, 
+  ## \code{\link{calc_FiniteMixture}}, \code{\link{calc_FuchsLang2001}},
+  ## \code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}
 
-}#EndOf function
-#EOF
+},  ex=function(){
+  ##load example data
+  data(ExampleData.DeValues, envir = environment())
+  
+  ##apply the central dose model
+  calc_CentralDose(ExampleData.DeValues)
+})#END OF STRUCTURE

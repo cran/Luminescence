@@ -3,10 +3,10 @@
 ##//////////////////////////////////////////////////////////////////////////////
 ##
 ##==============================================================================
-#author: Sebastian Kreutzer*, Margret C. Fuchs**
-#organisation: *JLU Giessen, **TU Bergakademie Freiberg
-#version: 0.2.8
-#date: 2013-03-28
+##author: Sebastian Kreutzer*, Margret C. Fuchs**
+##organisation: *JLU Giessen, **TU Bergakademie Freiberg
+##version: 0.2.10
+##date: 2013-09-19
 ##==============================================================================
 ##script analyses OSL data from a SAR measurement
 ##  --Input: RisoeBINfile object (as provided by readBIN2R())
@@ -108,13 +108,13 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
     ##(3) calculate Lx/Tx ratios
     for(k in 1:length(LnLxTnTx.curves[1,])){
       if(exists("LnLxTnTx")==FALSE){
-        LnLxTnTx<-Calc_OSLLxTxRatio(as.data.frame(LnLxTnTx.curves[1,k]),
+        LnLxTnTx<-get_RLum.Results(calc_OSLLxTxRatio(as.data.frame(LnLxTnTx.curves[1,k]),
                                     as.data.frame(LnLxTnTx.curves[2,k]),
-                                    signal.integral,background.integral)
+                                    signal.integral,background.integral))
       }else{
-        LnLxTnTx<-rbind(LnLxTnTx,Calc_OSLLxTxRatio(as.data.frame(LnLxTnTx.curves[1,k]),
+        LnLxTnTx<-rbind(LnLxTnTx,get_RLum.Results(calc_OSLLxTxRatio(as.data.frame(LnLxTnTx.curves[1,k]),
                                                    as.data.frame(LnLxTnTx.curves[2,k]),
-                                                   signal.integral,background.integral))
+                                                   signal.integral,background.integral)))
       }
     }
     
@@ -142,7 +142,7 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
       
       ##correct value for R0 (it is not really repeated)
       temp.DoseName[temp.DoseName[,"Dose"]==0,"Repeated"]<-FALSE
-     
+ 
       
     ##(5) Combine all values in a data.frame
     temp.LnLxTnTx<-data.frame(Name=temp.DoseName[,"Name"],
@@ -161,7 +161,7 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
               ##identify repeated doses
               temp.Repeated<-LnLxTnTx[LnLxTnTx[,"Repeated"]==TRUE,c("Name","Dose","LxTx")]
             
-              ##find concering previous dose for the repeated dose
+              ##find corresponding previous dose for the repeated dose
               temp.Previous<-t(sapply(1:length(temp.Repeated[,1]),function(x){
                   LnLxTnTx[LnLxTnTx[,"Dose"]==temp.Repeated[x,"Dose"] & 
                   LnLxTnTx[,"Repeated"]==FALSE,c("Name","Dose","LxTx")]
@@ -169,7 +169,7 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
              
               ##convert to data.frame
               temp.Previous<-as.data.frame(temp.Previous)
-            
+          
               ##set column names
               temp.ColNames<-sapply(1:length(temp.Repeated[,1]),function(x){
                      paste(temp.Repeated[x,"Name"],"/",
@@ -182,10 +182,10 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
               
               ##Just transform the matrix and add column names
               RecyclingRatio<-t(RecyclingRatio)
-              colnames(RecyclingRatio)<-temp.ColNames
-        
+              colnames(RecyclingRatio) <- unique(temp.ColNames)
+              
       }else{RecyclingRatio<-NA}  
-    
+   
       ##(6.2)
       ##Recuperation Rate
   
@@ -230,6 +230,7 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
 ##=================================================================================================##
 ##PLOTTING
 ##=================================================================================================##
+ 
 if(output.plot==TRUE){
  
  if(output.plot.single==FALSE){
@@ -353,11 +354,11 @@ if(output.plot==TRUE){
     
         ##open plot area for TL curves
         plot(NA,NA,
-             xlab="T [deg. C]",
+             xlab="T [\u00B0C]",
              ylab=if(log=="xy" | log=="y"){
-                    paste("log TL [cts/",HIGH/NPOINTS," deg. C]",sep="")
+                    paste("log TL [cts/",HIGH/NPOINTS," \u00B0C]",sep="")
                   }else{
-                    paste("TL [cts/",HIGH/NPOINTS," deg. C]",sep="") 
+                    paste("TL [cts/",HIGH/NPOINTS," \u00B0C]",sep="") 
                   },
              xlim=c(HIGH/NPOINTS,HIGH),
              ylim=c(1,TL.curveMax),
@@ -392,7 +393,7 @@ if(output.plot==TRUE){
       HIGH<-unique(sample.data@METADATA[sample.data@METADATA["ID"]==IRSL.curveID ,"HIGH"])
       NPOINTS<-unique(sample.data@METADATA[sample.data@METADATA["ID"]==IRSL.curveID ,"NPOINTS"])    
       xaxt.values<-seq(HIGH/NPOINTS,HIGH,by=HIGH/NPOINTS)
-    
+   
       ##open plot IRSL curve
       plot(NA,NA,
            xlab="t [s]",
@@ -401,14 +402,14 @@ if(output.plot==TRUE){
            ylim=c(0,max(unlist(sample.data@DATA[Reg1again.curveID]))),
            main="IRSLT"
            )
-      
+    
       ##show integral limits 
       abline(v=xaxt.values[min(signal.integral)], lty=2, col="gray")
       abline(v=xaxt.values[max(signal.integral)], lty=2, col="gray")
-    
+ 
       ##print(length(sample.data@DATA[IRSL.curveID]))
       lines(xaxt.values,unlist(sample.data@DATA[IRSL.curveID]),col="red")
-      lines(xaxt.values,unlist(sample.data@DATA[Reg1again.curveID]),col="blue")
+      lines(xaxt.values,unlist(sample.data@DATA[Reg1again.curveID[1]]),col="blue")
     
       ##legend
       legend("topright",c("R1 again","IRSL"),lty=c(1,1),col=c("blue","red"), bty="n")
@@ -418,7 +419,7 @@ if(output.plot==TRUE){
             cex=.8*cex.global
             )
     }
- 
+
    if(((is.na(IRSL_BOSL)==TRUE) & length(IRSL.curveID)>0) |
       ((is.na(IRSL_BOSL)==FALSE) & length(IRSL.curveID)>0)){
         

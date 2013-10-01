@@ -1,28 +1,55 @@
-##//////////////////////////////////////////////
-##//plmTransformation.R with interpolation 
-##/////////////////////////////////////////////
-##======================================
+##//////////////////////////////////////////////////////////////////////////////
+##//CW2pLMi.R with interpolation 
+##//////////////////////////////////////////////////////////////////////////////
+##==============================================================================
 #author: Sebastian Kreutzer
 #organisation: JLU Giessen
-#vers.: 0.2
-#date: 15/12/2012
-##======================================
+#version: 0.3
+#date: 2013-03-27
+##==============================================================================
 ##Based on the paper of Bos and Wallinga, 2012 (Radiation Measurements) and the 
 ##personal comments and suggestions of Adrie Bos via e-mail
 
 CW2pLMi<-function(values, P){
 
-  # (0) Integrity checks ------------------------------------------------------------------------
-  if(is.data.frame(values)==FALSE){stop("[CW2pLMi] >> Input object is not of type data.frame!")}
-
+  # (0) Integrity checks -------------------------------------------------------
+  
+  ##(1) data.frame or RLum.Data.Curve object?
+  if(is(values, "data.frame") == FALSE & is(values, "RLum.Data.Curve") == FALSE){
+    
+    stop("[CW2pLMi] Error: 'values' object has to be of type 'data.frame' or 'RLum.Data.Curve'!")
+    
+  }
+  
+  ##(2) if the input object is an 'RLum.Data.Curve' object check for allowed curves
+  if(is(values, "RLum.Data.Curve") == TRUE){
+    
+    if(values@recordType != "OSL" & values@recordType != "IRSL"){
+      
+      stop(paste("[CW2pLMi] Error: curve type ",values@recordType, "  is not allowed for the transformation!",
+                 sep=""))
+      
+    }else{
+      
+      temp.values <- as(values, "data.frame")
+    
+    }
+    
+  }else{
+    
+    temp.values <- values
+      
+  }
+  
+  
   # (1) Transform values ------------------------------------------------------------------------                  								
     
     
     ##(a) log transformation of the CW-OSL count values
-    CW_OSL.log<-log(values[,2])
+    CW_OSL.log<-log(temp.values[,2])
  
     ##(b) time transformation t >> t'
-    t<-values[,1]
+    t<-temp.values[,1]
     
       ##set P
       ##if no values for P is set selected a P value for a maximum of 
@@ -42,9 +69,11 @@ CW2pLMi<-function(values, P){
         }#end::while
       }else{
       
+      if(P==0){stop("[CW2pLMi] Error: P has to be > 0!")}
       t.transformed<-0.5*1/P*t^2
       
-     }#endif  
+     }
+       #endif  
   
     # (2) Interpolation ---------------------------------------------------------------------------
     
@@ -102,11 +131,31 @@ CW2pLMi<-function(values, P){
   pLM<-1/P*t*CW_OSL
 
   ##combine all values and exclude NA values
-  values<-data.frame(x=t,y.t=pLM,x.t=t.transformed,method=temp.method)
-  values<-na.exclude(values)
-  
+  temp.values <- data.frame(x=t,y.t=pLM,x.t=t.transformed, method=temp.method)
+  temp.values <- na.exclude(temp.values)
+ 
   # (5) Return values ---------------------------------------------------------------------------  
   
-  return(values)
+  ##returns the same data type as the input
+  if(is(values, "data.frame") == TRUE){
+    
+    values <- temp.values
+    return(values)
+    
+  }else{
+      
+  
+    ##add old info elements to new info elements
+    temp.info <- c(values@info, 
+                   CW2pLMi.x.t = list(temp.values$x.t),
+                   CW2pLMi.method = list(temp.values$method)) 
+
+    newRLumDataCurves.CW2pLMi <- set_RLum.Data.Curve(recordType = values@recordType,
+                                                    data = as.matrix(temp.values[,1:2]),
+                                                    info = temp.info)
+    return(newRLumDataCurves.CW2pLMi)                                                    
+    
+  }
+
 }
 ##EOF
