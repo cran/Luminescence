@@ -7,7 +7,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ## Sebastian Kreutzer, JLU Giessen (Germany), Michael Dietze, GFZ Potsdam (Germany)
   
   ##section<<
-  ##version 1.1 [2013-05-20]
+  ##version 1.2.1 [2013-11-14]
   # ===========================================================================
   
   sample,
@@ -15,7 +15,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ### for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx. The column for the test dose 
   ### response is optional, but requires 'TnTx' as column name if used.
   na.exclude = TRUE,
-  ### \code{\link{logical}} (with default): exclude NA values from the data 
+  ### \code{\link{logical}} (with default): excludes \code{NA} values from the data 
   ### set prior to any further operations.
   main = "Growth Curve",
   ### \code{\link{character}} (with default): header of the plot.
@@ -23,7 +23,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ### \code{\link{character}} (optional): additional text on the right side 
   ### of the plot.
 	fit.method = "EXP", 
-  ### \code{\link{character}} (with default): functions used for fitting. 
+  ### \code{\link{character}} (with default): function used for fitting. 
   ### Possible options are: \code{LIN}, \code{EXP}, \code{EXP OR LIN}, 
   ### \code{EXP+LIN} or \code{EXP+EXP}. See details.
   fit.weights = TRUE,
@@ -35,26 +35,26 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 	fit.NumberRegPoints,
   ### \code{\link{integer}} (optional): set number of regeneration points 
   ### manually. By default the number of all(!) regeneration points is 
-  ### grepped automatically.
+  ### used automatically.
 	fit.NumberRegPointsReal,
   ### \code{\link{integer}} (optional): if the number of regeneration points 
-  ### is provided manually the value of the real regenerations points = 
-  ### all points - repeated points - reg 0 has to be inserted.
+  ### is provided manually, the value of the real regeneration points = 
+  ### all points (repeated points) reg 0 has to be inserted.
   fit.bounds = TRUE,
-  ### \code{\link{logical}} (with default): set lower fit bounds for fitting 
-  ### parameter to 0. Limited for the use with the fit methods \code{EXP}, 
+  ### \code{\link{logical}} (with default): set lower fit bounds for all fitting 
+  ### parameters to 0. Limited for the use with the fit methods \code{EXP}, 
   ### \code{EXP+LIN} and \code{EXP OR LIN}. Argument to be inserted for 
   ### experimental application only!
 	NumberIterations.MC = 100, 
   ### \code{\link{integer}} (with default): number of Monte Carlo simulations 
-  ### for the error estimation. See details.
+  ### for error estimation. See details.
 	xlab = "s", 
   ### \code{\link{character}} (with default): unit for x-axis labelling. 
   ### Possible values are \code{"Gy"} and \code{"s"}.
 	output.plot = TRUE, 
   ### \code{\link{logical}} (with default): plot output (\code{TRUE/FALSE}).
   output.plotExtended = TRUE,
-  ### \code{\link{logical}} (with default): If \code{TRUE} 3-plots on one plot 
+  ### \code{\link{logical}} (with default): If \code{TRUE}, 3 plots on one plot 
   ### area are provided: (1) growth curve, (2) histogram from error Monte 
   ### Carlo simulation and (3) a test dose response plot. If \code{FALSE}, 
   ### just the growth curve will be plotted. \bold{Requires:} 
@@ -69,9 +69,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
   ##2. check if sample contains a least three rows 
   if(length(sample[,1])<3){
-    
     stop("\n [plot_GrowthCurve] Error: At least two regeneration points are needed!")
-    
   }
   
   ## optionally, count nd exclude NA values and print result
@@ -83,7 +81,6 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
   ##NULL values in the data.frame are not allowed for the y-column
     if(length(sample[sample[,2]==0,2])>0){
-     
       cat("\n[plot_GrowthCurve.R] >> Warning:",
           length(sample[sample[,2]==0,2]),"values with 0 for Lx/Tx detected; replaced by 0.0001.\n")
       sample[sample[,2]==0,2]<-0.0001 
@@ -124,9 +121,9 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   De <- NA
   De.Error <- NA
  
-##=================================================================================================
-# FITTING ------------------------------------------------------------------------------------
-##=================================================================================================##
+##============================================================================##
+# FITTING ----------------------------------------------------------------------
+##============================================================================##
 ##3. Fitting values with nonlinear least-squares estimation of the parameters
  
   ##set functions for fitting
@@ -167,7 +164,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
      #set D01 and D02 (in case of EXp+EXP)
      D01 <- NA; D02 <- NA
   
-  ##-----------------------------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
   ##to be a little bit more flexible the start parameters varries within a normal distribution
   
       ##draw 50 start values from a normal distribution a start values
@@ -181,9 +178,9 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
 
   
-  ##-----------------------------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
     
-	#================================================================================================##
+	#===========================================================================##
 	#EXP#
 
 	if (fit.method=="EXP" | fit.method=="EXP OR LIN" | fit.method=="LIN"){
@@ -291,7 +288,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 						}#end for loop             
 					}#endif::try-error fit    
         }#endif:fit.method!="LIN"
-       #=============================================================================================
+       #========================================================================
 	     #LIN#
 			 ##two options: just linear fit or LIN fit after the EXP fit failed
                 
@@ -321,8 +318,8 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
                         
       }else{fit.method<-"EXP"}#endif::LIN
     }#end if EXP (this includes the LIN fit option)
-		#================================================================================================
-    #================================================================================================
+		#===========================================================================
+    #===========================================================================
 		#EXP+LIN#
 		else if (fit.method=="EXP+LIN") {
       
@@ -332,7 +329,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
                     
                    a<-a.MC[i];b<-b.MC[i];c<-c.MC[i];g<-g.MC[i]
                    
-                   ##------------------------------------------------------------------------------##
+                   ##---------------------------------------------------------##
                    ##start: with EXP function
                    fit.EXP<-try(nls(y~fit.functionEXP(a,b,c,x),
                                 data=data,
@@ -352,7 +349,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
                        c<-as.vector((parameters["c"]))
                       
                    ##end: with EXP function
-                   ##------------------------------------------------------------------------------##
+                   ##---------------------------------------------------------##
                    }
                     
                    
@@ -510,8 +507,8 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
             
       }#end if try-error 				
 		} #End if EXP+LIN
-		#================================================================================================
-		#================================================================================================
+		#==========================================================================
+		#===========================================================================
 		#EXP+EXP#
 		else if (fit.method=="EXP+EXP") {
       
@@ -698,7 +695,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
       
         ##close
         close(pb)    
-    #================================================================================================
+    #===========================================================================
 		} #End if Fit Method  
       
       
@@ -710,11 +707,45 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
 			#De.Error is Error of the whole De (ignore NaN values)
 			De.Error<-round(sd(na.exclude(x.natural)),digits=2)
-    
 
-##=================================================================================================##
-# PLOTTING ------------------------------------------------------------------------------------
-##=================================================================================================##
+# Formula creation --------------------------------------------------------
+  
+  if(is(fit,"try-error") == FALSE){
+  
+  if(fit.method == "EXP") {
+    f <- as.formula(paste("f ~", round(coef(fit)[1], 5), "* (1-exp(-(x+", 
+                          round(coef(fit)[3], 5), ") /", 
+                          round(coef(fit)[2], 5), "))"))
+  }
+  
+  if(fit.method == "EXP+LIN") {
+    f <- as.formula(paste("f ~", round(coef(fit)[1], 5), "* (1-exp(-(x+", 
+                          round(coef(fit)[3], 5), ") /", 
+                          round(coef(fit)[2], 5), ")+(",
+                          round(coef(fit)[4], 5), "*x))"))
+  }
+  
+  if(fit.method == "EXP+EXP") {
+    f <- as.formula(paste("f ~ ", round(coef(fit)[1], 5), " * (1 - exp( -x / ", 
+                          round(coef(fit)[3], 5), ")) + ", 
+                          round(coef(fit)[2], 5), " * (1 - exp(-x / ", 
+                          round(coef(fit)[4], 5), "))"))
+  }
+  
+  if(fit.method == "LIN") {
+    f <- as.formula(paste("f ~ ", round(fit.lm$coefficients[2], 5),
+                          "* x + ", round(fit.lm$coefficients[1], 5)))
+    
+  }
+  }else{
+    
+    f <- NA
+    
+  }
+
+##============================================================================##
+# PLOTTING ---------------------------------------------------------------------
+##============================================================================##
 
 ##5. Plotting if plotOutput=TRUE
 if(output.plot==TRUE) {
@@ -857,35 +888,36 @@ mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
 	  output <- try(data.frame(De=De,De.Error=De.Error, D01=D01, D02=D02, 
                              Fit=fit.method),
                   silent=TRUE)
-    output <- set_RLum.Results(data=list(De=output,Fit=fit))
+    output <- set_RLum.Results(data=list(De=output,Fit=fit, Formula=f))
     return(output)
-  ### an \code{RLum.Results} object containing the De (De, De Error, D01 value, D02 value and Fit 
+  ### \code{RLum.Results} object containing the De (De, De Error, D01 value, D02 value and Fit 
   ### type) and Fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} 
-  ### and \code{EXP+EXP}. In case of a linear fit \code{EXP OR LIN}, a 
-  ### \link{lm} object is returned. A plot is also returned.
+  ### and \code{EXP+EXP}. In case of a resulting linear fit when using 
+  ### \code{EXP OR LIN}, a \link{lm} object is returned. 
+  ### Additionally a plot is returned.
   
   ##details<<
-  ## \bold{Fitting methods} \cr
+  ## \bold{Fitting methods} \cr\cr
   ## For all options (except for the \code{LIN} and the \code{EXP OR LIN}), 
   ## the \link{nls} function with the \code{port} algorithm is used. \cr
-  ## \code{LIN}: fit a linear function to the data using \link{lm}:
+  ## \code{LIN}: fits a linear function to the data using \link{lm}:
   ## \deqn{y = m*x+n}
   ## \code{EXP}: try to fit a function of the form 
   ## \deqn{y = a*(1-exp(-(x+c)/b))}
   ## Parameters b and c are approximated by a linear fit using \link{lm}.\cr
-  ## \code{EXP OR LIN}: works for some cases where an \code{EXP} fit failes. 
-  ## If the \code{EXP} fit failes, a \code{LIN} fit is done instead. \cr
-  ## \code{EXP+LIN}: try to fit an exponential plus linear function of the 
+  ## \code{EXP OR LIN}: works for some cases where an \code{EXP} fit fails. 
+  ## If the \code{EXP} fit fails, a \code{LIN} fit is done instead. \cr
+  ## \code{EXP+LIN}: tries to fit an exponential plus linear function of the 
   ## form: \deqn{y = a*(1-exp(-(x+c)/b)+(g*x))}
   ## The De is calculated by iteration.\cr
   ## \bold{Note:} In the context of luminescence dating, this function has 
   ## no physical meaning. Therefore, no D0 value is returned.\cr
-  ## \code{EXP+EXP}: try to fit a double exponential function of the form
+  ## \code{EXP+EXP}: tries to fit a double exponential function of the form
   ## \deqn{y = (a1*(1-exp(-(x)/b1)))+(a2*(1-exp(-(x)/b2)))}
   ## This fitting procedure is not robust against wrong start parameters 
   ## and should be further improved.\cr\cr
-  ## \bold{Fit weighting} (suggested by Michael Dietze and Margret Fuchs)\cr
-  ## If the option \code{fit.weights = TRUE} is chosen weights are calculated 
+  ## \bold{Fit weighting}\cr
+  ## If the option \code{fit.weights = TRUE} is chosen, weights are calculated 
   ## using provided signal errors (Lx/Tx error):
   ## \deqn{fit.weights = 1/error/(sum(1/error))}
   ## \bold{Error estimation using Monte Carlo simulation}\cr

@@ -4,11 +4,12 @@
 \description{Function to calculate the common dose of a De distribution.}
 \usage{calc_CommonDose(input.data, sigmab = 0, log = TRUE, sample.id = "unknown sample")}
 \arguments{
-  \item{input.data}{\code{\link{data.frame}} (\bold{required}): two column data frame with De 
-values and corresponding De errors}
+  \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}} (with default): spread in De values given as a 
 fraction (e.g. 0.2). This value represents the expected overdispersion in 
-the data should the sample be well-bleached (Cunningham & Walling 2012, 
+the data, if the sample is well-bleached (Cunningham & Walling 2012, 
 p. 100).}
   \item{log}{\code{\link{logical}} (with default): fit the (un-)logged common age 
 model to De data}
@@ -24,10 +25,14 @@ zero or negative. In this case the un-logged model can be applied instead
 (\code{log = FALSE}). The weighted mean is then calculated using the 
 un-logged estimates of De and their absolute standard error 
 (Galbraith & Roberts 2012, p. 14).}
-\value{Returns a terminal output. In addition a list is returned containing the 
-following element:
+\value{Returns a terminal output. In addition an 
+\code{\linkS4class{RLum.Results}} object is 
+returned containing the following element:
 
-\code{results} data frame with statistical parameters.}
+\item{results}{\link{data.frame} with statistical parameters.}
+
+The output should be accessed using the function 
+\code{\link{get_RLum.Results}}}
 \references{Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
 track ages. Nuclear Tracks Radiation Measurements, 4, pp. 459-470. \cr\cr
 Galbraith, R.F., Roberts, R.G., Laslett, G.M., Yoshida, H. & Olley, J.M., 

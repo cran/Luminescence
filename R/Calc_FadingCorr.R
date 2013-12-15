@@ -1,24 +1,33 @@
-##//////////////////////////////////////////////
-##//calc_FadingCorr.R
-##/////////////////////////////////////////////
+calc_FadingCorr<- structure(function(#Apply a fading correction according to Huntley & Lamothe (2001) for a given g-value.
+  ### This function runs the iterations that are needed to calculate the corrected 
+  ### age including the error for a given g-value according to Huntley & Lamothe (2001).
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  
+  ##section<<
+  ## version 0.1.1
+  # ===========================================================================
 
-##======================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-#vers.: 0.1.1
-#date: 15/04/2012
-##======================================
-##
-##  --fading correction according Huntely and Lamothe 2001
-##  --Error estimation by Monte Carlo simulation
-##
-##
-calc_FadingCorr<-function(g_value,    #g-value in $
-                  tc,         #tc in seconds
-                  age.faded,  #Age.faded in ka
-                  n.MCruns=500 #MC runs for error        
-                         )  
-{
+  g_value, 
+  ### g_value}{\link{vector} (\bold{required}): g-value and error obtained from separate 
+  ### fading measurements (see example)
+  
+  tc,
+  #### \link{numeric} (\bold{required}): time in seconds (time between irradiation and
+  ### the prompt measurement, cf. Huntely & Lamothe 2001)
+  
+  age.faded,
+  ### \link{numeric} \link{vector} (\bold{required}): uncorrected age with error 
+  ### in ka (see example)
+  
+  n.MCruns = 500
+  ### \link{integer} (with default): number of Monte Carlo simulation runs for 
+  ### error estimation
+  
+){  
+
   
 ##=================================================================================================##
 ##CALCULATION
@@ -69,5 +78,34 @@ calc_FadingCorr<-function(g_value,    #g-value in $
   cat(paste("\n\t Age (corr.): ",age.corr[1]," +/- ",age.corr[2]," ka",sep=""))
   cat("\n\t ----------------------------------\n") 
   
-  return(age.corr)      
-}#EOF
+  return(age.corr)  
+  
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+  
+  ##details<<
+  ## The error of the fading-corrected age is determined using a Monte 
+  ## Carlo simulation approach. 
+  ## Large values for \code{n.MCruns} will significantly increase the computation time.
+  
+  ##value<<
+  ## A \link{data.frame} containing the fading-corrected age is returned.
+  
+  ##references<<
+  ## Huntley, D.J., Lamothe, M., 2001. Ubiquity of anomalous fading in K-feldspars 
+  ## and the measurement and correction for it in optical dating. 
+  ## Canadian Journal of Earth Sciences 38, pp. 1093-1106.
+  
+  ##note<<
+  ## The upper age limit is set to 500 ka!
+  
+  ##seealso<<
+  ## #
+  
+  ##keyword<<
+  ## datagen
+  
+}, ex=function(){
+  
+  calc_FadingCorr(g_value = c(3.3,0.03), tc = 752, age.faded = c(100,10), n.MCruns=50)
+  
+})#END OF STRUCTURE

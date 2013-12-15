@@ -1,105 +1,66 @@
 \name{analyse_SAR.TL}
 \alias{analyse_SAR.TL}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{Analyse SAR TL measurements 
-}
-\description{
-The function performs a SAR TL analysis on a \code{\linkS4class{RLum.Analysis}} 
-object including growth curve fitting.
-}
-\usage{
-analyse_SAR.TL(object, 
-               object.background, 
-               signal.integral.min,
-               signal.integral.max,
-               sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"), 
-               rejection.criteria = list(recycling.ratio = 10, 
-                                         recuperation.rate = 10), 
-               log = "", 
-               ...)
-}
-%- maybe also 'usage' for other objects documented here.
+\title{Analyse SAR TL measurements }
+\description{The function performs a SAR TL analysis on a \code{\linkS4class{RLum.Analysis}}
+object including growth curve fitting.}
+\usage{analyse_SAR.TL(object, object.background, signal.integral.min, 
+    signal.integral.max, sequence.structure = c("PREHEAT", "SIGNAL", 
+        "BACKGROUND"), rejection.criteria = list(recycling.ratio = 10, 
+        recuperation.rate = 10), log = "", ...)}
 \arguments{
   \item{object}{\code{\linkS4class{RLum.Analysis}}(\bold{required}): input object containing 
-  data for analysis
+data for analysis}
+  \item{object.background}{currently not used}
+  \item{signal.integral.min}{\link{integer} (\bold{required}): requires the channel number for the 
+lower signal integral bound (e.g. \code{signal.integral.min = 100})}
+  \item{signal.integral.max}{\link{integer} (\bold{required}): requires the channel number for the 
+upper signal integral bound (e.g. \code{signal.integral.max = 200})}
+  \item{sequence.structure}{\link{vector} \link{character} (with default): specifies the general 
+sequence structure. Three steps are allowed 
+\code{PREHEAT}, \code{SIGNAL}, \code{BACKGROUND}}
+  \item{rejection.criteria}{\link{list} (with default): list containing rejection criteria in 
+percentage for the calculation.}
+  \item{log}{\link{character} (with default): a character string which contains "x" 
+if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic 
+and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}).}
+  \item{\dots}{further arguments that will be passed to the function 
+\code{\link{plot_GrowthCurve}}}
 }
-  \item{object.background}{currently not used
-%%     ~~Describe \code{object.background} here~~
-}
-  
-    \item{signal.integral.min}{
-  \link{integer} (\bold{required}): requires the channel number for the lower signal integral bound
-  (e.g. \code{signal.integral.min = 100})
-}
-
- \item{signal.integral.max}{
-  \link{integer} (\bold{required}): requires the channel number for the upper signal integral bound
-  (e.g. \code{signal.integral.max = 200})
-}
-  
-  
-  \item{sequence.structure}{\link{vector} \link{character} (with default): specifies the general sequence structure. Three steps are allowed \code{PREHEAT}, \code{SIGNAL}, \code{BACKGROUND}
-  
-%%     ~~Describe \code{sequence.structure} here~~
-}
-  \item{rejection.criteria}{\link{list} (with default): list containing rejection criteria in percentage for the calculation. 
-%%     ~~Describe \code{rejection.criteria} here~~
-}
-  \item{log}{\link{character} (with default): a character string which contains "x" if the x axis is to be logarithmic, "y" if the y     axis is to be logarithmic and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}).
-%%     ~~Describe \code{log} here~~
-}
-  \item{\dots}{further arguments that will be passed to the function \code{\link{plot_GrowthCurve}}
-%%     ~~Describe \code{\dots} here~~
-}
-}
-\details{
-This function performs a SAR TL analyses on a set of curves. The SAR procedure in 
-general is given by Murray and Wintle (2000). For the calculation of the Lx/Tx value the function \link{calc_TLLxTxRatio} is used.
-
-\bold{Provided rejection criteria}\cr
-
+\details{This function performs a SAR TL analysis on a set of curves. The SAR procedure in 
+general is given by Murray and Wintle (2000). For the calculation of the 
+Lx/Tx value the function \link{calc_TLLxTxRatio} is used.\cr\cr
+\bold{Provided rejection criteria}\cr\cr
 \sQuote{recyling.ratio}: calculated for every repeated regeneration dose point.\cr
-
-\sQuote{recuperation.rate}: recuperation rate calculated by comparing the Lx/Tx values of the zero regeneration point with the 
-Ln/Tn value (the Lx/Tx ratio of the natural signal). For methodological background see Aitken and Smith (1988)\cr
-
-}
-\value{
-A plot (optional) and an \code{\linkS4class{RLum.Results}} object is returned containing the following elements: 
+\sQuote{recuperation.rate}: recuperation rate calculated by comparing the 
+Lx/Tx values of the zero regeneration point with the Ln/Tn value (the Lx/Tx 
+ratio of the natural signal). 
+For methodological background see Aitken and Smith (1988)\cr}
+\value{A plot (optional) and an \code{\linkS4class{RLum.Results}} object is returned 
+containing the following elements: 
 \item{De.values}{\link{data.frame} containing De-values and further parameters}
-\item{LnLxTnTx.values}{\link{data.frame} of all calculated Lx/Tx values including signal, background counts and the dose points.}
-\item{rejection.criteria}{\link{data.frame} with values that might by used as rejection criteria. NA is produced if no R0 dose point 
-exists.}\cr
+\item{LnLxTnTx.values}{\link{data.frame} of all calculated Lx/Tx values including 
+signal, background counts and the dose points.}
+\item{rejection.criteria}{\link{data.frame} with values that might by used 
+as rejection criteria. NA is produced if no R0 dose point exists.}\cr\cr
+\bold{note:} the output should be accessed using the function 
+\code{\link{get_RLum.Results}}}
+\references{Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after bleaching. 
+Quaternary Science Reviews, 7, pp. 387-393.
 
-\bold{note:} the output should be accessed using the function \code{\link{get_RLum.Results}}
+Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an 
+improved single-aliquot regenerative-dose protocol. Radiation Measurements, 
+32, pp. 57-73. }
+\author{Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
+R Luminescence Package Team}
+\note{\bold{THIS IS A BETA VERSION}\cr\cr
+None TL curves will be removed from the input object without further warning.}
 
-}
-\references{
-Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after bleaching. Quaternary Science Reviews, 7, pp. 387-393.
 
-Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an improved single-aliquot regenerative-dose protocol. Radiation Measurements, 32, pp. 57-73. 
-
-}
-\author{Sebastian Kreutzer, JLU Giessen/Freiberg Instruments (Germany), 
-R Luminescence Package Team
-}
-\note{
-\bold{THIS IS A BETA VERSION}\cr\cr
-
-Non TL curves will be removed from the input object without further warning.
-}
-
-\section{Version}{0.1.3 [2013-09-25] BETA}
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-\code{\link{calc_TLLxTxRatio}}, \code{\link{plot_GrowthCurve}}, 
+\seealso{\code{\link{calc_TLLxTxRatio}}, \code{\link{plot_GrowthCurve}}, 
 \code{\linkS4class{RLum.Analysis}}, \code{\linkS4class{RLum.Results}}
-\code{\link{get_RLum.Results}}
-
-
-}
+\code{\link{get_RLum.Results}}}
 \examples{
+
 ##load data
 data(ExampleData.BINfileData, envir = environment())
 
@@ -108,13 +69,13 @@ object <- Risoe.BINfileData2RLum.Analysis(TL.SAR.Data, pos=3)
 
 ##perform analysis
 analyse_SAR.TL(object, 
-              signal.integral.min = 210, 
-              signal.integral.max = 220, 
-              log = "y", 
-              fit.method = "EXP OR LIN",
-              sequence.structure = c("SIGNAL", "BACKGROUND"))
+               signal.integral.min = 210, 
+               signal.integral.max = 220, 
+               log = "y", 
+               fit.method = "EXP OR LIN",
+               sequence.structure = c("SIGNAL", "BACKGROUND"))
+
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{datagen}
 \keyword{plot}

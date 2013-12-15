@@ -1,179 +1,160 @@
 \name{plot_RadialPlot}
 \alias{plot_RadialPlot}
-\title{
-Produce a Galbraith's radial plot. 
-}
-\description{
-A Galbraith radial plot is produced on a logarithmic or a linear De scale. The function is
-based on a rewritten S script of Rex Galbraith. 
-}
-\usage{
-plot_RadialPlot(sample, 
-                na.exclude = TRUE,
-                sample.groups, 
-                sample.legend, 
-                sample.lty = 1, 
-                sample.pch = 1, 
-                sample.col = "black", 
-                sample.min = FALSE,
-                sample.max = FALSE,
-                sample.mtext, 
-                zscale.log = TRUE, 
-                zaxis.scale, 
-                zaxis.group_circle = FALSE, 
-                zaxis.tck,
-                yaxis.scale, 
-                plot.2sigmaRange = TRUE, 
-                plot.area_ratio = 4.5/6, 
-                zlab = expression(paste(D[e], " [Gy]")), 
-                main = expression(paste(D[e], " Distribution", sep = "")), 
-                cex.global = 1, 
-                xscale_factor = 1.01)
-}
-%- maybe also 'usage' for other objects documented here.
+\title{Function to create a Radial Plot}
+\description{A Galbraith's radial plot is produced on a logarithmic or a linear 
+scale.}
+\usage{plot_RadialPlot(data, na.exclude = TRUE, log.z = TRUE, central.value, 
+    plot.ratio, bar.col, grid.col, legend.text, stats, summary = FALSE, 
+    output = FALSE, ...)}
 \arguments{
-  \item{sample}{\link{data.frame} (\bold{required}): two column data frame with the input values, e.g. 'de' and 'se'.
+  \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object 
+(required): for \code{data.frame} two columns: De (\code{data[,1]})
+and De error (\code{data[,2]}). To plot several data sets in one plot,
+the data sets must be provided as \code{list}, e.g. 
+\code{list(data.1, data.2)}.}
+  \item{na.exclude}{\code{\link{logical}} (with default): excludes \code{NA} values from the data 
+set prior to any further operations.}
+  \item{log.z}{\code{\link{logical}} (with default): Option to display the z-axis
+in logarithmic scale. Default is \code{TRUE}.}
+  \item{central.value}{\code{\link{numeric}}: User-defined central value, primarily used for
+horizontal centering of the z-axis.}
+  \item{plot.ratio}{\code{\link{numeric}}: User-defined plot area ratio (i.e. curvature of
+the z-axis). If omitted, the default value (\code{4.5/5.5}) is used and
+modified automatically to optimise the z-axis curvature. 
+The parameter should be decreased when data points are plotted outside
+the z-axis or when the z-axis gets too elliptic.}
+  \item{bar.col}{\code{\link{character}} or \code{\link{numeric}} (with default): colour 
+of the bar showing the 2-sigma range around the central value. To 
+disable the bar, use \code{"none"}. Default is \code{"grey"}.}
+  \item{grid.col}{\code{\link{character}} or \code{\link{numeric}} (with default): colour 
+of the grid lines (originating at [0,0] and stretching to the z-scale).  
+To disable grid lines, use \code{"none"}. Default is \code{"grey"}.}
+  \item{legend.text}{\code{\link{character}}: optional vector with legend item names (e.g.
+sample ID). Legend will only be plotted if legend text is provided.}
+  \item{stats}{\code{\link{character}}: additional labels of statistically important
+values in the plot. One or more out of the following: \code{"min"}, 
+\code{"max"}, \code{"median"}.}
+  \item{summary}{\code{\link{logical}} (with default): Shows statistical summary of 
+sample or sample groups below plot main header, default is 
+\code{FALSE}.}
+  \item{output}{\code{\link{logical}}: Optional output of numerical plot parameters.
+These can be useful to reproduce similar plots. Default is \code{FALSE}.}
+  \item{\dots}{Further plot arguments to pass. \code{xlab} must be a vector of length 2,
+specifying the upper and lower x-axes labels.}
 }
-        \item{na.exclude}{\link{logical} (with default): exclude NA values
-from the data set prior to any further operations.}
-  \item{sample.groups}{\link{list} (optional): option to group the input data set like: 
-  
-  \code{sample.groups = list(c(1:14), c(15:26), c(27:40))}
-}
-  \item{sample.legend}{\link{character} (optional): character vector for a legend. This option is provided for the parameter \code{sample.groups}, but can also be used for one sample.  
-}
-  \item{sample.lty}{\link{vector} (with default): line type for the central value (see \link{par}. If the sample is grouped, a line type can be defined for each data set. )
-}
-  \item{sample.pch}{\link{vector} (with default): point type for the presented data (see \link{par}. If the sample is grouped, a point type can be defined for each data.set
-}
-  \item{sample.col}{\link{vector} or \link{character} (with default): colour of the points and lines (see \link{colors}). If the sample is grouped, a colour can be defined for each group.
-}
-\item{sample.min}{\link{logical} (with default): add minimum value to respective data point in plot.
-}
-\item{sample.max}{\link{logical} (with default): add maximum value to respective data point in plot.
-}
-\item{sample.mtext}{\link{character} (optional): \link{mtext} on the top of the plot. By default, a statistical summary of the sample(s) is plotted. To prevent
-any text set this parameter to \code{""}.
-}
-  \item{zscale.log}{\link{logical} (with default): log De scale (\code{TRUE/FALSE})
-}
-  \item{zaxis.scale}{\link{numeric} (optional): option to set the z-scale manually. 
-  
-  Example: \code{zaxis.scale = seq(50,120, by = 10)}
-}
-  \item{zaxis.group_circle}{\link{logical} (with default): shows additional group circles for the 2-sigma uncertainties on the z-scale.
-}
-  \item{yaxis.scale}{\link{vector} (optional): option for manual y-axis scaling. Example: \code{yaxis.scale=c(-15,15)}
-}
-  \item{zaxis.tck}{\link{numeric} (optional): determines the relative length of ticks on the z-axis. Set to zero disables any ticks. If no value is provided the tick length is calculated automatically. 
-}
-  \item{plot.2sigmaRange}{\link{logical} (with default): plot a grey polygon showing the 2-sigma range of the central value.
-}
-  \item{plot.area_ratio}{\link{vector} (with default): option for manual plot ratio adjustments. 
-  
-  Example \code{plot.area_ratio=4.5/5.5} 
-}
-  \item{zlab}{\link{character} (with default): z-axis (semi circle) label
-}
-  \item{main}{\link{character} (with default): title of the plot
-}
-  \item{cex.global}{\link{numeric} (with default): global scaling factor
-}
-  \item{xscale_factor}{\link{numeric} (with default): scaling factor for the z-scale ticks.
-}
-}
-\details{
-Details and the theoretical background on the radial plot are given in the cited literature.
+\details{Details and the theoretical background of the radial plot are given 
+in the cited literature. This function is based on an S script of Rex 
+Galbraith. To reduce the manual adjustments, the function has been 
+rewritten. Thanks to Rex Galbraith for useful comments on this function.
+\cr Plotting can be disabled by adding the argument 
+\code{plot = "FALSE"}, e.g. to return only numeric plot output.}
+\value{Returns a plot object.}
+\references{Galbraith, R.F., 1988. Graphical Display of Estimates Having Differing 
+Standard Errors. Technometrics, 30 (3), pp. 271-281.
 
-}
-\value{
-Returns a plot.
-}
-\references{
+Galbraith, R.F., 1990. The radial plot: Graphical assessment of spread in 
+ages. International Journal of Radiation Applications and Instrumentation. 
+Part D. Nuclear Tracks and Radiation Measurements, 17, 3, 207-214. 
 
-Galbraith, R.F., 1988. Graphical Display of Estimates Having Differing Standard Errors. Technometrics, 30 (3), pp. 271-281.
+Galbraith, R. & Green, P., 1990. Estimating the component ages in a 
+finite mixture. International Journal of Radiation Applications and 
+Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17, 3 
+197-206. 
 
-Galbraith, R.F., 1990. The radial plot: Graphical assessment of spread in ages. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3), pp. 207-214.
+Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission 
+track ages. Nuclear Tracks And Radiation Measurements, 21, 4,  
+459-470. 
 
-Galbraith, R. & Green, P., 1990. Estimating the component ages in a finite mixture. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3), pp. 197-206. 
+Galbraith, R.F., 1994. Some Applications of Radial Plots. Journal of the 
+American Statistical Association, 89 (428), pp. 1232-1242. \cr\cr
+Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL, 
+28 (1), 1-10. 
 
-Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission track ages. Nuclear Tracks And Radiation Measurements, 21 (4), pp. 459-470.
+Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
+dose and error calculation and display in OSL dating: An overview and 
+some recommendations. Quaternary Geochronology, 11, 1-27. }
+\author{Michhael Dietze, GFZ Potsdam (Germany), Sebastian Kreutzer, JLU Giessen 
+(Germany)\cr
+Based on a rewritten S script of Rex Galbraith, 2010\cr
+R Luminescence Package Team}
 
-Galbraith, R.F., 1994. Some Applications of Radial Plots. Journal of the American Statistical Association, 89 (428), pp. 1232-1242.
 
-Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL, 28 (1), pp. 1-10. 
 
-Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: An overview and some recommendations. Quaternary Geochronology, 11, pp.1-27.
-
-}
-\author{Original S script: Rex Gablraith, University College London (UK), 
-Revised R script: Sebastian Kreutzer, JLU Giessen (Germany),
-Michael Dietze, TU Dresden (Germany)
-}
-\note{
-This function is based on an S script of Rex Galbraith. To reduce the manual adjustments, the function 
-has been rewritten. Thanks to Rex Galbraith for useful comments on this function.
-}
-
-\section{Version}{0.4.3 [2013-04-01]}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-\link{plot}, \link{legend}
-}
+\seealso{\code{\link{plot}}, \code{\link{plot_KDE}}, \code{\link{plot_Histogram}}}
 \examples{
-##load data
+## load example data
 data(ExampleData.DeValues, envir = environment())
 
-##plot the example data set the easiest way
-plot_RadialPlot(ExampleData.DeValues)
+## plot the example data straightforward
+plot_RadialPlot(data = ExampleData.DeValues)
 
-##Notice that a statistical summary is provided by default.
-##However, a sample ID is missing. Notice also that the z-scale
-##units are sub-optimally spaced and not (yet) logarithmically
-##scaled. To take care of this, look at the following code:
+## now with linear z-scale
+plot_RadialPlot(data = ExampleData.DeValues,
+                log.z = FALSE)
 
-## a) plot a user-defined sample text
-usertext <- "Example data set"
+## now with output of the plot parameters
+plot1 <- plot_RadialPlot(data = ExampleData.DeValues,
+                         log.z = FALSE,
+                         output = TRUE)
+plot1
+plot1$zlim
 
-## b) define an evenly-spaced z-axis between min and max
-zscale <- seq(from = min(ExampleData.DeValues$ED),
-              to = max(ExampleData.DeValues$ED),
-              by = 100)
-              
-##plot the same data set a bit more user-adjusted
-plot_RadialPlot(sample = ExampleData.DeValues,
-                zscale.log = TRUE,
-                zaxis.scale = zscale,
-                zlab = expression(paste(D[e], " [s]")),
-                sample.mtext = usertext,
-                sample.pch = 4)
+## now with adjusted z-scale limits
+plot_RadialPlot(data = ExampleData.DeValues,
+               log.z = FALSE,
+               zlim = c(2000, 4000))
 
-##Now let us assume that the data set consists of two
-##different groups of samples that should however be
-##plotted in one graph. The function can handle grouped
-##data by specifying a group agument:
+## now the two plots with serious but seasonally changing fun
+#plot_RadialPlot(data = data.3, fun = TRUE)
 
-group.indices <- list(c(1:10),  # group 1 with samples 1 to 10
-                      c(11:20)) # group 2 with samples 11 to 20
+## now with user-defined central value, in log-scale again
+plot_RadialPlot(data = ExampleData.DeValues,
+                central.value = 3500)
 
-##plot the data.set grouped 
-plot_RadialPlot(ExampleData.DeValues,
-                zscale.log = TRUE, 
-                zaxis.scale = seq(2000, 4000, by = 100), 
-                zlab = expression(paste(D[e], " [s]")),
-                sample.groups = group.indices,
-                sample.col = c("royalblue", "orange3"),
-                sample.pch = c(3, 4),
-                cex.global = 0.8)
-                
-##Notice that the default statistical summary is provided
-##for each group individually and that z-axis limits were
-##changed from example 1.
+## now with legend, colour, different points and smaller scale
+plot_RadialPlot(data = ExampleData.DeValues,
+                legend.text = "Sample 1",
+                col = "tomato4",
+                bar.col = "peachpuff",
+                pch = "R",
+                cex = 0.8)
 
+## now without 2-sigma bar, grid lines and central value line
+plot_RadialPlot(data = ExampleData.DeValues,
+                bar.col = "none",
+                grid.col = "none",
+                lwd = 0)
 
+## now with user-defined axes labels
+plot_RadialPlot(data = ExampleData.DeValues,
+                xlab = c("Data error [\%]",
+                         "Data precision"),
+                ylab = "Scatter",
+                zlab = "Equivalent dose [Gy]")
+
+## now with minimum, maximum and median value indicated
+plot_RadialPlot(data = ExampleData.DeValues,
+                central.value = 3500,
+                stats = c("min", "max", "median"))
+
+## now with a brief statistical summary header
+plot_RadialPlot(data = ExampleData.DeValues,
+                summary = TRUE)
+
+## now the data set is split into sub-groups, one is manipulated
+data.1 <- ExampleData.DeValues[1:15,]
+data.2 <- ExampleData.DeValues[16:25,] * 1.3
+
+## now a common dataset is created from the two subgroups
+data.3 <- list(data.1, data.2)
+
+## now the two data sets are plotted in one plot
+plot_RadialPlot(data = data.3)
+
+## now with some graphical modification
+plot_RadialPlot(data = data.3,
+                col = c("darkblue", "darkgreen"),
+                bar.col = c("lightblue", "lightgreen"),
+                pch = c(2, 6),
+                summary = TRUE)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{aplot}

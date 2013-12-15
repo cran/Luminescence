@@ -6,12 +6,13 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
   ## Christoph Burow, University of Cologne (Germany) \cr
   
   ##section<<
-  ## version 0.1 [2013-09-04] 
+  ## version 0.2 [2013-11-04] 
   # ===========================================================================
   
   input.data,
-  ### \code{\link{data.frame}} (\bold{required}): two column data frame with De
-  ### values and corresponding De errors
+  ### \code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+  ### for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+  ### De error \code{(values[,2])}
   log = TRUE,
   ### \code{\link{logical}} (with default): peform the homogeniety test with
   ### (un-)logged data
@@ -24,9 +25,24 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
 ## CONSISTENCY CHECK OF INPUT DATA
 ##============================================================================##
   
-  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type 
-                                               data.frame",quote=F) 
-                                         stop(domain=NA) }
+  if(missing(input.data)==FALSE){
+    
+    if(is(input.data, "data.frame") == FALSE & is(input.data,
+                                                  "RLum.Results") == FALSE){
+      
+      stop("[calc_FiniteMixture] Error: 'input.data' object has to be of type 
+           'data.frame' or 'RLum.Results'!")
+      
+    }else{
+      
+      if(is(input.data, "RLum.Results") == TRUE){
+        
+        input.data <- get_RLum.Results(input.data, 
+                                       signature(object = "De.values"))
+        
+      }
+    }
+  }  
   
 ##============================================================================##
 ## CALCULATIONS
@@ -36,15 +52,15 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
     input.data<- log(input.data)
   }
   
-wi<- 1/input.data[2]^2
-wizi<- wi*input.data[1]
-mu<- sum(wizi)/sum(wi)
-gi<- wi*(input.data[1]-mu)^2
-
-G<- sum(gi)
-df<- length(wi)-1
-n<- length(wi)
-P<- pchisq(G, df, lower.tail = FALSE)
+  wi<- 1/input.data[2]^2
+  wizi<- wi*input.data[1]
+  mu<- sum(wizi)/sum(wi)
+  gi<- wi*(input.data[1]-mu)^2
+  
+  G<- sum(gi)
+  df<- length(wi)-1
+  n<- length(wi)
+  P<- pchisq(G, df, lower.tail = FALSE)
 
 ##============================================================================##
 ## OUTPUT
@@ -62,13 +78,23 @@ P<- pchisq(G, df, lower.tail = FALSE)
   cat(paste("\n P-value:           ", round(P,4)))
   cat(paste("\n ---------------------------------\n\n"))  
 
-      #return value
-      results<- data.frame(id=sample.id,n=n,g.value=G,df=df,P.value=P)
-      
-      invisible(list(results=results))
-  ### Returns a terminal output. In addition a list is returned containing the
-  ### following element: \cr\cr
-  ### \code{results} data frame with statistical parameters.
+  #return value
+  results<- data.frame(id=sample.id,n=n,g.value=G,df=df,P.value=P)
+  
+  newRLumResults.calc_HomogeneityTest <- set_RLum.Results(
+    data = list(
+      results = results))
+  
+  
+  invisible(newRLumResults.calc_HomogeneityTest)
+  ### Returns a terminal output. In addition an 
+  ### \code{\linkS4class{RLum.Results}} object is 
+  ### returned containing the following element:
+  ###
+  ### \item{results}{\link{data.frame} with statistical parameters.}
+  ###
+  ### The output should be accessed using the function 
+  ### \code{\link{get_RLum.Results}}  
   
   ##details<<
   ## For details see Galbraith (2003).

@@ -1,5 +1,163 @@
 NEWS for the R Package Luminescence
 
+Changes in version 0.3.1 (15th December, 2013):
+
+  S4-classes and methods:
+
+         • Added S4-class ‘RLum.Data.Spectrum’ for TL/OSL spectra.
+
+         • ‘set_RLum.Data.Spectrum()’: Constructor method for
+           ‘RLum.Data.Spectrum’ objects
+
+         • ‘merge_RLum.Results()’: Correct an error that results in a
+           false combination of list elements
+
+         • ‘get_Risoe.BINfileData()’: get-method has been added
+           formally.  In fact it does not allow a direct access, but is
+           showing a message.
+
+         • ‘get_RLum.Analysis()’: Added argument ‘curveType’ to method.
+
+         • ‘get_RLum.Analysis()’: Allow more flexibility using the
+           argument ‘recordType’ to method.
+
+         • ‘get_RLum.Analysis()’: Added argument ‘RLum.type’ to method.
+
+         • ‘RLum.Results()’: Add generic show method (#68)
+
+         • ‘RLum.Data.Curve()’: get-method for object class has been
+           added (#57)
+
+  New functions:
+
+         • ‘plot_RLum.Data.Spectrum()’: Plot function for corresponding
+           S4-class object
+
+         • ‘length_RLum.Analyis()’: Return length (i.e. number of
+           records) for ‘RLum.Analysis’ objects
+
+         • ‘calc_MaxDose3()’: Apply the maximum age model to a given De
+           distribution (#45, suggestion by Kathryn Fitzsimmons)
+
+  Bugfixes and changes:
+
+         • ‘calc_MinDose3()’: Graphical output has been changed from
+           postscript to display device output; ‘output.plot = TRUE’ as
+           default
+
+         • ‘calc_MinDose3()’: Implement ‘RLum.Results’ object handling
+           (input/output)
+
+         • ‘calc_MinDose4()’: Graphical output has been changed from
+           postscript to display device output; ‘output.plot = TRUE’ as
+           default
+
+         • ‘calc_MinDose4()’: Implement ‘RLum.Results’ object handling
+           (input/output)
+
+         • ‘calc_CommonDose()’: Implement ‘RLum.Results’ object
+           handling (input/output)
+
+         • ‘calc_FiniteMixture()’: Implement ‘RLum.Results’ object
+           handling (input/output)
+
+         • ‘calc_HomogenityTest()’: Implement ‘RLum.Results’ object
+           handling (input/output)
+
+         • ‘calc_CentralDose()’: Implement ‘RLum.Results’ object
+           handling (input/output)
+
+         • ‘calc_CentralDose()’: Now working with data sets with no
+           overdispersion (#65)
+
+         • ‘plot_KDE()’: Option ‘na.exclude’ did not work as expected
+           and ended up with an error message; corrected
+
+         • ‘plot_KDE()’: Add statistic paramter for kurtosis and
+           skewness for the argument ‘summary’
+
+         • ‘plot_KDE()’: Add argument ‘output’
+
+         • ‘plot_KDE()’: Add output values ‘summary.pos’
+
+         • ‘plot_KDE()’: Now allows keywords for ‘summary.pos’, e.g.
+           'topleft'
+
+         • ‘plot_RLum.Analysis()’: ‘log’ argument will now be passed to
+           the output plot
+
+         • ‘plot_GrowthCurve()’: Now an additional ‘Formula’ object
+           containing the equation used for fitting is provided with
+           the output.
+
+         • ‘analyse_SAR.CWOSL()’: Argument ‘output.plot.single’ added
+           to allow for separate plot outputs
+
+         • ‘plot_RadialPlot’: Function has been completely new written
+
+         • ‘readXSYG2R’: Add support for TL/OSL spectra has been added
+           by using ‘RLum.Data.Spectrum’ objects
+
+         • ‘plot_RLum’: Add support for ‘RLum.Data.Spectrum’
+
+         • ‘plot_RLum.Analysis’: Add support for ‘RLum.Data.Spectrum’
+
+         • ‘plot_RLum.Data.Curve’: Forward further plot arguments, like
+           ‘lwd’.  ‘pch’, ‘lty’
+
+         • ‘readXSYG2R’: Considerably import performance improvements
+           by using the argument ‘useInternalNodes = TRUE’ during XML
+           parsing
+
+         • ‘readXSYG2R’: Add argument ‘recalculate.TL.curves’ to allow
+           temperature values instead of time values in the x-axis for
+           TL curves; along with this option the heating rate will be
+           calculated and stored in the info element ‘RATE’
+
+         • ‘plot_RLum.Data.Curve’: Allow for more flexible ‘TL’ curve
+           detection
+
+         • ‘calc_AliquotSize()’: Fix return values (#66)
+
+         • ‘calc_CosmicDoseRate()’: Fitting procedure for the
+           soft-component optimised (#75)
+
+         • ‘calc_CosmicDoseRate()’: Erroneous estimation of parameters
+           F, J and H fixed. Non-linear parts now fitted with a
+           3-degree polynomial (#76)
+
+         • ‘calc_CosmicDoseRate()’: Conversion from geographic to
+           geomagnetic latitude fixed (#71)
+
+         • ‘fit_LMCurve()’: Correct for an error in the plotting of the
+           component to sum contribution
+
+         • ‘fit_CWCurve()’: Correct for an error in the plotting of the
+           component to sum contribution
+
+         • ‘fit_CWCurve()’: Improve convergence stability during
+           fitting by using a two step fitting approach; add comment
+           that the functions has beta status
+
+         • ‘fit_CWCurve()’: Correct for an error, for component signal
+           plotting (#77)
+
+         • ‘calc_OSLLxTxRatio’: Add error message for the case signal
+           integral > background integral
+
+  Example data:
+
+         • ‘ExampleData.RLum.Analysis’: data set has been replaced, as
+           the containing curve elements did not fit the changed
+           ‘RLum.Data.Curve’ object
+
+  Internals:
+
+         • Complete conversion to ‘inlinedoc’ documentation for the
+           entire package
+
+         • Allow more fun during plotting.
+
 Changes in version 0.3 (1st October, 2013):
 
   Substantial Changes:
@@ -8,10 +166,10 @@ Changes in version 0.3 (1st October, 2013):
            introduced by the usage of S4 objects. Inherited classes
            have been designed to store input and output data for
            luminescence dating data analysis. Most of the existing
-           functions now allow for RLum objects as input data along
-           with generic R objects. The S4-class structure in this
-           package is shown in the additional PDF provided with this
-           package. The following S4 object classes are implemented:
+           functions now allow RLum objects as input data along with
+           generic R objects. The S4-class structure in this package is
+           shown in the additional PDF provided with this package. The
+           following S4 object classes are implemented:
 
   Added S4-classes:
 
@@ -236,6 +394,9 @@ Changes in version 0.3 (1st October, 2013):
 
          • ‘Risoe.BINfileData-class’: The *.binx file format support
            has been added
+
+         • ‘RLum.Analysis’: Add argument ‘get.index’ just to show the
+           index values
 
   Internals:
 

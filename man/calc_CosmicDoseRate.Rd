@@ -2,7 +2,7 @@
 \alias{calc_CosmicDoseRate}
 \title{Calculate the cosmic dose rate}
 \description{This function calculates the cosmic dose rate taking into account the
-soft- and hard-component of the cosmic ray flux and allows for 
+soft- and hard-component of the cosmic ray flux and allows
 corrections for geomagnetic latitude, altitude above sea-level and 
 geomagnetic field changes.}
 \usage{calc_CosmicDoseRate(depth, density, latitude, longitude, altitude, 
@@ -16,9 +16,9 @@ For more than one absorber use \cr
 density (g/cm^3). For more than one absorber use \cr
 \code{c(density_1, density_2, ..., density_n)} }
   \item{latitude}{\code{\link{numeric}} (\bold{required}): latitude (decimal 
-degree), north positive}
+degree), N positive}
   \item{longitude}{\code{\link{numeric}} (\bold{required}): longitude (decimal 
-degree), east positive}
+degree), E positive}
   \item{altitude}{\code{\link{numeric}} (\bold{required}): altitude (m above 
 sea-level)}
   \item{corr.fieldChanges}{\code{\link{logical}} (with default): correct for 
@@ -51,7 +51,7 @@ density_n}
 (3) Calculate cosmic dose rate at sea-level and 55 deg. latitude
 
 a) If absorber is > 167 g/cm^2 (only hard-component; Allkofer et al. 
-1975): apply equation given by Prescott & Hutton (1994) (Barbouti & 
+1975): apply equation given by Prescott & Hutton (1994) (c.f. Barbouti & 
 Rastin 1983)
 
 \deqn{D0 = C/(((absorber+d)^\alpha+a)*(absober+H))*exp(-B*absorber)}
@@ -67,7 +67,7 @@ sin(latitude))}
 
 (5) Apply correction for geomagnetic latitude and altitude above 
 sea-level. Values for F, J and H were read from Fig. 3 shown in 
-Prescott & Stephan (1982) and fitted with 6-degree polynomials for 
+Prescott & Stephan (1982) and fitted with 3-degree polynomials for 
 lambda < 35 degree and a linear fit for lambda > 35 degree.
 
 \deqn{Dc = D0*(F+J*exp((altitude/1000)/H))}
@@ -95,14 +95,14 @@ density = c(1.7, 2.4)})
 
 (3) Another possibility is to calculate the cosmic dose rate for more 
 than one sample of the same profile. This is done by providing more than
-one value for \code{depth} and only one for \code{density}. For example,
+one values for \code{depth} and only one for \code{density}. For example,
 \code{depth = c(1, 2, 3), density = 1.7} will calculate the cosmic dose 
 rate for three samples in 1, 2 and 3 m depth in a sediment of density 
 1.7 g/cm^3.}
 \value{Returns terminal output. In addition a list is returned containing 
 the following element:
 
-\code{results} data frame with results of cosmic dose rate calculation.}
+\item{results}{data frame with results of cosmic dose rate calculation.}}
 \references{Allkofer, O.C., Carstensen, K., Dau, W.D., Jokisch, H., 1975. Letter to
 the editor. The absolute cosmic ray flux at sea level. Journal of 
 Physics G: Nuclear and Particle Physics, 1, pp. L51-L52. \cr\cr

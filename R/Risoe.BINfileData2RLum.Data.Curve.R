@@ -1,23 +1,39 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//Risoe.BINfileData2RLum.Data.Curve.R
-##//////////////////////////////////////////////////////////////////////////////
-##
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: Freiberg Instruments/JLU Giessen
-##version: 0.1
-##date: 2013-03-27
-##==============================================================================
-
-Risoe.BINfileData2RLum.Data.Curve <- function (
+Risoe.BINfileData2RLum.Data.Curve<- structure(function(#Convert an element from a Risoe.BINfileData object to an RLum.Data.Curve object
+  ### The function converts one specified single record from a Risoe.BINfileData 
+  ### object to an RLum.Data.Curve object. 
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)
+  
+  ##section<<
+  ## version 0.1 [2013-03-27]
+  # ===========================================================================
 
   object,
-  id,
-  pos,
-  run,
-  set
+  ### \code{\linkS4class{Risoe.BINfileData}} (\bold{required}): \code{Risoe.BINfileData} object
   
-  ){
+  id,
+  ### \code{\link{integer}} (\bold{required}): record id in the \code{Risoe.BINfileData} object
+  ### of the curve that should be stored in the \code{RLum.Data.Curve} object. If no value 
+  ### for id is provided, the record has to be specified by \code{pos}, \code{set} and \code{run}.
+  
+  pos,
+  ### \code{\link{integer}} (optional): record position number in the \code{Risoe.BINfileData} object
+  ### of the curve that is to be stored in the \code{RLum.Data.Curve} object. If a value
+  ### for \code{id} is provided, this argument is ignored.
+  
+  run,
+  ### \code{\link{integer}} (optional): record run number in the \code{Risoe.BINfileData} object
+  ### of the curve that is to be stored in the \code{RLum.Data.Curve} object. If a value
+  ### for \code{id} is provided, this argument is ignored.
+  
+  set
+  ### \code{\link{integer}} (optional): record set number in the \code{Risoe.BINfileData} object
+  ### of the curve that is to be stored in the \code{RLum.Data.Curve} object. If a value
+  ### for \code{id} is provided, this argument is ignored.
+  
+){
   
   
 # Integrity Check ---------------------------------------------------------
@@ -131,4 +147,37 @@ Risoe.BINfileData2RLum.Data.Curve <- function (
     info = temp.info)
     
   return(newRLumDataCurve.Risoe.BINfileData2RLum.Data.Curve) 
-} 
+
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+
+  ##details<<
+  ## The function extracts all \code{METADATA} from the \code{Risoe.BINfileData} 
+  ## object and stores them in the \code{RLum.Data.Curve} object.
+
+  ##value<<
+  ## Returns an \code{\linkS4class{RLum.Data.Curve}} object. 
+
+  ##references<<
+  ## #
+
+  ##note<<
+  ## The function is intended for experimental usage. Normally, the function 
+  ## \code{\link{Risoe.BINfileData2RLum.Analysis}} should be used for the conversion.
+
+  ##seealso<<
+  ## \code{\link{Risoe.BINfileData2RLum.Analysis}}, \code{\link{set_RLum.Data.Curve}},
+  ## \code{\linkS4class{RLum.Data.Curve}}, \code{\linkS4class{RLum.Analysis}}, 
+  ## \code{\linkS4class{Risoe.BINfileData}}, \code{\link{plot_RLum}}
+
+  ##keyword<<
+  ## manip
+
+}, ex=function(){
+  
+  ##get package example data
+  data(ExampleData.BINfileData, envir = environment())
+  
+  ##convert one record
+  Risoe.BINfileData2RLum.Data.Curve(CWOSL.SAR.Data, id = 1)
+  
+})#END OF STRUCTURE 

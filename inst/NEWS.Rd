@@ -1,5 +1,118 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.3.1 (15th December, 2013)}{
+       
+     \subsection{S4-classes and methods}{
+       \itemize{
+    
+      \item Added S4-class \code{RLum.Data.Spectrum} for TL/OSL spectra. 
+	    \item \code{set_RLum.Data.Spectrum()}: Constructor method for 
+             \code{RLum.Data.Spectrum} objects
+      \item \code{merge_RLum.Results()}: Correct an error that results in a false
+            combination of list elements   
+		 \item \code{get_Risoe.BINfileData()}: get-method has been added formally. 
+            In fact it does not allow a direct access, but is showing 
+            a message.        
+
+		 \item \code{get_RLum.Analysis()}: Added argument \code{curveType} to method. 
+     \item \code{get_RLum.Analysis()}: Allow more flexibility using the argument 
+     \code{recordType} to method. 
+     \item \code{get_RLum.Analysis()}: Added argument \code{RLum.type} to method.
+     \item \code{RLum.Results()}: Add generic show method (#68)
+     \item \code{RLum.Data.Curve()}: get-method for object class has been added (#57)
+       }}
+       
+       
+    \subsection{New functions}{
+       \itemize{
+
+     \item \code{plot_RLum.Data.Spectrum()}: Plot function for corresponding 
+     S4-class object
+     
+     \item \code{length_RLum.Analyis()}: Return length (i.e. number of records) for
+     \code{RLum.Analysis} objects
+     
+     \item \code{calc_MaxDose3()}: Apply the maximum age model to a given De distribution 
+     (#45, suggestion by Kathryn Fitzsimmons)
+    
+    
+    }}
+
+	   \subsection{Bugfixes and changes}{
+       \itemize{
+       
+       \item \code{calc_MinDose3()}: Graphical output has been changed from 
+       postscript to display device output; \code{output.plot = TRUE} as default
+       \item \code{calc_MinDose3()}: Implement \code{RLum.Results} object 
+       handling (input/output)
+		 \item \code{calc_MinDose4()}: Graphical output has been changed from 
+     postscript to display device output; \code{output.plot = TRUE} as default 
+      \item \code{calc_MinDose4()}: Implement \code{RLum.Results} object 
+      handling (input/output)
+      \item \code{calc_CommonDose()}: Implement \code{RLum.Results} object handling (input/output)
+      \item \code{calc_FiniteMixture()}: Implement \code{RLum.Results} object handling (input/output)
+      \item \code{calc_HomogenityTest()}: Implement \code{RLum.Results} object handling (input/output)
+        \item \code{calc_CentralDose()}: Implement \code{RLum.Results} object handling (input/output)
+        \item \code{calc_CentralDose()}: Now working with data sets with no overdispersion (#65)
+		 \item \code{plot_KDE()}: Option \code{na.exclude} did not work as expected and ended up with an error message; corrected
+     \item \code{plot_KDE()}: Add statistic paramter for kurtosis and skewness
+     for the argument \code{summary}
+     \item \code{plot_KDE()}: Add argument \code{output}
+     \item \code{plot_KDE()}: Add output values \code{summary.pos}
+       \item \code{plot_KDE()}: Now allows keywords for \code{summary.pos}, e.g. 'topleft'
+		 \item \code{plot_RLum.Analysis()}: \code{log} argument will now be passed to the output plot
+    \item \code{plot_GrowthCurve()}: Now an additional \code{Formula} object containing the equation used
+    for fitting is provided with the output.
+    \item \code{analyse_SAR.CWOSL()}: Argument \code{output.plot.single} added to allow for separate plot outputs
+    \item \code{plot_RadialPlot}: Function has been completely new written
+	 \item \code{readXSYG2R}: Add support for TL/OSL spectra has been added by using \code{RLum.Data.Spectrum} objects
+   \item \code{plot_RLum}: Add support for \code{RLum.Data.Spectrum}
+	\item \code{plot_RLum.Analysis}: Add support for \code{RLum.Data.Spectrum}
+  \item \code{plot_RLum.Data.Curve}: Forward further plot arguments, like \code{lwd}. 
+  \code{pch}, \code{lty}
+  \item \code{readXSYG2R}: Considerably import performance improvements by using the argument \code{useInternalNodes = TRUE} during XML parsing 
+  \item \code{readXSYG2R}: Add argument \code{recalculate.TL.curves} to allow temperature 
+  values instead of time values in the x-axis for TL curves; along with this option 
+  the heating rate will be calculated and stored in the info element \code{RATE} 
+  \item \code{plot_RLum.Data.Curve}: Allow for more flexible \code{TL} curve detection
+  \item \code{calc_AliquotSize()}: Fix return values (#66)
+  \item \code{calc_CosmicDoseRate()}: Fitting procedure for the soft-component optimised (#75)
+\item \code{calc_CosmicDoseRate()}: Erroneous estimation of parameters F, J and H fixed. Non-linear parts now fitted with a 3-degree polynomial (#76)
+\item \code{calc_CosmicDoseRate()}: Conversion from geographic to geomagnetic latitude fixed (#71)
+  \item \code{fit_LMCurve()}: Correct for an error in the plotting of the component
+  to sum contribution
+   \item \code{fit_CWCurve()}: Correct for an error in the plotting of the component
+  to sum contribution
+     \item \code{fit_CWCurve()}: Improve convergence stability during fitting by using 
+     a two step fitting approach; add comment that the functions has beta status
+          \item \code{fit_CWCurve()}: Correct for an error, for component signal 
+          plotting (#77)
+          \item \code{calc_OSLLxTxRatio}: Add error message for the case signal integral > background integral
+  
+    
+       }}
+
+		\subsection{Example data}{
+		\itemize{
+
+		\item \code{ExampleData.RLum.Analysis}: data set has been replaced, as the containing curve elements did not fit the changed \code{RLum.Data.Curve} object
+		
+		}	
+		}
+
+       \subsection{Internals}{
+       \itemize{
+       
+       \item Complete conversion to \code{inlinedoc} documentation for the entire 
+       package
+       
+       \item Allow more fun during plotting. 
+       
+       }}
+
+
+}
+
 \section{Changes in version 0.3 (1st October, 2013)}{
  
   \subsection{Substantial Changes}{
@@ -8,7 +121,7 @@
      \item The most substantial changes in this package version are introduced by 
      the usage of S4 objects. Inherited classes have been designed to store input
      and output data for luminescence dating data analysis. Most of the existing 
-     functions now allow for RLum objects as input data along with generic 
+     functions now allow RLum objects as input data along with generic 
      R objects. The S4-class structure in this package is shown in the additional 
      PDF provided with this package. The following S4 object classes are implemented:
      }}
@@ -112,6 +225,7 @@
      \item \code{readBIN2R()}: BINX file format support has been added 
      \item \code{readBIN2R()}: An argument \code{forced.VersionNumber} has been added to cheat the internal version check routine if needed
      \item \code{Risoe.BINfileData-class}: The *.binx file format support has been added 
+	  \item \code{RLum.Analysis}: Add argument \code{get.index} just to show the index values
   
     }}
 

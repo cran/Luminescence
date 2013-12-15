@@ -1,24 +1,40 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//Risoe.BINfileData2RLum.Analysis.R
-##//////////////////////////////////////////////////////////////////////////////
-##
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: Freiberg Instruments, JLU Giessen
-##version: 0.1
-##date: 2013-08-04
-##==============================================================================
-
-Risoe.BINfileData2RLum.Analysis <- function (
+Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData object to an RLum.Analysis object
+  ### Converts values from one specific position of a Risoe.BINfileData S4-class object
+  ### to an RLum.Analysis object. 
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  
+  ##section<<
+  ## version 0.1 [2013-08-04]
+  # ===========================================================================
 
   object,
-  pos,
-  run,
-  set,
-  ltype = c("IRSL","OSL","TL","RIR","RBR","USER", "RL"),
-  protocol = "unknown"
+  ### \code{\linkS4class{Risoe.BINfileData}} (\bold{required}): \code{Risoe.BINfileData} object
   
-  ){
+  pos,
+  ### \code{\link{integer}} (\bold{required}): position number of the \code{Risoe.BINfileData}
+  ### object for which the curves are stored in the \code{RLum.Analysis} object.
+  
+  run,
+  ### \code{\link{vector}, \link{numeric}} (optional): run number from the measurement to limit
+  ### the converted data set (e.g. run = c(1:48)).
+  
+  set,
+  ### \code{\link{vector}, \link{numeric}} (optional): set number from the measurement to limit
+  ### the converted data set (e.g. set = c(1:48)).
+  
+  ltype = c("IRSL","OSL","TL","RIR","RBR","USER", "RL"),
+  ### \code{\link{vector}, \link{character}} (with default): curve type to limit 
+  ### the converted data. Allowed values are: \code{IRSL}, \code{OSL}, 
+  ### \code{TL}, \code{RIR}, \code{RBR} and \code{USER}
+  
+  protocol = "unknown"
+  ### \code{\link{character}} (optional): sets protocol type for analysis 
+  ### object. Value may be used by subsequent analysis functions. 
+  
+){
   
   
 # Integrity Check ---------------------------------------------------------
@@ -98,4 +114,38 @@ Risoe.BINfileData2RLum.Analysis <- function (
       }),
       protocol = protocol
   )
-} 
+
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+
+  ##details<<
+  ## The \code{\linkS4class{RLum.Analysis}} object requires a set of curves for specific 
+  ## further protocol analyses. However, the \code{\linkS4class{Risoe.BINfileData}} 
+  ## usually contains a set of curves for different aliquots and different protocol 
+  ## types that may be mixed up. Therefore, a conversion is needed. 
+
+  ##value<<
+  ## Returns an \code{\linkS4class{RLum.Analysis}} object. 
+
+  ##references<<
+  ## #
+
+  ##note<<
+  ## The \code{protocol} argument of the \code{\linkS4class{RLum.Analysis}} 
+  ## object is set to 'unknown' if not stated otherwise.  
+
+  ##seealso<<
+  ## \code{\linkS4class{Risoe.BINfileData}}, \code{\linkS4class{RLum.Analysis}},
+  ## \code{\link{readBIN2R}}
+
+  ##keyword<<
+  ## manip
+
+}, ex=function(){
+  
+  ##load data
+  data(ExampleData.BINfileData, envir = environment())
+  
+  ##convert values for position 1
+  Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1)
+  
+})#END OF STRUCTURE 

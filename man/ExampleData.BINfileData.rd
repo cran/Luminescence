@@ -4,7 +4,7 @@
 \title{Example data from a SAR OSL and SAR TL measurement for the package Luminescence}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Example data from a SAR OSL and TL measurement for package Luminescence directly extracted from
+Example data from a SAR OSL and TL measurement for package Luminescence directly, extracted from
 a Risoe BIN file and provided in an object of type \link{Risoe.BINfileData-class}
 }
 \usage{
@@ -17,7 +17,7 @@ ExampleData.BINfileData
 
 \code{TL.SAR.Data}: SAR TL measurement data
 
-Each Class object containing two slots: (a) \code{METADATA} is a \link{data.frame} with all metadata
+Each class object contains two slots: (a) \code{METADATA} is a \link{data.frame} with all metadata
 stored in the BIN file of the measurements and (b) \code{DATA} contains a list of vectors of the measured data
 (usually count values).
 } 
@@ -31,7 +31,7 @@ Lab: \tab Luminescence Laboratory Bayreuth\cr
 Lab-Code: \tab BT607\cr
 Location: \tab Saxony/Germany\cr
 Material: \tab Middle grain quartz measured \cr
-          \tab on aluminum cups on a Risoe DA-15 reader\cr
+          \tab on aluminum cups on a Risoe TL/OSL DA-15 reader\cr
 Reference: \tab unpublished
 }
 
@@ -45,7 +45,7 @@ Location: \tab Spain\cr
 Material: \tab Flint \cr
 Setup: \tab Risoe TL/OSL DA-20 reader \cr
        \tab (Filter: Semrock Brightline, \cr
-       \tab HC475/50, N2, unpolished, steel discs) \cr
+       \tab HC475/50, N2, unpolished steel discs) \cr
 Reference: \tab unpublished \cr
 Remarks: \tab dataset limited to one position\cr
 }

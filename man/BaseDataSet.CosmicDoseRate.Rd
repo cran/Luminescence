@@ -12,26 +12,28 @@ BaseDataSet.CosmicDoseRate
 %- maybe also 'usage' for other objects documented here.
 \format{
 
+\bold{values.cosmic.Softcomp}\cr
 
-\code{values.cosmic.Softcomp}: \cr 
-data frame containing cosmic dose rates for 
-shallow depths (0-1 m) obtained using the "AGE" program by Rainer Gruen (Gruen 2009). 
-These data essentially reproduce the graph shown in Fig. 1 of Prescott & Hutton (1988). \cr
+data frame containing cosmic dose rates for
+shallow depths (< 167 g cm^-2) obtained using the "AGE" program by Rainer Gruen 
+(cf. Gruen 2009). These data essentially reproduce the graph shown in Fig. 1 of 
+Prescott & Hutton (1988). \cr
 
-\code{values.factor.Altitude}: \cr 
+\bold{values.factor.Altitude}\cr 
+
 data frame containing altitude factors for adjusting geomagnetic field-change factors. 
 Values were read from Fig. 1 in Prescott & Hutton (1994). \cr
 
-\code{values.par.FJH}: \cr 
-data frame containing values for parameters F, J and H 
-(read off from Fig. 2 in Prescott & Hutton 1994) used in the expression 
+\bold{values.par.FJH}\cr
+
+data frame containing values for parameters F, J and H (read from Fig. 2 in Prescott & Hutton 1994) used in the expression 
 
 
-\deqn{D_{c} = D_{0}*(F+J*exp((altitude/1000)/H))}
+\deqn{Dc = D0*(F+J*exp((altitude/1000)/H))}
 } 
 
 \source{
-The following data were carefully read from figures in mentioned sources and used for fitting procedures. The derived expressions are used in the function \code{\link{calc_CosmicDoseRate}}.
+The following data were carefully read from figures in mentioned sources and used for fitting procedures. The derived expressions are used in the function \code{calc_CosmicDoseRate}.
 
 \bold{values.cosmic.Softcomp}
 
@@ -39,11 +41,13 @@ The following data were carefully read from figures in mentioned sources and use
 
 Program: \tab "AGE"\cr
 Reference: \tab Gruen (2009) \cr
-Fit: \tab 6-degree polynomial in the form of
+Fit: \tab Polynomials in the form of
 
 }
 
-\deqn{y = 0.6926*x^6 - 2.6189*x^5 + 4.1617*x^4 - 3.6374*x^3 + 1.9109*x^2 - 0.6258*x + 0.2999}
+\deqn{y = 2*10^-6*x^2-0.0008*x+0.2535 (for depths between 40-167 g cm^-2)} 
+
+\deqn{y = 2*10^-6*x^2-0.0008*x+0.2535 (For depths <40 g cm^-2)} 
 
 
 \bold{values.factor.Altitude}
@@ -67,34 +71,31 @@ Fit: \tab 2-degree polynomial in the form of
 Reference: \tab Prescott & Hutton (1994) \cr
 Page: \tab 500  \cr
 Figure: \tab 2 \cr
-Fits: \tab 6-degree polynomials and linear fits
+Fits: \tab 3-degree polynomials and linear fits
 
 }
 
-\deqn{F (non-linear-part, lambda < 36.5 deg.)}
+F (non-linear part, \eqn{\lambda} < 36.5 deg.):
 
-\deqn{y = 0.6926*x^6 - 2.6189*x^5 + 4.1617*x^4 - 
-3.6374*x^3 + 1.9109*x^2 - 0.6258*x + 0.2999}
+\deqn{y = -7*10^-7*x^3-8*10^-5*x^2-0.0009*x+0.3988}
 
-\deqn{F (linear-part, lambda > 36.5 deg.)}
+F (linear part, \eqn{\lambda} > 36.5 deg.):
 
 \deqn{y = -0.0001*x + 0.2347}
 
-\deqn{J (non-linear-part, lambda < 34 deg.)}
+J (non-linear part, \eqn{\lambda} < 34 deg.):
 
-\deqn{y = -2*10^-10*x^6 + 1*10^-8*x^5 + 4*10^-7*x^4 -
-3*10^-5*x^3 + 0.0006*x^2 - 0.0013*x + 0.52}
+\deqn{y = 5*10^-6*x^3-5*10^-5*x^2+0.0026*x+0.5177}
 
-\deqn{J (linear-part, lambda > 34 deg.)}
+J (linear part, \eqn{\lambda} > 34 deg.):
 
 \deqn{y = 0.0005*x + 0.7388}
 
-\deqn{H (non-linear-part, lambda < 36 deg.)}
+H (non-linear part, \eqn{\lambda} < 36 deg.):
 
-\deqn{y = 1*10^-9*x^6 - 8*10^-8*x^5 + 2*10^-6*x^4 - 
-3*10^-6*x^3 - 0.0002*x^2 - 0.0025*x + 4.399}
+\deqn{y = -3*10^-6*x^3-5*10^-5*x^2-0.0031*x+4.398}
 
-\deqn{H (linear-part, lambda > 36 deg.)}
+H (linear part, \eqn{\lambda} > 36 deg.):
 
 \deqn{y = 0.0002*x + 4.0914}
 
@@ -116,7 +117,7 @@ Prescott, J.R., Hutton, J.T., 1994. Cosmic ray contributions to dose rates for l
 
 \examples{
 ##load data
-data(BaseDataSet.CosmicDoseRate, envir = environment())
+data(BaseDataSet.CosmicDoseRate)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

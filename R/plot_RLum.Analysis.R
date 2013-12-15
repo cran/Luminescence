@@ -1,24 +1,36 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//plot_Rlum.Analysis.R
-##//////////////////////////////////////////////////////////////////////////////
-##==============================================================================
-#author: Sebastian Kreutzer
-#organisation: JLU Giessen
-##version: 0.1
-##date: 2013-09-06
-##==============================================================================
+plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 class object
+  ### The function provides a standardized plot output for curve data of an 
+  ### RLum.Analysis S4 class object
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  
+  ##section<<
+  ## version 0.1.2 [2013-11-24]
+  # ===========================================================================
 
-plot_RLum.Analysis <- function(object, 
-                              nrows = 3,    
-                              ncols = 2, 
-                              ...){
+  object, 
+  ### \code{\linkS4class{RLum.Analysis}} (\bold{required}): S4 object of class 
+  ### \code{RLum.Analysis}
+  
+  nrows = 3, 
+  ### \code{\link{integer}} (with default): sets number of rows for plot output
+  
+  ncols = 2, 
+  ### \code{\link{integer}} (with default): sets number of columns for plot output
+  
+  ...
+  ### further arguments and graphical parameters will be passed to the \code{plot} function.
+
+){
   
   # Integrity check ----------------------------------------------------------------------------
   
   ##check if object is of class RLum.Data.Curve
   if(is(object,"RLum.Analysis") == FALSE){
     
-    stop("[plot_RLum.Analysis]: Single input objects are not of type 'RLum.Data.Curve'")
+    stop("[plot_RLum.Analysis]: Input object is not of type 'RLum.Analysis'")
     
   }
   
@@ -33,13 +45,34 @@ plot_RLum.Analysis <- function(object,
   mtext <- if("mtext" %in% names(extraArgs)) {extraArgs$mtext} else 
   {""}
   
-  # Plotting ------------------------------------------------------------------------------------
+  ##log
+  log <- if("log" %in% names(extraArgs)) {extraArgs$log} else
+  {""}
   
-      ##grep RLum.Data.Curve objects 
+  ##lwd
+  lwd <- if("lwd" %in% names(extraArgs)) {extraArgs$lwd} else
+  {1}
+  
+  ##lty
+  lty <- if("lty" %in% names(extraArgs)) {extraArgs$lty} else
+  {1}
+  
+  ##type
+  type <- if("type" %in% names(extraArgs)) {extraArgs$type} else
+  {"l"}
+  
+  ##pch
+  pch <- if("pch" %in% names(extraArgs)) {extraArgs$pch} else
+  {1}
+  
+  # Plotting ------------------------------------------------------------------
+  
+      ##grep RLum.Data.Curve or RLum.Data.Spectrum objects 
       temp <- lapply(1:length(object@records), function(x){
                 
-                if(is(object@records[[x]], "RLum.Data.Curve") == TRUE){
-                  
+                if(is(object@records[[x]], "RLum.Data.Curve") == TRUE || 
+                   is(object@records[[x]], "RLum.Data.Spectrum") == TRUE){
+                   
                   object@records[[x]]
                   
                 }})
@@ -62,19 +95,71 @@ plot_RLum.Analysis <- function(object,
       ##plot curves
       for(i in 1:length(temp)){
                 
+            if(is(temp[[i]], "RLum.Data.Curve") == TRUE){
             plot_RLum.Data.Curve(temp[[i]], 
                  col = if(grepl("IRSL", temp[[i]]@recordType) == TRUE){"red"} else 
                        if(grepl("OSL", temp[[i]]@recordType) == TRUE){"blue"} else
                        {"black"},
                      mtext = paste("#",i,sep=""),
                      par.local = FALSE,
-                     main = if(main==""){temp[[i]]@recordType}else{main})           
-               
-           
-           if(i%%(nrows*ncols)==0){
-             mtext(mtext, outer = TRUE, side=3, line=-2)
-           }
-        }     
+                     main = if(main==""){temp[[i]]@recordType}else{main},
+                     log = log,
+                     lwd = lwd,
+                     type = type,
+                     lty = lty, 
+                     pch = pch)
+          
+            
+           } else if(is(temp[[i]], "RLum.Data.Spectrum") == TRUE) {
+             
+             plot_RLum.Data.Spectrum(temp[[i]],
+                  
+                  mtext = paste("#",i,sep=""),
+                  par.local = FALSE,
+                  main = if(main==""){temp[[i]]@recordType}else{main})
         
+           }  
+            
+          if(i%%(nrows*ncols)==0){
+              mtext(mtext, outer = TRUE, side=3, line=-2)
+          }
+            
+        }#end for loop
+            
+        
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
   
-}
+  ##details<<
+  ## The function produces a multiple plot output. 
+  ## A file output is recommended (e.g., \code{\link{pdf}}).
+  
+  ##value<<
+  ## Returns multiple plots.
+  
+  ##references<<
+  ## #
+  
+  ##note<<
+  ## Not all arguments available for \code{\link{plot}} will be passed!
+  ## Only plotting of \code{RLum.Data.Curve} and \code{RLum.Data.Spectrum}
+  ## objects are currently supported. 
+  
+  ##seealso<<
+  ## \code{\link{plot}}, \code{\link{plot_RLum}}, 
+  ## \code{\link{plot_RLum.Data.Curve}}
+  
+  ##keyword<<
+  ## aplot
+  
+}, ex=function(){
+  
+  ###load data
+  data(ExampleData.BINfileData, envir = environment())
+  
+  ##convert values for position 1
+  temp <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
+  
+  ##plot
+  plot_RLum.Analysis(temp)
+  
+})#END OF STRUCTURE

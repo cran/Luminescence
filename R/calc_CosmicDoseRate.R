@@ -1,6 +1,6 @@
 calc_CosmicDoseRate<- structure(function( # Calculate the cosmic dose rate
   ### This function calculates the cosmic dose rate taking into account the
-  ### soft- and hard-component of the cosmic ray flux and allows for 
+  ### soft- and hard-component of the cosmic ray flux and allows
   ### corrections for geomagnetic latitude, altitude above sea-level and 
   ### geomagnetic field changes.
 
@@ -9,7 +9,7 @@ calc_CosmicDoseRate<- structure(function( # Calculate the cosmic dose rate
   ## Christoph Burow, University of Cologne (Germany) \cr
   
   ##section<<
-  ## version 0.4 [2013-09-04] 
+  ## version 0.5 [2013-11-25] 
   # ===========================================================================
   
   depth,
@@ -22,10 +22,10 @@ calc_CosmicDoseRate<- structure(function( # Calculate the cosmic dose rate
   ### \code{c(density_1, density_2, ..., density_n)} 
   latitude,
   ### \code{\link{numeric}} (\bold{required}): latitude (decimal 
-  ### degree), north positive
+  ### degree), N positive
   longitude,
   ### \code{\link{numeric}} (\bold{required}): longitude (decimal 
-  ### degree), east positive
+  ### degree), E positive
   altitude,
   ### \code{\link{numeric}} (\bold{required}): altitude (m above 
   ### sea-level)
@@ -50,21 +50,22 @@ calc_CosmicDoseRate<- structure(function( # Calculate the cosmic dose rate
 ## CONSISTENCY CHECK OF INPUT DATA
 ##============================================================================##
   
-  if(depth < 0 || density < 0 || altitude < 0) { 
-    cat(paste("\n No negative values allowed for depth/density/altitude"))
+  if(depth < 0 || density < 0) { 
+    cat(paste("\nNo negative values allowed for depth and density"))
       stop(domain=NA)
     }
   
-  if(latitude < 0) { 
-    cat(paste("\n CAUTION: For latitude only north positive values allowed. 
-              Will automatically be converted for calculation."))
-    }
-  
-  
-  if(est.age > 80 & corr.fieldChanges == TRUE) {
-    cat(paste("\n CAUTION: No geomagnetic field change correction for samples 
-              older >80 ka possible!"))
+  if(corr.fieldChanges == TRUE) {
+    if(is.na(est.age) == TRUE) {
+    cat(paste("\nCorrection for geomagnetic field changes requires", 
+              "an age estimate."), fill = FALSE)
+    stop(domain=NA)
+  }
+  if(est.age > 80) {
+    cat(paste("\nCAUTION: No geomagnetic field change correction for samples", 
+              "older >80 ka possible!"), fill = FALSE)
     corr.fieldChanges<- FALSE
+  }
   }
   
   
@@ -134,32 +135,36 @@ for(i in 1:length(hgcm)) {
   
     d0<- (C/((((hgcm[i]+d)^alpha)+a)*(hgcm[i]+H)))*exp(-B*hgcm[i])
 
-  } else {
+  } 
+  if(hgcm[i]*100 < 167) {
     
-    if(half.depth==TRUE) {
-      x<- depth[i]/2
-    }
+    temp.hgcm<- hgcm[i]*100
+    d0.ph<- (C/((((hgcm[i]+d)^alpha)+a)*(hgcm[i]+H)))*exp(-B*hgcm[i])
+    
+    if(hgcm[i]*100 < 40) {
+      d0<- -6*10^-8*temp.hgcm^3+2*10^-5*temp.hgcm^2-0.0025*temp.hgcm+0.2969
+    } 
     else {
-      x<- depth[i]
+      d0<- 2*10^-6*temp.hgcm^2-0.0008*temp.hgcm+0.2535
     }
-    
-    d0<- 0.6926*x^6 - 2.6189*x^5 + 4.1617*x^4 - 3.6374*x^3 + 
-         1.9109*x^2 - 0.6258*x + 0.2999
-    
+    if(d0.ph > d0) {
+      d0<- d0.ph
+    }    
   }
 # Calculate geomagnetic latitude
-  
-  gml<- (asin(0.203*cos((pi/180)*latitude)*cos(((pi/180)*longitude)-
-        (291*pi/180))+0.979*sin((pi/180)*abs(latitude))))/(pi/180)
+  gml.temp<- 0.203*cos((pi/180)*latitude)*
+                cos(((pi/180)*longitude)-(291*pi/180))+0.979*
+                sin((pi/180)*latitude)
+  true.gml<- asin(gml.temp)/(pi/180)
+  gml<- abs(asin(gml.temp)/(pi/180))
 
-# Find values for F, J and H from graph shown in Prescott & Hutton (1994)
-  # values were read from the graph and fitted with 6 degree polynomials and a 
+  # Find values for F, J and H from graph shown in Prescott & Hutton (1994)
+  # values were read from the graph and fitted with 3 degree polynomials and a 
   # linear part
   
  if(gml < 36.5) { # Polynomial fit
    
-   F_ph<- 1*10^-9*gml^6 - 2*10^-7*gml^5 + 6*10^-6*gml^4 -
-          0.0001*gml^3 + 0.0012*gml^2 - 0.0054*gml + 0.4001
+   F_ph<- -7*10^-7*gml^3-8*10^-5*gml^2-0.0009*gml+0.3988
  }
   else { # Linear fit
    
@@ -169,8 +174,7 @@ for(i in 1:length(hgcm)) {
   
  if(gml < 34) { # Polynomial fit
    
-   J_ph<- -2*10^-10*gml^6 + 1*10^-8*gml^5 + 4*10^-7*gml^4 -
-          3*10^-5*gml^3 + 0.0006*gml^2 - 0.0013*gml + 0.52
+   J_ph<- 5*10^-6*gml^3-5*10^-5*gml^2+0.0026*gml+0.5177
      
  }
   else { # Linear fit
@@ -179,8 +183,7 @@ for(i in 1:length(hgcm)) {
   
  if(gml < 36) { # Polynomial fit
   
-   H_ph<- 1*10^-9*gml^6 - 8*10^-8*gml^5 + 2*10^-6*gml^4 -
-          3*10^-6*gml^3 - 0.0002*gml^2 - 0.0025*gml + 4.399
+   H_ph<- -3*10^-6*gml^3-5*10^-5*gml^2-0.0031*gml+4.398
      
  }
   else { # Linear fit
@@ -193,6 +196,7 @@ for(i in 1:length(hgcm)) {
   # Prescott & Hutton (1994)
   
   dc<- d0*(F_ph + J_ph*exp((altitude/1000)/H_ph))  
+  
   
 ## Additional correction for geomagnetic field change
   
@@ -255,6 +259,8 @@ for(i in 1:length(hgcm)) {
     }
   
   # Find altitude factor via fitted function 2-degree polynomial
+  # This factor is only available for positive altitudes
+  if(altitude > 0) { 
   
   alt.fac<- -0.026*(altitude/1000)^2 + 0.6628*altitude/1000 + 1.0435
   
@@ -265,11 +271,14 @@ for(i in 1:length(hgcm)) {
   diff.one<- corr.fac - 1
   corr.fac<- corr.fac + diff.one * alt.fac
   
+  }
+  
   # Final correction of cosmic dose rate
   
   dc<- dc * corr.fac
   
-
+  print(paste("corr.fac",corr.fac,"diff.one",diff.one,"alt.fac",alt.fac))
+  
     }
     
     else {
@@ -279,7 +288,6 @@ for(i in 1:length(hgcm)) {
   }
   
 # calculate error
-  
   dc.err<- dc*error/100
   
 # save intermediate results before next sample is calculated
@@ -311,13 +319,14 @@ if(length(hgcm)==1) {
   cat(paste("\n cosmic dose rate (Gy ka^-1)    :", round(d0,4)))
   cat(paste("\n  [@sea-level & 55 deg. N G.lat]"))
   cat(paste("\n"))
-  cat(paste("\n geomagnetic latitude (deg.)    :", round(gml,1)))
+  cat(paste("\n geomagnetic latitude (deg.)    :", round(true.gml,1)))
   cat(paste("\n"))
   cat(paste("\n cosmic dose rate (Gy ka^-1)    :", round(dc,4),"+-",
             round(dc.err,4)))
   cat(paste("\n  [corrected]                 "))
   cat(paste("\n ---------------------------------------------------------\n\n"))
 
+  cat(paste("F", round(F_ph,2), "J", round(J_ph,2), "H", round(H_ph,2)))
   
 ##============================================================================##  
 ##RETURN VALUES
@@ -353,11 +362,11 @@ if(length(hgcm)==1) {
   
   temp2<- data.frame(latitude=latitude,longitude=longitude,
                        altitude=altitude,total_absorber.gcm2=hgcm*100,
-                         d0=d0,geom_lat=gml,dc=dc)
+                         d0=d0,geom_lat=true.gml,dc=dc)
                      
   results<- data.frame(cbind(temp1,temp2))
   
-  invisible(list(results=results)) #nicht als liste ausgeben
+  invisible(list(results=results)) 
   
 }
   else {
@@ -371,7 +380,7 @@ if(length(hgcm)==1) {
     #return value
     add.info<- data.frame(latitude=latitude,longitude=longitude,
                           altitude=altitude,total_absorber.gcm2=hgcm*100,
-                          geom_lat=gml)
+                          geom_lat=true.gml)
     add.info<- rbind(add.info*length(i))
     colnames(profile.results)<- c("depth","d0","dc","dc_err")
     
@@ -381,7 +390,7 @@ if(length(hgcm)==1) {
     ### Returns terminal output. In addition a list is returned containing 
     ### the following element:
     ###
-    ### \code{results} data frame with results of cosmic dose rate calculation.
+    ### \item{results}{data frame with results of cosmic dose rate calculation.}
     
     ##details<<
     ## This function calculates the total cosmic dose rate considering both the 
@@ -402,7 +411,7 @@ if(length(hgcm)==1) {
     ## (3) Calculate cosmic dose rate at sea-level and 55 deg. latitude
     ##
     ## a) If absorber is > 167 g/cm^2 (only hard-component; Allkofer et al. 
-    ## 1975): apply equation given by Prescott & Hutton (1994) (Barbouti & 
+    ## 1975): apply equation given by Prescott & Hutton (1994) (c.f. Barbouti & 
     ## Rastin 1983)
     ##
     ## \deqn{D0 = C/(((absorber+d)^\alpha+a)*(absober+H))*exp(-B*absorber)}
@@ -418,7 +427,7 @@ if(length(hgcm)==1) {
     ##
     ## (5) Apply correction for geomagnetic latitude and altitude above 
     ## sea-level. Values for F, J and H were read from Fig. 3 shown in 
-    ## Prescott & Stephan (1982) and fitted with 6-degree polynomials for 
+    ## Prescott & Stephan (1982) and fitted with 3-degree polynomials for 
     ## lambda < 35 degree and a linear fit for lambda > 35 degree.
     ##
     ## \deqn{Dc = D0*(F+J*exp((altitude/1000)/H))}
@@ -446,7 +455,7 @@ if(length(hgcm)==1) {
     ##
     ## (3) Another possibility is to calculate the cosmic dose rate for more 
     ## than one sample of the same profile. This is done by providing more than
-    ## one value for \code{depth} and only one for \code{density}. For example,
+    ## one values for \code{depth} and only one for \code{density}. For example,
     ## \code{depth = c(1, 2, 3), density = 1.7} will calculate the cosmic dose 
     ## rate for three samples in 1, 2 and 3 m depth in a sediment of density 
     ## 1.7 g/cm^3.

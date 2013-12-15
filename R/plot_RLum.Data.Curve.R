@@ -1,18 +1,30 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//plot_Rlum.Data.Curve.R
-##//////////////////////////////////////////////////////////////////////////////
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: JLU Giessen
-##version: 0.1
-##date: 2013-09-27
-##==============================================================================
-
-plot_RLum.Data.Curve <- function(object, 
-                                 par.local = TRUE,
-                                 ...){
+plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve S4 class object
+  ### The function provides a standardized plot output for curve data of an 
+  ### RLum.Data.Curve S4 class object 
   
-  # Integrity check ----------------------------------------------------------------------------
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  
+  ##section<<
+  ## version 0.1.2 [2013-11-25]
+  # ===========================================================================
+
+  object, 
+  ### \code{\linkS4class{RLum.Data.Curve}} (\bold{required}): 
+  ### S4 object of class \code{RLum.Data.Curve}
+  
+  par.local = TRUE,
+  ### \code{\link{logical}} (with default): use local graphical parameters for plotting, e.g.
+  ### the plot is shown in one column and one row. If \code{par.local = FALSE},  
+  ### global parameters are inherited.
+  
+  ...
+  ### further arguments and graphical parameters that will be passed to the 
+  ### \code{plot} function
+){
+  
+  # Integrity check -------------------------------------------------------------
   
   ##check if object is of class RLum.Data.Curve
   if(class(object) != "RLum.Data.Curve"){
@@ -66,7 +78,7 @@ plot_RLum.Data.Curve <- function(object,
   
   sub <-  if("sub" %in% names(extraArgs)) {extraArgs$sub} else
   { 
-    if((object@recordType == "TL") & "RATE" %in% names(object@info)){
+    if((grepl("TL", object@recordType) == TRUE) & "RATE" %in% names(object@info)){
       paste("(",object@info$RATE," K/s)", sep = "")
     }                
   }
@@ -75,6 +87,15 @@ plot_RLum.Data.Curve <- function(object,
   
   type <- if("type" %in% names(extraArgs)) {extraArgs$type} else 
   {"l"}
+  
+  lwd <- if("lwd" %in% names(extraArgs)) {extraArgs$lwd} else 
+  {1}
+  
+  lty <- if("lty" %in% names(extraArgs)) {extraArgs$lty} else 
+  {1}
+  
+  pch <- if("pch" %in% names(extraArgs)) {extraArgs$pch} else 
+  {1}
   
   col <- if("col" %in% names(extraArgs)) {extraArgs$col} else 
   {1}
@@ -90,6 +111,8 @@ plot_RLum.Data.Curve <- function(object,
   
   mtext <- if("mtext" %in% names(extraArgs)) {extraArgs$mtext} else 
   {""}
+  
+  fun       <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE}
   
   ##to avoid problems with plot method of RLum.Analysis
   plot.trigger <- if("plot.trigger" %in% names(extraArgs)) {extraArgs$plot.trigger} else 
@@ -108,8 +131,48 @@ plot_RLum.Data.Curve <- function(object,
        sub = sub,
        type = type,
        log = log,
-       col = col)
+       col = col,
+       lwd = lwd,
+       pch = pch,
+       lty = lty)
   
   ##plot additional mtext
-  mtext(mtext, side = 3, cex = cex*0.8)          
-}
+  mtext(mtext, side = 3, cex = cex*0.8)  
+  
+  if(fun==TRUE){sTeve()}
+  
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+  
+  ##details<<
+  ## Only single curve data can be plotted with this function. 
+  ## Arguments according to \code{\link{plot}}.
+  
+  ##value<<
+  ## Returns a plot.
+  
+  ##references<<
+  ## #
+  
+  ##note<<
+  ## Not all arguments of \code{\link{plot}} will be passed!
+  
+  ##seealso<<
+  ## \code{\link{plot}}, \code{\link{plot_RLum}}
+  
+  ##keyword<<
+  ## aplot
+  
+}, ex=function(){
+  
+  ##plot curve data
+  
+  #load Example data
+  data(ExampleData.CW_OSL_Curve, envir = environment())
+  
+  #transform data.frame to RLum.Data.Curve object
+  temp <- as(ExampleData.CW_OSL_Curve, "RLum.Data.Curve")
+  
+  #plot RLum.Data.Curve object
+  plot_RLum.Data.Curve(temp)
+  
+})#END OF STRUCTURE

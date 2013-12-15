@@ -1,29 +1,47 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//analyse_SAR.TL.R
-##//////////////////////////////////////////////////////////////////////////////
-##
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: Freiberg Instruments, JLU Giessen
-##version: 0.1.2
-##date: 2013-09-25
-##==============================================================================
-##TODO add backround subtraction
-##TODO exchange example data set
+analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements 
+  ### The function performs a SAR TL analysis on a \code{\linkS4class{RLum.Analysis}}
+  ### object including growth curve fitting.
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
+  
+  ##section<<
+  ## version 0.1.2 [2013-09-25]
+  # ===========================================================================
 
-
-analyse_SAR.TL<-function(
-                         object,
-                         object.background, #not used at the moment
-                         signal.integral.min,
-                         signal.integral.max, #e.g. c(1:2) 
-                         sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"),
-                         rejection.criteria = list(recycling.ratio=10,
-                                                   recuperation.rate=10
-                         ),
-                         log = "",
-                         ... 
-                         ){
+  object,
+  ### \code{\linkS4class{RLum.Analysis}}(\bold{required}): input object containing 
+  ### data for analysis
+                        
+  object.background, 
+  ### currently not used
+  
+  signal.integral.min,
+  ### \link{integer} (\bold{required}): requires the channel number for the 
+  ### lower signal integral bound (e.g. \code{signal.integral.min = 100})
+  
+  signal.integral.max,
+  ###  \link{integer} (\bold{required}): requires the channel number for the 
+  ### upper signal integral bound (e.g. \code{signal.integral.max = 200})
+  
+  sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"),
+  ### \link{vector} \link{character} (with default): specifies the general 
+  ### sequence structure. Three steps are allowed 
+  ### \code{PREHEAT}, \code{SIGNAL}, \code{BACKGROUND}
+  
+  rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
+  ### \link{list} (with default): list containing rejection criteria in 
+  ### percentage for the calculation.
+  
+  log = "",
+  ### \link{character} (with default): a character string which contains "x" 
+  ### if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic 
+  ### and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}).
+  
+  ... 
+  ### further arguments that will be passed to the function 
+  ### \code{\link{plot_GrowthCurve}}
+){
 
   
 # CONFIG  -----------------------------------------------------------------
@@ -58,7 +76,7 @@ analyse_SAR.TL<-function(
 # Protocol Integrity Checks -------------------------------------------------- 
    
   ##Remove non TL-curves from object by selecting TL curves
-  object@records <- get_RLum.Analysis(object, recordType=type.curves)
+  object@records <- get_RLum.Analysis(object, recordType = type.curves)
 
   ##ANALYSE SEQUENCE OBJECT STRUCTURE
   
@@ -490,5 +508,67 @@ temp.sample <- data.frame(Dose=LnLxTnTx$Dose,
     
 
   return(newRLumResults.analyse_SAR.TL)
+  
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
 
-}##EOF
+  ##details<<
+  ## This function performs a SAR TL analysis on a set of curves. The SAR procedure in 
+  ## general is given by Murray and Wintle (2000). For the calculation of the 
+  ## Lx/Tx value the function \link{calc_TLLxTxRatio} is used.\cr\cr
+  ## \bold{Provided rejection criteria}\cr\cr
+  ## \sQuote{recyling.ratio}: calculated for every repeated regeneration dose point.\cr
+  ## \sQuote{recuperation.rate}: recuperation rate calculated by comparing the 
+  ## Lx/Tx values of the zero regeneration point with the Ln/Tn value (the Lx/Tx 
+  ## ratio of the natural signal). 
+  ## For methodological background see Aitken and Smith (1988)\cr
+
+
+  ##value<<
+  ## A plot (optional) and an \code{\linkS4class{RLum.Results}} object is returned 
+  ## containing the following elements: 
+  ## \item{De.values}{\link{data.frame} containing De-values and further parameters}
+  ## \item{LnLxTnTx.values}{\link{data.frame} of all calculated Lx/Tx values including 
+  ## signal, background counts and the dose points.}
+  ## \item{rejection.criteria}{\link{data.frame} with values that might by used 
+  ## as rejection criteria. NA is produced if no R0 dose point exists.}\cr\cr
+  ## \bold{note:} the output should be accessed using the function 
+  ## \code{\link{get_RLum.Results}}
+
+  ##references<<
+  ## Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after bleaching. 
+  ## Quaternary Science Reviews, 7, pp. 387-393.
+  ## 
+  ## Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an 
+  ## improved single-aliquot regenerative-dose protocol. Radiation Measurements, 
+  ## 32, pp. 57-73. 
+  
+  ##note<<
+  ## \bold{THIS IS A BETA VERSION}\cr\cr
+  ## None TL curves will be removed from the input object without further warning.
+
+  ##seealso<<
+  ## \code{\link{calc_TLLxTxRatio}}, \code{\link{plot_GrowthCurve}}, 
+  ## \code{\linkS4class{RLum.Analysis}}, \code{\linkS4class{RLum.Results}}
+  ## \code{\link{get_RLum.Results}}
+
+  ##keyword<<
+  ## datagen
+  ## plot
+
+}, ex=function(){
+  
+  ##load data
+  data(ExampleData.BINfileData, envir = environment())
+  
+  ##transform the values from the first position in a RLum.Analysis object
+  object <- Risoe.BINfileData2RLum.Analysis(TL.SAR.Data, pos=3)
+  
+  ##perform analysis
+  analyse_SAR.TL(object, 
+                 signal.integral.min = 210, 
+                 signal.integral.max = 220, 
+                 log = "y", 
+                 fit.method = "EXP OR LIN",
+                 sequence.structure = c("SIGNAL", "BACKGROUND"))
+  
+})#END OF STRUCTURE

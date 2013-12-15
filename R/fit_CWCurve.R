@@ -1,40 +1,81 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//fit_CWCurve.R - for CW - curve fitting 
-##/////////////////////////////////////////////////////////////////////////////
-##
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: JLU of Giessen
-##version: 0.3
-##date: 2013-09-30
-##==============================================================================
+fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves [beta version]
+  ### The function determines the weighted least-squares estimates of the 
+  ### component parameters of a CW-OSL signal for a given maximum number of components 
+  ### and returns various component parameters. The fitting procedure uses the 
+  ### \code{\link{nls}} function with the \code{port} algorithm.
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany)\cr
+  
+  ##section<<
+  ## version 0.4 [2013-11-27]
+  # ===========================================================================
 
-fit_CWCurve<- function(
-                  values, #values from bin file or what ever
+  values,
+  ### \code{\linkS4class{RLum.Data.Curve}} or \link{data.frame} 
+  ### (\bold{required}): x, y data of measured values (time and counts). See examples.
                            
-                  n.components.max, #maximum number of components,
-                  fit.failure_threshold=3, #threshold for fit failure
-                  fit.trace=FALSE,
-                  fit.calcError=FALSE,
+  n.components.max, 
+  ### \link{vector} (optional): maximum number of components that are to be used for 
+  ### fitting. The upper limit is 7.
+  
+  fit.failure_threshold = 3,
+  ### \link{vector} (with default): limits the failed fitting attempts.
+  
+  fit.trace = FALSE,
+  ### \link{logical} (with default): traces the fitting process on the terminal.
+  
+  fit.calcError = FALSE,
+  ### \link{logical} (with default): calculate 1-sigma error range of components 
+  ### using \code{\link{confint}}
                   
-                  LED.power=36, #in mW/cm^2
-                  LED.wavelength=470, #in nm
+  LED.power = 36, 
+  ### \link{numeric} (with default): LED power (max.) used for intensity ramping 
+  ### in mW/cm^2. \bold{Note:} The value is used for the calculation of the 
+  ### absolute photoionisation cross section.
+  
+  LED.wavelength = 470,
+  ### \link{numeric} (with default): LED wavelength used for stimulation in nm. 
+  ### \bold{Note:} The value is used for the calculation of the absolute 
+  ### photoionisation cross section.
 
-                  log="", #set log scale
-                  cex.global=0.6,
-                  main="CW-OSL Curve Fit",
-                  sample_code="Default", #set sample code 
-                  ylab, #provide more options for a brighter application
-                  xlab, #provide more options for a brighter application
+  log = "", 
+  ### \link{character} (optional): option for log-scaled axis, 
+  ### works as in \link{plot}
+  
+  cex.global = 0.6,
+  ### \link{numeric} (with default): global scaling factor.
+  
+  main = "CW-OSL Curve Fit",
+  ### \link{character} (with default): header for plot output.
+
+  sample_code = "Default", 
+  ### \link{character} (optional): sample code used for the plot and the 
+  ### optional output table (mtext).
+  
+  ylab, 
+  ### \link{character} (with default): alternative y-axis labelling 
+  
+  xlab, 
+  ### \link{character} (with default): alternative x-axis labelling 
                   
-                  output.path, #outputname is produced automatically
+  output.path, 
+  ### \link{character} (optional): output path for table output containing the 
+  ### results of the fit. The file name is set automatically. If
+  ### the file already exists in the directory, the values are appended.
                   
-                  output.terminal=TRUE, #terminal output TRUE/FALSE
-                  output.terminalAdvanced=TRUE, #advanced terminal output TRUE/FALSE
-                                                #only used if output.terminal is TRUE
-                                               
-                  output.plot=TRUE #plot TRUE or FALSE
-                  ) {
+  output.terminal = TRUE, 
+  ### \link{logical} (with default): terminal ouput with fitting results.
+  
+  output.terminalAdvanced = TRUE, 
+  ### \link{logical} (with default): enhanced terminal output. 
+  ### Requires \code{output.terminal = TRUE}.
+  ### If \code{output.terminal = FALSE} no advanced output is possible.
+                                                                                           
+  output.plot = TRUE
+  ### \link{logical} (with default): returns a plot of the fitted curves.
+){
                                   		
     
       ##set sys language to EN (to get the error messages as well in EN) 
@@ -71,23 +112,33 @@ fit_CWCurve<- function(
       
      
       
-##=================================================================================================##		
+##============================================================================##		
 ## FITTING
-##=================================================================================================##
+##============================================================================##
 ##             
 ##////equation used for fitting////(start)
-  fit.equation<-function(I0.i,lambda.i){   
+  fit.equation <- function(I0.i,lambda.i){   
                 equation<-parse(
                 text=paste("I0[",I0.i,"]*lambda[",lambda.i,"]*exp(-lambda[",lambda.i,"]*x)",
                 collapse="+",sep=""))
                 return(equation)
   }
 ##////equation used for fitting///(end)    
+      
+##////equation used for fitting////(start)
+  fit.equation.simple <- function(I0.i,lambda.i){   
+        equation<-parse(
+          text=paste("I0[",I0.i,"]*exp(-lambda[",lambda.i,"]*x)",
+                     collapse="+",sep=""))
+        return(equation)
+      }
+##////equation used for fitting///(end)          
+      
        
   ##set variables     
-  fit.trigger<-TRUE #triggers if the fitting should stopped
-  n.components<-1 #number of components used for fitting - start with 1
-  fit.failure_counter<-0 #counts the failed fitting attempts
+  fit.trigger <- TRUE #triggers if the fitting should stopped
+  n.components <- 1 #number of components used for fitting - start with 1
+  fit.failure_counter <- 0 #counts the failed fitting attempts
  
   ##if n.components_max is missing, then it is Inf
   if(missing(n.components.max)==TRUE){n.components.max<-Inf}     
@@ -96,7 +147,7 @@ fit_CWCurve<- function(
 ##       
 ##
 ##++++Fitting loop++++(start)       
-while(fit.trigger==TRUE & n.components<=n.components.max){
+while(fit.trigger==TRUE & n.components <= n.components.max){
         
     ##rough automatic start parameter estimation
     I0<-rep(values[1,2]/3,n.components)
@@ -116,48 +167,86 @@ while(fit.trigger==TRUE & n.components<=n.components.max){
     ##set fit equation as fit function
     I0.i<-1:n.components
     lambda.i<-1:n.components
-    fit.function<-fit.equation(I0.i=I0.i,lambda.i=lambda.i)
-         
-  
+    fit.function.simple <- fit.equation.simple(I0.i=I0.i,lambda.i=lambda.i)
+    
+    
+    ##try fit simple    
+    fit.try<-try(nls(y~eval(fit.function.simple), 
+                     trace=fit.trace, 
+                     data=values, 
+                     algorithm="port",
+                     na.action = "na.exclude",
+                     start=list(
+                       I0=I0,
+                       lambda=lambda
+                     ),
+                     nls.control(
+                       maxiter=50,
+                       warnOnly=FALSE,
+                       minFactor=1/1048
+                     ),
+                     lower=c(I0=0,lambda=0)# set lower boundaries for components
+    ), silent=TRUE# nls
+    )#end try
+   
+    if(inherits(fit.try,"try-error") == FALSE){
+
+      ##grep parameters from simple fit to further work with them
+      parameters <- coef(fit.try)
+      
+      #grep parameters an set new starting parameters
+      I0 < -parameters[1:(length(parameters)/2)]/2
+      lambda <- parameters[(1+(length(parameters)/2)):length(parameters)] 
+          
+      fit.function<-fit.equation(I0.i=I0.i,lambda.i=lambda.i)
+
     ##try fit    
     fit.try<-try(nls(y~eval(fit.function), 
                      trace=fit.trace, 
                      data=values, 
                      algorithm="port",
+                     na.action = "na.exclude",
                 start=list(
-  						            I0=I0,
-                          lambda=lambda
+  						            I0 = I0,
+                          lambda = lambda
 							            ),
 						    nls.control(
-						             maxiter=500,
-                         warnOnly=FALSE,
-                         minFactor=1/2048,
+						             maxiter = 500,
+                         warnOnly = FALSE,
+                         minFactor = 1/4096
                          ),
-						    lower=c(I0=0,lambda=0)# set lower boundaries for components
+						    lower=c(I0 = 0,lambda = 0)# set lower boundaries for components
             ), silent=TRUE# nls
 		)#end try
-   
+    }
+
     ##count failed attempts for fitting 
     if(inherits(fit.try,"try-error")==FALSE){
-      fit<-fit.try
-      n.components<-n.components+1       
-    }else{fit.failure_counter<-fit.failure_counter+1
+      
+      fit <- fit.try
+      n.components <- n.components + 1       
+      
+    }else{
+        
+         n.components<-n.components+1    
+         fit.failure_counter <- fit.failure_counter+1
          if(n.components==fit.failure_counter & exists("fit")==FALSE){fit<-fit.try}}
+    
     
     ##stop fitting after a given number of wrong attempts
     if(fit.failure_counter>=fit.failure_threshold){fit.trigger<-FALSE}
-   
+    
 }##end while 
 ##++++Fitting loop++++(end)    
       
-##=================================================================================================##   
+##============================================================================##   
 ## FITTING OUTPUT
-##=================================================================================================##       
+##============================================================================##       
     
     ##grep parameters
     if(inherits(fit,"try-error")==FALSE){
      
-      parameters<-coef(fit)
+      parameters <- coef(fit)
     
     ##correct fit equation for the de facto used number of components
       I0.i<-1:(length(parameters)/2)
@@ -172,10 +261,10 @@ while(fit.trigger==TRUE & n.components<=n.components.max){
           o<-order(lambda,decreasing=TRUE)
           I0<-I0[o]
           lambda<-lambda[o]
-                      
-##=================================================================================================##   
+                   
+##============================================================================##   
 ## Additional Calculation
-##=================================================================================================##
+##============================================================================##
     
       
     ## ---------------------------------------------  
@@ -224,9 +313,9 @@ while(fit.trigger==TRUE & n.components<=n.components.max){
         
       }#endif::fit.calcError
       
-##=================================================================================================##   
+##============================================================================##   
 ## Terminal Output 
-##=================================================================================================##   
+##============================================================================##   
       
       if (output.terminal==TRUE){  
         
@@ -249,17 +338,17 @@ while(fit.trigger==TRUE & n.components<=n.components.max){
         writeLines("------------------------------------------------------------------------------")
       }#end if    
    
-##=================================================================================================##   
+##============================================================================##   
 ## Terminal Output (advanced)
-##=================================================================================================##   
+##============================================================================##   
 if (output.terminalAdvanced==TRUE && output.terminal==TRUE){    
 
     ##sum of squares
  		writeLines(paste("pseudo-R^2 = ",pR,sep=""))
 }#end if
-##=================================================================================================##   
+##============================================================================##   
 ## Table Output
-##=================================================================================================##                  
+##============================================================================##                  
 
     ##write output table if values exists
     if (exists("fit")){
@@ -339,16 +428,15 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
     ##+++++++++++++++++++++++++++++++
     ##set 1st polygon
     ##1st polygon (calculation)
-    
     y.contribution_first<-(I0[1]*lambda[1]*exp(-lambda[1]*x))/(eval(fit.function))*100
     
     ##avoid NaN values (might happen with synthetic curves)
     y.contribution_first[is.nan(y.contribution_first)==TRUE] <- 0
-    
+        
     ##set values in matrix
     component.contribution.matrix[,3] <- 100
-    component.contribution.matrix[,4] <- 100-rev(y.contribution_first)
-   
+    component.contribution.matrix[,4] <- 100 - rev(y.contribution_first)
+
     ##+++++++++++++++++++++++++++++++
     ##set polygons in between
     ##polygons in between (calculate and plot)
@@ -357,23 +445,28 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
       y.contribution_prev <- y.contribution_first
       i<-2
       
+      ##matrix stepping
+      k <- seq(3, ncol(component.contribution.matrix), by=2)
+  
       while (i<=length(I0)-1) {
-        y.contribution_next<-I0[i]*lambda[i]*exp(-lambda[i]*x)/(eval(fit.function))*100
         
+        y.contribution_next<-I0[i]*lambda[i]*exp(-lambda[i]*x)/(eval(fit.function))*100
+   
         ##avoid NaN values
         y.contribution_next[is.nan(y.contribution_next)==TRUE] <- 0
-        
+       
         ##set values in matrix
-        component.contribution.matrix[,(3+i)] <- 100-y.contribution_prev
-        component.contribution.matrix[,(4+i)] <- rev(100-y.contribution_prev-
+        component.contribution.matrix[,k[i]] <- 100 - y.contribution_prev
+        component.contribution.matrix[, k[i]+1] <- rev(100-y.contribution_prev-
                                                        y.contribution_next)
-        
+          
         y.contribution_prev <- y.contribution_prev + y.contribution_next
         
-        i<-i+1        
+        i <- i+1     
+
       }#end while loop
     }#end if
-    
+
     ##+++++++++++++++++++++++++++++++
     ##set last polygon
     
@@ -385,7 +478,15 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
     y.contribution_last[is.nan(y.contribution_last)==TRUE]<-0
     
     component.contribution.matrix[,((2*length(I0))+1)] <- y.contribution_last
-    component.contribution.matrix[,((2*length(I0))+2)] <- 0          
+    component.contribution.matrix[,((2*length(I0))+2)] <- 0   
+    
+    ##change names of matrix to make more easy to understand
+    component.contribution.matrix.names <- c(
+      "x", "rev.x",
+      paste(c("y.c","rev.y.c"),rep(1:n.components,each=2), sep=""))
+    
+    colnames(component.contribution.matrix) <- 
+      component.contribution.matrix.names
 
 }#endif :: (exists("fit"))   
   
@@ -394,9 +495,9 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
       component.contribution.matrix <- NA
       }
    
-##=================================================================================================##  
+##============================================================================##  
 ## PLOTTING
-##=================================================================================================##
+##============================================================================##
 if(output.plot==TRUE){      
    
     ##set colors gallery to provide more colors
@@ -426,13 +527,13 @@ if(output.plot==TRUE){
      points(x,y,pch=20, col="grey")
 
      ##add additional labeling (fitted function)
-     mtext(side=3,sample_code,cex=0.7*cex.global)
+     mtext(side=3, sample_code, cex=0.7*cex.global)
     
    	##plot sum function
     if(inherits(fit,"try-error")==FALSE){
     lines(x,eval(fit.function), lwd=2, col="black")
     legend.caption<-"sum curve"
-    curve.col<-1
+    curve.col <- 1
                     
     ##plot signal curves                
  			            
@@ -440,7 +541,9 @@ if(output.plot==TRUE){
      if(length(I0)>1){
       
        for (i in 1:length(I0)) {
-            curve(I0[i]*exp(-lambda[i]*x),col=col[i+1], lwd=2,add=TRUE)
+            curve(I0[i]*lambda[i]*exp(-lambda[i]*x),col=col[i+1], 
+                  lwd = 2, 
+                  add = TRUE)
             legend.caption<-c(legend.caption,paste("component ",i,sep=""))
             curve.col<-c(curve.col,i+1)
         }
@@ -480,8 +583,8 @@ if(output.plot==TRUE){
              main="Component Contribution To Sum Curve",
              log=if(log=="x" | log=="xy"){log="x"}else{""})
   
-    stepping <- seq(3,length(component.contribution.matrix),2)
-    
+    stepping <- seq(3,length(component.contribution.matrix[1,]),2)
+
     for(i in 1:length(I0)){
       
       polygon(c(component.contribution.matrix[,1],
@@ -491,7 +594,7 @@ if(output.plot==TRUE){
               col = col[i+1])
     }
     rm(stepping)   
-    
+ 
     
     }#end if try-error for fit
 } 
@@ -507,5 +610,93 @@ if(output.plot==TRUE){
           component.contribution.matrix = component.contribution.matrix))
  
       invisible(newRLumResults.fit_CWCurve)
+    
+   # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+      
+   ##details<<
+   ## \bold{Fitting function}\cr\cr
+   ## The function for the CW-OSL fitting has the general form:
+   ## \deqn{y = I0_{1}*\lambda_{1}*exp(-\lambda_1*x) + ,\ldots, 
+   ## + I0_{i}*\lambda_{i}*exp(-\lambda_i*x)
+   ## }
+   ## where \eqn{1 < i < 8}\cr\cr
+   ## and \eqn{\lambda} is the decay constant and \eqn{N0} the intial number of 
+   ## trapped electrons.\cr
+   ## (for the used equation cf. Boetter-Jensen et al., 2003)\cr\cr
+   ## \bold{Start values}\cr\cr
+   ##
+   ## Start values are estimated automatically by fitting a linear function to 
+   ## the log arithmised input data set. Currently, there is no option to manually provide 
+   ## start parameters. \cr\cr
+   ## \bold{Goodness of fit}\cr\cr
+   ## The goodness of the fit is given as pseudoR^2 value 
+   ## (pseudo coefficient of determination). 
+   ## According to Lave (1970), the value is calculated as:
+   ## \deqn{pseudoR^2 = 1 - RSS/TSS}
+   ## where \eqn{RSS = Residual~Sum~of~Squares} \cr
+   ## and \eqn{TSS = Total~Sum~of~Squares}\cr\cr
+   ##  
+   ## \bold{Error of fitted component parameters}\cr\cr
+   ## The 1-sigma error for the components is calculated using the function 
+   ## \code{\link{confint}}. Due to considerable calculation time, this option is 
+   ## deactived by default. In addition, the error for the components can be 
+   ## estimated by using internal R functions like \code{\link{summary}}.
+   ## See the \code{\link{nls}} help page for more information.\cr\cr
+   ## \emph{For details on the nonlinear regression in R, see Ritz & Streibig (2008).}
+      
+   ##value<<
+   ## \item{plot}{(optional) the fitted CW-OSL curves are returned as plot.}
+   ## \item{table}{(optional) an output table (*.csv) with parameters of the fitted 
+   ## components is provided if the \code{output.path} is set.}
+   ## \item{\code{\linkS4class{RLum.Results}} object}{beside the plot and table 
+   ## output options, an \code{\linkS4class{RLum.Results}} object is returned.\cr\cr
+   ## \code{fit}: an \code{nls} object (\code{$fit}) for which generic R functions 
+   ## are provided, e.g. \link{summary}, \link{confint}, \link{profile}. 
+   ## For more details, see \link{nls}.\cr\cr
+   ## \code{output.table}:  a \link{data.frame} containing the summarized 
+   ## parameters including the error\cr
+   ## \code{component.contribution.matrix}: \link{matrix} containing the values 
+   ## for the component to sum contribution plot 
+   ## (\code{$component.contribution.matrix}).
+   ## }
+      
+   ##references<<
+   ## Boetter-Jensen, L., McKeever, S.W.S., Wintle, A.G., 2003. 
+   ## Optically Stimulated Luminescence Dosimetry. Elsevier Science B.V.
+   ## 
+   ## Lave, C.A.T., 1970. The Demand for Urban Mass Transportation. 
+   ## The Review of Economics and Statistics, 52 (3), 320-323. 
+   ##
+   ## Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. In: R. Gentleman, 
+   ## K. Hornik, G. Parmigiani, eds., Springer, p. 150.
+  
+   ##note<<
+   ## \bold{Beta version - This function has not been properly tested yet and should 
+   ## therefore not used for publication purposes!}\cr\cr
+   ## The pseudo-R^2 may not be the best parameter to describe the goodness of 
+   ## the fit. The trade off between the \code{n.components} and the pseudo-R^2 
+   ## value is currently not considered.\cr\cr
+   ## The function \bold{does not} ensure that the fitting procedure has reached 
+   ## a global minimum rather than a local minimum! 
+       
+   ##seealso<<
+   ## \code{\link{fit_LMCurve}}, \code{\link{plot}},\code{\link{nls}},
+   ## \code{\linkS4class{RLum.Data.Curve}}, \code{\linkS4class{RLum.Results}},
+   ## \code{\link{get_RLum.Results}}
+   
+   ##keyword<<
+   ## dplot
+   ## models
             
-}#EOF
+}, ex=function(){
+  
+  ##load data
+  data(ExampleData.CW_OSL_Curve, envir = environment())
+  
+  ##fit data
+  fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,
+                     main = "CW Curve Fit",
+                     n.components.max = 4,
+                     log = "x")
+  
+})#END OF STRUCTURE

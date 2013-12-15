@@ -4,8 +4,8 @@
 ##==============================================================================
 ##author: Sebastian Kreutzer
 ##organisation: JLU Giessen
-##version: 0.3
-##date: 2013-09-20
+##version: 0.3.1
+##date: 2013-11-11
 ##==============================================================================
 ##TODO
 
@@ -75,6 +75,21 @@ setMethod("set_Risoe.BINfileData",
             )
             
           })
+
+
+# accessor (get) method for object class -----------------------------------
+
+setGeneric("get_Risoe.BINfileData",
+           function(object) {standardGeneric("get_Risoe.BINfileData")})
+
+
+setMethod("get_Risoe.BINfileData", 
+          signature=signature(object = "Risoe.BINfileData"), 
+          definition = function(object) {
+                     
+            cat("[get_Risoe.BINfileData]: No direct access is provided object type. Use the function 'Risoe.BINfileData2RLum.Analysis' for object coercing instead.")
+            
+          })##end setMethod
 
 ##-------------------------------------------------------------------------------------------------##
 ##=================================================================================================##

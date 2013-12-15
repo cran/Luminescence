@@ -1,5 +1,5 @@
 plot_KDE <- structure(function( # Plot kernel density estimate with statistics
-  ### Plot a kernel density estimate of measurement values in combination with 
+  ### Function plots a kernel density estimate of measurement values in combination with 
   ### the actual values and associated error bars in ascending order. 
   ### Optionally, statistical measures such as mean, median, standard 
   ### deviation, standard error and quartile range can be provided visually 
@@ -9,20 +9,20 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   #authors: Sebastian Kreutzer (1), Michael Dietze (2)
   ##organisation: 1 - JLU Giessen, Germany
   ##              2 - GFZ Potsdam, Germany
-  ##version: 3.1
-  ##date: 2013-09-29
+  ##version: 3.2
+  ##date: 2013-11-25
   # ===========================================================================
 
   values, 
   ### \code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object 
   ### (required): for \code{data.frame}: two columns: De (\code{values[,1]})
   ### and De error (\code{values[,2]}). For plotting multiple data sets, these
-  ### must be provided as \code{list} (e.g. \code{list(dataset1, dataset2)}).
+  ### must be provided as \code{list} (e.g., \code{list(dataset1, dataset2)}).
   na.exclude = TRUE,
-  ### \code{\link{logical}} (with default): exclude NA values from the data
+  ### \code{\link{logical}} (with default): excludes \code{NA} values from the data
   ### set prior to any further operations.
   distribution.parameters,
-  ### \code{\link{character}} (optional): plot additional distribution 
+  ### \code{\link{character}} (optional): plots additional distribution 
   ### parameters. Can be one or more out of "mean", "median", "kdemax" 
   ### (maximum value of probability density function), "sd" (standard 
   ### deviation) and "qr" (quartile range). Example: 
@@ -30,19 +30,24 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   ### median are potted as a line, the standard deviation is shown as a 
   ### gray polygon. Polygons are not possible for multiple data sets.
   summary,
-  ### \code{\link{character}} (optinal): add numerical output to the plot. 
+  ### \code{\link{character}} (optional): adds numerical output to the plot. 
   ### Can be one or more out of: "n" (number of samples), "mean" (mean De 
   ### value), "median" (median of the De values), "kdemax" (maximum value of 
-  ### probability density function), "sdrel" (relative standard deviation in 
+  ### probability density function), "kurtosis" (kurtosis), "skewness"
+  ### (skewness), "sdrel" (relative standard deviation in 
   ### percent), "sdabs" (absolute standard deviation), "serel" (relative 
   ### standard error) and "seabs" (absolute standard error). Summary
   ### information is not possible for multiple datasets.
   summary.pos,
-  ### \code{\link{numeric}} (with default): optional position coordinates for 
-  ### the statistical summary. Y-coordinate refers to the right hand y-axis.
+  ### \code{\link{numeric}} or \code{\link{character}} (with default): optional  
+  ### position coordinates or keyword for the statistical summary. Y-coordinate  
+  ### refers to the right hand y-axis.
   bw = "nrd0",
   ### \code{\link{character}} (with default): bin-width, choose a numeric 
   ### value for manual setting.
+  output = FALSE,
+  ### \code{\link{logical}}: Optional output of numerical plot parameters.
+  ### These can be useful to reproduce similar plots. Default is \code{FALSE}.
   ...
   ### further arguments and graphical parameters passed to \code{\link{plot}}.
 ) {
@@ -66,6 +71,16 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   ## Check/set default parameters ---------------------------------------------
   if(missing(distribution.parameters)==TRUE) {distribution.parameters = ""}
   if(missing(summary)==TRUE) {summary = ""}
+  
+  ## Optionally, count and exclude NA values and print result
+  if(na.exclude == TRUE) {
+    for(i in 1:length(values)) {
+      n.NA <- sum(!complete.cases(values[[i]]))
+      if(n.NA == 1) {print("1 NA value excluded.")
+      } else if(n.NA > 1) {print(paste(n.NA, "NA values excluded."))}
+      values[[i]] <- na.exclude(values[[i]])
+    }
+  }
   
   ## Merge global data set for plot limit calculation
   values.global <- values[[1]][,1:2]
@@ -95,7 +110,7 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   main <- if("main" %in% names(extraArgs)) {extraArgs$main} else
     {expression(bold(paste(D[e], " Distribution")))}
   xlab <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} else
-    {expression(paste(D[e], " [Gy]"))}
+    {expression(paste(D[e], " [s]"))}
   ylabs <- if("ylabs" %in% names(extraArgs)) {extraArgs$ylabs} else
     {c("density", "cumulative frequency")}
   xlim <- if("xlim" %in% names(extraArgs)) {extraArgs$xlim} else
@@ -134,12 +149,6 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
      
   ## Loop through all data sets -----------------------------------------------
   for(i in 1:length(values)) {
-    ## Optionally, count and exclude NA values and print result
-    if(na.exclude == TRUE) {
-      n.NA <- sum(!complete.cases(values[[i]]))
-      if(n.NA == 1) {print("1 NA value excluded.")
-      } else if(n.NA > 1) {print(paste(n.NA, "NA values excluded."))}
-      values[[i]] <- na.exclude(values[[i]])}
     ## Sort data set in ascending order
     values[[i]] <- values[[i]][order(values[[i]][,1]),]
     ## calculate density function
@@ -269,6 +278,12 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   
   # Add optional descriptive statistics texts ---------------------------------
   if(length(values) == 1) {
+    ## calculate skewness
+    skewness <- (mean((values[[1]][,1] - mean(values[[1]][,1]))^3)) / 
+                  (sd(values[[1]][,1])^3)
+    kurtosis <- (mean((values[[1]][,1] - mean(values[[1]][,1]))^4) ) / 
+                  ((sd(values[[1]][,1])^4)) - 3
+    
     label.text <- paste(ifelse("n" %in% summary == TRUE,
                                paste("n = ", 
                                      n_De, 
@@ -290,6 +305,19 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
                         ifelse("kdemax" %in% summary == TRUE,
                                paste("KDE max = ", 
                                      round(xkdemax, 2), 
+                                     "\n", 
+                                     sep = ""),
+                               ""),
+
+                        ifelse("skewness" %in% summary == TRUE,
+                               paste("skewness = ", 
+                                     round(skewness, 2),
+                                     "\n", 
+                                     sep = ""),
+                               ""),
+                        ifelse("kurtosis" %in% summary == TRUE,
+                               paste("kurtosis = ", 
+                                     round(kurtosis, 2),
                                      "\n", 
                                      sep = ""),
                                ""),
@@ -322,11 +350,44 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
     
     
     
-    if(missing(summary.pos)==TRUE) {summary.pos <- c(xlim[1], ylims[4])}
+    if(missing(summary.pos) == TRUE) {
+      summary.pos <- c(xlim[1], ylims[4])
+      summary.adj <- c(0, 1)
+    } else if(length(summary.pos) == 2) {
+      summary.pos <- summary.pos
+      summary.adj <- c(0, 1)
+    } else if(summary.pos[1] == "topleft") {
+      summary.pos <- c(xlim[1], ylims[4])
+      summary.adj <- c(0, 1)
+    } else if(summary.pos[1] == "top") {
+      summary.pos <- c(mean(xlim), ylims[4])
+      summary.adj <- c(0.5, 1)
+    } else if(summary.pos[1] == "topright") {
+      summary.pos <- c(xlim[2], ylims[4])
+      summary.adj <- c(1, 1)
+    }  else if(summary.pos[1] == "left") {
+      summary.pos <- c(xlim[1], mean(ylims[3:4]))
+      summary.adj <- c(0, 0.5)
+    } else if(summary.pos[1] == "center") {
+      summary.pos <- c(mean(xlim), mean(ylims[3:4]))
+      summary.adj <- c(0.5, 0.5)
+    } else if(summary.pos[1] == "right") {
+      summary.pos <- c(xlim[2], mean(ylims[3:4]))
+      summary.adj <- c(1, 0.5)
+    }else if(summary.pos[1] == "bottomleft") {
+      summary.pos <- c(xlim[1], ylims[3])
+      summary.adj <- c(0, 0)
+    } else if(summary.pos[1] == "bottom") {
+      summary.pos <- c(mean(xlim), ylims[3])
+      summary.adj <- c(0.5, 0)
+    } else if(summary.pos[1] == "bottomright") {
+      summary.pos <- c(xlim[2], ylims[3])
+      summary.adj <- c(1, 0)
+    }
     
     text(x = summary.pos[1],
          y = summary.pos[2],
-         adj = c(0, 1),
+         adj = summary.adj,
          labels = label.text,
          cex = 0.8 * cex,
          col = 1)
@@ -335,15 +396,20 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   ##FUN by R Luminescence Team
   if(fun==TRUE){sTeve()}
   
+  if(output == TRUE) {
+    return(list(summary.pos = summary.pos))
+  }
+    
+  
   ##details<<
-  ## The function allows to pass several plot arguments, such as \code{main}, 
+  ## The function allows passing several plot arguments, such as \code{main}, 
   ## \code{xlab}, \code{cex}. However, as the figure is an overlay of two 
   ## separate plots, \code{ylim} must be specified in the order: c(ymin_axis1, 
   ## ymax_axis1, ymin_axis2, ymax_axis2). Similarly, if other than the default 
-  ## colours are desired, the argument col must be provided with colours in 
+  ## colours are desired, the argument \code{col} must be provided with colours in 
   ## the following order: probability density function, De values, De error 
   ## bars, sd or qr polygon. See examples for some further explanations. For 
-  ## details on the calculation of the bin-width (parameter \code{bw}) see 
+  ## details on the calculation of the bin-width (parameter \code{bw}), see 
   ## \code{\link{density}}.
   
   ##seealso<<

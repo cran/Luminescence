@@ -1,4 +1,5 @@
-calc_CommonDose<- structure(function( # Apply the (un-)logged common age model after Galbraith et al. (1999) to a given De distribution
+calc_CommonDose <-
+structure(function( # Apply the (un-)logged common age model after Galbraith et al. (1999) to a given De distribution
   ### Function to calculate the common dose of a De distribution.
   
   # ===========================================================================
@@ -6,21 +7,22 @@ calc_CommonDose<- structure(function( # Apply the (un-)logged common age model a
   ## Christoph Burow, University of Cologne (Germany) \cr
   
   ##section<<
-  ## version 1.1 [2013-09-04] 
+  ## version 1.2 [2013-11-04] 
   # ===========================================================================
   
   input.data,
-  ### \code{\link{data.frame}} (\bold{required}): two column data frame with De 
-  ### values and corresponding De errors
-  sigmab=0,
+  ### \code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+  ### for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+  ### De error \code{(values[,2])}
+  sigmab = 0,
   ### \code{\link{numeric}} (with default): spread in De values given as a 
   ### fraction (e.g. 0.2). This value represents the expected overdispersion in 
-  ### the data should the sample be well-bleached (Cunningham & Walling 2012, 
+  ### the data, if the sample is well-bleached (Cunningham & Walling 2012, 
   ### p. 100).
-  log=TRUE,
+  log = TRUE,
   ### \code{\link{logical}} (with default): fit the (un-)logged common age 
   ### model to De data
-  sample.id="unknown sample"
+  sample.id = "unknown sample"
   ### \code{\link{character}} (with default): sample id
   ) {                     
                               
@@ -29,17 +31,37 @@ calc_CommonDose<- structure(function( # Apply the (un-)logged common age model a
 ## CONSISTENCY CHECK OF INPUT DATA
 ##============================================================================##
   
-  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type 
-                                               data.frame",quote=F) 
-                              stop(domain=NA) }
-  try(colnames(input.data)<- c("ED","ED_Error"),silent=TRUE)
-  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error")
-                                             { print("Columns must be named 'ED'
-                                                     and 'ED_Error'",quote=F)
-                              stop(domain=NA)}
-  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction 
-                                    between 0 and 1 (e.g. 0.2)",quote=F)
-                              stop(domain=NA)}
+  if(missing(input.data)==FALSE){
+    
+    if(is(input.data, "data.frame") == FALSE & is(input.data,
+                                                 "RLum.Results") == FALSE){
+      
+      stop("[calc_CommonDose] Error: 'input.data' object has to be of type 
+           'data.frame' or 'RLum.Results'!")
+      
+    }else{
+      
+      if(is(input.data, "RLum.Results") == TRUE){
+    
+        input.data <- get_RLum.Results(input.data, 
+                                       signature(object = "De.values"))
+      }
+    }
+  }  
+  
+  
+  try(colnames(input.data)<- c("ED","ED_Error"), silent = TRUE)
+  
+  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error") { 
+    cat(paste("Columns must be named 'ED' and 'ED_Error'"), fill = FALSE)
+    stop(domain=NA) 
+  }
+  
+  if(sigmab <0 | sigmab >1) { 
+    cat(paste("sigmab needs to be given as a fraction between", 
+              "0 and 1 (e.g. 0.2)"), fill = FALSE)
+    stop(domain=NA)
+  }
   
 ##============================================================================##
 ## CALCULATIONS
@@ -66,7 +88,7 @@ calc_CommonDose<- structure(function( # Apply the (un-)logged common age model a
     sedelta<- sedelta/delta
   }  
   
-  cat("\n [Calc_CommonDose]")
+  cat("\n [calc_CommonDose]")
   cat(paste("\n\n ---------------------------------"))
   cat(paste("\n sample ID:              ",sample.id))
   cat(paste("\n n:                      ",n))
@@ -85,11 +107,19 @@ calc_CommonDose<- structure(function( # Apply the (un-)logged common age model a
                        rse=round(sedelta,4),se=round(if(log==TRUE){
                          exp(delta)*sedelta}else{delta*sedelta},4))
   
-  invisible(list(results=results))
-  ### Returns a terminal output. In addition a list is returned containing the 
-  ### following element:
+  newRLumResults.calc_CommonDose <- set_RLum.Results(
+    data = list(
+      results = results))
+  
+  invisible(newRLumResults.calc_CommonDose)
+  ### Returns a terminal output. In addition an 
+  ### \code{\linkS4class{RLum.Results}} object is 
+  ### returned containing the following element:
   ###
-  ### \code{results} data frame with statistical parameters.
+  ### \item{results}{\link{data.frame} with statistical parameters.}
+  ###
+  ### The output should be accessed using the function 
+  ### \code{\link{get_RLum.Results}}
   
   ##details<<
   ##  \bold{(Un-)logged model} \cr\cr
@@ -134,10 +164,10 @@ calc_CommonDose<- structure(function( # Apply the (un-)logged common age model a
   ## \code{\link{calc_FiniteMixture}}, \code{\link{calc_FuchsLang2001}},
   ## \code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}   
   
-}, ex=function(){
+}, ex = function(){
   ## load example data
   data(ExampleData.DeValues, envir = environment())
   
   ## apply the common dose model
   calc_CommonDose(ExampleData.DeValues)                         
-})#END OF STRUCTURE
+})

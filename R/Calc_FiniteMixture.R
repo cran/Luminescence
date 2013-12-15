@@ -10,12 +10,13 @@ calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) 
   ## Based on a rewritten S script of Rex Galbraith, 2006. \cr\cr
   
   ##section<<
-  ## version 0.2 [2013-09-04] 
+  ## version 0.21 [2013-11-04] 
   # ===========================================================================
   
   input.data,
-  ### \code{\link{data.frame}} (\bold{required}): two column data frame with De
-  ### values and corresponding De errors
+  ### \code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+  ### for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+  ### De error \code{(values[,2])}
   sigmab,
   ### \code{\link{numeric}}  (\bold{required}): spread in De values given as a
   ### fraction (e.g. 0.2). This value represents the expected overdispersion in
@@ -44,22 +45,48 @@ calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) 
 ## CONSISTENCY CHECK OF INPUT DATA
 ##============================================================================##
 
-  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type 
-                                               data.frame",quote=F) 
-                                         stop(domain=NA) } 
+  if(missing(input.data)==FALSE){
+    
+    if(is(input.data, "data.frame") == FALSE & is(input.data,
+                                                  "RLum.Results") == FALSE){
+      
+      stop("[calc_FiniteMixture] Error: 'input.data' object has to be of type 
+           'data.frame' or 'RLum.Results'!")
+      
+    }else{
+      
+      if(is(input.data, "RLum.Results") == TRUE){
+        
+        input.data <- get_RLum.Results(input.data, 
+                                       signature(object = "De.values"))
+        
+      }
+    }
+  }  
+  
   try(colnames(input.data)<- c("ED","ED_Error"),silent=TRUE)
+  
   if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error") { 
-    print("Columns must be named 'ED' and 'ED_Error'",quote=F)
-                                         stop(domain=NA)}
-  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction 
-                                    between 0 and 1 (e.g. 0.2)",quote=F)
-                                         stop(domain=NA)}
-  if(n.components<2) { print("Atleast two components need to be fitted",quote=F)
-                                         stop(domain=NA)}
-  if(n.iterations<1 | n.iterations>10000) { print("Only integers between 1:10000
-                                                  allowed for n.iterations",
-                                                  quote=F)
-                                         stop(domain=NA)}
+    cat(paste("Columns must be named 'ED' and 'ED_Error'"), fill = FALSE)
+    stop(domain=NA) 
+  }
+  
+  if(sigmab <0 | sigmab >1) { 
+    cat(paste("sigmab needs to be given as a fraction between", 
+              "0 and 1 (e.g. 0.2)"), fill = FALSE)
+    stop(domain=NA)
+  }
+  
+  if(n.components<2) { 
+    cat(paste("Atleast two components need to be fitted"), fill = FALSE)
+    stop(domain=NA)
+  }
+  
+  if(n.iterations<1 | n.iterations>10000) { 
+    cat(paste("Only integers between 1:10000 allowed for n.iterations"),
+        fill = FALSE)
+    stop(domain=NA)
+  }
 
 ##============================================================================##
 ## CALCULATIONS
@@ -214,7 +241,7 @@ calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) 
   write(c(comp0),lbout,append=T)
   }
   
-  # Prepare return values
+# Prepare return values
   meta<- data.frame(id=sample.id,n=n,sigmab=sigmab,n.components=k,
                     llik=llik,bic=bic)
   single.comp<- data.frame(id=sample.id,mu=comp0[1],sigmab=comp0[2],
@@ -224,23 +251,33 @@ calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) 
                                            "se(dose)(Gy)","proportion   "))
   names(comp.re)<- paste(cp,cn,sep="")
   
-  # Return values
-  invisible(list(mle.matrix=vmat,
-                 grain.probability=round(pui,2),
-                 meta=meta,
-                 components=comp.re,
-                 single.comp=single.comp))
+  grain.probability<- round(pui, 2)
+  
+  newRLumResults.calc_FiniteMixture <- set_RLum.Results(
+    data = list(
+      mle.matrix=vmat,
+      grain.probability=grain.probability,
+      meta=meta,
+      components=comp.re,
+      single.comp=single.comp))
+  
+# Return values
+  invisible(newRLumResults.calc_FiniteMixture)
   ### Returns a terminal output and a file containing statistical results if 
   ### wanted. In addition a list is returned containing the following elements:
-  ### \cr\cr
-  ### \code{mle.matrix} covariance matrix of maximum likelihood estimates.\cr
-  ### \code{grain.probability} matrix with estimated probabilities of which 
-  ### component each grain is in.\cr
-  ### \code{meta} data frame containing model parameters (sample.id, sigmab, 
-  ### n.components, llik, bic).\cr
-  ### \code{components} data frame containing fitted components.\cr
-  ### \code{single.comp} data frame containing log likelihood and BIC for a 
-  ### single component.
+  ### \item{mle.matrix}{\link{matrix} covariance matrix of maximum likelihood
+  ### estimates.}
+  ### \item{grain.probability}{\link{matrix} with estimated probabilities 
+  ### of which component each grain is in.}
+  ### \item{meta}{\link{data.frame} containing model parameters 
+  ### (sample.id, sigmab, n.components, llik, bic).}
+  ### \item{components}{\link{data.frame} containing fitted components.}
+  ### \item{single.comp}{\link{data.frame} containing log likelihood and 
+  ### BIC for a single component.}
+  ###
+  ### The output should be accessed using the function 
+  ### \code{\link{get_RLum.Results}}
+  
   
   ##details<<
   ## This model uses the maximum likelihood and Bayesian Information Criterion 

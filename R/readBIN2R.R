@@ -1,23 +1,43 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//readBIN2R.R
-##//////////////////////////////////////////////////////////////////////////////
-##=============================================================================#
-##author: Sebastian Kreutzer
-##organisation: JLU Giessen
-##version: 0.7
-##date: 2013-09-20
-##=============================================================================#
-##
-
-readBIN2R <- function(file,
-                      show.raw.values = FALSE,  
-                      n.records,
-                      show.record.number = FALSE,
-                      txtProgressBar = TRUE,
-                      forced.VersionNumber
-                      ){
-
+readBIN2R <- structure(function(#Import Risoe BIN-file into R
+  ### Import a *.bin or a *.binx file produced by a Risoe DA15 and DA20 
+  ### TL/OSL reader into R.
   
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany),
+  ## Margret C. Fuchs, TU Bergakademie Freiberg (Germany)
+  
+  ##section<<
+  ## version 0.7
+  # ===========================================================================
+
+  file,
+  ###  \link{character} (\bold{required}): bin-file name (including path), e.g. \cr
+  ### [WIN]: \code{readBIN2R("C:/Desktop/test.bin")}, \cr  
+  ### [MAC/LINUX]: \code{readBIN2R("/User/test/Desktop/test.bin")}
+  
+  show.raw.values = FALSE,  
+  ### \link{logical} (with default): shows raw values from BIN file for 
+  ### \code{LTYPE}, \code{DTYPE} and \code{LIGHTSOURCE} without translation in characters. 
+  
+  n.records,
+  ###  \link{raw} (optional): limits the number of imported records. Can be used in 
+  ###  combination with \code{show.record.number} for debugging purposes, e.g. corrupt BIN files.
+  
+  show.record.number = FALSE,
+  ### \link{logical} (with default): shows record number of the imported record, 
+  ### for debugging usage only. 
+  
+  txtProgressBar = TRUE,
+  ### \link{logical} (with default): enables or disables 
+  ### \code{\link{txtProgressBar}}.
+  
+  forced.VersionNumber
+  ### \link{integer} (optional): allows to cheat the version number check in the 
+  ### function by own values for cases where the BIN-file version is not supported.\cr 
+  ### Note: The usage is at own risk, only supported BIN-file versions have been tested.
+){
+
   
 # Config ------------------------------------------------------------------  
   
@@ -754,4 +774,37 @@ object@METADATA[,"LIGHTSOURCE"]<- sapply(1:length(object@METADATA[,"LIGHTSOURCE"
 
 ##return values
 return(object)
-}
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+
+  ##details<<
+  ## The binary data file is parsed byte by byte following the data structure 
+  ## published in the Appendices of the Analyst manual p. 42.\cr\cr
+  ## For the general BIN-file structure, the reader is referred to the Risoe
+  ## website: \code{http://www.nutech.dtu.dk/}
+
+  ##value<<
+  ## Returns an S4 \link{Risoe.BINfileData-class} object containing two slots:\cr
+  ## \item{METADATA}{A \link{data.frame} containing all variables stored in the bin-file.}
+  ## \item{DATA}{A \link{list} containing a numeric \link{vector} of the measured data. 
+  ## The ID corresponds to the record ID in METADATA.}
+
+  ##references<<
+  ## Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/english/~/media/Andre_Universitetsenheder/Nutech/Produkter%20og%20services/Dosimetri/radiation_measurement_instruments/tl_osl_reader/Manuals/analyst_manual_v3_22b.ashx}
+
+  ##note<<
+  ## The function has been successfully tested for BIN format versions 03, 04 and 06. 
+  ## The version number depends on the used Sequence Editor.\cr\cr
+  ## \bold{Other BIN format versions are currently not supported}. 
+
+  ##seealso<<
+  ## \code{\link{writeR2BIN}}, \code{\linkS4class{Risoe.BINfileData}},
+  ## \code{\link{readBin}}, \code{\link{txtProgressBar}}
+
+  ##keyword<<
+  ## IO
+
+}, ex=function(){
+  
+  ##readBIN2R("~/Desktop/Example.bin")
+  
+})  

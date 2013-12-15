@@ -1,38 +1,58 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//analyse_SAR.CWOSL.R
-##//////////////////////////////////////////////////////////////////////////////
-##
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: Freiberg Instruments, JLU Giessen
-##version: 0.2.3
-#date: 2013-06-13
-##==============================================================================
-##TODO (sebastian kreutzer): IRSL/OSL - it is no difference
-##TODO (sebastian kreuter): add IRSL as rejection criteria 
-##protocol types:   - SAR CW-OSL 
-
-
-analyse_SAR.CWOSL<-function(
-                         object,
-                         signal.integral.min,
-                         signal.integral.max,
-                         background.integral.min,
-                         background.integral.max,
-                         rejection.criteria = list(recycling.ratio=10,
-                                                   recuperation.rate=10
-                                                   ),
-                         log = "",
-                         output.plot = TRUE,
-                         ... 
-                         ){
-
+analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
+  ### The function performs a SAR CW-OSL analysis on a \code{\linkS4class{RLum.Analysis}}
+  ### object including growth curve fitting.
   
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
+  
+  ##section<<
+  ## version 0.3 [2013-11-14]
+  # ===========================================================================
+
+  object,
+  ### \code{\linkS4class{RLum.Analysis}}(\bold{required}): 
+  ### input object containing data for analysis
+  
+  signal.integral.min,
+  ### \code{\link{integer}} (\bold{required}): lower bound of the signal integral
+  
+  signal.integral.max,
+  ### code{\link{integer}} (\bold{required}): upper bound of the signal integral
+  
+  background.integral.min,
+  ### \code{\link{integer}} (\bold{required}): lower bound of the background integral
+  
+  background.integral.max,
+  ### \code{\link{integer}} (\bold{required}): upper bound of the background integral
+  
+  rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
+  ### \link{list} (with default): list containing rejection criteria in 
+  ### percentage for the calculation. 
+  
+  log = "",
+  ### \link{character} (with default): a character string which contains "x" 
+  ### if the x axis is to be logarithmic, "y" if the y-axis is to be logarithmic 
+  ### and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}.
+  
+  output.plot = TRUE,
+  ### \link{logical} (with default): enables or disables plot output.
+  
+  output.plot.single = FALSE,
+  ### \link{logical} (with default): single plot output (\code{TRUE/FALSE}) to 
+  ### allow for plotting the results in single plot windows. 
+  ### Requires \code{output.plot = TRUE}.
+  
+  ... 
+  ### further arguments that will be passed to the function 
+  ### \code{\link{plot_GrowthCurve}}
+
+){
   
 # CONFIG  -----------------------------------------------------------------
   
   ##set allowed curve types
-  type.curves <- c("OSL")
+  #type.curves <- c("OSL")
 
   ##build signal and background integrals
   signal.integral <- c(signal.integral.min:signal.integral.max)
@@ -61,7 +81,8 @@ analyse_SAR.CWOSL<-function(
     }
 
     ##INTEGRAL LIMITS
-    if(is(signal.integral, "integer")==FALSE | is(background.integral, "integer")==FALSE){
+    if(is(signal.integral, "integer")==FALSE | is(background.integral, 
+                                                  "integer")==FALSE){
       stop("[analyse_SAR.CWOSL] Error: 'signal.integral' or background.integral is not 
            of type integer!")
     }
@@ -73,12 +94,38 @@ analyse_SAR.CWOSL<-function(
   ##check overall structur of the object
   ##every SAR protocol has to have equal number of curves
   
-  ##grep curve types from analysis value
+
+  ##grep curve types from analysis value and remove unated information
   temp.ltype <- sapply(1:length(object@records), function(x) {
-                object@records[[x]]@recordType
+          
+                ##export as global variable
+                object@records[[x]]@recordType <<- gsub(" .*", "", 
+                                                        object@records[[x]]@recordType)
+                
+                object@records[[x]]@recordType        
+              
   })
   
+  ##problem: FI lexsyg devices provide irradtion information in a separat curve 
+  if("irradiation"%in%temp.ltype){
+    
+    ##grep irraditation times
+    temp.irradiation <- get_structure.RLum.Analysis(object)
+    temp.irradiation <- temp.irradiation[temp.irradiation$recordType == "irradiation",
+                                         "x.max"]
+    
+    ##remove every 2nd entry (test dose) and add "0" dose for natural signal
+    temp.Dose <- c(0,temp.irradiation)
+    
+    ##remove irradiation entries from file
+    object <- set_RLum.Analysis(
+               records = get_RLum.Analysis(object, recordType = c("OSL", "TL")),
+               protocol = "SAR")
+
+  }
+
   ##check if the wanted curves are a multiple of two
+  ##gsub removes unwanted information from the curves
   if(table(temp.ltype)["OSL"]%%2!=0){
     stop("[analyse_SAR.CWOSL] Error: Input OSL/IRSL curves are not a multiple of two.")
   }
@@ -164,7 +211,6 @@ analyse_SAR.CWOSL<-function(
 # Calculate LnLxTnTx values  --------------------------------------------------
 
 
-
   ##calculate LxTx values using external function   
   for(x in seq(1,length(OSL.Curves.ID),by=2)){
                 
@@ -173,12 +219,19 @@ analyse_SAR.CWOSL<-function(
                                  Tx.data=object@records[[OSL.Curves.ID[x+1]]]@data,
                                  signal.integral,
                                  background.integral))
-                             
+                
                ##grep dose
-               temp.Dose <- object@records[[OSL.Curves.ID[x]]]@info$IRR_TIME
+               if(exists("temp.irradiation") == FALSE){
                
-               temp.LnLxTnTx <- cbind(Dose=temp.Dose, temp.LnLxTnTx)
+                temp.Dose <- object@records[[OSL.Curves.ID[x]]]@info$IRR_TIME
+                temp.LnLxTnTx <- cbind(Dose=temp.Dose, temp.LnLxTnTx)
                
+               }else{
+                 
+                 temp.LnLxTnTx <- cbind(Dose=temp.Dose[x], temp.LnLxTnTx)
+                 
+               }
+                  
                if(exists("LnLxTnTx")==FALSE){
                  
                  LnLxTnTx <- data.frame(temp.LnLxTnTx)
@@ -189,8 +242,7 @@ analyse_SAR.CWOSL<-function(
                  
                }
     }
-
-
+   
 # Set regeneration points -------------------------------------------------
 
         #generate unique dose id - this are also the # for the generated points
@@ -240,7 +292,7 @@ analyse_SAR.CWOSL<-function(
              
               ##convert to data.frame
               temp.Previous<-as.data.frame(temp.Previous)
-            
+              
               ##set column names
               temp.ColNames<-sapply(1:length(temp.Repeated[,1]),function(x){
                      paste(temp.Repeated[x,"Name"],"/",
@@ -325,20 +377,23 @@ if(output.plot == TRUE){
 
   ##colours and double for plotting
   col <- get("col", pos = .LuminescenceEnv)
-
-  layout(matrix(c(1,1,3,3,
-                  1,1,3,3,
-                  2,2,4,4,
-                  2,2,4,4,
-                  5,5,5,5),5,4,byrow=TRUE))
   
-   par(oma=c(0,0,0,0), mar=c(4,4,3,3))
-
+  if(output.plot.single == FALSE){
+    
+    layout(matrix(c(1,1,3,3,
+                    1,1,3,3,
+                    2,2,4,4,
+                    2,2,4,4,
+                    5,5,5,5),5,4,byrow=TRUE))
+    
+    par(oma=c(0,0,0,0), mar=c(4,4,3,3))
+    
     ## 1 -> TL previous LnLx
     ## 2 -> LnLx
     ## 3 -> TL previous TnTx
     ## 4 -> TnTx 
     ## 5 -> Legend
+  }else{par(mfrow=c(1,1))}   
   
 
   ##warning if number of curves exceed colour values
@@ -346,6 +401,9 @@ if(output.plot == TRUE){
        cat("\n[analyse_SAR.CWOSL.R] Warning: To many curves! Only the first",
            length(col),"curves are plotted!")
    }
+
+  ##legend text
+  legend.text <- paste(LnLxTnTx$Name,"\n(",LnLxTnTx$Dose,")", sep="")
 
 
     ##get channel resolution (should be equal for all curves)
@@ -568,15 +626,13 @@ plot(c(1:(length(OSL.Curves.ID)/2)),
 ##add text
 text(c(1:(length(OSL.Curves.ID)/2)), 
      rep(4,length(OSL.Curves.ID)/2),
-     paste(LnLxTnTx$Name,"\n(",LnLxTnTx$Dose,")", sep="")
-
-    )
+     legend.text)
 
 ##add line
 abline(h=10,lwd=0.5)
 
 ##set failed text and mark De as failed
-if(length(grep("FAILED",RejectionCriteria$status))>0){
+if(length(grep("FAILED", RejectionCriteria$status))>0){
   
   mtext("[FAILED]", col="red")
 
@@ -595,6 +651,8 @@ temp.sample <- data.frame(Dose=LnLxTnTx$Dose,
  temp.GC <- get_RLum.Results(plot_GrowthCurve(temp.sample,
                                               output.plot = output.plot,
                                               ...))[,c("De","De.Error")]
+
+
 
  ##add recjection status
  if(length(grep("FAILED",RejectionCriteria$status))>0){
@@ -618,4 +676,79 @@ temp.sample <- data.frame(Dose=LnLxTnTx$Dose,
                        rejection.criteria = RejectionCriteria))
 
   return(temp.return)
-}##EOF
+  
+  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+
+  ##details<<
+  ## The function performs an analysis for a standard SAR protocol measurements 
+  ## introduced by Murray and Wintle (2000) with CW-OSL curves. 
+  ## For the calculation of the Lx/Tx value the function \link{calc_OSLLxTxRatio} 
+  ## is used. \cr\cr
+  ## 
+  ## \bold{Provided rejection criteria}\cr\cr
+  ## \sQuote{recyling.ratio}: calculated for every repeated regeneration dose point.\cr
+  ## \sQuote{recuperation.rate}: recuperation rate calculated by comparing the 
+  ## Lx/Tx values of the zero regeneration point with the Ln/Tn value 
+  ## (the Lx/Tx ratio of the natural signal). 
+  ## For methodological background see Aitken and Smith (1988)
+
+  ##value<<
+  ## A plot (optional) and an \code{\linkS4class{RLum.Results}} object is 
+  ## returned containing the following elements: 
+  ## \item{De.values}{\link{data.frame} containing De-values, 
+  ## De-error and further parameters}
+  ## \item{LnLxTnTx.values}{\link{data.frame} of all calculated Lx/Tx values 
+  ## including signal, background counts and the dose points.}
+  ## \item{rejection.criteria}{\link{data.frame} with values that might by 
+  ## used as rejection criteria. NA is produced if no R0 dose point 
+  ## exists.}\cr
+  ##
+  ## The output should be accessed using the function 
+  ## \code{\link{get_RLum.Results}}
+  
+  ##references<<
+  ## Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after bleaching. 
+  ## Quaternary Science Reviews, 7, pp. 387-393.
+  ##
+  ## Duller, G., 2003. Distinguishing quartz and feldspar in single grain luminescence
+  ## measurements. Radiation Measurements, 37 (2), pp. 161-165. 
+  ##
+  ## Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using an 
+  ## improved single-aliquot regenerative-dose protocol. Radiation Measurements, 
+  ## 32, pp. 57-73. 
+
+  ##note<<
+  ## This function must not be mixed up with the function 
+  ## \code{\link{Analyse_SAR.OSLdata}}, which works with \link{Risoe.BINfileData-class}
+  ## objects.
+
+  ##seealso<<
+  ## \code{\link{calc_OSLLxTxRatio}}, \code{\link{plot_GrowthCurve}}, 
+  ## \code{\linkS4class{RLum.Analysis}}, \code{\linkS4class{RLum.Results}}
+  ## \code{\link{get_RLum.Results}}
+
+  ##keyword<<
+  ## datagen
+  ## plot
+
+
+}, ex=function(){
+  
+  ##load data
+  ##ExampleData.BINfileData contains two BINfileData objects 
+  ##CWOSL.SAR.Data and TL.SAR.Data
+  data(ExampleData.BINfileData, envir = environment())
+  
+  ##transform the values from the first position in a RLum.Analysis object
+  object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
+  
+  ##perform SAR analysis
+  analyse_SAR.CWOSL(object, 
+                    signal.integral.min = 1,
+                    signal.integral.max = 2,
+                    background.integral.min = 900,
+                    background.integral.max = 1000,
+                    log = "x",
+                    fit.method = "EXP")
+  
+})#END OF STRUCTURE

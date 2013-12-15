@@ -1,4 +1,4 @@
-calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given set of TL curves
+calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given set of TL curves [beta version]
   ### Calculate Lx/Tx ratio for a given set of TL curves. 
   
   # ===========================================================================
@@ -207,7 +207,7 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
      
      ##value<<
      ## Returns an S4 object of type \code{\linkS4class{RLum.Results}}. 
-     ## Slot \code{data} containt a \link{data.frame} with the following 
+     ## Slot \code{data} contains a \link{data.frame} with the following 
      ## structure:\cr\cr 
      ## $ LnLx  \cr        
      ## $ LnLx.BG   \cr     

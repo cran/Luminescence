@@ -5,13 +5,14 @@
 (MAM 3) to De data.}
 \usage{calc_MinDose3(input.data, sigmab, log = TRUE, sample.id = "unknown sample", 
     gamma.xlb = 0.1, gamma.xub = 100, sigma.xlb = 0.001, sigma.xub = 5, 
-    init.gamma = 10, init.sigma = 1.2, init.p0 = 0.01, calc.ProfileLikelihoods = TRUE, 
-    console.ProfileLikelihoods = FALSE, console.extendedOutput = FALSE, 
-    output.file = FALSE, output.filename = "default", output.plot = FALSE, 
-    output.indices = 3)}
+    init.gamma = 10, init.sigma = 1.2, init.p0 = 0.01, ignore.NA = FALSE, 
+    calc.ProfileLikelihoods = TRUE, console.ProfileLikelihoods = FALSE, 
+    console.extendedOutput = FALSE, output.file = FALSE, output.filename = "default", 
+    output.plot = TRUE, output.indices = 3)}
 \arguments{
-  \item{input.data}{\code{\link{data.frame}} (\bold{required}): two column data frame with De
-values and corresponding De errors}
+  \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}}  (\bold{required}): spread in De values given as a 
 fraction (e.g. 0.2). This value represents the expected overdispersion in
 the data should the sample be well-bleached (Cunningham & Walling 2012, p. 100).}
@@ -24,7 +25,9 @@ minimum dose model to De data}
   \item{sigma.xub}{\code{\link{numeric}} (with default): upper boundary of sigma }
   \item{init.gamma}{\code{\link{numeric}} (with default): starting value of gamma }
   \item{init.sigma}{\code{\link{numeric}} (with default): starting value of sigma}
-  \item{init.p0}{\code{\link{numeric}} (with default): starting value of p0 }
+  \item{init.p0}{\code{\link{numeric}} (with default): starting value of p0}
+  \item{ignore.NA}{\code{\link{logical}} (with default): ignore NA values during log
+likelihood calculations. See details.}
   \item{calc.ProfileLikelihoods}{\code{\link{logical}} (with default): calculate profile log likelihood
 functions for gamma, sigma, p0. See \code{output.indices}.}
   \item{console.ProfileLikelihoods}{\code{\link{logical}} (with default): print profile log likelihood
@@ -41,11 +44,11 @@ are saved to default-3R(-UL).res }
 2 = gamma/sigma, 3 = gamma/sigma/p0.}
 }
 \details{\bold{Parameters} \cr\cr
-This model has three parameters: 
+This model has three parameters: \cr
 \tabular{rl}{
 \code{gamma}: \tab minimum dose on the log scale \cr
 \code{sigma}: \tab spread in ages above the minimum \cr
-\code{p0}: \tab proportion of grains at gamma}
+\code{p0}: \tab proportion of grains at gamma \cr }
 \bold{(Un-)logged model} \cr\cr
 In the original version of the three-parameter minimum dose model, the basic
 data are the natural logarithms of the De estimates and relative standard 
@@ -69,11 +72,24 @@ sigma boundaries (\code{sigma.xlb} and \code{sigma.xub}). \cr\cr
 \bold{Initial values} \cr\cr
 The log likelihood calculations use the \link{nlminb} function. Accordingly,
 initial values for the three parameters \code{init.gamma}, \code{init.sigma} 
-and \code{init.p0} need to be specified.}
-\value{A terminal output is provided. A plot (\link{postscript}) and a file 
-containing statistical results are provided if desired. In addition a list 
-is returned containing the following element: \cr\cr
-\code{results} data frame containing statistical results.}
+and \code{init.p0} need to be specified. \cr\cr
+\bold{Ignore NA values} \cr\cr
+In some cases during the calculation of the log likelihoods, \code{NA} values 
+are produced instantly terminating the minimum age model. It is advised to 
+adjust some of the values provided for any argument. If the model still
+produces NA values it is possible to omit these values by setting 
+\code{ignore.NA = TRUE}. While the model is then usually able to finish
+all calculations the integrity of the final estimates cannot be ensured.
+Use this argument at your own risk.}
+\value{Returns a plot (optional) and terminal output. A file 
+containing statistical results is provided if desired. In addition an 
+\code{\linkS4class{RLum.Results}} object is 
+returned containing the following element:
+
+\item{results}{\link{data.frame} with statistical parameters.}
+
+The output should be accessed using the function 
+\code{\link{get_RLum.Results}}  }
 \references{Arnold, L.J., Roberts, R.G., Galbraith, R.F. & DeLong, S.B., 2009. A revised
 burial dose estimation procedure for optical dating of young and modern-age 
 sediments. Quaternary Geochronology, 4, pp. 306-325. \cr\cr
@@ -104,7 +120,7 @@ Quaternary Geochronology, 1, pp. 109-120. \cr\cr
 Rodnight, H., 2008. How many equivalent dose values are needed to obtain a
 reproducible distribution?. Ancient TL, 26, pp. 3-10. \cr\cr}
 \author{Christoph Burow, University of Cologne (Germany) \cr
-Based on a rewritten script S script of Rex Galbraith, 2010 \cr\cr
+Based on a rewritten S script of Rex Galbraith, 2010 \cr\cr
 R Luminescence Package Team}
 \note{The default boundary and starting values for \emph{gamma}, \emph{sigma} and 
 \emph{p0} may only be appropriate for some De data sets and may need to be 
@@ -112,7 +128,7 @@ changed for other data. This is especially true when the un-logged version is
 applied.}
 
 
-\seealso{\code{\link{nlminb}}, \code{\link{postscript}}, 
+\seealso{\code{\link{nlminb}}, 
 \code{\link{calc_CentralDose}},
 \code{\link{calc_CommonDose}}, \code{\link{calc_FiniteMixture}},
 \code{\link{calc_FuchsLang2001}}, \code{\link{calc_MinDose4}}}

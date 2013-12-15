@@ -1,18 +1,30 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//merge_Risoe.BINfileData.R
-##//////////////////////////////////////////////////////////////////////////////
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: Freiberg Instruments/JLU Giessen
-##version: 0.1
-##date: 2013-09-06
-##==============================================================================
+merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects or Risoe BIN-files
+  ### Function allows merging Risoe BIN files or Risoe.BINfileData objects.
+   
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany), 
+  
+  ##section<<
+  ## version 0.1
+  # ===========================================================================
 
-
-merge_Risoe.BINfileData <- function(input.objects,
-                                    output.file,
-                                    keep.position.number = FALSE
-                                    ){
+  input.objects,
+  ### \code{\link{character}} or \code{\linkS4class{Risoe.BINfileData}} (\bold{required}):
+  ### Character vector with path and files names 
+  ### (e.g. \code{input.objects = c("path/file1.bin", "path/file2.bin")} 
+  ### or \code{\linkS4class{Risoe.BINfileData}} objects 
+  ### (e.g. \code{input.objects = c(object1, object2)})
+  
+  output.file,
+  ### \code{\link{character}} (optional): File output path and name. \cr
+  ### If no value is given, a \code{\linkS4class{Risoe.BINfileData}} \cr
+  ### is returned instead of a file.
+  
+  keep.position.number = FALSE
+  ### \code{\link{logical}} (with default): Allows keeping the original 
+  ### position numbers of the input objects. Otherwise the positions numbers a recalculated.
+){
 
   
 # Integrity Checks --------------------------------------------------------
@@ -160,4 +172,39 @@ merge_Risoe.BINfileData <- function(input.objects,
     
   }
 
-}
+# DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+
+##details<<
+## The function allows mering different measurements to one file or one object.\cr
+## The record IDs are recalculated for the new object. Other values 
+## are kept for each object. The number of input objects is not limited. 
+
+##value<<
+## Returns a \code{file} or a \code{\linkS4class{Risoe.BINfileData}} object.
+
+##references<<
+## Duller, G., 2007. Analyst. 
+
+##note<<
+## The validity of the output objects is not further checked.  
+
+##seealso<<
+## \code{\linkS4class{Risoe.BINfileData}},
+## \code{\link{readBIN2R}}, \code{\link{writeR2BIN}}  
+
+##keyword<<
+## IO
+## manip
+
+}, ex=function(){
+  
+  ##merge two objects
+  data(ExampleData.BINfileData, envir = environment())
+  
+  object1 <- CWOSL.SAR.Data
+  object2 <- CWOSL.SAR.Data
+  
+  object.new <- merge_Risoe.BINfileData(c(object1, object2))
+  
+  
+})  

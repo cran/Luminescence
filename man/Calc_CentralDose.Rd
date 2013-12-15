@@ -7,8 +7,9 @@ function for sigma.}
 \usage{calc_CentralDose(input.data, sigmab = 0, sample.id = "unknown sample", 
     print.iterations = FALSE, output.plot = TRUE)}
 \arguments{
-  \item{input.data}{\code{\link{data.frame}} (\bold{required}): two column data 
-frame with De values and corresponding De errors                                 }
+  \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}} (with default): spread in De values given as
 a fraction (e.g. 0.2). This value represents the expected overdispersion
 in the data should the sample be well-bleached (Cunningham & Walling 2012, 
@@ -19,13 +20,17 @@ calculation iterations}
   \item{output.plot}{\code{\link{logical}} (with default): plot output}
 }
 \details{This function uses the equations of Galbraith et al. (1999, pp. 358-359). 
-The parameter \code{sigmab} is estimated using the maximum likelihood 
+The parameter \code{sigma} is estimated using the maximum likelihood 
 approach. A detailed explanation on maximum likelihood estimation can be 
 found in the appendix of Galbraith & Laslett (1993, pp. 468-470)}
-\value{Returns a plot and terminal output. In addition a list is returned 
-containing the following element:
+\value{Returns a plot (optional) and terminal output. In addition an 
+\code{\linkS4class{RLum.Results}} object is 
+returned containing the following element:
 
-\code{results} data frame with statistical parameters.}
+\item{results}{\link{data.frame} with statistical parameters.}
+
+The output should be accessed using the function 
+\code{\link{get_RLum.Results}}}
 \references{Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
 track ages. Nuclear Tracks Radiation Measurements, 4, pp. 459-470. \cr \cr
 Galbraith, R.F., Roberts, R.G., Laslett, G.M., Yoshida, H. & Olley, J.M., 

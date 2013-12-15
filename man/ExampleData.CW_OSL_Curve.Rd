@@ -2,14 +2,14 @@
 \alias{ExampleData.CW_OSL_Curve}
 \docType{data}
 \title{
-Example CW-OSL curve data for package Luminescence
+Example CW-OSL curve data for the package Luminescence
 }
 \description{
 \code{data.frame} containing CW-OSL curve data (time, counts)
 }
 \usage{data(ExampleData.CW_OSL_Curve)}
 \format{
-  Data frame with 1000 observations on the following 2 variables.
+  Data frame with 1000 observations on the following 2 variables:
   \describe{
     \item{\code{x}}{a numeric vector, time}
     \item{\code{y}}{a numeric vector, counts}
@@ -26,7 +26,7 @@ see source
 Lab: \tab Luminescence Laboratory Bayreuth\cr
 Lab-Code: \tab BT607\cr
 Location: \tab Saxony/Germany\cr
-Material: \tab Middle grain quartz measured on aluminum cups on a Risoe DA-15 reader.\cr
+Material: \tab Middle grain quartz measured on aluminum cups on a Risoe TL/OSL DA-15 reader.\cr
 Reference: \tab unpublished data 
 }
 
@@ -36,16 +36,16 @@ Reference: \tab unpublished data
 Lab: \tab Netherlands Centre for Luminescence Dating (NCL)\cr
 Lab-Code: \tab NCL-2108077\cr
 Location: \tab  Guadalentin Basin, Spain\cr
-Material: \tab Coarse grain quartz.\cr
+Material: \tab Coarse grain quartz\cr
 Reference: \tab Bos & Wallinga (2012) and Baartman et al. (2011) 
 }
 
 %%  ~~ reference to a publication or URL from which the data were obtained ~~
 }
 \references{
-Baartman, J.E.M., Veldkamp, A., Schoorl, J.M., Wallinga, J., Cammeraat, L.H., 2011. Unravelling Late Pleistocene and Holocene landscape dynamics: The Upper Guadalentin Basin, SE Spain. Geomorphology, 125, pp. 172-185.
+Baartman, J.E.M., Veldkamp, A., Schoorl, J.M., Wallinga, J., Cammeraat, L.H., 2011. Unravelling Late Pleistocene and Holocene landscape dynamics: The Upper Guadalentin Basin, SE Spain. Geomorphology, 125, 172-185.
 
-Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal components. Radiation Measurements, 47, pp. 752-758.
+Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal components. Radiation Measurements, 47, 752-758.
 
 %%  ~~ possibly secondary sources and usages ~~
 }

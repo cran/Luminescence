@@ -2,6 +2,7 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{RLum.Results-class}
+\alias{show,RLum.Results-method}
 \alias{set_RLum.Results}
 \alias{set_RLum.Results,RLum.Results-method}
 \alias{set_RLum.Results,ANY,list-method}
@@ -36,20 +37,22 @@ Objects can be created by calls of the form \code{new("RLum.Results", ...)}.
     \item{validObject}{\code{signature(object = "RLum.Results")}: validates object depending 
     on the \code{originator} argument}
     
+    \item{show}{\code{signature(object = "RLum.Results")}: ... }
+    
     \item{set_RLum.Results}{\code{signature(originator = "character", data = "list")}: 
     
-    Conctructor method for \code{RLum.Results} object. The slot \code{originator} is optional 
+    Construction method for \code{RLum.Results} object. The slot \code{originator} is optional 
     and predefined as the function that calls the function \code{set_RLum.Results}.    
     }
     
      \item{get_RLum.Results}{\code{signature(object = "RLum.Results", data.object = "character")}: accessor method for \code{RLum.Results} object.
-     The argument \code{data.object} allows to directly access objects delivered within the slot \code{data}. If no \code{data.object} is specified a preselected object is returned. The default return
+     The argument \code{data.object} allows directly accessing objects delivered within the slot \code{data}. If no \code{data.object} is specified, a preselected object is returned. The default return
      object depends on the object originator (e.g. \code{fit_LMCurve}). 
      }
      
       \item{merge_RLum.Results}{\code{signature(object.list = "list")}: merge method for \code{RLum.Results} objects.
      The argument \code{object.list} requires a list of \code{RLum.Results} objects.\cr
-     Merging is doen by appending similar elements on the first object of the input list.
+     Merging is done by appending similar elements to the first object of the input list.
      }
 
    }
@@ -63,7 +66,7 @@ Objects can be created by calls of the form \code{new("RLum.Results", ...)}.
 \author{Sebastian Kreutzer, 2013 (Freiberg Instruments/JLU Giessen, Germany)
 }
 
-\section{Version}{0.3 [2013-09-27]}
+\section{Version}{0.2.2 [2013-11-21]}
 
 
 \note{

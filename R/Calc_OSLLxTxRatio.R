@@ -6,7 +6,7 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
   ## Sebastian Kreutzer, JLU Giessen (Germany)
   
   ##section<<
-  ## version 0.3
+  ## version 0.3.1
   # ===========================================================================
   
   Lx.data, 
@@ -70,9 +70,14 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
    ##(g) - check if signal and background integral overlapping
    if(min(background.integral)<=max(signal.integral)){
      stop("[calc_OSLLxTxRatio.R] >> Error: Overlapping of signal.integral and background.integral is not permitted!")}
+   
+   ##(h) - check if signal > background integral overlapping
+   if(length(background.integral)<length(signal.integral)){
+     stop("[calc_OSLLxTxRatio.R] >> Error: signal integral > background integral. This is currently not supported.")}
+   
    ##
-  ##------------------------------------------------------------------------------------------------##
-  ##------------------------------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
   ##(2) - read data and produce background subracted values 
    
    Lx.curve<-Lx.data[,2] 
@@ -85,41 +90,50 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
      Tx.background<-sum(Tx.curve[background.integral])/(length(background.integral)/length(signal.integral))
      TnTx<-(Tx.signal-Tx.background)                         
      
-  ##------------------------------------------------------------------------------------------------##
-  ##------------------------------------------------------------------------------------------------##
-  ##(3) calulate Lx/Tx Errors according Galbraith (2002) follwing also the nomenclator for the ease of use
+  ##--------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
+  ##(3) 
+  ## calulate Lx/Tx Errors according Galbraith (2002) follwing also the 
+  ## nomenclator for the ease of use
   ## -- results checked with the analyst an they are comparable! (29/10/2011)    
   
   ##(a)
   ##calculate Y.0 - which is the sum OSL signal including the background
-  Y.0<-Lx.signal
-  Y.0_TnTx<-Tx.signal
+  Y.0 <- Lx.signal
+  Y.0_TnTx<- Tx.signal
   
   ##(b)
-  ##calculate k value - express the background as mutiple value from the number of signal channels 
-  k<-length(background.integral)/length(signal.integral)
+  ## calculate k value - express the background as mutiple value from the number 
+  ## of signal channels 
+  k <- length(background.integral)/length(signal.integral)
   
-  
+     
   ##(c)
-  ##calculate background over n channels (k sets); note that m=n*k = background.integral
-  Y.i<-sapply(0:round(k,digits=0), function(i){
+  ## calculate background over n channels (k sets); 
+  ## note that m=n*k = background.integral
+  Y.i <- sapply(0:round(k,digits=0), function(i){
     Y.i<-sum(Lx.curve[(min(background.integral)+length(signal.integral)*i):(min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
   })      
+   
+   
   ##also for the test signal   
-  Y.i_TnTx<-sapply(0:round(k,digits=0), function(i){
+  Y.i_TnTx <- sapply(0:round(k,digits=0), function(i){
     Y.i<-sum(Tx.curve[(min(background.integral)+length(signal.integral)*i):(min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
   })
   
   ##(d)
-  ##calculate the variance of the background over the k sets; exlcude NA values
-  Y.var<-var(Y.i,na.rm=TRUE)
-  Y.var_TnTx<-var(Y.i_TnTx,na.rm=TRUE)
+  ## calculate the variance of the background over the k sets; exlcude NA values
+  Y.var<-var(Y.i,na.rm = TRUE)
+  Y.var_TnTx<-var(Y.i_TnTx,na.rm = TRUE)
   
+
+   
   ##(e)
-  ##calculate average background for the k sets    
-  Y.mean<-sum(na.exclude(Y.i))/round(k,digits=0)
-  Y.mean_TnTx<-sum(na.exclude(Y.i_TnTx))/round(k,digits=0)
+  ## calculate average background for the k sets    
+  Y.mean <- sum(na.exclude(Y.i))/round(k,digits=0)
+  Y.mean_TnTx <- sum(na.exclude(Y.i_TnTx))/round(k,digits=0)
   
+   
   ##(f)
   ##calculate difference from variance and mean background counts
   Y.sigma<-abs(Y.var-Y.mean)
@@ -129,39 +143,45 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
   ##calculate error after equation 7 in Gablraith 2002        
   LnLx.relError<-sqrt(1+(Y.sigma/Y.mean))*(sqrt(Y.0+(Y.mean/k))/(Y.0-Y.mean))
   TnTx.relError<-sqrt(1+(Y.sigma_TnTx/Y.mean_TnTx))*(sqrt(Y.0_TnTx+(Y.mean_TnTx/k))/(Y.0_TnTx-Y.mean_TnTx))
-  
+
+   
   ##(h)
   ##calculate absolute standard error
-  LnLx.Error<-abs(LnLx*LnLx.relError)
-  TnTx.Error<-abs(TnTx*TnTx.relError)
+  LnLx.Error <- abs(LnLx*LnLx.relError)
+  TnTx.Error <- abs(TnTx*TnTx.relError)
 
   ##combine results
-  LnLxTnTx<-cbind(Lx.signal,Lx.background,Tx.signal,Tx.background,LnLx,LnLx.Error,TnTx,TnTx.Error)
-  ##------------------------------------------------------------------------------------------------##
-  ##------------------------------------------------------------------------------------------------##
+  LnLxTnTx<-cbind(Lx.signal,
+                  Lx.background,
+                  Tx.signal,
+                  Tx.background,
+                  LnLx, LnLx.Error,
+                  TnTx, TnTx.Error)
+   
+  ##--------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
   ##(4) Calculate LxTx error with gaussian error propagation and combine results
 
   #transform results in a data.frame
-  LnLxTnTx<-as.data.frame((LnLxTnTx))
+  LnLxTnTx <- as.data.frame((LnLxTnTx))
+
 
   #add col names
   colnames(LnLxTnTx)<-c("LnLx","LnLx.BG","TnTx","TnTx.BG","Net_LnLx","Net_LnLx.Error","Net_TnTx","Net_TnTx.Error")
   
   ##calculate Ln/Tx
-  LxTx<-LnLxTnTx$LnLx/LnLxTnTx$TnTx
+  LxTx <- LnLxTnTx$LnLx/LnLxTnTx$TnTx
 
   ##calculate Ln/Tx error
   LxTx.Error<-sqrt(((1/LnLxTnTx$Net_TnTx)*LnLxTnTx$Net_LnLx.Error)^2+((LnLxTnTx$Net_LnLx/-LnLxTnTx$Net_TnTx^2)*LnLxTnTx$Net_TnTx.Error)^2)
 
   ##return combined values
   temp <- cbind(LnLxTnTx,LxTx,LxTx.Error)
-  
+   
   temp.return <- new("RLum.Results", 
                      originator = "calc_OSLLxTxRatio",
-                     data = temp
-                     )
-  
-   
+                     data = temp)
+
   return(temp.return)
   ### 
    
@@ -177,19 +197,20 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
    
   ##value<<
   ## Returns an S4 object of type \code{\linkS4class{RLum.Results}}. 
-  ## Slot \code{data} containt a \link{data.frame} with the following structure:\cr 
+  ## Slot \code{data} contains a \link{list} with the following structure:\cr 
   ## $ LnLx  \cr        
   ## $ LnLx.BG   \cr     
   ## $ TnTx    \cr       
   ## $ TnTx.BG    \cr   
   ## $ Net_LnLx   \cr   
   ## $ Net_LnLx.Error\cr 
-  ## $ Net_TnTx.Error
+  ## $ Net_TnTx.Error\cr
+  ## $ LxTx\cr
+  ## $ LxTx.Error
    
   ##references<<
-  ## Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/Produkter/Dosimetri
-  ## /NUK_instruments/TL_OSL_readers/~/media/Risoe_dk/Erhvervskontakt/NUK/Documents
-  ## /Analyst%20Manual%20v3%2022b.ashx}\cr\cr 
+  ## Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/english/~/media/Andre_Universitetsenheder/Nutech/Produkter%20og%20services/Dosimetri/radiation_measurement_instruments/tl_osl_reader/Manuals/analyst_manual_v3_22b.ashx}\cr
+  ##
   ## Galbraith, R.F., 2002. A note on the variance of a background-corrected 
   ## OSL count. Ancient TL, 20 (2), 49-51. 
   
@@ -198,7 +219,8 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
   ## Access to the results object via \code{get_RLum.Results}.
    
   ##seealso<<
-  ## \code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}} 
+  ## \code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}}, 
+  ## \code{\link{analyse_SAR.CWOSL}}
    
   ##keyword<<
   ## datagen
@@ -211,6 +233,6 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
   
   ##calculate Lx/Tx ratio
   results <- calc_OSLLxTxRatio(Lx.data, Tx.data, signal.integral = c(1:2), 
-                             background.integral = c(85:100))
+                               background.integral = c(85:100))
 
-})  
+})#END OF STRUCTURE

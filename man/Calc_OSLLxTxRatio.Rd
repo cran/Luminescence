@@ -22,17 +22,18 @@ an artificial \code{data.frame}
 is produced. The error calculation is done according to Galbraith (2002).}
 \value{
 Returns an S4 object of type \code{\linkS4class{RLum.Results}}. 
-Slot \code{data} containt a \link{data.frame} with the following structure:\cr 
+Slot \code{data} contains a \link{list} with the following structure:\cr 
 $ LnLx  \cr        
 $ LnLx.BG   \cr     
 $ TnTx    \cr       
 $ TnTx.BG    \cr   
 $ Net_LnLx   \cr   
 $ Net_LnLx.Error\cr 
-$ Net_TnTx.Error}
-\references{Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/Produkter/Dosimetri
-/NUK_instruments/TL_OSL_readers/~/media/Risoe_dk/Erhvervskontakt/NUK/Documents
-/Analyst\%20Manual\%20v3\%2022b.ashx}\cr\cr 
+$ Net_TnTx.Error\cr
+$ LxTx\cr
+$ LxTx.Error}
+\references{Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/english/~/media/Andre_Universitetsenheder/Nutech/Produkter\%20og\%20services/Dosimetri/radiation_measurement_instruments/tl_osl_reader/Manuals/analyst_manual_v3_22b.ashx}\cr
+
 Galbraith, R.F., 2002. A note on the variance of a background-corrected 
 OSL count. Ancient TL, 20 (2), 49-51. }
 \author{Sebastian Kreutzer, JLU Giessen (Germany)
@@ -41,7 +42,8 @@ R Luminescence Package Team}
 Access to the results object via \code{get_RLum.Results}.}
 
 
-\seealso{\code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}} }
+\seealso{\code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}}, 
+\code{\link{analyse_SAR.CWOSL}}}
 \examples{
 
 ##load data
@@ -49,7 +51,7 @@ data(ExampleData.LxTxOSLData, envir = environment())
 
 ##calculate Lx/Tx ratio
 results <- calc_OSLLxTxRatio(Lx.data, Tx.data, signal.integral = c(1:2), 
-                           background.integral = c(85:100))
+                             background.integral = c(85:100))
 
 }
 

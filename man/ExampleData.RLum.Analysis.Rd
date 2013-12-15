@@ -30,7 +30,7 @@ Lab: \tab Luminescence Laboratory TU Bergakademie Freiberg\cr
 Lab-Code: \tab ZEU/SA1\cr
 Location: \tab Zeuchfeld (Zeuchfeld Sandur; Saxony-Anhalt/Germany)\cr
 Material: \tab K-feldspar (130-200 \eqn{\mu}m)\cr
-Reference: Kreutzer et al. (2012)
+Reference: \tab Kreutzer et al. (2012)\cr
 
 
 }

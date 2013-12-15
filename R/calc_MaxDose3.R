@@ -1,7 +1,8 @@
 ##======================================
-calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter minimum age model (MAM 3) after Galbraith et al. (1999) to a given De distribution
-  ### Function to fit the (un-)logged three parameter minimum dose model 
-  ### (MAM 3) to De data.
+calc_MaxDose3<- structure(function( # Apply the maximum age model to a given De distribution 
+  ### Function to fit the maximum age model to De data. This function is a
+  ### modified version of the three parameter minimum age model after Galbraith
+  ### et al. (1999) using a similiar approach described in Olley et al. (2006).
   
   # ===========================================================================
   ##author<< 
@@ -19,10 +20,11 @@ calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter mini
   sigmab, 
   ### \code{\link{numeric}}  (\bold{required}): spread in De values given as a 
   ### fraction (e.g. 0.2). This value represents the expected overdispersion in
-  ### the data should the sample be well-bleached (Cunningham & Walling 2012, p. 100).
+  ### the data, if the sample is well-bleached (Cunningham & Walling 2012, p. 100).
   log=TRUE, 
   ### \code{\link{logical}} (with default): fit the (un-)logged three parameter 
-  ### minimum dose model to De data
+  ### maximum dose model to De data. An un-logged version is currently not
+  ### supported
   sample.id="unknown sample",
   ### \code{\link{character}} (with default): sample id
   gamma.xlb=0.1, 
@@ -38,7 +40,7 @@ calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter mini
   init.sigma=1.2, 
   ### \code{\link{numeric}} (with default): starting value of sigma
   init.p0=0.01,
-  ### \code{\link{numeric}} (with default): starting value of p0
+  ### \code{\link{numeric}} (with default): starting value of p0 
   ignore.NA = FALSE,
   ### \code{\link{logical}} (with default): ignore NA values during log
   ### likelihood calculations. See details.
@@ -56,7 +58,7 @@ calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter mini
   output.filename="default", 
   ### \code{\link{character}} (with default): desired filename, else results 
   ### are saved to default-3R(-UL).res 
-  output.plot=TRUE, 
+  output.plot=FALSE, 
   ### \code{\link{logical}} (with default): plot output
   ### (\code{TRUE}/\code{FALSE})
   output.indices=3
@@ -108,6 +110,18 @@ calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter mini
     stop(domain=NA)
   }
   
+  if(log == FALSE) { 
+    cat(paste("Warning! The maximum age model currently only works with",
+              "logarithmic De values."), fill = FALSE)
+    stop(domain=NA)
+  }
+  
+  if(output.plot == TRUE) {
+    cat(paste("\n\n CAUTION: Graph labels are erroneous in this version! \n"), 
+        fill = FALSE)
+    #stop(domain=NA)
+  }
+  
 ##============================================================================##
 ## CALCULATIONS
 ##============================================================================##
@@ -115,8 +129,8 @@ calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter mini
 # this calculates ln(1-Phi(x)) robustly, where 
 # Phi(x) is the standard normal c.d.f
 
-lnnprob.f<- function(x) { 
-  
+lnnprob.f<- function(x)
+{ 
   logsqrt2pi<- 0.5*log(2*pi)
 
   b1  <-  3.8052e-8
@@ -164,7 +178,7 @@ lnnprob.f<- function(x) {
   }
   return(lnnp)
 }
-  
+	
 # neglik.f calculates minus the log-likelihood of the data from 
 # the parameters and the data
 
@@ -210,23 +224,23 @@ neglik.f<- function(param,input.data,rep){
 	ipr<-    prstat[3]
 	ncalls<- ncalls+1
 	ncmod<- ncmod+1
-  
   if(console.extendedOutput==TRUE) {
-    
-    if( ncmod==ipr | (ncalls==1 & ipr>0) ) {
-      cat(paste("\n\n\n ------ # function calls:", ncalls,"------"))
-      cat(paste("\n neg. log likelihood: ",round(negll,3)))
-      cat(paste("\n parameters"))
-      cat(paste("\n  gamma: ",round(gamma,3),"  mindose:",
-                if(log==TRUE){round(exp(gamma),3)}else{round(gamma,3)}))
-      cat(paste("\n  sigma: ",round(sigma,4)))
-      cat(paste("\n     p0: ",round(p0,3)))
-      cat(paste("\n      n: ",length(zi)))
-      ncmod<- 0
-    }
+	if( ncmod==ipr | (ncalls==1 & ipr>0) )
+	   {
+	    cat(paste("\n\n\n ------ # function calls:", ncalls,"------"))
+	    cat(paste("\n neg. log likelihood: ",round(negll,3)))
+	    cat(paste("\n parameters"))
+      cat(paste("\n  gamma: ",round(gamma,3),"  maxdose:",
+              if(log==TRUE){round(exp(gamma),3)}else{round(gamma,3)}))
+	    cat(paste("\n  sigma: ",round(sigma,4)))
+	    cat(paste("\n     p0: ",round(p0,3)))
+	    cat(paste("\n      n: ",length(zi)))
+	    ncmod<- 0
+	   }
   }
   
 	assign("prstat",c(ncalls,ncmod,ipr))
+
   return(negll)
 }
 
@@ -236,55 +250,46 @@ neglik.f<- function(param,input.data,rep){
 
 # read in the data and print the number of grains
   if(log==TRUE) { 
-    lcd<- log(input.data$ED)
-    lse<- sqrt((input.data$ED_Error/input.data$ED)^2 + sigmab^2)
+    lcd<- log(input.data$ED)*-1
+    x.offset<- abs(min(lcd))
+    lcd<- lcd+x.offset
+    lse<-   sqrt( (input.data$ED_Error/input.data$ED)^2 + sigmab^2 )
   }
   else {
     lcd<- input.data$ED
-    lse<- sqrt((input.data$ED_Error)^2 + sigmab^2)
-  }
-  
+    lse<-   sqrt( (input.data$ED_Error)^2 + sigmab^2 )
+    }
+
 	datmat<- cbind(lcd,lse)
 
-  
-  cat("\n [Calc_MinDose3] \n")
+  cat("\n [Calc_MaxDose3] \n")
 
 # supply the starting values and bounds for the parameters
-  if(log==TRUE) { 
-    gamma.init<- log(init.gamma) 
-  }
-  else {          
-    gamma.init<- init.gamma 
-  }
-  
+  if(log==TRUE) { gamma.init<- log(init.gamma) }
+  else {          gamma.init<- init.gamma }
   sigma.init<- init.sigma
   p0.init<- init.p0
+
   x0<- c(gamma.init, sigma.init, p0.init)
-  
-  if(log==TRUE) { 
-    xlb<- c( log(gamma.xlb), sigma.xlb, 0.0001 )
-    xub<- c( log(gamma.xub), sigma.xub, 0.9999 )
+  if(log==TRUE) { xlb<- c( log(gamma.xlb), sigma.xlb, 0.0001 )
+                  xub<- c( log(gamma.xub), sigma.xub, 0.9999 )
   }
-  else { 
-    xlb<- c( gamma.xlb, sigma.xlb, 0.0001 )
-    xub<- c( gamma.xub, sigma.xub, 0.9999 )
+  else { xlb<- c( gamma.xlb, sigma.xlb, 0.0001 )
+         xub<- c( gamma.xub, sigma.xub, 0.9999 )
   }
-  
+
 # parameters to control printing from nlminb
 	ncalls<- 0
 	ncmod<- 0
 	ipr<- 50
 	prstat<- c(ncalls,ncmod,ipr)
 	prfile<- F
-  
-  if(log==TRUE) {
-    Bmess<- 0 
-  }
-  
+	if(log==TRUE) { Bmess<- 0 }
+
 # maximise the likelihood
-  opt.param<- nlminb(start=x0, objective=neglik.f, scale=1, lower=xlb,
-                     upper=xub, input.data=datmat,
-                     control=list(iter.max = 1000, eval.max = 1000))
+  opt.param<- nlminb(start=x0,objective=neglik.f,scale=1,lower=xlb,upper=xub,
+                     input.data=datmat,control=list(iter.max = 1000, 
+                                                    eval.max = 1000))
 
 # print out the maxmimum likelihood estimates
   mlest<- opt.param$par
@@ -296,383 +301,379 @@ neglik.f<- function(param,input.data,rep){
 	bic<- -2*maxlik + 3*log(length(lcd))
   get("prstat",mode="numeric")
   ncalls<- prstat[1]
-  
   if(log==TRUE){
     get("Bmess",)
   }
-  
+
 # write the parameter estimates to output file filnam.res 
 # where filnam is the input file name
   
   filnam<- output.filename
 
-  if(output.file==TRUE) {
-    lbout<- paste(filnam,if(log==TRUE){"-3R.res"}else{"-3R-UL.res"},sep="")
-    
-    write(c("Sample: ", filnam, "\nSigma_b: ", sigmab), file=lbout, ncolumns=2,
-          append=F)
-    write("",lbout,append=T)
-    write(paste("Final estimate of model parameters"),lbout,append=T)
-    write(paste("gamma:", round(gamma,3), "sigma:", round(sigma,3), "p0:",
-                round(p0,3)),lbout,append=T)
-    
-    write("\nmaximum likelihood estimate of minimum age",lbout, append=T)
-    
-    write(if(log==TRUE){exp(gamma)}else{gamma},lbout,append=T)
-    
-    
-    # write fitted values to output file filnam-3R.res 
-    # where filnam is the input file name
-    prfile<- T
-    neglik.f(mlest,datmat)
-    prfile<- F
-  }
+  if(output.file==TRUE)
+  {
+  lbout<- paste(filnam,if(log==TRUE){"-3R.res"}else{"-3R-UL.res"},sep="")
   
+  write(c("Sample: ", filnam, "\nSigma_b: ", sigmab), file=lbout, ncolumns=2,
+        append=F)
+  write("",lbout,append=T)
+  write(paste("Final estimate of model parameters"),lbout,append=T)
+  write(paste("gamma:", round(gamma,3), "sigma:", round(sigma,3), "p0:",
+              round(p0,3)),lbout,append=T)
+  
+  write("\nmaximum likelihood estimate of maximum age",lbout, append=T)
+  
+  write(if(log==TRUE){exp(gamma)}else{gamma},lbout,append=T)
+
+
+# write fitted values to output file filnam-3R.res 
+# where filnam is the input file name
+  prfile<- T
+  neglik.f(mlest,datmat)
+  prfile<- F
+  
+  }
+
 ##============================================================================##
 ## PROFILE LOG LIKELIHOODS
 ##============================================================================##
 
-  if(calc.ProfileLikelihoods==TRUE) {
+  if(calc.ProfileLikelihoods==TRUE)
+  {
 
-    # read in the indices of the parameters for which profile
-    # likelihoods are to be calculated
-    
-    profind<- as.integer(output.indices)
-    
+# read in the indices of the parameters for which profile
+# likelihoods are to be calculated
+  
+  profind<- as.integer(output.indices)
+
+  if(output.plot==TRUE) {
     par(mfrow=c(2,2),oma=c(9,2,9,1),mar=c(3.7,3.1,1.1,0.2),
         mgp=c(1.75,0.5,0),las=1,cex.axis=1.1,cex.lab=1.3)
+  }
+  
+# calculate the required profiles
+  lbpar<- c("gamma","sigma","p0")
+  npar<- length(x0)
+  for(j in 1:profind)
+  {
     
-    # calculate the required profiles
-    lbpar<- c("gamma","sigma","p0")
-    npar<- length(x0)
-    
-    for(j in 1:profind) {
-      
 ##============================================================================##    
 ## first pass at the profile likelihood
 
 # this does a broad sweep of the possible parameter values and
 # estimates where more intensive calculations should be made
-      lowpar<- xlb[j]+(mlest[j]-xlb[j])*c(0.01,0.5,0.8,0.9,0.95,0.99)
-      highpar<- mlest[j]+(xub[j]-mlest[j])*c(0.01,0.05,0.1,0.2,0.5,0.99)
-      prfpar<- c(lowpar,mlest[j],highpar)
-      plk<- numeric(0)
-      
-      if(console.ProfileLikelihoods==TRUE) {
-        cat("\n ------calculating profiles: broad sweep-------")
-        cat(paste("\n trial parameter value","|","profile log likelihood \n"))
-      }
-      
-      for(par in prfpar) {
-        
+  lowpar<- xlb[j]+(mlest[j]-xlb[j])*c(0.01,0.5,0.8,0.9,0.95,0.99)
+  highpar<- mlest[j]+(xub[j]-mlest[j])*c(0.01,0.05,0.1,0.2,0.5,0.99)
+  prfpar<- c(lowpar,mlest[j],highpar)
+  plk<- numeric(0)
+
+  if(console.ProfileLikelihoods==TRUE){
+    cat("\n ------calculating profiles: broad sweep-------")
+    cat(paste("\n trial parameter value","|","profile log likelihood \n"))
+  }
+  for(par in prfpar)
+    {
+    
 # set up the initial values and the bounds so that the 
 # profile parameter is fixed i.e. lower bd = upper bd
-        if(j==1) {
-          px0<- c(par,mlest[2:npar])
-          pxlb<- c(par,xlb[2:npar])
-          pxub<- c(par,xub[2:npar])
-        }
-        
-        if(j>1 & j<npar) { 
-          j1<- j-1
-          j2<- j+1
-          px0<- c(mlest[1:j1],par,mlest[j2:npar])
-          pxlb<- c(xlb[1:j1],par,xlb[j2:npar])
-          pxub<- c(xub[1:j1],par,xub[j2:npar])
-        }
-        
-        if(j==npar) { 
-          npar1<- npar-1
-          px0<- c(mlest[1:npar1],par)
-          pxlb<- c(xlb[1:npar1],par)
-          pxub<- c(xub[1:npar1],par)
-        }
-        
+  if(j==1) 
+    {
+      px0<- c(par,mlest[2:npar])
+      pxlb<- c(par,xlb[2:npar])
+      pxub<- c(par,xub[2:npar])
+     }
+  if(j>1 & j<npar) 
+    { 
+      j1<- j-1
+      j2<- j+1
+      px0<- c(mlest[1:j1],par,mlest[j2:npar])
+      pxlb<- c(xlb[1:j1],par,xlb[j2:npar])
+      pxub<- c(xub[1:j1],par,xub[j2:npar])
+     }
+  if(j==npar) 
+    { 
+      npar1<- npar-1
+      px0<- c(mlest[1:npar1],par)
+      pxlb<- c(xlb[1:npar1],par)
+      pxub<- c(xub[1:npar1],par)
+     }
+
 # parameters to control printing from nlminb
-        ncalls<-0
-        ncmod<- 0
-        ipr<- 0
-        prstat<- c(ncalls,ncmod,ipr)
-        
-# maximise the likelihood
-        opt.param<- nlminb(start=px0, objective=neglik.f, scale=1, lower=pxlb,
-                           upper=pxub, input.data=datmat,
-                           control=list(iter.max = 1000, eval.max = 1000))
-        
-# save and print the results
-        proflik<- -maxlik-opt.param$objective
-        plk<- c(plk,proflik)
-        
-        if(console.ProfileLikelihoods==TRUE) {
-          cat(c("",format(round(j,0)),"   ", 
-                format(round(c(par, proflik), 3), nsmall=3), "\n"))
-        }
-      }#END OF LOOP
-      
+  ncalls<-0
+  ncmod<- 0
+  ipr<- 0
+  prstat<- c(ncalls,ncmod,ipr)
+
+  # maximise the likelihood
+  opt.param<- nlminb(start=px0,objective=neglik.f,scale=1,lower=pxlb,upper=pxub,
+                     input.data=datmat,control=list(iter.max = 1000, 
+                                                    eval.max = 1000))
+
+  # save and print the results
+  proflik<- -maxlik-opt.param$objective
+  plk<- c(plk,proflik)
+  #
+  if(console.ProfileLikelihoods==TRUE){
+  cat(c("",format(round(j,0)),"   ",format(round(c(par,proflik),3),nsmall=3),
+        "\n"))
+  }
+}#END OF LOOP
+
 ##============================================================================##
 ## second pass
 
 # this does a fine sweep of the parameter values between
 # limits derived from the broad sweep
-      n<- length(prfpar)
-      cnt<- (1:n)
-      tf<- plk > -2.0
-      n1<- min(cnt[tf])
-      n2<- max(cnt[tf])
-      
-      if(n1>1) {
-        tf[n1-1]<- T
-      }
-      
-      if(n2<n) {
-        tf[n2+1]<- T
-      }
-     
-      minpar<- xlb[j]
-      
-      if(n1>1) {
-        minpar<- min(prfpar[tf])
-      }
-      
-      maxpar<- xub[j]
-      
-      if(n2<n) {
-        maxpar<- max(prfpar[tf])
-      }
-      
-      prfpar2<- seq(minpar,maxpar,length=20)
-      plk2<- numeric(0)
-      
-      if(console.ProfileLikelihoods==TRUE) {
-        cat("\n ------calculating profiles: fine sweep-------")
-        cat(paste("\n trial parameter value","|","profile log likelihood \n"))
-      }
-      
-      for(par in prfpar2) { 
-        
+  n<- length(prfpar)
+  cnt<- (1:n)
+  tf<- plk > -2.0
+  n1<- min(cnt[tf])
+  n2<- max(cnt[tf])
+  if(n1>1) tf[n1-1]<- T
+  if(n2<n) tf[n2+1]<- T
+  minpar<- xlb[j]
+  if(n1>1) minpar<- min(prfpar[tf])
+  maxpar<- xub[j]
+  if(n2<n) maxpar<- max(prfpar[tf])
+  prfpar2<- seq(minpar,maxpar,length=20)
+  plk2<- numeric(0)
+
+  if(console.ProfileLikelihoods==TRUE){
+  cat("\n ------calculating profiles: fine sweep-------")
+  cat(paste("\n trial parameter value","|","profile log likelihood \n"))
+  }
+  for(par in prfpar2 )
+    { 
+    
 # set up the initial values and the bounds so that the 
 # profile parameter is fixed i.e. lower bd = upper bd 
-        if(j==1) {
-          px0<- c(par,mlest[2:npar])
-          pxlb<- c(par,xlb[2:npar])
-          pxub<- c(par,xub[2:npar])
-        }
-        
-        if(j>1 & j<npar) {
-          j1<- j-1
-          j2<- j+1
-          px0<- c(mlest[1:j1],par,mlest[j2:npar])
-          pxlb<- c(xlb[1:j1],par,xlb[j2:npar])
-          pxub<- c(xub[1:j1],par,xub[j2:npar])
-        }
-        
-        if(j==npar) {
-          npar1<- npar-1
-          px0<- c(mlest[1:npar1],par)
-          pxlb<- c(xlb[1:npar1],par)
-          pxub<- c(xub[1:npar1],par)
-        }
-        
-        
+  if(j==1) 
+    {
+      px0<- c(par,mlest[2:npar])
+      pxlb<- c(par,xlb[2:npar])
+      pxub<- c(par,xub[2:npar])
+    }
+  if(j>1 & j<npar) 
+    {
+      j1<- j-1
+      j2<- j+1
+      px0<- c(mlest[1:j1],par,mlest[j2:npar])
+      pxlb<- c(xlb[1:j1],par,xlb[j2:npar])
+      pxub<- c(xub[1:j1],par,xub[j2:npar])
+    }
+  if(j==npar) 
+    {
+      npar1<- npar-1
+      px0<- c(mlest[1:npar1],par)
+      pxlb<- c(xlb[1:npar1],par)
+      pxub<- c(xub[1:npar1],par)
+    }
+
+
 # parameters to control printing from nlminb
-        ncalls<-0
-        ncmod<- 0
-        ipr<- 0
-        prstat<- c(ncalls,ncmod,ipr)
-        
+  ncalls<-0
+  ncmod<- 0
+  ipr<- 0
+  prstat<- c(ncalls,ncmod,ipr)
+ 
 # maximise the likelihood
-        opt.param<- nlminb(start=px0,objective=neglik.f,scale=1,lower=pxlb,upper=pxub,
-                           input.data=datmat,control=list(iter.max = 1000, 
-                                                          eval.max = 1000))
-        
+  opt.param<- nlminb(start=px0,objective=neglik.f,scale=1,lower=pxlb,upper=pxub,
+                     input.data=datmat,control=list(iter.max = 1000, 
+                                                    eval.max = 1000))
+
 # save and print the results
-        proflik<- -maxlik-opt.param$objective
-        plk2<- c(plk2,proflik)
-        
-        if(console.ProfileLikelihoods==TRUE){
-          cat(c("",format(round(j,0)),"   ",format(round(c(par,proflik),3),nsmall=3),
-                "\n"))
-        }
-      }#END OF LOOP
-      
+  proflik<- -maxlik-opt.param$objective
+  plk2<- c(plk2,proflik)
+  
+  if(console.ProfileLikelihoods==TRUE){
+    cat(c("",format(round(j,0)),"   ",format(round(c(par,proflik),3),nsmall=3),
+          "\n"))
+  }
+}#END OF LOOP
+
 ##============================================================================##
 ## POOLING & PLOTTING
 ##============================================================================##
-
+  
 # the results from the broad sweep and the fine sweep
 # are pooled, and only the data values near the  maximum likelihood
 # solution are kept and the results are plotted
-      prfpar<- c(prfpar,prfpar2)
-      plk<- c(plk,plk2)
-      ord<- order(prfpar)
-      prfpar<- prfpar[ord]
-      plk<- plk[ord]
-      n<- length(prfpar)
-      cnt<- (1:n)
-      tf<- plk>=-1.92
-      n1<- min(cnt[tf])
-      n2<- max(cnt[tf])
-      if(n1>1) tf[n1-1]<- T
-      if(n2<n) tf[n2+1]<- T
-      prfpar<- prfpar[tf]
-      plk<- plk[tf]
-      
+  prfpar<- c(prfpar,prfpar2)
+  plk<- c(plk,plk2)
+  ord<- order(prfpar)
+  prfpar<- prfpar[ord]
+  plk<- plk[ord]
+  n<- length(prfpar)
+  cnt<- (1:n)
+  tf<- plk>=-1.92
+  n1<- min(cnt[tf])
+  n2<- max(cnt[tf])
+  if(n1>1) tf[n1-1]<- T
+  if(n2<n) tf[n2+1]<- T
+  prfpar<- prfpar[tf]
+  plk<- plk[tf]
+
+  true.prfpar<- (prfpar-x.offset)*-1
+  
 # plotting
-      if(output.plot==TRUE) {
-        
-        plot(prfpar,plk,type="n",xlab=lbpar[j],ylab="",ylim=c(-2.5,0),cex=0.8)
-        lines(prfpar,plk)
-        abline(h=-1.92,lty=3)
-        abline(h=-0.5,lty=3)
-        
-      }
-      
+  if(output.plot==TRUE) {
+  
+  plot(true.prfpar,plk,type="n",xlab=lbpar[j],ylab="",ylim=c(-2.5,0),cex=0.8)
+  lines(true.prfpar,plk)
+  abline(h=-1.92,lty=3)
+  abline(h=-0.5,lty=3)
+  
+  }
+
 # the 95% upper and lower confidence limits are calculated from the
 # profile results  and the results are added to the plot
-      n<- length(prfpar)
-      cnt<- (1:n)
-      tf<- plk>=-1.92
-      n1<- min(cnt[tf])
-      n2<- max(cnt[tf])
-      delu<- (maxpar-minpar)/100
-      
-# the lower confidence limit
-      if(n1>1)
-      {
-        uci<-prfpar[(n1-1):n1]
-        lci<- plk[(n1-1):n1]
-        u1<- approx(lci,uci,-1.92)$y
-        
-        if(output.plot==TRUE) {
-          text(u1+delu,-2.12,format(round(u1,2)),adj=0,cex=1)
-          if(j==1 & log==TRUE)
-          {
-            text(u1+delu,-2.32,format(round(exp(u1),2)),adj=0,cex=1)
-          }
-        }
-      }
-# the upper confidence limit
-      if(n2<n)
-      {
-        uci<-prfpar[n2:(n2+1)]
-        lci<- plk[n2:(n2+1)]
-        u2<- approx(lci,uci,-1.92)$y
-        
-        if(output.plot==TRUE) {
-          text(u2-delu,-2.12,format(round(u2,2)),adj=1,cex=1)
-          if(j==1 & log==TRUE)
-          {
-            text(u2-delu,-2.32,format(round(exp(u2),2)),adj=1,cex=1)
-          }
-        }
-      }
-      if(j==1) {
-        try(gul<- u1, silent=TRUE)
-        try(guu<- u2, silent=TRUE) }
-      
-      if(output.file==TRUE&&j==1) {
-        write("\n95% confidence interval",lbout,append=T)
-        if(log==TRUE) {
-          try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
-                          round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE)
-        }
-        else {
-          try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma,2)),lbout,
-                    append=T), silent=TRUE)  
-        }
-      }
-      
-# the 68% upper and lower confidence limits are calculated from the
-# profile results  and the results are added to the plot
-      n<- length(prfpar)
-      cnt<- (1:n)
-      tf<- plk>=-0.5
-      n1<- min(cnt[tf])
-      n2<- max(cnt[tf])
-      delu<- (maxpar-minpar)/100
-      
-# the lower confidence limit
-      if(n1>1)
-      {
-        uci<-prfpar[(n1-1):n1]
-        lci<- plk[(n1-1):n1]
-        u1<- approx(lci,uci,-0.5)$y
-        
-        if(output.plot==TRUE) {
-          text(u1+delu,-0.7,format(round(u1,2)),adj=0,cex=1)
-          
-          if(j==1 & log==TRUE)
-          {
-            text(u1+delu,-0.9,format(round(exp(u1),2)),adj=0,cex=1)
-          }
-        }
-      }
-      
-# the upper confidence limit
-      if(n2<n)
-      {
-        uci<-prfpar[n2:(n2+1)]
-        lci<- plk[n2:(n2+1)]
-        u2<- approx(lci,uci,-0.5)$y
-        
-        if(output.plot==TRUE) {
-          text(u2-delu,-0.7,format(round(u2,2)),adj=1,cex=1)
-          if(j==1 & log==TRUE)
-          {
-            text(u2-delu,-0.9,format(round(exp(u2),2)),adj=1,cex=1)
-          }
-        }
-      }
-      
-      if(j==1) {
-        try(gll<- u1, silent=TRUE)
-        try(glu<- u2, silent=TRUE) }
-      
-      if(output.file==TRUE&&j==1) {
-        write("\n68% confidence interval",lbout,append=T)
-        if(log==TRUE) {
-          try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
-                          round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE) }
-        else {
-          try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma),2),lbout,
-                    append=T),silent=TRUE) }
-      }
-      
-      
-# printing the maximum likelihood estimate on the graph
-      if(output.plot==TRUE) {
-        text(mlest[j],-0.17,format(round(mlest[j],2)),cex=1)
-        if(j==1 & log==TRUE)
-        {
-          text(mlest[j],-0.35,format(round(exp(mlest[j]),2)),cex=1)
-        } 
-      }
-    }
-    if(output.plot==TRUE) {
-      mtext(side=2,line=0,"relative profile log likelihood",cex=1.2,outer=T,las=0)
-      mtext(side=3,line=0,paste(filnam,if(log==TRUE){"   MAM 3"}
-                                else{"   MAM 3-UL"}),cex=1.4,outer=T)
-    }
-# Bmess is a message: it is the number ofs times 
-# B1<=B2 
-    if(log==TRUE) {
-      get("Bmess")
-      cat("\n -----------------------------")
-      cat(paste("\n # number of times B1<=B2:",Bmess,"#"))
-      cat("\n -----------------------------")
-    }
-  }#EndOf IF (PROFILE LOG LIKELIHOODS)
+  n<- length(prfpar)
+  cnt<- (1:n)
+  tf<- plk>=-1.92
+  n1<- min(cnt[tf])
+  n2<- max(cnt[tf])
+  delu<- (maxpar-minpar)/100
+
+  # save "true" gamma value
+  true.gamma<- (gamma-x.offset)*-1
   
-  if(output.file==TRUE) {
-    write("",lbout,append=T)
-    write(paste("Likelihood: ", round(maxlik, 5)),lbout, append=T)
-    write(paste("       BIC: ", round(bic, 3)),lbout, append=T)
+# the lower confidence limit
+if(n1>1)
+  {
+    uci<-prfpar[(n1-1):n1]
+    lci<- plk[(n1-1):n1]
+    u1<- approx(lci,uci,-1.92)$y
+    
+    if(output.plot==TRUE) {
+      text(u1+delu,-2.12,format(round(u1,2)),adj=0,cex=1)
+      if(j==1 & log==TRUE)
+        {
+	        text(u1+delu,-2.32,format(round(exp(u1),2)),adj=0,cex=1)
+        }
+      }
+    }
+# the upper confidence limit
+  if(n2<n)
+    {
+      uci<-prfpar[n2:(n2+1)]
+      lci<- plk[n2:(n2+1)]
+      u2<- approx(lci,uci,-1.92)$y
+     	
+      if(output.plot==TRUE) {
+        text(u2-delu,-2.12,format(round(u2,2)),adj=1,cex=1)
+     	  if(j==1 & log==TRUE)
+         {
+	         text(u2-delu,-2.32,format(round(exp(u2),2)),adj=1,cex=1)
+         }
+       }
+     }
+  if(j==1) {
+  try(gul<- u1, silent=TRUE)
+  try(guu<- u2, silent=TRUE) }
+  
+  if(output.file==TRUE&&j==1) {
+  write("\n95% confidence interval",lbout,append=T)
+  if(log==TRUE) {
+    try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
+    try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
+                    round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE)
+  }
+  else {
+    try(write(c(u1,u2),lbout,append=T),silent=TRUE)
+    try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma,2)),lbout,
+              append=T), silent=TRUE)  
+  }
   }
   
+# the 68% upper and lower confidence limits are calculated from the
+# profile results  and the results are added to the plot
+  n<- length(prfpar)
+  cnt<- (1:n)
+  tf<- plk>=-0.5
+  n1<- min(cnt[tf])
+  n2<- max(cnt[tf])
+  delu<- (maxpar-minpar)/100
+
+# the lower confidence limit
+  if(n1>1)
+    {
+      uci<-prfpar[(n1-1):n1]
+      lci<- plk[(n1-1):n1]
+      u1<- approx(lci,uci,-0.5)$y
+     	
+      if(output.plot==TRUE) {
+        text(u1+delu,-0.7,format(round(u1,2)),adj=0,cex=1)
+     	
+        if(j==1 & log==TRUE)
+         {
+          text(u1+delu,-0.9,format(round(exp(u1),2)),adj=0,cex=1)
+         }
+       }
+     }
+
+# the upper confidence limit
+  if(n2<n)
+    {
+      uci<-prfpar[n2:(n2+1)]
+      lci<- plk[n2:(n2+1)]
+      u2<- approx(lci,uci,-0.5)$y
+     	
+      if(output.plot==TRUE) {
+        text(u2-delu,-0.7,format(round(u2,2)),adj=1,cex=1)
+    	  if(j==1 & log==TRUE)
+        {
+	        text(u2-delu,-0.9,format(round(exp(u2),2)),adj=1,cex=1)
+        }
+      }
+    }
+  
+  if(j==1) {
+  try(gll<- u1, silent=TRUE)
+  try(glu<- u2, silent=TRUE) }
+  
+  if(output.file==TRUE&&j==1) {
+  write("\n68% confidence interval",lbout,append=T)
+  if(log==TRUE) {
+    try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
+    try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
+                    round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE) }
+  else {
+    try(write(c(u1,u2),lbout,append=T),silent=TRUE)
+    try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma),2),lbout,
+              append=T),silent=TRUE) }
+  }
+  
+  
+# printing the maximum likelihood estimate on the graph
+  if(output.plot==TRUE) {
+    text(mlest[j],-0.17,format(round(mlest[j],2)),cex=1)
+       	 if(j==1 & log==TRUE)
+            {
+  	          text(mlest[j],-0.35,format(round(exp(mlest[j]),2)),cex=1)
+            } 
+        }
+    }
+  if(output.plot==TRUE) {
+    mtext(side=2,line=0,"relative profile log likelihood",cex=1.2,outer=T,las=0)
+    mtext(side=3,line=0,paste(filnam,if(log==TRUE){"   MAM 3"}
+                              else{"   MAM 3-UL"}),cex=1.4,outer=T)
+  }
+# Bmess is a message: it is the number ofs times 
+# B1<=B2 
+  if(log==TRUE) {
+  get("Bmess")
+  cat("\n -----------------------------")
+  cat(paste("\n # number of times B1<=B2:",Bmess,"#"))
+  cat("\n -----------------------------")
+  }
+}#EndOf IF (PROFILE LOG LIKELIHOODS)
+
+  if(output.file==TRUE) {
+  write("",lbout,append=T)
+  write(paste("Likelihood: ", round(maxlik, 5)),lbout, append=T)
+  write(paste("       BIC: ", round(bic, 3)),lbout, append=T)
+  }
+
 
 # prepare return values
 results<- data.frame(id=sample.id,n=length(lcd),log=log,Lmax=maxlik,BIC=bic,
@@ -701,25 +702,32 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
   cat(paste("\n BIC:            ",round(bic,3)))
 
   cat(paste("\n\n--------- final parameter estimates ---------"))
-  cat(paste("\n gamma:   ",round(gamma,4)),
-        "\t\t minimum dose: ",if(log==TRUE){round(exp(gamma),3)}
+  cat(paste("\n gamma:   ",round(true.gamma,4)),
+        "\t\t maximum dose: ",if(log==TRUE){round(exp(true.gamma),3)}
       else{round(gamma,3)})
   cat(paste("\n sigma:   ",round(sigma,4))) 
   cat(paste("\n p0:      ",round(p0,4)))
 
+
   cat(paste("\n\n------- confidence intervals for gamma -------"))
   if(log==TRUE) {
-    try(cat(paste("\n 95% ci:  ", round(exp(gul),2), "-", round(exp(guu),2),
-                  " (-", round(exp(gamma)-exp(gul),2), " +",
-                  round(exp(guu)-exp(gamma),2),")") ,sep=""),silent=TRUE)
-    try(cat(paste("\n 68% ci:  ", round(exp(gll),2), "-", round(exp(glu),2),
-                  " (-", round(exp(gamma)-exp(gll),2), " +",
-                  round(exp(glu)-exp(gamma),2),")") ,sep=""),silent=TRUE)
+    try(cat(paste("\n 95% ci:  ", round(exp((guu-x.offset)*-1),2),
+                  "-", round(exp((gul-x.offset)*-1),2),
+                  " (-", round(exp(true.gamma)-exp((guu-x.offset)*-1),2), " +",
+                  round(exp((gul-x.offset)*-1)-exp(true.gamma),2),")"),
+            sep=""),silent=TRUE)
+    
+    try(cat(paste("\n 68% ci:  ", round(exp((glu-x.offset)*-1),2),
+                  "-", round(exp((gll-x.offset)*-1),2),
+                  " (-", round(exp(true.gamma)-exp((glu-x.offset)*-1),2), " +",
+                  round(exp((gll-x.offset)*-1)-exp(true.gamma),2),")") ,
+            sep=""),silent=TRUE)
   }
   else {
     try(cat(paste("\n 95% ci:  ", round(gul,2), "-", round(guu,2), " (-",
                     round(gamma-gul,2), " +",round(guu-gamma,2),")")
               ),silent=TRUE)
+    
     try(cat(paste("\n 68% ci:  ", round(gll,2), "-", round(glu,2), " (-",
                     round(gamma-gll,2), " +",round(glu-gamma,2),")")
               ),silent=TRUE)
@@ -730,16 +738,16 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
   }
 
   cat(paste("\n----------------------------------------------"))
-
+  
 # Print out warnings with regard to parameter boundaries
 
-  bcheck<- data.frame(gamma=c(all.equal(gamma.xub,if(log==TRUE){exp(gamma)}
-                                        else{gamma})==TRUE,
-                              all.equal(gamma.xlb,if(log==TRUE){exp(gamma)}
-                                        else{gamma})==TRUE),
-                      sigma=c(all.equal(sigma.xub,sigma)==TRUE,
-                              all.equal(sigma.xlb,sigma)==TRUE))
-  rownames(bcheck)<- c(".xub",".xlb")
+bcheck<- data.frame(gamma=c(all.equal(gamma.xub,if(log==TRUE){exp(gamma)}
+                                      else{gamma})==TRUE,
+                            all.equal(gamma.xlb,if(log==TRUE){exp(gamma)}
+                                      else{gamma})==TRUE),
+                    sigma=c(all.equal(sigma.xub,sigma)==TRUE,
+                            all.equal(sigma.xlb,sigma)==TRUE))
+rownames(bcheck)<- c(".xub",".xlb")
 
 
                     
@@ -752,44 +760,62 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
     cat(paste("\n #---------------------------------#\n\n"))
     print(bcheck)
   }
-  
+
   if(ignore.NA == TRUE) {
     cat(paste("\n CAUTION: By ignoring NA values the validity of results",
               "is not ensured. \n"), fill = FALSE)
   }
 
 # return values
-  newRLumResults.calc_MinDose3 <- set_RLum.Results(
+  
+  newRLumResults.calc_MaxDose3 <- set_RLum.Results(
     data = list(
       results = results))
-  
-  invisible(newRLumResults.calc_MinDose3)
-  ### Returns a plot (optional) and terminal output. A file 
-  ### containing statistical results is provided if desired. In addition an 
-  ### \code{\linkS4class{RLum.Results}} object is 
-  ### returned containing the following element:
-  ###
-  ### \item{results}{\link{data.frame} with statistical parameters.}
-  ###
-  ### The output should be accessed using the function 
-  ### \code{\link{get_RLum.Results}}  
+
+invisible(newRLumResults.calc_MaxDose3)
+### Returns a plot (optional) and terminal output. A file 
+### containing statistical results is provided if desired. In addition an 
+### \code{\linkS4class{RLum.Results}} object is 
+### returned containing the following element:
+###
+### \item{results}{\link{data.frame} with statistical parameters.}
+###
+### The output should be accessed using the function 
+### \code{\link{get_RLum.Results}}  
   
 ##details<<
 ## \bold{Parameters} \cr\cr
 ## This model has three parameters: \cr
 ## \tabular{rl}{
-## \code{gamma}: \tab minimum dose on the log scale \cr
-## \code{sigma}: \tab spread in ages above the minimum \cr
+## \code{gamma}: \tab maximum dose on the log scale \cr
+## \code{sigma}: \tab spread in ages above the maximum \cr
 ## \code{p0}: \tab proportion of grains at gamma \cr }
+## \bold{Data transformation} \cr\cr
+## To estimate the maximum dose population and its standard error, the three 
+## parameter minimum age model of Galbraith et al. (1999) is adapted. The
+## measured De values are transformed as follows: \cr\cr
+## 1. convert De values to natural logs \cr
+## 2. multiply the logged data to creat a mirror image of the De distribution\cr
+## 3. shift De values along x-axis by the smallest x-value found to obtain 
+## only positive values \cr
+## 4. apply the MAM to these data, after combining the square of the measurement
+## error associated with each De value with a relative error specified by 
+## sigmab \cr\cr
+## When all calculations are done, results are then converted
+## as follows\cr\cr
+## 1. subtract the x-offset \cr
+## 2. multiply the natural logs by -1 \cr
+## 3. take the exponent to obtain the maximum dose estimate in Gy \cr\cr
 ## \bold{(Un-)logged model} \cr\cr
-## In the original version of the three-parameter minimum dose model, the basic
+## In the original version of the three-parameter maximum dose model, the basic
 ## data are the natural logarithms of the De estimates and relative standard 
 ## errors of the De estimates. This model will be applied if \code{log = TRUE}.
 ## \cr\cr
 ## If \code{log = FALSE}, the modified un-logged model will be applied instead.
 ## This has essentially the same form as the original version. \code{gamma} and 
-## \code{sigma} are in Gy and \code{gamma} becomes the minimum true dose in 
-## the population. \cr\cr
+## \code{sigma} are in Gy and \code{gamma} becomes the maximum true dose in 
+## the population. NOTE: This option is disabled for the maximum dose 
+## model, as the data transformation requires logged De values! \cr\cr
 ## While the original (logged) version of the mimimum dose model may be 
 ## appropriate for most samples (i.e. De distributions), the modified 
 ## (un-logged) version is specially designed for modern-age and young samples 
@@ -806,13 +832,14 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
 ## initial values for the three parameters \code{init.gamma}, \code{init.sigma} 
 ## and \code{init.p0} need to be specified. \cr\cr
 ## \bold{Ignore NA values} \cr\cr
-## In some cases during the calculation of the log likelihoods, \code{NA} values 
+## In some cases during the calculation of the log likelihoods NA values 
 ## are produced instantly terminating the minimum age model. It is advised to 
 ## adjust some of the values provided for any argument. If the model still
 ## produces NA values it is possible to omit these values by setting 
 ## \code{ignore.NA = TRUE}. While the model is then usually able to finish
 ## all calculations the integrity of the final estimates cannot be ensured.
-## Use this argument at your own risk.
+## \bold{Use this argument at your own risk.}
+  
 
 ##references<<
 ## Arnold, L.J., Roberts, R.G., Galbraith, R.F. & DeLong, S.B., 2009. A revised
@@ -829,6 +856,9 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
 ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent dose
 ## and error calculation and display in OSL dating: An overview and some
 ## recommendations. Quaternary Geochronology, 11, pp. 1-27. \cr\cr
+## Olley, J.M., Roberts, R.G., Yoshida, H., Bowler, J.M., 2006. Single-grain
+## optical dating of grave-infill associated with human burials at Lake Mungo,
+## Australia. Quaternary Science Reviews, 25, pp. 2469-2474.\cr\cr
 ## \bold{Further reading} \cr\cr
 ## Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain 
 ## equivalent dose (De) distributions: Implications for OSL dating of sediment 
@@ -848,8 +878,7 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
 ##note<<
 ## The default boundary and starting values for \emph{gamma}, \emph{sigma} and 
 ## \emph{p0} may only be appropriate for some De data sets and may need to be 
-## changed for other data. This is especially true when the un-logged version is
-## applied.
+## changed for other data. An un-logged version is currently not supported.
 
 ##seealso<<
 ## \code{\link{nlminb}}, 
@@ -861,15 +890,9 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
   ## load example data
   data(ExampleData.DeValues, envir = environment())
   
-  ## apply the logged minimum dose model
-  calc_MinDose3(ExampleData.DeValues,
-                sigmab = 0.3,gamma.xub = 7000, 
-                output.file = FALSE, output.plot = FALSE)
-  
-  ## apply the un-logged minimum dose model
-  ## note that the example data set does not meet the un-logged model 
-  ## requirements
-  calc_MinDose3(ExampleData.DeValues, log = FALSE,
-                sigmab = 0.3,gamma.xub = 5000, 
-                output.file = FALSE, output.plot = FALSE)
+  ## apply the logged maximum dose model
+  ## NOTE THAT THE EXAMPLE DATA SET IS NOT SUITABLE FOR THE
+  ## MAXIMUM DOSE MODEL.
+  calc_MaxDose3(ExampleData.DeValues,
+                sigmab = 0.3, gamma.xub = 4000)
 })

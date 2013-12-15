@@ -9,12 +9,13 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
   ## Based on a rewritten S script of Rex Galbraith, 2010 \cr \cr
   
   ##section<<
-  ## version 1.1 [2013-09-04] 
+  ## version 1.21 [2013-11-19] 
   # ===========================================================================
   
   input.data,
-  ### \code{\link{data.frame}} (\bold{required}): two column data 
-  ### frame with De values and corresponding De errors                                 
+  ### \code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+  ### for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+  ### De error \code{(values[,2])}
   sigmab = 0,
   ### \code{\link{numeric}} (with default): spread in De values given as
   ### a fraction (e.g. 0.2). This value represents the expected overdispersion
@@ -34,17 +35,37 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
 ## CONSISTENCY CHECK OF INPUT DATA
 ##============================================================================##
   
-  if(is.data.frame(input.data)==FALSE) { print("Input data needs to be of type 
-                                               data.frame",quote=F) 
-                              stop(domain=NA) }
-  try(colnames(input.data)<- c("ED","ED_Error"),silent=TRUE)
-  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error")
-                                             { print("Columns must be named 'ED'
-                                                     and 'ED_Error'",quote=F)
-                              stop(domain=NA)}
-  if(sigmab <0 | sigmab >1) { print("sigmab needs to be given as a fraction 
-                                    between 0 and 1 (e.g. 0.2)",quote=F)
-                              stop(domain=NA)}
+  if(missing(input.data)==FALSE){
+    
+    if(is(input.data, "data.frame") == FALSE & is(input.data,
+                                                  "RLum.Results") == FALSE){
+      
+      stop("[calc_CentralDose] Error: 'input.data' object has to be of type 
+           'data.frame' or 'RLum.Results'!")
+      
+    }else{
+      
+      if(is(input.data, "RLum.Results") == TRUE){
+        
+        input.data <- get_RLum.Results(input.data, 
+                                       signature(object = "De.values"))
+        
+      }
+    }
+  }  
+  
+  try(colnames(input.data)<- c("ED","ED_Error"), silent = TRUE)
+  
+  if(colnames(input.data[1])!="ED"||colnames(input.data[2])!="ED_Error") { 
+    cat(paste("Columns must be named 'ED' and 'ED_Error'"), fill = FALSE)
+    stop(domain=NA) 
+  }
+  
+  if(sigmab <0 | sigmab >1) { 
+    cat(paste("sigmab needs to be given as a fraction between", 
+              "0 and 1 (e.g. 0.2)"), fill = FALSE)
+    stop(domain=NA)
+  }
   
 ##============================================================================##
 ## CALCULATIONS
@@ -98,7 +119,11 @@ out.sigma<- sigma
 	llik<- 0
 	sig0<- max(0,sigmax-8*sesigma)
 	sig1<- sigmax + 9.5*sesigma
-	sig<- seq(sig0,sig1,0.0001)
+	sig<- try(seq(sig0,sig1,0.0001), silent = TRUE)
+  
+  if(class(sig) != "try-error") {
+ 
+
   
 	for(sigma in sig) {
     
@@ -110,12 +135,14 @@ out.sigma<- sigma
   }
   
 	llik<- llik[-1] - Lmax
+  
+  }#endif::try-error
 
 ##============================================================================##  
 ##TERMINAL OUTPUT
 ##============================================================================##  
   
-  cat("\n [Calc_CentralDose]")
+  cat("\n [calc_CentralDose]")
   cat(paste("\n\n ---------------------------------"))
   cat(paste("\n sample ID:              ",sample.id))
   cat(paste("\n n:                      ",n))
@@ -126,18 +153,18 @@ out.sigma<- sigma
   cat(paste("\n se (delta):             ",round(out.delta*out.sedelta,4)))
   cat(paste("\n ---------------------------------"))
   cat(paste("\n overdispersion (sigma): ",round(out.sigma,4)))
-  cat(paste("\n se (sigma):             ",round(out.sesigma,4)))
+  cat(paste("\n se (sigma):             ",if(class(sig) != "try-error") {
+    round(out.sesigma,4) } else {"-"}))
   cat(paste("\n ---------------------------------\n\n"))  
 
-  results<- data.frame(id=sample.id,n=n,log_ED="TRUE",central_dose=out.delta,
-                       rse_delta=out.sedelta, se_delta=out.delta*out.sedelta,
-                       OD=out.sigma,se_sigma=out.sesigma)
   
 ##============================================================================##  
 ##PLOTTING
 ##============================================================================##
   
 if(output.plot==TRUE) {
+  
+  if(class(sig) != "try-error") {
   
 # plot the profile log likeihood
 	par(oma=c(2,1,2,1),las=1,cex.axis=1.2, cex.lab=1.2)
@@ -162,18 +189,38 @@ if(output.plot==TRUE) {
 	ytext<- min(llik) + dy
 	res<- c(sigL,sigmax,sigU)
 	text(res+dx,rep(ytext,3),round(res,2),adj=0)
+  }#endif::try-error
 }#endif::output.plot
   
 #return value
-  invisible(list(results=results))
-  ### Returns a plot and terminal output. In addition a list is returned 
-  ### containing the following element:
+  
+  if(class(sig) == "try-error") {
+    out.sigma<- 0
+    out.sesigma<- NA
+  }
+  
+  results<- data.frame(id=sample.id,n=n,log_ED="TRUE",central_dose=out.delta,
+                       rse_delta=out.sedelta, se_delta=out.delta*out.sedelta,
+                       OD=out.sigma,se_sigma=out.sesigma)
+  
+  newRLumResults.calc_CentralDose <- set_RLum.Results(
+    data = list(
+      results = results))
+  
+  invisible(newRLumResults.calc_CentralDose)
+  ### Returns a plot (optional) and terminal output. In addition an 
+  ### \code{\linkS4class{RLum.Results}} object is 
+  ### returned containing the following element:
   ###
-  ### \code{results} data frame with statistical parameters.
+  ### \item{results}{\link{data.frame} with statistical parameters.}
+  ###
+  ### The output should be accessed using the function 
+  ### \code{\link{get_RLum.Results}}
+  
   
   ##details<<
   ## This function uses the equations of Galbraith et al. (1999, pp. 358-359). 
-  ## The parameter \code{sigmab} is estimated using the maximum likelihood 
+  ## The parameter \code{sigma} is estimated using the maximum likelihood 
   ## approach. A detailed explanation on maximum likelihood estimation can be 
   ## found in the appendix of Galbraith & Laslett (1993, pp. 468-470)
   

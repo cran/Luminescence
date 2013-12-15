@@ -9,8 +9,9 @@ are from a mixture of normal distributions.}
     n.iterations = 200, grain.probability = FALSE, output.file = FALSE, 
     output.filename = "default")}
 \arguments{
-  \item{input.data}{\code{\link{data.frame}} (\bold{required}): two column data frame with De
-values and corresponding De errors}
+  \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}}  (\bold{required}): spread in De values given as a
 fraction (e.g. 0.2). This value represents the expected overdispersion in
 the data should the sample be well-bleached (Cunningham & Walling 2012, 
@@ -36,15 +37,18 @@ Indications of overfitting are: \cr\cr
 - convergence problems}
 \value{Returns a terminal output and a file containing statistical results if 
 wanted. In addition a list is returned containing the following elements:
-\cr\cr
-\code{mle.matrix} covariance matrix of maximum likelihood estimates.\cr
-\code{grain.probability} matrix with estimated probabilities of which 
-component each grain is in.\cr
-\code{meta} data frame containing model parameters (sample.id, sigmab, 
-n.components, llik, bic).\cr
-\code{components} data frame containing fitted components.\cr
-\code{single.comp} data frame containing log likelihood and BIC for a 
-single component.}
+\item{mle.matrix}{\link{matrix} covariance matrix of maximum likelihood
+estimates.}
+\item{grain.probability}{\link{matrix} with estimated probabilities 
+of which component each grain is in.}
+\item{meta}{\link{data.frame} containing model parameters 
+(sample.id, sigmab, n.components, llik, bic).}
+\item{components}{\link{data.frame} containing fitted components.}
+\item{single.comp}{\link{data.frame} containing log likelihood and 
+BIC for a single component.}
+
+The output should be accessed using the function 
+\code{\link{get_RLum.Results}}}
 \references{Galbraith, R.F. & Green, P.F., 1990. Estimating the component ages in a 
 finite mixture. Nuclear Tracks and Radiation Measurements, 17, pp. 197-206.
 \cr\cr

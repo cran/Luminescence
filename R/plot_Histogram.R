@@ -1,5 +1,5 @@
 plot_Histogram <- structure(function(# Plot a histogram with a separate error plot
-  ### Plot a predefined histogram with an accompanying error plot as suggested by 
+  ### Function plots a predefined histogram with an accompanying error plot as suggested by 
   ### Rex Galbraith at the UK LED in Oxford 2010.
 
   # ===========================================================================
@@ -15,26 +15,26 @@ plot_Histogram <- structure(function(# Plot a histogram with a separate error pl
   ### for \code{data.frame}: two columns: De 
   ### (\code{values[,1]}) and De error (\code{values[,2]})
   na.exclude = TRUE,
-  ### \code{\link{logical}} (with default): exclude NA values from the data set prior 
-  ### to any further operations.
+  ### \code{\link{logical}} (with default): excludes \code{NA} values from the 
+  ### data set prior to any further operations.
   mtext,
   ### \code{\link{character}} (optional): further sample information 
   ### (\link{mtext}).
   cex.global,
   ### \code{\link{numeric}} (with default): global scaling factor.
   breaks,
-  ### (with default): set breakpoints for histogram. Works as in \link{hist}.
+  ### (with default): sets breakpoints for histogram. Works as in \link{hist}.
   se,
-  ### \code{\link{logical}} (optional): plot standard error points over the 
+  ### \code{\link{logical}} (optional): plots standard error points over the 
   ### histogram, default is \code{FALSE}.
   rug,
-  ### \code{\link{logical}} (optional): add rugs to the histogram, default is 
+  ### \code{\link{logical}} (optional): adds rugs to the histogram, default is 
   ### \code{TRUE}.
   normal_curve,
-  ### \code{\link{logical}} (with default): add a normal curve to the histogram. 
+  ### \code{\link{logical}} (with default): adds a normal curve to the histogram. 
   ### Mean and sd are calculated from the input data. More see details section.
   summary,
-  ### \code{\link{character}} (optinal): add numerical output to the plot. Can 
+  ### \code{\link{character}} (optional): adds numerical output to the plot. Can 
   ### be one or more out of: "n" (number of samples), "mean" (mean De value), 
   ### "median" (median of the De values), "kdemax" (maximum value of probability 
   ### density function), "sdrel" (relative standard deviation), "sdabs" 
@@ -47,7 +47,7 @@ plot_Histogram <- structure(function(# Plot a histogram with a separate error pl
   ### \code{\link{numeric}} or \link{character} (with default): optional vector 
   ### of length 4 which specifies the colours of the following plot items in 
   ### exactly this order: histogram bars, rug lines, normal distribution curve 
-  ### and standard error points (e.g. c("grey", "black", "red", "grey")).
+  ### and standard error points (e.g., c("grey", "black", "red", "grey")).
   ...
   ### further arguments and graphical parameters passed to \code{\link{plot}}. 
   ### If y-axis labels are provided, these must be specified as a vector of 
@@ -77,6 +77,9 @@ plot_Histogram <- structure(function(# Plot a histogram with a separate error pl
   if(missing(colour) == TRUE) {colour = c("white", "black", "red", "black")}
   if(missing(summary) == TRUE) {summary <- ""}
   if(missing(normal_curve) == TRUE) {normal_curve = FALSE}  
+  
+  extraArgs <- list(...) # read out additional arguments list
+  fun <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE}
   
   ## optionally, count nd exclude NA values and print result
   if(na.exclude == TRUE) {
@@ -250,6 +253,9 @@ plot_Histogram <- structure(function(# Plot a histogram with a separate error pl
        col = "black", 
        cex = 0.8 * cex.global)
   
+  ## FUN by R Luminescence Team
+  if(fun==TRUE){sTeve()}
+  
   ##details<<
   ## If the normal curve is added, the y-axis in the histogram will show 
   ## the probability density. 
@@ -264,10 +270,10 @@ plot_Histogram <- structure(function(# Plot a histogram with a separate error pl
   ## 2010.\cr
   ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
   ## dose and error calculation and display in OSL dating: An overview and 
-  ## some recommendations. Quaternary Geochronology, 11, pp.1-27.
+  ## some recommendations. Quaternary Geochronology, 11, 1-27.
   
   ##note<<
-  ## The input data is not restricted to a special type of input data.
+  ## The input data is not restricted to a special type.
   
 }, ex=function(){
   ## load data

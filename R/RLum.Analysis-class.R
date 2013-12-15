@@ -4,8 +4,8 @@
 ##==============================================================================
 ##author: Sebastian Kreutzer
 ##organisation: JLU Giessen/Freiberg Instruments
-##version: 0.1
-##date: 2013-03-27
+##version: 0.1.3
+##date: 2013-11-20
 ##==============================================================================
 
 ##class definition
@@ -28,38 +28,41 @@ setClass("RLum.Analysis",
   setMethod("show", 
             signature(object = "RLum.Analysis"),
             function(object){
-                          
+               
               ##print
               cat("\n [RLum.Analysis Object]")
               cat("\n\t protocol:", object@protocol)
               cat("\n\t number of records:", length(object@records))  
               
               ##get object class types
-              temp<-sapply(1:length(object@records), function(x){
+              temp <- sapply(1:length(object@records), function(x){
                              
                             is(object@records[[x]])[1]
                             
-                           }
-                          )
-             
+                           })
+      
+        
+            
               ##print object class types
               sapply(1:length(table(temp)), function(x){
-                
+             
                 ##show RLum class type
-                cat("\n\t .. :",names(table(temp)[x]),":", 
-                    table(temp)[x])
+                cat("\n\t .. :",names(table(temp)[x]),":",table(temp)[x])
                 
-                ##show structure
+      
+                ##show structure               
+               
                 cat("\n\t .. .. : ", 
-                    sapply(1:length(object@records), 
-                           function(x) {
-                                        paste(object@records[[x]]@recordType,
-                                        if(x%%10==0 & x!=length(object@records)){"\n\t .. .. : "})
-                            }))
+                    unlist(sapply(1:length(object@records),  function(i) {
+               
+                      if(names(table(temp)[x]) == is(object@records[[i]])[1]){
+                         paste(object@records[[i]]@recordType,
+                         if(i%%10==0 & i!=length(object@records)){"\n\t .. .. : "})
+                      }
+                    })))
                       
-              }
-              )
-              
+              })
+        
             }                              
             )##end show method
 
@@ -90,26 +93,32 @@ setMethod("get_structure.RLum.Analysis",
             ##OBJECT TYPE
             temp.recordType <- c(NA)
             length(temp.recordType) <- temp.object.length
-            temp.recordType <- sapply(1:temp.object.length, function(x){object@records[[x]]@recordType})
+            temp.recordType <- sapply(1:temp.object.length, 
+                                      function(x){object@records[[x]]@recordType})
             
             ##PROTOCOL STEP
             temp.protocol.step <- c(NA)
             length(temp.protocol.step) <- temp.object.length
             
             ##n.channels
-            temp.n.channels <- sapply(1:temp.object.length, function(x){length(object@records[[x]]@data[,1])})
+            temp.n.channels <- sapply(1:temp.object.length, 
+                                      function(x){length(object@records[[x]]@data[,1])})
                 
             ##X.MIN
-            temp.x.min <- sapply(1:temp.object.length, function(x){min(object@records[[x]]@data[,1])})
+            temp.x.min <- sapply(1:temp.object.length, 
+                                 function(x){min(object@records[[x]]@data[,1])})
 
             ##X.MAX
-            temp.x.max <- sapply(1:temp.object.length, function(x){max(object@records[[x]]@data[,1])})
+            temp.x.max <- sapply(1:temp.object.length, 
+                                 function(x){max(object@records[[x]]@data[,1])})
 
             ##y.MIN
-            temp.y.min <- sapply(1:temp.object.length, function(x){min(object@records[[x]]@data[,2])})
+            temp.y.min <- sapply(1:temp.object.length, 
+                                 function(x){min(object@records[[x]]@data[,2])})
 
             ##X.MAX
-            temp.y.max <- sapply(1:temp.object.length, function(x){max(object@records[[x]]@data[,2])})
+            temp.y.max <- sapply(1:temp.object.length, 
+                                 function(x){max(object@records[[x]]@data[,2])})
             
             ##info elements as character value
             temp.info.elements <- unlist(sapply(1:temp.object.length, function(x){
@@ -121,9 +130,11 @@ setMethod("get_structure.RLum.Analysis",
                   }))
     
             ##combine output to a data.frame
-            return(data.frame(id=temp.id, recordType=temp.recordType, protocol.step=temp.protocol.step,
+            return(data.frame(id=temp.id, recordType=temp.recordType, 
+                              protocol.step=temp.protocol.step,
                               n.channels=temp.n.channels,
-                              x.min=temp.x.min, x.max=temp.x.max, y.min=temp.y.min, y.max=temp.y.max,
+                              x.min=temp.x.min, x.max=temp.x.max,
+                              y.min=temp.y.min, y.max=temp.y.max,
                               info.elements=temp.info.elements))
            
           })
@@ -160,19 +171,25 @@ setMethod("set_RLum.Analysis",
 # constructor (set) method for object class ------------------------------------------
 
 setGeneric("get_RLum.Analysis",
-           function(object, record.id, recordType) {standardGeneric("get_RLum.Analysis")})
+           function(object, record.id, recordType, curveType, RLum.type, get.index) {
+             standardGeneric("get_RLum.Analysis")})
 
 
 setMethod("get_RLum.Analysis", 
-          signature = c(object = "RLum.Analysis", record.id = "ANY", recordType = "ANY"), 
+          signature = c(object = "RLum.Analysis", 
+                        record.id = "ANY", 
+                        recordType = "ANY",
+                        curveType = "ANY",
+                        RLum.type = "ANY",
+                        get.index = "ANY"), 
           
-          function(object, record.id, recordType){             
+          function(object, record.id, recordType, curveType, RLum.type, get.index){             
             
             ##record.id
             if(missing(record.id) == TRUE){
               
               record.id <- c(1:length(object@records))
-              
+  
             }else if (is(record.id, "numeric") == FALSE){
               
               stop("[get_RLum.Analysis] Error: 'record.id' has to be of type 'numeric'!")
@@ -187,35 +204,136 @@ setMethod("get_RLum.Analysis",
                                 lapply(1:length(object@records), 
                                        function(x){object@records[[x]]@recordType})))
               
-            }else if (is(recordType, "character") == FALSE){
+            }else{
               
-              stop("[get_RLum.Analysis] Error: 'recordType' has to be of type 'character'!")
+              if (is(recordType, "character") == FALSE){
+              
+                stop("[get_RLum.Analysis] Error: 'recordType' has to be of type 'character'!")
+                
+              }
+                
+            }
+            
+            ##curveType
+            if(missing(curveType) == TRUE){
+              
+              curveType <- unique(
+                unlist(
+                  lapply(1:length(object@records), 
+                         function(x){object@records[[x]]@curveType})))
+              
+            }else if (is(curveType, "character") == FALSE){
+              
+              stop("[get_RLum.Analysis] Error: 'curveType' has to be of type 'character'!")
+              
+            }
+            
+            ##RLum.type
+            if(missing(RLum.type) == TRUE){
+              
+              RLum.type <- c("RLum.Data.Curve","RLum.Data.Spectrum")
+              
+            }else if (is(RLum.type, "character") == FALSE){
+              
+              stop("[get_RLum.Analysis] Error: 'RLum.type' has to be of type 'character'!")
+              
+            }
+            
+            ##get.index
+            if(missing(get.index) == TRUE){
+              
+             get.index <- FALSE
+              
+            }else if (is(get.index, "logical") == FALSE){
+              
+              stop("[get_RLum.Analysis] Error: 'get.index' has to be of type 'logical'!")
               
             }
             
             
+            
+           ##-----------------------------------------------------------------##
            ##select curves according to the chosen paramter
            if(length(record.id)>1){  
-             
+           
             temp <- sapply(record.id, function(x){
-                    
-                                if(object@records[[x]]@recordType%in%recordType){
-                                  object@records[[x]]
-                                }
-                              })
+             
+                if(is(object@records[[x]])[1]%in%RLum.type == TRUE){
+                
+                  ##as input a vector is allowed
+                  temp <- sapply(1:length(recordType), function(k){
+                     
+                     
+                     ##translate input to regular expression
+                     recordType[k] <- glob2rx(recordType[k])
+                     recordType[k] <- substr(recordType[k], 
+                                          start = 2, 
+                                          stop = nchar(recordType[k])-1)
+                     
+                     if(grepl(recordType[k],object@records[[x]]@recordType) == TRUE &  
+                          object@records[[x]]@curveType%in%curveType){
+                       
+                      if(get.index == FALSE){
+                         
+                        object@records[[x]]
+                                    
+                      }else{x}
+                       
+                     }
+  
+                   })
+                
+                  ##remove empty entries and select just one to unlist
+                  temp <- temp[!sapply(temp, is.null)]
+                  
+                  ##if list has length 0 skip entry
+                  if(length(temp) != 0){temp[[1]]}else{temp <- NULL}
+
+                }
+                
+              })
             
+           
             ##remove empty list element
-            temp[!sapply(temp, is.null)]
+            temp <- temp[!sapply(temp, is.null)]
+           
             
-            
+            ##remove list for get.index
+            if(get.index == TRUE){
+              
+              return(unlist(temp))
+              
+            } else{
+              
+              return(temp)
+              
+            }
             
            }else{
              
-            
-             object@records[[record.id]]   
-             
+             if(get.index == FALSE){
+               
+               return(object@records[[record.id]])  
+               
+             }else{
+        
+               return(record.id)
+               
+             }
            }
             
           })
 
+# constructor (length) method for object class ------------------------------------------
 
+setGeneric("length_RLum.Analysis",
+           function(object) {
+             standardGeneric("length_RLum.Analysis")})
+
+setMethod("length_RLum.Analysis", 
+          signature(object = "RLum.Analysis"),
+          function(object){
+            
+            length(object@records)
+            
+          })

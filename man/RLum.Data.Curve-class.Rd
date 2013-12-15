@@ -9,6 +9,9 @@
 \alias{set_RLum.Data.Curve,RLum.Data.Curve-method}
 \alias{set_RLum.Data.Curve,ANY-method}
 \alias{set_RLum.Data.Curve,character,matrix-method}
+\alias{get_RLum.Data.Curve}
+\alias{get_RLum.Data.Curve-methods}
+\alias{get_RLum.Data.Curve,ANY-method}
 
 \title{Class \code{"RLum.Data.Curve"}}
 \description{
@@ -29,7 +32,7 @@ Objects can be created by calls of the form \code{new("RLum.Data.Curve", ...)}.
   }
 }
 \section{Extends}{
-Class \code{"\linkS4class{RLum.Data}"}, directly.
+Class \code{"\linkS4class{RLum.Data}"}.
 }
 \section{Methods}{
   \describe{
@@ -45,12 +48,21 @@ Class \code{"\linkS4class{RLum.Data}"}, directly.
     
     }
     \item{show}{\code{signature(object = "RLum.Data.Curve")}: ... }
-    \item{set_RLum.Data.Curve}{\code{signature(recordType = "character", 
-    curveType = "character", data = "matrix", info = "list")}: 
     
-    Conctructor method for \code{RLum.Data.Curve} object. The slot \code{info} is optional 
+    \item{set_RLum.Data.Curve}{\code{signature(recordType = "character", curveType = "character", data = "matrix", info = "list")}: 
+    
+    Construction method for \code{RLum.Data.Curve} object. The slot \code{info} is optional 
     and predefined as empty \code{list} by default.    
     }
+    
+    \item{get_RLum.Data.Curve}{\code{signature(object = "RLum.Data.Curve", 
+    info.object = "character")}: 
+    
+    Accessor method for \code{RLum.Data.Curve} object. The argument \code{info.object}
+    is optional to directly access the info elements. If no info element name is 
+    provided, the raw curve data (\code{matrix}) will be returned.
+    }
+    
     
     
 	 }
@@ -61,7 +73,7 @@ Class \code{"\linkS4class{RLum.Data}"}, directly.
 \author{Sebastian Kreutzer Freiberg Instruments/JLU Giessen (Germany)
 }
 
-\section{Version}{0.1 [2013-09-24]}
+\section{Version}{0.1.2 [2013-11-22]}
 
 
 \note{

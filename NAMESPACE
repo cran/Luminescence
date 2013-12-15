@@ -1,5 +1,6 @@
 import(methods)
 import(XML)
 import(shape)
+import(rgl)
 import(Rserve)
 exportPattern("^[[:alpha:]]+")

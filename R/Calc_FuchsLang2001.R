@@ -1,50 +1,48 @@
-##//////////////////////////////////////////////
-##//calc_FuchsLang2001.R
-##/////////////////////////////////////////////
+calc_FuchsLang2001<- structure(function(#Apply the model after Fuchs & Lang (2001) to a given De distribution.
+  ### This function applies the method according to Fuchs & Lang (2001) for 
+  ### heterogeneously bleached samples with a given coefficient of variation threshold. 
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  
+  ##section<<
+  ## version 0.3.1 [2012-12-10]
+  # ===========================================================================
 
-##======================================
-#author: Sebastian Kreutzer
-#organisation: University of Bayreuth
-#vers.: 0.3.1
-#date: 10/12/2012
-##======================================
-##+++++++++++++++++++++++Preface+++++++++++++++++++++++(START)
-## (A) Input is data.frame() with two columns De and De_Error
-## 
-##(B) 
-## 1. Output is a PDF
-## 2. If the cv of the first two D[e] values > cvThreshold, 
-##		the frist D[e] is skipped. If you want to use only values
-##		above the second or third values use the startDeValue parameter
-##3. Function based on: 
-##		Fuchs, M.;Lang, A. (2001): OSL dating of coarse-grain fluvial quartz using single-aliqout
-##		protocols on sediments from NE Peloponnese, Greece. In: Quaternary Science Reviews (20), p. 783-787
-##	
-##		Short description: 
-##		
-##		(1) Estimate natural relative variation of the sample via DRT
-##		(2) Orderd D[e] values of sample in increasing order
-##		(3) Calculate a running mean, starting with the lowermost two values, than add 
-##			 one value each step
-##		(4) Stop if the value c[v] is exceed 
-##		(5) plot figure 
-##
-##############################################################
-
-calc_FuchsLang2001 <- function(
-                        sample,#data frame 
-                        sample.mtext="unknown sample",
-                        sample.id=sample.mtext,
-                        cvThreshold=5, #variation coefficient in %
-                        startDeValue=1, #D[e] value from which the calculation starts
+  sample,
+  ### \link{data.frame} (\bold{required}): two column data frame, e.g. De and De error
+  
+  sample.mtext = "unknown sample",
+  ### \link{character} (optional): mtext for optional plot (top)
+  
+  sample.id = sample.mtext,
+  ### \link{character} (with default): sample id, with default the sample.mtext is used.
+  
+  cvThreshold = 5, 
+  ### \link{numeric} (with default): coefficient of variation in percent, 
+  ### as threshold for the method, e.g. \code{cvThreshold = 3}. See details.
+  
+  startDeValue = 1, 
+  ### \link{numeric} (with default): number of the first aliquot that is used 
+  ### for the calculations
                         
-                        output.plot=TRUE,
-                        output.terminal=TRUE,
-											
-												main="Fuchs & Lang (2001)",#alternative name for title 
-												xlab=expression(paste(D[e]," [Gy]")),
-                        cex.global=1
-									) {
+  output.plot = TRUE,
+  ### \link{logical} (with default): plot output \code{TRUE}/\code{FALSE}
+  
+  output.terminal = TRUE,
+  ### \link{logical} (with default): terminal output \code{TRUE}/\code{FALSE}
+  
+	main = "Fuchs & Lang (2001)",
+  ### \link{character} (with default): title of the plot (works as in \link{plot})
+  
+  xlab = expression(paste(D[e]," [Gy]")),
+  ### \link{character} (with default): xlab works as in \link{plot}
+  
+  cex.global = 1
+  ### \link{numeric} (with default): global scaling factor
+
+){
 
 ##=================================================================================================##
 ##PREPARE DATA
@@ -229,5 +227,57 @@ par(cex=cex.global,mfrow=c(1,1))
                       n.usedDeValues)
   
   return(list(results=results,usedDeValues=usedDeValues))  
-}#EndOf function
-#EOF
+  
+	# DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+	
+	##details<<
+  ## \bold{Used values} \cr
+  ## If the coefficient of variation (c[v]) of the first two values is larger than 
+  ## the threshold c[v_threshold], the first value is skipped. 
+  ## Use the \code{startDeValue} argument to define a start value for 
+  ## calculation (e.g. 2nd or 3rd value).\cr
+	##
+	## \bold{Basic steps of the approach} \cr
+	##
+	## (1) Estimate natural relative variation of the sample using a dose recovery test\cr
+	## (2) Sort the input values ascendingly\cr
+	## (3) Calculate a running mean, starting with the lowermost two values and 
+  ## add values iteratively.\cr
+  ## (4) Stop if the calculated c[v] exceeds the specified \code{cvThreshold}\cr
+	
+	##value<<
+  ## A plot and terminal output is provided if desired. In addition, a 
+  ## list is returned containing two elements:
+  ## \item{results}{\link{data.frame} with stastical parameters, e.g. mean, sd, ...}
+  ## \item{usedDeValues}{\link{data.frame} containing the used values for the calculation}
+	
+	##references<<
+  ## Fuchs, M. & Lang, A., 2001. OSL dating of coarse-grain fluvial quartz using 
+  ## single-aliqout 	protocols on sediments from NE Peloponnese, 
+  ## Greece. In: Quaternary Science Reviews (20), pp. 783-787.
+	##
+	## Fuchs, M. & Wagner, G.A., 2003. Recognition of insufficient bleaching by 
+  ## small aliquots of quartz for reconstructing soil erosion in Greece. 
+  ## Quaternary Science Reviews, 22, pp. 1161-1167. 
+	
+	##note<<
+	## Please consider the requirements and the constraints of this method 
+  ## (see Fuchs & Lang, 2001)
+  
+	##seealso<<
+	## \code{\link{plot}}, \code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}
+  ## \code{\link{calc_FiniteMixture}}, \code{\link{calc_CentralDose}}, 
+  ## \code{\link{calc_CommonDose}}
+	
+	##keyword<<
+	## dplot
+  
+}, ex=function(){
+  
+  ##load example data
+  data(ExampleData.DeValues, envir = environment())
+  
+  ##calculate De according to Fuchs & Lang (2001)
+  calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
+  
+})#END OF STRUCTURE

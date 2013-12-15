@@ -6,6 +6,9 @@
 \alias{set_Risoe.BINfileData}
 \alias{set_Risoe.BINfileData,Risoe.BINfileData-method}
 \alias{set_Risoe.BINfileData,data.frame,list-method}
+\alias{get_Risoe.BINfileData}
+\alias{get_Risoe.BINfileData-methods}
+\alias{get_Risoe.BINfileData,Risoe.BINfileData-method}
 
 \title{Class \code{"Risoe.BINfileData"}}
 \description{
@@ -20,7 +23,7 @@ Objects can be created by calls of the form \code{new("Risoe.BINfileData", ...)}
 }
 \section{Slots}{
   \describe{
-    \item{\code{METADATA}:}{Object of class \code{"data.frame"} containing the meta information for each curvee }
+    \item{\code{METADATA}:}{Object of class \code{"data.frame"} containing the meta information for each curve.}
     \item{\code{DATA}:}{Object of class \code{"list"} containing numeric vector with count data }
     \item{\code{.S3Class}:}{Object of class \code{"character"}}
   }
@@ -32,9 +35,17 @@ Objects can be created by calls of the form \code{new("Risoe.BINfileData", ...)}
     \item{set_Risoe.BINfileData}{\code{signature(METADATA = "data.frame", DATA = "list")}: 
     
     The \code{\linkS4class{Risoe.BINfileData}} is normally produced as output of 
-    the function \code{\link{readBIN2R}}. This constructor method is intended for internal usage
+    the function \code{\link{readBIN2R}}. This construction method is intended for internal usage
     only.
    } 
+   
+   \item{get_Risoe.BINfileData}{\code{signature(object = "Risoe.BINfileData")}: 
+    
+    Formal get-method for \code{\linkS4class{Risoe.BINfileData}} object. It does not
+    allow accessing the object directly, but it is just showing a terminal message.  
+   } 
+   
+
   }
 }
   
@@ -90,7 +101,7 @@ Risoe DTU, 2013. The Sequence Editor User Manual - Feb 2013
 [,31]    \tab LTYPE           \tab  \code{character} \tab 03-06 \tab Luminescence type\cr
 [,32]    \tab LIGHTSOURCE     \tab  \code{character} \tab 03-06 \tab Light source\cr
 [,33]    \tab LPOWER          \tab  \code{numeric}  \tab 03-06 \tab Optical stimulation power\cr
-[,34]    \tab LIGHTPOWER      \tab  \code{numeric}  \tab 06    \tab Optical simulation power\cr
+[,34]    \tab LIGHTPOWER      \tab  \code{numeric}  \tab 06    \tab Optical stimulation power\cr
 [,35]    \tab LOW             \tab  \code{numeric}  \tab 03-06 \tab Low (temperature, time, wavelength)\cr
 [,36]    \tab HIGH            \tab  \code{numeric}  \tab 03-06 \tab High (temperature, time, wavelength)\cr
 [,37]    \tab RATE            \tab  \code{numeric}  \tab 03-06 \tab Rate (heating rate, scan rate)\cr
@@ -124,11 +135,11 @@ Risoe DTU, 2013. The Sequence Editor User Manual - Feb 2013
 [,65]    \tab SEQUENCE        \tab  \code{character}  \tab 03-04 \tab Sequence name\cr
 }
 V = BIN-file version (RLum means that it does not depend on a specific 
-R version)\cr
+BIN version)\cr
 
 Note that the \code{Risoe.BINfileData} object combines all values from 
 different versions from the BIN-file. Invalid values for a specific version 
-are set to \code{NA}. Furthermore the internal R data types not necessarily 
+are set to \code{NA}. Furthermore, the internal R data types do not necessarily 
 match the required data types for the BIN-file data import! Data types are
 converted during data import.\cr
 
@@ -143,7 +154,7 @@ converted during data import.\cr
 [,5] \tab TOL \tab: Thermo-optical luminescence \cr
 [,6] \tab TRPOSL \tab: Time Resolved Pulsed OSL\cr
 [,7] \tab RIR \tab: Ramped IRSL\cr
-[,8] \tab RBR \tab: Ramped Blue LEDs\cr
+[,8] \tab RBR \tab: Ramped (Blue) LEDs\cr
 [,9] \tab USER \tab: User defined\cr
 [,10] \tab POSL \tab: Pulsed OSL \cr
 [,11] \tab SGOSL \tab: Single Grain OSL\cr

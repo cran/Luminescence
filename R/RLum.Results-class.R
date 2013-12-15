@@ -4,8 +4,8 @@
 ##==============================================================================
 ##author: Sebastian Kreutzer
 ##organisation: JLU Giessen/Freiberg Instruments
-##version: 0.2
-##date: 2013-09-25
+##version: 0.2.2
+##date: 2013-11-21
 ##==============================================================================
 
 ##class definition
@@ -38,6 +38,40 @@ setValidity("RLum.Results",
               
             }           
             )
+
+
+# show method for object ------------------------------------------------------
+
+setMethod("show", 
+          signature(object = "RLum.Results"),
+          function(object){
+            
+            
+            ##data elements
+            temp.names <- names(object@data)
+            temp.type <- sapply(1:length(object@data), 
+                                   function(x){
+                                     
+                                     paste("\t .. $", temp.names[x],
+                                           " : ",
+                                           is(object@data[[x]])[1], 
+                                           sep = "")
+                                     
+                                     
+                                     })
+            temp.type <- paste(temp.type, collapse="\n")
+            
+            ##print information
+            cat("\n [RLum.Results]")
+            cat("\n\t originator: ", object@originator,"()", sep="")
+            cat("\n\t data:", length(object@data))
+            cat("\n", temp.type)
+            
+               
+          }         
+)
+
+
 
 # constructor (set) method for object class -------------------------------
 
@@ -229,10 +263,10 @@ differs!")
               
               ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               ##vector or data.frame or matrix 
-              if(is(object.list[[1]]@data[[i]], "data.frame") == TRUE ||
-                 is(object.list[[1]]@data[[i]], "vector") == TRUE || 
-                 is(object.list[[1]]@data[[i]], "matrix") == TRUE){
-                
+              if(is(object.list[[1]]@data[[i]]) == "data.frame"||
+                 is(object.list[[1]]@data[[i]])[1] == "vector" || 
+                 is(object.list[[1]]@data[[i]])[1] == "matrix"){
+    
                 ##grep elements and write them into a list
                 temp.list <- lapply(1:length(object.list), function(x){
                                                         
@@ -240,7 +274,7 @@ differs!")
                                                         
                    })
                 
-
+  
                 ##combine them using rbind
                 object.list[[1]]@data[[i]] <- do.call(rbind,temp.list)
                 
@@ -248,15 +282,26 @@ differs!")
                 
                 ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                 ##all other elements 
-                
+                                                           
                 ##grep elements and write them into a list
-                object.list[[1]]@data[[i]] <- lapply(1:length(object.list), function(x){
-                  
-                  object.list[[x]]@data[[i]]                     
-                  
+                object.list[[1]]@data[[i]] <- lapply(1:length(object.list),
+                                                     function(x){
+              
+                 object.list[[x]]@data[[i]]               
+                    
                 })
                 
+                ##unlist to flatten list if necessary for the elements
+                if(is(object.list[[1]]@data[[i]][[1]])[1] == "list"){
+                  
+                  object.list[[1]]@data[[i]] <- unlist(object.list[[1]]@data[[i]],
+                                                       recursive = FALSE)
+                }
               }
+                
+                
+                
+          
               
             }##end loop
 

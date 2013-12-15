@@ -4,7 +4,7 @@
 \title{Example Lx/Tx data from CW-OSL SAR measurement}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-LxTx data from a SAR measurement.
+LxTx data from a SAR measurement for the package Luminescence.
 
 }
 \usage{
@@ -21,7 +21,7 @@ A \code{data.frame} with 4 columns (Dose, LxTx, LxTx.Error, TnTx).
 Lab: \tab Luminescence Laboratory Bayreuth\cr
 Lab-Code: \tab BT607\cr
 Location: \tab Ostrau (Saxony-Anhalt/Germany)\cr
-Material: \tab Middle grain quartz measured on a Risoe DA-15 reader.\cr
+Material: \tab Middle grain quartz measured on a Risoe TL/OSL DA-15 reader.\cr
 }
 }
 

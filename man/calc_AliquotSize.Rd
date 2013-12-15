@@ -6,15 +6,15 @@ density of an aliquot is computed.}
 \usage{calc_AliquotSize(grain.size, sample.diameter, packing.density = 0.65, 
     grains.counted)}
 \arguments{
-  \item{grain.size}{\code{\link{numeric}} (\bold{required}): mean grain size (m x 10^-6) or a range 
-of grain sizes from which the mean grain size is computed 
+  \item{grain.size}{\code{\link{numeric}} (\bold{required}): mean grain size (microns) or a 
+range of grain sizes from which the mean grain size is computed 
 (e.g. \code{c(100,200)}).}
   \item{sample.diameter}{\code{\link{numeric}} (\bold{required}): diameter (mm) of the targeted
 area on the sample carrier.}
   \item{packing.density}{\code{\link{numeric}} (with default) empirical value for mean packing 
-density. \cr
+density. \cr 
 If \code{packing.density = "inf"} a hexagonal structure on an
-infinite plane with a packing density of \eqn{0.906\dots} is assumed.}
+infinite plane with a packing density of \eqn{0.906\ldots} is assumed.}
   \item{grains.counted}{\code{\link{numeric}} (optional) grains counted on a sample carrier. If
 a non-zero positive integer is provided this function will calculate the 
 packing density of the aliquot.
@@ -22,26 +22,27 @@ If more than one value is provided the mean packing density and its
 standard deviation is calculated. Note that this overrides
 \code{packing.density}.}
 }
-\details{This function can be used to either estimate the number of grains on an
-aliquot or to compute the packing density depending on the
+\details{This function can be used to either estimate the number of grains
+on an aliquot or to compute the packing density depending on
 the arguments provided. \cr
-The following function is used to estimate the number of grains: \cr
-\deqn{(\pi*x^2)/(\pi*y^2)*d}
-where \code{x} is the radius of the aliquot size (m x 10^-6). \code{y}
-is the mean radius (m x 10^-6) and d is the packing density 
-(value between 0 and 1) of the mineral grains. \cr\cr
+The following function is used to estimate the number of grains \code{n}:
+\cr
+\deqn{n = (\pi*x^2)/(\pi*y^2)*d}
+where \code{x} is the radius of the aliquot size (microns), \code{y}
+is the mean radius of the mineral grains (mm) and \code{d} is the packing
+density (value between 0 and 1). \cr\cr
 \bold{Packing density} \cr\cr
 The default value for \code{packing.density} is 0.65, which is the mean of
 empirical values determined by Heer et al. 2012 and unpublished data from
 the cologne luminescence laboratory. If \code{packing.density = "inf"}
-a maximum density of \eqn{\pi/\sqrt12 = 0.9068\dots} is used. However,
+a maximum density of \eqn{\pi/\sqrt12 = 0.9068\ldots} is used. However,
 note that this value is not appropriate as the standard preparation
 procedure of aliquots resembles a PECC ("Packing Equal Circles in a 
-Circle") problem.}
+Circle") problem. }
 \value{Returns terminal output. In addition a list is returned containing 
 the following element:
 
-\code{results} data frame with calculation results.}
+\item{results}{data frame with calculation results.}}
 \references{Duller, G.A.T., 2008. Single-grain optical dating of Quaternary sediments: 
 why aliquot size matters in luminescence dating. Boreas 37, pp. 589-612. 
 \cr\cr

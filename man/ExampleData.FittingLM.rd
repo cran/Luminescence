@@ -1,11 +1,11 @@
 \name{ExampleData.FittingLM}
 \alias{ExampleData.FittingLM}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Example data for fit_LMCurve() in package Luminescence }
+\title{Example data for fit_LMCurve() in the package Luminescence }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Lineraly modulated (LM) measurement data from a quartz sample from Norway including background 
-measurement. Measurements carried out at the luminescence laboratory at the University of Bayreuth.
+measurement. Measurements carried from the luminescence laboratory at the University of Bayreuth.
 
 }
 \usage{
@@ -22,14 +22,14 @@ Two objects (data.frames) with two columns (time and counts).
 Lab: \tab Luminescence Laboratory Bayreuth\cr
 Lab-Code: \tab BT900\cr
 Location: \tab Norway\cr
-Material: \tab Beach deposit, coarse grain quartz measured on aluminum discs on a Risoe DA-15 reader\cr
+Material: \tab Beach deposit, coarse grain quartz measured on aluminum discs on a Risoe TL/OSL DA-15 reader\cr
 }
 }
 
 
 \references{
 %% ~put references to the literature/web site here ~
-Fuchs, M., Kreutzer, S., Fischer, M., Sauer, D., Soerensen, R., 2012. OSL and IRSL dating of raised beach sand deposits along the southeastern coast of Norway. Quaternary Geochronology, 10, pp. 195-200.
+Fuchs, M., Kreutzer, S., Fischer, M., Sauer, D., Soerensen, R., 2012. OSL and IRSL dating of raised beach sand deposits along the southeastern coast of Norway. Quaternary Geochronology, 10, 195-200.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

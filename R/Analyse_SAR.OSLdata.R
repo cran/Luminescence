@@ -1,47 +1,76 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//Analyse_SAR.OSLdata.R
-##//////////////////////////////////////////////////////////////////////////////
-##
-##==============================================================================
-##author: Sebastian Kreutzer*, Margret C. Fuchs**
-##organisation: *JLU Giessen, **TU Bergakademie Freiberg
-##version: 0.2.10
-##date: 2013-09-19
-##==============================================================================
-##script analyses OSL data from a SAR measurement
-##  --Input: RisoeBINfile object (as provided by readBIN2R())
-##  --the script should work for all types of SAR measurements 
-
-##ToDo
-##  --IRSL Signal might be triggered not optimal 
-
-
-##==================================================================================================
-##function - self start model at the end of this file 
-Analyse_SAR.OSLdata<-function(input.data,
-                         signal.integral, #e.g. c(1:2)
-                         background.integral, #e.g. c(90:100)
-                         position,#e.g. c(1:12) - invalid positions will be omitted
-                         run,
-                         set,
-                         info.measurement="unkown measurement",
-                         log="",
-                         output.plot=FALSE,
-                         output.plot.single=FALSE,
-                         cex.global=1                         
-                         ){
+Analyse_SAR.OSLdata<- structure(function(#Analyse SAR CW-OSL measurements.
+  ### The function analyses SAR CW-OSL curve data and provides a summary of the 
+  ### measured data for every position. The output of the function is optimized 
+  ### for SAR OSL measurements on quartz.
+  
+  # ===========================================================================
+  ##author<<
+  ## Sebastian Kreutzer, JLU Giessen (Germany), Margret C. Fuchs, TU Bergakademie
+  ## Freiberg (Germany)\cr
+  
+  ##section<<
+  ## version 0.2.11 [2013-11-01]
+  # ===========================================================================
+  
+  input.data,
+  ### \link{Risoe.BINfileData-class} (\bold{required}): 
+  ### input data from a Risoe BIN file, produced by the function \link{readBIN2R}.
+  
+  signal.integral, 
+  ### \link{vector} (\bold{required}): channels used for the signal integral,
+  ### e.g. \code{signal.integral=c(1:2)}
+  
+  background.integral,
+  ### \link{vector} (\bold{required}): channels used for the background integral,
+  ### e.g. \code{background.integral=c(85:100)}
+  
+  position,
+  ### \link{vector} (optional): reader positions that want to be analysed 
+  ### (e.g. \code{position=c(1:48)}. Empty positions are automatically omitted.  
+  ### If no value is given all positions are analysed by default.
+  
+  run,
+  ### \link{vector} (optional): range of runs used for the analysis. 
+  ### If no value is given the range of the runs in the sequence is deduced 
+  ### from the Risoe.BINfileData object.
+  
+  set,
+  ### \link{vector} (optional): range of sets used for the analysis. 
+  ### If no value is given the range of the sets in the sequence is deduced 
+  ### from the \code{Risoe.BINfileData} object.
+  
+  info.measurement = "unkown measurement",
+  ### \link{character} (with default): option to provide information about
+  ### the measurement on the plot output (e.g. name of the BIN or BINX file).
+  
+  log = "",
+  ### \link{character} (with default): a character string which contains "x" 
+  ### if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic 
+  ### and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}.
+  
+  output.plot = FALSE,
+  ### \link{logical} (with default): plot output (\code{TRUE/FALSE})
+  
+  output.plot.single = FALSE,
+  ### \link{logical} (with default): single plot output (\code{TRUE/FALSE}) to 
+  ### allow for plotting the results in single plot windows. 
+  ### Requires \code{output.plot = TRUE}.
+  
+  cex.global = 1
+  ### \link{numeric} (with default): global scaling factor.
+){
                       
-##=================================================================================================##
+##============================================================================##
 ##CONFIG
-##=================================================================================================##
+##============================================================================##
 
 ##set colors gallery to provide more colors
-    col<-unlist(colors())
-    col<-col[c(261,552,51,62,76,151,451,474,654,657,100,513,23,612,129,27,551,393)]
-    
-##=================================================================================================##
+
+  col <- get("col", pos = .LuminescenceEnv) 
+  
+##============================================================================##
 ##ERROR HANDLING
-##=================================================================================================##
+##============================================================================##
 
   if(missing(input.data)==TRUE){stop("[Analyse_SAR.OSLdata.R] >> Error: No input data given!")
                                 }else{sample.data<-input.data}
@@ -55,9 +84,9 @@ Analyse_SAR.OSLdata<-function(input.data,
   if(missing(set)==TRUE){set<-min(sample.data@METADATA[,"SET"]):max(sample.data@METADATA[,"SET"])}  
  
     
-##=================================================================================================##
+##============================================================================##
 ##CALCULATIONS 
-##=================================================================================================##
+##============================================================================##
    
     
 ##loop over all positions
@@ -227,9 +256,9 @@ if(length(which(sample.data@METADATA["POSITION"]==i))>0){
        RejectionCriteria<-rbind(RejectionCriteria,RejectionCriteria.temp)
      }
     
-##=================================================================================================##
+##============================================================================##
 ##PLOTTING
-##=================================================================================================##
+##============================================================================##
  
 if(output.plot==TRUE){
  
@@ -238,10 +267,11 @@ if(output.plot==TRUE){
  }     
     ##warning if number of curves exceed colour values
     if(length(col)<length(LnLx.curveID)){
-      cat("\n[Analyse_OSLCurves.R] Warning: To many curves! Only the first",length(col),"curves are plotted!")
+      cat("\n[Analyse_OSLCurves.R] Warning: To many curves! Only the first",
+          length(col),"curves are plotted!")
     }
  
-    ##============================================================================================
+    ##==========================================================================
     ##plot Ln,Lx Curves
 
 
@@ -286,7 +316,8 @@ if(output.plot==TRUE){
      
           ##sample name
           mtext(side=3,sample.data@METADATA[sample.data@METADATA[,"ID"]==LnLx.curveID[1],"SAMPLE"],cex=0.7*cex.global)
-      ##============================================================================================    
+ 
+      ##========================================================================    
       ##open plot area TnTx
       plot(NA,NA,
           xlab=if(log=="x" | log=="xy"){"log t [s]"}else{"t [s]"},
@@ -320,7 +351,7 @@ if(output.plot==TRUE){
          ##sample name
          mtext(side=3,sample.data@METADATA[sample.data@METADATA[,"ID"]==LnLx.curveID[1],"SAMPLE"],cex=0.7*cex.global)
  
-      ##============================================================================================
+      ##========================================================================
       ##Print TL curves for TnTx - 
       sample.data@METADATA[,"SEL"]<-FALSE
       sample.data@METADATA[sample.data@METADATA["LTYPE"]=="TL","SEL"]<-TRUE
@@ -385,10 +416,10 @@ if(output.plot==TRUE){
         text(50,50,"no cutheat as TL curve detected")     
       }
         
-      ##===========================================================================================##
+      ##======================================================================##
       ##Print IRSL Curves if IRSL curve is set
 
-      if(is.na(IRSL_BOSL)==FALSE){        
+      if(is.na(IRSL_BOSL) == FALSE){        
       ##get channel resolution (it should be the same for all values)
       HIGH<-unique(sample.data@METADATA[sample.data@METADATA["ID"]==IRSL.curveID ,"HIGH"])
       NPOINTS<-unique(sample.data@METADATA[sample.data@METADATA["ID"]==IRSL.curveID ,"NPOINTS"])    
@@ -437,7 +468,7 @@ if(output.plot==TRUE){
         plot(NA,NA,xlim=c(0,10), ylim=c(0,10), main="IRSL curve")
         text(5,5,"no IRSL curve detected")      
       }
-     ##============================================================================================
+     ##=========================================================================
      ##Plot header
      if(output.plot.single==TRUE){
        mtext(side=3,paste("ALQ Pos. ",i,sep=""))  
@@ -458,7 +489,7 @@ if(output.plot==TRUE){
  
 }#endif for output.plot    
 ##preprate output of values
-##============================================================================================
+##==============================================================================
      
     ##Add LnLxTnTx values to the list   
     if(exists("LnLxTnTx_List")==FALSE){LnLxTnTx_List<-list()}    
@@ -470,9 +501,9 @@ if(output.plot==TRUE){
 
 }#end for loop
 
-##=================================================================================================##
+##============================================================================##
 ##OUTPUT OF FUNCTION
-##=================================================================================================## 
+##============================================================================## 
 
   ##get further information from the position used 
     
@@ -487,7 +518,82 @@ if(output.plot==TRUE){
 
     SARParameters<-data.frame(readTemp=readTemp,cutheat=cutheat,systemID=systemID)
    
-    return(list(LnLxTnTx=LnLxTnTx_List,RejectionCriteria=RejectionCriteria,SARParameters=SARParameters)) 
-}#end function
-##=================================================================================================##
-##EOF
+    return(list(LnLxTnTx=LnLxTnTx_List,
+                RejectionCriteria=RejectionCriteria,
+                SARParameters=SARParameters)) 
+    
+    # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
+    
+    ##details<<
+    ## The function works only for standard SAR protocol measurements introduced 
+    ## by Murray and Wintle (2000) with CW-OSL curves. 
+    ## For the calculation of the Lx/Tx value the function \link{calc_OSLLxTxRatio} 
+    ## is used. \cr\cr
+    ## 
+    ## \bold{Provided rejection criteria}\cr\cr
+    ## \sQuote{recyling ratio}: calculated for every repeated regeneration dose point.\cr
+    ## \sQuote{recuperation}: recuperation rate calculated by comparing the Lx/Tx 
+    ## values of the zero regeneration point with the Ln/Tn value (the Lx/Tx ratio 
+    ## of the natural signal). For methodological background see Aitken and Smith (1988)\cr
+    ##
+    ## \sQuote{IRSL/BOSL}: the integrated counts (\code{signal.integral}) of a IRSL 
+    ## curve are compared with the integrated counts of the first regenerated dose point. 
+    ## It is assumed that IRSL curves got the same dose as the first regenerated 
+    ## dose point. \strong{Note:} This is not the IR depletation ratio described 
+    ## by Duller (2003).
+    
+    ##value<<
+    ## A plot (optional) and \link{list} is returned containing the following elements:
+    ## \item{LnLxTnTx}{\link{data.frame} of all calculated Lx/Tx values including signal,
+    ## background counts and the dose points.}
+    ## \item{RejectionCriteria}{\link{data.frame} with values that might by used 
+    ## as rejection criteria. NA is produced if no R0 dose point exists.}
+    ## \item{SARParameters}{\link{data.frame} of additional measurement parameters 
+    ## obtained from the BIN file, e.g. preheat or read temperature 
+    ## (not valid for all types of measurements).}
+    
+    ##references<<
+    ## Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after 
+    ## bleaching. Quaternary Science Reviews, 7, pp. 387-393.
+    ## 
+    ## Duller, G., 2003. Distinguishing quartz and feldspar in single grain 
+    ## luminescence measurements. Radiation Measurements, 37 (2), pp. 161-165. 
+    ##
+    ## Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using 
+    ## an improved single-aliquot regenerative-dose protocol. 
+    ## Radiation Measurements, 32, pp. 57-73. 
+    
+    ##note<<
+    ## Rejection criteria are calculated but not considered during 
+    ## the analysis to discard values.\cr\cr
+    ## 
+    ## \bold{The development of this function will not be continued. 
+    ## We recommend to use the function \link{analyse_SAR.CWOSL} instead.}
+    
+    ##seealso<<
+    ## \link{calc_OSLLxTxRatio}, \link{Risoe.BINfileData-class}, 
+    ## \link{readBIN2R} and for further analysis \link{plot_GrowthCurve}
+    
+    ##keyword<<
+    ## datagen
+    ## dplot
+  
+}, ex=function(){
+  
+  ##load data
+  data(ExampleData.BINfileData, envir = environment())
+  
+  ##analyse data
+  output <- Analyse_SAR.OSLdata(input.data = CWOSL.SAR.Data, 
+                                signal.integral = c(1:5), 
+                                background.integral = c(900:1000),
+                                position = c(1:1),
+                                output.plot = TRUE)
+  
+  ##combine results relevant for further analysis
+  output.SAR <- data.frame(Dose = output$LnLxTnTx[[1]]$Dose, 
+                           LxTx = output$LnLxTnTx[[1]]$LxTx, 
+                           LxTx.Error = output$LnLxTnTx[[1]]$LxTx.Error)
+  output.SAR
+  
+})#END OF STRUCTURE

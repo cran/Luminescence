@@ -1,7 +1,7 @@
 \name{plot_Histogram}
 \alias{plot_Histogram}
 \title{Plot a histogram with a separate error plot}
-\description{Plot a predefined histogram with an accompanying error plot as suggested by 
+\description{Function plots a predefined histogram with an accompanying error plot as suggested by 
 Rex Galbraith at the UK LED in Oxford 2010.}
 \usage{plot_Histogram(values, na.exclude = TRUE, mtext, cex.global, 
     breaks, se, rug, normal_curve, summary, summary.pos, colour, 
@@ -10,19 +10,19 @@ Rex Galbraith at the UK LED in Oxford 2010.}
   \item{values}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object (required): 
 for \code{data.frame}: two columns: De 
 (\code{values[,1]}) and De error (\code{values[,2]})}
-  \item{na.exclude}{\code{\link{logical}} (with default): exclude NA values from the data set prior 
-to any further operations.}
+  \item{na.exclude}{\code{\link{logical}} (with default): excludes \code{NA} values from the 
+data set prior to any further operations.}
   \item{mtext}{\code{\link{character}} (optional): further sample information 
 (\link{mtext}).}
   \item{cex.global}{\code{\link{numeric}} (with default): global scaling factor.}
-  \item{breaks}{(with default): set breakpoints for histogram. Works as in \link{hist}.}
-  \item{se}{\code{\link{logical}} (optional): plot standard error points over the 
+  \item{breaks}{(with default): sets breakpoints for histogram. Works as in \link{hist}.}
+  \item{se}{\code{\link{logical}} (optional): plots standard error points over the 
 histogram, default is \code{FALSE}.}
-  \item{rug}{\code{\link{logical}} (optional): add rugs to the histogram, default is 
+  \item{rug}{\code{\link{logical}} (optional): adds rugs to the histogram, default is 
 \code{TRUE}.}
-  \item{normal_curve}{\code{\link{logical}} (with default): add a normal curve to the histogram. 
+  \item{normal_curve}{\code{\link{logical}} (with default): adds a normal curve to the histogram. 
 Mean and sd are calculated from the input data. More see details section.}
-  \item{summary}{\code{\link{character}} (optinal): add numerical output to the plot. Can 
+  \item{summary}{\code{\link{character}} (optional): adds numerical output to the plot. Can 
 be one or more out of: "n" (number of samples), "mean" (mean De value), 
 "median" (median of the De values), "kdemax" (maximum value of probability 
 density function), "sdrel" (relative standard deviation), "sdabs" 
@@ -33,7 +33,7 @@ the statistical summary. Y-coordinate refers to the right hand y-axis.}
   \item{colour}{\code{\link{numeric}} or \link{character} (with default): optional vector 
 of length 4 which specifies the colours of the following plot items in 
 exactly this order: histogram bars, rug lines, normal distribution curve 
-and standard error points (e.g. c("grey", "black", "red", "grey")).}
+and standard error points (e.g., c("grey", "black", "red", "grey")).}
   \item{\dots}{further arguments and graphical parameters passed to \code{\link{plot}}. 
 If y-axis labels are provided, these must be specified as a vector of 
 length 2 since the plot features two axes (e.g. \code{xlab = c("axis 
@@ -45,7 +45,7 @@ the probability density. }
 
 \author{Sebastian Kreutzer, JLU Giessen (Germany), Michael Dietze (GFZ Potsdam)
 R Luminescence Package Team}
-\note{The input data is not restricted to a special type of input data.}
+\note{The input data is not restricted to a special type.}
 
 
 \seealso{\code{\link{hist}}, \code{\link{plot}}}
