@@ -3,21 +3,30 @@
 \title{Function to create a Radial Plot}
 \description{A Galbraith's radial plot is produced on a logarithmic or a linear 
 scale.}
-\usage{plot_RadialPlot(data, na.exclude = TRUE, log.z = TRUE, central.value, 
-    plot.ratio, bar.col, grid.col, legend.text, stats, summary = FALSE, 
-    output = FALSE, ...)}
+\usage{plot_RadialPlot(data, na.exclude = TRUE, negatives = "remove", 
+    log.z = TRUE, central.value, centrality = "mean.weighted", 
+    plot.ratio, bar.col, grid.col, legend.text, summary = FALSE, 
+    stats, line, line.col, line.label, output = FALSE, ...)}
 \arguments{
   \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object 
 (required): for \code{data.frame} two columns: De (\code{data[,1]})
 and De error (\code{data[,2]}). To plot several data sets in one plot,
 the data sets must be provided as \code{list}, e.g. 
 \code{list(data.1, data.2)}.}
-  \item{na.exclude}{\code{\link{logical}} (with default): excludes \code{NA} values from the data 
-set prior to any further operations.}
+  \item{na.exclude}{\code{\link{logical}} (with default): excludes \code{NA} values from 
+the data set prior to any further operations.}
+  \item{negatives}{\code{\link{character}} (with default): rule for negative values. Default
+is \code{"remove"} (i.e. negative values are removed from the data set).
+Alternatively, \code{"adjust"} shifts the entire plot to show negative
+values.}
   \item{log.z}{\code{\link{logical}} (with default): Option to display the z-axis
 in logarithmic scale. Default is \code{TRUE}.}
   \item{central.value}{\code{\link{numeric}}: User-defined central value, primarily used for
 horizontal centering of the z-axis.}
+  \item{centrality}{\code{\link{character}} (with default): measure of centrality, used for
+automatically centering the plot and drawing the central line. Can be
+one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
+and \code{"median.weighted"}.}
   \item{plot.ratio}{\code{\link{numeric}}: User-defined plot area ratio (i.e. curvature of
 the z-axis). If omitted, the default value (\code{4.5/5.5}) is used and
 modified automatically to optimise the z-axis curvature. 
@@ -31,12 +40,17 @@ of the grid lines (originating at [0,0] and stretching to the z-scale).
 To disable grid lines, use \code{"none"}. Default is \code{"grey"}.}
   \item{legend.text}{\code{\link{character}}: optional vector with legend item names (e.g.
 sample ID). Legend will only be plotted if legend text is provided.}
-  \item{stats}{\code{\link{character}}: additional labels of statistically important
-values in the plot. One or more out of the following: \code{"min"}, 
-\code{"max"}, \code{"median"}.}
   \item{summary}{\code{\link{logical}} (with default): Shows statistical summary of 
 sample or sample groups below plot main header, default is 
 \code{FALSE}.}
+  \item{stats}{\code{\link{character}}: additional labels of statistically important
+values in the plot. One or more out of the following: \code{"min"}, 
+\code{"max"}, \code{"median"}.}
+  \item{line}{\code{\link{numeric}}: numeric values of the additional lines to be
+added.}
+  \item{line.col}{\code{\link{character}} or \code{\link{numeric}}: colour of the
+additional lines.}
+  \item{line.label}{\code{\link{character}}: labels for the additional lines.}
   \item{output}{\code{\link{logical}}: Optional output of numerical plot parameters.
 These can be useful to reproduce similar plots. Default is \code{FALSE}.}
   \item{\dots}{Further plot arguments to pass. \code{xlab} must be a vector of length 2,

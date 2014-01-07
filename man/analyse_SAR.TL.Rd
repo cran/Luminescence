@@ -17,7 +17,10 @@ lower signal integral bound (e.g. \code{signal.integral.min = 100})}
 upper signal integral bound (e.g. \code{signal.integral.max = 200})}
   \item{sequence.structure}{\link{vector} \link{character} (with default): specifies the general 
 sequence structure. Three steps are allowed 
-\code{PREHEAT}, \code{SIGNAL}, \code{BACKGROUND}}
+\code{"PREHEAT"}, \code{"SIGNAL"}, \code{"BACKGROUND"}. 
+In addition a parameter \code{"EXCLUDE"}. This allows to exclude 
+TL curves which are not relevant for the protocol analysis. 
+(Note: None TL are removed by default)}
   \item{rejection.criteria}{\link{list} (with default): list containing rejection criteria in 
 percentage for the calculation.}
   \item{log}{\link{character} (with default): a character string which contains "x" 

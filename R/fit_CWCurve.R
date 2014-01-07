@@ -9,7 +9,7 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
   ## Sebastian Kreutzer, JLU Giessen (Germany)\cr
   
   ##section<<
-  ## version 0.4 [2013-11-27]
+  ## version 0.4.1 [2013-12-23]
   # ===========================================================================
 
   values,
@@ -90,7 +90,7 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
       
       ##INPUT OBJECTS
       if(is(values, "RLum.Data.Curve") == FALSE & is(values, "data.frame") == FALSE){
-        stop("[fit_CWCurve] Error: Input object is not of type 'RLum.Analyis' or 'data.frame'!")
+        stop("[fit_CWCurve] Error: Input object is not of type 'RLum.Data.Curve' or 'data.frame'!")
       } 
         
       
@@ -485,8 +485,29 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
       "x", "rev.x",
       paste(c("y.c","rev.y.c"),rep(1:n.components,each=2), sep=""))
     
-    colnames(component.contribution.matrix) <- 
-      component.contribution.matrix.names
+    ##calculate area for each component, for each time interval
+    component.contribution.matrix.area <- sapply(
+      seq(3,ncol(component.contribution.matrix),by=2), 
+      function(x){
+        
+        rowDiffs(cbind(rev(component.contribution.matrix[,(x+1)]),
+                       component.contribution.matrix[,x]))
+        
+      })
+    
+    ##append to existing matrix
+    component.contribution.matrix <- cbind(
+      component.contribution.matrix,
+      component.contribution.matrix.area,
+      rowSums(component.contribution.matrix.area)
+    )
+    
+    ##set final column names
+    colnames(component.contribution.matrix) <- c(
+      component.contribution.matrix.names,
+      paste(c("cont.c"),rep(1:n.components,each=1), sep=""),
+      "cont.sum")
+    
 
 }#endif :: (exists("fit"))   
   
@@ -657,8 +678,15 @@ if(output.plot==TRUE){
    ## parameters including the error\cr
    ## \code{component.contribution.matrix}: \link{matrix} containing the values 
    ## for the component to sum contribution plot 
-   ## (\code{$component.contribution.matrix}).
-   ## }
+   ## (\code{$component.contribution.matrix}).\cr
+   ## 
+   ## Matrix structure:\cr
+   ## Column 1 and 2: time and \code{rev(time)} values\cr
+   ## Additional columns are used for the components, two for each component,
+   ## containing I0 and n0. The last columns \code{cont.} provide information on 
+   ## the relative component contribution for each time interval including the row
+   ## sum for this values.
+   ##}
       
    ##references<<
    ## Boetter-Jensen, L., McKeever, S.W.S., Wintle, A.G., 2003. 

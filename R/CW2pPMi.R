@@ -90,10 +90,10 @@ CW2pPMi<- structure(function(#Transform a CW-OSL curve into a pPM-OSL curve via 
 
  
    ##interpolate values, values beyond the range return NA values
-   CW_OSL.interpolated<-approx(t,CW_OSL.log, xout=t.transformed, rule=1 )
+   CW_OSL.interpolated <- approx(t, CW_OSL.log, xout=t.transformed, rule=1 )
     
    ##combine t.transformed and CW_OSL.interpolated in a data.frame
-   temp<-data.frame(x=t.transformed, y=unlist(CW_OSL.interpolated$y))
+   temp<-data.frame(x=t.transformed, y = unlist(CW_OSL.interpolated$y))
   
     
   # (5) Extrapolate first values of the curve ---------------------------------

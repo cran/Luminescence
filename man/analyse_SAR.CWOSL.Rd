@@ -6,7 +6,7 @@ object including growth curve fitting.}
 \usage{analyse_SAR.CWOSL(object, signal.integral.min, signal.integral.max, 
     background.integral.min, background.integral.max, 
     rejection.criteria = list(recycling.ratio = 10, 
-    recuperation.rate = 10), log = "", output.plot = TRUE, 
+        recuperation.rate = 10), dose.points, log = "", output.plot = TRUE, 
     output.plot.single = FALSE, ...)}
 \arguments{
   \item{object}{\code{\linkS4class{RLum.Analysis}}(\bold{required}): 
@@ -17,6 +17,8 @@ input object containing data for analysis}
   \item{background.integral.max}{\code{\link{integer}} (\bold{required}): upper bound of the background integral}
   \item{rejection.criteria}{\link{list} (with default): list containing rejection criteria in 
 percentage for the calculation. }
+  \item{dose.points}{\link{numeric} (optional): a numeric vector containg the dose points values
+Using this argument overwrites dose point values in the signal curves. }
   \item{log}{\link{character} (with default): a character string which contains "x" 
 if the x axis is to be logarithmic, "y" if the y-axis is to be logarithmic 
 and "xy" or "yx" if both axes are to be logarithmic. See \link{plot.default}.}

@@ -138,7 +138,9 @@ contribution plot (\code{$component.contribution.matrix}).\cr
 Matrix structure:\cr
 Column 1 and 2: time and \code{rev(time)} values\cr
 Additional columns are used for the components, two for each component,
-containing I0 and n0
+containing I0 and n0. The last columns \code{cont.} provide information on 
+the relative component contribution for each time interval including the row
+sum for this values.
 }}
 \references{Bulur, E., 1996. An Alternative Technique For Optically Stimulated Luminescence
 (OSL) Experiment. Radiation Measurements, 26, 5, 

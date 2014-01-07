@@ -11,7 +11,7 @@ CW2pHMi<- structure(function(#Transform a CW-OSL curve into a pHM-OSL curve via 
   ## Adrie J.J. Bos, Delft University of Technology, The Netherlands\cr\cr
   
   ##section<<
-  ## version 0.2 [2013-03-27]
+  ## version 0.2.1 [2013-12-27]
   # ===========================================================================
 
   values, 
@@ -91,20 +91,29 @@ CW2pHMi<- structure(function(#Transform a CW-OSL curve into a pHM-OSL curve via 
 
    ##interpolate values, values beyond the range return NA values
    CW_OSL.interpolated <- approx(t,CW_OSL.log, xout=t.transformed, rule=1)
-   print(CW_OSL.interpolated)
-   ##combine t.transformed and CW_OSL.interpolated in a data.frame
-   temp<-data.frame(x=t.transformed, y=unlist(CW_OSL.interpolated$y))
+ 
+
+  ##combine t.transformed and CW_OSL.interpolated in a data.frame
+   temp <- data.frame(x=t.transformed, y=unlist(CW_OSL.interpolated$y))
   
-   ##Problem: I some cases the interpolation algorithm is not working properely and Inf or NaN values are returned
+   ##Problem: I some cases the interpolation algorithm is not working properely 
+   ##and Inf or NaN values are returned
   
       ##fetch row number of the invalid values
-      invalid_values.id<-c(which(is.infinite(temp[,2]) | is.nan(temp[,2])))
+      invalid_values.id <- c(which(is.infinite(temp[,2]) | is.nan(temp[,2])))
+      
+      if(length(invalid_values.id) > 0){
+        
+        warning(paste(length(invalid_values.id)," values have been found and replaced the mean of the nearest values." ))
+        
+      }
   
       ##interpolate between the lower and the upper value
       invalid_values.interpolated<-sapply(1:length(invalid_values.id), 
                    function(x) {
                      
-                      mean(c(temp[invalid_values.id[x]-1,2],temp[invalid_values.id[x]+1,2]))
+                      mean(c(temp[invalid_values.id[x]-1,2], 
+                             temp[invalid_values.id[x]+1,2]))
                       
                    }
       )
@@ -152,8 +161,8 @@ CW2pHMi<- structure(function(#Transform a CW-OSL curve into a pHM-OSL curve via 
   pHM<-((delta*t)/(1+(delta*t)))*c*CW_OSL
 
   ##combine all values and exclude NA values
-  temp.values<-data.frame(x=t,y.t=pHM,x.t=t.transformed,method=temp.method)
-  temp.values<-na.exclude(temp.values)
+  temp.values <- data.frame(x=t,y.t=pHM,x.t=t.transformed,method=temp.method)
+  temp.values <- na.exclude(temp.values)
 
   # (5) Return values ---------------------------------------------------------  
   
@@ -247,7 +256,8 @@ CW2pHMi<- structure(function(#Transform a CW-OSL curve into a pHM-OSL curve via 
   ## The function \code{\link{approx}} may produce some \code{Inf} and \code{NaN} data. 
   ## The function tries to manually interpolate these values by calculating the 
   ## \code{mean} using the adjacent channels. If two invalid values are succeeding, 
-  ## the values are removed and no further interpolation is attempted.
+  ## the values are removed and no further interpolation is attempted.\cr
+  ## In every case a warning message is shown.
 
   ##seealso<<
   ## \code{\link{CW2pLM}}, \code{\link{CW2pLMi}}, \code{\link{CW2pPMi}}, 

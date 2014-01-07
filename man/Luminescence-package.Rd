@@ -11,8 +11,8 @@ of Luminescence Dating data analysis.
 \tabular{ll}{
 Package: \tab Luminescence\cr
 Type: \tab Package\cr
-Version: \tab 0.3.1\cr
-Date: \tab 2013-12-15\cr
+Version: \tab 0.3.2\cr
+Date: \tab 2014-01-07\cr
 License: \tab GPL-3\cr
 }
 %~~ An overview of how to use the package, including the most important functions ~~

@@ -6,7 +6,7 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
   ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
   
   ##section<<
-  ## version 0.1.2 [2013-09-25]
+  ## version 0.1.3 [2013-12-23]
   # ===========================================================================
 
   object,
@@ -27,7 +27,10 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
   sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"),
   ### \link{vector} \link{character} (with default): specifies the general 
   ### sequence structure. Three steps are allowed 
-  ### \code{PREHEAT}, \code{SIGNAL}, \code{BACKGROUND}
+  ### \code{"PREHEAT"}, \code{"SIGNAL"}, \code{"BACKGROUND"}. 
+  ### In addition a parameter \code{"EXCLUDE"}. This allows to exclude 
+  ### TL curves which are not relevant for the protocol analysis. 
+  ### (Note: None TL are removed by default)
   
   rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
   ### \link{list} (with default): list containing rejection criteria in 
@@ -59,16 +62,16 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
        stop("[analyse_SAR.TL] Error: No value set for 'object'!")
      }
  
-     if(missing("signal.integral.min")==TRUE){
+     if(missing("signal.integral.min") == TRUE){
        stop("[analyse_SAR.TL] Error: No value set for 'signal.integral.min'!")
      }
 
-    if(missing("signal.integral.max")==TRUE){
+    if(missing("signal.integral.max") == TRUE){
        stop("[analyse_SAR.TL] Error: No value set for 'signal.integral.max'!")
     }
       
      ##INPUT OBJECTS
-     if(is(object, "RLum.Analysis")==FALSE){
+     if(is(object, "RLum.Analysis") == FALSE){
        stop("[analyse_SAR.TL] Error: Input object is not of type 'RLum.Analyis'!")
      }
  
@@ -89,7 +92,10 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
     ##set values for step
     temp.sequence.structure[,"protocol.step"] <- temp.protocol.step
       
-  
+    ##remove TL curves which are excluded
+    temp.sequence.structure <- temp.sequence.structure[which(
+      temp.sequence.structure[,"protocol.step"]!="EXCLUDE"),]
+
   ##check integrity; signal and bg range should be equal
   if(length(
       unique(
@@ -113,11 +119,14 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
 # # Calculate LnLxTnTx values  --------------------------------------------------
 
     ##grep IDs for signal and background curves
-    TL.preheat.ID <- temp.sequence.structure[temp.sequence.structure[,"protocol.step"]=="PREHEAT","id"]
+    TL.preheat.ID <- temp.sequence.structure[
+      temp.sequence.structure[,"protocol.step"] == "PREHEAT","id"]
     
-    TL.signal.ID <- temp.sequence.structure[temp.sequence.structure[,"protocol.step"]=="SIGNAL","id"]
+    TL.signal.ID <- temp.sequence.structure[
+      temp.sequence.structure[,"protocol.step"] == "SIGNAL","id"]
     
-    TL.background.ID <- temp.sequence.structure[temp.sequence.structure[,"protocol.step"]=="BACKGROUND","id"]
+    TL.background.ID <- temp.sequence.structure[
+      temp.sequence.structure[,"protocol.step"] == "BACKGROUND","id"]
 
 
    ##calculate LxTx values using external function 
@@ -409,7 +418,7 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
                               object@records[[TL.background.ID[4]]]@data[,2])
 
 
-  ##combine
+  ##combine values
   TL.Plateau.TnTx <- data.frame(NTL.net.TnTx[,1], Reg1.net.TnTx[,2]/NTL.net.TnTx[,2])
 
   ##Plot Plateau Test

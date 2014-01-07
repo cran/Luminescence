@@ -7,7 +7,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
   
   ##section<<
-  ## version 0.3 [2013-11-14]
+  ## version 0.3.1 [2014-01-06]
   # ===========================================================================
 
   object,
@@ -29,6 +29,10 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
   ### \link{list} (with default): list containing rejection criteria in 
   ### percentage for the calculation. 
+  
+  dose.points,
+  ### \link{numeric} (optional): a numeric vector containg the dose points values
+  ### Using this argument overwrites dose point values in the signal curves. 
   
   log = "",
   ### \link{character} (with default): a character string which contains "x" 
@@ -95,7 +99,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   ##every SAR protocol has to have equal number of curves
   
 
-  ##grep curve types from analysis value and remove unated information
+  ##grep curve types from analysis value and remove unwanted information
   temp.ltype <- sapply(1:length(object@records), function(x) {
           
                 ##export as global variable
@@ -210,7 +214,6 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
 
 # Calculate LnLxTnTx values  --------------------------------------------------
 
-
   ##calculate LxTx values using external function   
   for(x in seq(1,length(OSL.Curves.ID),by=2)){
                 
@@ -245,6 +248,19 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
    
 # Set regeneration points -------------------------------------------------
 
+        ##overwrite dose point manually
+        if(missing(dose.points) == FALSE){
+          
+          if(length(dose.points)!=length(LnLxTnTx$Dose)){
+            
+            stop("[analyse_SAR.CWOSL] length 'dose.points' differes from number of curves.")
+            
+          }
+          
+          LnLxTnTx$Dose <- dose.points
+          
+        }
+
         #generate unique dose id - this are also the # for the generated points
         temp.DoseID <- c(0:(length(LnLxTnTx$Dose)-1))
         temp.DoseName <- paste("R",temp.DoseID,sep="")
@@ -256,7 +272,8 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
       
         
         ##set R0
-        temp.DoseName[temp.DoseName[,"Name"]!="Natural" & temp.DoseName[,"Dose"]==0,"Name"]<-"R0"
+        temp.DoseName[temp.DoseName[,"Name"]!="Natural" & 
+                        temp.DoseName[,"Dose"]==0,"Name"]<-"R0"
           
         ##find duplicated doses (including 0 dose - which means the Natural) 
         temp.DoseDuplicated<-duplicated(temp.DoseName[,"Dose"])

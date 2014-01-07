@@ -78,7 +78,8 @@ a warning message is returned. \cr\cr
 The function \code{\link{approx}} may produce some \code{Inf} and \code{NaN} data. 
 The function tries to manually interpolate these values by calculating the 
 \code{mean} using the adjacent channels. If two invalid values are succeeding, 
-the values are removed and no further interpolation is attempted.}
+the values are removed and no further interpolation is attempted.\cr
+In every case a warning message is shown.}
 
 
 \seealso{\code{\link{CW2pLM}}, \code{\link{CW2pLMi}}, \code{\link{CW2pPMi}}, 

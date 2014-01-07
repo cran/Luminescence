@@ -83,7 +83,14 @@ For more details, see \link{nls}.\cr\cr
 parameters including the error\cr
 \code{component.contribution.matrix}: \link{matrix} containing the values 
 for the component to sum contribution plot 
-(\code{$component.contribution.matrix}).
+(\code{$component.contribution.matrix}).\cr
+
+Matrix structure:\cr
+Column 1 and 2: time and \code{rev(time)} values\cr
+Additional columns are used for the components, two for each component,
+containing I0 and n0. The last columns \code{cont.} provide information on 
+the relative component contribution for each time interval including the row
+sum for this values.
 }}
 \references{Boetter-Jensen, L., McKeever, S.W.S., Wintle, A.G., 2003. 
 Optically Stimulated Luminescence Dosimetry. Elsevier Science B.V.

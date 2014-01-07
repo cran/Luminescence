@@ -9,7 +9,7 @@ calc_CosmicDoseRate<- structure(function( # Calculate the cosmic dose rate
   ## Christoph Burow, University of Cologne (Germany) \cr
   
   ##section<<
-  ## version 0.5 [2013-11-25] 
+  ## version 0.5.1 [2014-01-07] 
   # ===========================================================================
   
   depth,
@@ -325,8 +325,6 @@ if(length(hgcm)==1) {
             round(dc.err,4)))
   cat(paste("\n  [corrected]                 "))
   cat(paste("\n ---------------------------------------------------------\n\n"))
-
-  cat(paste("F", round(F_ph,2), "J", round(J_ph,2), "H", round(H_ph,2)))
   
 ##============================================================================##  
 ##RETURN VALUES

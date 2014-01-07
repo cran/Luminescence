@@ -7,7 +7,7 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
   ## Christoph Schmidt, University of Bayreuth (Germany)
   
   ##section<<
-  ## version 0.2
+  ## version 0.2.1 [2013-12-23]
   # ===========================================================================
 
   Lx.data.signal,
@@ -76,13 +76,13 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
     Lx.data.signal <- as(Lx.data.signal, "matrix")
     Tx.data.signal <- as(Tx.data.signal, "matrix")
     
-    if(missing(Lx.data.background) == FALSE){
+    if(missing(Lx.data.background) == FALSE && is.null(Lx.data.background) == FALSE){
       
       Lx.data.background <- as(Lx.data.background, "matrix")
       
     }
     
-    if(missing(Tx.data.background) == FALSE){
+    if(missing(Tx.data.background) == FALSE && is.null(Tx.data.background) == FALSE){
       
       Tx.data.background <- as(Tx.data.background, "matrix")
       

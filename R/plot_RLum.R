@@ -6,7 +6,7 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
   ## Sebastian Kreutzer, JLU Giessen (Germany)
   
   ##section<<
-  ## version 0.1 [2013-01-18]
+  ## version 0.1 [2014-01-06]
   # ===========================================================================
 
   object, 
@@ -36,7 +36,7 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
     switch (object.class,
             
             RLum.Data.Curve = plot_RLum.Data.Curve (object, ...),
-            RLum.Data.Spectrum = plot_RLum.Data.Curve (object, ...),
+            RLum.Data.Spectrum = plot_RLum.Data.Spectrum (object, ...),
             RLum.Analysis = plot_RLum.Analysis (object, ...)
   
            )

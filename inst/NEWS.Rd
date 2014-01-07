@@ -1,5 +1,49 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+
+\section{Changes in version 0.3.2 (7th Januar, 2014)}{
+       
+     \subsection{Bugfixes and changes}{
+       \itemize{
+       \item \code{calc_OSLLxTxRatio}: Correct critical error that calculates 
+       the Lx/Tx ratio without background subtraction since version 0.3. This
+       error had been fixed previously (version 0.2.2), however, it had been accidentally 
+       reintroduced with version 0.3. (#82)
+       \item \code{analyse_SAR.TL}: Added option \code{"EXCLUDE"} 
+       in the argument \code{sequence.structure} to support exclusion of TL curves
+       (this fixes #27)
+       \item \code{calc_TLLxTxRatio}: Added \code{NULL} object support for background 
+       curves
+       \item \code{fit_LMCurve}: Extent \code{component.contribution.matrix} to allow
+       calculation of absolute contributions to sum signal of each component (#67)
+       \item \code{fit_CWCurve}: Extent \code{component.contribution.matrix} to allow
+       calculation of absolute contributions to sum signal of each component (#67)
+        \item \code{CW2pHMi}: Implement a warning message when \code{NA} values are produced
+        by the function \code{approx} are deteted (#8)
+         \item \code{CW2pHMi}: Remove unwanted data output accidentally introduced during 
+         bug fixing 
+         
+       \item \code{plot_RadialPlot}: added parameters: line, line.col, 
+       line.label, centrality, negatives
+       \item \code{plot_RadialPlot}: robust coding of x-axes labels
+       \item \code{plot_RadialPlot}: major bug fixed: polygon ends now at 
+       highest data value, not at z-axis
+         \item \code{plot_RadialPlot}: z-axis now scales with user-defined x-axis limits
+            \item \code{plot_RadialPlot}: axes lengths when user-define 
+          \item \code{plot_RadialPlot}: some minor tweaks for code and plot polishing
+       \item \code{plot_GrowthCurve}: prevent rare error occured during MC simulation for EXP+LIN error estimation
+       \item \code{plot_RLum}: fix error for passing \code{RLum.Data.Spectrum} objects
+       \item \code{analyse_SAR.CWOSL}: add argument \code{dose.points}
+       \item \code{calc_CosmicDoseRate}: remove unwanted terminal output
+          
+       
+       
+    }}
+       
+      
+}
+
+
 \section{Changes in version 0.3.1 (15th December, 2013)}{
        
      \subsection{S4-classes and methods}{

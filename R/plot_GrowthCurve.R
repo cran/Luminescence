@@ -7,7 +7,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ## Sebastian Kreutzer, JLU Giessen (Germany), Michael Dietze, GFZ Potsdam (Germany)
   
   ##section<<
-  ##version 1.2.1 [2013-11-14]
+  ##version 1.2.2 [2014-01-05]
   # ===========================================================================
   
   sample,
@@ -403,9 +403,9 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 						c<-as.vector((parameters["c"]))
 						g<-as.vector((parameters["g"]))
       
-						#problem: analytic it is not easy to calculat x, here an simple approximation is made
+						#problem: analytically it is not easy to calculate x, here a simple approximation is made
 						
-              #calculate absolut diffrences from LnTn
+              #calculate absolut differences from LnTn
 							differences <- data.frame(dose=xy$x,differences=(sample[1,2]-
                 (round(fit.functionEXPLIN(a,b,c,g,x=xy$x),digits=3))))
 		         
@@ -418,25 +418,27 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 											artificialRegPoint<-max(xy$x)+max(xy$x)*0.2
 											boundary.upper[1,1]<-artificialRegPoint									
 											}
-
+         
 							#write all boundary values in a vector
-							i<-seq(boundary.lower[,1],boundary.upper[,1],by=0.01)
+							i <- seq(boundary.lower[,1],boundary.upper[,1], by=0.01)
 					    
 							#produce an iteration matrix 
-							iteration.matrix<-matrix(c(i,(round(fit.functionEXPLIN(a,b,c,g,x=i),digits=3))),ncol=2)
+							iteration.matrix <- matrix(c(i,(round(fit.functionEXPLIN(a,b,c,g,x=i),
+                                                    digits=3))),
+                                         ncol=2)
 					                 
 							#select dose if Ln/Tn fits the values in the matrix
-							De<-round(mean(iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1]),digits=2)
+							De <- round(mean(iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1]),digits=2)
 					   
 						##Monte Carlo Simulation for error estimation
 						#	--Fit many curves and calculate a new De +/- De_Error
 						#	--take De_Error
 
 						#set variables
-						var.b<-vector(mode="numeric", length=NumberIterations.MC)
-						var.a<-vector(mode="numeric", length=NumberIterations.MC)
-						var.c<-vector(mode="numeric", length=NumberIterations.MC)
-						var.g<-vector(mode="numeric", length=NumberIterations.MC)
+						var.b <- vector(mode="numeric", length=NumberIterations.MC)
+						var.a <- vector(mode="numeric", length=NumberIterations.MC)
+						var.c <- vector(mode="numeric", length=NumberIterations.MC)
+						var.g <- vector(mode="numeric", length=NumberIterations.MC)
 					           
             ##terminal output fo MC
             cat("\n\t Execute Monte Carlo loops for error estimation of the EXP+LIN fit\n")
@@ -447,7 +449,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 						#start Monto Carlo loops
 						for (i in 1:NumberIterations.MC) { 
 							
-							data<-data.frame(x=xy$x,y=data.MC[,i])
+							data <- data.frame(x=xy$x,y=data.MC[,i])
 							 
 							fit.MC<-try(nls(y~fit.functionEXPLIN(a,b,c,g,x),
 								data=data,
@@ -465,31 +467,41 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 
 							}else {
 
-							parameters<-(coef(fit.MC)) 
+							parameters <- coef(fit.MC) 
 							var.b[i]<-as.vector((parameters["b"]))
 							var.a[i]<-as.vector((parameters["a"]))
 							var.c[i]<-as.vector((parameters["c"]))
 							var.g[i]<-as.vector((parameters["g"]))
 					
-							#problem: analytic it is not easy to calculat x, here an simple approximation is made
+							#problem: analytical it is not easy to calculate x, here a simple approximation is made
 						
-							#calculate absolut differences from LnTn
+							#calculate absolute differences from LnTn
 							differences <- data.frame(dose=xy$x,
-                               differences=(sample[1,2]-(round(fit.functionEXPLIN(a=var.a[i],b=var.b[i],c=var.c[i],g=var.g[i],x=xy$x),digits=3))))
-					
-							#set upper and lower boundary for searching (really timesaving)
-							boundary.upper<-unique(differences[differences[,2]==max(differences[differences[,2]<=0,2]),])
-							boundary.lower<-unique(differences[differences[,2]==min(differences[differences[,2]>=0,2]),])
+                               differences=(sample[1,2]-(fit.functionEXPLIN(a=var.a[i],b=var.b[i],c=var.c[i],g=var.g[i],x=xy$x))))
+            
+           		#set upper and lower boundary for searching (really timesaving)
+							boundary.upper <- round(
+                unique(differences[differences[,2]==max(differences[differences[,2]<=0,2]),]), 
+                digits = 3)
+							boundary.lower <- round(
+                unique(differences[differences[,2]==min(differences[differences[,2]>=0,2]),]),
+                digits = 3)
 
-							#case that there is no upper regeneration point...set a artificial point 20% above the highest reg Point 
-							if (length(boundary.upper[,1])==0){
+							#case that there is no upper regeneration point...
+              # set a artificial point 20% above the highest reg Point 
+							if (length(boundary.upper[,1]) == 0){
 											artificialRegPoint<-max(xy$x)+max(xy$x)*0.2
-											boundary.upper[1,1]<-artificialRegPoint									
+											boundary.upper[1,1]<-round(artificialRegPoint, digits = 2)								
 											}
 
-							#write all boundary values in a vector
-							j<-seq(boundary.lower[,1],boundary.upper[,1],by=0.01)
-									
+							#write all boundary values in a vector (if cases to prevent error)				
+						  if(boundary.lower[,1] < boundary.upper[,1]){
+               j <- seq(boundary.lower[,1], boundary.upper[,1], by=0.01)
+						  }else{
+						   j <- seq(boundary.upper[,1], boundary.lower[,1], by=0.01)   
+						  }
+              
+						
 							#produce an iteration matrix 
 							iteration.matrix<-matrix(c(j,(round(var.a[i]*(1-exp(-(j+var.c[i])/var.b[i])+var.g[i]*j),digits=3))),ncol=2)
 					

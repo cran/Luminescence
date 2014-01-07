@@ -30,27 +30,32 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
    
   
   ##--------------------------------------------------------------------------##
-  ##(1) - a few integrity check 
+  ##(1) - a few integrity checks 
   
    if(missing(Tx.data)==FALSE){
      
      ##(a) - check data type
      if(is(Lx.data)[1]!=is(Tx.data)[1]){
-       stop("[calc_OSLLxTxRatio.R] >> Error: Data type of Lx and Tx data differs!")}
+       stop("[calc_OSLLxTxRatio.R] >> Error: Data type of Lx and Tx data differs!")
+     }
    
      ##(b) - test if data.type is valid in general
-     if((is(Lx.data)[1]!="data.frame" & is(Lx.data)[1]!="numeric") & is(Lx.data)[1]!="matrix"){
-       stop("[calc_OSLLxTxRatio.R] >> Error: Data type error! Required types are data.frame or numeric vector.")}
+     if((is(Lx.data)[1] != "data.frame" & 
+         is(Lx.data)[1] != "numeric") & 
+         is(Lx.data)[1] != "matrix"){
+       stop("[calc_OSLLxTxRatio.R] >> Error: Data type error! Required types are data.frame or numeric vector.")
+     }
       
      ##(c) - convert vector to data.frame if nescessary
-     if(is(Lx.data)[1]!="data.frame" & is(Lx.data)[1]!="matrix"){
-       Lx.data<-data.frame(x=1:length(Lx.data),y=Lx.data)
-       Tx.data<-data.frame(x=1:length(Tx.data),y=Tx.data)
+     if(is(Lx.data)[1] != "data.frame" & 
+        is(Lx.data)[1] != "matrix"){
+       Lx.data <- data.frame(x=1:length(Lx.data),y=Lx.data)
+       Tx.data <- data.frame(x=1:length(Tx.data),y=Tx.data)
      }
    
      ##(d) - check if Lx and Tx curves have the same channel length
-     if(length(Lx.data[,2])!=length(Tx.data[,2])){
-       stop("[calc_OSLLxTxRatio.R] >> Error: Channel number of Lx and Tx data differs!")}
+     if(length(Lx.data[,2]) != length(Tx.data[,2])){
+       stop("[calc_OSLLxTxRatio.R] Error: Channel number of Lx and Tx data differs!")}
    
    }else{
 
@@ -61,72 +66,78 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
    
    ##(e) - check if signal integral is valid
    if(min(signal.integral)<1 | max(signal.integral>length(Lx.data[,2]))){
-     stop("[calc_OSLLxTxRatio.R] >> Error: signal.integral is not valid!")}
+     stop("[calc_OSLLxTxRatio.R] Signal.integral is not valid!")}
 
    ##(f) - check if background integral is valid
    if(min(background.integral)<1 | max(background.integral>length(Lx.data[,2]))){
-     stop(paste("[calc_OSLLxTxRatio.R] >> Error: background.integral is not valid! Max: ",length(Lx.data[,2]),sep=""))}
+     stop(paste("[calc_OSLLxTxRatio.R] Background.integral is not valid! Max: ",length(Lx.data[,2]),sep=""))}
    
    ##(g) - check if signal and background integral overlapping
    if(min(background.integral)<=max(signal.integral)){
-     stop("[calc_OSLLxTxRatio.R] >> Error: Overlapping of signal.integral and background.integral is not permitted!")}
+     stop("[calc_OSLLxTxRatio.R] Overlapping of 'signal.integral' and 'background.integral' is not permitted!")}
    
-   ##(h) - check if signal > background integral overlapping
-   if(length(background.integral)<length(signal.integral)){
-     stop("[calc_OSLLxTxRatio.R] >> Error: signal integral > background integral. This is currently not supported.")}
-   
-   ##
+#    ##(h) - check if signal > background integral 
+#    if(length(background.integral)<length(signal.integral)){
+#      stop("[calc_OSLLxTxRatio.R] Signal integral > background integral. This is currently not supported.")}
+
   ##--------------------------------------------------------------------------##
-  ##--------------------------------------------------------------------------##
-  ##(2) - read data and produce background subracted values 
+  ##(2) - read data and produce background subtracted values 
    
-   Lx.curve<-Lx.data[,2] 
-   Lx.signal<-sum(Lx.curve[signal.integral])
-   Lx.background<-sum(Lx.curve[background.integral])/(length(background.integral)/length(signal.integral))
-   LnLx<-(Lx.signal-Lx.background)
+   Lx.curve <- Lx.data[,2] 
+   Lx.signal <- sum(Lx.curve[signal.integral])
+   Lx.background <- sum(
+     Lx.curve[background.integral])/(
+       length(background.integral)/length(signal.integral))
+   LnLx <- (Lx.signal-Lx.background)
    
    if(is.na(Tx.data[1,1])==FALSE){Tx.curve<-Tx.data[,2]}else{Tx.curve<-NA}
-     Tx.signal<-sum(Tx.curve[signal.integral])
-     Tx.background<-sum(Tx.curve[background.integral])/(length(background.integral)/length(signal.integral))
-     TnTx<-(Tx.signal-Tx.background)                         
+  
+     Tx.signal <- sum(Tx.curve[signal.integral])
+     Tx.background<-sum(
+       Tx.curve[background.integral])/(
+         length(background.integral)/length(signal.integral))
+     TnTx <- (Tx.signal-Tx.background)                         
      
-  ##--------------------------------------------------------------------------##
   ##--------------------------------------------------------------------------##
   ##(3) 
   ## calulate Lx/Tx Errors according Galbraith (2002) follwing also the 
   ## nomenclator for the ease of use
-  ## -- results checked with the analyst an they are comparable! (29/10/2011)    
+  ## -- results checked with the analyst and they are comparable! (29/10/2011)    
   
   ##(a)
   ##calculate Y.0 - which is the sum OSL signal including the background
   Y.0 <- Lx.signal
-  Y.0_TnTx<- Tx.signal
+  Y.0_TnTx <- Tx.signal
   
   ##(b)
   ## calculate k value - express the background as mutiple value from the number 
   ## of signal channels 
-  k <- length(background.integral)/length(signal.integral)
-  
-     
-  ##(c)
+  n <- length(signal.integral) 
+  m <- length(background.integral)
+  k <- m/n
+
+  ##(c)(1)
   ## calculate background over n channels (k sets); 
-  ## note that m=n*k = background.integral
+  ## note that m=n*k = multiple background.integral from signal.integral
   Y.i <- sapply(0:round(k,digits=0), function(i){
-    Y.i<-sum(Lx.curve[(min(background.integral)+length(signal.integral)*i):(min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
+    sum(Lx.curve[
+      (min(background.integral)+length(signal.integral)*i):
+      (min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
   })      
+  
    
-   
-  ##also for the test signal   
+  ##(c)(2)
+  ## also for the test signal   
   Y.i_TnTx <- sapply(0:round(k,digits=0), function(i){
-    Y.i<-sum(Tx.curve[(min(background.integral)+length(signal.integral)*i):(min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
+    sum(Tx.curve[
+      (min(background.integral)+length(signal.integral)*i):
+      (min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
   })
   
   ##(d)
   ## calculate the variance of the background over the k sets; exlcude NA values
-  Y.var<-var(Y.i,na.rm = TRUE)
-  Y.var_TnTx<-var(Y.i_TnTx,na.rm = TRUE)
-  
-
+  Y.var <- var(Y.i, na.rm = TRUE)
+  Y.var_TnTx <- var(Y.i_TnTx, na.rm = TRUE)
    
   ##(e)
   ## calculate average background for the k sets    
@@ -136,13 +147,13 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
    
   ##(f)
   ##calculate difference from variance and mean background counts
-  Y.sigma<-abs(Y.var-Y.mean)
-  Y.sigma_TnTx<-abs(Y.var_TnTx-Y.mean_TnTx)
+  Y.sigma <- abs(Y.var-Y.mean)
+  Y.sigma_TnTx <- abs(Y.var_TnTx-Y.mean_TnTx)
   
   ##(g)
-  ##calculate error after equation 7 in Gablraith 2002        
-  LnLx.relError<-sqrt(1+(Y.sigma/Y.mean))*(sqrt(Y.0+(Y.mean/k))/(Y.0-Y.mean))
-  TnTx.relError<-sqrt(1+(Y.sigma_TnTx/Y.mean_TnTx))*(sqrt(Y.0_TnTx+(Y.mean_TnTx/k))/(Y.0_TnTx-Y.mean_TnTx))
+  ##calculate error according equation (7) in Gablraith 2002        
+  LnLx.relError <- sqrt(1+(Y.sigma/Y.mean))*(sqrt(Y.0+(Y.mean/k))/(Y.0-Y.mean))
+  TnTx.relError <- sqrt(1+(Y.sigma_TnTx/Y.mean_TnTx))*(sqrt(Y.0_TnTx+(Y.mean_TnTx/k))/(Y.0_TnTx-Y.mean_TnTx))
 
    
   ##(h)
@@ -170,7 +181,7 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves.
   colnames(LnLxTnTx)<-c("LnLx","LnLx.BG","TnTx","TnTx.BG","Net_LnLx","Net_LnLx.Error","Net_TnTx","Net_TnTx.Error")
   
   ##calculate Ln/Tx
-  LxTx <- LnLxTnTx$LnLx/LnLxTnTx$TnTx
+  LxTx <- LnLxTnTx$Net_LnLx/LnLxTnTx$Net_TnTx
 
   ##calculate Ln/Tx error
   LxTx.Error<-sqrt(((1/LnLxTnTx$Net_TnTx)*LnLxTnTx$Net_LnLx.Error)^2+((LnLxTnTx$Net_LnLx/-LnLxTnTx$Net_TnTx^2)*LnLxTnTx$Net_TnTx.Error)^2)

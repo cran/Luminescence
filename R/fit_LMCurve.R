@@ -10,7 +10,7 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
   ## Sebastian Kreutzer, JLU Giessen (Germany)\cr
   
   ##section<<
-  ## version 0.2.12 [2013-11-27]
+  ## version 0.2.13 [2013-12-23]
   # ===========================================================================
 
   values,
@@ -488,6 +488,108 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
     pR<-round(1-RSS/TSS,digits=4)
    
 ##============================================================================##   
+## COMPONENT TO SUM CONTRIBUTION MATRIX
+##============================================================================##                  
+
+##+++++++++++++++++++++++++++++++
+##set matrix
+##set polygon matrix for optional plot output
+component.contribution.matrix <- matrix(NA, 
+                                        nrow = length(values[,1]), 
+                                        ncol = (2*length(xm)) + 2)
+
+##set x-values
+component.contribution.matrix[,1] <- values[,1]
+component.contribution.matrix[,2] <- rev(values[,1]) 
+
+##+++++++++++++++++++++++++++++++
+##set 1st polygon
+##1st polygon (calculation)
+y.contribution_first <- (exp(0.5)*Im[1]*values[,1]/
+                           xm[1]*exp(-values[,1]^2/(2*xm[1]^2))/
+                           (eval(fit.function))*100) 
+
+##avoid NaN values (might happen with synthetic curves)
+y.contribution_first[is.nan(y.contribution_first)==TRUE] <- 0
+
+##set values in matrix
+component.contribution.matrix[,3] <- 100
+component.contribution.matrix[,4] <- 100-rev(y.contribution_first)
+
+##+++++++++++++++++++++++++++++++
+##set polygons in between
+##polygons in between (calculate and plot)
+if (length(xm)>2){
+  
+  y.contribution_prev <- y.contribution_first
+  i<-2
+  
+  ##matrix stepping
+  k <- seq(3, ncol(component.contribution.matrix), by=2)
+  
+  while (i<=length(xm)-1) {
+    y.contribution_next<-(exp(0.5)*Im[i]*values[,1]/
+                            xm[i]*exp(-values[,1]^2/(2*xm[i]^2))/
+                            (eval(fit.function))*100)
+    
+    ##avoid NaN values
+    y.contribution_next[is.nan(y.contribution_next)==TRUE] <- 0
+    
+    ##set values in matrix
+    component.contribution.matrix[, k[i]] <- 100-y.contribution_prev
+    component.contribution.matrix[, k[i]+1] <- rev(100-y.contribution_prev-
+                                                     y.contribution_next)
+    
+    y.contribution_prev <- y.contribution_prev + y.contribution_next
+    
+    i<-i+1        
+  }#end while loop
+}#end if
+
+##+++++++++++++++++++++++++++++++
+##set last polygon
+
+##last polygon (calculation)  
+y.contribution_last<-(exp(0.5)*Im[length(xm)]*values[,1]/
+                        xm[length(xm)]*exp(-values[,1]^2/
+                                             (2*xm[length(xm)]^2))/
+                        (eval(fit.function))*100)
+
+##avoid NaN values
+y.contribution_last[is.nan(y.contribution_last)==TRUE]<-0
+
+component.contribution.matrix[,((2*length(xm))+1)] <- y.contribution_last
+component.contribution.matrix[,((2*length(xm))+2)] <- 0       
+
+##change names of matrix to make more easy to understand
+component.contribution.matrix.names <- c("x", "rev.x",
+                                         paste(c("y.c","rev.y.c"),rep(1:n.components,each=2), sep=""))
+
+
+##calculate area for each component, for each time interval
+component.contribution.matrix.area <- sapply(
+  seq(3,ncol(component.contribution.matrix),by=2), 
+  function(x){
+    
+    rowDiffs(cbind(rev(component.contribution.matrix[,(x+1)]),
+                   component.contribution.matrix[,x]))
+    
+  })
+
+##append to existing matrix
+component.contribution.matrix <- cbind(
+  component.contribution.matrix,
+  component.contribution.matrix.area,
+  rowSums(component.contribution.matrix.area)
+  )
+
+##set final column names
+colnames(component.contribution.matrix) <- c(
+  component.contribution.matrix.names,
+  paste(c("cont.c"),rep(1:n.components,each=1), sep=""),
+  "cont.sum")
+
+##============================================================================##   
 ##  Terminal Output (advanced)
 ##============================================================================##   
 if (output.terminaladvanced==TRUE && output.terminal==TRUE){    
@@ -501,10 +603,11 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
      
     ##write photoionisation cross section on terminal
     for (i in 1:length(cs)){    
-    writeLines(paste("cs from component",i," = ",format(cs[i],scientific=TRUE, digits=4), " cm^2",
+    writeLines(paste("cs from component.",i," = ",format(cs[i],scientific=TRUE, digits=4), " cm^2",
                 "\t >> relative: ",round(cs[i]/cs[1],digits=4),sep=""))
     
      }#end for loop 
+    
     writeLines(paste(
     "\n(stimulation intensity value used for calculation: ",format(stimulation_intensity,scientific=TRUE)," 1/s 1/cm^2)",sep=""))
     writeLines("(errors quoted as 1-sigma uncertainties)")
@@ -575,86 +678,6 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
        ###alter column names
        colnames(output.table)<-c("ID","sample_code","n.components",output.tableColNames,"pseudo-R^2")
 
-       
-##============================================================================##   
-## COMPONENT TO SUM CONTRIBUTION PLOT
-##============================================================================##                  
-       
-       ##+++++++++++++++++++++++++++++++
-       ##set matrix
-       ##set polygon matrix for optional plot output
-       component.contribution.matrix <- matrix(NA, 
-                                               nrow = length(values[,1]), 
-                                               ncol = (2*length(xm)) + 2)
-       
-       ##set x-values
-       component.contribution.matrix[,1] <- values[,1]
-       component.contribution.matrix[,2] <- rev(values[,1]) 
-       
-       ##+++++++++++++++++++++++++++++++
-       ##set 1st polygon
-       ##1st polygon (calculation)
-       y.contribution_first <- (exp(0.5)*Im[1]*values[,1]/
-                                  xm[1]*exp(-values[,1]^2/(2*xm[1]^2))/
-                                  (eval(fit.function))*100) 
-       
-       ##avoid NaN values (might happen with synthetic curves)
-       y.contribution_first[is.nan(y.contribution_first)==TRUE] <- 0
-       
-       ##set values in matrix
-       component.contribution.matrix[,3] <- 100
-       component.contribution.matrix[,4] <- 100-rev(y.contribution_first)
-       
-       ##+++++++++++++++++++++++++++++++
-       ##set polygons in between
-       ##polygons in between (calculate and plot)
-       if (length(xm)>2){
-         
-         y.contribution_prev <- y.contribution_first
-         i<-2
-         
-         ##matrix stepping
-         k <- seq(3, ncol(component.contribution.matrix), by=2)
-         
-         while (i<=length(xm)-1) {
-           y.contribution_next<-(exp(0.5)*Im[i]*values[,1]/
-                                   xm[i]*exp(-values[,1]^2/(2*xm[i]^2))/
-                                   (eval(fit.function))*100)
-           
-           ##avoid NaN values
-           y.contribution_next[is.nan(y.contribution_next)==TRUE] <- 0
-           
-           ##set values in matrix
-           component.contribution.matrix[, k[i]] <- 100-y.contribution_prev
-           component.contribution.matrix[, k[i]+1] <- rev(100-y.contribution_prev-
-                                                          y.contribution_next)
-           
-           y.contribution_prev <- y.contribution_prev + y.contribution_next
-           
-           i<-i+1        
-         }#end while loop
-       }#end if
-       
-       ##+++++++++++++++++++++++++++++++
-       ##set last polygon
-       
-       ##last polygon (calculation)  
-       y.contribution_last<-(exp(0.5)*Im[length(xm)]*values[,1]/
-                               xm[length(xm)]*exp(-values[,1]^2/
-                                                    (2*xm[length(xm)]^2))/
-                               (eval(fit.function))*100)
-       
-       ##avoid NaN values
-       y.contribution_last[is.nan(y.contribution_last)==TRUE]<-0
-       
-       component.contribution.matrix[,((2*length(xm))+1)] <- y.contribution_last
-       component.contribution.matrix[,((2*length(xm))+2)] <- 0       
-       
-       ##change names of matrix to make more easy to understand
-       component.contribution.matrix.names <- c("x", "rev.x",
-         paste(c("y.c","rev.y.c"),rep(1:n.components,each=2), sep=""))
-       
-       colnames(component.contribution.matrix) <- component.contribution.matrix.names
        
 ##============================================================================##   
 ## TABLE OUTPUT (CVS)
@@ -907,7 +930,9 @@ if(output.plot==TRUE){
   ## Matrix structure:\cr
   ## Column 1 and 2: time and \code{rev(time)} values\cr
   ## Additional columns are used for the components, two for each component,
-  ## containing I0 and n0
+  ## containing I0 and n0. The last columns \code{cont.} provide information on 
+  ## the relative component contribution for each time interval including the row
+  ## sum for this values.
   ##}
   
   ##references<<
