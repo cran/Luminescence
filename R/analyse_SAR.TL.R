@@ -1,12 +1,12 @@
 analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements 
-  ### The function performs a SAR TL analysis on a \code{\linkS4class{RLum.Analysis}}
+  ### The function performs an SAR TL analysis on a \code{\linkS4class{RLum.Analysis}}
   ### object including growth curve fitting.
   # ===========================================================================
   ##author<<
   ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
   
   ##section<<
-  ## version 0.1.3 [2013-12-23]
+  ## version 0.1.4
   # ===========================================================================
 
   object,
@@ -27,8 +27,8 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
   sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"),
   ### \link{vector} \link{character} (with default): specifies the general 
   ### sequence structure. Three steps are allowed 
-  ### \code{"PREHEAT"}, \code{"SIGNAL"}, \code{"BACKGROUND"}. 
-  ### In addition a parameter \code{"EXCLUDE"}. This allows to exclude 
+  ### \code{"PREHEAT"}, \code{"SIGNAL"}, \code{"BACKGROUND"}, 
+  ### in addition a parameter \code{"EXCLUDE"}. This allows excluding 
   ### TL curves which are not relevant for the protocol analysis. 
   ### (Note: None TL are removed by default)
   
@@ -59,20 +59,20 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
 
      ##MISSING INPUT
      if(missing("object")==TRUE){
-       stop("[analyse_SAR.TL] Error: No value set for 'object'!")
+       stop("[analyse_SAR.TL] No value set for 'object'!")
      }
  
      if(missing("signal.integral.min") == TRUE){
-       stop("[analyse_SAR.TL] Error: No value set for 'signal.integral.min'!")
+       stop("[analyse_SAR.TL] No value set for 'signal.integral.min'!")
      }
 
     if(missing("signal.integral.max") == TRUE){
-       stop("[analyse_SAR.TL] Error: No value set for 'signal.integral.max'!")
+       stop("[analyse_SAR.TL] No value set for 'signal.integral.max'!")
     }
       
      ##INPUT OBJECTS
      if(is(object, "RLum.Analysis") == FALSE){
-       stop("[analyse_SAR.TL] Error: Input object is not of type 'RLum.Analyis'!")
+       stop("[analyse_SAR.TL] Input object is not of type 'RLum.Analyis'!")
      }
  
 
@@ -110,7 +110,7 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
   ##check if the wanted curves are a multiple of the structure
   if(length(temp.sequence.structure[,"id"])%%length(sequence.structure)!=0){
     
-          stop("[analyse_SAR.TL] Error: Input TL curves are not a multiple of the sequence structure.")
+          stop("[analyse_SAR.TL] Input TL curves are not a multiple of the sequence structure.")
           
    }
 
@@ -267,6 +267,9 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
   
 # Plotting - Config -------------------------------------------------------
  
+   ##grep plot parameter
+   par.default <- par(no.readonly = TRUE)
+
    ##colours and double for plotting
    col <- get("col", pos = .LuminescenceEnv)
    
@@ -302,12 +305,8 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
  
        #open plot area LnLx
        plot(NA,NA,
-           xlab=if(log=="x" | log=="xy"){"log temp. [\u00B0C]"}else{"temp. [\u00B0C]"},
-           ylab=if(log=="y" | log=="xy"){
-                 paste("log TL [a.u.]",sep="")
-                 }else{
-                   paste("TL [a.u.]",sep="")                 
-                 },
+           xlab="Temp. [\u00B0C]",
+           ylab=paste("TL [a.u.]",sep=""),
             xlim=c(0.1,
                    max(temp.sequence.structure[temp.sequence.structure[,"protocol.step"]=="SIGNAL","x.max"])),            
              ylim=c(
@@ -335,12 +334,8 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
     
   #open plot area TnTx
   plot(NA,NA,
-      xlab=if(log=="x" | log=="xy"){"log temp. [\u00B0C]"}else{"temp. [\u00B0C]"},
-       ylab=if(log=="y" | log=="xy"){
-        paste("log TL [a.u.]",sep="")
-     }else{
-       paste("TL [a.u.]",sep="")                 
-     },
+      xlab="Temp. [\u00B0C]",
+       ylab=paste("TL [a.u.]",sep=""),
      xlim=c(0.1,
             max(temp.sequence.structure[temp.sequence.structure[,"protocol.step"]=="SIGNAL","x.max"])),            
      ylim=c(
@@ -379,11 +374,11 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
   
   ##Plot Plateau Test
   plot(NA, NA,
-       xlab = "temp. [\u00B0C]",
+       xlab = "Temp. [\u00B0C]",
        ylab = "TL [a.u.]",
        xlim = c(min(signal.integral.temperature)*0.9, max(signal.integral.temperature)*1.1),
        ylim = c(0, max(NTL.net.LnLx[,2])),
-       main = expression(paste("Plateau Test ",L[n],",",L[x]," curves",sep=""))
+       main = expression(paste("Plateau test ",L[n],",",L[x]," curves",sep=""))
        )
     
 
@@ -423,11 +418,11 @@ analyse_SAR.TL<- structure(function(#Analyse SAR TL measurements
 
   ##Plot Plateau Test
   plot(NA, NA,
-       xlab = "temp. [\u00B0C]",
+       xlab = "Temp. [\u00B0C]",
        ylab = "TL [a.u.]",
        xlim = c(min(signal.integral.temperature)*0.9, max(signal.integral.temperature)*1.1),
        ylim = c(0, max(NTL.net.TnTx[,2])),
-       main = expression(paste("Plateau Test ",T[n],",",T[x]," curves",sep=""))
+       main = expression(paste("plateau Test ",T[n],",",T[x]," curves",sep=""))
   )
 
 
@@ -484,6 +479,9 @@ if(length(grep("FAILED",RejectionCriteria$status))>0){
   
 }
 
+  ##reset par
+  par(par.default)
+  rm(par.default)
 
 # Plotting  GC  ----------------------------------------
 temp.sample <- data.frame(Dose=LnLxTnTx$Dose, 

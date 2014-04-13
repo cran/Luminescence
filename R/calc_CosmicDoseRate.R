@@ -9,7 +9,7 @@ calc_CosmicDoseRate<- structure(function( # Calculate the cosmic dose rate
   ## Christoph Burow, University of Cologne (Germany) \cr
   
   ##section<<
-  ## version 0.5.1 [2014-01-07] 
+  ## version 0.5.2
   # ===========================================================================
   
   depth,
@@ -363,8 +363,12 @@ if(length(hgcm)==1) {
                          d0=d0,geom_lat=true.gml,dc=dc)
                      
   results<- data.frame(cbind(temp1,temp2))
+
+  newRLumResults.calc_CosmicDoseRate <- set_RLum.Results(
+    data = list(results=results))
   
-  invisible(list(results=results)) 
+    # Return values
+    invisible(newRLumResults.calc_CosmicDoseRate)
   
 }
   else {
@@ -384,12 +388,20 @@ if(length(hgcm)==1) {
     
     results<- data.frame(cbind(profile.results,add.info))
     
-    invisible(list(results=results))
-    ### Returns terminal output. In addition a list is returned containing 
-    ### the following element:
+    newRLumResults.calc_CosmicDoseRate <- set_RLum.Results(
+      data = list(results=results))
+      
+      # Return values
+      invisible(newRLumResults.calc_CosmicDoseRate)
+    ### Returns terminal output. In addition an 
+    ### \code{\linkS4class{RLum.Results}} object is 
+    ### returned containing the following element:
     ###
-    ### \item{results}{data frame with results of cosmic dose rate calculation.}
-    
+    ### \item{results}{\link{data.frame} with statistical parameters.}
+    ###
+    ### The output should be accessed using the function 
+    ### \code{\link{get_RLum.Results}}
+
     ##details<<
     ## This function calculates the total cosmic dose rate considering both the 
     ## soft- and hard-component of the cosmic ray flux.\cr
@@ -540,7 +552,10 @@ if(length(hgcm)==1) {
   #calculate cosmic dose rate and save to variable
   results<- calc_CosmicDoseRate(depth = 2.78, density = 1.7,
                                 latitude = 38.06451, longitude = 1.49646, 
-                                altitude = 364, error = 10)$results
+                                altitude = 364, error = 10)
+  
+  # the results can be accessed by
+  get_RLum.Results(results, "results")
   
   #export results to .csv file - uncomment for usage
   #write.csv(results, file = "c:/users/public/results.csv")
@@ -551,7 +566,7 @@ if(length(hgcm)==1) {
   results<- calc_CosmicDoseRate(depth = c(0.1, 0.5 , 2.1, 2.7, 4.2, 6.3), 
                                 density = 1.7, latitude = 38.06451, 
                                 longitude = 1.49646, altitude = 364, 
-                                error = 10)$results
+                                error = 10)
   
   #export results to .csv file - uncomment for usage
   #write.csv(results, file = "c:/users/public/results_profile.csv")

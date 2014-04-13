@@ -1,6 +1,184 @@
 NEWS for the R Package Luminescence
 
-Changes in version 0.3.2 (7th Januar, 2014):
+Changes in version 0.3.3 (13th April, 2014):
+
+  New functions:
+
+         • ‘plot_AbanicoPlot()’: New function for standard De
+           distribution plots
+
+         • ‘plot_DRTResults()’: New function to visualise dose recovery
+           test results
+
+         • ‘calc_Statistics()’: New function to calculate
+           De/Age/Distribution statistics that are often used by
+           functions in the package
+
+         • ‘apply_CosmicRayRemoval()’: New function to remove cosmic
+           rays in ‘RLum.Data.Spectrum’ objects (#80)
+
+         • ‘apply_EfficiencyCorrection()’: New function to allow
+           spectral efficiency corrections on ‘RLum.Data.Spectrum’
+           objects using a given spectral response data set for the
+           used system
+
+  New Data Sets:
+
+         • ‘ExampleData.XSYG’: SAR measurement and TL spectrum imported
+           from a Freiberg Instruments XSYG file.
+
+  Changes within the 'RLum' classes and methods:
+
+         • ‘get_RLum.Analysis()’: Add argument ‘keep.object’ to allow
+           returing an ‘RLum.Analysis’ object instead of single records
+           when using the method. For the sake of consistency with
+           previous examples the default option is ‘keep.object =
+           FALSE’
+
+         • ‘get_RLum.Analysis()’: In cases for that the output contains
+           only one element the element is returned as non-list element
+           (no list is returned)
+
+  Further bugfixes and changes:
+
+         • ‘calc_OSLLxTxRatio()’: Considering the case that the number
+           of backround intergral channels is smaller than the number
+           for signal integral channels by implementing suggestions
+           from Rex Galbraith (2014) (#78, reported by Alexandra
+           Rowell).
+
+         • ‘calc_OSLLxTxRatio()’: Add preset argument
+           ‘background.count.distribution’
+
+         • ‘calc_OSLLxTxRatio()’: Add optional argument ‘sigmab’ and
+           extend value output
+
+         • ‘plot_RLum.Analysis()’: Pass ‘col’ argument to the plot
+
+         • ‘calc_FiniteMixture()’: The ‘n.components’ argument now
+           accepts vectors in the form of ‘c(min:max)’ to calculate the
+           finite mixtures while increasing stepwise the number of k
+           components to be fitted
+
+         • ‘calc_FiniteMixture()’: Added plot output when a vector is
+           provided for ‘n.components’
+
+         • ‘calc_FiniteMixture()’: Evaluation of BIC scores and maximum
+           log-likelihoods estimates when a vector is provided for
+           ‘n.components’
+
+         • ‘calc_FiniteMixture()’:Tolerance increased when solving the
+           covariance matrix from ‘$double.eps (~10^-16) to
+           $double.xmin (~10^-308)’
+
+         • ‘calc_FiniteMixture()’: New examples added
+
+         • ‘analyse_IRSAR.RF()’: Correct an error that occurred when
+           ‘NaN’ are produced during De calculation
+
+         • ‘analyse_IRSAR.RF()’: Implement automatic ‘predefined’ curve
+           removal from the ‘RLum.Analysis’ input object for data
+           imported from XSYG files
+
+         • ‘analyse_IRSAR.RF()’: Add limitation of points used for
+           natural signal calculation by using ‘fit.range.min’
+
+         • ‘analyse_IRSAR.RF()’: Correct an error for the case that a
+           fitting could not be applied
+
+         • ‘analyse_SAR.CWOSL()’: Add support for palaeodose error as
+           rejection criteria
+
+         • ‘Risoe.BINfileData2RLum.Analysis()’: Setting of arguments
+           ‘run’, ‘set’ and ‘ltype’ had no effect: Corrected (#87,
+           reported by Thomas Kolb).
+
+         • ‘plot_Histogram()’: Add summary options and y-limits
+
+         • ‘plot_Histogram()’: Fix odd plotting (#89)
+
+         • ‘plot_KDE()’: Fix bug for using multiple datasets. KDE can
+           now calculated with error-weights; however per default set
+           to ‘FALSE’ as it will be a PD plot otherwise
+
+         • ‘plot_KDE()’: Add argument ‘values.cumulative’ to show
+           cummulative values individually (#88)
+
+         • ‘plot_KDE()’, ‘plot_Histogram’, ‘plot_RadialPlot’: flexible
+           placement of statistical summary and legend added
+
+         • ‘plot_RLum.Data.Spectrum()’: Add plot type ‘single’ to allow
+           single curve output and optimise code
+
+         • ‘plot_RLum.Data.Spectrum()’: Add arguments for horizontal
+           (‘bin.rows’) and vertical binning (‘bin.cols’)
+
+         • ‘plot_RLum.Data.Spectrum()’: Add argument ‘bg.channels’ to
+           allow the specification of background channels that are
+           subtracted from the other channels.
+
+         • ‘plot_RLum.Data.Spectrum()’: Correct an error that occurred
+           if no xlab or ylab information are provided
+
+         • ‘plot_RLum.Data.Spectrum()’: Add new plot option
+           ‘mutiple.lines’, allowing to draw all frames in one plot
+
+         • ‘plot_GrowthCurve()’: Correct ‘mtext’ behaviour as expected
+           (#91)
+
+         • ‘plot_GrowthCurve()’: Now resets global ‘par’ parameter
+           after plotting
+
+         • ‘plot_RadialPlot()’: Provide note on polygone behaviour
+           (#90)
+
+         • ‘plot_RadialPlot()’: Correct 2-sigma label plotting (#92)
+
+         • ‘plot_RadialPlot()’: Some minor graphical adjustments
+
+         • ‘merge_Risoe.BINfileData()’: New argument added
+           ‘position.number.append.gap’ allowing to account for a
+           specific position number structure within the data sets
+           (#94, requested by Thomas Kolb)
+
+         • ‘merge_Risoe.BINfileData()’: Correct an error that occured
+           for merging more than two BIN-files (#93, reported by Thomas
+           Kolb)
+
+         • ‘readXSYG2R()’: Rewritten TL curve recalculation routine;
+           argument ‘recalculate.TL.curves’ set now to ‘TRUE’ by
+           default.  (#86)
+
+         • ‘calc_FuchsLang2001()’: Function now allows ‘RLum.Results’
+           object as input and returns an ‘RLum.Results’ object.
+
+         • ‘calc_FuchsLang2001()’: Now supports the ‘...’ argument.
+           The arguments ‘cex.global’, ‘main’, ‘xlab’, ‘sample.mtext’
+           have been therefore removed.
+
+         • ‘calc_AliquotSize()’: added the option to estimate the
+           amount of grains on an aliquot by monte carlo simulation;
+           implement ‘RLum.Results’ object handling (output)
+
+         • ‘calc_MaxDose3()’: removed the option to print results to a
+           file
+
+         • ‘calc_MinDose3()’: removed the option to print results to a
+           file
+
+         • ‘calc_MinDose4()’: removed the option to print results to a
+           file
+
+         • ‘calc_CosmicDoseRate()’: Implement ‘RLum.Results’ object
+           handling (output)
+
+         • ‘fit_CWCurve()’: Now uses package colour library and ‘par’
+           settings will be reset after plotting
+
+         • ‘fit_LMCurve()’: Now uses package colour library and ‘par’
+           settings will be reset after plotting
+
+Changes in version 0.3.2 (7th January, 2014):
 
   Bugfixes and changes:
 
@@ -55,10 +233,7 @@ Changes in version 0.3.2 (7th Januar, 2014):
 
          • ‘analyse_SAR.CWOSL’: add argument ‘dose.points’
 
-  New functions:
-
-         • ‘plot_AbanicoPlot()’: New standard plot alternative for De
-           distributions
+         • ‘calc_CosmicDoseRate’: remove unwanted terminal output
 
 Changes in version 0.3.1 (15th December, 2013):
 
@@ -455,7 +630,7 @@ Changes in version 0.3 (1st October, 2013):
          • ‘Risoe.BINfileData-class’: The *.binx file format support
            has been added
 
-         • ‘RLum.Analysis’: Add argument ‘get.index’ just to show the
+         • ‘RLum.Analysis’: Add argument ‘get.index’ just to show the
            index values
 
   Internals:

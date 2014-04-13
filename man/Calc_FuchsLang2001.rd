@@ -5,10 +5,11 @@
 heterogeneously bleached samples with a given coefficient of variation threshold. }
 \usage{calc_FuchsLang2001(sample, sample.mtext = "unknown sample", sample.id = sample.mtext, 
     cvThreshold = 5, startDeValue = 1, output.plot = TRUE, output.terminal = TRUE, 
-    main = "Fuchs & Lang (2001)", xlab = expression(paste(D[e], 
-        " [Gy]")), cex.global = 1)}
+    ...)}
 \arguments{
-  \item{sample}{\link{data.frame} (\bold{required}): two column data frame, e.g. De and De error}
+  \item{sample}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+De error \code{(values[,2])}}
   \item{sample.mtext}{\link{character} (optional): mtext for optional plot (top)}
   \item{sample.id}{\link{character} (with default): sample id, with default the sample.mtext is used.}
   \item{cvThreshold}{\link{numeric} (with default): coefficient of variation in percent, 
@@ -17,9 +18,7 @@ as threshold for the method, e.g. \code{cvThreshold = 3}. See details.}
 for the calculations}
   \item{output.plot}{\link{logical} (with default): plot output \code{TRUE}/\code{FALSE}}
   \item{output.terminal}{\link{logical} (with default): terminal output \code{TRUE}/\code{FALSE}}
-  \item{main}{\link{character} (with default): title of the plot (works as in \link{plot})}
-  \item{xlab}{\link{character} (with default): xlab works as in \link{plot}}
-  \item{cex.global}{\link{numeric} (with default): global scaling factor}
+  \item{\dots}{further arguments and graphical parameters passed to \code{\link{plot}}}
 }
 \details{\bold{Used values} \cr
 If the coefficient of variation (c[v]) of the first two values is larger than 
@@ -40,11 +39,11 @@ list is returned containing two elements:
 \item{usedDeValues}{\link{data.frame} containing the used values for the calculation}}
 \references{Fuchs, M. & Lang, A., 2001. OSL dating of coarse-grain fluvial quartz using 
 single-aliqout 	protocols on sediments from NE Peloponnese, 
-Greece. In: Quaternary Science Reviews (20), pp. 783-787.
+Greece. In: Quaternary Science Reviews, 20, 783-787.
 
 Fuchs, M. & Wagner, G.A., 2003. Recognition of insufficient bleaching by 
 small aliquots of quartz for reconstructing soil erosion in Greece. 
-Quaternary Science Reviews, 22, pp. 1161-1167. }
+Quaternary Science Reviews, 22, 1161-1167. }
 \author{Sebastian Kreutzer, JLU Giessen (Germany)
 R Luminescence Package Team}
 \note{Please consider the requirements and the constraints of this method 
@@ -53,15 +52,19 @@ R Luminescence Package Team}
 
 \seealso{\code{\link{plot}}, \code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}
 \code{\link{calc_FiniteMixture}}, \code{\link{calc_CentralDose}}, 
-\code{\link{calc_CommonDose}}}
+\code{\link{calc_CommonDose}}, \code{\linkS4class{RLum.Results}}}
 \examples{
 
 ##load example data
 data(ExampleData.DeValues, envir = environment())
 
 ##calculate De according to Fuchs & Lang (2001)
-calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
+temp <- calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
+
+##show values
+get_RLum.Results(temp)
 
 }
 
 \keyword{dplot}
+\section{Function version}{0.4.0 (2014-04-13 14:27:55)}

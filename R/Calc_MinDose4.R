@@ -8,7 +8,7 @@ calc_MinDose4<- structure(function( # Apply the (un-)logged four parameter minim
   ## Based on a rewritten S script of Rex Galbraith, 2010 \cr\cr
   
   ##section<<
-  ## version 0.2 [2013-11-04] 
+  ## version 0.22
   # ===========================================================================
     
   input.data, 
@@ -56,12 +56,6 @@ calc_MinDose4<- structure(function( # Apply the (un-)logged four parameter minim
   ### functions for gamma, mu, sigma, p0 to console.
   console.extendedOutput=FALSE, 
   ### \code{\link{logical}} (with default): extended terminal output
-  output.file=FALSE,
-  ### \code{\link{logical}} (with default): save results to file. See 
-  ### \code{output.filename}.
-  output.filename="default", 
-  ### \code{\link{character}} (with default): desired filename, else results 
-  ### are saved to default-4R(-UL).res 
   output.plot=TRUE, 
   ### \code{\link{logical}} (with default): plot output
   ### (\code{TRUE}/\code{FALSE})
@@ -318,51 +312,6 @@ neglik.f<- function(param,dat,rep){
 	get("prstat",mode="numeric")
 	ncalls<- prstat[1]
 	get("Bmess")
-
-# write the parameter estimates to output file filnam-4R.res 
-# where filnam is the input file name
-
-  filnam<- output.filename
-  
-  if(output.file == TRUE) {
-    
-    lbout<- paste(filnam,if(log==TRUE){"-4R.res"}else{"-4R-UL.res"},sep="")
-    
-    write(c("Sample: ", filnam, "\nSigma_b: ", sigmab), file=lbout, ncolumns=2,
-          append=FALSE)
-    write(" ", file=lbout, append=TRUE)
-    write(paste("Final estimate of model parameters"), lbout, append=TRUE)
-    write(paste("gamma:", round(gamma,3), "sigma:", round(sigma,3), "p0:",
-                round(p0,3), "mu: ", round(mu,3)), lbout, append=TRUE)
-    write(" ", file=lbout, append = TRUE)
-    write("\nmaximum likelihood estimate of minimum age", lbout, append=TRUE)
-    write(" ",file=lbout, append=TRUE)
-    
-    if(log == TRUE) {
-      write(paste(" mindose  [exp(gamma)]: ",
-                  round(exp(gamma), 3)), lbout, append=TRUE)
-      write(paste(" centdose    [exp(mu)]: ",
-                  round(exp(mu), 3)), lbout, append=TRUE)
-    }
-    else {
-      write(paste(" mindose       [gamma]: ",
-                  round(gamma, 3)), lbout,append=TRUE)
-      write(paste(" centdose         [mu]: ",
-                  round(mu, 3)), lbout, append=TRUE)
-    }
-    
-    write(" ", file=lbout, append=TRUE)
-    write(c(" number of times mu<=gamma:", Bmess),
-          file=lbout, ncolumns=2, append=TRUE)
-    write(" ", file=lbout, append=TRUE)
-    
-    # write fitted values to output file filnam-4R.res 
-    # where filnam is the input file name
-    prfile<- TRUE
-    neglik.f(mlest,datmat)
-    prfile<- FALSE
-    
-  }
   
 ##============================================================================##
 ## PROFILE LOG LIKELIHOODS
@@ -375,6 +324,9 @@ neglik.f<- function(param,dat,rep){
     
   profind<- as.integer(output.indices)
 
+  # save previous plot parameter and set new ones
+  .pardefault<- par(no.readonly = TRUE)
+  
   if(output.plot == TRUE) {
     par(mfrow=c(2,2),oma=c(9,2,9,1),mar=c(3.7,3.1,1.1,0.2),
         mgp=c(1.75,0.5,0),las=1,cex.axis=1.1,cex.lab=1.3)
@@ -601,24 +553,6 @@ neglik.f<- function(param,dat,rep){
 	  try(muu<-u2, silent=TRUE)
 	}
 	
-	if(output.file == TRUE && c(j == 1 | j == 2)) {
-	  if(log == TRUE) {
-	    write(paste("\n95% confidence interval",if(j==1){" [exp(gamma)]"}
-	                else{" [exp(mu)]"}),lbout,append=T)
-	    try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-	    try(write(paste("-",round(exp(if(j==1){gamma}else{mu})-exp(u1),2),
-	                    "+",round(exp(u2)-exp(if(j==1){gamma}else{mu}),2)),
-	              lbout,append=T),silent=TRUE) 
-	  }
-	  else {
-	    write(paste("\n95% confidence interval",if(j==1){" [gamma]"}
-	                else{" [mu]"}),lbout,append=T)
-	    try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-	    try(write(paste("-",round(if(j==1){gamma}else{mu}-u1,2),"+",
-	                    round(u2-if(j==1){gamma}else{mu},2)),lbout,append=T),
-	        silent=TRUE)
-	  }
-	}
 
 # the 68% upper and lower confidence limits are calculated from the
 # profile results and the results are added to the plot
@@ -670,24 +604,6 @@ neglik.f<- function(param,dat,rep){
 	  try(mlu<-u2, silent=TRUE)
 	}
 	
-	if(output.file == TRUE && c(j == 1 | j == 2)) {
-	  if(log == TRUE) {
-	    write(paste("\n68% confidence interval",if(j==1){" [exp(gamma)]"}
-	                else{" [exp(mu)]"}),lbout,append=T)
-	    try(write(c(exp(u1),exp(u2)),lbout,append=T), silent=TRUE)
-	    try(write(paste("-",round(exp(if(j==1){gamma}else{mu})-exp(u1),2),
-	                    "+",round(exp(u2)-exp(if(j==1){gamma}else{mu}),2)),
-	              lbout,append=T), silent=TRUE)
-	  }
-	  else {
-	    write(paste("\n68% confidence interval",if(j==1){" [gamma]"}
-	                else{" [mu]"}),lbout,append=T)
-	    try(write(c(u1,u2),lbout,append=T), silent=TRUE)
-	    try(write(paste("-",round(if(j==1){gamma}else{mu}-u1,2),"+",
-	                    round(u2-if(j==1){gamma}else{mu},2)),lbout,append=T),
-	        silent=TRUE)
-	  }
-	}
 	
 # printing the maximum likelihood estimate on the graph
 	if(output.plot == TRUE) {
@@ -701,8 +617,8 @@ neglik.f<- function(param,dat,rep){
 	}
   
   if(output.plot==TRUE) {
-    mtext(side=2,line=0,"relative profile log likelihood",cex=1.2,outer=T,las=0) 
-    mtext(side=3,line=0,paste(filnam,if(log==TRUE){"   MAM 4"}else{"   MAM 4-UL"}),
+    mtext(side=2,line=0,"Relative profile log likelihood",cex=1.2,outer=T,las=0) 
+    mtext(side=3,line=0,paste(sample.id,if(log==TRUE){"   MAM 4"}else{"   MAM 4-UL"}),
           cex=1.4,outer=T)
   }
   
@@ -715,11 +631,6 @@ neglik.f<- function(param,dat,rep){
 
   }#EndOf IF (PROFILE LOG LIKELIHOODS)
 
-  if(output.file == TRUE) {
-    write("",lbout,append=T)
-    write(paste("Likelihood: ", round(maxlik, 5)),lbout, append=T)
-    write(paste("       BIC: ", round(bic, 3)),lbout, append=T)
-  }
   
 # prepare return values
   results<- data.frame(id=sample.id,n=length(lcd),log=log,Lmax=maxlik,BIC=bic,
@@ -849,6 +760,9 @@ neglik.f<- function(param,dat,rep){
               "is not ensured. \n"), fill = FALSE)
   }
   
+  # restore previous plot parameters
+  par(.pardefault)
+  
 # return values
   newRLumResults.calc_MinDose3 <- set_RLum.Results(
     data = list(
@@ -908,7 +822,7 @@ neglik.f<- function(param,dat,rep){
   ## produces NA values it is possible to omit these values by setting 
   ## \code{ignore.NA = TRUE}. While the model is then usually able to finish
   ## all calculations the integrity of the final estimates cannot be ensured.
-  ## Use this argument at your own risk.
+  ## Use this argument at own risk.
   
   
   ##references<<
@@ -962,5 +876,5 @@ neglik.f<- function(param,dat,rep){
   ## apply the logged minimum dose model
   calc_MinDose4(ExampleData.DeValues, 
                 sigmab = 0.05, gamma.xub = 10000, mu.xub = 10000, init.p0 = 0.4,
-                output.file = FALSE,output.plot = FALSE)
+                output.plot = FALSE)
 })

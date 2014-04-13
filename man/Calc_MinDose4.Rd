@@ -8,8 +8,7 @@ to De data.}
     sigma.xlb = 0.001, sigma.xub = 5, init.gamma = 10, init.mu = 10, 
     init.sigma = 0.6, init.p0 = 0.01, ignore.NA = FALSE, calc.ProfileLikelihoods = TRUE, 
     console.ProfileLikelihoods = FALSE, console.extendedOutput = FALSE, 
-    output.file = FALSE, output.filename = "default", output.plot = TRUE, 
-    output.indices = 4)}
+    output.plot = TRUE, output.indices = 4)}
 \arguments{
   \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
 for \code{data.frame}: two columns with De \code{(input.data[,1])} and
@@ -38,10 +37,6 @@ functions for gamma, mu, sigma, p0. See \code{output.indices}.}
   \item{console.ProfileLikelihoods}{\code{\link{logical}} (with default): print profile log likelihood
 functions for gamma, mu, sigma, p0 to console.}
   \item{console.extendedOutput}{\code{\link{logical}} (with default): extended terminal output}
-  \item{output.file}{\code{\link{logical}} (with default): save results to file. See 
-\code{output.filename}.}
-  \item{output.filename}{\code{\link{character}} (with default): desired filename, else results 
-are saved to default-4R(-UL).res }
   \item{output.plot}{\code{\link{logical}} (with default): plot output
 (\code{TRUE}/\code{FALSE})}
   \item{output.indices}{\code{\link{numeric}} (with default): requires 
@@ -90,7 +85,7 @@ adjust some of the values provided for any argument. If the model still
 produces NA values it is possible to omit these values by setting 
 \code{ignore.NA = TRUE}. While the model is then usually able to finish
 all calculations the integrity of the final estimates cannot be ensured.
-Use this argument at your own risk.}
+Use this argument at own risk.}
 \value{Returns a plot (optional) and terminal output. A file 
 containing statistical results is provided if desired. In addition an 
 \code{\linkS4class{RLum.Results}} object is 
@@ -149,5 +144,6 @@ data(ExampleData.DeValues, envir = environment())
 ## apply the logged minimum dose model
 calc_MinDose4(ExampleData.DeValues, 
               sigmab = 0.05, gamma.xub = 10000, mu.xub = 10000, init.p0 = 0.4,
-              output.file = FALSE,output.plot = FALSE)
+              output.plot = FALSE)
 }
+\section{Function version}{0.22 (2014-04-13 14:28:35)}

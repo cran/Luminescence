@@ -8,15 +8,14 @@ et al. (1999) using a similiar approach described in Olley et al. (2006).}
     gamma.xlb = 0.1, gamma.xub = 100, sigma.xlb = 0.001, sigma.xub = 5, 
     init.gamma = 10, init.sigma = 1.2, init.p0 = 0.01, ignore.NA = FALSE, 
     calc.ProfileLikelihoods = TRUE, console.ProfileLikelihoods = FALSE, 
-    console.extendedOutput = FALSE, output.file = FALSE, output.filename = "default", 
-    output.plot = FALSE, output.indices = 3)}
+    console.extendedOutput = FALSE, output.plot = FALSE, output.indices = 3)}
 \arguments{
   \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
 for \code{data.frame}: two columns with De \code{(input.data[,1])} and
 De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}}  (\bold{required}): spread in De values given as a 
 fraction (e.g. 0.2). This value represents the expected overdispersion in
-the data, if the sample is well-bleached (Cunningham & Walling 2012, p. 100).}
+the data should the sample be well-bleached (Cunningham & Walling 2012, p. 100).}
   \item{log}{\code{\link{logical}} (with default): fit the (un-)logged three parameter 
 maximum dose model to De data. An un-logged version is currently not
 supported}
@@ -34,11 +33,7 @@ likelihood calculations. See details.}
 functions for gamma, sigma, p0. See \code{output.indices}.}
   \item{console.ProfileLikelihoods}{\code{\link{logical}} (with default): print profile log likelihood
 functions for gamma, sigma, p0 to console.}
-  \item{console.extendedOutput}{\code{\link{logical}} (with default): extended terminal output}
-  \item{output.file}{\code{\link{logical}} (with default): save results to file. See 
-\code{output.filename}.}
-  \item{output.filename}{\code{\link{character}} (with default): desired filename, else results 
-are saved to default-3R(-UL).res }
+  \item{console.extendedOutput}{\code{\link{logical}} (with default): extended terminal output }
   \item{output.plot}{\code{\link{logical}} (with default): plot output
 (\code{TRUE}/\code{FALSE})}
   \item{output.indices}{\code{\link{numeric}} (with default): requires 
@@ -59,10 +54,10 @@ measured De values are transformed as follows: \cr\cr
 2. multiply the logged data to creat a mirror image of the De distribution\cr
 3. shift De values along x-axis by the smallest x-value found to obtain 
 only positive values \cr
-4. apply the MAM to these data, after combining the square of the measurement
-error associated with each De value with a relative error specified by 
-sigmab \cr\cr
-When all calculations are done, results are then converted
+4. combine in quadrature the measurement error associated with each De value
+with a relative error specified by sigmab
+5. apply the MAM to these data \cr\cr
+When all calculations are done the results are then converted
 as follows\cr\cr
 1. subtract the x-offset \cr
 2. multiply the natural logs by -1 \cr
@@ -99,9 +94,8 @@ adjust some of the values provided for any argument. If the model still
 produces NA values it is possible to omit these values by setting 
 \code{ignore.NA = TRUE}. While the model is then usually able to finish
 all calculations the integrity of the final estimates cannot be ensured.
-\bold{Use this argument at your own risk.}}
-\value{Returns a plot (optional) and terminal output. A file 
-containing statistical results is provided if desired. In addition an 
+Use this argument at own risk.}
+\value{Returns a plot (optional) and terminal output. In addition an 
 \code{\linkS4class{RLum.Results}} object is 
 returned containing the following element:
 
@@ -163,3 +157,4 @@ data(ExampleData.DeValues, envir = environment())
 calc_MaxDose3(ExampleData.DeValues,
               sigmab = 0.3, gamma.xub = 4000)
 }
+\section{Function version}{0.22 (2014-04-13 14:28:21)}

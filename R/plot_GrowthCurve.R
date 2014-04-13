@@ -4,63 +4,77 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany), Michael Dietze, GFZ Potsdam (Germany)
+  ## Sebastian Kreutzer, JLU Giessen (Germany), 
+  ## Michael Dietze, GFZ Potsdam (Germany), \cr
   
   ##section<<
-  ##version 1.2.2 [2014-01-05]
+  ##version 1.2.3
   # ===========================================================================
   
   sample,
   ### \code{\link{data.frame}} (\bold{required}): data frame with three columns
   ### for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx. The column for the test dose 
   ### response is optional, but requires 'TnTx' as column name if used.
+
   na.exclude = TRUE,
   ### \code{\link{logical}} (with default): excludes \code{NA} values from the data 
   ### set prior to any further operations.
-  main = "Growth Curve",
+  
+  main = "Growth curve",
   ### \code{\link{character}} (with default): header of the plot.
-  mtext = "",
-  ### \code{\link{character}} (optional): additional text on the right side 
-  ### of the plot.
-	fit.method = "EXP", 
+  
+  fit.method = "EXP", 
   ### \code{\link{character}} (with default): function used for fitting. 
   ### Possible options are: \code{LIN}, \code{EXP}, \code{EXP OR LIN}, 
   ### \code{EXP+LIN} or \code{EXP+EXP}. See details.
+  
   fit.weights = TRUE,
   ### \code{\link{logical}} (with default): option whether the fitting is 
   ### done with or without weights. See details.
-	fit.includingRepeatedRegPoints = TRUE, 
+	
+  fit.includingRepeatedRegPoints = TRUE, 
   ### \code{\link{logical}} (with default): includes repeated points for 
   ### fitting (\code{TRUE}/\code{FALSE}).
-	fit.NumberRegPoints,
+	
+  fit.NumberRegPoints,
   ### \code{\link{integer}} (optional): set number of regeneration points 
-  ### manually. By default the number of all(!) regeneration points is 
+  ### manually. By default the number of all (!) regeneration points is 
   ### used automatically.
-	fit.NumberRegPointsReal,
+	
+  fit.NumberRegPointsReal,
   ### \code{\link{integer}} (optional): if the number of regeneration points 
-  ### is provided manually, the value of the real regeneration points = 
-  ### all points (repeated points) reg 0 has to be inserted.
+  ### is provided manually, the value of the real, regeneration points = 
+  ### all points (repeated points) including reg 0, has to be inserted.
+  
   fit.bounds = TRUE,
   ### \code{\link{logical}} (with default): set lower fit bounds for all fitting 
   ### parameters to 0. Limited for the use with the fit methods \code{EXP}, 
   ### \code{EXP+LIN} and \code{EXP OR LIN}. Argument to be inserted for 
   ### experimental application only!
-	NumberIterations.MC = 100, 
+	
+  NumberIterations.MC = 100, 
   ### \code{\link{integer}} (with default): number of Monte Carlo simulations 
   ### for error estimation. See details.
-	xlab = "s", 
+	
+  xlab = "s", 
   ### \code{\link{character}} (with default): unit for x-axis labelling. 
   ### Possible values are \code{"Gy"} and \code{"s"}.
-	output.plot = TRUE, 
+	
+  output.plot = TRUE, 
   ### \code{\link{logical}} (with default): plot output (\code{TRUE/FALSE}).
+  
   output.plotExtended = TRUE,
   ### \code{\link{logical}} (with default): If \code{TRUE}, 3 plots on one plot 
-  ### area are provided: (1) growth curve, (2) histogram from error Monte 
-  ### Carlo simulation and (3) a test dose response plot. If \code{FALSE}, 
+  ### area are provided: (1) growth curve, (2) histogram from Monte 
+  ### Carlo error simulation and (3) a test dose response plot. If \code{FALSE}, 
   ### just the growth curve will be plotted. \bold{Requires:} 
   ### \code{output.plot = TRUE}.
-  cex.global = 1
+  
+  cex.global = 1,
   ### \code{\link{numeric}} (with default): global scaling factor.
+  
+  ...
+  ### Further arguments and graphical parameters to be passed.
 ) {
   ##1. check if sample is data.frame
   if(is.data.frame(sample)==FALSE){
@@ -144,7 +158,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
 
   ##START PARAMETER ESTIMATION
-  ##-----------------------------------------------------------------------------------------------##
+  ##--------------------------------------------------------------------------##
   ##general setting of start parameters for fitting
   
 	   ##a - estimation for a a the maxium of the y-values (Lx/Tx)
@@ -509,7 +523,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 							x.natural[i]<-mean(iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1])
 							}
 
-				  ##updata progress bar
+				  ##update progress bar
 				  setTxtProgressBar(pb, i)
               
           }#end for loop	
@@ -767,18 +781,25 @@ if(output.plot==TRUE) {
 
 #PAR	#open plot area
       if(output.plot==TRUE & output.plotExtended==TRUE){
+      
+      ##grep recent plot parameter for later reset
+      par.default <- par(no.readonly = TRUE)
+      
+      ##set new parameter
 			layout(matrix(c(1,1,1,1,2,3), 3, 2, byrow=TRUE), respect=TRUE)
 			par(cex=0.8*cex.global)
       }else{par(mfrow=c(1,1),cex=cex.global)}
   
 #PLOT		#Plot input values
 			plot(xy[1:fit.NumberRegPointsReal,1],xy[1:fit.NumberRegPointsReal,2],
-				main=main,
 				ylim=c(0,(max(xy$y)+if(max(xy$y)*0.1>1.5){1.5}else{max(xy$y)*0.2})),
 				xlim=c(0,(max(xy$x)+if(max(xy$x)*0.4>50){50}else{max(xy$x)*0.4})),
 				pch=19,
 				xlab=if(xlab=="Gy"){"Dose [Gy]"}else{"Dose [s]"},
 				ylab=expression(L[x]/T[x]))
+
+#ADD HEADER
+      title(main=main,line=3)
 
 #CURVE	#plot fitted curve
 			if (fit.method=="EXP+LIN") {try(curve(a*(1-exp(-(x+c)/b)+(g*x)), lwd=1.5, add=TRUE))}
@@ -802,10 +823,19 @@ if(output.plot==TRUE) {
 			try(lines(c(De,De),c(0,sample[1,2]), col="red", lty=2, lwd=1.25),silent=TRUE)
 			try(points(De,sample[1,2], col="red", pch=19),silent=TRUE)
 
+## check/set mtext
+mtext <- if("mtext" %in% names(list(...))) {
+  list(...)$mtext
+  } else {
+    substitute(D[e] == De, 
+               list(De=paste(De,"+/-",De.Error, xlab,
+                             " | fit: ",fit.method)))
+  }
+
+
+
 ##TEXT		#Insert fit and result
-			try(mtext(side=3, substitute(D[e] == De, 
-                                list(De=paste(De,"+/-",De.Error, xlab,
-                                " | fit: ",fit.method))), line=0, cex=0.8*cex.global),silent=TRUE)
+			try(mtext(side=3, mtext, line=0.5, cex=0.8*cex.global),silent=TRUE)
 	
 			#write error message in plot if De is NaN
 			try(if (De=="NaN") {
@@ -815,7 +845,7 @@ if(output.plot==TRUE) {
 	
 ##LEGEND	#plot legend
 			
-			legend("topleft", c("REG Points", "REG Point repeated", "REG Point 0"),
+			legend("topleft", c("REG points", "REG point repeated", "REG point 0"),
           pch=c(19,2,1), cex=0.8*cex.global, bty="n")
 
 ##plot only if wanted
@@ -874,7 +904,7 @@ if(output.plot==TRUE) {
 				plot(1:length(sample[,"TnTx"]),sample[1:(length(sample[,"TnTx"])),"TnTx"]/sample[1,"TnTx"],
 				xlab="SAR cycle",
 				ylab=expression(paste(T[n]/T[x])),
-				main="Test Dose Response",
+				main="Test dose response",
 				type="o",
 				pch=20,
 				)
@@ -887,12 +917,13 @@ if(output.plot==TRUE) {
 				text(5,5,"not available\n no TnTx column")
 			}#end if else
 
-##Additional mtext
-mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
-		
 	
 ##END lines
   }#endif::output.plotExtended
+
+  par(par.default)
+  rm(par.default)
+
 }#end if plotOutput	
 
     ##RETURN - return De values and parameter
@@ -901,9 +932,9 @@ mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
                              Fit=fit.method),
                   silent=TRUE)
     output <- set_RLum.Results(data=list(De=output,Fit=fit, Formula=f))
-    return(output)
+    invisible(output)
   ### \code{RLum.Results} object containing the De (De, De Error, D01 value, D02 value and Fit 
-  ### type) and Fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} 
+  ### type) and fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} 
   ### and \code{EXP+EXP}. In case of a resulting linear fit when using 
   ### \code{EXP OR LIN}, a \link{lm} object is returned. 
   ### Additionally a plot is returned.
@@ -932,6 +963,7 @@ mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
   ## If the option \code{fit.weights = TRUE} is chosen, weights are calculated 
   ## using provided signal errors (Lx/Tx error):
   ## \deqn{fit.weights = 1/error/(sum(1/error))}
+  ##
   ## \bold{Error estimation using Monte Carlo simulation}\cr
   ## Error estimation is done using a Monte Carlo (MC) simulation approach. A 
   ## set of values is constructed by randomly drawing curve data from a normal 
@@ -943,8 +975,12 @@ mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
   ## take some calculation time with increasing MC runs, especially for the 
   ## composed functions (\code{EXP+LIN} and \code{EXP+EXP}).\cr
   ## Each error estimation is done with the function of the chosen fitting 
-  ## method. 
-  
+  ## method. \cr
+  ##
+  ## \bold{Subtitle information}\cr
+  ## To avoid plotting the subtitle information, provide an empty user mtext
+  ## \code{mtext = ""}. To plot any other subtitle text, use \code{mtext}.
+
   ##<<seealso
   ## \code{\link{hist}}, \code{\link{plot}},  \code{\link{nls}}, 
   ## \code{\link{lm}
@@ -952,10 +988,10 @@ mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
   ##<<references
   ## Duller, G.A.T., 2007. Assessing the error on equivalent dose estimates 
   ## derived from single aliquot regenerative dose measurements. Ancient TL, 
-  ## 25, pp. 15-24.\cr
+  ## 25, 15-24.\cr
   ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
   ## dose and error calculation and display in OSL dating: An overview and 
-  ## some recommendations. Quaternary Geochronology, 11, pp.1-27.
+  ## some recommendations. Quaternary Geochronology, 11, 1-27.
   
   ##<<note
   ## No D01 is returned for the fit functions \code{EXP+LIN} and \code{LIN}. 
@@ -967,17 +1003,15 @@ mtext(side=4,mtext,outer=TRUE,line=-1.5,cex=0.6,col="blue")
   plot_GrowthCurve(LxTxData)
   
   
-  ##(2) plot the growth curve only
+  ##(2) plot the growth curve only - uncomment to use
   
   ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
-  data(ExampleData.LxTxData, envir = environment())
   plot_GrowthCurve(LxTxData)
   ##dev.off()                                   
   
-  ##(3) plot growth curve with pdf output on desktop (path works for Mac)
+  ##(3) plot growth curve with pdf output - uncomment to use
   
   ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
-  data(ExampleData.LxTxData, envir = environment())
   plot_GrowthCurve(LxTxData)
   ##dev.off()  
 })

@@ -66,7 +66,7 @@ Objects can be created by calls of the form \code{new("RLum.Results", ...)}.
 \author{Sebastian Kreutzer, 2013 (Freiberg Instruments/JLU Giessen, Germany)
 }
 
-\section{Version}{0.2.2 [2013-11-21]}
+\section{Version}{0.2.2 (2013-11-21)}
 
 
 \note{

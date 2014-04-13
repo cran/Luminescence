@@ -1,15 +1,15 @@
 Analyse_SAR.OSLdata<- structure(function(#Analyse SAR CW-OSL measurements.
   ### The function analyses SAR CW-OSL curve data and provides a summary of the 
-  ### measured data for every position. The output of the function is optimized 
+  ### measured data for every position. The output of the function is optimised 
   ### for SAR OSL measurements on quartz.
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany), Margret C. Fuchs, TU Bergakademie
-  ## Freiberg (Germany)\cr
+  ## Sebastian Kreutzer, JLU Giessen (Germany), 
+  ## Margret C. Fuchs, AWI Potsdam (Germany), \cr
   
   ##section<<
-  ## version 0.2.11 [2013-11-01]
+  ## version 0.2.12
   # ===========================================================================
   
   input.data,
@@ -72,11 +72,11 @@ Analyse_SAR.OSLdata<- structure(function(#Analyse SAR CW-OSL measurements.
 ##ERROR HANDLING
 ##============================================================================##
 
-  if(missing(input.data)==TRUE){stop("[Analyse_SAR.OSLdata.R] >> Error: No input data given!")
+  if(missing(input.data)==TRUE){stop("[Analyse_SAR.OSLdata] No input data given!")
                                 }else{sample.data<-input.data}
     
-  if(missing(signal.integral)==TRUE){stop("[Analyse_SAR.OSLdata.R] >> No signal integral is given!")}
-  if(missing(background.integral)==TRUE){stop("[Analyse_SAR.OSLdata.R] >> No background integral is given!")}
+  if(missing(signal.integral)==TRUE){stop("[Analyse_SAR.OSLdata] No signal integral is given!")}
+  if(missing(background.integral)==TRUE){stop("[Analyse_SAR.OSLdata] No background integral is given!")}
                                      
   ##set values for run and set if they are not defined by the user 
   if(missing(position)==TRUE){position<-min(sample.data@METADATA[,"POSITION"]):max(sample.data@METADATA[,"POSITION"])}
@@ -286,12 +286,8 @@ if(output.plot==TRUE){
  
       ##open plot area LnLx
       plot(NA,NA,
-          xlab=if(log=="x" | log=="xy"){"log t [s]"}else{"t [s]"},
-          ylab=if(log=="y" | log=="xy"){
-                 paste("log OSL [cts/",HIGH/NPOINTS," s]",sep="")
-               }else{
-                 paste("OSL [cts/",HIGH/NPOINTS," s]",sep="")                 
-               },
+          xlab="Time [s]",
+          ylab=paste("OSL [cts/",HIGH/NPOINTS," s]",sep=""),
           xlim=c(HIGH/NPOINTS,HIGH),
           ylim=c(1,max(unlist(sample.data@DATA[LnLx.curveID]))),
           main=expression(paste(L[n],",",L[x]," curves",sep="")),
@@ -320,12 +316,8 @@ if(output.plot==TRUE){
       ##========================================================================    
       ##open plot area TnTx
       plot(NA,NA,
-          xlab=if(log=="x" | log=="xy"){"log t [s]"}else{"t [s]"},
-          ylab=if(log=="y" | log=="xy"){
-             paste("log OSL [cts/",HIGH/NPOINTS," s]",sep="")
-           }else{
-             paste("OSL [cts/",HIGH/NPOINTS," s]",sep="")                 
-           },
+          xlab="Time [s]",
+          ylab=paste("OSL [cts/",HIGH/NPOINTS," s]",sep=""),
           xlim=c(HIGH/NPOINTS,HIGH),
           ylim=c(1,max(unlist(sample.data@DATA[TnTx.curveID]))),
           main=expression(paste(T[n],",",T[x]," curves",sep="")),
@@ -386,11 +378,7 @@ if(output.plot==TRUE){
         ##open plot area for TL curves
         plot(NA,NA,
              xlab="T [\u00B0C]",
-             ylab=if(log=="xy" | log=="y"){
-                    paste("log TL [cts/",HIGH/NPOINTS," \u00B0C]",sep="")
-                  }else{
-                    paste("TL [cts/",HIGH/NPOINTS," \u00B0C]",sep="") 
-                  },
+             ylab=paste("TL [cts/",HIGH/NPOINTS," \u00B0C]",sep=""),
              xlim=c(HIGH/NPOINTS,HIGH),
              ylim=c(1,TL.curveMax),
              main="Cutheat - TL curves",
@@ -427,7 +415,7 @@ if(output.plot==TRUE){
    
       ##open plot IRSL curve
       plot(NA,NA,
-           xlab="t [s]",
+           xlab="Time [s]",
            ylab=paste("OSL and IRSL [cts/",HIGH/NPOINTS," s]",sep=""),
            xlim=c(0,HIGH),
            ylim=c(0,max(unlist(sample.data@DATA[Reg1again.curveID]))),
@@ -456,7 +444,7 @@ if(output.plot==TRUE){
         
       ##plot only IRSL curve
       plot(xaxt.values,unlist(sample.data@DATA[IRSL.curveID]),
-           xlab="t [s]",
+           xlab="Time [s]",
            ylab=paste("IRSL [cts/",HIGH/NPOINTS," s]",sep=""),
            xlim=c(0,10),
            ylim=c(0,max(unlist(sample.data@DATA[IRSL.curveID]))),
@@ -480,7 +468,7 @@ if(output.plot==TRUE){
      mtext(side=4,info.measurement,outer=TRUE,line=-1.5,cex=0.6*cex.global, col="blue")
 
     ##output on terminal for plot
-    writeLines(paste("\n[Analyse_OSLCurves.R] >> Figure for position ",i," produced.",sep=""))
+    writeLines(paste("\n[Analyse_OSLCurves] >> Figure for position ",i," produced.",sep=""))
  
     ##reset mfrow
     par(mfrow=c(1,1))
@@ -536,8 +524,8 @@ if(output.plot==TRUE){
     ## values of the zero regeneration point with the Ln/Tn value (the Lx/Tx ratio 
     ## of the natural signal). For methodological background see Aitken and Smith (1988)\cr
     ##
-    ## \sQuote{IRSL/BOSL}: the integrated counts (\code{signal.integral}) of a IRSL 
-    ## curve are compared with the integrated counts of the first regenerated dose point. 
+    ## \sQuote{IRSL/BOSL}: the integrated counts (\code{signal.integral}) of an IRSL 
+    ## curve are compared to the integrated counts of the first regenerated dose point. 
     ## It is assumed that IRSL curves got the same dose as the first regenerated 
     ## dose point. \strong{Note:} This is not the IR depletation ratio described 
     ## by Duller (2003).
@@ -572,7 +560,9 @@ if(output.plot==TRUE){
     
     ##seealso<<
     ## \link{calc_OSLLxTxRatio}, \link{Risoe.BINfileData-class}, 
-    ## \link{readBIN2R} and for further analysis \link{plot_GrowthCurve}
+    ## \link{readBIN2R} 
+    ##
+    ## and for further analysis \link{plot_GrowthCurve}
     
     ##keyword<<
     ## datagen

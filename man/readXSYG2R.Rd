@@ -34,18 +34,44 @@ object.\cr\cr
 \code{ </Sample>}\cr\cr
 So far, each XSYG file can only contain one \code{<Sample></Sample>}, but 
 multiple sequences. \cr\cr
-Each record may compris several curves.\cr\cr
+Each record may comprise several curves.\cr\cr
 
 \bold{TL curve recalculation}\cr
-On the lexsyg device TL curves are recorded as time against count values. 
+
+On the FI lexsyg device TL curves are recorded as time against count values. 
 Temperature values are monitored on the heating plate and stored in a separate
 curve (time vs. temperature). If the option \code{recalculate.TL.curves = TRUE}
-is chosen, the time values for each TL curve are replaced by temperature values.\cr
+is chosen, the time values for each 
+TL curve are replaced by temperature values.\cr
 
-Practically, this means combining two matrices with different row numbers by 
-their time values. If multiple count values per temperature are obtained, 
-the mean of count values per temperature value is calculated. 
-Note: Temperature values for spectrum curves are currently not supported. }
+Practically, this means combining two matrices 
+(Time vs. Counts and Time vs. Temperature) with different row numbers by 
+their time values. Three cases are considered:
+
+HE: Heating element\cr
+PMT: Photomultiplier tube\cr
+Interpolation is done using the function \code{\link{approx}}\cr
+
+CASE (1): \code{nrow(matrix(PMT))} > \code{nrow(matrix(HE))} \cr
+
+Missing temperature values from the heating element are calculated using
+time values from the PMT measurement.\cr
+
+CASE (2): \code{nrow(matrix(PMT))} < \code{nrow(matrix(HE))} \cr
+
+Missing count values from the PMT are calculated using
+time values from the heating element measurement.\cr
+
+CASE (3): \code{nrow(matrix(PMT))} == \code{nrow(matrix(HE))} \cr
+
+A new matrix is produced using temperature values from the heating 
+element and count values from the PMT. \cr
+
+\emph{Note: Temperature values for spectrum curves are currently 
+not supported. Please further note that due to the recalculation of the 
+temperature values based on values delivered by the heating element, it 
+may happen that mutiple count values exists for each temperature value and 
+temperature values may also decrease during heating, not only increase. }}
 \value{\bold{Using the option \code{import = FALSE}}\cr\cr
 A list consisting of two elements is shown:
 \item{Sample}{\link{data.frame} with information on file.}
@@ -59,11 +85,12 @@ A list is provided, the list elements contain:
 Unpublished Technical Note. Freiberg, Germany \cr\cr
 \bold{Further reading} \cr\cr
 XML: \url{http://en.wikipedia.org/wiki/XML}}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)
+\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{This function is a beta version as the XSYG file format is not yet fully
 specified. 
-Thus, further file operations (merge, export, write) should be done using the functions
+Thus, further file operations (merge, export, write) should be 
+done using the functions
 provided with the package \code{\link{xml}}.\cr
 
 \bold{So far, no image data import is provided!}\cr
@@ -71,18 +98,20 @@ Corresponding values in the XSXG file are skipped. }
 
 
 \seealso{\code{\link{xml}}, \code{\linkS4class{RLum.Analysis}}, 
-\code{\linkS4class{RLum.Data.Curve}}}
+\code{\linkS4class{RLum.Data.Curve}}, \code{\link{approx}}}
 \examples{
 
-##Import XSYG file
-##uncomment for usage
-#temp <- readXSYG2R("input_file.xsyg")
+##(1) import XSYG file to R (uncomment for usage)
 
-##Additional examples for pure XML import using the package XML
-##uncomment for usage
+#FILE <- file.choose()
+#temp <- readXSYG2R(FILE)
 
-  ##import entire file
-  #temp <- xmlRoot(xmlTreeParse("input_file.xsyg"))
+##(2) additional examples for pure XML import using the package XML
+##    (uncomment for usage)
+
+  ##import entire XML file 
+  #FILE <- file.choose()
+  #temp <- xmlRoot(xmlTreeParse(FILE))
   
   ##search for specific subnodes with curves containing 'OSL'
   #getNodeSet(temp, "//Sample/Sequence/Record[@recordType = 'OSL']/Curve")
@@ -90,3 +119,4 @@ Corresponding values in the XSXG file are skipped. }
 }
 
 \keyword{IO}
+\section{Function version}{0.3.0 (2014-04-13 14:33:49)}

@@ -10,7 +10,7 @@ CW2pPMi<- structure(function(#Transform a CW-OSL curve into a pPM-OSL curve via 
   ## Adrie J.J. Bos, Delft University of Technology, The Netherlands\cr\cr
   
   ##section<<
-  ## version 0.2 [2013-03-27]
+  ## version 0.2
   # ===========================================================================
   
   values,

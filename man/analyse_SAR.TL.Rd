@@ -1,7 +1,7 @@
 \name{analyse_SAR.TL}
 \alias{analyse_SAR.TL}
 \title{Analyse SAR TL measurements }
-\description{The function performs a SAR TL analysis on a \code{\linkS4class{RLum.Analysis}}
+\description{The function performs an SAR TL analysis on a \code{\linkS4class{RLum.Analysis}}
 object including growth curve fitting.}
 \usage{analyse_SAR.TL(object, object.background, signal.integral.min, 
     signal.integral.max, sequence.structure = c("PREHEAT", "SIGNAL", 
@@ -17,8 +17,8 @@ lower signal integral bound (e.g. \code{signal.integral.min = 100})}
 upper signal integral bound (e.g. \code{signal.integral.max = 200})}
   \item{sequence.structure}{\link{vector} \link{character} (with default): specifies the general 
 sequence structure. Three steps are allowed 
-\code{"PREHEAT"}, \code{"SIGNAL"}, \code{"BACKGROUND"}. 
-In addition a parameter \code{"EXCLUDE"}. This allows to exclude 
+\code{"PREHEAT"}, \code{"SIGNAL"}, \code{"BACKGROUND"}, 
+in addition a parameter \code{"EXCLUDE"}. This allows excluding 
 TL curves which are not relevant for the protocol analysis. 
 (Note: None TL are removed by default)}
   \item{rejection.criteria}{\link{list} (with default): list containing rejection criteria in 
@@ -82,3 +82,4 @@ analyse_SAR.TL(object,
 
 \keyword{datagen}
 \keyword{plot}
+\section{Function version}{0.1.4 (2014-04-13 14:22:36)}

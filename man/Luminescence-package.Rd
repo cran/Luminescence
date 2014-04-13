@@ -11,8 +11,8 @@ of Luminescence Dating data analysis.
 \tabular{ll}{
 Package: \tab Luminescence\cr
 Type: \tab Package\cr
-Version: \tab 0.3.2\cr
-Date: \tab 2014-01-07\cr
+Version: \tab 0.3.3\cr
+Date: \tab 2014-04-13\cr
 License: \tab GPL-3\cr
 }
 %~~ An overview of how to use the package, including the most important functions ~~
@@ -24,7 +24,7 @@ License: \tab GPL-3\cr
 Christoph Burow \tab University of Cologne, Germany \cr
 Michael Dietze \tab GFZ Helmholtz Centre Potsdam, Germany \cr
 Manfred Fischer\tab University of Bayreuth, Germany \cr 
-Margret C. Fuchs \tab TU Bergakademie Freiberg, Germany\cr
+Margret C. Fuchs \tab Alfred Wegener Insitute for Polar and Marine Research, Potsdam, Germany\cr
 Sebastian Kreutzer \tab Justus-Liebig-University Giessen, Germany\cr
 Christoph Schmidt \tab University of Bayreuth, Germany
 }
@@ -35,21 +35,29 @@ Markus Fuchs, Justus-Liebig-University Giessen, Germany
 
 \bold{Support contact}
 
-\url{http://forum.r-luminescence.de}\cr
-\email{team@r-luminescence.de} \cr
+\url{http://forum.r-luminescence.de}
 
-\bold{Bug reporting}\cr
+\email{team@r-luminescence.de}\cr
+
+\bold{Bug reporting}
 
 \email{bugtracker@r-luminescence.de} \cr
 
 \bold{Project website}
 
-\url{http://www.r-luminescence.de}
+\url{http://www.r-luminescence.de}\cr
 
 \bold{Package maintainer}
 
 Sebastian Kreutzer, Justus-Liebig-University Giessen, Germany, \cr
 \email{sebastian.kreutzer@geogr.uni-giessen.de}
+
+\bold{Acknowledgement}
+
+Cooperation and personal exchange between the developers is gratefully funded by 
+the DFG (SCHM 3051/3-1) in the framework of the program "Scientific Networks". 
+Project title: "Lum.Network: Ein Wissenschaftsnetzwerk zur Analyse von Lumineszenzdaten mit R" (2014-2016) 
+
 }
 
 \references{

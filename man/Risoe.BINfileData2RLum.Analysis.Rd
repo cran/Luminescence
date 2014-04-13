@@ -3,17 +3,17 @@
 \title{Convert Risoe.BINfileData object to an RLum.Analysis object}
 \description{Converts values from one specific position of a Risoe.BINfileData S4-class object
 to an RLum.Analysis object. }
-\usage{Risoe.BINfileData2RLum.Analysis(object, pos, run, set, ltype = c("IRSL", 
-    "OSL", "TL", "RIR", "RBR", "USER", "RL"), protocol = "unknown")}
+\usage{Risoe.BINfileData2RLum.Analysis(object, pos, run, set, ltype, 
+    protocol = "unknown")}
 \arguments{
   \item{object}{\code{\linkS4class{Risoe.BINfileData}} (\bold{required}): \code{Risoe.BINfileData} object}
   \item{pos}{\code{\link{integer}} (\bold{required}): position number of the \code{Risoe.BINfileData}
 object for which the curves are stored in the \code{RLum.Analysis} object.}
   \item{run}{\code{\link{vector}, \link{numeric}} (optional): run number from the measurement to limit
-the converted data set (e.g. run = c(1:48)).}
+the converted data set (e.g., \code{run = c(1:48)}).}
   \item{set}{\code{\link{vector}, \link{numeric}} (optional): set number from the measurement to limit
-the converted data set (e.g. set = c(1:48)).}
-  \item{ltype}{\code{\link{vector}, \link{character}} (with default): curve type to limit 
+the converted data set (e.g., \code{set = c(1:48)}).}
+  \item{ltype}{\code{\link{vector}, \link{character}} (optional): curve type to limit 
 the converted data. Allowed values are: \code{IRSL}, \code{OSL}, 
 \code{TL}, \code{RIR}, \code{RBR} and \code{USER}}
   \item{protocol}{\code{\link{character}} (optional): sets protocol type for analysis 
@@ -25,7 +25,7 @@ usually contains a set of curves for different aliquots and different protocol
 types that may be mixed up. Therefore, a conversion is needed. }
 \value{Returns an \code{\linkS4class{RLum.Analysis}} object. }
 \references{#}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)
+\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{The \code{protocol} argument of the \code{\linkS4class{RLum.Analysis}} 
 object is set to 'unknown' if not stated otherwise.  }
@@ -44,3 +44,4 @@ Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1)
 }
 
 \keyword{manip}
+\section{Function version}{0.1.1 (2014-04-13 14:32:02)}

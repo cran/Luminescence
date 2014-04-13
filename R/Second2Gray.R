@@ -6,14 +6,14 @@ Second2Gray <- structure(function(#Converting values from seconds (s) to gray (G
   ##author<<
   ## Sebastian Kreutzer, JLU Giessen (Germany), 
   ## Michael Dietze, GFZ Potsdam (Germany),
-  ## Margret C. Fuchs, TU Bergakademie Freiberg (Germany)
+  ## Margret C. Fuchs, AWI Potsdam (Germany), \cr
   
   ##section<<
   ## version 0.3
   # ===========================================================================
 
   values,
-  ### \bold{required}): measured data (\code{values[,1]}) and data error 
+  ### \link{data.frame} (\bold{required}): measured data (\code{values[,1]}) and data error 
   ### (\code{values [,2]})
   
   dose_rate,
@@ -77,8 +77,8 @@ Second2Gray <- structure(function(#Converting values from seconds (s) to gray (G
   
 }, ex=function(){
   
-  ##(1) for dose rate = 0.14 +/- 0.001
+  ##(1) for dose taken from the example data help file
   data(ExampleData.DeValues, envir = environment())
-  Second2Gray(ExampleData.DeValues, c(0.14,0.001))
+  Second2Gray(ExampleData.DeValues, c(0.0438,0.0019))
   
 })  

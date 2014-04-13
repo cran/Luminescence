@@ -8,7 +8,7 @@
   \item{\dots}{further arguments and graphical parameters that will be passed to the specific 
 plot functions}
 }
-\details{The function provides a generalized access point for plotting specific 
+\details{The function provides a generalised access point for plotting specific 
 \code{\linkS4class{RLum}} objects.\cr
 Depending on the input object, the corresponding plot function will be selected. 
 Allowed arguments can be found in the documentations of each plot function. 
@@ -20,7 +20,7 @@ Allowed arguments can be found in the documentations of each plot function.
 }}
 \value{Returns a plot.}
 \references{#}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)
+\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{The provided plot output depends on the input object.}
 
@@ -41,3 +41,4 @@ plot_RLum(temp)
 }
 
 \keyword{dplot}
+\section{Function version}{0.1 (2014-04-13 14:31:12)}

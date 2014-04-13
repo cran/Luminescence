@@ -7,7 +7,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
   
   ##section<<
-  ## version 0.3.1 [2014-01-06]
+  ## version 0.3.3
   # ===========================================================================
 
   object,
@@ -26,7 +26,9 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   background.integral.max,
   ### \code{\link{integer}} (\bold{required}): upper bound of the background integral
   
-  rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
+  rejection.criteria = list(recycling.ratio = 10, 
+                            recuperation.rate = 10, 
+                            palaeodose.error = 10),
   ### \link{list} (with default): list containing rejection criteria in 
   ### percentage for the calculation. 
   
@@ -68,26 +70,26 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
 
     ##MISSING INPUT
     if(missing("object")==TRUE){
-      stop("[analyse_SAR.CWOSL] Error: No value set for 'object'!")
+      stop("[analyse_SAR.CWOSL] No value set for 'object'!")
     }
 
     if(missing("signal.integral")==TRUE){
-      stop("[analyse_SAR.CWOSL] Error: No value set for 'signal.integral'!")
+      stop("[analyse_SAR.CWOSL] No value set for 'signal.integral'!")
     }
     
     if(missing("background.integral")==TRUE){
-     stop("[analyse_SAR.CWOSL] Error: No value set for 'background.integral'!")
+     stop("[analyse_SAR.CWOSL] No value set for 'background.integral'!")
     }
 
     ##INPUT OBJECTS
     if(is(object, "RLum.Analysis")==FALSE){
-      stop("[analyse_SAR.CWOSL] Error: Input object is not of type 'RLum.Analyis'!")
+      stop("[analyse_SAR.CWOSL] Input object is not of type 'RLum.Analyis'!")
     }
 
     ##INTEGRAL LIMITS
     if(is(signal.integral, "integer")==FALSE | is(background.integral, 
                                                   "integer")==FALSE){
-      stop("[analyse_SAR.CWOSL] Error: 'signal.integral' or background.integral is not 
+      stop("[analyse_SAR.CWOSL] 'signal.integral' or background.integral is not 
            of type integer!")
     }
 
@@ -131,7 +133,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   ##check if the wanted curves are a multiple of two
   ##gsub removes unwanted information from the curves
   if(table(temp.ltype)["OSL"]%%2!=0){
-    stop("[analyse_SAR.CWOSL] Error: Input OSL/IRSL curves are not a multiple of two.")
+    stop("[analyse_SAR.CWOSL] Input OSL/IRSL curves are not a multiple of two.")
   }
 
   ##check if the curve lengths differ
@@ -142,7 +144,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   }))
   
   if(length(unique(temp.matrix.length))!=1){
-    stop("[analyse_SAR.CWOSL] Error: Input curves lengths differ.")
+    stop("[analyse_SAR.CWOSL] Input curves lengths differ.")
   }
 
 
@@ -253,7 +255,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
           
           if(length(dose.points)!=length(LnLxTnTx$Dose)){
             
-            stop("[analyse_SAR.CWOSL] length 'dose.points' differes from number of curves.")
+            stop("[analyse_SAR.CWOSL] length 'dose.points' differs from number of curves.")
             
           }
           
@@ -337,6 +339,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
          Recuperation<-round(LnLxTnTx[LnLxTnTx[,"Name"]=="R0","LxTx"]/
                                LnLxTnTx[LnLxTnTx[,"Name"]=="Natural","LxTx"],digits=4)
          }else{Recuperation<-NA}
+      
 
 
 # Evaluate and Combine Rejection Criteria ---------------------------------
@@ -349,7 +352,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
 
   
     ##RecyclingRatio
-    if(is.na(RecyclingRatio)==FALSE){
+    if(is.na(RecyclingRatio) == FALSE){
      
       temp.status.RecyclingRatio <- sapply(1:length(RecyclingRatio), function(x){
         if(abs(1-RecyclingRatio[x])>(rejection.criteria$recycling.ratio/100)){
@@ -362,7 +365,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
     }
 
     ##Recuperation
-    if(is.na(Recuperation)==FALSE){
+    if(is.na(Recuperation) == FALSE){
       if(Recuperation>rejection.criteria$recuperation.rate){
       
         temp.status.Recuperation <- "FAILED"
@@ -379,7 +382,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
     }
  
     RejectionCriteria <- data.frame(
-      citeria = temp.criteria,
+      criteria = temp.criteria,
       value = temp.value,
       threshold = temp.threshold,
       status = c(temp.status.RecyclingRatio,temp.status.Recuperation)) 
@@ -391,6 +394,8 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
 if(output.plot == TRUE){
 
 # Plotting - Config -------------------------------------------------------
+  
+  par.default <- par(no.readonly = TRUE)
 
   ##colours and double for plotting
   col <- get("col", pos = .LuminescenceEnv)
@@ -450,11 +455,7 @@ if(output.plot == TRUE){
      
      plot(NA,NA,
           xlab="T [\u00B0C]",
-          ylab=if(log=="y" | log=="xy"){
-            paste("log TL [cts/",resolution.TLCurves," \u00B0C]",sep="")
-          }else{
-            paste("TL [cts/",resolution.TLCurves," \u00B0C]",sep="")                 
-          },
+          ylab=paste("TL [cts/",resolution.TLCurves," \u00B0C]",sep=""),
           xlim=c(object@records[[TL.Curves.ID[1]]]@data[1,1],
                  max(object@records[[TL.Curves.ID[1]]]@data[,1])),
           
@@ -497,12 +498,8 @@ if(output.plot == TRUE){
 
       #open plot area LnLx
       plot(NA,NA,
-          xlab=if(log=="x" | log=="xy"){"log t [s]"}else{"t [s]"},
-          ylab=if(log=="y" | log=="xy"){
-                 paste("log OSL [cts/",resolution.OSLCurves," s]",sep="")
-               }else{
-                 paste("OSL [cts/",resolution.OSLCurves," s]",sep="")                 
-               },
+          xlab="Time [s]",
+          ylab=paste("OSL [cts/",resolution.OSLCurves," s]",sep=""),
           xlim=c(object@records[[OSL.Curves.ID.Lx[1]]]@data[1,1],
                  max(object@records[[OSL.Curves.ID.Lx[1]]]@data[,1])),
            
@@ -548,11 +545,7 @@ if(length(TL.Curves.ID.Tx[[1]]>0)) {
   
   plot(NA,NA,
        xlab="T [\u00B0C]",
-       ylab=if(log=="y" | log=="xy"){
-         paste("log TL [cts/",resolution.TLCurves," \u00B0C]",sep="")
-       }else{
-         paste("TL [cts/",resolution.TLCurves," \u00B0C]",sep="")                 
-       },
+       ylab=paste("TL [cts/",resolution.TLCurves," \u00B0C]",sep=""),
        xlim=c(object@records[[TL.Curves.ID.Tx[1]]]@data[1,1],
               max(object@records[[TL.Curves.ID.Tx[1]]]@data[,1])),
        
@@ -596,12 +589,8 @@ if(length(TL.Curves.ID.Tx[[1]]>0)) {
 
     #open plot area LnLx
     plot(NA,NA,
-         xlab=if(log=="x" | log=="xy"){"log t [s]"}else{"t [s]"},
-         ylab=if(log=="y" | log=="xy"){
-             paste("log OSL [cts/",resolution.OSLCurves," s]",sep="")
-         }else{
-             paste("OSL [cts/",resolution.OSLCurves," s]",sep="")                 
-         },
+         xlab="Time [s]",
+         ylab=paste("OSL [cts/",resolution.OSLCurves," s]",sep=""),
            xlim=c(object@records[[OSL.Curves.ID.Tx[1]]]@data[1,1],
                max(object@records[[OSL.Curves.ID.Tx[1]]]@data[,1])),
      
@@ -655,6 +644,10 @@ if(length(grep("FAILED", RejectionCriteria$status))>0){
 
   
 }
+
+par(par.default)
+rm(par.default)
+
 }##end output.plot == TRUE
 
 # Plotting  GC  ----------------------------------------
@@ -669,6 +662,32 @@ temp.sample <- data.frame(Dose=LnLxTnTx$Dose,
                                               output.plot = output.plot,
                                               ...))[,c("De","De.Error")]
 
+
+
+  
+
+# Provide Rejection Criteria for Palaedose error --------------------------
+
+  palaeodose.error.calculated <- ifelse(is.na(temp.GC[,1]) == FALSE, 
+                                        round(temp.GC[,2]/temp.GC[,1], digits = 5),
+                                        NA)
+
+  palaeodose.error.threshold <- paste("+/- ",  
+                                      rejection.criteria$palaeodose.error/100,
+                                      sep = "")
+  
+  palaeodose.error.status <- ifelse(
+    palaeodose.error.calculated <= rejection.criteria$palaeodose.error,
+                                    "OK", "FAILED")
+
+
+  palaeodose.error.data.frame <- data.frame(criteria = "palaeodose.error", 
+                                   value = palaeodose.error.calculated, 
+                                   threshold = palaeodose.error.threshold,
+                                   status =  palaeodose.error.status)
+  
+  ##add to RejectionCriteria data.frame
+  RejectionCriteria <- rbind(RejectionCriteria, palaeodose.error.data.frame)
 
 
  ##add recjection status

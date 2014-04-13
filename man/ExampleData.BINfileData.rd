@@ -4,8 +4,8 @@
 \title{Example data from a SAR OSL and SAR TL measurement for the package Luminescence}
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Example data from a SAR OSL and TL measurement for package Luminescence directly, extracted from
-a Risoe BIN file and provided in an object of type \link{Risoe.BINfileData-class}
+Example data from a SAR OSL and TL measurement for package Luminescence directly extracted from
+a Risoe BIN-file and provided in an object of type \link{Risoe.BINfileData-class}
 }
 \usage{
 ExampleData.BINfileData

@@ -7,8 +7,7 @@
     gamma.xlb = 0.1, gamma.xub = 100, sigma.xlb = 0.001, sigma.xub = 5, 
     init.gamma = 10, init.sigma = 1.2, init.p0 = 0.01, ignore.NA = FALSE, 
     calc.ProfileLikelihoods = TRUE, console.ProfileLikelihoods = FALSE, 
-    console.extendedOutput = FALSE, output.file = FALSE, output.filename = "default", 
-    output.plot = TRUE, output.indices = 3)}
+    console.extendedOutput = FALSE, output.plot = TRUE, output.indices = 3)}
 \arguments{
   \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
 for \code{data.frame}: two columns with De \code{(input.data[,1])} and
@@ -33,10 +32,6 @@ functions for gamma, sigma, p0. See \code{output.indices}.}
   \item{console.ProfileLikelihoods}{\code{\link{logical}} (with default): print profile log likelihood
 functions for gamma, sigma, p0 to console.}
   \item{console.extendedOutput}{\code{\link{logical}} (with default): extended terminal output}
-  \item{output.file}{\code{\link{logical}} (with default): save results to file. See 
-\code{output.filename}.}
-  \item{output.filename}{\code{\link{character}} (with default): desired filename, else results 
-are saved to default-3R(-UL).res }
   \item{output.plot}{\code{\link{logical}} (with default): plot output
 (\code{TRUE}/\code{FALSE})}
   \item{output.indices}{\code{\link{numeric}} (with default): requires 
@@ -74,15 +69,14 @@ The log likelihood calculations use the \link{nlminb} function. Accordingly,
 initial values for the three parameters \code{init.gamma}, \code{init.sigma} 
 and \code{init.p0} need to be specified. \cr\cr
 \bold{Ignore NA values} \cr\cr
-In some cases during the calculation of the log likelihoods, \code{NA} values 
+In some cases during the calculation of the log likelihoods NA values 
 are produced instantly terminating the minimum age model. It is advised to 
 adjust some of the values provided for any argument. If the model still
 produces NA values it is possible to omit these values by setting 
 \code{ignore.NA = TRUE}. While the model is then usually able to finish
 all calculations the integrity of the final estimates cannot be ensured.
-Use this argument at your own risk.}
-\value{Returns a plot (optional) and terminal output. A file 
-containing statistical results is provided if desired. In addition an 
+Use this argument at own risk.}
+\value{Returns a plot (optional) and terminal output. In addition an 
 \code{\linkS4class{RLum.Results}} object is 
 returned containing the following element:
 
@@ -139,12 +133,13 @@ data(ExampleData.DeValues, envir = environment())
 ## apply the logged minimum dose model
 calc_MinDose3(ExampleData.DeValues,
               sigmab = 0.3,gamma.xub = 7000, 
-              output.file = FALSE, output.plot = FALSE)
+              output.plot = FALSE)
 
 ## apply the un-logged minimum dose model
 ## note that the example data set does not meet the un-logged model 
 ## requirements
 calc_MinDose3(ExampleData.DeValues, log = FALSE,
               sigmab = 0.3,gamma.xub = 5000, 
-              output.file = FALSE, output.plot = FALSE)
+              output.plot = FALSE)
 }
+\section{Function version}{0.22 (2014-04-13 14:28:27)}

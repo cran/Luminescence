@@ -6,8 +6,9 @@ differing known standard errors. Parameters (doses and mixing proportions)
 are estimated by maximum likelihood assuming that the log dose estimates 
 are from a mixture of normal distributions.}
 \usage{calc_FiniteMixture(input.data, sigmab, n.components, sample.id = "unknown sample", 
-    n.iterations = 200, grain.probability = FALSE, output.file = FALSE, 
-    output.filename = "default")}
+    n.iterations = 200, grain.probability = FALSE, main = "Finite Mixture Model", 
+    dose.scale, pdf.weight = TRUE, pdf.sigma = "sigmab", pdf.colors = "gray", 
+    pdf.scale, plot.proportions = TRUE)}
 \arguments{
   \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
 for \code{data.frame}: two columns with De \code{(input.data[,1])} and
@@ -17,16 +18,32 @@ fraction (e.g. 0.2). This value represents the expected overdispersion in
 the data should the sample be well-bleached (Cunningham & Walling 2012, 
 p. 100).}
   \item{n.components}{\code{\link{numeric}}  (\bold{required}): number of components to be 
-fitted}
+fitted. If a vector is provided (e.g. \code{c(2:8)}) the finite
+mixtures for 2, 3 ... 8 components are calculated and a plot and a
+statistical evaluation of the model performance (BIC score and maximum
+log-likelihood) is provided.}
   \item{sample.id}{\code{\link{character}} (with default): sample id}
   \item{n.iterations}{\code{\link{numeric}}  (with default): number of iterations for maximum 
-likelihood estimates}
+log likelihood estimates}
   \item{grain.probability}{\code{\link{logical}} (with default): prints the estimated probabilities
 of which component each grain is in}
-  \item{output.file}{\code{\link{logical}} (with default): save results to file. See 
-\code{output.filename}.}
-  \item{output.filename}{\code{\link{character}} (with default): desired filename, else results 
-are saved to default.res}
+  \item{main}{\code{\link{character}} (with default): plot main title}
+  \item{dose.scale}{\code{\link{numeric}}: manually set the scaling of the y-axis of  
+the first plot with a vector in the form of \code{c(min,max)}}
+  \item{pdf.weight}{\code{\link{logical}} (with default): weight the probability density 
+functions by the components proportion (applies only when a vector
+is provided for \code{n.components})}
+  \item{pdf.sigma}{\code{\link{character}} (with default): if \code{"sigmab"} the components
+normal distributions are plotted with a common standard deviation (i.e.
+\code{sigmab}) as assumed by the FFM. Alternatively,
+\code{"se"} takes the standard error of each
+component for the sigma parameter of the normal distribution}
+  \item{pdf.colors}{\code{\link{character}} (with default): color coding of the components 
+in the the plot. Possible options are "gray", "colors" and "none"}
+  \item{pdf.scale}{\code{\link{numeric}}: manually set the max density value for
+proper scaling of the x-axis of the first plot}
+  \item{plot.proportions}{\code{\link{logical}} (with default): plot barplot showing the 
+proportions of components}
 }
 \details{This model uses the maximum likelihood and Bayesian Information Criterion 
 (BIC) approaches. \cr\cr
@@ -34,9 +51,27 @@ Indications of overfitting are: \cr\cr
 - increasing BIC \cr
 - repeated dose estimates \cr
 - covariance matrix not positive definite \cr
-- convergence problems}
-\value{Returns a terminal output and a file containing statistical results if 
-wanted. In addition a list is returned containing the following elements:
+- covariance matrix produces NaNs\cr
+- convergence problems \cr\cr
+\bold{Plot} \cr\cr
+If a vector (\code{c(k.min:k.max)}) is provided for \code{n.components}
+a plot is generated showing the the k components equivalent doses as 
+normal distributions. By default \code{pdf.weight} is set to \code{FALSE},
+so that the area under each normal distribution is always 1. If \code{TRUE},
+the probability density functions are weighted by the components proportion
+for each iteration of k components, so the sum of areas of each component 
+equals 1. While the density values are on the same scale when no weights are
+used, the y-axis are individually scaled if the probability density 
+are weighted by the components proportion. \cr 
+The standard deviation (sigma) of the normal distributions is by default
+determined by a common \code{sigmab} (see \code{pdf.sigma}). For
+\code{pdf.sigma = "se"} the standard error of each component is taken 
+instead.\cr
+The stacked barplot shows the proportion of each component (in per cent)
+calculated by the FFM. The last plot shows the achieved BIC scores
+and maximum log-likelihood estimates for each iteration of k.}
+\value{Returns a terminal output. In addition a list
+is returned containing the following elements:
 \item{mle.matrix}{\link{matrix} covariance matrix of maximum likelihood
 estimates.}
 \item{grain.probability}{\link{matrix} with estimated probabilities 
@@ -46,6 +81,10 @@ of which component each grain is in.}
 \item{components}{\link{data.frame} containing fitted components.}
 \item{single.comp}{\link{data.frame} containing log likelihood and 
 BIC for a single component.}
+
+If a vector for \code{n.components} is provided (e.g. 
+\code{c(2:8)}), \code{mle.matrix, grain.probability} and \code{meta} are
+lists containing matrices of the results for each iteration of the model.
 
 The output should be accessed using the function 
 \code{\link{get_RLum.Results}}}
@@ -88,8 +127,28 @@ R Luminescence Package Team}
 ## load example data
 data(ExampleData.DeValues, envir = environment())
 
-## apply the finite mixture model
+## (1) apply the finite mixture model
+## NOTE: the data set is not suitable for the finite mixture model,
+## which is why a very small sigmab is necessary
 calc_FiniteMixture(ExampleData.DeValues,
                    sigmab = 0.08, n.components = 2,
-                   grain.probability = TRUE, output.file = FALSE)
+                   grain.probability = TRUE)
+
+## (2) repeat the finite mixture model for 2, 3 and 4 maximum number of fitted
+## components and save results
+## NOTE: The following example is computationally intensive. Please un-comment
+## the following lines to make the example work.
+#res<- calc_FiniteMixture(ExampleData.DeValues,
+#                         sigmab = 0.01, n.components = c(2:4),
+#                         pdf.weight = TRUE, dose.scale = c(2200,4500))
+
+## show structure of the results
+#res
+
+## show the results on equivalent dose, standard error and proportion of
+## fitted components for n = 4
+#res@data$components[,"4"]
+
+
 }
+\section{Function version}{0.32 (2014-04-13 14:27:37)}

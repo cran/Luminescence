@@ -4,8 +4,8 @@
 ##==============================================================================
 ##author: Sebastian Kreutzer
 ##organisation: JLU Giessen/Freiberg Instruments
-##version: 0.1.3
-##date: 2013-11-20
+##version: 0.1.5
+##date: 2014-03-19
 ##==============================================================================
 
 ##class definition
@@ -19,7 +19,7 @@ setClass("RLum.Analysis",
            records = list(),
            protocol = character()
          ),                
-         S3methods=FALSE
+         S3methods = FALSE
 )
 
 
@@ -30,7 +30,7 @@ setClass("RLum.Analysis",
             function(object){
                
               ##print
-              cat("\n [RLum.Analysis Object]")
+              cat("\n [RLum.Analysis]")
               cat("\n\t protocol:", object@protocol)
               cat("\n\t number of records:", length(object@records))  
               
@@ -171,7 +171,7 @@ setMethod("set_RLum.Analysis",
 # constructor (set) method for object class ------------------------------------------
 
 setGeneric("get_RLum.Analysis",
-           function(object, record.id, recordType, curveType, RLum.type, get.index) {
+           function(object, record.id, recordType, curveType, RLum.type, get.index, keep.object = FALSE) {
              standardGeneric("get_RLum.Analysis")})
 
 
@@ -181,9 +181,10 @@ setMethod("get_RLum.Analysis",
                         recordType = "ANY",
                         curveType = "ANY",
                         RLum.type = "ANY",
-                        get.index = "ANY"), 
+                        get.index = "ANY",
+                        keep.object = "ANY"), 
           
-          function(object, record.id, recordType, curveType, RLum.type, get.index){             
+          function(object, record.id, recordType, curveType, RLum.type, get.index, keep.object = FALSE){             
             
             ##record.id
             if(missing(record.id) == TRUE){
@@ -297,24 +298,40 @@ setMethod("get_RLum.Analysis",
             ##remove empty list element
             temp <- temp[!sapply(temp, is.null)]
            
-            
             ##remove list for get.index
             if(get.index == TRUE){
               
               return(unlist(temp))
               
-            } else{
+            }else{
               
-              return(temp)
+              if(keep.object == TRUE){
+                
+                temp <- set_RLum.Analysis(records = temp, protocol = object@protocol)
+                return(temp)
+                
+              }else{
+            
+                if(length(temp) == 1){
+                  
+                  return(temp[[1]])
+                  
+                }else{
+                  
+                  return(temp)
+                  
+                }
               
+              }
+           
             }
             
            }else{
              
              if(get.index == FALSE){
-               
-               return(object@records[[record.id]])  
-               
+            
+                 return(object@records[[record.id]])
+  
              }else{
         
                return(record.id)

@@ -11,10 +11,13 @@ using the protocol according to Erfurt et al. (2003)}
   \item{object}{\code{\linkS4class{RLum.Analysis}} (\bold{required}): 
 input object containing data for protocol analysis}
   \item{sequence.structure}{\link{vector} \link{character} (with default): specifies the general 
-sequence structure. Allowed steps are \code{NATURAL}, \code{REGENERATED}}
+sequence structure. Allowed steps are \code{NATURAL}, \code{REGENERATED}
+In addition any other character is allowed in the sequence structure; 
+such curves will be ignored. }
   \item{fit.range.min}{\link{integer} (optional): set the minimum channel range for signal fitting.   
 Usually the entire data set is used for curve fitting, but there might be 
-reasons to limit the channels used for fitting.}
+reasons to limit the channels used for fitting.
+Note: This option also limits the values used for natural signal calculation.}
   \item{fit.range.max}{\link{integer} (optional): set maximum channel range for signal fitting. 
 Usually the entire data set is used for curve fitting, but there might be 
 reasons to limit the channels used for fitting.}
@@ -110,3 +113,4 @@ temp <- analyse_IRSAR.RF(object = IRSAR.RF.Data)
 }
 
 \keyword{datagen}
+\section{Function version}{0.1.3 (2014-04-13 14:21:09)}

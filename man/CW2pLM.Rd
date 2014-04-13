@@ -28,7 +28,7 @@ LM-OSL curves. Radiation Measurements, 32, 141-145.
 \bold{Further Reading}\cr\cr
 Bulur, E., 1996. An Alternative Technique For Optically Stimulated Luminescence 
 (OSL) Experiment. Radiation Measurements, 26, 701-709.}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)\cr
+\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{The transformation is recommended for curves recorded with a channel 
 resolution of at least 0.05 s/channel.}
@@ -66,3 +66,4 @@ plot(values.transformed)
 }
 
 \keyword{manip}
+\section{Function version}{0.4 (2014-04-13 14:29:18)}

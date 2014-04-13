@@ -44,12 +44,12 @@ Objects can be created by calls of the form \code{new("RLum.Analysis", ...)}.
     }
     
     \item{get_RLum.Analysis}{\code{signature(object = "RLum.Analysis",                                                     record.id = "numeric", recordType = "character", curveType = "character", RLum.type = "character",
-    get.index = "logical")}: 
+    get.index = "logical", keep.object = "logical")}: 
     
     Accessor method for \code{RLum.Analysis} object. 
     
-    The slot \code{record.id}, \code{recordType}, \code{curveType} and \code{RLum.type}
-    are optional to allow for record limiting by their id (list index number), 
+    The slots \code{record.id}, \code{recordType}, \code{curveType} and \code{RLum.type}
+    are optional to allow for records limited by their id (list index number), 
     their record type (e.g. \code{recordType = "OSL"}) or object type. 
     
     Example: curve type (e.g. \code{curveType = "predefined"} 
@@ -60,6 +60,9 @@ Objects can be created by calls of the form \code{new("RLum.Analysis", ...)}.
     
     The argument \code{get.index = TRUE} just returns a \code{\link{numeric}} 
     \code{\link{vector}} with the index of each element in the \code{RLum.Analysis} object. 
+    
+    The argument \code{keep.object} allowing returns an \code{RLum.Analysis} object 
+    instead of the single elements. Default is \code{keep.object = FALSE}.
     
     }
     
@@ -83,7 +86,7 @@ Objects can be created by calls of the form \code{new("RLum.Analysis", ...)}.
 Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)
 }
 
-\section{Version}{0.1.3 [2013-11-20]}
+\section{Version}{0.1.4 (2014-02-26)}
 
 \note{
 The method \code{get_structure.RLum.Analysis} is currently just avaiblable for 
@@ -99,5 +102,9 @@ objects containing \code{\linkS4class{RLum.Data.Curve}}.
 
 \examples{
 showClass("RLum.Analysis")
+
+## usage of get_RLum.Analysis() with returining an RLum.Analysis object
+#  get_RLum.Analysis(object, keep.object = TRUE) 
+
 }
 \keyword{classes}

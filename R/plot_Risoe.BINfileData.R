@@ -1,4 +1,4 @@
-plot_Risoe.BINfileData<- structure(function(#Plot single luminescence curves from a BIN file object.
+plot_Risoe.BINfileData<- structure(function(#Plot single luminescence curves from a BIN file object
   ### Plots single luminescence curves from an object returned by the \link{readBIN2R} function.
   
   # ===========================================================================
@@ -7,7 +7,7 @@ plot_Risoe.BINfileData<- structure(function(#Plot single luminescence curves fro
   ## Michael Dietze, GFZ Potsdam (Germany)\cr
   
   ##section<<
-  ## version 0.4.1 [2013-07-07]
+  ## version 0.4.1
   # ===========================================================================
 
   BINfileData,
@@ -16,15 +16,15 @@ plot_Risoe.BINfileData<- structure(function(#Plot single luminescence curves fro
   
   position, 
   ### \link{vector} (optional): option to limit the plotted curves by 
-  ### position (e.g. position = 1, position = c(1,3,5)).
+  ### position (e.g. \code{position = 1}, \code{position = c(1,3,5)}).
   
   run,
   ### \link{vector} (optional): option to limit the plotted curves by run 
-  ### (e.g., \code{run = 1, set = c(1,3,5)}).
+  ### (e.g., \code{run = 1}, \code{run = c(1,3,5)}).
   
   set,
   ### \link{vector} (optional): option to limit the plotted curves by set 
-  ### (e.g., \code{run = 1, set = c(1,3,5)}).
+  ### (e.g., \code{set = 1}, \code{set = c(1,3,5)}).
   
   sorter = "POSITION", 
   ### \link{character} (with default): the plot output can be ordered by 

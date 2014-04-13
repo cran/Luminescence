@@ -3,10 +3,10 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
   
   # ===========================================================================
   ##author<< 
-  ## Christoph Burow, University of Cologne (Germany) \cr
+  ## Christoph Burow, University of Cologne (Germany), \cr
   
   ##section<<
-  ## version 0.2 [2013-11-04] 
+  ## version 0.2
   # ===========================================================================
   
   input.data,
@@ -16,8 +16,10 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
   log = TRUE,
   ### \code{\link{logical}} (with default): peform the homogeniety test with
   ### (un-)logged data
-  sample.id="unknown sample" 
+  sample.id="unknown sample", 
   ### \code{\link{character}} (with default): sample id
+  ...
+  ### further arguments (for internal compatibility only).
   ){                     
   
   
@@ -44,6 +46,20 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
     }
   }  
   
+  
+##==========================================================================##
+## ... ARGUMENTS
+##==========================================================================##
+  
+  extraArgs <- list(...)
+  
+  ## set plot main title
+  if("output.console" %in% names(extraArgs)) {
+    output.console<- extraArgs$output.console
+  } else {
+    output.console<- TRUE
+  }
+  
 ##============================================================================##
 ## CALCULATIONS
 ##============================================================================##
@@ -65,7 +81,8 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
 ##============================================================================##
 ## OUTPUT
 ##============================================================================##
-  
+
+if(output.console == TRUE) {
   
   cat("\n [calc_HomogeneityTest]")
   cat(paste("\n\n ---------------------------------"))
@@ -76,7 +93,9 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
   cat(paste("\n G-value:           ", round(G,4)))
   cat(paste("\n Degrees of freedom:", df))
   cat(paste("\n P-value:           ", round(P,4)))
-  cat(paste("\n ---------------------------------\n\n"))  
+  cat(paste("\n ---------------------------------\n\n"))
+  
+}
 
   #return value
   results<- data.frame(id=sample.id,n=n,g.value=G,df=df,P.value=P)
@@ -110,6 +129,6 @@ calc_HomogeneityTest<- structure(function( # Apply a simple homogeneity test aft
   ## load example data
   data(ExampleData.DeValues, envir = environment())
   
-  ## apply the common dose model
+  ## apply the homogeneity test
   calc_HomogeneityTest(ExampleData.DeValues)
 })

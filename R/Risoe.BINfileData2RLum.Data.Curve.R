@@ -4,10 +4,10 @@ Risoe.BINfileData2RLum.Data.Curve<- structure(function(#Convert an element from 
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)
+  ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.1 [2013-03-27]
+  ## version 0.1
   # ===========================================================================
 
   object,
@@ -15,7 +15,7 @@ Risoe.BINfileData2RLum.Data.Curve<- structure(function(#Convert an element from 
   
   id,
   ### \code{\link{integer}} (\bold{required}): record id in the \code{Risoe.BINfileData} object
-  ### of the curve that should be stored in the \code{RLum.Data.Curve} object. If no value 
+  ### of the curve that is to be stored in the \code{RLum.Data.Curve} object. If no value 
   ### for id is provided, the record has to be specified by \code{pos}, \code{set} and \code{run}.
   
   pos,

@@ -20,12 +20,12 @@ If \code{LTYPE}, \code{DTYPE} and \code{LIGHTSOURCE} are not of type
 \code{\link{character}}, no transformation into numeric values is done. }
 \value{Write a binary file.}
 \references{Duller, G., 2007. Analyst. }
-\author{Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)
+\author{Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{The function just roughly checks the data structures. 
 The validity of the output data depends on the user.\cr\cr
 The validity of the file path is not further checked. \cr 
-BIN-file conversions using the argument \code{version} may be a lossly conversion, 
+BIN-file conversions using the argument \code{version} may be a lossy conversion, 
 depending on the chosen input and output data 
 (e.g. conversion from version 06 to 04).}
 
@@ -42,3 +42,4 @@ depending on the chosen input and output data
 }
 
 \keyword{IO}
+\section{Function version}{0.1 (2014-04-11 18:11:51)}

@@ -51,10 +51,10 @@ where \eqn{1 < i < 8}\cr\cr
 and \eqn{\lambda} is the decay constant and \eqn{N0} the intial number of 
 trapped electrons.\cr
 (for the used equation cf. Boetter-Jensen et al., 2003)\cr\cr
-\bold{Start values}\cr\cr
+\bold{Start values}\cr
 
 Start values are estimated automatically by fitting a linear function to 
-the log arithmised input data set. Currently, there is no option to manually provide 
+the logarithmized input data set. Currently, there is no option to manually provide 
 start parameters. \cr\cr
 \bold{Goodness of fit}\cr\cr
 The goodness of the fit is given as pseudoR^2 value 
@@ -100,10 +100,10 @@ The Review of Economics and Statistics, 52 (3), 320-323.
 
 Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. In: R. Gentleman, 
 K. Hornik, G. Parmigiani, eds., Springer, p. 150.}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)\cr
+\author{Sebastian Kreutzer, JLU Giessen (Germany),\cr
 R Luminescence Package Team}
 \note{\bold{Beta version - This function has not been properly tested yet and should 
-therefore not used for publication purposes!}\cr\cr
+therefore not be used for publication purposes!}\cr\cr
 The pseudo-R^2 may not be the best parameter to describe the goodness of 
 the fit. The trade off between the \code{n.components} and the pseudo-R^2 
 value is currently not considered.\cr\cr
@@ -129,3 +129,4 @@ fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,
 
 \keyword{dplot}
 \keyword{models}
+\section{Function version}{0.4.3 (2014-04-13 14:29:43)}

@@ -3,10 +3,10 @@ readXSYG2R <- structure(function(#Import XSYG files to R
 
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.2 [2013-11-20]
+  ## version 0.3.0
   # ===========================================================================
   
   file,
@@ -33,12 +33,20 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ## allow for short check, i.e. just show a data.frame with all sequences 
   ## data in the file
   
+  # Consistency check -------------------------------------------------------
+  
+  ##check if file exists 
+  if(file.exists(file) == FALSE){
+    
+    stop("[readXSYG2R] Wrong file name or file does not exsits!")
+    
+  }
   
   # (0) config --------------------------------------------------------------
   #version.supported <- c("1.0")
   
   #additional functions
-  ##get curve value
+  ##get curve values
   get_XSYG.curve.values <- function(curve.node){
     
     ##1st string split 
@@ -97,6 +105,8 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ##parse XML tree using the package XML
   temp <- try(xmlRoot(xmlTreeParse(file, useInternalNodes = TRUE)), silent = TRUE)
 
+
+
   ##show error
   if(is(temp, "try-error") == TRUE){
     
@@ -118,6 +128,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
     
     ##set data.frame
     temp.sequence.header <- data.frame(t(1:length(names(xmlAttrs(temp[[1]])))))
+      
     colnames(temp.sequence.header) <- names(xmlAttrs(temp[[1]]))
        
     ##fill information in data.frame
@@ -140,7 +151,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   cat("[readXSYG2R]\n")
     
   ##PROGRESS BAR
-  if(txtProgressBar ==TRUE){
+  if(txtProgressBar == TRUE){
       pb <- txtProgressBar(min=0,max=xmlSize(temp), char = "=", style=3)
   }  
     
@@ -178,8 +189,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
          ##get additional information
          temp.sequence.object.info <- as.list(xmlAttrs(temp.sequence.object.curveValue)) 
 
-      
-      
+  
          ## TL curve recalculation ============================================
          if(recalculate.TL.curves == TRUE){
          
@@ -192,7 +202,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
             temp.sequence.object.curveValue.PMT <- get_XSYG.curve.values(
               temp[[x]][[i]][[j]])
             
-              ##round values (1 digit is resolution of heating element)
+              ##round values (1 digit is technical resolution of the heating element)
               temp.sequence.object.curveValue.PMT[,1] <- round(
                 temp.sequence.object.curveValue.PMT[,1], digits = 1)
             
@@ -209,7 +219,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
                   max(temp.sequence.object.curveValue.PMT[,1]),]
             
                 ## calculate corresponding heating rate, this makes only sense
-                ## for heating, therefor is has to be the maximum value
+                ## for heating, therefore is has to be the maximum value
               
                 ##remove 0 values (not measured) and limit to peak
                 heating.rate.values <- temp.sequence.object.curveValue.heating.element[
@@ -230,48 +240,56 @@ readXSYG2R <- structure(function(#Import XSYG files to R
                 temp.sequence.object.info <- c(temp.sequence.object.info, 
                                                RATE = heating.rate)
             
-            ##grep unqiue values 
-            temp.sequence.object.curveValue.PMT.unique <-  unique(
-              temp.sequence.object.curveValue.PMT[,1])
-            
-            ##calculate mean count value for similar entries
-            temp.sequence.object.curveValue.PMT.counts <- sapply(
-              1:length(temp.sequence.object.curveValue.PMT.unique), function(z){
                 
-                mean(temp.sequence.object.curveValue.PMT[
-                  temp.sequence.object.curveValue.PMT[,1] == 
-                  temp.sequence.object.curveValue.PMT.unique[z], 2])
-
-              })
+                ##PERFORM RECALCULATION
+                ##check which object contains more data
             
-            ##set new set
-            temp.sequence.object.curveValue.PMT <- as.matrix(cbind(
-              temp.sequence.object.curveValue.PMT.unique,
-              temp.sequence.object.curveValue.PMT.counts))
-            
+                ##CASE (1)
+                if(nrow(temp.sequence.object.curveValue.PMT) > 
+                   nrow(temp.sequence.object.curveValue.heating.element)){
+                  
+                  temp.sequence.object.curveValue.heating.element.i <- approx(
+                    x = temp.sequence.object.curveValue.heating.element[,1],
+                    y = temp.sequence.object.curveValue.heating.element[,2],
+                    xout = temp.sequence.object.curveValue.PMT[,1])
+                  
+                    temperature.values <- 
+                      temp.sequence.object.curveValue.heating.element.i$y
+                  
+                    count.values <- 
+                      temp.sequence.object.curveValue.PMT[,2]
+                  
+                ##CASE (2)  
+                }else if((nrow(temp.sequence.object.curveValue.PMT) < 
+                          nrow(temp.sequence.object.curveValue.heating.element))){
+                  
+                  temp.sequence.object.curveValue.PMT.i <- approx(
+                    x = temp.sequence.object.curveValue.PMT[,1],
+                    y = temp.sequence.object.curveValue.PMT[,2],
+                    xout = temp.sequence.object.curveValue.heating.element[,1])
+                  
+                  temperature.values <- 
+                    temp.sequence.object.curveValue.heating.element[,2]
+                  
+                  count.values <- temp.sequence.object.curveValue.PMT.i$y
 
-            ##combine values
-            temperature.values <- sapply(
-              1:length(temp.sequence.object.curveValue.PMT[,1]), function(n){
-              
-              temp.sequence.object.curveValue.PMT[n,2] <- 
-               temp.sequence.object.curveValue.heating.element[
-                  temp.sequence.object.curveValue.heating.element[,1] ==
-                  temp.sequence.object.curveValue.PMT[n,1], 2]
-              
-             })
+                ##CASE (3)  
+                }else{
+                  
+                  temperature.values <- 
+                    temp.sequence.object.curveValue.heating.element[,2]
+                  
+                  count.values <- temp.sequence.object.curveValue.PMT[,2]
+                
+                }
             
             ##combine as matrix
             temp.sequence.object.curveValue <- as.matrix(cbind(
-              temperature.values,
-              temp.sequence.object.curveValue.PMT[,2]))
+                           temperature.values,
+                           count.values))
             
-            temp.sequence.object.info$curveDescripter <- "T [\u00B0C]; cts [a.u.]"
-          
-            ##order values by increasing temperature
-            temp.sequence.object.curveValue <- 
-              temp.sequence.object.curveValue[order(
-                temp.sequence.object.curveValue[,1]),]
+            ##set curve identifier 
+            temp.sequence.object.info$curveDescripter <- "Temperature [\u00B0C]; Counts [a.u.]"
           
           }##endif          
          }##endif recalculate.TL.curves == TRUE
@@ -335,14 +353,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ##close ProgressBar
   if(txtProgressBar == TRUE){close(pb)}
   
-  cat(paste("\t >>",xmlSize(temp), " sequence(s) loaded successfully."), sep = "")
-  
-
-
-
-
-  
-  
+  cat(paste("\t >>",xmlSize(temp), " sequence(s) loaded successfully.\n"), sep = "")
   
   ##output
   invisible(output)
@@ -382,18 +393,44 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ## \code{ </Sample>}\cr\cr
   ## So far, each XSYG file can only contain one \code{<Sample></Sample>}, but 
   ## multiple sequences. \cr\cr
-  ## Each record may compris several curves.\cr\cr
+  ## Each record may comprise several curves.\cr\cr
   ##
   ## \bold{TL curve recalculation}\cr
-  ## On the lexsyg device TL curves are recorded as time against count values. 
+  ## 
+  ## On the FI lexsyg device TL curves are recorded as time against count values. 
   ## Temperature values are monitored on the heating plate and stored in a separate
   ## curve (time vs. temperature). If the option \code{recalculate.TL.curves = TRUE}
-  ## is chosen, the time values for each TL curve are replaced by temperature values.\cr
+  ## is chosen, the time values for each 
+  ## TL curve are replaced by temperature values.\cr
   ##
-  ## Practically, this means combining two matrices with different row numbers by 
-  ## their time values. If multiple count values per temperature are obtained, 
-  ## the mean of count values per temperature value is calculated. 
-  ## Note: Temperature values for spectrum curves are currently not supported. 
+  ## Practically, this means combining two matrices 
+  ## (Time vs. Counts and Time vs. Temperature) with different row numbers by 
+  ## their time values. Three cases are considered:
+  ## 
+  ## HE: Heating element\cr
+  ## PMT: Photomultiplier tube\cr
+  ## Interpolation is done using the function \code{\link{approx}}\cr
+  ##
+  ## CASE (1): \code{nrow(matrix(PMT))} > \code{nrow(matrix(HE))} \cr
+  ##
+  ## Missing temperature values from the heating element are calculated using
+  ## time values from the PMT measurement.\cr
+  ##
+  ## CASE (2): \code{nrow(matrix(PMT))} < \code{nrow(matrix(HE))} \cr
+  ##
+  ## Missing count values from the PMT are calculated using
+  ## time values from the heating element measurement.\cr
+  ## 
+  ## CASE (3): \code{nrow(matrix(PMT))} == \code{nrow(matrix(HE))} \cr
+  ##
+  ## A new matrix is produced using temperature values from the heating 
+  ## element and count values from the PMT. \cr
+  ##
+  ## \emph{Note: Temperature values for spectrum curves are currently 
+  ## not supported. Please further note that due to the recalculation of the 
+  ## temperature values based on values delivered by the heating element, it 
+  ## may happen that mutiple count values exists for each temperature value and 
+  ## temperature values may also decrease during heating, not only increase. }
   
   ##references<<
   ## Grehl, S., Kreutzer, S., Hoehne, M., 2013. Documentation of the XSYG file format.
@@ -404,7 +441,8 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ##note<<
   ## This function is a beta version as the XSYG file format is not yet fully
   ## specified. 
-  ## Thus, further file operations (merge, export, write) should be done using the functions
+  ## Thus, further file operations (merge, export, write) should be 
+  ## done using the functions
   ## provided with the package \code{\link{xml}}.\cr
   ##
   ## \bold{So far, no image data import is provided!}\cr
@@ -412,22 +450,24 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   
   ##seealso<<
   ## \code{\link{xml}}, \code{\linkS4class{RLum.Analysis}}, 
-  ## \code{\linkS4class{RLum.Data.Curve}}
+  ## \code{\linkS4class{RLum.Data.Curve}}, \code{\link{approx}}
   
   ##keyword<<
   ## IO
   
 }, ex=function(){
   
-  ##Import XSYG file
-  ##uncomment for usage
-  #temp <- readXSYG2R("input_file.xsyg")
+  ##(1) import XSYG file to R (uncomment for usage)
+
+  #FILE <- file.choose()
+  #temp <- readXSYG2R(FILE)
   
-  ##Additional examples for pure XML import using the package XML
-  ##uncomment for usage
+  ##(2) additional examples for pure XML import using the package XML
+  ##    (uncomment for usage)
   
-    ##import entire file
-    #temp <- xmlRoot(xmlTreeParse("input_file.xsyg"))
+    ##import entire XML file 
+    #FILE <- file.choose()
+    #temp <- xmlRoot(xmlTreeParse(FILE))
     
     ##search for specific subnodes with curves containing 'OSL'
     #getNodeSet(temp, "//Sample/Sequence/Record[@recordType = 'OSL']/Curve")

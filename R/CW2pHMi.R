@@ -11,7 +11,7 @@ CW2pHMi<- structure(function(#Transform a CW-OSL curve into a pHM-OSL curve via 
   ## Adrie J.J. Bos, Delft University of Technology, The Netherlands\cr\cr
   
   ##section<<
-  ## version 0.2.1 [2013-12-27]
+  ## version 0.2.1
   # ===========================================================================
 
   values, 
@@ -238,7 +238,7 @@ CW2pHMi<- structure(function(#Transform a CW-OSL curve into a pHM-OSL curve via 
   
   ##references<<
   ## Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal 
-  ## components. Radiation Measurements 47, 752-758.\cr
+  ## components. Radiation Measurements, 47, 752-758.\cr
   ##
   ## \bold{Further Reading}\cr\cr
   ## Bulur, E., 1996. An Alternative Technique For Optically Stimulated Luminescence 

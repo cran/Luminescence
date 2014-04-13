@@ -70,4 +70,6 @@ data(ExampleData.DeValues, envir = environment())
 
 ##apply the central dose model
 calc_CentralDose(ExampleData.DeValues)
+
 }
+\section{Function version}{1.22 (2014-04-13 14:27:18)}

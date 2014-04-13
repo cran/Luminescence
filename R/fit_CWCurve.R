@@ -6,10 +6,10 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)\cr
+  ## Sebastian Kreutzer, JLU Giessen (Germany),\cr
   
   ##section<<
-  ## version 0.4.1 [2013-12-23]
+  ## version 0.4.3
   # ===========================================================================
 
   values,
@@ -90,7 +90,7 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
       
       ##INPUT OBJECTS
       if(is(values, "RLum.Data.Curve") == FALSE & is(values, "data.frame") == FALSE){
-        stop("[fit_CWCurve] Error: Input object is not of type 'RLum.Data.Curve' or 'data.frame'!")
+        stop("[fit_CWCurve] Input object is not of type 'RLum.Data.Curve' or 'data.frame'!")
       } 
         
       
@@ -320,7 +320,7 @@ while(fit.trigger==TRUE & n.components <= n.components.max){
       if (output.terminal==TRUE){  
         
         ##print rough fitting information - use the nls() control for more information
-        writeLines("\n[fit_CWCurve.R]")
+        writeLines("\n[fit_CWCurve]")
         writeLines(paste("\nFitting was finally done using a ",n.components, 
                          "-component function (max=",n.components.max,"):",sep=""))
         writeLines("------------------------------------------------------------------------------")
@@ -511,7 +511,7 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
 
 }#endif :: (exists("fit"))   
   
-}else{writeLines("[simpleITLCurveFit.R] >> Fitting Error >> Plot without fit produced!")
+}else{writeLines("[fit_CWCurve] Fitting Error >> Plot without fit produced!")
       output.table<-NA
       component.contribution.matrix <- NA
       }
@@ -520,10 +520,12 @@ if (output.terminalAdvanced==TRUE && output.terminal==TRUE){
 ## PLOTTING
 ##============================================================================##
 if(output.plot==TRUE){      
-   
+
+    ##grep par parameters
+    par.default <- par(no.readonly = TRUE)
+  
     ##set colors gallery to provide more colors
-    col<-unlist(colors())
-    col<-col[c(261,552,51,62,76,151,451,474,654)]
+    col <- get("col", pos = .LuminescenceEnv)
    
     ##set plot frame
     layout(matrix(c(1,2,3),3,1,byrow=TRUE),c(1.6,1,1), c(1,0.3,0.4),TRUE)
@@ -578,10 +580,10 @@ if(output.plot==TRUE){
     par(mar=c(4.2,4,0,0))
     plot(x,residuals(fit), 
          xlim=c(min(x),max(x)), 
-         xlab=if(missing(xlab)==TRUE){if(log=="x" | log== "xy"){"log time [s]"}else{"time [s]"}}else{xlab}, 
+         xlab=if(missing(xlab)==TRUE){"Time [s]"}else{xlab}, 
          type="l", 
          col="grey", 
-         ylab="residual [a.u.]",
+         ylab="Residual [a.u.]",
          lwd=2,
          log=if(log=="x" | log=="xy"){log="x"}else{""}
          )
@@ -599,9 +601,9 @@ if(output.plot==TRUE){
          plot(NA,NA,
              xlim=c(min(x),max(x)),
              ylim=c(0,100),
-             ylab="contribution [%]",
-             xlab=if(missing(xlab)==TRUE){if(log=="x" | log=="xy"){"log time [s]"}else{"time [s]"}}else{xlab},
-             main="Component Contribution To Sum Curve",
+             ylab="Contribution [%]",
+             xlab=if(missing(xlab)==TRUE){"Time [s]"}else{xlab},
+             main="Component contribution to sum curve",
              log=if(log=="x" | log=="xy"){log="x"}else{""})
   
     stepping <- seq(3,length(component.contribution.matrix[1,]),2)
@@ -618,6 +620,9 @@ if(output.plot==TRUE){
  
     
     }#end if try-error for fit
+    
+    par(par.default)
+    rm(par.default)
 } 
           
 ##============================================================================##  
@@ -644,10 +649,10 @@ if(output.plot==TRUE){
    ## and \eqn{\lambda} is the decay constant and \eqn{N0} the intial number of 
    ## trapped electrons.\cr
    ## (for the used equation cf. Boetter-Jensen et al., 2003)\cr\cr
-   ## \bold{Start values}\cr\cr
+   ## \bold{Start values}\cr
    ##
    ## Start values are estimated automatically by fitting a linear function to 
-   ## the log arithmised input data set. Currently, there is no option to manually provide 
+   ## the logarithmized input data set. Currently, there is no option to manually provide 
    ## start parameters. \cr\cr
    ## \bold{Goodness of fit}\cr\cr
    ## The goodness of the fit is given as pseudoR^2 value 
@@ -700,7 +705,7 @@ if(output.plot==TRUE){
   
    ##note<<
    ## \bold{Beta version - This function has not been properly tested yet and should 
-   ## therefore not used for publication purposes!}\cr\cr
+   ## therefore not be used for publication purposes!}\cr\cr
    ## The pseudo-R^2 may not be the best parameter to describe the goodness of 
    ## the fit. The trade off between the \code{n.components} and the pseudo-R^2 
    ## value is currently not considered.\cr\cr

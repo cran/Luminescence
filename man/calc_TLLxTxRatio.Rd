@@ -30,7 +30,7 @@ $ Net_LnLx   \cr
 $ Net_LnLx.Error\cr }
 \references{-}
 \author{Sebastian Kreutzer, JLU Giessen/Freiberg Instruments (Germany),
-Christoph Schmidt, University of Bayreuth (Germany)
+Christoph Schmidt, University of Bayreuth (Germany),\cr
 R Luminescence Package Team}
 \note{\bold{This function is a beta version!}}
 
@@ -61,3 +61,4 @@ get_RLum.Results(output)
 }
 
 \keyword{datagen}
+\section{Function version}{0.2.1 (2014-04-13 14:29:01)}

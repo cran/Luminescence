@@ -7,11 +7,13 @@ calc_FuchsLang2001<- structure(function(#Apply the model after Fuchs & Lang (200
   ## Sebastian Kreutzer, JLU Giessen (Germany)
   
   ##section<<
-  ## version 0.3.1 [2012-12-10]
+  ## version 0.4.0
   # ===========================================================================
 
   sample,
-  ### \link{data.frame} (\bold{required}): two column data frame, e.g. De and De error
+  ### \code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+  ### for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+  ### De error \code{(values[,2])}
   
   sample.mtext = "unknown sample",
   ### \link{character} (optional): mtext for optional plot (top)
@@ -32,21 +34,71 @@ calc_FuchsLang2001<- structure(function(#Apply the model after Fuchs & Lang (200
   
   output.terminal = TRUE,
   ### \link{logical} (with default): terminal output \code{TRUE}/\code{FALSE}
-  
-	main = "Fuchs & Lang (2001)",
-  ### \link{character} (with default): title of the plot (works as in \link{plot})
-  
-  xlab = expression(paste(D[e]," [Gy]")),
-  ### \link{character} (with default): xlab works as in \link{plot}
-  
-  cex.global = 1
-  ### \link{numeric} (with default): global scaling factor
-
+  ...
+  ### further arguments and graphical parameters passed to \code{\link{plot}}
 ){
 
-##=================================================================================================##
+  
+  # Integrity Tests ---------------------------------------------------------
+  
+  if(missing(sample)==FALSE){
+    
+    if(is(sample, "data.frame") == FALSE & is(sample,"RLum.Results") == FALSE){
+      
+      stop("[calc_FuchsLang2001] 'sample' has to be of type 'data.frame' or 'RLum.Results'!")
+      
+    }else{
+      
+      if(is(sample, "RLum.Results") == TRUE){
+        
+        sample <- get_RLum.Results(sample,data.object="De.values")
+        
+      }
+    }
+  }    
+  
+  # Deal with extra arguments -----------------------------------------------
+  ##deal with addition arguments 
+  extraArgs <- list(...) 
+  
+  main <- if("main" %in% names(extraArgs)) {extraArgs$main} else 
+  {"Fuchs & Lang (2001)"}
+  
+  xlab <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} else 
+  {expression(paste(D[e]," [s]"))}
+  
+  ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} else
+  {"# Aliquots"}
+
+  sub <-  if("sub" %in% names(extraArgs)) {extraArgs$sub} else
+  {""}
+    
+  cex <- if("cex" %in% names(extraArgs)) {extraArgs$cex} else 
+  {1}
+  
+  lwd <- if("lwd" %in% names(extraArgs)) {extraArgs$lwd} else 
+  {1}
+  
+  pch <- if("pch" %in% names(extraArgs)) {extraArgs$pch} else 
+  {19}
+  
+  ylim <- if("ylim" %in% names(extraArgs)) {extraArgs$ylim} else 
+  {c(1,length(sample[,1])+3)}
+  
+  xlim <- if("xlim" %in% names(extraArgs)) {extraArgs$xlim} else 
+  {c(min(sample[,1])-max(sample[,2]),
+     max(sample[,1])+max(sample[,2]))}
+
+  mtext <- if("mtext" %in% names(extraArgs)) {extraArgs$mtext} else 
+  {"unknown sample"}
+  
+  fun   <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE}
+  
+  
+  
+##============================================================================##
 ##PREPARE DATA
-##=================================================================================================##
+##============================================================================##
 
 	##1. order values in acending order write used D[e] values in data.frame
 	o <- order(sample[1]) # o is only an order parameter 
@@ -152,31 +204,33 @@ calc_FuchsLang2001<- structure(function(#Apply the model after Fuchs & Lang (200
 	  cat(paste("\n weighted sd:            ",weighted_sd))
 	  cat(paste("\n ---------------------------------\n\n"))
   }
-##=================================================================================================##
+##============================================================================##
 ##PLOTTING
-##=================================================================================================##
+##============================================================================##
  
 if(output.plot==TRUE){
-par(cex=cex.global,mfrow=c(1,1))
+  
+par(cex = cex, mfrow=c(1,1))
   
 ##PLOT  
 	counter<-seq(1,max(o))
+
 	plot(NA,NA,
-		ylim=c(min(o)-1,max(o)+3),
-		xlim=c((min(sample_ordered[,1])-sample_ordered[1,2]),(max(sample_ordered[,1])+sample_ordered[max(o),2])),
-		xlab=xlab,
-		ylab="# Aliquots",
-		main=main
-		)
+		ylim = ylim,
+		xlim = xlim,
+		xlab = xlab,
+		ylab = ylab,
+		main = main,
+    sub = sub)
 
 ##SEGMENTS
 	segments(sample_ordered[,1]-sample_ordered[,2],1:length(sample_ordered[,1]),
 	         sample_ordered[,1]+sample_ordered[,2],1:length(sample_ordered[,1]),
-	         col="gray"
-	         )
+	         col="gray")
+	         
   
 ##POINTS
-	points(sample_ordered[,1], counter,pch=19)
+	points(sample_ordered[,1], counter,pch=pch)
   
 ##LINES
     ##BOUNDARY INFORMATION 
@@ -186,11 +240,12 @@ par(cex=cex.global,mfrow=c(1,1))
 			usedDeValues[length(usedDeValues[,1])-n.usedDeValues+1,1]),
 			c(min(o)-0.5,max(o)+0.5),
 			col="red",
-			lty="dashed"
-			)
+			lty="dashed", lwd = lwd)
+			
 
 		#upper boundary
-		lines(c(max(usedDeValues[,1]),max(usedDeValues[,1])),c(min(o)-0.5,max(o)+0.5),col="red",lty="dashed")
+		lines(c(max(usedDeValues[,1]),max(usedDeValues[,1])),c(min(o)-0.5,max(o)+0.5),
+          col="red",lty="dashed", lwd = lwd)
 
 		#plot some further informations into the grafik
 		arrows(
@@ -199,26 +254,26 @@ par(cex=cex.global,mfrow=c(1,1))
 			max(usedDeValues[,1]-usedDeValues[,1]*0.02), #x2
 			max(o)+0.5, #y2,
 			code=3,
-			length=0.03
-		)
+			length=0.03)
+		
 		text(
 			c(
 			usedDeValues[length(usedDeValues[,1])-n.usedDeValues+1,1], 
 			usedDeValues[length(usedDeValues[,1])-n.usedDeValues+1,1]),
 			c(max(o)+2,max(o)+2),		
 			labels=paste("used values = ",n.usedDeValues),
-			cex=0.6*cex.global,
-			adj=0			
-			)
+			cex=0.6*cex,
+			adj=0)			
+			
 
 ##MTEXT
   
-  mtext(side=3,sample.mtext,cex=1.2*cex.global)
+  mtext(side=3,sample.mtext,cex=cex)
 }#endif::output.plot 
 ##=================================================================================================#
 ##RETURN  VALUES
 ##=================================================================================================##  
-  
+
   ##combine statistic parameters
   results<-data.frame(id=sample.id,
                       mean=mean,sd=sd,
@@ -226,7 +281,8 @@ par(cex=cex.global,mfrow=c(1,1))
                       weighted_sd=weighted_sd,
                       n.usedDeValues)
   
-  return(list(results=results,usedDeValues=usedDeValues))  
+  calc_FuchsLangReturn <- set_RLum.Results(data =list(results=results,usedDeValues=usedDeValues))
+  invisible(calc_FuchsLangReturn)  
   
 	# DOCUMENTATION - INLINEDOC LINES -----------------------------------------
 	
@@ -254,11 +310,11 @@ par(cex=cex.global,mfrow=c(1,1))
 	##references<<
   ## Fuchs, M. & Lang, A., 2001. OSL dating of coarse-grain fluvial quartz using 
   ## single-aliqout 	protocols on sediments from NE Peloponnese, 
-  ## Greece. In: Quaternary Science Reviews (20), pp. 783-787.
+  ## Greece. In: Quaternary Science Reviews, 20, 783-787.
 	##
 	## Fuchs, M. & Wagner, G.A., 2003. Recognition of insufficient bleaching by 
   ## small aliquots of quartz for reconstructing soil erosion in Greece. 
-  ## Quaternary Science Reviews, 22, pp. 1161-1167. 
+  ## Quaternary Science Reviews, 22, 1161-1167. 
 	
 	##note<<
 	## Please consider the requirements and the constraints of this method 
@@ -267,7 +323,7 @@ par(cex=cex.global,mfrow=c(1,1))
 	##seealso<<
 	## \code{\link{plot}}, \code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}
   ## \code{\link{calc_FiniteMixture}}, \code{\link{calc_CentralDose}}, 
-  ## \code{\link{calc_CommonDose}}
+  ## \code{\link{calc_CommonDose}}, \code{\linkS4class{RLum.Results}}
 	
 	##keyword<<
 	## dplot
@@ -278,6 +334,9 @@ par(cex=cex.global,mfrow=c(1,1))
   data(ExampleData.DeValues, envir = environment())
   
   ##calculate De according to Fuchs & Lang (2001)
-  calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
+  temp <- calc_FuchsLang2001(ExampleData.DeValues, cvThreshold = 5)
+  
+  ##show values
+  get_RLum.Results(temp)
   
 })#END OF STRUCTURE

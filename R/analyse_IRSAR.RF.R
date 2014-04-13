@@ -7,12 +7,11 @@ analyse_IRSAR.RF<- structure(function(# Analyse IRSAR RF measurements
   ## Sebastian Kreutzer, JLU Giessen/Freiberg Instruments (Germany) \cr
   
   ##section<<
-  ## version 0.1 [2013-08-22]
+  ## version 0.1.3
   # ===========================================================================
 
-
   #TODO - keep fit.range in mind for De calculation
-  #TODO - example with example data
+
 
   object,
   ### \code{\linkS4class{RLum.Analysis}} (\bold{required}): 
@@ -21,11 +20,14 @@ analyse_IRSAR.RF<- structure(function(# Analyse IRSAR RF measurements
   sequence.structure = c("NATURAL", "REGENERATED"),
   ### \link{vector} \link{character} (with default): specifies the general 
   ### sequence structure. Allowed steps are \code{NATURAL}, \code{REGENERATED}
+  ### In addition any other character is allowed in the sequence structure; 
+  ### such curves will be ignored. 
   
   fit.range.min, 
   ### \link{integer} (optional): set the minimum channel range for signal fitting.   
   ### Usually the entire data set is used for curve fitting, but there might be 
   ### reasons to limit the channels used for fitting.
+  ### Note: This option also limits the values used for natural signal calculation.
   
   fit.range.max,
   ### \link{integer} (optional): set maximum channel range for signal fitting. 
@@ -75,6 +77,17 @@ analyse_IRSAR.RF<- structure(function(# Analyse IRSAR RF measurements
 
   # Protocol Integrity Checks -------------------------------------------------- 
   
+  ##REMOVE predefined curves if they are availabe
+  if(grepl("curveType", 
+           as.character(get_structure.RLum.Analysis(object)$info.elements))[1] == TRUE){
+    
+    object <- set_RLum.Analysis(
+      records = get_RLum.Analysis(object, curveType="measured"),
+      protocol = object@protocol)
+    
+  }
+  
+  
   ##ANALYSE SEQUENCE OBJECT STRUCTURE
   
   ##set vector for sequence structure 
@@ -103,6 +116,9 @@ analyse_IRSAR.RF<- structure(function(# Analyse IRSAR RF measurements
       warning("[analyse_IRSAR.RF] Fit range out of bounds, set to full data set extend.")
 
   }
+  
+  ##apply fit range also for the natural curve
+  fit.range.natural <- fit.range
     
 
   
@@ -121,10 +137,13 @@ analyse_IRSAR.RF<- structure(function(# Analyse IRSAR RF measurements
   {"IR-RF"}
   
   xlab      <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} else # assign x axis label
-  {paste("time [", xlab.unit, "]", sep="")}
+  {paste("Time [", xlab.unit, "]", sep="")}
   
   ylab     <- if("ylabs" %in% names(extraArgs)) {extraArgs$ylabs} else # assign y axes labels
   {paste("IR-RF [cts/",resolution.RF," ", xlab.unit,"]",sep = "")}
+
+  cex     <- if("cex" %in% names(extraArgs)) {extraArgs$cex} else # assign y axes labels
+  {1}
   
   
   
@@ -209,11 +228,11 @@ fit.function <- as.formula(y~phi.0-(delta.phi*((1-exp(-lambda*x))^beta)))
       fit.parameters.results.MC.results[i,"delta.phi"] <- temp.fit.parameters.results.MC.results["delta.phi"]
       fit.parameters.results.MC.results[i,"beta"] <- temp.fit.parameters.results.MC.results["beta"]
     
-   }      
+   }       
   }
-  
+
  ##FINAL fitting after successful MC
- if(length(na.omit(fit.parameters.results.MC.results)[,1])!=0){
+ if(length(na.omit(fit.parameters.results.MC.results)) != 0){
    
       ##choose median as final fit version
       fit.parameters.results.MC.results <- sapply(na.omit(fit.parameters.results.MC.results), median)
@@ -243,6 +262,7 @@ fit.function <- as.formula(y~phi.0-(delta.phi*((1-exp(-lambda*x))^beta)))
                 silent=FALSE)
  }else{
    
+   fit <- NA
    class(fit) <- "try-error"
    
  }
@@ -266,26 +286,32 @@ if(inherits(fit,"try-error") == FALSE){
   ##grep values from natural signal 
   values.natural <- as.data.frame(object@records[[
     temp.sequence.structure[temp.sequence.structure$protocol.step=="NATURAL","id"]]]@data)
-  
-  values.natural.mean <- mean(values.natural[,2])
-  values.natural.sd <- sd(values.natural[,2])
+
+  ##limit values to fit range (at least to the minimum)
+  values.natural.limited<- values.natural[min(fit.range.natural):nrow(values.natural),]
+
+  values.natural.mean <- mean(values.natural.limited[,2])
+  values.natural.sd <- sd(values.natural.limited[,2])
   
   values.natural.error.lower <- values.natural.mean + values.natural.sd 
   values.natural.error.upper <- values.natural.mean - values.natural.sd 
   
+
   if(is.na(fit.parameters.results[1]) == FALSE){
-  
-  De.mean <- round(log(-((values.natural.mean - fit.parameters.results["phi.0"])/
-                      -fit.parameters.results["delta.phi"])^(1/fit.parameters.results["beta"])+1)/
-                      -fit.parameters.results["lambda"], digits=2)
-          
-  De.error.lower <- round(log(-((values.natural.error.lower - fit.parameters.results["phi.0"])/
-                     -fit.parameters.results["delta.phi"])^(1/fit.parameters.results["beta"])+1)/
-                     -fit.parameters.results["lambda"],digits=2)
     
-  De.error.upper <- round(log(-((values.natural.error.upper - fit.parameters.results["phi.0"])/
-                            -fit.parameters.results["delta.phi"])^(1/fit.parameters.results["beta"])+1)/
-                            -fit.parameters.results["lambda"],digits=2)
+  De.mean <- suppressWarnings(round(log(-((values.natural.mean - fit.parameters.results["phi.0"])/
+                      -fit.parameters.results["delta.phi"])^(1/fit.parameters.results["beta"])+1)/
+                      -fit.parameters.results["lambda"], digits=2))
+          
+  De.error.lower <- suppressWarnings(
+    round(log(-((values.natural.error.lower - fit.parameters.results["phi.0"])/
+                     -fit.parameters.results["delta.phi"])^(1/fit.parameters.results["beta"])+1)/
+                     -fit.parameters.results["lambda"],digits=2))
+    
+  De.error.upper <- suppressWarnings(
+    round(log(-((values.natural.error.upper - fit.parameters.results["phi.0"])/
+          -fit.parameters.results["delta.phi"])^(1/fit.parameters.results["beta"])+1)/
+          -fit.parameters.results["lambda"],digits=2))
   
   }else{
     
@@ -295,6 +321,8 @@ if(inherits(fit,"try-error") == FALSE){
        
   }
   
+  
+ 
 ##=============================================================================#
 ## PLOTTING
 ##=============================================================================#
@@ -305,17 +333,17 @@ if(output.plot==TRUE){
 
   ##set plot frame
   layout(matrix(c(1,2),2,1,byrow=TRUE),c(2), c(1.5,0.4), TRUE)
-  par(oma=c(1,1,1,1), mar=c(0,4,3,0))
+  par(oma=c(1,1,1,1), mar=c(0,4,3,0), cex = cex)
   
   ##open plot area
   plot(NA,NA,
-       xlim=c(0,max(temp.sequence.structure$x.max)),
-       ylim=c(min(temp.sequence.structure$y.min), max(temp.sequence.structure$y.max)),
-       xlab="",
-       xaxt="n",
-       ylab=ylab,
-      main=main, 
-       log="")
+       xlim = c(0,max(temp.sequence.structure$x.max)),
+       ylim = c(min(temp.sequence.structure$y.min), max(temp.sequence.structure$y.max)),
+       xlab = "",
+       xaxt = "n",
+       ylab = ylab,
+       main = main, 
+       log = "")
 
   ##plotting measured signal 
   points(values.regenerated[,1], values.regenerated[,2], pch=3, col="grey")
@@ -325,7 +353,7 @@ if(output.plot==TRUE){
 
   ##show fitted curve COLORED
   
-    ##dummy to trick R CMD check
+    ##dummy to cheat R CMD check
     x<-NULL; rm(x)
   
   curve(fit.parameters.results["phi.0"]-
@@ -355,7 +383,9 @@ if(output.plot==TRUE){
       col="grey")
 
   ##PLOT NATURAL VALUES
-  points(values.natural, pch=20, col="red")
+  
+  points(values.natural, pch = 20, col = "grey")
+  points(values.natural.limited, pch = 20, col = "red")
 
   ##plot range choosen for fitting
   abline(v=values.regenerated[min(fit.range), 1], lty=2)
@@ -368,7 +398,7 @@ if(output.plot==TRUE){
 
   
   ##plot De if De was calculated 
-  if(is.na(De.mean) == FALSE){
+  if(is.na(De.mean) == FALSE & is.nan(De.mean) == FALSE){
     
     lines(c(0,De.error.lower), c(values.natural.error.lower,values.natural.error.lower), lty=2, col="grey")
     lines(c(0,De.mean), c(values.natural.mean,values.natural.mean), lty=2, col="red")
@@ -382,8 +412,11 @@ if(output.plot==TRUE){
     
   }
  
+  
   ##Insert fit and result
-  if(De.mean > max(values.regenrated.x) | De.error.upper > max(values.regenrated.x)){
+  if(is.na(De.mean) != TRUE & (is.nan(De.mean) == TRUE |
+    De.mean > max(values.regenrated.x) | 
+    De.error.upper > max(values.regenrated.x))){
     
     try(mtext(side=3, substitute(D[e] == De.mean, 
                                  list(De.mean=paste(
@@ -410,11 +443,11 @@ if(output.plot==TRUE){
     
   plot(values.regenrated.x,residuals(fit), 
      xlim=c(0,max(temp.sequence.structure$x.max)),
-     xlab="time [s]", 
+     xlab="Time [s]", 
      type="p", 
      pch=20,
      col="grey", 
-     ylab="residual [a.u.]",
+     ylab="Residual [a.u.]",
      #lwd=2,
      log="")
 
@@ -423,7 +456,7 @@ if(output.plot==TRUE){
   }else{
     plot(NA,NA,
          xlim=c(0,max(temp.sequence.structure$x.max)),
-         ylab="residual [a.u.]",
+         ylab="Residual [a.u.]",
          xlab=xlab, 
          ylim=c(-1,1)
          )    

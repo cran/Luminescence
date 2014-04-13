@@ -22,7 +22,7 @@ No methods defined with class "RLum" in the signature.
 \author{Sebastian Kreutzer, 2013 (Freiberg Instruments/JLU Giessen, Germany)
 }
 
-\section{Version}{0.1 [2013-01-18]}
+\section{Version}{0.1 (2013-01-18)}
 
 \note{
 \code{RLum} is a virtual class.

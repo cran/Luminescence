@@ -4,8 +4,8 @@ readBIN2R <- structure(function(#Import Risoe BIN-file into R
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany),
-  ## Margret C. Fuchs, TU Bergakademie Freiberg (Germany)
+  ## Sebastian Kreutzer, JLU Giessen (Germany), 
+  ## Margret C. Fuchs, AWI Postdam (Germany),\cr
   
   ##section<<
   ## version 0.7
@@ -798,13 +798,17 @@ return(object)
 
   ##seealso<<
   ## \code{\link{writeR2BIN}}, \code{\linkS4class{Risoe.BINfileData}},
-  ## \code{\link{readBin}}, \code{\link{txtProgressBar}}
+  ## \code{\link{readBin}}, \code{\link{merge_Risoe.BINfileData}}, \code{\link{txtProgressBar}}
 
   ##keyword<<
   ## IO
 
 }, ex=function(){
   
-  ##readBIN2R("~/Desktop/Example.bin")
+  ##(1) import Risoe BIN-file to R (uncomment for usage)
+
+  #FILE <- file.choose()
+  #temp <- readBIN2R(FILE)
+  #temp
   
 })  

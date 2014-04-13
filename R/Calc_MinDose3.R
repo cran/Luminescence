@@ -9,7 +9,7 @@ calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter mini
   ## Based on a rewritten S script of Rex Galbraith, 2010 \cr\cr
   
   ##section<<
-  ## version 0.2 [2013-11-04] 
+  ## version 0.22
   # ===========================================================================
   
   input.data, 
@@ -50,12 +50,6 @@ calc_MinDose3<- structure(function( # Apply the (un-)logged three parameter mini
   ### functions for gamma, sigma, p0 to console.
   console.extendedOutput=FALSE, 
   ### \code{\link{logical}} (with default): extended terminal output
-  output.file=FALSE,
-  ### \code{\link{logical}} (with default): save results to file. See 
-  ### \code{output.filename}.
-  output.filename="default", 
-  ### \code{\link{character}} (with default): desired filename, else results 
-  ### are saved to default-3R(-UL).res 
   output.plot=TRUE, 
   ### \code{\link{logical}} (with default): plot output
   ### (\code{TRUE}/\code{FALSE})
@@ -301,32 +295,6 @@ neglik.f<- function(param,input.data,rep){
     get("Bmess",)
   }
   
-# write the parameter estimates to output file filnam.res 
-# where filnam is the input file name
-  
-  filnam<- output.filename
-
-  if(output.file==TRUE) {
-    lbout<- paste(filnam,if(log==TRUE){"-3R.res"}else{"-3R-UL.res"},sep="")
-    
-    write(c("Sample: ", filnam, "\nSigma_b: ", sigmab), file=lbout, ncolumns=2,
-          append=F)
-    write("",lbout,append=T)
-    write(paste("Final estimate of model parameters"),lbout,append=T)
-    write(paste("gamma:", round(gamma,3), "sigma:", round(sigma,3), "p0:",
-                round(p0,3)),lbout,append=T)
-    
-    write("\nmaximum likelihood estimate of minimum age",lbout, append=T)
-    
-    write(if(log==TRUE){exp(gamma)}else{gamma},lbout,append=T)
-    
-    
-    # write fitted values to output file filnam-3R.res 
-    # where filnam is the input file name
-    prfile<- T
-    neglik.f(mlest,datmat)
-    prfile<- F
-  }
   
 ##============================================================================##
 ## PROFILE LOG LIKELIHOODS
@@ -339,8 +307,13 @@ neglik.f<- function(param,input.data,rep){
     
     profind<- as.integer(output.indices)
     
+    # save previous plot parameter and set new ones
+    .pardefault<- par(no.readonly = TRUE)
+    
+    if(output.plot == TRUE) {
     par(mfrow=c(2,2),oma=c(9,2,9,1),mar=c(3.7,3.1,1.1,0.2),
         mgp=c(1.75,0.5,0),las=1,cex.axis=1.1,cex.lab=1.3)
+    }
     
     # calculate the required profiles
     lbpar<- c("gamma","sigma","p0")
@@ -569,20 +542,7 @@ neglik.f<- function(param,input.data,rep){
       if(j==1) {
         try(gul<- u1, silent=TRUE)
         try(guu<- u2, silent=TRUE) }
-      
-      if(output.file==TRUE&&j==1) {
-        write("\n95% confidence interval",lbout,append=T)
-        if(log==TRUE) {
-          try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
-                          round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE)
-        }
-        else {
-          try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma,2)),lbout,
-                    append=T), silent=TRUE)  
-        }
-      }
+
       
 # the 68% upper and lower confidence limits are calculated from the
 # profile results  and the results are added to the plot
@@ -630,18 +590,6 @@ neglik.f<- function(param,input.data,rep){
         try(gll<- u1, silent=TRUE)
         try(glu<- u2, silent=TRUE) }
       
-      if(output.file==TRUE&&j==1) {
-        write("\n68% confidence interval",lbout,append=T)
-        if(log==TRUE) {
-          try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
-                          round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE) }
-        else {
-          try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-          try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma),2),lbout,
-                    append=T),silent=TRUE) }
-      }
-      
       
 # printing the maximum likelihood estimate on the graph
       if(output.plot==TRUE) {
@@ -653,8 +601,8 @@ neglik.f<- function(param,input.data,rep){
       }
     }
     if(output.plot==TRUE) {
-      mtext(side=2,line=0,"relative profile log likelihood",cex=1.2,outer=T,las=0)
-      mtext(side=3,line=0,paste(filnam,if(log==TRUE){"   MAM 3"}
+      mtext(side=2,line=0,"Relative profile log likelihood",cex=1.2,outer=T,las=0)
+      mtext(side=3,line=0,paste(sample.id,if(log==TRUE){"   MAM 3"}
                                 else{"   MAM 3-UL"}),cex=1.4,outer=T)
     }
 # Bmess is a message: it is the number ofs times 
@@ -666,12 +614,6 @@ neglik.f<- function(param,input.data,rep){
       cat("\n -----------------------------")
     }
   }#EndOf IF (PROFILE LOG LIKELIHOODS)
-  
-  if(output.file==TRUE) {
-    write("",lbout,append=T)
-    write(paste("Likelihood: ", round(maxlik, 5)),lbout, append=T)
-    write(paste("       BIC: ", round(bic, 3)),lbout, append=T)
-  }
   
 
 # prepare return values
@@ -757,6 +699,9 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
     cat(paste("\n CAUTION: By ignoring NA values the validity of results",
               "is not ensured. \n"), fill = FALSE)
   }
+  
+# restore previous plot parameters
+  par(.pardefault)
 
 # return values
   newRLumResults.calc_MinDose3 <- set_RLum.Results(
@@ -764,8 +709,7 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
       results = results))
   
   invisible(newRLumResults.calc_MinDose3)
-  ### Returns a plot (optional) and terminal output. A file 
-  ### containing statistical results is provided if desired. In addition an 
+  ### Returns a plot (optional) and terminal output. In addition an 
   ### \code{\linkS4class{RLum.Results}} object is 
   ### returned containing the following element:
   ###
@@ -806,13 +750,13 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
 ## initial values for the three parameters \code{init.gamma}, \code{init.sigma} 
 ## and \code{init.p0} need to be specified. \cr\cr
 ## \bold{Ignore NA values} \cr\cr
-## In some cases during the calculation of the log likelihoods, \code{NA} values 
+## In some cases during the calculation of the log likelihoods NA values 
 ## are produced instantly terminating the minimum age model. It is advised to 
 ## adjust some of the values provided for any argument. If the model still
 ## produces NA values it is possible to omit these values by setting 
 ## \code{ignore.NA = TRUE}. While the model is then usually able to finish
 ## all calculations the integrity of the final estimates cannot be ensured.
-## Use this argument at your own risk.
+## Use this argument at own risk.
 
 ##references<<
 ## Arnold, L.J., Roberts, R.G., Galbraith, R.F. & DeLong, S.B., 2009. A revised
@@ -864,12 +808,12 @@ try(results$"X95ci_upper"<- if(log==TRUE){exp(guu)}else{guu},silent=TRUE)
   ## apply the logged minimum dose model
   calc_MinDose3(ExampleData.DeValues,
                 sigmab = 0.3,gamma.xub = 7000, 
-                output.file = FALSE, output.plot = FALSE)
+                output.plot = FALSE)
   
   ## apply the un-logged minimum dose model
   ## note that the example data set does not meet the un-logged model 
   ## requirements
   calc_MinDose3(ExampleData.DeValues, log = FALSE,
                 sigmab = 0.3,gamma.xub = 5000, 
-                output.file = FALSE, output.plot = FALSE)
+                output.plot = FALSE)
 })

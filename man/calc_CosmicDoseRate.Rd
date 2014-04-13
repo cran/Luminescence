@@ -99,10 +99,14 @@ one values for \code{depth} and only one for \code{density}. For example,
 \code{depth = c(1, 2, 3), density = 1.7} will calculate the cosmic dose 
 rate for three samples in 1, 2 and 3 m depth in a sediment of density 
 1.7 g/cm^3.}
-\value{Returns terminal output. In addition a list is returned containing 
-the following element:
+\value{Returns terminal output. In addition an 
+\code{\linkS4class{RLum.Results}} object is 
+returned containing the following element:
 
-\item{results}{data frame with results of cosmic dose rate calculation.}}
+\item{results}{\link{data.frame} with statistical parameters.}
+
+The output should be accessed using the function 
+\code{\link{get_RLum.Results}}}
 \references{Allkofer, O.C., Carstensen, K., Dau, W.D., Jokisch, H., 1975. Letter to
 the editor. The absolute cosmic ray flux at sea level. Journal of 
 Physics G: Nuclear and Particle Physics, 1, pp. L51-L52. \cr\cr
@@ -183,7 +187,10 @@ calc_CosmicDoseRate(depth = c(5.0, 2.78), density = c(2.65, 1.7),
 #calculate cosmic dose rate and save to variable
 results<- calc_CosmicDoseRate(depth = 2.78, density = 1.7,
                               latitude = 38.06451, longitude = 1.49646, 
-                              altitude = 364, error = 10)$results
+                              altitude = 364, error = 10)
+
+# the results can be accessed by
+get_RLum.Results(results, "results")
 
 #export results to .csv file - uncomment for usage
 #write.csv(results, file = "c:/users/public/results.csv")
@@ -194,9 +201,10 @@ results<- calc_CosmicDoseRate(depth = 2.78, density = 1.7,
 results<- calc_CosmicDoseRate(depth = c(0.1, 0.5 , 2.1, 2.7, 4.2, 6.3), 
                               density = 1.7, latitude = 38.06451, 
                               longitude = 1.49646, altitude = 364, 
-                              error = 10)$results
+                              error = 10)
 
 #export results to .csv file - uncomment for usage
 #write.csv(results, file = "c:/users/public/results_profile.csv")
 
 }
+\section{Function version}{0.5.2 (2014-04-13 14:27:31)}

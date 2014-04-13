@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Package for Luminescence Dating data analysis
-Version: 0.3.2
-Date: 2014-01-07
+Version: 0.3.3
+Date: 2014-04-13
 Author: Sebastian Kreutzer [aut, trl, cre],
   Christoph Schmidt [aut],
   Margret C. Fuchs [aut],
@@ -41,8 +41,10 @@ Collate: Analyse_SAR.OSLdata.R analyse_SAR.CWOSL.R analyse_SAR.TL.R
         merge_Risoe.BINfileData.R writeR2BIN.R
         Risoe.BINfileData2RLum.Data.Curve.R calc_HomogeneityTest.R
         calc_AliquotSize.R readXSYG2R.R RLum.Data.Spectrum-class.R
-        plot_RLum.Data.Spectrum.R calc_MaxDose3.R zzz.R
-Packaged: 2014-01-07 13:19:09 UTC; sebastiankreutzer
+        plot_RLum.Data.Spectrum.R calc_MaxDose3.R plot_AbanicoPlot.R
+        plot_DRTResults.R calc_Statistics.R apply_CosmicRayRemoval.R
+        apply_EfficiencyCorrection.R zzz.R
+Packaged: 2014-04-14 00:29:47 UTC; sebastiankreutzer
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-01-07 16:11:02
+Date/Publication: 2014-04-14 14:52:24

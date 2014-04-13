@@ -148,17 +148,17 @@ sum for this values.
 
 Jain, M., Murray, A.S., Boetter-Jensen, L., 2003. Characterisation of blue-light
 stimulated luminescence components in different quartz samples: implications for
-dose measurement. Radiation Measurements, 37, 4-5, 441-449. 
+dose measurement. Radiation Measurements, 37 (4-5), 441-449. 
 
 Kitis, G. & Pagonis, V., 2008. Computerized curve deconvolution analysis for 
 LM-OSL. Radiation Measurements, 43, 737-741. 
 
 Lave, C.A.T., 1970. The Demand for Urban Mass Transportation. The Review of
-Economics and Statistics, 52, 3, 320-323. 
+Economics and Statistics, 52 (3), 320-323. 
 
 Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. R. Gentleman, 
 K. Hornik, & G. Parmigiani, eds., Springer, p. 150.}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)\cr
+\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{The pseudo-R^2 may not be the best parameter to describe the goodness of the fit.
 The trade off between the \code{n.components} and the pseudo-R^2 value 
@@ -198,3 +198,4 @@ fit_LMCurve(values = values.curve,
 
 \keyword{dplot}
 \keyword{models}
+\section{Function version}{0.2.15 (2014-04-13 14:29:53)}

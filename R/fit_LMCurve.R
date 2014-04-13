@@ -7,10 +7,10 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)\cr
+  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.2.13 [2013-12-23]
+  ## version 0.2.15
   # ===========================================================================
 
   values,
@@ -164,30 +164,19 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
   xlab      <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} 
                else {
                  
-                 if(log=="x" | log=="xy"){
-                     if(input.dataType=="LM"){"log time [s]"}else{"log u [s]"}
-                 }
-                 else{if(input.dataType=="LM"){"time [s]"}else{"u [s]"}
-                 }
+                 if(input.dataType=="LM"){"Time [s]"}else{"u [s]"}
                      
                }
   
   ylab     <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} 
               else {
                 
-                if(log=="y" | log=="xy"){
-                  if(input.dataType=="LM"){
-                    paste("log LM-OSL [cts/",round(max(values[,1])/length(values[,1]),digits=2)," s]",sep="")
-                  }else{"log pLM-OSL [a.u.]"}
-                }
-                else{ if(input.dataType=="LM"){
+                if(input.dataType=="LM"){
                       paste("LM-OSL [cts/",round(max(values[,1])/length(values[,1]),digits=2)," s]",sep="")
-                      }
-                      else{"pLM-OSL [a.u.]"}
+                      }else{"pLM-OSL [a.u.]"}
                 }
 
-              }
-  
+
   main      <- if("main" %in% names(extraArgs)) {extraArgs$main} 
                else {"Default"}
     
@@ -206,10 +195,10 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
        if(missing(values.bg)==FALSE){
               
           #set graphical parameters
-          par(mfrow=c(1,1), cex=1.5*cex.global)
+          par.default <- par(mfrow=c(1,1), cex=1.5*cex.global)
          
           ##check if length of bg and signal is consistent
-          if(length(values[,2])!=length(values.bg[,2])){stop("Error: Length of values and values.bg differs!")}
+          if(length(values[,2])!=length(values.bg[,2])){stop("[fit_LMCurve] Length of values and values.bg differs!")}
          
          if(bg.subtraction=="polynomial"){
          
@@ -220,12 +209,12 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
            #subtract background with fitted function
            values[,2]<-values[,2]-
              (glm.coef[4]*values[,1]^3+glm.coef[3]*values[,1]^2+glm.coef[2]*values[,1]+glm.coef[1])
-           writeLines("[fit_LMCurve.R] >> Background subtracted (method=\"polynomial\")!")
+           writeLines("[fit_LMCurve] >> Background subtracted (method=\"polynomial\")!")
            
            ##plot Background measurement if needed
            if(output.plotBG==TRUE){
              
-             plot(values.bg, ylab="LM-OSL [a.u.]", xlab="time [s]", main="Background")
+             plot(values.bg, ylab="LM-OSL [a.u.]", xlab="Time [s]", main="Background")
              curve((glm.coef[4]*x^3+glm.coef[3]*x^2+glm.coef[2]*x+glm.coef[1]),add=TRUE,col="red",lwd=2)
              text(0,max(values.bg[,2]),paste("y = ", round(glm.coef[4],digits=2),
                                              "*x^3+",
@@ -251,7 +240,7 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
            ##plot Background measurement if needed
            if(output.plotBG==TRUE){
            
-             plot(values.bg, ylab="LM-OSL [a.u.]", xlab="time [s]", main="Background")
+             plot(values.bg, ylab="LM-OSL [a.u.]", xlab="Time [s]", main="Background")
              curve((glm.coef[2]*x+glm.coef[1]),add=TRUE,col="red",lwd=1.5)
              text(0,max(values.bg[,2]),paste("y = ",
                                              round(glm.coef[2],digits=2),
@@ -269,11 +258,15 @@ fit_LMCurve<- structure(function(#Nonlinear Least Squares Fit for LM-OSL curves
         
            if(output.plotBG==TRUE){
           
-           plot(values.bg, ylab="LM-OSL [a.u.]", xlab="time [s]", main="Background")
+           plot(values.bg, ylab="LM-OSL [a.u.]", xlab="Time [s]", main="Background")
            mtext(side=3,sample_code,cex=.8*cex.global)
            }
            
          }else{stop("Error: Invalid method for background subtraction")}
+         
+         ##reset par values
+         par(par.default)
+         rm(par.default)
        }
                         
 	
@@ -679,9 +672,9 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
        colnames(output.table)<-c("ID","sample_code","n.components",output.tableColNames,"pseudo-R^2")
 
        
-##============================================================================##   
+##============================================================================# 
 ## TABLE OUTPUT (CVS)
-##============================================================================##       
+##============================================================================#      
        
       if(missing(output.path)==FALSE){
        
@@ -701,24 +694,25 @@ if (output.terminaladvanced==TRUE && output.terminal==TRUE){
   
   output.table <- NA
   component.contribution.matrix <- NA
-  writeLines("[fit_LMCurve.R] >> Fitting Error: Plot without fit produced!")
+  writeLines("[fit_LMCurve] Fitting Error: Plot without fit produced!")
   
   }
 ##============================================================================##    
 ##  PLOTTING
 ##============================================================================##
 if(output.plot==TRUE){    
- 
+   
     ##cheat the R check routine
     x <- NULL; rm(x)
   
-    ##set colors gallery to provide more colors
-    col<-unlist(colors())
-    col<-col[c(261,552,51,62,76,151,451,474,654)]
-   
+    ##grep package colour gallery
+    col <- get("col", pos = .LuminescenceEnv)
+
     ##set plot frame
+    par.default <- par(no.readonly = TRUE)
+    
     layout(matrix(c(1,2,3),3,1,byrow=TRUE),c(1.6,1,1), c(1,0.3,0.4),TRUE)
-    par(oma=c(1,1,1,1),mar=c(0,4,3,0),cex=cex.global)
+    par(oma=c(1,1,1,1),mar=c(0,4,3,0), cex=cex.global)
  		
      ##==uppper plot==##
      ##open plot area
@@ -737,7 +731,8 @@ if(output.plot==TRUE){
      ##plotting measured signal 
      points(values[,1],values[,2],pch=20, col="grey")
     
-    ##==pseudo curve==##------------------------------------------------------##
+    ##==pseudo curve==##------------------------------------------------------#
+    
     ##curve for used pseudo values
     if(inherits(fit,"try-error")==TRUE & missing(start_values)==TRUE){ 
       fit.function<-fit.equation(Im.i=1:n.components,xm.i=1:n.components)
@@ -758,7 +753,6 @@ if(output.plot==TRUE){
       ##additional legend
       legend("topright",c("pseudo sum function"),lty=2,lwd=2,col="red",bty="n")
       
-      par()
      }
     ##==pseudo curve==##------------------------------------------------------##
            
@@ -781,6 +775,7 @@ if(output.plot==TRUE){
        if(input.dataType=="pLM"){"topright"}else{"topleft"}}else{"topright"},
           legend.caption,lty=1,lwd=2,col=col[curve.col], bty="n")
  		
+   
    ##==lower plot==##    
  		##plot residuals	
     par(mar=c(4.2,4,0,0))
@@ -789,26 +784,27 @@ if(output.plot==TRUE){
          xlab=xlab, 
          type="l", 
          col="grey", 
-         ylab="residual",
+         ylab="Residual",
          lwd=2,
          log=log)
  		
      ##ad 0 line
      abline(h=0)
- 		
+ 		 
     
-    ##------------------------------------------------------------------------##
+    ##------------------------------------------------------------------------#
     ##++component to sum contribution plot ++##
-    ##------------------------------------------------------------------------##
+    ##------------------------------------------------------------------------#
+   
      ##plot component contribution to the whole signal
      #open plot area
      par(mar=c(4,4,3.2,0))
      plot(NA,NA,
           xlim=xlim,
           ylim=c(0,100),
-          ylab="contribution [%]",
+          ylab="Contribution [%]",
           xlab=xlab,
-          main="Component Contribution To Sum Curve",
+          main="Component contribution to sum curve",
           log=if(log=="xy"){"x"}else{log})
    
      stepping <- seq(3,length(component.contribution.matrix),2)
@@ -823,6 +819,9 @@ if(output.plot==TRUE){
      }
      rm(stepping)      
     
+    ##reset par  
+    par(par.default)
+    rm(par.default)
     ##------------------------------------------------------------------------##
     }#end if try-error for fit
 
@@ -832,9 +831,9 @@ if(output.plot==TRUE){
     ##remove objects  
     try(unlist("parameters"))
   
-##============================================================================##  
+##============================================================================# 
 ## Return Values
-##============================================================================##    
+##============================================================================#    
   
   newRLumResults.fit_LMCurve <- set_RLum.Results(
     data = list(
@@ -942,13 +941,13 @@ if(output.plot==TRUE){
   ##
   ## Jain, M., Murray, A.S., Boetter-Jensen, L., 2003. Characterisation of blue-light
   ## stimulated luminescence components in different quartz samples: implications for
-  ## dose measurement. Radiation Measurements, 37, 4-5, 441-449. 
+  ## dose measurement. Radiation Measurements, 37 (4-5), 441-449. 
   ##
   ## Kitis, G. & Pagonis, V., 2008. Computerized curve deconvolution analysis for 
   ## LM-OSL. Radiation Measurements, 43, 737-741. 
   ##
   ## Lave, C.A.T., 1970. The Demand for Urban Mass Transportation. The Review of
-  ## Economics and Statistics, 52, 3, 320-323. 
+  ## Economics and Statistics, 52 (3), 320-323. 
   ##
   ## Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. R. Gentleman, 
   ## K. Hornik, & G. Parmigiani, eds., Springer, p. 150.

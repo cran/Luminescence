@@ -86,7 +86,7 @@ setMethod("show",
             
             ##print information
             
-            cat("\n [RLum.Data.Curve Object]")
+            cat("\n [RLum.Data.Curve]")
             cat("\n\t recordType:", object@recordType)
             cat("\n\t curveType:",  object@curveType)
             cat("\n\t measured values:", length(object@data[,1]))

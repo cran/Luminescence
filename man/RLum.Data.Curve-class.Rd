@@ -73,7 +73,7 @@ Class \code{"\linkS4class{RLum.Data}"}.
 \author{Sebastian Kreutzer Freiberg Instruments/JLU Giessen (Germany)
 }
 
-\section{Version}{0.1.2 [2013-11-22]}
+\section{Version}{0.1.2 (2013-11-22)}
 
 
 \note{

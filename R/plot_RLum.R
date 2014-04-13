@@ -3,10 +3,10 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.1 [2014-01-06]
+  ## version 0.1
   # ===========================================================================
 
   object, 
@@ -45,7 +45,7 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
    # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
    
    ##details<<
-   ## The function provides a generalized access point for plotting specific 
+   ## The function provides a generalised access point for plotting specific 
    ## \code{\linkS4class{RLum}} objects.\cr
    ## Depending on the input object, the corresponding plot function will be selected. 
    ## Allowed arguments can be found in the documentations of each plot function. 

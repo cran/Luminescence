@@ -12,22 +12,14 @@ BaseDataSet.CosmicDoseRate
 %- maybe also 'usage' for other objects documented here.
 \format{
 
-\bold{values.cosmic.Softcomp}\cr
+\tabular{ll}{
 
-data frame containing cosmic dose rates for
-shallow depths (< 167 g cm^-2) obtained using the "AGE" program by Rainer Gruen 
-(cf. Gruen 2009). These data essentially reproduce the graph shown in Fig. 1 of 
-Prescott & Hutton (1988). \cr
+\code{values.cosmic.Softcomp}: \tab data frame containing cosmic dose rates for shallow depths (< 167 g cm^-2) obtained using the "AGE" program by Rainer Gruen (cf. Gruen 2009). These data essentially reproduce the graph shown in Fig. 1 of Prescott & Hutton (1988). \cr
 
-\bold{values.factor.Altitude}\cr 
+\code{values.factor.Altitude}: \tab data frame containing altitude factors for adjusting geomagnetic field-change factors. Values were read from Fig. 1 in Prescott & Hutton (1994). \cr
 
-data frame containing altitude factors for adjusting geomagnetic field-change factors. 
-Values were read from Fig. 1 in Prescott & Hutton (1994). \cr
-
-\bold{values.par.FJH}\cr
-
-data frame containing values for parameters F, J and H (read from Fig. 2 in Prescott & Hutton 1994) used in the expression 
-
+\code{values.par.FJH}: \tab data frame containing values for parameters F, J and H (read from Fig. 2 in Prescott & Hutton 1994) used in the expression 
+}
 
 \deqn{Dc = D0*(F+J*exp((altitude/1000)/H))}
 } 
@@ -45,9 +37,13 @@ Fit: \tab Polynomials in the form of
 
 }
 
-\deqn{y = 2*10^-6*x^2-0.0008*x+0.2535 (for depths between 40-167 g cm^-2)} 
+For depths between 40-167 g cm^-2:
 
-\deqn{y = 2*10^-6*x^2-0.0008*x+0.2535 (For depths <40 g cm^-2)} 
+\deqn{y = 2*10^-6*x^2-0.0008*x+0.2535} 
+
+(For depths <40 g cm^-2)
+
+\deqn{y = -6*10^-8*x^3+2*10^-5*x^2-0.0025*x+0.2969} 
 
 
 \bold{values.factor.Altitude}

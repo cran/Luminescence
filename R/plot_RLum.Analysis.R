@@ -1,13 +1,13 @@
 plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 class object
-  ### The function provides a standardized plot output for curve data of an 
+  ### The function provides a standardised plot output for curve data of an 
   ### RLum.Analysis S4 class object
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.1.2 [2013-11-24]
+  ## version 0.1.2
   # ===========================================================================
 
   object, 
@@ -65,6 +65,10 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
   pch <- if("pch" %in% names(extraArgs)) {extraArgs$pch} else
   {1}
   
+  ##col
+  col <- if("col" %in% names(extraArgs)) {extraArgs$col} else
+  {"black"}
+  
   # Plotting ------------------------------------------------------------------
   
       ##grep RLum.Data.Curve or RLum.Data.Spectrum objects 
@@ -97,9 +101,11 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
                 
             if(is(temp[[i]], "RLum.Data.Curve") == TRUE){
             plot_RLum.Data.Curve(temp[[i]], 
-                 col = if(grepl("IRSL", temp[[i]]@recordType) == TRUE){"red"} else 
-                       if(grepl("OSL", temp[[i]]@recordType) == TRUE){"blue"} else
-                       {"black"},
+                 col = if(col != "black"){col} else{
+                   if(grepl("IRSL", temp[[i]]@recordType) == TRUE){"red"} else 
+                     if(grepl("OSL", temp[[i]]@recordType) == TRUE){"blue"} else
+                     {col}
+                 },
                      mtext = paste("#",i,sep=""),
                      par.local = FALSE,
                      main = if(main==""){temp[[i]]@recordType}else{main},

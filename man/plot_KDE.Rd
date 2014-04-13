@@ -1,89 +1,146 @@
 \name{plot_KDE}
 \alias{plot_KDE}
 \title{Plot kernel density estimate with statistics}
-\description{Function plots a kernel density estimate of measurement values in combination with 
+\description{Plot a kernel density estimate of measurement values in combination with 
 the actual values and associated error bars in ascending order. 
 Optionally, statistical measures such as mean, median, standard 
 deviation, standard error and quartile range can be provided visually 
 and numerically.}
-\usage{plot_KDE(values, na.exclude = TRUE, distribution.parameters, 
-    summary, summary.pos, bw = "nrd0", output = FALSE, ...)}
+\usage{plot_KDE(data, na.exclude = TRUE, weights = FALSE, values.cumulative = TRUE, 
+    centrality, dispersion, stats, stats.pos = "sub", polygon.col, 
+    order = TRUE, bw = "nrd0", output = FALSE, ...)}
 \arguments{
-  \item{values}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object 
+  \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object 
 (required): for \code{data.frame}: two columns: De (\code{values[,1]})
 and De error (\code{values[,2]}). For plotting multiple data sets, these
-must be provided as \code{list} (e.g., \code{list(dataset1, dataset2)}).}
-  \item{na.exclude}{\code{\link{logical}} (with default): excludes \code{NA} values from the data
+must be provided as \code{list} (e.g. \code{list(dataset1, dataset2)}).}
+  \item{na.exclude}{\code{\link{logical}} (with default): exclude NA values from the data
 set prior to any further operations.}
-  \item{distribution.parameters}{\code{\link{character}} (optional): plots additional distribution 
-parameters. Can be one or more out of "mean", "median", "kdemax" 
-(maximum value of probability density function), "sd" (standard 
-deviation) and "qr" (quartile range). Example: 
-\code{distribution.parameter=c("median","mean","sd")}. Mean and 
-median are potted as a line, the standard deviation is shown as a 
-gray polygon. Polygons are not possible for multiple data sets.}
-  \item{summary}{\code{\link{character}} (optional): adds numerical output to the plot. 
-Can be one or more out of: "n" (number of samples), "mean" (mean De 
-value), "median" (median of the De values), "kdemax" (maximum value of 
-probability density function), "kurtosis" (kurtosis), "skewness"
-(skewness), "sdrel" (relative standard deviation in 
-percent), "sdabs" (absolute standard deviation), "serel" (relative 
-standard error) and "seabs" (absolute standard error). Summary
-information is not possible for multiple datasets.}
-  \item{summary.pos}{\code{\link{numeric}} or \code{\link{character}} (with default): optional  
+  \item{weights}{\code{\link{logical}} (with default): calculate the KDE with De-errors
+as weights. Attention, using errors as weights will result in a plot
+similar to a a probability density plot, with all ambiguities related
+to this plot type!}
+  \item{values.cumulative}{\code{\link{logical}} (with default): show cumulative individual data.}
+  \item{centrality}{\code{\link{character}}: measure(s) of centrality, used for
+plotting vertical lines of the respective measure. Can be
+one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
+\code{"median.weighted"} and \code{"kdemax"}.}
+  \item{dispersion}{\code{\link{character}}: measure of dispersion, used for
+drawing the polygon that depicts the dose distribution. One out of
+\code{"sd"} (standard deviation),\code{"2sd"} (2 standard deviations) 
+\code{"qr"} (quartile range).}
+  \item{stats}{\code{\link{character}} (optional): add numerical output to the plot. 
+Can be one or more out of: \code{"n"} (number of samples), \code{"mean"} (mean De 
+value), \code{"mean.weighted"} (error-weighted mean), \code{"median.weighted"}
+(error-weighted median), \code{"median"} (median of the De values), \code{"kdemax"} 
+(maximum value of probability density function), \code{"kurtosis"} (kurtosis), 
+\code{"skewness"} (skewness), \code{"sdrel"} (relative standard deviation in 
+percent), \code{"sdabs"} (absolute standard deviation), \code{"serel"} (relative 
+standard error) and \code{"seabs"} (absolute standard error).}
+  \item{stats.pos}{\code{\link{numeric}} or \code{\link{character}} (with default): optional  
 position coordinates or keyword for the statistical summary. Y-coordinate  
-refers to the right hand y-axis.}
-  \item{bw}{\code{\link{character}} (with default): bin-width, choose a numeric 
+refers to the left y-axis.}
+  \item{polygon.col}{\code{\link{character}} or \code{\link{numeric}} (with default): colour 
+of the polygon showing the dose dispersion around the central value.
+Only relevant if \code{dispersion} is specified.}
+  \item{order}{\code{\link{logical}}: Order data in ascending order.}
+  \item{bw}{\code{\link{character}} (with default): bin-width, chose a numeric 
 value for manual setting.}
   \item{output}{\code{\link{logical}}: Optional output of numerical plot parameters.
 These can be useful to reproduce similar plots. Default is \code{FALSE}.}
   \item{\dots}{further arguments and graphical parameters passed to \code{\link{plot}}.}
 }
-\details{The function allows passing several plot arguments, such as \code{main}, 
+\details{The function allow passing several plot arguments, such as \code{main}, 
 \code{xlab}, \code{cex}. However, as the figure is an overlay of two 
 separate plots, \code{ylim} must be specified in the order: c(ymin_axis1, 
-ymax_axis1, ymin_axis2, ymax_axis2). Similarly, if other than the default 
-colours are desired, the argument \code{col} must be provided with colours in 
+ymax_axis1, ymin_axis2, ymax_axis2) when using the cumulative values plot
+option. Similarly, if other than the default 
+colours are desired, the argument col must be provided with colours in 
 the following order: probability density function, De values, De error 
-bars, sd or qr polygon. See examples for some further explanations. For 
-details on the calculation of the bin-width (parameter \code{bw}), see 
+bars, sd or qr polygon. The line type (\code{lty}) for additional 
+measures of centrality will cycle through the default values (1, 2, ...)
+by default, i.e. KDE line solid, further vertical lines dashed, dotted, 
+dash-dotted and so on. To change this behaviour specify the desired
+order of line types (e.g. \code{lty = c(1, 3, 2, 5)}).
+See examples for some further explanations. For 
+details on the calculation of the bin-width (parameter \code{bw}) see 
 \code{\link{density}}.}
 
 
-\author{R Luminescence Package Team}
+\author{Michael Dietze (GFZ Potsdam),
+Sebastian Kreutzer, JLU Giessen (Germany), \cr
+R Luminescence Package Team}
 \note{The plot output is no 'PD' plot (cf. the discussion of Berger and 
 Galbraith in Ancient TL; see references)!}
 
 
 \seealso{\code{\link{density}}, \code{\link{plot}}}
 \examples{
-# read example data set
+## read example data set
 data(ExampleData.DeValues, envir = environment())
+ExampleData.DeValues <- 
+  Second2Gray(values = ExampleData.DeValues, dose_rate = c(0.0438,0.0019))
 
-# native function call
-plot_KDE(ExampleData.DeValues)
+## create plot straightforward
+plot_KDE(data = ExampleData.DeValues)
 
-# function call with some user-defined modifications
-plot_KDE(ExampleData.DeValues,
-         main = "Plot of Dose distribution data",
-         col = c("red", "black", "grey", "cyan"),
-         xlab = "Equivalent dose [Gy]",
-         ylabs = c("KDE estimate", "cumulative De values"),
-         distribution.parameters = c("qr", "median"), 
-         xlim = c(2000, 5000),
-         ylims = c(0, 0.005, -5, 50),
-         summary = c("n", "median", "serel", "seabs"),
-         cex = 0.8)
+## create plot with logarithmic x-axis
+plot_KDE(data = ExampleData.DeValues, 
+         log = "x")
 
-# function call with complete numerical statistical description output
-plot_KDE(ExampleData.DeValues,
-         distribution.parameters = c("qr", "kdemax"), 
-         summary = c("n", "mean", "median", "kdemax", "serel", 
-                     "sdrel", "sdabs", "seabs"))
+## create plot with user-defined labels and axes limits
+plot_KDE(data = ExampleData.DeValues,
+         main = "Dose distribution",
+         xlab = "Dose [s]",
+         ylab = c("KDE estimate", "Cumulative dose value"),
+         xlim = c(100, 250),
+         ylim = c(0, 0.08, 0, 30))
 
-# function call with two data sets
-dataset1 <- ExampleData.DeValues[1:8,]
-dataset2 <- ExampleData.DeValues[9:25,]
+## create plot with centrality lines and distribution polygons
+plot_KDE(data = ExampleData.DeValues,
+         ylim = c(0, 0.08, 0, 35),
+         centrality = c("median", "mean"),
+         dispersion = "sd",
+         polygon.col = "lightblue")
 
-plot_KDE(list(dataset1, dataset2), col = c("blue", "orange"))
+## create plot with statistical summary below header
+plot_KDE(data = ExampleData.DeValues,
+         stats = c("n", "median", "skewness", "qr"))
+
+## create plot with statistical summary as legend
+plot_KDE(data = ExampleData.DeValues,
+         stats = c("n", "mean", "sdrel", "seabs"),
+         stats.pos = "topleft")
+
+## split data set into sub-groups, one is manipulated, and merge again
+data.1 <- ExampleData.DeValues[1:15,]
+data.2 <- ExampleData.DeValues[16:25,] * 1.3
+data.3 <- list(data.1, data.2)
+
+## create plot with two subsets straightforward
+plot_KDE(data = data.3)
+
+## create plot with two subsets and summary legend at user coordinates
+plot_KDE(data = data.3,
+         stats = c("n", "median", "skewness"),
+         stats.pos = c(110, 0.07),
+         col = c("blue", "orange"))
+
+## example of how to use the numerical output of the function
+## return plot output to draw a thicker KDE line
+KDE <- plot_KDE(data = ExampleData.DeValues,
+                output = TRUE)
+
+## read out coordinates of KDE graph
+KDE.x <- KDE$De.density[[1]]$x
+KDE.y <- KDE$De.density[[1]]$y
+
+## transform y-values to right y-axis dimensions
+KDE.y <- KDE.y / max(KDE.y) * (nrow(ExampleData.DeValues) - 1) + 1
+
+## draw the KDE line
+lines(x = KDE.x,
+      y = KDE.y,
+      lwd = 3)
 }
+\section{Function version}{3.2 (2014-04-13 14:30:32)}

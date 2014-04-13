@@ -30,8 +30,8 @@ website: \code{http://www.nutech.dtu.dk/}}
 \item{DATA}{A \link{list} containing a numeric \link{vector} of the measured data. 
 The ID corresponds to the record ID in METADATA.}}
 \references{Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/english/~/media/Andre_Universitetsenheder/Nutech/Produkter\%20og\%20services/Dosimetri/radiation_measurement_instruments/tl_osl_reader/Manuals/analyst_manual_v3_22b.ashx}}
-\author{Sebastian Kreutzer, JLU Giessen (Germany),
-Margret C. Fuchs, TU Bergakademie Freiberg (Germany)
+\author{Sebastian Kreutzer, JLU Giessen (Germany), 
+Margret C. Fuchs, AWI Postdam (Germany),\cr
 R Luminescence Package Team}
 \note{The function has been successfully tested for BIN format versions 03, 04 and 06. 
 The version number depends on the used Sequence Editor.\cr\cr
@@ -39,11 +39,16 @@ The version number depends on the used Sequence Editor.\cr\cr
 
 
 \seealso{\code{\link{writeR2BIN}}, \code{\linkS4class{Risoe.BINfileData}},
-\code{\link{readBin}}, \code{\link{txtProgressBar}}}
+\code{\link{readBin}}, \code{\link{merge_Risoe.BINfileData}}, \code{\link{txtProgressBar}}}
 \examples{
 
-##readBIN2R("~/Desktop/Example.bin")
+##(1) import Risoe BIN-file to R (uncomment for usage)
+
+#FILE <- file.choose()
+#temp <- readBIN2R(FILE)
+#temp
 
 }
 
 \keyword{IO}
+\section{Function version}{0.7 (2014-04-13 14:31:53)}

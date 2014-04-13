@@ -2,7 +2,7 @@
 \alias{Analyse_SAR.OSLdata}
 \title{Analyse SAR CW-OSL measurements.}
 \description{The function analyses SAR CW-OSL curve data and provides a summary of the 
-measured data for every position. The output of the function is optimized 
+measured data for every position. The output of the function is optimised 
 for SAR OSL measurements on quartz.}
 \usage{Analyse_SAR.OSLdata(input.data, signal.integral, background.integral, 
     position, run, set, info.measurement = "unkown measurement", 
@@ -46,8 +46,8 @@ is used. \cr\cr
 values of the zero regeneration point with the Ln/Tn value (the Lx/Tx ratio 
 of the natural signal). For methodological background see Aitken and Smith (1988)\cr
 
-\sQuote{IRSL/BOSL}: the integrated counts (\code{signal.integral}) of a IRSL 
-curve are compared with the integrated counts of the first regenerated dose point. 
+\sQuote{IRSL/BOSL}: the integrated counts (\code{signal.integral}) of an IRSL 
+curve are compared to the integrated counts of the first regenerated dose point. 
 It is assumed that IRSL curves got the same dose as the first regenerated 
 dose point. \strong{Note:} This is not the IR depletation ratio described 
 by Duller (2003).}
@@ -68,8 +68,8 @@ luminescence measurements. Radiation Measurements, 37 (2), pp. 161-165.
 Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using 
 an improved single-aliquot regenerative-dose protocol. 
 Radiation Measurements, 32, pp. 57-73. }
-\author{Sebastian Kreutzer, JLU Giessen (Germany), Margret C. Fuchs, TU Bergakademie
-Freiberg (Germany)\cr
+\author{Sebastian Kreutzer, JLU Giessen (Germany), 
+Margret C. Fuchs, AWI Potsdam (Germany), \cr
 R Luminescence Package Team}
 \note{Rejection criteria are calculated but not considered during 
 the analysis to discard values.\cr\cr
@@ -79,7 +79,9 @@ We recommend to use the function \link{analyse_SAR.CWOSL} instead.}}
 
 
 \seealso{\link{calc_OSLLxTxRatio}, \link{Risoe.BINfileData-class}, 
-\link{readBIN2R} and for further analysis \link{plot_GrowthCurve}}
+\link{readBIN2R} 
+
+and for further analysis \link{plot_GrowthCurve}}
 \examples{
 
 ##load data
@@ -102,3 +104,4 @@ output.SAR
 
 \keyword{datagen}
 \keyword{dplot}
+\section{Function version}{0.2.12 (2014-04-13 14:22:24)}

@@ -1,7 +1,180 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
 
-\section{Changes in version 0.3.2 (7th Januar, 2014)}{
+
+\section{Changes in version 0.3.3 (13th April, 2014)}{
+
+ 
+     \subsection{New functions}{
+       \itemize{
+       \item \code{plot_AbanicoPlot()}: New function for standard De distribution plots
+       \item \code{plot_DRTResults()}: New function to visualise dose recovery test results
+       \item \code{calc_Statistics()}: New function to calculate De/Age/Distribution
+       statistics that are often used by functions in the package
+       \item \code{apply_CosmicRayRemoval()}: New function to remove cosmic rays in 
+       \code{RLum.Data.Spectrum} objects (#80)
+       \item \code{apply_EfficiencyCorrection()}: New function to allow spectral efficiency corrections 
+       on \code{RLum.Data.Spectrum} objects using a given spectral response data set for the used system
+     
+      }
+    }
+    
+     \subsection{New Data Sets}{
+    \itemize{
+      \item \code{ExampleData.XSYG}: SAR measurement and TL spectrum imported 
+      from a Freiberg Instruments XSYG file.
+ 
+    }}
+    
+    
+     \subsection{Changes within the \code{RLum} classes and methods}{
+     
+      \itemize{
+      
+      \item \code{get_RLum.Analysis()}: Add argument \code{keep.object} to allow 
+      returing an \code{RLum.Analysis} object instead of single records when using 
+      the method. For the sake of consistency with previous examples the default
+      option is \code{keep.object = FALSE}
+      
+      
+      \item \code{get_RLum.Analysis()}: In cases for that the output contains only one
+      element the element is returned as non-list element (no list is returned)
+      }
+     }
+       
+     \subsection{Further bugfixes and changes}{
+       \itemize{
+            
+       \item \code{calc_OSLLxTxRatio()}: Considering the case that the number of backround intergral
+       channels is smaller than the number for signal integral channels by implementing 
+       suggestions from Rex Galbraith (2014) (#78, reported by Alexandra Rowell). 
+       
+       \item \code{calc_OSLLxTxRatio()}: Add preset argument \code{background.count.distribution}
+       
+       \item \code{calc_OSLLxTxRatio()}: Add optional argument \code{sigmab} and extend value
+       output
+       
+       \item \code{plot_RLum.Analysis()}: Pass \code{col} argument to the plot
+       
+       \item \code{calc_FiniteMixture()}: The \code{n.components} argument 
+       now accepts vectors in the form of \code{c(min:max)} 
+       to calculate the finite mixtures while increasing stepwise the number of 
+       k components to be fitted
+       
+       \item \code{calc_FiniteMixture()}: Added plot output when a vector is provided for 
+       \code{n.components}      
+       \item \code{calc_FiniteMixture()}: Evaluation of BIC scores and maximum 
+       log-likelihoods estimates when a vector is provided for \code{n.components}
+       
+        \item \code{calc_FiniteMixture()}:Tolerance increased when solving the covariance matrix from 
+        \code{$double.eps (~10^-16) to $double.xmin (~10^-308)}
+        
+          \item \code{calc_FiniteMixture()}: New examples added
+          
+          \item \code{analyse_IRSAR.RF()}: Correct an error that occurred when \code{NaN} 
+          are produced during De calculation
+          
+          \item \code{analyse_IRSAR.RF()}: Implement automatic \code{predefined} curve
+          removal from the \code{RLum.Analysis} input object for data imported
+          from XSYG files
+          
+          \item \code{analyse_IRSAR.RF()}: Add limitation of points used for 
+          natural signal calculation by using \code{fit.range.min}
+          
+           \item \code{analyse_IRSAR.RF()}: Correct an error for the case that a fitting 
+           could not be applied 
+          
+          \item \code{analyse_SAR.CWOSL()}: Add support for palaeodose error 
+           as rejection criteria
+           
+           \item \code{Risoe.BINfileData2RLum.Analysis()}: Setting of arguments \code{run}, 
+           \code{set} and \code{ltype} had no effect: Corrected (#87, reported by Thomas Kolb).
+           
+           \item \code{plot_Histogram()}: Add summary options and y-limits
+           
+           \item \code{plot_Histogram()}: Fix odd plotting (#89)
+           
+           \item \code{plot_KDE()}: Fix bug for using multiple datasets. KDE can now
+           calculated with error-weights; however per default set to \code{FALSE} as
+           it will be a PD plot otherwise
+           
+           \item \code{plot_KDE()}: Add argument \code{values.cumulative} to show 
+           cummulative values individually (#88)
+           
+           \item \code{plot_KDE()}, \code{plot_Histogram}, \code{plot_RadialPlot}: flexible
+           placement of statistical summary and legend added
+           
+                 
+           \item \code{plot_RLum.Data.Spectrum()}: Add plot type \code{single} to 
+           allow single curve output and optimise code
+           
+           \item \code{plot_RLum.Data.Spectrum()}: Add arguments for horizontal
+           (\code{bin.rows}) and vertical binning (\code{bin.cols})
+           
+            \item \code{plot_RLum.Data.Spectrum()}: Add argument \code{bg.channels}
+            to allow the specification of background channels that are subtracted from 
+            the other channels.
+             
+            \item \code{plot_RLum.Data.Spectrum()}: Correct an error that occurred if no xlab or
+            ylab information are provided
+            
+            \item \code{plot_RLum.Data.Spectrum()}: Add new plot option \code{mutiple.lines}, 
+            allowing to draw all frames in one plot
+            
+            \item \code{plot_GrowthCurve()}: Correct \code{mtext} behaviour as expected 
+            (#91)
+            
+            \item \code{plot_GrowthCurve()}: Now resets global \code{par} parameter 
+            after plotting
+            
+            \item \code{plot_RadialPlot()}: Provide note on polygone behaviour (#90)
+            
+            \item \code{plot_RadialPlot()}: Correct 2-sigma label plotting (#92)
+            
+            \item \code{plot_RadialPlot()}: Some minor graphical adjustments 
+             
+            \item \code{merge_Risoe.BINfileData()}: New argument added 
+             \code{position.number.append.gap} allowing to account for a specific 
+             position number structure within the data sets (#94, requested by 
+             Thomas Kolb)
+             
+             \item \code{merge_Risoe.BINfileData()}: Correct an error that occured 
+             for merging more than two BIN-files (#93, reported by Thomas Kolb)
+             
+            \item \code{readXSYG2R()}: Rewritten TL curve recalculation routine;
+            argument \code{recalculate.TL.curves} set now to \code{TRUE} by default.
+            (#86)
+            
+            \item \code{calc_FuchsLang2001()}: Function now allows \code{RLum.Results} object
+            as input and returns an \code{RLum.Results} object.
+            
+            \item \code{calc_FuchsLang2001()}: Now supports the \code{...} argument. 
+            The arguments \code{cex.global}, \code{main}, \code{xlab}, \code{sample.mtext} 
+            have been therefore removed. 
+            
+            \item \code{calc_AliquotSize()}: added the option to estimate the
+            amount of grains on an aliquot by monte carlo simulation; implement \code{RLum.Results}
+            object handling (output)
+
+            \item \code{calc_MaxDose3()}: removed the option to print results to a file
+
+            \item \code{calc_MinDose3()}: removed the option to print results to a file
+
+            \item \code{calc_MinDose4()}: removed the option to print results to a file
+
+            \item \code{calc_CosmicDoseRate()}: Implement \code{RLum.Results} object handling (output)
+            
+            \item \code{fit_CWCurve()}: Now uses package colour library and \code{par} settings will 
+            be reset after plotting
+            
+            \item \code{fit_LMCurve()}: Now uses package colour library and \code{par} settings will 
+            be reset after plotting
+  
+    }}
+    
+}
+
+\section{Changes in version 0.3.2 (7th January, 2014)}{
        
      \subsection{Bugfixes and changes}{
        \itemize{
@@ -269,7 +442,7 @@
      \item \code{readBIN2R()}: BINX file format support has been added 
      \item \code{readBIN2R()}: An argument \code{forced.VersionNumber} has been added to cheat the internal version check routine if needed
      \item \code{Risoe.BINfileData-class}: The *.binx file format support has been added 
-	  \item \code{RLum.Analysis}: Add argument \code{get.index} just to show the index values
+	  \item \code{RLum.Analysis}: Add argument \code{get.index} just to show the index values
   
     }}
 

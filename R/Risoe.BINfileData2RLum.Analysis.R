@@ -4,10 +4,10 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.1 [2013-08-04]
+  ## version 0.1.1
   # ===========================================================================
 
   object,
@@ -19,14 +19,14 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
   
   run,
   ### \code{\link{vector}, \link{numeric}} (optional): run number from the measurement to limit
-  ### the converted data set (e.g. run = c(1:48)).
+  ### the converted data set (e.g., \code{run = c(1:48)}).
   
   set,
   ### \code{\link{vector}, \link{numeric}} (optional): set number from the measurement to limit
-  ### the converted data set (e.g. set = c(1:48)).
+  ### the converted data set (e.g., \code{set = c(1:48)}).
   
-  ltype = c("IRSL","OSL","TL","RIR","RBR","USER", "RL"),
-  ### \code{\link{vector}, \link{character}} (with default): curve type to limit 
+  ltype,
+  ### \code{\link{vector}, \link{character}} (optional): curve type to limit 
   ### the converted data. Allowed values are: \code{IRSL}, \code{OSL}, 
   ### \code{TL}, \code{RIR}, \code{RBR} and \code{USER}
   
@@ -69,9 +69,52 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
 # Grep run and set data ---------------------------------------------------
 
 
-  ##grep values according to their criteria
-  run <- unique(object@METADATA[, "RUN"])
-  set <- unique(object@METADATA[, "SET"])
+  ##grep values according to their criteria and check for validity 
+  ##run
+  if(missing(run) == TRUE){run <- unique(object@METADATA[, "RUN"])} else{
+      
+    if(TRUE %in% unique(unique(object@METADATA[, "RUN"]) %in% run) != TRUE){
+      
+      ##get and check valid positions
+      run.valid <- paste(as.character(unique(object@METADATA[,"RUN"])), collapse=", ")
+      
+        stop(paste("[Risoe.BINfileData2RLum.Analysis] run = ", run, " contain invalid run(s). 
+                   Valid runs are: ", run.valid, sep=""))
+      
+    }
+     
+  }
+
+  #set
+  if(missing(set) == TRUE){set <- unique(object@METADATA[, "SET"])} else{
+  
+     if(TRUE %in% unique(unique(object@METADATA[, "SET"]) %in% set) != TRUE){
+    
+     ##get and check valid positions
+     set.valid <- paste(as.character(unique(object@METADATA[,"SET"])), collapse=", ")
+    
+     stop(paste("[Risoe.BINfileData2RLum.Analysis] set = ", set, " contain invalid set(s). 
+                   Valid sets are: ", set.valid, sep=""))
+    
+    }
+  
+  }
+  
+  ##ltype
+  if(missing(ltype) == TRUE){ltype <- unique(object@METADATA[, "LTYPE"])} else{
+    
+    if(TRUE %in% unique(unique(object@METADATA[, "LTYPE"]) %in% ltype) != TRUE){
+    
+     ##get and check valid positions
+     ltype.valid <- paste(as.character(unique(object@METADATA[,"LTYPE"])), collapse=", ")
+    
+     stop(paste("[Risoe.BINfileData2RLum.Analysis] ltype = ", ltype, " contain invalid ltype(s). 
+               Valid ltypes are: ", ltype.valid, sep=""))
+    
+    }
+  
+  }
+
 
 # Select values -----------------------------------------------------------
 
@@ -82,9 +125,9 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
   object@METADATA[
     which(
       object@METADATA[,"POSITION"] == pos &
-      (object@METADATA[,"RUN"] %in% run) == TRUE &
-      (object@METADATA[,"SET"] %in% set) == TRUE &
-      (object@METADATA[,"LTYPE"] %in% ltype) == TRUE      
+      object@METADATA[,"RUN"] %in% run == TRUE &
+      object@METADATA[,"SET"] %in% set == TRUE &
+      object@METADATA[,"LTYPE"] %in% ltype == TRUE      
       )    
     , "SEL"] <- TRUE
 

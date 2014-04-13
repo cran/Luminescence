@@ -4,10 +4,10 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
   # ===========================================================================
   ##author<<
   ## Sebastian Kreutzer, JLU Giessen/Freiberg Instruments (Germany),
-  ## Christoph Schmidt, University of Bayreuth (Germany)
+  ## Christoph Schmidt, University of Bayreuth (Germany),\cr
   
   ##section<<
-  ## version 0.2.1 [2013-12-23]
+  ## version 0.2.1
   # ===========================================================================
 
   Lx.data.signal,

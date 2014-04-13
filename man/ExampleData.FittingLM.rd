@@ -5,7 +5,7 @@
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Lineraly modulated (LM) measurement data from a quartz sample from Norway including background 
-measurement. Measurements carried from the luminescence laboratory at the University of Bayreuth.
+measurement. Measurements carried out in th luminescence laboratory at the University of Bayreuth.
 
 }
 \usage{

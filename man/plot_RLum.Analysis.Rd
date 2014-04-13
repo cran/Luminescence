@@ -1,7 +1,7 @@
 \name{plot_RLum.Analysis}
 \alias{plot_RLum.Analysis}
 \title{Plot function for an RLum.Analysis S4 class object}
-\description{The function provides a standardized plot output for curve data of an 
+\description{The function provides a standardised plot output for curve data of an 
 RLum.Analysis S4 class object}
 \usage{plot_RLum.Analysis(object, nrows = 3, ncols = 2, ...)}
 \arguments{
@@ -15,7 +15,7 @@ RLum.Analysis S4 class object}
 A file output is recommended (e.g., \code{\link{pdf}}).}
 \value{Returns multiple plots.}
 \references{#}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)
+\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{Not all arguments available for \code{\link{plot}} will be passed!
 Only plotting of \code{RLum.Data.Curve} and \code{RLum.Data.Spectrum}
@@ -38,3 +38,4 @@ plot_RLum.Analysis(temp)
 }
 
 \keyword{aplot}
+\section{Function version}{0.1.2 (2014-04-13 14:30:54)}

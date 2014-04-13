@@ -10,7 +10,7 @@ calc_MaxDose3<- structure(function( # Apply the maximum age model to a given De 
   ## Based on a rewritten S script of Rex Galbraith, 2010 \cr\cr
   
   ##section<<
-  ## version 0.2 [2013-11-04] 
+  ## version 0.22
   # ===========================================================================
   
   input.data, 
@@ -20,7 +20,7 @@ calc_MaxDose3<- structure(function( # Apply the maximum age model to a given De 
   sigmab, 
   ### \code{\link{numeric}}  (\bold{required}): spread in De values given as a 
   ### fraction (e.g. 0.2). This value represents the expected overdispersion in
-  ### the data, if the sample is well-bleached (Cunningham & Walling 2012, p. 100).
+  ### the data should the sample be well-bleached (Cunningham & Walling 2012, p. 100).
   log=TRUE, 
   ### \code{\link{logical}} (with default): fit the (un-)logged three parameter 
   ### maximum dose model to De data. An un-logged version is currently not
@@ -51,13 +51,7 @@ calc_MaxDose3<- structure(function( # Apply the maximum age model to a given De 
   ### \code{\link{logical}} (with default): print profile log likelihood
   ### functions for gamma, sigma, p0 to console.
   console.extendedOutput=FALSE, 
-  ### \code{\link{logical}} (with default): extended terminal output
-  output.file=FALSE,
-  ### \code{\link{logical}} (with default): save results to file. See 
-  ### \code{output.filename}.
-  output.filename="default", 
-  ### \code{\link{character}} (with default): desired filename, else results 
-  ### are saved to default-3R(-UL).res 
+  ### \code{\link{logical}} (with default): extended terminal output 
   output.plot=FALSE, 
   ### \code{\link{logical}} (with default): plot output
   ### (\code{TRUE}/\code{FALSE})
@@ -305,35 +299,6 @@ neglik.f<- function(param,input.data,rep){
     get("Bmess",)
   }
 
-# write the parameter estimates to output file filnam.res 
-# where filnam is the input file name
-  
-  filnam<- output.filename
-
-  if(output.file==TRUE)
-  {
-  lbout<- paste(filnam,if(log==TRUE){"-3R.res"}else{"-3R-UL.res"},sep="")
-  
-  write(c("Sample: ", filnam, "\nSigma_b: ", sigmab), file=lbout, ncolumns=2,
-        append=F)
-  write("",lbout,append=T)
-  write(paste("Final estimate of model parameters"),lbout,append=T)
-  write(paste("gamma:", round(gamma,3), "sigma:", round(sigma,3), "p0:",
-              round(p0,3)),lbout,append=T)
-  
-  write("\nmaximum likelihood estimate of maximum age",lbout, append=T)
-  
-  write(if(log==TRUE){exp(gamma)}else{gamma},lbout,append=T)
-
-
-# write fitted values to output file filnam-3R.res 
-# where filnam is the input file name
-  prfile<- T
-  neglik.f(mlest,datmat)
-  prfile<- F
-  
-  }
-
 ##============================================================================##
 ## PROFILE LOG LIKELIHOODS
 ##============================================================================##
@@ -346,6 +311,9 @@ neglik.f<- function(param,input.data,rep){
   
   profind<- as.integer(output.indices)
 
+  # save previous plot parameter and set new ones
+  .pardefault<- par(no.readonly = TRUE)
+  
   if(output.plot==TRUE) {
     par(mfrow=c(2,2),oma=c(9,2,9,1),mar=c(3.7,3.1,1.1,0.2),
         mgp=c(1.75,0.5,0),las=1,cex.axis=1.1,cex.lab=1.3)
@@ -571,19 +539,6 @@ if(n1>1)
   try(gul<- u1, silent=TRUE)
   try(guu<- u2, silent=TRUE) }
   
-  if(output.file==TRUE&&j==1) {
-  write("\n95% confidence interval",lbout,append=T)
-  if(log==TRUE) {
-    try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-    try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
-                    round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE)
-  }
-  else {
-    try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-    try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma,2)),lbout,
-              append=T), silent=TRUE)  
-  }
-  }
   
 # the 68% upper and lower confidence limits are calculated from the
 # profile results  and the results are added to the plot
@@ -631,17 +586,7 @@ if(n1>1)
   try(gll<- u1, silent=TRUE)
   try(glu<- u2, silent=TRUE) }
   
-  if(output.file==TRUE&&j==1) {
-  write("\n68% confidence interval",lbout,append=T)
-  if(log==TRUE) {
-    try(write(c(exp(u1),exp(u2)),lbout,append=T),silent=TRUE)
-    try(write(paste("-",round(exp(gamma)-exp(u1),2),"+",
-                    round(exp(u2)-exp(gamma),2)),lbout,append=T),silent=TRUE) }
-  else {
-    try(write(c(u1,u2),lbout,append=T),silent=TRUE)
-    try(write(paste("-",round(gamma-u1,2),"+",round(u2-gamma),2),lbout,
-              append=T),silent=TRUE) }
-  }
+
   
   
 # printing the maximum likelihood estimate on the graph
@@ -654,8 +599,8 @@ if(n1>1)
         }
     }
   if(output.plot==TRUE) {
-    mtext(side=2,line=0,"relative profile log likelihood",cex=1.2,outer=T,las=0)
-    mtext(side=3,line=0,paste(filnam,if(log==TRUE){"   MAM 3"}
+    mtext(side=2,line=0,"Relative profile log likelihood",cex=1.2,outer=T,las=0)
+    mtext(side=3,line=0,paste(sample.id,if(log==TRUE){"   MAM 3"}
                               else{"   MAM 3-UL"}),cex=1.4,outer=T)
   }
 # Bmess is a message: it is the number ofs times 
@@ -667,13 +612,6 @@ if(n1>1)
   cat("\n -----------------------------")
   }
 }#EndOf IF (PROFILE LOG LIKELIHOODS)
-
-  if(output.file==TRUE) {
-  write("",lbout,append=T)
-  write(paste("Likelihood: ", round(maxlik, 5)),lbout, append=T)
-  write(paste("       BIC: ", round(bic, 3)),lbout, append=T)
-  }
-
 
 # prepare return values
 results<- data.frame(id=sample.id,n=length(lcd),log=log,Lmax=maxlik,BIC=bic,
@@ -766,6 +704,9 @@ rownames(bcheck)<- c(".xub",".xlb")
               "is not ensured. \n"), fill = FALSE)
   }
 
+  # restore previous plot parameters
+  par(.pardefault)
+  
 # return values
   
   newRLumResults.calc_MaxDose3 <- set_RLum.Results(
@@ -773,8 +714,7 @@ rownames(bcheck)<- c(".xub",".xlb")
       results = results))
 
 invisible(newRLumResults.calc_MaxDose3)
-### Returns a plot (optional) and terminal output. A file 
-### containing statistical results is provided if desired. In addition an 
+### Returns a plot (optional) and terminal output. In addition an 
 ### \code{\linkS4class{RLum.Results}} object is 
 ### returned containing the following element:
 ###
@@ -798,10 +738,10 @@ invisible(newRLumResults.calc_MaxDose3)
 ## 2. multiply the logged data to creat a mirror image of the De distribution\cr
 ## 3. shift De values along x-axis by the smallest x-value found to obtain 
 ## only positive values \cr
-## 4. apply the MAM to these data, after combining the square of the measurement
-## error associated with each De value with a relative error specified by 
-## sigmab \cr\cr
-## When all calculations are done, results are then converted
+## 4. combine in quadrature the measurement error associated with each De value
+## with a relative error specified by sigmab
+## 5. apply the MAM to these data \cr\cr
+## When all calculations are done the results are then converted
 ## as follows\cr\cr
 ## 1. subtract the x-offset \cr
 ## 2. multiply the natural logs by -1 \cr
@@ -838,7 +778,7 @@ invisible(newRLumResults.calc_MaxDose3)
 ## produces NA values it is possible to omit these values by setting 
 ## \code{ignore.NA = TRUE}. While the model is then usually able to finish
 ## all calculations the integrity of the final estimates cannot be ensured.
-## \bold{Use this argument at your own risk.}
+## Use this argument at own risk.
   
 
 ##references<<

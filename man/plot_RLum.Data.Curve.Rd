@@ -1,7 +1,7 @@
 \name{plot_RLum.Data.Curve}
 \alias{plot_RLum.Data.Curve}
 \title{Plot function for an RLum.Data.Curve S4 class object}
-\description{The function provides a standardized plot output for curve data of an 
+\description{The function provides a standardised plot output for curve data of an 
 RLum.Data.Curve S4 class object }
 \usage{plot_RLum.Data.Curve(object, par.local = TRUE, ...)}
 \arguments{
@@ -17,7 +17,7 @@ global parameters are inherited.}
 Arguments according to \code{\link{plot}}.}
 \value{Returns a plot.}
 \references{#}
-\author{Sebastian Kreutzer, JLU Giessen (Germany)
+\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
 R Luminescence Package Team}
 \note{Not all arguments of \code{\link{plot}} will be passed!}
 
@@ -39,3 +39,4 @@ plot_RLum.Data.Curve(temp)
 }
 
 \keyword{aplot}
+\section{Function version}{0.1.3 (2014-04-13 14:30:59)}

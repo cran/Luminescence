@@ -5,7 +5,7 @@
 including error propagation. Normally used for equivalent dose data.}
 \usage{Second2Gray(values, dose_rate, method = "gaussian")}
 \arguments{
-  \item{values}{\bold{required}): measured data (\code{values[,1]}) and data error 
+  \item{values}{\link{data.frame} (\bold{required}): measured data (\code{values[,1]}) and data error 
 (\code{values [,2]})}
   \item{dose_rate}{\link{vector} (\bold{required}): dose rate in Gy/s and dose rate error in Gy/s}
   \item{method}{\link{character} (with default): method used for error calculation 
@@ -22,7 +22,7 @@ Provided calculation methods for error calculation:
 \references{#}
 \author{Sebastian Kreutzer, JLU Giessen (Germany), 
 Michael Dietze, GFZ Potsdam (Germany),
-Margret C. Fuchs, TU Bergakademie Freiberg (Germany)
+Margret C. Fuchs, AWI Potsdam (Germany), \cr
 R Luminescence Package Team}
 \note{If no or a wrong method is given, the execution of the function is stopped. }
 
@@ -30,10 +30,11 @@ R Luminescence Package Team}
 \seealso{# }
 \examples{
 
-##(1) for dose rate = 0.14 +/- 0.001
+##(1) for dose taken from the example data help file
 data(ExampleData.DeValues, envir = environment())
-Second2Gray(ExampleData.DeValues, c(0.14,0.001))
+Second2Gray(ExampleData.DeValues, c(0.0438,0.0019))
 
 }
 
 \keyword{manip}
+\section{Function version}{0.3 (2014-04-13 14:32:24)}

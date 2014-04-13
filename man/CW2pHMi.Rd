@@ -59,7 +59,7 @@ $x.t  \tab: transformed time values \cr
 $method \tab: used method for the production of the new data points
 }}}
 \references{Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal 
-components. Radiation Measurements 47, 752-758.\cr
+components. Radiation Measurements, 47, 752-758.\cr
 
 \bold{Further Reading}\cr\cr
 Bulur, E., 1996. An Alternative Technique For Optically Stimulated Luminescence 
@@ -164,3 +164,4 @@ text(0.5,6500,"PM", col="blue" ,cex=.8)
 }
 
 \keyword{manip}
+\section{Function version}{0.2.1 (2014-04-13 14:29:09)}

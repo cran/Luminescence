@@ -22,7 +22,7 @@ No methods defined with class "RLum.Data" in the signature.
 \author{Sebastian Kreutzer, 2013 (Freiberg Instruments/JLU Giessen, Germany)
 }
 
-\section{Version}{0.1 [2013-01-18]}
+\section{Version}{0.1 (2013-01-18)}
 
 \note{
 Just a virtual class. 
@@ -31,8 +31,9 @@ Just a virtual class.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\linkS4class{RLum}}
-\code{\linkS4class{RLum.Data.Curve}}
+\code{\linkS4class{RLum}}, 
+\code{\linkS4class{RLum.Data.Curve}}, 
+\code{\linkS4class{RLum.Data.Spectrum}}
 %%  ~~objects to See Also as \code{\link{~~fun~~}}, ~~~
 %%  ~~or \code{\linkS4class{CLASSNAME}} for links to other classes ~~~
 }

@@ -7,7 +7,7 @@ structure(function( # Apply the (un-)logged common age model after Galbraith et 
   ## Christoph Burow, University of Cologne (Germany) \cr
   
   ##section<<
-  ## version 1.2 [2013-11-04] 
+  ## version 1.2
   # ===========================================================================
   
   input.data,
@@ -17,7 +17,7 @@ structure(function( # Apply the (un-)logged common age model after Galbraith et 
   sigmab = 0,
   ### \code{\link{numeric}} (with default): spread in De values given as a 
   ### fraction (e.g. 0.2). This value represents the expected overdispersion in 
-  ### the data, if the sample is well-bleached (Cunningham & Walling 2012, 
+  ### the data should the sample be well-bleached (Cunningham & Walling 2012, 
   ### p. 100).
   log = TRUE,
   ### \code{\link{logical}} (with default): fit the (un-)logged common age 

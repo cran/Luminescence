@@ -74,7 +74,7 @@ Class \code{"\linkS4class{RLum.Data}"}, directly.
 \author{Sebastian Kreutzer, JLU Giessen (Germany)
 }
 
-\section{Version}{0.1 [2013-11-23]}
+\section{Version}{0.1 (2013-11-23)}
 
 
 \note{
@@ -89,5 +89,11 @@ the slot \code{info} can be used.
 }
 \examples{
 showClass("RLum.Data.Spectrum")
+
+##show example data (uncomment for usage)
+# data(ExampleData.XSYG, envir = environment())
+# TL.Spectrum
+
+
 }
 \keyword{classes}

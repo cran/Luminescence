@@ -4,10 +4,10 @@ CW2pLM <- structure(function(#Transform a CW-OSL curve into a pLM-OSL curve
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)\cr
+  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.4 [2013-03-27]
+  ## version 0.4
   # ===========================================================================
 
   values

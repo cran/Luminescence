@@ -210,6 +210,48 @@ setMethod("get_RLum.Results",
               
             }
             
+            ##-------------------------------------------------------------
+            ##calc_MinDose3       
+            if(object@originator == "calc_MinDose3") {
+              
+              return(object@data$results)
+              
+            }
+            
+            ##-------------------------------------------------------------
+            ##calc_MinDose4       
+            if(object@originator == "calc_MinDose4") {
+              
+              return(object@data$results)
+              
+            }
+            
+            ##-------------------------------------------------------------
+            ## calc_CommonDose   
+            if(object@originator == "calc_CommonDose") {
+              
+              return(object@data$results)
+              
+            }
+            
+            ##-------------------------------------------------------------
+            ## calc_CentralDose   
+            if(object@originator == "calc_CentralDose") {
+              
+              return(object@data$results)
+              
+            }
+            
+            ##-------------------------------------------------------------
+            ## calc_FuchsLang2001  
+            if(object@originator == "calc_FuchsLang2001") {
+              
+              return(object@data$results)
+              
+            }
+            
+          
+            
           }##end if missing data.object 
           })
 

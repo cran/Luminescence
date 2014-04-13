@@ -1,13 +1,13 @@
 plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve S4 class object
-  ### The function provides a standardized plot output for curve data of an 
+  ### The function provides a standardised plot output for curve data of an 
   ### RLum.Data.Curve S4 class object 
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.1.2 [2013-11-25]
+  ## version 0.1.3
   # ===========================================================================
 
   object, 
@@ -39,14 +39,14 @@ plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve 
                    object@recordType=="RL" | 
                    object@recordType=="RBR"){"s"} 
               else if (object@recordType == "TL"){"\u00B0C"}
-              else {"unknown"}
+              else {"Unknown"}
   
   lab.xlab <- if(object@recordType=="OSL" | 
                    object@recordType=="IRSL" | 
                    object@recordType=="RL" | 
-                   object@recordType=="RBR"){"t"} 
-              else if (object@recordType == "TL"){"T"}
-              else {"independent"}
+                   object@recordType=="RBR"){"Time"} 
+              else if (object@recordType == "TL"){"Temperature"}
+              else {"Independent"}
   
   ##XSYG
   ##check for curveDescripter
@@ -71,7 +71,7 @@ plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve 
   
   ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} 
           else if (exists("ylab") == TRUE){ylab}
-          else if (lab.xlab == "independent") {"dependent [unknown]"} 
+          else if (lab.xlab == "Independent") {"Dependent [unknown]"} 
           else {paste(object@recordType, 
                       " [cts/", round(max(object@data[,1])/length(object@data[,1]),digits=2)
          , " ", lab.unit,"]", sep="")}

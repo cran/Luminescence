@@ -42,7 +42,7 @@ Objects can be created by calls of the form \code{new("Risoe.BINfileData", ...)}
    \item{get_Risoe.BINfileData}{\code{signature(object = "Risoe.BINfileData")}: 
     
     Formal get-method for \code{\linkS4class{Risoe.BINfileData}} object. It does not
-    allow accessing the object directly, but it is just showing a terminal message.  
+    allow accessing the object directly, it is just showing a terminal message.  
    } 
    
 
@@ -60,7 +60,7 @@ Risoe DTU, 2013. The Sequence Editor User Manual - Feb 2013
 \author{Sebastian Kreutzer, JLU Giessen (Germany)
 }
 
-\section{Version}{0.3 [2013-06-02]}
+\section{Version}{0.3 (2013-06-02)}
 
 \note{
 

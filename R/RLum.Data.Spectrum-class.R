@@ -87,11 +87,11 @@ setMethod("show",
     
             ##print information
         
-            cat("\n [RLum.Data.Spectrum Object]")
+            cat("\n [RLum.Data.Spectrum]")
             cat("\n\t recordType:", object@recordType)
             cat("\n\t curveType:",  object@curveType)
-            cat("\n\t .. recorded spectra:", length(object@data[1,]))
-            cat("\n\t .. .. measured values per spectrum:", length(object@data[,1]))
+            cat("\n\t .. recorded frames:", length(object@data[1,]))
+            cat("\n\t .. .. measured values per frame:", length(object@data[,1]))
             cat("\n\t .. .. range wavelength/pixel:", x.range)
             cat("\n\t .. .. range time/temp.:", y.range)            
             cat("\n\t .. .. range count values:", z.range)          

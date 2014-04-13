@@ -1,6 +1,6 @@
 \name{plot_Risoe.BINfileData}
 \alias{plot_Risoe.BINfileData}
-\title{Plot single luminescence curves from a BIN file object.}
+\title{Plot single luminescence curves from a BIN file object}
 \description{Plots single luminescence curves from an object returned by the \link{readBIN2R} function.}
 \usage{plot_Risoe.BINfileData(BINfileData, position, run, set, sorter = "POSITION", 
     ltype = c("IRSL", "OSL", "TL", "RIR", "RBR", "RL"), curve.transformation, 
@@ -9,11 +9,11 @@
   \item{BINfileData}{\link{Risoe.BINfileData-class} (\bold{required}): 
 requires an S4 object returned by the \link{readBIN2R} function.}
   \item{position}{\link{vector} (optional): option to limit the plotted curves by 
-position (e.g. position = 1, position = c(1,3,5)).}
+position (e.g. \code{position = 1}, \code{position = c(1,3,5)}).}
   \item{run}{\link{vector} (optional): option to limit the plotted curves by run 
-(e.g., \code{run = 1, set = c(1,3,5)}).}
+(e.g., \code{run = 1}, \code{run = c(1,3,5)}).}
   \item{set}{\link{vector} (optional): option to limit the plotted curves by set 
-(e.g., \code{run = 1, set = c(1,3,5)}).}
+(e.g., \code{set = 1}, \code{set = c(1,3,5)}).}
   \item{sorter}{\link{character} (with default): the plot output can be ordered by 
 "POSITION","SET" or "RUN". POSITION, SET and RUN are options defined in 
 the Risoe Sequence Editor.}
@@ -129,3 +129,4 @@ data(ExampleData.BINfileData, envir = environment())
 }
 
 \keyword{dplot}
+\section{Function version}{0.4.1 (2014-04-13 14:30:45)}

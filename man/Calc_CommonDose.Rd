@@ -9,7 +9,7 @@ for \code{data.frame}: two columns with De \code{(input.data[,1])} and
 De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}} (with default): spread in De values given as a 
 fraction (e.g. 0.2). This value represents the expected overdispersion in 
-the data, if the sample is well-bleached (Cunningham & Walling 2012, 
+the data should the sample be well-bleached (Cunningham & Walling 2012, 
 p. 100).}
   \item{log}{\code{\link{logical}} (with default): fit the (un-)logged common age 
 model to De data}
@@ -72,3 +72,4 @@ data(ExampleData.DeValues, envir = environment())
 ## apply the common dose model
 calc_CommonDose(ExampleData.DeValues)                         
 }
+\section{Function version}{1.2 (2014-04-13 14:27:25)}

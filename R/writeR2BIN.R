@@ -4,7 +4,7 @@ writeR2BIN <- structure(function(#Export Risoe.BINfileData into Risoe BIN-file
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)
+  ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany), \cr
   
   ##section<<
   ## version 0.1
@@ -917,7 +917,7 @@ cat(paste("\t >> ",ID-1,"records have been written successfully!\n\n",paste=""))
   ## The function just roughly checks the data structures. 
   ## The validity of the output data depends on the user.\cr\cr
   ## The validity of the file path is not further checked. \cr 
-  ## BIN-file conversions using the argument \code{version} may be a lossly conversion, 
+  ## BIN-file conversions using the argument \code{version} may be a lossy conversion, 
   ## depending on the chosen input and output data 
   ## (e.g. conversion from version 06 to 04).
 

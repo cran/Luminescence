@@ -9,7 +9,7 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
   ## Based on a rewritten S script of Rex Galbraith, 2010 \cr \cr
   
   ##section<<
-  ## version 1.21 [2013-11-19] 
+  ## version 1.22
   # ===========================================================================
   
   input.data,
@@ -123,8 +123,6 @@ out.sigma<- sigma
   
   if(class(sig) != "try-error") {
  
-
-  
 	for(sigma in sig) {
     
    	wu<- 1/(sigma^2 + su^2)
@@ -143,19 +141,19 @@ out.sigma<- sigma
 ##============================================================================##  
   
   cat("\n [calc_CentralDose]")
-  cat(paste("\n\n ---------------------------------"))
+  cat(paste("\n\n ---------------------------------------"))
   cat(paste("\n sample ID:              ",sample.id))
   cat(paste("\n n:                      ",n))
   cat(paste("\n log ED:                 ","TRUE"))
-  cat(paste("\n ---------------------------------"))
+  cat(paste("\n ---------------------------------------"))
   cat(paste("\n central dose (delta):   ",round(out.delta,4)))
   cat(paste("\n rse (delta):            ",round(out.sedelta,4)))
   cat(paste("\n se (delta):             ",round(out.delta*out.sedelta,4)))
-  cat(paste("\n ---------------------------------"))
+  cat(paste("\n ---------------------------------------"))
   cat(paste("\n overdispersion (sigma): ",round(out.sigma,4)))
   cat(paste("\n se (sigma):             ",if(class(sig) != "try-error") {
     round(out.sesigma,4) } else {"-"}))
-  cat(paste("\n ---------------------------------\n\n"))  
+  cat(paste("\n ---------------------------------------\n\n"))  
 
   
 ##============================================================================##  
@@ -166,9 +164,12 @@ if(output.plot==TRUE) {
   
   if(class(sig) != "try-error") {
   
+    # save previous plot parameter and set new ones
+    .pardefault<- par(no.readonly = TRUE)
+    
 # plot the profile log likeihood
 	par(oma=c(2,1,2,1),las=1,cex.axis=1.2, cex.lab=1.2)
-	plot(sig,llik,type="l",xlab="sigma",ylab="Log likelihood",lwd=1.5)
+	plot(sig,llik,type="l",xlab="Sigma",ylab="Log likelihood",lwd=1.5)
 	abline(h=0,lty=3)
 	abline(h=-1.92,lty=3)
 	title("Profile log likelihood for sigma")
@@ -191,6 +192,9 @@ if(output.plot==TRUE) {
 	text(res+dx,rep(ytext,3),round(res,2),adj=0)
   }#endif::try-error
 }#endif::output.plot
+  
+  # restore previous plot parameters
+  par(.pardefault)
   
 #return value
   
@@ -261,4 +265,5 @@ if(output.plot==TRUE) {
   
   ##apply the central dose model
   calc_CentralDose(ExampleData.DeValues)
+  
 })#END OF STRUCTURE
