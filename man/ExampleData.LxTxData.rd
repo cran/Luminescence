@@ -2,11 +2,7 @@
 \alias{ExampleData.LxTxData}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Example Lx/Tx data from CW-OSL SAR measurement}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-LxTx data from a SAR measurement for the package Luminescence.
-
-}
+\description{LxTx data from a SAR measurement for the package Luminescence.}
 \usage{
 ExampleData.LxTxData
 }

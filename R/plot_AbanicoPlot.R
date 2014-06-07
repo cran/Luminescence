@@ -36,7 +36,7 @@ plot_AbanicoPlot <- structure(function(# Function to create an Abanico Plot.
   ### \code{\link{character}} (with default): measure of centrality, used for
   ### automatically centering the plot and drawing the central line. Can be
   ### one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
-  ### and \code{"median.weighted"}.
+  ### and \code{"median.weighted"}. Default is \code{"mean.weighted"}.
   
   dispersion = "sd",
   ### \code{\link{character}} (with default): measure of dispersion, used for
@@ -189,12 +189,17 @@ plot_AbanicoPlot <- structure(function(# Function to create an Abanico Plot.
                   (1.1 + z.span) * max(De.global))
   }
   ticks <- round(pretty(limits.z, n = 5), 3)
-  De.delta <- ticks[2] - ticks[1]
   
-  ## calculate correction dose to shift negative values
+  ## check for negative values
   if(min(De.global) <= 0) {
-    De.add <- abs(ticks[length(ticks) - sum(ticks > limits.z[1])])
-  } else {De.add <- 0}
+    stop("[plot_AbanicoPlot] Error: Data contains negative or zero values.")
+  }
+  
+  #   ## calculate correction dose to shift negative values
+#   if(min(De.global) <= 0) {
+#     De.add <- abs(ticks[length(ticks) - sum(ticks > limits.z[1])])
+#   } else {De.add <- 0}
+  De.add <- 0
   
   ## optionally add correction dose to data set and adjust error
   for(i in 1:length(data)) {
@@ -968,17 +973,8 @@ plot_AbanicoPlot <- structure(function(# Function to create an Abanico Plot.
     for(i in 1:length(data)) {
       polygon(x = bars[i,1:4], 
               y = bars[i,5:8],
-              col = bar.col[i],
+              col = adjustcolor(bar.col[i], alpha.f = 0.7),
               border = NA)
-    }
-  }
-
-  ## optionally, redraw polygon boundary
-  if(polygon.col[1] != "none") {
-    for(i in 1:length(data)) {
-      polygon(x = polygons[i,1:7], 
-              y = polygons[i,8:14],
-              border = polygon.col[i])
     }
   }
 
@@ -993,12 +989,6 @@ plot_AbanicoPlot <- structure(function(# Function to create an Abanico Plot.
                 min(ellipse[,2]) * 2),
           col = bg.original,
           lty = 0)
-
-  ## draw border around plot
-  polygon(x = c(limits.x[1], min(ellipse[,1]), par()$usr[2],
-                par()$usr[2], min(ellipse[,1])),
-          y = c(0, max(ellipse[,2]), max(ellipse[,2]), 
-                min(ellipse[,2]), min(ellipse[,2])))
 
   ## optionally, add radial grid lines
   if(grid.col[1] != "none") {
@@ -1021,7 +1011,13 @@ plot_AbanicoPlot <- structure(function(# Function to create an Abanico Plot.
     }
   }
   
-  ## optionally, plot central value lines
+## draw border around plot
+polygon(x = c(limits.x[1], min(ellipse[,1]), par()$usr[2],
+              par()$usr[2], min(ellipse[,1])),
+        y = c(0, max(ellipse[,2]), max(ellipse[,2]), 
+              min(ellipse[,2]), min(ellipse[,2])))
+
+## optionally, plot central value lines
   if(lwd[1] > 0 & lty[1] > 0) {
     for(i in 1:length(data)) {
       x2 <- r / sqrt(1 + f^2 * (
@@ -1112,7 +1108,8 @@ plot_AbanicoPlot <- structure(function(# Function to create an Abanico Plot.
     tick.space <- axisTicks(usr = limits.y, log = FALSE)
     tick.space <- (max(tick.space) - min(tick.space)) / length(tick.space)
     if(tick.space < char.height * 1.7) {
-      axis(side = 2, at = 0, labels = paste("\u00B1", "2"), las = 1)
+      axis(side = 2, at = c(-2, 2), labels = c("", ""), las = 1)
+      axis(side = 2, at = 0, tcl = 0, labels = paste("\u00B1", "2"), las = 1)
     } else {
       axis(side = 2, at = seq(-2, 2, by = 2), las = 1)
     }

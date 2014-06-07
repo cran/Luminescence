@@ -4,11 +4,11 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany), 
+  ## Sebastian Kreutzer, Universite Bordeaux Montaigne (France), 
   ## Michael Dietze, GFZ Potsdam (Germany), \cr
   
   ##section<<
-  ##version 1.2.3
+  ##version 1.2.6
   # ===========================================================================
   
   sample,
@@ -55,11 +55,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   NumberIterations.MC = 100, 
   ### \code{\link{integer}} (with default): number of Monte Carlo simulations 
   ### for error estimation. See details.
-	
-  xlab = "s", 
-  ### \code{\link{character}} (with default): unit for x-axis labelling. 
-  ### Possible values are \code{"Gy"} and \code{"s"}.
-	
+		
   output.plot = TRUE, 
   ### \code{\link{logical}} (with default): plot output (\code{TRUE/FALSE}).
   
@@ -74,16 +70,19 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ### \code{\link{numeric}} (with default): global scaling factor.
   
   ...
-  ### Further arguments and graphical parameters to be passed.
+  ### Further arguments and graphical parameters to be passed. Note: Standard 
+  ### arguments will only be passed to the growth curve plot
 ) {
+
+  
   ##1. check if sample is data.frame
   if(is.data.frame(sample)==FALSE){
-    stop("\n [plot_GrowthCurve] >> sample has to be of type data.fame!")
+    stop("\n [plot_GrowthCurve] Sample has to be of type data.fame!")
   }
   
   ##2. check if sample contains a least three rows 
   if(length(sample[,1])<3){
-    stop("\n [plot_GrowthCurve] Error: At least two regeneration points are needed!")
+    stop("\n [plot_GrowthCurve] At least two regeneration points are needed!")
   }
   
   ## optionally, count nd exclude NA values and print result
@@ -118,12 +117,36 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   }else{
     fit.weights<-NULL
   }
-  
+    
+
+  # Deal with extra arguments -----------------------------------------------
+  ##deal with addition arguments 
+  extraArgs <- list(...) 
+
+  main <- if("main" %in% names(extraArgs)) {extraArgs$main} else 
+  {"Growth curve"}
+
+  xlab <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} else 
+  {"Dose [s]"}
+
+  ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} else
+  {expression(L[x]/T[x])}
+
+  if("cex" %in% names(extraArgs)) {cex.global <- extraArgs$cex} 
+
+  ylim <- if("ylim" %in% names(extraArgs)) {extraArgs$ylim} else 
+  {c(min(xy$y)-max(y.Error),(max(xy$y)+if(max(xy$y)*0.1>1.5){1.5}else{max(xy$y)*0.2}))}
+
+  xlim <- if("xlim" %in% names(extraArgs)) {extraArgs$xlim} else 
+  {c(0,(max(xy$x)+if(max(xy$x)*0.4>50){50}else{max(xy$x)*0.4}))}
+
+  fun   <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE}
+
 
 	#1.2 Prepare datasets for Monte Carlo Simulation
-	
+
 		data.MC<-t(matrix(sapply(seq(2,fit.NumberRegPoints+1,by=1), 
-									function(x){sample(rnorm(10000,mean=sample[x,2], sd=sample[x,3]), 
+									function(x){sample(rnorm(10000,mean=sample[x,2], sd=abs(sample[x,3])), 
                             NumberIterations.MC, replace=TRUE)}), nrow=NumberIterations.MC
 						     )#end matrix
 					)#end transpose matrix
@@ -141,7 +164,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 ##3. Fitting values with nonlinear least-squares estimation of the parameters
  
   ##set functions for fitting
- 
+
   #EXP
 	fit.functionEXP<-function(a,b,c,x) {a*(1-exp(-(x+c)/b))}
 
@@ -309,16 +332,20 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
          #set fit object, if fit objekt was not set before
          if(exists("fit")==FALSE){fit<-NA}
         
-		   if ((fit.method=="EXP OR LIN" & class(fit)=="try-error") | fit.method=="LIN" | length(data[,1])<3) {
+		   if ((fit.method=="EXP OR LIN" & class(fit)=="try-error") | 
+             fit.method=="LIN" | length(data[,1])<3) {
 		     
             #calculate De 
-					  De<-round((sample[1,2]-fit.lm$coefficients[1])/fit.lm$coefficients[2], digits=2)
-
+					  De <- round((sample[1,2]-fit.lm$coefficients[1])/fit.lm$coefficients[2], digits=2)
+            
+            ##remove vector labels
+            De <- as.numeric(as.character(De))
+            
             #start loop for Monte Carlo Error estimation
             for (i in 1:NumberIterations.MC) { 
   
-                data<-data.frame(x=xy$x,y=data.MC[,i])
-                fit.lmMC<-lm(data$y~data$x, weights=fit.weights)
+                data <- data.frame(x=xy$x, y=data.MC[,i])
+                fit.lmMC <- lm(data$y~data$x, weights=abs(fit.weights))
   
                 #calculate x.natural
                 x.natural[i]<-round((sample[1,2]-fit.lmMC$coefficients[1])/fit.lmMC$coefficients[2], digits=2)
@@ -776,27 +803,28 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 ##5. Plotting if plotOutput=TRUE
 if(output.plot==TRUE) {
   
+      ####grep recent plot parameter for later reset
+      par.default <- par(no.readonly = TRUE)
+      
       ##cheat the R check
       x<-NULL; rm(x)
 
 #PAR	#open plot area
       if(output.plot==TRUE & output.plotExtended==TRUE){
       
-      ##grep recent plot parameter for later reset
-      par.default <- par(no.readonly = TRUE)
       
       ##set new parameter
 			layout(matrix(c(1,1,1,1,2,3), 3, 2, byrow=TRUE), respect=TRUE)
 			par(cex=0.8*cex.global)
       }else{par(mfrow=c(1,1),cex=cex.global)}
-  
+
 #PLOT		#Plot input values
 			plot(xy[1:fit.NumberRegPointsReal,1],xy[1:fit.NumberRegPointsReal,2],
-				ylim=c(0,(max(xy$y)+if(max(xy$y)*0.1>1.5){1.5}else{max(xy$y)*0.2})),
-				xlim=c(0,(max(xy$x)+if(max(xy$x)*0.4>50){50}else{max(xy$x)*0.4})),
+				ylim=ylim,
+				xlim=xlim,
 				pch=19,
-				xlab=if(xlab=="Gy"){"Dose [Gy]"}else{"Dose [s]"},
-				ylab=expression(L[x]/T[x]))
+				xlab=xlab,
+				ylab=ylab)
 
 #ADD HEADER
       title(main=main,line=3)
@@ -828,8 +856,7 @@ mtext <- if("mtext" %in% names(list(...))) {
   list(...)$mtext
   } else {
     substitute(D[e] == De, 
-               list(De=paste(De,"+/-",De.Error, xlab,
-                             " | fit: ",fit.method)))
+               list(De=paste(De,"+/-",De.Error, " | fit: ",fit.method)))
   }
 
 
@@ -850,6 +877,7 @@ mtext <- if("mtext" %in% names(list(...))) {
 
 ##plot only if wanted
       if(output.plot==TRUE & output.plotExtended==TRUE){
+        
 ##HIST		#try to plot histogramm of De values from the Monte Carlo simulation
 			par(cex=0.7*cex.global)
       
@@ -862,19 +890,19 @@ mtext <- if("mtext" %in% names(list(...))) {
           xlab="",
           xaxt="n",
           main="" 
-      ))
+      ), silent = TRUE)
                   
-        par(new=TRUE)
+		  	if(exists("histogram")) {par(new=TRUE)} ##otherwise we get an overplotting
   			try(histogram<-hist(
   				x.natural,
-  				xlab=if(xlab=="Gy"){"Dose [Gy]"}else{"Dose [s]"},
+  				xlab=xlab,
   				main=expression(paste(D[e], " from Monte Carlo simulation")),
           freq=FALSE,
   				sub=paste("n.iterations = ", NumberIterations.MC,", valid fits =",length(na.exclude(x.natural))),
   				col="grey",
           ylab="",
           yaxt="n",
-  			))#end plot hist
+  			), silent = TRUE)#end plot hist
 			      
 			#to avoid errors plot only if histogram exists
 			if (exists("histogram")) {
@@ -891,8 +919,14 @@ mtext <- if("mtext" %in% names(list(...))) {
               " | quality = ",round((1-abs(De-De.MonteCarlo)/De)*100,
               digits=1),"%"))),cex=0.6*cex.global),silent=TRUE)
           
-			} else {plot(NA,NA,xlim=c(0,10), ylim=c(0,10), main=expression(paste(D[e], " from Monte Carlo simulation")))
+			} else {
+    
+        plot(NA,NA,
+             xlim=c(0,10), 
+             ylim=c(0,10), 
+             main=expression(paste(D[e], " from Monte Carlo simulation")))
 				text(5,5,"not available")
+        
 			}#end ifelse
 
 		
@@ -913,11 +947,14 @@ mtext <- if("mtext" %in% names(list(...))) {
 				lines(c(1,length(sample[,"TnTx"])),c(1,1), lty=2, col="gray")
 				} else {
 			
-			 	plot(NA,NA,xlim=c(0,10), ylim=c(0,10), main="Test Dose Response")
+			 	plot(NA,NA,xlim=c(0,10), ylim=c(0,10), main="Test dose response")
 				text(5,5,"not available\n no TnTx column")
 			}#end if else
 
-	
+
+## FUN by R Luminescence Team
+if(fun==TRUE){sTeve()}
+
 ##END lines
   }#endif::output.plotExtended
 

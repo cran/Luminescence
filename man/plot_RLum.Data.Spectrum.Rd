@@ -101,4 +101,4 @@ plot_RLum.Data.Spectrum(TL.Spectrum,
 }
 
 \keyword{aplot}
-\section{Function version}{0.2.5 (2014-04-13 14:31:06)}
+\section{Function version}{0.2.5 (2014-05-21 16:58:16)}

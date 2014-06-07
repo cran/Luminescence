@@ -17,9 +17,7 @@ the data sets must be provided as \code{list}, e.g.
   \item{na.exclude}{\code{\link{logical}} (with default): excludes \code{NA} values from 
 the data set prior to any further operations.}
   \item{negatives}{\code{\link{character}} (with default): rule for negative values. Default
-is \code{"remove"} (i.e. negative values are removed from the data set).
-Alternatively, \code{"adjust"} shifts the entire plot to show negative
-values.}
+is \code{"remove"} (i.e. negative values are removed from the data set).}
   \item{log.z}{\code{\link{logical}} (with default): Option to display the z-axis
 in logarithmic scale. Default is \code{TRUE}.}
   \item{central.value}{\code{\link{numeric}}: User-defined central value, primarily used for
@@ -27,7 +25,7 @@ horizontal centering of the z-axis.}
   \item{centrality}{\code{\link{character}} (with default): measure of centrality, used for
 automatically centering the plot and drawing the central line. Can be
 one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
-and \code{"median.weighted"}.}
+and \code{"median.weighted"}. Default is \code{"mean.weighted"}.}
   \item{mtext}{\code{\link{character}}: additional text below the plot title.}
   \item{summary}{\code{\link{character}} (optional): adds numerical output to the plot. 
 Can be one or more out of: \code{"n"} (number of samples), \code{"mean"} (mean De 
@@ -208,4 +206,4 @@ plot_RadialPlot(data = data.3,
                 summary.pos = "sub",
                 legend = c("Sample 1", "Sample 2"))
 }
-\section{Function version}{0.5.2 (2014-04-13 14:30:38)}
+\section{Function version}{0.5.2 (2014-06-05 13:42:41)}

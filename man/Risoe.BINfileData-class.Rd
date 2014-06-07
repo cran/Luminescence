@@ -14,8 +14,6 @@
 \description{
 S4 class object for luminescence data in R. The object is produced as output of the 
 function \code{\link{readBIN2R}}.
-
-%%  ~~ A concise (1-5 lines) description of what the class is. ~~
 }
 \section{Objects from the Class}{
 Objects can be created by calls of the form \code{new("Risoe.BINfileData", ...)}.

@@ -26,8 +26,6 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   negatives = "remove",
   ### \code{\link{character}} (with default): rule for negative values. Default
   ### is \code{"remove"} (i.e. negative values are removed from the data set).
-  ### Alternatively, \code{"adjust"} shifts the entire plot to show negative
-  ### values.
   
   log.z = TRUE,
   ### \code{\link{logical}} (with default): Option to display the z-axis
@@ -41,7 +39,7 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   ### \code{\link{character}} (with default): measure of centrality, used for
   ### automatically centering the plot and drawing the central line. Can be
   ### one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
-  ### and \code{"median.weighted"}.
+  ### and \code{"median.weighted"}. Default is \code{"mean.weighted"}.
   
   mtext,
   ### \code{\link{character}}: additional text below the plot title.
@@ -179,10 +177,10 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   ticks <- round(pretty(limits.z, n = 5), 3)
   De.delta <- ticks[2] - ticks[1]
   
-  ## calculate correction dose to shift negative values
-  if(min(De.global) <= 0) {
-    De.add <- abs(ticks[length(ticks) - sum(ticks > limits.z[1])])
-  } else {De.add <- 0}
+#   ## calculate correction dose to shift negative values
+#   if(min(De.global) <= 0) {
+#     De.add <- abs(ticks[length(ticks) - sum(ticks > limits.z[1])])
+#   } else {De.add <- 0}
   
   ## optionally, reassign De.add to remove negative values
   if(negatives == "remove") {
@@ -1119,7 +1117,8 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
       tick.space <- axisTicks(usr = limits.y, log = FALSE)
       tick.space <- (max(tick.space) - min(tick.space)) / length(tick.space)
       if(tick.space < char.height * 1.5) {
-        axis(side = 2, at = 0, labels = "\u00B1 2", las = 2)
+        axis(side = 2, at = c(-2, 2), labels = c("", ""), las = 1)
+        axis(side = 2, at = 0, tcl = 0, labels = paste("\u00B1", "2"), las = 1)
       } else {
         axis(side = 2, at = seq(-2, 2, by = 2), las = 2)
       }

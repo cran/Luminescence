@@ -15,7 +15,7 @@ for \code{data.frame}: two columns with De \code{(input.data[,1])} and
 De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}}  (\bold{required}): spread in De values given as a
 fraction (e.g. 0.2). This value represents the expected overdispersion in
-the data should the sample be well-bleached (Cunningham & Walling 2012, 
+the data should the sample be well-bleached (Cunningham & Wallinga 2012, 
 p. 100).}
   \item{n.components}{\code{\link{numeric}}  (\bold{required}): number of components to be 
 fitted. If a vector is provided (e.g. \code{c(2:8)}) the finite
@@ -146,9 +146,9 @@ calc_FiniteMixture(ExampleData.DeValues,
 #res
 
 ## show the results on equivalent dose, standard error and proportion of
-## fitted components for n = 4
-#res@data$components[,"4"]
+## fitted components
+#get_RLum.Results(object=res, data.object="components")
 
 
 }
-\section{Function version}{0.32 (2014-04-13 14:27:37)}
+\section{Function version}{0.32 (2014-05-09 17:14:59)}

@@ -9,7 +9,7 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
   ## Based on a rewritten S script of Rex Galbraith, 2010 \cr \cr
   
   ##section<<
-  ## version 1.22
+  ## version 1.23 [2014-04-29]
   # ===========================================================================
   
   input.data,
@@ -163,38 +163,42 @@ out.sigma<- sigma
 if(output.plot==TRUE) {
   
   if(class(sig) != "try-error") {
-  
+    
     # save previous plot parameter and set new ones
     .pardefault<- par(no.readonly = TRUE)
     
-# plot the profile log likeihood
-	par(oma=c(2,1,2,1),las=1,cex.axis=1.2, cex.lab=1.2)
-	plot(sig,llik,type="l",xlab="Sigma",ylab="Log likelihood",lwd=1.5)
-	abline(h=0,lty=3)
-	abline(h=-1.92,lty=3)
-	title("Profile log likelihood for sigma")
-	
-# find upper and lower confidence limits for sigma
-	tf<- abs(llik+1.92) < 0.005
-	sig95<- sig[tf]
-	ntf<- length(sig95)
-	sigL<- sig95[1]
-	sigU<- sig95[ntf]
-
-# put them on the graph
-	abline(v=sigL)	
-	abline(v=sigmax)	
-	abline(v=sigU)
-	dx<- 0.006
-	dy<- 0.2
-	ytext<- min(llik) + dy
-	res<- c(sigL,sigmax,sigU)
-	text(res+dx,rep(ytext,3),round(res,2),adj=0)
+    # plot the profile log likeihood
+    par(oma=c(2,1,2,1),las=1,cex.axis=1.2, cex.lab=1.2)
+    plot(sig,llik,type="l",xlab="Sigma",ylab="Log likelihood",lwd=1.5)
+    abline(h=0,lty=3)
+    abline(h=-1.92,lty=3)
+    title("Profile log likelihood for sigma")
+    
+    # find upper and lower confidence limits for sigma
+    tf<- abs(llik+1.92) < 0.005
+    sig95<- sig[tf]
+    ntf<- length(sig95)
+    sigL<- sig95[1]
+    sigU<- sig95[ntf]
+    
+    # put them on the graph
+    abline(v=sigL)	
+    abline(v=sigmax)	
+    abline(v=sigU)
+    dx<- 0.006
+    dy<- 0.2
+    ytext<- min(llik) + dy
+    res<- c(sigL,sigmax,sigU)
+    text(res+dx,rep(ytext,3),round(res,2),adj=0)
+    
+    # restore previous plot parameters
+    par(.pardefault)
+    rm(.pardefault)
+    
   }#endif::try-error
 }#endif::output.plot
   
-  # restore previous plot parameters
-  par(.pardefault)
+  
   
 #return value
   

@@ -2,11 +2,7 @@
 \alias{ExampleData.LxTxOSLData}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Example Lx and Tx curve data from an artificial OSL measurement}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Lx and Tx data of continous wave (CW-) OSL signal curves.
-
-}
+\description{Lx and Tx data of continous wave (CW-) OSL signal curves.}
 \usage{
 ExampleData.LxTxOSLData.RData
 }

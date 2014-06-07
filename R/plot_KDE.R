@@ -85,26 +85,6 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   ### further arguments and graphical parameters passed to \code{\link{plot}}.
 ) {
   
-  ## define function after isotone::weighted.mean -----------------------------
-  median.w <- function (y, w) 
-  {
-    ox <- order(y)
-    y <- y[ox]
-    w <- w[ox]
-    k <- 1
-    low <- cumsum(c(0, w))
-    up <- sum(w) - low
-    df <- low - up
-    repeat {
-      if (df[k] < 0) 
-        k <- k + 1
-      else if (df[k] == 0) 
-        return((w[k] * y[k] + w[k - 1] * y[k - 1])/(w[k] + 
-                                                      w[k - 1]))
-      else return(y[k - 1])
-    }
-  }
-  
   ## check data and parameter consistency -------------------------------------
   
   ## Homogenise input data format
@@ -149,14 +129,17 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   }
   
   ## create output variables
-  De.stats <- matrix(nrow = length(data), ncol = 11)
+  De.stats <- matrix(nrow = length(data), ncol = 14)
   colnames(De.stats) <- c("n",
                           "mean", 
                           "mean.weighted",
                           "median",
                           "median.weighted",
                           "kde.max",
-                          "sd",
+                          "sd.abs",
+                          "sd.rel",
+                          "se.abs",
+                          "se.rel",
                           "q25",
                           "q75",
                           "skewness",
@@ -165,20 +148,20 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   
   ## loop through all data sets
   for(i in 1:length(data)) {
-    De.stats[i,1] <- length(data[[i]][,1])
-    De.stats[i,2] <- mean(data[[i]][,1], na.rm = TRUE)
-    De.stats[i,3] <- median(data[[i]][,1], na.rm = TRUE)
-    De.stats[i,4] <- sum(data[[i]][,1] / data[[i]][,2]) / 
-                        sum(1 / data[[i]][,2])
-    De.stats[i,5] <- median.w(y = data[[i]][,1], w = data[[i]][,2])
-    De.stats[i,7] <- sd(data[[i]][,1])
-    De.stats[i,8] <- quantile(data[[i]][,1], 0.25)
-    De.stats[i,9] <- quantile(data[[i]][,1], 0.75)
-    De.stats[i,10] <- (mean((data[[i]][,1] - mean(data[[i]][,1]))^3)) / 
-                        (sd(data[[i]][,1])^3)
-    De.stats[i,11] <- (mean((data[[i]][,1] - mean(data[[i]][,1]))^4) ) / 
-                        ((sd(data[[i]][,1])^4)) - 3
-    
+    statistics <- calc_Statistics(data[[i]])
+    De.stats[i,1] <- statistics$weighted$n
+    De.stats[i,2] <- statistics$unweighted$mean
+    De.stats[i,3] <- statistics$weighted$mean
+    De.stats[i,4] <- statistics$unweighted$median
+    De.stats[i,5] <- statistics$weighted$median
+    De.stats[i,7] <- statistics$weighted$sd.abs
+    De.stats[i,8] <- statistics$weighted$sd.rel
+    De.stats[i,9] <- statistics$weighted$se.abs
+    De.stats[i,10] <- statistics$weighted$se.rel
+    De.stats[i,11] <- quantile(data[[i]][,1], 0.25)
+    De.stats[i,12] <- quantile(data[[i]][,1], 0.75)
+    De.stats[i,13] <- statistics$unweighted$skewness
+    De.stats[i,14] <- statistics$unweighted$kurtosis
     
     De.density[[length(De.density) + 1]] <- if(weights == TRUE) {
       density(data[[i]][,1], 
@@ -237,23 +220,20 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
       } else if(stats[i] == "kdemax") {
         paste(" KDE max = ", round(De.stats[,6], 2), sep = "")
       } else if(stats[i] == "sdrel") {
-        paste(" rel. sd = ", round(De.stats[,7] / 
-          De.stats[,3] * 100, 2), sep = "")
+        paste(" rel. sd = ", round(De.stats[,8], 2), sep = "")
       } else if(stats[i] == "serel") {
-        paste(" rel. se = ", round(De.stats[,7] / (sqrt(De.stats[,1]) * 
-          De.stats[,3]), 2), sep = "")
+        paste(" rel. se = ", round(De.stats[,10], 2), sep = "")
       } else if(stats[i] == "sdabs") {
         paste(" abs. sd = ", round(De.stats[,7], 2), sep = "")
       } else if(stats[i] == "seabs") {
-        paste(" abs. se = ", round(De.stats[,7] / sqrt(De.stats[,1]), 2),
-          sep = "")
+        paste(" abs. se = ", round(De.stats[,9], 2), sep = "")
       } else if(stats[i] == "qr") {
-        paste(" quartile range = ", round(De.stats[,8], 2), " - ",
-          round(De.stats[,9], 2), sep = "")
+        paste(" quartile range = ", round(De.stats[,11], 2), " - ",
+          round(De.stats[,12], 2), sep = "")
       } else if(stats[i] == "skewness") {
-        paste(" skewness = ", round(De.stats[,10], 2), sep = "")
+        paste(" skewness = ", round(De.stats[,13], 2), sep = "")
       } else if(stats[i] == "kurtosis") {
-        paste(" kurtosis = ", round(De.stats[,11], 2), sep = "")
+        paste(" kurtosis = ", round(De.stats[,14], 2), sep = "")
       }
       
       stats.sub <- paste(stats.sub, 
@@ -280,23 +260,20 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
       } else if(stats[i] == "kdemax") {
         paste("KDE max = ", round(De.stats[,6], 2), "\n", sep = "")
       } else if(stats[i] == "sdrel") {
-        paste("rel. sd = ", round(De.stats[,7] / 
-          De.stats[,3] * 100, 2), "\n", sep = "")
+        paste("rel. sd = ", round(De.stats[,8], 2), "\n", sep = "")
       } else if(stats[i] == "serel") {
-        paste("rel. se = ", round(De.stats[,7] / (sqrt(De.stats[,1]) * 
-          De.stats[,3]), 2), "\n", sep = "")
+        paste("rel. se = ", round(De.stats[,10], 2), "\n", sep = "")
       } else if(stats[i] == "sdabs") {
         paste("abs. sd = ", round(De.stats[,7], 2), "\n", sep = "")
       } else if(stats[i] == "seabs") {
-        paste("abs. se = ", round(De.stats[,7] / sqrt(De.stats[,1]), 2),
-              "\n", sep = "")
+        paste("abs. se = ", round(De.stats[,9], 2), "\n", sep = "")
       } else if(stats[i] == "qr") {
-        paste("quartile range = ", round(De.stats[,8], 2), " - ",
-              round(De.stats[,9], 2), "\n", sep = "")
+        paste("quartile range = ", round(De.stats[,11], 2), " - ",
+              round(De.stats[,12], 2), "\n", sep = "")
       } else if(stats[i] == "skewness") {
-        paste("skewness = ", round(De.stats[,10], 2), "\n", sep = "")
+        paste("skewness = ", round(De.stats[,13], 2), "\n", sep = "")
       } else if(stats[i] == "kurtosis") {
-        paste("kurtosis = ", round(De.stats[,11], 2), "\n", sep = "")
+        paste("kurtosis = ", round(De.stats[,14], 2), "\n", sep = "")
       }
       
       stats.legend <- paste(stats.legend, 
@@ -371,7 +348,7 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
   if("lty" %in% names(list(...))) {
     lty <- list(...)$lty
   } else {
-    lty <- seq(2, 6 * length(data))
+    lty <- seq(2, 7 * length(data))
   }
   
   if("cex" %in% names(list(...))) {
@@ -401,10 +378,10 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
         De.stats[i,3] + 2 * De.stats[i,7],
         De.stats[i,3] + 2 * De.stats[i,7])
     } else if(dispersion == "qr") {
-      c(De.stats[i,8],
-        De.stats[i,8],
-        De.stats[i,9],
-        De.stats[i,9])
+      c(De.stats[i,11],
+        De.stats[i,11],
+        De.stats[i,12],
+        De.stats[i,12])
     } else {
       rep(NA, 4)
     }
@@ -612,7 +589,18 @@ plot_KDE <- structure(function( # Plot kernel density estimate with statistics
     }
   }
   
-
+  ## add empty plot
+  par(new = TRUE)
+  plot(NA,
+       ann = FALSE,
+       axes = FALSE,
+       xlim     = xlim,
+       ylim     = ylim[1:2],
+       log      = log.option,
+       cex      = cex,
+       cex.lab  = cex,
+       cex.main = cex,
+       cex.axis = cex)
 
   ## FUN by R Luminescence Team
   if(fun==TRUE){sTeve()}

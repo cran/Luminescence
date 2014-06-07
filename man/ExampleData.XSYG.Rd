@@ -2,11 +2,8 @@
 \alias{ExampleData.XSYG}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Example data for a SAR OSL measurement and a TL spectrum using a lexsyg reader}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Example data from a SAR OSL measurement and a TL spectrum for package Luminescence imported from a Freiberg Instruments XSYG file using the function 
-\code{\link{readXSYG2R}}.
-}
+\description{Example data from a SAR OSL measurement and a TL spectrum for package Luminescence imported from a Freiberg Instruments XSYG file using the function 
+\code{\link{readXSYG2R}}.}
 \usage{
 ExampleData.XSYG
 }

@@ -6,8 +6,8 @@ regenerative protocol.}
 \usage{plot_GrowthCurve(sample, na.exclude = TRUE, main = "Growth curve", 
     fit.method = "EXP", fit.weights = TRUE, fit.includingRepeatedRegPoints = TRUE, 
     fit.NumberRegPoints, fit.NumberRegPointsReal, fit.bounds = TRUE, 
-    NumberIterations.MC = 100, xlab = "s", output.plot = TRUE, 
-    output.plotExtended = TRUE, cex.global = 1, ...)}
+    NumberIterations.MC = 100, output.plot = TRUE, output.plotExtended = TRUE, 
+    cex.global = 1, ...)}
 \arguments{
   \item{sample}{\code{\link{data.frame}} (\bold{required}): data frame with three columns
 for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx. The column for the test dose 
@@ -34,8 +34,6 @@ parameters to 0. Limited for the use with the fit methods \code{EXP},
 experimental application only!}
   \item{NumberIterations.MC}{\code{\link{integer}} (with default): number of Monte Carlo simulations 
 for error estimation. See details.}
-  \item{xlab}{\code{\link{character}} (with default): unit for x-axis labelling. 
-Possible values are \code{"Gy"} and \code{"s"}.}
   \item{output.plot}{\code{\link{logical}} (with default): plot output (\code{TRUE/FALSE}).}
   \item{output.plotExtended}{\code{\link{logical}} (with default): If \code{TRUE}, 3 plots on one plot 
 area are provided: (1) growth curve, (2) histogram from Monte 
@@ -43,7 +41,8 @@ Carlo error simulation and (3) a test dose response plot. If \code{FALSE},
 just the growth curve will be plotted. \bold{Requires:} 
 \code{output.plot = TRUE}.}
   \item{cex.global}{\code{\link{numeric}} (with default): global scaling factor.}
-  \item{\dots}{Further arguments and graphical parameters to be passed.}
+  \item{\dots}{Further arguments and graphical parameters to be passed. Note: Standard 
+arguments will only be passed to the growth curve plot}
 }
 \details{\bold{Fitting methods} \cr\cr
 For all options (except for the \code{LIN} and the \code{EXP OR LIN}), 
@@ -91,7 +90,7 @@ and \code{EXP+EXP}. In case of a resulting linear fit when using
 \code{EXP OR LIN}, a \link{lm} object is returned. 
 Additionally a plot is returned.}
 
-\author{Sebastian Kreutzer, JLU Giessen (Germany), 
+\author{Sebastian Kreutzer, Universite Bordeaux Montaigne (France), 
 Michael Dietze, GFZ Potsdam (Germany), \cr
 R Luminescence Package Team}
 
@@ -116,4 +115,4 @@ plot_GrowthCurve(LxTxData)
 plot_GrowthCurve(LxTxData)
 ##dev.off()  
 }
-\section{Function version}{1.2.3 (2014-04-13 14:30:20)}
+\section{Function version}{1.2.6 (2014-06-04 19:45:24)}

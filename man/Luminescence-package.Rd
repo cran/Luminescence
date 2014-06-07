@@ -11,8 +11,8 @@ of Luminescence Dating data analysis.
 \tabular{ll}{
 Package: \tab Luminescence\cr
 Type: \tab Package\cr
-Version: \tab 0.3.3\cr
-Date: \tab 2014-04-13\cr
+Version: \tab 0.3.4\cr
+Date: \tab 2014-06-07\cr
 License: \tab GPL-3\cr
 }
 %~~ An overview of how to use the package, including the most important functions ~~
@@ -25,7 +25,7 @@ Christoph Burow \tab University of Cologne, Germany \cr
 Michael Dietze \tab GFZ Helmholtz Centre Potsdam, Germany \cr
 Manfred Fischer\tab University of Bayreuth, Germany \cr 
 Margret C. Fuchs \tab Alfred Wegener Insitute for Polar and Marine Research, Potsdam, Germany\cr
-Sebastian Kreutzer \tab Justus-Liebig-University Giessen, Germany\cr
+Sebastian Kreutzer \tab IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac, France\cr
 Christoph Schmidt \tab University of Bayreuth, Germany
 }
 
@@ -49,8 +49,8 @@ Markus Fuchs, Justus-Liebig-University Giessen, Germany
 
 \bold{Package maintainer}
 
-Sebastian Kreutzer, Justus-Liebig-University Giessen, Germany, \cr
-\email{sebastian.kreutzer@geogr.uni-giessen.de}
+Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac, France, \cr
+\email{sebastian.kreutzer@u-bordeaux-montaigne.fr}
 
 \bold{Acknowledgement}
 

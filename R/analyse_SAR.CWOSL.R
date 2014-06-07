@@ -7,7 +7,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   ## Sebastian Kreutzer, Freiberg Instruments/JLU Giessen (Germany)\cr
   
   ##section<<
-  ## version 0.3.3
+  ## version 0.3.4
   # ===========================================================================
 
   object,
@@ -54,7 +54,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   ### \code{\link{plot_GrowthCurve}}
 
 ){
-  
+
 # CONFIG  -----------------------------------------------------------------
   
   ##set allowed curve types
@@ -111,7 +111,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
                 object@records[[x]]@recordType        
               
   })
-  
+
   ##problem: FI lexsyg devices provide irradtion information in a separat curve 
   if("irradiation"%in%temp.ltype){
     
@@ -186,7 +186,6 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
   })
 
 
-
 # COMPONENT FITTING -------------------------------------------------------
 
 
@@ -224,19 +223,23 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
                                  Tx.data=object@records[[OSL.Curves.ID[x+1]]]@data,
                                  signal.integral,
                                  background.integral))
-                
+              
                ##grep dose
                if(exists("temp.irradiation") == FALSE){
                
                 temp.Dose <- object@records[[OSL.Curves.ID[x]]]@info$IRR_TIME
+                
+                  ##for the case that no information on the dose can be found
+                  if(is.null(temp.Dose)){temp.Dose <- NA}
+                
                 temp.LnLxTnTx <- cbind(Dose=temp.Dose, temp.LnLxTnTx)
-               
+           
                }else{
-                 
+            
                  temp.LnLxTnTx <- cbind(Dose=temp.Dose[x], temp.LnLxTnTx)
                  
                }
-                  
+         
                if(exists("LnLxTnTx")==FALSE){
                  
                  LnLxTnTx <- data.frame(temp.LnLxTnTx)
@@ -247,7 +250,7 @@ analyse_SAR.CWOSL<- structure(function(#Analyse SAR CW-OSL measurements
                  
                }
     }
-   
+
 # Set regeneration points -------------------------------------------------
 
         ##overwrite dose point manually

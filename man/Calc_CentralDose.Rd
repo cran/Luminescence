@@ -72,4 +72,4 @@ data(ExampleData.DeValues, envir = environment())
 calc_CentralDose(ExampleData.DeValues)
 
 }
-\section{Function version}{1.22 (2014-04-13 14:27:18)}
+\section{Function version}{1.23[2014-04-29] (2014-04-29 18:44:00)}

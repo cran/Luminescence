@@ -2,9 +2,7 @@
 \alias{ExampleData.BINfileData}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Example data from a SAR OSL and SAR TL measurement for the package Luminescence}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Example data from a SAR OSL and TL measurement for package Luminescence directly extracted from
+\description{Example data from a SAR OSL and TL measurement for package Luminescence directly extracted from
 a Risoe BIN-file and provided in an object of type \link{Risoe.BINfileData-class}
 }
 \usage{

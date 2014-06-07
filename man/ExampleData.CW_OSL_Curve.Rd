@@ -4,8 +4,7 @@
 \title{
 Example CW-OSL curve data for the package Luminescence
 }
-\description{
-\code{data.frame} containing CW-OSL curve data (time, counts)
+\description{\code{data.frame} containing CW-OSL curve data (time, counts)
 }
 \usage{data(ExampleData.CW_OSL_Curve)}
 \format{

@@ -1,5 +1,80 @@
 NEWS for the R Package Luminescence
 
+Changes in version 0.3.4 (7th June, 2014):
+
+  Bugfixes and changes:
+
+         • ‘calc_CentralDose()’: fixed an error that occurred when
+           ‘output.plot = FALSE’ (#106, reported by Peter Dobak)
+
+         • ‘analyse_SAR.CWOSL()’: fixed an error that forced a chrash
+           if no information in the irradiation time was found in the
+           measurement data
+
+         • ‘plot_GrowthCurve()’:
+
+             • Fixed an error that forced a chrash when 'par.default'
+               was not found (for option ‘output.plotExtended =
+               FALSE’),
+
+             • confusing vector label for De '(intercept)' occurred
+               when using ‘fit.method = "LIN"’ removed (#117, reported
+               by Thomas Kolb),
+
+             • direct argument ‘xlab’ removed, but it can still be used
+               via the ‘...’ argument,
+
+             • support ‘ylim’ and ‘xlim’ for the growth curve via the
+               ‘...’ argument,
+
+             • remove some minor output errors (mostly due to negative
+               values),
+
+             • prevent function chrash for rare cases using ‘fit.method
+               = "LIN"’ where the Lx/Tx error become negative (#118,
+               reported by Thomas Kolb).
+
+         • ‘apply_CosmicRayRemoval()’:
+
+             • Optional argument ‘method.Pych.histogram.plot’ added to
+               provide a graphical feedback of the removal process,
+
+             • terminal output providing the number of recognised
+               channels effected by cosmic-rays per frame has been
+               added. (#113 requested by Johanna Lomax),
+
+             • argument ‘silent’ added to suppress terminal output.
+
+         • ‘calc_FiniteMixture()’: fixed a bug when plotting (layout
+           removed, #114)
+
+         • ‘plot_KDE()’: calculation of median corrected
+
+         • ‘plot_RadialPlot()’:
+
+             • Tick positions for +/- 2 option corrected (#109),
+
+             • option to handle negative values reduced to 'removed'.
+
+         • ‘plot_AbanicoPlot()’:
+
+             • Overplotting of plot outline fixed,
+
+             • tick positions for +/- 2 option corrected (#109),
+
+             • transparency for 2-sigma-bar added (#108),
+
+             • option to handle negative values disabled.
+
+         • ‘readXSYG2R()’: Corrected for ‘NA’ values appearing rarely
+           during TL curve recalculation.
+
+  Internals:
+
+         • The PDF with the S4-class object structure has not been
+           linked properly.  Fixed by using a self generated HTML index
+           file.
+
 Changes in version 0.3.3 (13th April, 2014):
 
   New functions:

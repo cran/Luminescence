@@ -2,12 +2,8 @@
 \alias{ExampleData.FittingLM}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Example data for fit_LMCurve() in the package Luminescence }
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Lineraly modulated (LM) measurement data from a quartz sample from Norway including background 
-measurement. Measurements carried out in th luminescence laboratory at the University of Bayreuth.
-
-}
+\description{Lineraly modulated (LM) measurement data from a quartz sample from Norway including background 
+measurement. Measurements carried out in th luminescence laboratory at the University of Bayreuth.}
 \usage{
 ExampleData.FittingLM
 }

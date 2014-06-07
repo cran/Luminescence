@@ -24,7 +24,7 @@ horizontal centering of the z-axis.}
   \item{centrality}{\code{\link{character}} (with default): measure of centrality, used for
 automatically centering the plot and drawing the central line. Can be
 one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
-and \code{"median.weighted"}.}
+and \code{"median.weighted"}. Default is \code{"mean.weighted"}.}
   \item{dispersion}{\code{\link{character}} (with default): measure of dispersion, used for
 drawing the polygon that depicts the dose distribution. One out of
 \code{"sd"} (standard deviation),\code{"2sd"} (2 standard deviations) 
@@ -263,4 +263,4 @@ plot_AbanicoPlot(data = data.3,
                  angle = c(30, 50),
                  summary = c("n", "in.ci"))
 }
-\section{Function version}{0.1 (2014-04-13 14:30:08)}
+\section{Function version}{0.1 (2014-06-05 13:42:28)}

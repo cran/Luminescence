@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Package for Luminescence Dating data analysis
-Version: 0.3.3
-Date: 2014-04-13
+Version: 0.3.4
+Date: 2014-06-07
 Author: Sebastian Kreutzer [aut, trl, cre],
   Christoph Schmidt [aut],
   Margret C. Fuchs [aut],
@@ -11,19 +11,18 @@ Author: Sebastian Kreutzer [aut, trl, cre],
   Christoph Burow [aut],
   Markus Fuchs [ths]
 Authors@R: c(person("Sebastian", "Kreutzer", role = c("aut","trl","cre"),
-                          email = "sebastian.kreutzer@geogr.uni-giessen.de"),
+                          email = "sebastian.kreutzer@u-bordeaux-montaigne.fr"),
                    person("Christoph", "Schmidt", role = c("aut")),
                    person("Margret C.", "Fuchs", role = c("aut")),
 				person("Michael", "Dietze", role = c("aut")),
 				person("Manfred", "Fischer", role = c("aut","trl")),
 				person("Christoph", "Burow", role = c("aut")),
 				person("Markus", "Fuchs", role = "ths"))
-Maintainer: Sebastian Kreutzer
-        <sebastian.kreutzer@geogr.uni-giessen.de>
+Maintainer: Sebastian Kreutzer <sebastian.kreutzer@u-bordeaux-montaigne.fr>
 Description: Package provides a collection of various R functions for Luminescence Dating data analysis.
 Contact: Package Developer Team <team@r-luminescence.de>
 License: GPL-3
-Depends: R (>= 3.0.0), utils, Rserve
+Depends: R (>= 3.1.0), utils, Rserve
 Imports: methods, XML, shape, rgl, matrixStats
 URL: http://CRAN.R-project.org/package=Luminescence
 Collate: Analyse_SAR.OSLdata.R analyse_SAR.CWOSL.R analyse_SAR.TL.R
@@ -44,7 +43,7 @@ Collate: Analyse_SAR.OSLdata.R analyse_SAR.CWOSL.R analyse_SAR.TL.R
         plot_RLum.Data.Spectrum.R calc_MaxDose3.R plot_AbanicoPlot.R
         plot_DRTResults.R calc_Statistics.R apply_CosmicRayRemoval.R
         apply_EfficiencyCorrection.R zzz.R
-Packaged: 2014-04-14 00:29:47 UTC; sebastiankreutzer
+Packaged: 2014-06-08 09:01:43 UTC; sebastiankreutzer
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-04-14 14:52:24
+Date/Publication: 2014-06-08 12:27:30

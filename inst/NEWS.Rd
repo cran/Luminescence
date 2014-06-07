@@ -1,8 +1,95 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
 
+\section{Changes in version 0.3.4 (7th June, 2014)}{
+
+   \subsection{Bugfixes and changes}{
+       \itemize{
+        \item \code{calc_CentralDose()}: fixed an error that occurred when 
+        \code{output.plot = FALSE} (#106, reported by Peter Dobak)
+        \item \code{analyse_SAR.CWOSL()}: fixed an error that forced a chrash if no
+        information in the irradiation time was found in the measurement data
+        \item \code{plot_GrowthCurve()}: 
+        \itemize{
+        
+         \item Fixed an error that forced a chrash when 'par.default' was 
+          not found (for option \code{output.plotExtended = FALSE}),
+        
+          \item confusing vector label for De '(intercept)' occurred when using 
+          \code{fit.method = "LIN"} removed (#117, reported by Thomas Kolb),
+        
+          \item direct argument \code{xlab} removed, but it can still be used 
+          via the \code{...} argument,
+          
+          \item support \code{ylim} and \code{xlim} for the growth curve via 
+        the \code{...} argument,
+        
+          \item remove some minor output errors (mostly due to negative values),
+          
+          \item prevent function chrash for rare cases using \code{fit.method = "LIN"} 
+          where the Lx/Tx error become negative (#118, reported by Thomas Kolb).
+        }
+        
+        \item \code{apply_CosmicRayRemoval()}:
+        
+        \itemize{
+          
+          \item Optional argument \code{method.Pych.histogram.plot} 
+                added to provide a graphical feedback of the removal process,
+                
+          \item terminal output providing the number of recognised channels effected by 
+          cosmic-rays per frame has been added. (#113 requested by Johanna Lomax),
+          
+          \item argument \code{silent} added to suppress terminal output.
+        
+        }
+        
+        \item \code{calc_FiniteMixture()}: fixed a bug when plotting (layout removed, #114)
+        \item \code{plot_KDE()}: calculation of median corrected
+        
+        \item \code{plot_RadialPlot()}: 
+        
+        \itemize{
+        
+        \item Tick positions for +/- 2 option corrected (#109), 
+        \item option to handle negative values reduced to 'removed'.
+        
+        }
+        
+        \item \code{plot_AbanicoPlot()}:
+        
+        \itemize{
+        
+        \item Overplotting of plot outline fixed, 
+        \item tick positions for +/- 2 option corrected (#109), 
+        \item transparency for 2-sigma-bar added (#108), 
+        \item option to handle negative values disabled.
+
+        }
+        
+        \item \code{readXSYG2R()}: Corrected for \code{NA} values appearing rarely during 
+        TL curve recalculation. 
+        
+       }
+  }
+  
+   \subsection{Internals}{
+   
+   \itemize{
+   
+   \item The PDF with the S4-class object structure has not been linked properly.
+   Fixed by using a self generated HTML index file. 
+   
+   }
+   
+   }
+   
+   
+}
+
 
 \section{Changes in version 0.3.3 (13th April, 2014)}{
+
 
  
      \subsection{New functions}{

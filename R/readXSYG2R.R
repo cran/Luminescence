@@ -6,7 +6,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.3.0
+  ## version 0.3.1
   # ===========================================================================
   
   file,
@@ -219,7 +219,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
                   max(temp.sequence.object.curveValue.PMT[,1]),]
             
                 ## calculate corresponding heating rate, this makes only sense
-                ## for heating, therefore is has to be the maximum value
+                ## for linear heating, therefore is has to be the maximum value
               
                 ##remove 0 values (not measured) and limit to peak
                 heating.rate.values <- temp.sequence.object.curveValue.heating.element[
@@ -251,22 +251,24 @@ readXSYG2R <- structure(function(#Import XSYG files to R
                   temp.sequence.object.curveValue.heating.element.i <- approx(
                     x = temp.sequence.object.curveValue.heating.element[,1],
                     y = temp.sequence.object.curveValue.heating.element[,2],
-                    xout = temp.sequence.object.curveValue.PMT[,1])
+                    xout = temp.sequence.object.curveValue.PMT[,1], 
+                    rule = 2)
                   
                     temperature.values <- 
                       temp.sequence.object.curveValue.heating.element.i$y
                   
                     count.values <- 
                       temp.sequence.object.curveValue.PMT[,2]
-                  
+                
                 ##CASE (2)  
                 }else if((nrow(temp.sequence.object.curveValue.PMT) < 
                           nrow(temp.sequence.object.curveValue.heating.element))){
-                  
+                 
                   temp.sequence.object.curveValue.PMT.i <- approx(
                     x = temp.sequence.object.curveValue.PMT[,1],
                     y = temp.sequence.object.curveValue.PMT[,2],
-                    xout = temp.sequence.object.curveValue.heating.element[,1])
+                    xout = temp.sequence.object.curveValue.heating.element[,1], 
+                    rule = 2)
                   
                   temperature.values <- 
                     temp.sequence.object.curveValue.heating.element[,2]

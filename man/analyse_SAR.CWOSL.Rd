@@ -4,9 +4,9 @@
 \description{The function performs a SAR CW-OSL analysis on a \code{\linkS4class{RLum.Analysis}}
 object including growth curve fitting.}
 \usage{analyse_SAR.CWOSL(object, signal.integral.min, signal.integral.max, 
-    background.integral.min, background.integral.max, 
-    rejection.criteria = list(recycling.ratio = 10, 
-        recuperation.rate = 10, palaeodose.error = 10), dose.points, 
+    background.integral.min, background.integral.max, rejection.criteria = list(
+      recycling.ratio = 10, 
+      recuperation.rate = 10, palaeodose.error = 10), dose.points, 
     log = "", output.plot = TRUE, output.plot.single = FALSE, 
     ...)}
 \arguments{
@@ -95,4 +95,4 @@ analyse_SAR.CWOSL(object,
 
 \keyword{datagen}
 \keyword{plot}
-\section{Function version}{0.3.3 (2014-04-13 14:21:40)}
+\section{Function version}{0.3.4 (2014-05-13 15:18:33)}

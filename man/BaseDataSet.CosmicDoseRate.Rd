@@ -3,7 +3,6 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Base data set for cosmic dose rate calculation}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Collection of data from various sources needed for cosmic dose rate calculation 
 }
 \usage{

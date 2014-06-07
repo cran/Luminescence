@@ -4,10 +4,10 @@ apply_CosmicRayRemoval<- structure(function(#Function to remove cosmic rays from
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany)
+  ## Sebastian Kreutzer, Universite Bordeaux Montaigne (France)
   
   ##section<<
-  ## version 0.1
+  ## version 0.1.2
   # ===========================================================================
 
   object,
@@ -26,6 +26,14 @@ apply_CosmicRayRemoval<- structure(function(#Function to remove cosmic rays from
   ### many neighboring values in each frame are used for smoothing 
   ### (e.g. \code{2} means that the two previous and two following values 
   ### are used)
+  
+  method.Pych.histogram.plot = FALSE,
+  ### \code{\link{logical}} (with default): If \code{TRUE} the histograms used 
+  ### for the cosmic-ray removal are returned as plot including the used 
+  ### threshold. Note: A separat plot is returned for each frame!,
+  
+  silent = FALSE, 
+  ### \code{\link{logical}} (with default): Option to suppress terminal output 
   
   ...
   ### further arguments and graphical parameters that will be passed to the 
@@ -105,10 +113,10 @@ apply_CosmicRayRemoval<- structure(function(#Function to remove cosmic rays from
         
         , x])
 
-      ##(3) - construct histogramm of count distribution
+      ##(3) - construct histogram of count distribution
       temp.hist <- hist(object.data.temp[,x], 
                         breaks = length(object.data.temp[,x])/2, plot = FALSE)
-      
+ 
       ##(4) - find mode of the histogram (e.g. peak)
       temp.hist.max <- which(temp.hist$counts == max(temp.hist$counts))
       
@@ -130,11 +138,12 @@ apply_CosmicRayRemoval<- structure(function(#Function to remove cosmic rays from
       temp.hist.nonzerobin.diff <- diff(
         temp.hist$breaks[temp.hist.nonzerobin])
         
+     
           ## select the first value where the thershold is reached
           ## factor 3 is defined by Pych (2003)
           temp.hist.thres <- which(
             temp.hist.nonzerobin.diff >= 3 * temp.sd.corr)[1]
-
+      
       ##(7) - use counts above the threshold and recalculate values
       ## on all further values 
       if(is.na(temp.hist.thres) == FALSE){
@@ -154,10 +163,42 @@ apply_CosmicRayRemoval<- structure(function(#Function to remove cosmic rays from
           
           object.data.temp[n,x]
         
-        }
-       
+        }  
+        
        })
     
+      }
+
+      ##(8) - return histogram used for the removal as plot
+      if(method.Pych.histogram.plot == TRUE){
+          
+        plot(temp.hist, 
+             xlab = "Signal intensity [a.u.]",
+             main = "Cosmic-ray removal histogram")
+        
+        abline(v = temp.hist$breaks[temp.hist.thres], 
+               col = "red")
+        
+        legend("topright", "threshold" ,lty = 1, lwd = 1, col = "red", bty = "n")
+        
+        mtext(side = 3, paste("Frame: ", x, " (",
+                              colnames(object.data.temp)[x],
+                              ")", sep = ""))
+        
+      }
+      
+      ##(9) - return information on the amount of removed cosmic-rays
+        
+      if(silent == FALSE){
+        #sum up removed counts values above the threshold
+        sum.corrected.channels <- try(
+          sum(temp.hist$counts[temp.hist.thres:length(temp.hist$counts)]), 
+          silent = TRUE)
+      
+          if(is(sum.corrected.channels)[1] == "try-error"){sum.corrected.channels <- 0} 
+      
+        cat("[apply_CosmicRayRemoval] >> ")
+        cat(paste(sum.corrected.channels, " channels corrected in frame ", x, "\n", sep = ""))
       }
       
       ##return object

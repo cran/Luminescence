@@ -414,9 +414,7 @@ plot_RLum.Data.Spectrum<- structure(function(#Plot function for an RLum.Data.Spe
    ##plot additional mtext
    mtext(mtext, side = 3, cex = cex*0.8)  
   
-   }
-
-  else if(plot.type == "single") {
+   } else if(plot.type == "single") {
   ## ==========================================================================#
   ## single plot
   ## ==========================================================================#
@@ -495,7 +493,7 @@ plot_RLum.Data.Spectrum<- structure(function(#Plot function for an RLum.Data.Spe
       
   }else{
     
-    stop("[plot_RLum.Data.Spectrum] Error: Unknown plot type.")
+    stop("[plot_RLum.Data.Spectrum] Unknown plot type.")
     
   }
   

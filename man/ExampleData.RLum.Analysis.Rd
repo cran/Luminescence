@@ -2,11 +2,8 @@
 \alias{ExampleData.RLum.Analysis}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Example data as \code{\linkS4class{RLum.Analysis}} objects}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Collection of different \code{\linkS4class{RLum.Analysis}} objects for 
-protocol analysis.
-}
+\description{Collection of different \code{\linkS4class{RLum.Analysis}} objects for 
+protocol analysis.}
 \usage{
 ExampleData.RLum.Analysis
 }

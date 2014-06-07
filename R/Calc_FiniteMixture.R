@@ -20,7 +20,7 @@ calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) 
   sigmab,
   ### \code{\link{numeric}}  (\bold{required}): spread in De values given as a
   ### fraction (e.g. 0.2). This value represents the expected overdispersion in
-  ### the data should the sample be well-bleached (Cunningham & Walling 2012, 
+  ### the data should the sample be well-bleached (Cunningham & Wallinga 2012, 
   ### p. 100).
   n.components, 
   ### \code{\link{numeric}}  (\bold{required}): number of components to be 
@@ -776,7 +776,8 @@ calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) 
            pch = c(22,16), pt.bg=c("white","black"), 
            adj = 0, pt.cex=1.3, lty=c(1,2),
            bty = "n", horiz = TRUE, x.intersp=0.5)
-    layout.show(7)
+    
+    
     ## restore previous plot parameters
     par(.pardefault)
     
@@ -921,8 +922,8 @@ calc_FiniteMixture<- structure(function( # Apply the finite mixture model (FMM) 
   #res
   
   ## show the results on equivalent dose, standard error and proportion of
-  ## fitted components for n = 4
-  #res@data$components[,"4"]
+  ## fitted components
+  #get_RLum.Results(object=res, data.object="components")
   
   
 })#END OF STRUCTURE

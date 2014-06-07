@@ -2,12 +2,8 @@
 \alias{ExampleData.DeValues}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Example De data for the package Luminescence}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-25 equivalent dose (De) values measured for a fine grain quartz sample from a loess section 
-in Rottewitz (Saxony/Germany).
-
-}
+\description{25 equivalent dose (De) values measured for a fine grain quartz sample from a loess section 
+in Rottewitz (Saxony/Germany).}
 \usage{
 ExampleData.DeValues
 }
