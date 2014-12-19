@@ -8,7 +8,8 @@ to an RLum.Analysis object. }
 \arguments{
   \item{object}{\code{\linkS4class{Risoe.BINfileData}} (\bold{required}): \code{Risoe.BINfileData} object}
   \item{pos}{\code{\link{integer}} (\bold{required}): position number of the \code{Risoe.BINfileData}
-object for which the curves are stored in the \code{RLum.Analysis} object.}
+object for which the curves are stored in the \code{RLum.Analysis} object.
+If the position is not valid \code{NA} is returned.}
   \item{run}{\code{\link{vector}, \link{numeric}} (optional): run number from the measurement to limit
 the converted data set (e.g., \code{run = c(1:48)}).}
   \item{set}{\code{\link{vector}, \link{numeric}} (optional): set number from the measurement to limit
@@ -44,4 +45,4 @@ Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1)
 }
 
 \keyword{manip}
-\section{Function version}{0.1.1 (2014-04-13 14:32:02)}
+\section{Function version}{0.1.2 (2014-09-15 02:28:00)}

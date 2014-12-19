@@ -11,8 +11,8 @@ of Luminescence Dating data analysis.
 \tabular{ll}{
 Package: \tab Luminescence\cr
 Type: \tab Package\cr
-Version: \tab 0.3.4\cr
-Date: \tab 2014-06-07\cr
+Version: \tab 0.4.0\cr
+Date: \tab 2014-12-19\cr
 License: \tab GPL-3\cr
 }
 %~~ An overview of how to use the package, including the most important functions ~~
@@ -47,6 +47,9 @@ Markus Fuchs, Justus-Liebig-University Giessen, Germany
 
 \url{http://www.r-luminescence.de}\cr
 
+\bold{Project source code repository}\cr
+\url{https://github.com/R-Lum/Luminescence}\cr
+
 \bold{Package maintainer}
 
 Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac, France, \cr
@@ -56,14 +59,17 @@ Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac, France,
 
 Cooperation and personal exchange between the developers is gratefully funded by 
 the DFG (SCHM 3051/3-1) in the framework of the program "Scientific Networks". 
-Project title: "Lum.Network: Ein Wissenschaftsnetzwerk zur Analyse von Lumineszenzdaten mit R" (2014-2016) 
+Project title: "Lum.Network: Ein Wissenschaftsnetzwerk zur Analyse von Lumineszenzdaten mit R" (2014-2017) 
 
 }
 
 \references{
 Dietze, M., Kreutzer, S., Fuchs, M.C., Burow, C., Fischer, M., Schmidt, C., 2013. A practical guide to the R package Luminescence.  Ancient TL, 31, pp. 11-18.
 
+Fuchs, M.C., Kreutzer, S., Burow, C., Dietze, M., Fischer, M., Schmidt, C., Fuchs, M., 2014. Data processing in luminescence dating analysis: An exemplary workflow using the R package 'Luminescence'. Quaternary International, , pp. 1-6. http://dx.doi.org/10.1016/j.quaint.2014.06.034
+
 Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M., 2012. Introducing an R package for luminescence dating analysis. Ancient TL, 30, pp. 1-8.
+
 }
 
 \keyword{package}

@@ -1,6 +1,6 @@
 \name{calc_OSLLxTxRatio}
 \alias{calc_OSLLxTxRatio}
-\title{Calculate Lx/Tx ratio for CW-OSL curves.}
+\title{Calculate Lx/Tx ratio for CW-OSL curves}
 \description{Calculate Lx/Tx ratios from a given set of CW-OSL curves. }
 \usage{calc_OSLLxTxRatio(Lx.data, Tx.data, signal.integral, background.integral, 
     background.count.distribution = "non-poisson", sigmab)}
@@ -17,9 +17,11 @@ background integral.}
   \item{background.count.distribution}{\link{character} (with default): Sets the count distribution assumed for the 
 error calculation. Possible arguments \code{poisson} or \code{non-poisson}.
 See details for further information}
-  \item{sigmab}{\link{numeric} (optional): Option to set a manual value for the overdispersion, used
-for the Lx/Tx error calculation. The value should be provided as absolute
-squared count values. }
+  \item{sigmab}{\link{numeric} (optional): Option to set a manual value for the overdispersion (for LnTx and 
+TnTx), used for the Lx/Tx error calculation. The value should be provided as absolute
+squared count values, e.g. \code{sigmab = c(300,300)}. 
+Note: If only one value is provided
+this value is taken for both (LnTx and TnTx) signals.}
 }
 \details{The integrity of the chosen values for the signal and background integral 
 is checked by the function; 
@@ -42,24 +44,29 @@ Therefore the relative standard error is calculated as:\cr\cr
 (b) \code{non-poisson}\cr
 \deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2 + \sigma^2(1+1/k))/Y_{0} - Y_{1}/k}}
 \value{Returns an S4 object of type \code{\linkS4class{RLum.Results}}. 
-Slot \code{data} contains a \link{list} with the following structure:\cr 
-$ LnLx  \cr        
-$ LnLx.BG   \cr     
-$ TnTx    \cr       
-$ TnTx.BG    \cr   
-$ Net_LnLx   \cr   
-$ Net_LnLx.Error\cr 
-$ Net_TnTx.Error\cr
-$ LxTx\cr
-$ LxTx.Error}
+Slot \code{data} contains a \code{\link{list}} with the following structure:\cr 
+$ LxTx.table (data.frame)
+.. $ LnLx  \cr        
+.. $ LnLx.BG   \cr     
+.. $ TnTx    \cr       
+.. $ TnTx.BG    \cr   
+.. $ Net_LnLx   \cr   
+.. $ Net_LnLx.Error\cr 
+.. $ Net_TnTx.Error\cr
+.. $ LxTx\cr
+.. $ LxTx.Error
+$ calc.parameters (list)
+.. $ sigmab.LnTx
+.. $ sigmab.TnTx
+.. $ k}
 \references{Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/english/~/media/Andre_Universitetsenheder/Nutech/Produkter\%20og\%20services/Dosimetri/radiation_measurement_instruments/tl_osl_reader/Manuals/analyst_manual_v3_22b.ashx}\cr
 
 Galbraith, R.F., 2002. A note on the variance of a background-corrected 
 OSL count. Ancient TL, 20 (2), 49-51. 
 
 Galbraith, R.F., 2014. A further note on the variance of a background-corrected OSL count.
-Submitted to Ancient TL. }
-\author{Sebastian Kreutzer, JLU Giessen (Germany),\cr
+Ancient TL, 31 (2), 1-3.}
+\author{Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France),\cr
 R Luminescence Package Team}
 \note{The results of this function have been cross-checked with the Analyst (vers. 3.24b).   
 Access to the results object via \code{\link{get_RLum.Results}}.}
@@ -82,4 +89,4 @@ get_RLum.Results(results)
 }
 
 \keyword{datagen}
-\section{Function version}{0.4.1 (2014-04-13 14:28:43)}
+\section{Function version}{0.4.5 (2014-12-18 17:34:13)}

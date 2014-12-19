@@ -2,10 +2,10 @@
 \alias{calc_CommonDose}
 \title{Apply the (un-)logged common age model after Galbraith et al. (1999) to a given De distribution}
 \description{Function to calculate the common dose of a De distribution.}
-\usage{calc_CommonDose(input.data, sigmab = 0, log = TRUE, sample.id = "unknown sample")}
+\usage{calc_CommonDose(data, sigmab, log = TRUE, ...)}
 \arguments{
-  \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
-for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+  \item{data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+for \code{data.frame}: two columns with De \code{(data[,1])} and
 De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}} (with default): spread in De values given as a 
 fraction (e.g. 0.2). This value represents the expected overdispersion in 
@@ -13,7 +13,7 @@ the data should the sample be well-bleached (Cunningham & Walling 2012,
 p. 100).}
   \item{log}{\code{\link{logical}} (with default): fit the (un-)logged common age 
 model to De data}
-  \item{sample.id}{\code{\link{character}} (with default): sample id}
+  \item{\dots}{currently not used. }
 }
 \details{\bold{(Un-)logged model} \cr\cr
 When \code{log = TRUE} this function calculates the weighted mean of 
@@ -29,34 +29,37 @@ un-logged estimates of De and their absolute standard error
 \code{\linkS4class{RLum.Results}} object is 
 returned containing the following element:
 
-\item{results}{\link{data.frame} with statistical parameters.}
+\item{summary}{\link{data.frame} summary of all relevant model results.}
+\item{data}{\link{data.frame} original input data}
+\item{args}{\link{list} used arguments}
+\item{call}{\link{call} the function call}
 
 The output should be accessed using the function 
 \code{\link{get_RLum.Results}}}
 \references{Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
-track ages. Nuclear Tracks Radiation Measurements, 4, pp. 459-470. \cr\cr
+track ages. Nuclear Tracks Radiation Measurements 4, 459-470. \cr\cr
 Galbraith, R.F., Roberts, R.G., Laslett, G.M., Yoshida, H. & Olley, J.M., 
 1999. Optical dating of single grains of quartz from Jinmium rock shelter, 
 northern Australia. Part I: experimental design and statistical models. 
-Archaeometry, 41, pp. 339-364. \cr\cr
+Archaeometry 41, 339-364. \cr\cr
 Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
 dose and error calculation and display in OSL dating: An overview and some 
-recommendations. Quaternary Geochronology, 11, pp. 1-27. \cr\cr
+recommendations. Quaternary Geochronology 11, 1-27. \cr\cr
 \bold{Further reading} \cr\cr
 Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain
 equivalent dose (De) distributions: Implications for OSL dating of sediment
-mixtures. Quaternary Geochronology, 4, pp. 204-230. \cr\cr
+mixtures. Quaternary Geochronology 4, 204-230. \cr\cr
 Bailey, R.M. & Arnold, L.J., 2006. Statistical modelling of single grain
 quartz De distributions and an assessment of procedures for estimating 
-burial dose. Quaternary Science Reviews, 25, pp. 2475-2502. \cr\cr
+burial dose. Quaternary Science Reviews 25, 2475-2502. \cr\cr
 Cunningham, A.C. & Wallinga, J., 2012. Realizing the potential of fluvial
-archives using robust OSL chronologies. Quaternary Geochronology, 12, 
-pp. 98-106. \cr\cr
+archives using robust OSL chronologies. Quaternary Geochronology 12, 
+98-106. \cr\cr
 Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing the
 reproducibility and accuracy of optical dating of fluvial deposits.
-Quaternary Geochronology, 1, pp. 109-120.\cr\cr
+Quaternary Geochronology 1, 109-120.\cr\cr
 Rodnight, H., 2008. How many equivalent dose values are needed to obtain
-a reproducible distribution?. Ancient TL, 26, pp. 3-10.}
+a reproducible distribution?. Ancient TL 26, 3-10.}
 \author{Christoph Burow, University of Cologne (Germany) \cr
 R Luminescence Package Team}
 
@@ -64,7 +67,7 @@ R Luminescence Package Team}
 
 \seealso{\code{\link{calc_CentralDose}},
 \code{\link{calc_FiniteMixture}}, \code{\link{calc_FuchsLang2001}},
-\code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}   }
+\code{\link{calc_MinDose}}}
 \examples{
 ## load example data
 data(ExampleData.DeValues, envir = environment())
@@ -72,4 +75,3 @@ data(ExampleData.DeValues, envir = environment())
 ## apply the common dose model
 calc_CommonDose(ExampleData.DeValues)                         
 }
-\section{Function version}{1.2 (2014-04-13 14:27:25)}

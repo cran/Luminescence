@@ -7,9 +7,9 @@ and returns various component parameters. The fitting procedure uses the
 \code{\link{nls}} function with the \code{port} algorithm.}
 \usage{fit_CWCurve(values, n.components.max, fit.failure_threshold = 3, 
     fit.trace = FALSE, fit.calcError = FALSE, LED.power = 36, 
-    LED.wavelength = 470, log = "", cex.global = 0.6, main = "CW-OSL Curve Fit", 
-    sample_code = "Default", ylab, xlab, output.path, output.terminal = TRUE, 
-    output.terminalAdvanced = TRUE, output.plot = TRUE)}
+    LED.wavelength = 470, cex.global = 0.6, sample_code = "Default", 
+    output.path, output.terminal = TRUE, output.terminalAdvanced = TRUE, 
+    output.plot = TRUE, ...)}
 \arguments{
   \item{values}{\code{\linkS4class{RLum.Data.Curve}} or \link{data.frame} 
 (\bold{required}): x, y data of measured values (time and counts). See examples.}
@@ -25,14 +25,9 @@ absolute photoionisation cross section.}
   \item{LED.wavelength}{\link{numeric} (with default): LED wavelength used for stimulation in nm. 
 \bold{Note:} The value is used for the calculation of the absolute 
 photoionisation cross section.}
-  \item{log}{\link{character} (optional): option for log-scaled axis, 
-works as in \link{plot}}
   \item{cex.global}{\link{numeric} (with default): global scaling factor.}
-  \item{main}{\link{character} (with default): header for plot output.}
   \item{sample_code}{\link{character} (optional): sample code used for the plot and the 
 optional output table (mtext).}
-  \item{ylab}{\link{character} (with default): alternative y-axis labelling }
-  \item{xlab}{\link{character} (with default): alternative x-axis labelling }
   \item{output.path}{\link{character} (optional): output path for table output containing the 
 results of the fit. The file name is set automatically. If
 the file already exists in the directory, the values are appended.}
@@ -41,6 +36,7 @@ the file already exists in the directory, the values are appended.}
 Requires \code{output.terminal = TRUE}.
 If \code{output.terminal = FALSE} no advanced output is possible.}
   \item{output.plot}{\link{logical} (with default): returns a plot of the fitted curves.}
+  \item{\dots}{further arguments and graphical parameters passed to \code{\link{plot}}.}
 }
 \details{\bold{Fitting function}\cr\cr
 The function for the CW-OSL fitting has the general form:
@@ -79,7 +75,7 @@ output options, an \code{\linkS4class{RLum.Results}} object is returned.\cr\cr
 \code{fit}: an \code{nls} object (\code{$fit}) for which generic R functions 
 are provided, e.g. \link{summary}, \link{confint}, \link{profile}. 
 For more details, see \link{nls}.\cr\cr
-\code{output.table}:  a \link{data.frame} containing the summarized 
+\code{output.table}: a \link{data.frame} containing the summarised 
 parameters including the error\cr
 \code{component.contribution.matrix}: \link{matrix} containing the values 
 for the component to sum contribution plot 
@@ -100,7 +96,7 @@ The Review of Economics and Statistics, 52 (3), 320-323.
 
 Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. In: R. Gentleman, 
 K. Hornik, G. Parmigiani, eds., Springer, p. 150.}
-\author{Sebastian Kreutzer, JLU Giessen (Germany),\cr
+\author{Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr
 R Luminescence Package Team}
 \note{\bold{Beta version - This function has not been properly tested yet and should 
 therefore not be used for publication purposes!}\cr\cr
@@ -129,4 +125,4 @@ fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,
 
 \keyword{dplot}
 \keyword{models}
-\section{Function version}{0.4.3 (2014-04-13 14:29:43)}
+\section{Function version}{0.4.4 (2014-12-18 17:41:10)}

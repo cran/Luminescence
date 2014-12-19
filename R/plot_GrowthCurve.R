@@ -4,11 +4,11 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, Universite Bordeaux Montaigne (France), 
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
   ## Michael Dietze, GFZ Potsdam (Germany), \cr
   
   ##section<<
-  ##version 1.2.6
+  ##version 1.2.15
   # ===========================================================================
   
   sample,
@@ -16,7 +16,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ### for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx. The column for the test dose 
   ### response is optional, but requires 'TnTx' as column name if used.
 
-  na.exclude = TRUE,
+  na.rm = TRUE,
   ### \code{\link{logical}} (with default): excludes \code{NA} values from the data 
   ### set prior to any further operations.
   
@@ -66,6 +66,12 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ### just the growth curve will be plotted. \bold{Requires:} 
   ### \code{output.plot = TRUE}.
   
+  output.plotExtended.single = FALSE,
+  ### \code{\link{logical}} (with default): 
+  ### single plot output (\code{TRUE/FALSE}) to allow for plotting the results 
+  ### in single plot windows. 
+  ### Requires \code{output.plot = TRUE} and \code{output.plotExtended = TRUE}.
+  
   cex.global = 1,
   ### \code{\link{numeric}} (with default): global scaling factor.
   
@@ -74,27 +80,37 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   ### arguments will only be passed to the growth curve plot
 ) {
 
-  
   ##1. check if sample is data.frame
   if(is.data.frame(sample)==FALSE){
-    stop("\n [plot_GrowthCurve] Sample has to be of type data.fame!")
+    stop("\n [plot_GrowthCurve()] Sample has to be of type data.fame!")
   }
   
   ##2. check if sample contains a least three rows 
   if(length(sample[,1])<3){
-    stop("\n [plot_GrowthCurve] At least two regeneration points are needed!")
+    stop("\n [plot_GrowthCurve()] At least two regeneration points are needed!")
   }
   
-  ## optionally, count nd exclude NA values and print result
-  if(na.exclude == TRUE) {
+  ## optionally, count and exclude NA values and print result
+  if(na.rm == TRUE) {
     n.NA <- sum(!complete.cases(sample))
-    if(n.NA == 1) {print("1 NA value excluded.")
-    } else if(n.NA > 1) {print(paste(n.NA, "NA values excluded."))}
-    sample <- na.exclude(sample)}
+    if(n.NA == 1) {cat("\n [plot_GrowthCurve()] 1 NA value excluded.")
+    } else if(n.NA > 1) {cat(paste("\n [plot_GrowthCurve()]", n.NA, "NA values excluded."))}
+  
+    sample <- na.exclude(sample)
+    
+    ##Check if anything is left after removal
+    if(nrow(sample) == 0){
+      
+      stop("[plot_GrowthCurve()] Sorry, after NA removal nothing is left from the data set!")
+      
+    }
+  
+  }
+  
   
   ##NULL values in the data.frame are not allowed for the y-column
     if(length(sample[sample[,2]==0,2])>0){
-      cat("\n[plot_GrowthCurve.R] >> Warning:",
+      cat("\n[plot_GrowthCurve()] Warning:",
           length(sample[sample[,2]==0,2]),"values with 0 for Lx/Tx detected; replaced by 0.0001.\n")
       sample[sample[,2]==0,2]<-0.0001 
     }
@@ -104,7 +120,12 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   #1.0.1 calculate number of reg points if not set
   if(missing(fit.NumberRegPoints)==TRUE){fit.NumberRegPoints<-length(sample[-1,1])}
   if(missing(fit.NumberRegPointsReal)==TRUE){
-    fit.NumberRegPointsReal<-length(sample[-which(duplicated(sample[,1]) | sample[,1]==0),1])
+    
+    fit.RegPointsReal <- as.integer(
+      rownames(sample[-which(duplicated(sample[,1]) | sample[,1]==0),]))
+
+    fit.NumberRegPointsReal <- length(fit.RegPointsReal)
+    
   }
  
   #1.1 Produce dataframe from input values
@@ -117,7 +138,6 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
   }else{
     fit.weights<-NULL
   }
-    
 
   # Deal with extra arguments -----------------------------------------------
   ##deal with addition arguments 
@@ -188,9 +208,11 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
      a <- max(data[,2])
 
      ##b - get start parameters from a linear fit of the log(y) data
-     fit.lm <- lm(log(data$y)~data$x)
-     b <- as.numeric(1/fit.lm$coefficients[2])
-     
+     ##    (suppress the warning in case one parameter is negative)
+
+     fit.lm <- lm(suppressWarnings(log(data$y))~data$x)
+     b <- as.numeric(1/fit.lm$coefficients[2])   
+
 	   ##c - get start parameters from a linear fit - offset on x-axis
 	   fit.lm<-lm(data$y~data$x)
      c <- as.numeric(abs(fit.lm$coefficients[1]/fit.lm$coefficients[2]))
@@ -227,7 +249,8 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 					##FITTING on GIVEN VALUES##
 					#	--use classic R fitting routine to fit the curve
           
-          ##try to create some start parameters from the input values to make the fitting more stable
+          ##try to create some start parameters from the input values to make 
+          ## the fitting more stable
           for(i in 1:50){
          
             a<-a.MC[i];b<-b.MC[i];c<-c.MC[i]
@@ -266,7 +289,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
               
 							if (class(fit)=="try-error"){
                 
-							  writeLines("[plot_GrowthCurve.R] >> try-error for EXP fit")
+							  writeLines("[plot_GrowthCurve()] >> try-error for EXP fit")
                 
 							}else{
 							  #get parameters out of it
@@ -274,14 +297,17 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 							  b<-as.vector((parameters["b"]))
 							  a<-as.vector((parameters["a"])) 
 							  c<-as.vector((parameters["c"]))
-							
-              #print D01 value
-              writeLines(paste("[plot_GrowthCurve.R] >> D01 = ",round(b,digits=2),sep=""))
-              D01<-round(b,digits=2)  
-            
+					
+                
+                
 							#calculate De 
 							De<-round(-c-b*log(1-sample[1,2]/a), digits=2)
-							
+                
+              #print D01 value
+							D01<-round(b,digits=2) 
+              writeLines(paste0("[plot_GrowthCurve()] >> D01 = ",D01, " | De = ", De)) 
+            
+
 						##Monte Carlo Simulation
 						#	--Fit many curves and calculate a new De +/- De_Error
 						#	--take De_Error
@@ -320,8 +346,9 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 							
 								#calculate x.natural
 								x.natural[i]<-round(-var.c[i]-var.b[i]*log(1-sample[1,2]/var.a[i]), digits=2)
+                
 						  }
-  
+
 						}#end for loop             
 					}#endif::try-error fit    
         }#endif:fit.method!="LIN"
@@ -348,7 +375,8 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
                 fit.lmMC <- lm(data$y~data$x, weights=abs(fit.weights))
   
                 #calculate x.natural
-                x.natural[i]<-round((sample[1,2]-fit.lmMC$coefficients[1])/fit.lmMC$coefficients[2], digits=2)
+                x.natural[i]<-round((sample[1,2]-fit.lmMC$coefficients[1])/
+                                      fit.lmMC$coefficients[2], digits=2)
             }#endfor::loop for MC
             
             #correct for fit.method
@@ -514,7 +542,8 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 							var.c[i]<-as.vector((parameters["c"]))
 							var.g[i]<-as.vector((parameters["g"]))
 					
-							#problem: analytical it is not easy to calculate x, here a simple approximation is made
+							#problem: analytical it is not easy to calculate x, 
+              #here a simple approximation is made
 						
 							#calculate absolute differences from LnTn
 							differences <- data.frame(dose=xy$x,
@@ -544,10 +573,12 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
               
 						
 							#produce an iteration matrix 
-							iteration.matrix<-matrix(c(j,(round(var.a[i]*(1-exp(-(j+var.c[i])/var.b[i])+var.g[i]*j),digits=3))),ncol=2)
+							iteration.matrix<-matrix(
+                c(j,(round(var.a[i]*(1-exp(-(j+var.c[i])/var.b[i])+var.g[i]*j),digits=3))),ncol=2)
 					
-							#select dose if Ln/Tn fits the values in the matrix
-							x.natural[i]<-mean(iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1])
+							#select dose when Ln/Tn fits the values in the matrix
+							x.natural[i]<-mean(
+                iteration.matrix[iteration.matrix[,2]==round(sample[1,2],digits=3),1])
 							}
 
 				  ##update progress bar
@@ -585,6 +616,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 		                 nls.control(maxiter=500,warnOnly=FALSE,minFactor=1/2048) #increase max. iterations
 		    ),silent=TRUE)
 		    
+      
 		     if(class(fit)!="try-error"){
 		        #get parameters out of it
 		        parameters<-(coef(fit)) 
@@ -628,10 +660,9 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
               D02<-round(b2,digits=2)
        
               #print D0 values
-              writeLines(paste(">> D01 = ",D01,sep=""))
-              writeLines(paste(">> D02 = ",D02,sep=""))
+              writeLines(paste0("\n [plot_GrowthCurve()] >> D01 = ",D01, " | D02 = ",D02))
                             
-        #problem: analytic it is not easy to calculat x, here an simple approximation is made
+        #problem: analytic it is not easy to calculate x, here an simple approximation is made
 						
               #calculate absolut diffrences from LnTn
 							differences <- data.frame(dose=xy$x,differences=(sample[1,2]-
@@ -747,7 +778,7 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
           } #end if "try-error" Fit Method
       
         ##close
-        close(pb)    
+        if(exists("pb")){close(pb)}    
     #===========================================================================
 		} #End if Fit Method  
       
@@ -759,34 +790,41 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 			De.MonteCarlo<-round(mean(na.exclude(x.natural)),digits=2)		
   
 			#De.Error is Error of the whole De (ignore NaN values)
-			De.Error<-round(sd(na.exclude(x.natural)),digits=2)
+			De.Error <- sd(na.exclude(x.natural))
+      
+      ##choose format in dependency of the size of the error
+      De.Error <- ifelse(De.Error <= 0.01,
+                          format(De.Error, scientific = TRUE, digits = 2),
+                          round(De.Error, digits = 2))
+      
 
 # Formula creation --------------------------------------------------------
   
   if(is(fit,"try-error") == FALSE){
   
   if(fit.method == "EXP") {
-    f <- as.formula(paste("f ~", round(coef(fit)[1], 5), "* (1-exp(-(x+", 
-                          round(coef(fit)[3], 5), ") /", 
+    f <- parse(text = paste0(round(coef(fit)[1], 5), " * (1 - exp( - (x + ", 
+                          round(coef(fit)[3], 5), ")/", 
                           round(coef(fit)[2], 5), "))"))
+    
   }
   
   if(fit.method == "EXP+LIN") {
-    f <- as.formula(paste("f ~", round(coef(fit)[1], 5), "* (1-exp(-(x+", 
+    f <- parse(text = paste0(round(coef(fit)[1], 5), "* (1-exp(-(x+", 
                           round(coef(fit)[3], 5), ") /", 
                           round(coef(fit)[2], 5), ")+(",
                           round(coef(fit)[4], 5), "*x))"))
   }
   
   if(fit.method == "EXP+EXP") {
-    f <- as.formula(paste("f ~ ", round(coef(fit)[1], 5), " * (1 - exp( -x / ", 
+    f <- parse(text = paste0(round(coef(fit)[1], 5), " * (1 - exp( -x / ", 
                           round(coef(fit)[3], 5), ")) + ", 
                           round(coef(fit)[2], 5), " * (1 - exp(-x / ", 
                           round(coef(fit)[4], 5), "))"))
   }
   
   if(fit.method == "LIN") {
-    f <- as.formula(paste("f ~ ", round(fit.lm$coefficients[2], 5),
+    f <- parse(text = paste0(round(fit.lm$coefficients[2], 5),
                           "* x + ", round(fit.lm$coefficients[1], 5)))
     
   }
@@ -800,26 +838,47 @@ plot_GrowthCurve <- structure(function(# Fit and plot a growth curve for lumines
 # PLOTTING ---------------------------------------------------------------------
 ##============================================================================##
 
-##5. Plotting if plotOutput=TRUE
+##5. Plotting if plotOutput==TRUE
 if(output.plot==TRUE) {
   
-      ####grep recent plot parameter for later reset
-      par.default <- par(no.readonly = TRUE)
-      
+    
       ##cheat the R check
       x<-NULL; rm(x)
 
 #PAR	#open plot area
-      if(output.plot==TRUE & output.plotExtended==TRUE){
+      if(output.plot== TRUE & 
+           output.plotExtended== TRUE & 
+           output.plotExtended.single == FALSE ){
       
+        ####grep recent plot parameter for later reset
+        par.default.complex <- par(no.readonly = TRUE)
       
-      ##set new parameter
-			layout(matrix(c(1,1,1,1,2,3), 3, 2, byrow=TRUE), respect=TRUE)
-			par(cex=0.8*cex.global)
-      }else{par(mfrow=c(1,1),cex=cex.global)}
+        ##set new parameter
+			  layout(matrix(c(1,1,1,1,2,3), 3, 2, byrow=TRUE), respect=TRUE)
+			  par(cex=0.8*cex.global)
+        
+      }else{
+        
+        par.default.single <- par(no.readonly = TRUE)$cex
+        par(cex=cex.global)
+        
+      }
 
 #PLOT		#Plot input values
-			plot(xy[1:fit.NumberRegPointsReal,1],xy[1:fit.NumberRegPointsReal,2],
+
+      ##Make selection to support manual number of reg points input
+      if(exists("fit.RegPointsReal")==TRUE){
+         
+          ##here the object sample has to be used otherwise the first regeneration point is not plotted.
+          temp.xy.plot  <- sample[fit.RegPointsReal,]
+
+      }else{
+          
+          temp.xy.plot  <- xy[1:fit.NumberRegPointsReal]
+        
+      }
+
+			plot(temp.xy.plot[,1:2],
 				ylim=ylim,
 				xlim=xlim,
 				pch=19,
@@ -836,18 +895,29 @@ if(output.plot==TRUE) {
       else if (fit.method=="EXP+EXP") {try(curve(fit.functionEXPEXP(a1,a2,b1,b2,x),lwd=1.5,add=TRUE))}
 
 ##POINTS	#Plot Reg0 and Repeated Points
+
 			#Repeated Point
-      points(xy[which(duplicated(xy[,1])),1],xy[which(duplicated(xy[,1])),2], pch=2)
+      points(xy[which(duplicated(xy[,1])),1],xy[which(duplicated(xy[,1])),2], 
+             pch=2)
       
       #Reg Point 0
-      points(xy[which(xy==0),1],xy[which(xy==0),2], pch=1)
+      points(xy[which(xy==0),1],xy[which(xy==0),2], pch=1, cex = 1.5*cex.global)
    
 ##ARROWS	#y-error Bars
 
       segments(xy$x,xy$y-y.Error,xy$x,xy$y+y.Error)
 	
 ##LINES	#Insert Ln/Tn
-			try(lines(c(0,De),c(sample[1,2],sample[1,2]), col="red", lty=2,lwd=1.25),silent=TRUE)
+      if(is.na(De)){
+        
+        lines(c(0,max(sample[,1])*2),c(sample[1,2],sample[1,2]), col="red", lty=2,lwd=1.25)
+        
+      }else{
+        
+        try(lines(c(0,De),c(sample[1,2],sample[1,2]), col="red", lty=2,lwd=1.25),silent=TRUE)
+        
+      }
+		
 			try(lines(c(De,De),c(0,sample[1,2]), col="red", lty=2, lwd=1.25),silent=TRUE)
 			try(points(De,sample[1,2], col="red", pch=19),silent=TRUE)
 
@@ -856,7 +926,7 @@ mtext <- if("mtext" %in% names(list(...))) {
   list(...)$mtext
   } else {
     substitute(D[e] == De, 
-               list(De=paste(De,"+/-",De.Error, " | fit: ",fit.method)))
+               list(De=paste(De,"\u00B1",De.Error, " | fit: ",fit.method)))
   }
 
 
@@ -866,7 +936,7 @@ mtext <- if("mtext" %in% names(list(...))) {
 	
 			#write error message in plot if De is NaN
 			try(if (De=="NaN") {
-				text(sample[2,1],0,"Error: Fit not valid. At least one parameter is negative!", 
+				text(sample[2,1],0,"Error: De could not be calculated!", 
          adj=c(0,0), cex=0.8, col="red")
 			},silent=TRUE)
 	
@@ -879,43 +949,59 @@ mtext <- if("mtext" %in% names(list(...))) {
       if(output.plot==TRUE & output.plotExtended==TRUE){
         
 ##HIST		#try to plot histogramm of De values from the Monte Carlo simulation
-			par(cex=0.7*cex.global)
-      
-			##plot histogram for frequency axis
-      try(histogram<-hist(
-          x.natural,
-          freq=TRUE,
-          col="white",
-          border="white",
-          xlab="",
-          xaxt="n",
-          main="" 
-      ), silent = TRUE)
-                  
-		  	if(exists("histogram")) {par(new=TRUE)} ##otherwise we get an overplotting
-  			try(histogram<-hist(
-  				x.natural,
-  				xlab=xlab,
-  				main=expression(paste(D[e], " from Monte Carlo simulation")),
-          freq=FALSE,
-  				sub=paste("n.iterations = ", NumberIterations.MC,", valid fits =",length(na.exclude(x.natural))),
-  				col="grey",
-          ylab="",
-          yaxt="n",
-  			), silent = TRUE)#end plot hist
-			      
+			
+      if(output.plotExtended.single != TRUE){
+                
+        par(cex=0.7*cex.global)
+        
+      }
+   
+            
+			##(A) Calculate histogram data 
+      try(histogram <- hist(x.natural, plot = FALSE), silent = TRUE)
+                
 			#to avoid errors plot only if histogram exists
 			if (exists("histogram")) {
         
+			##calculate normal distribution curves for overlay
+			norm.curve.x <- seq(min(x.natural, na.rm = TRUE), 
+			                    max(x.natural, na.rm = TRUE),
+			                    length = 101)
+			
+			norm.curve.y <- dnorm(norm.curve.x,
+			                      mean=mean(x.natural, na.rm = TRUE),
+			                      sd=sd(x.natural, na.rm = TRUE))
+      
+      ##plot histogram 
+			histogram <- hist(x.natural,
+  				xlab = xlab,
+  				ylab = "Frequency",
+  				main=expression(paste(D[e], " from MC simulation")),
+          freq=FALSE,
+          border = "white",
+          axes = FALSE,
+          ylim = c(0,max(norm.curve.y)),
+  				sub = 
+            paste("n = ", NumberIterations.MC, ", valid fits =", length(na.exclude(x.natural))),
+  				col="grey")
+
+        ##add axes 
+        axis(side = 1)
+        axis(side = 2, 
+             at = seq(min(histogram$density),max(histogram$density), length = 5),
+             labels = round(
+               seq(min(histogram$counts),max(histogram$counts), length = 5), 
+               digits = 0))
+        
+        ##add norm curve
+        lines(norm.curve.x, norm.curve.y, col = "red")
+        
 			  ##add rug
 			  rug(x.natural)
-             
-        ##add normal curve
-			  curve(dnorm(x,mean=mean(na.exclude(x.natural)),sd=sd(na.exclude(x.natural))),col="red",add=TRUE)
-                        
-				#write De + Error from Monte Carlo simulation + write quality of error estimation
-		  	try(mtext(side=3,substitute(D[e[MC]] == De, 
-              list(De=paste(De.MonteCarlo,"+/-",De.Error,
+                   
+			##write De + Error from Monte Carlo simulation + write quality of error estimation
+			try(mtext(side=3,substitute(D[e[MC]] == De, 
+              list(De=paste(De.MonteCarlo,"\u00B1",De.Error,
               " | quality = ",round((1-abs(De-De.MonteCarlo)/De)*100,
               digits=1),"%"))),cex=0.6*cex.global),silent=TRUE)
           
@@ -958,8 +1044,21 @@ if(fun==TRUE){sTeve()}
 ##END lines
   }#endif::output.plotExtended
 
-  par(par.default)
-  rm(par.default)
+ 
+  ##reset only the parameter that have been changed!  
+  if(exists("par.default.single")){
+   
+    par(cex = par.default.single)
+    rm(par.default.single)
+  
+  }
+
+  if(exists("par.default.complex")){
+   
+   par(par.default.complex)
+   rm(par.default.complex)
+   
+  }
 
 }#end if plotOutput	
 
@@ -970,10 +1069,12 @@ if(fun==TRUE){sTeve()}
                   silent=TRUE)
     output <- set_RLum.Results(data=list(De=output,Fit=fit, Formula=f))
     invisible(output)
+
   ### \code{RLum.Results} object containing the De (De, De Error, D01 value, D02 value and Fit 
   ### type) and fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} 
   ### and \code{EXP+EXP}. In case of a resulting linear fit when using 
-  ### \code{EXP OR LIN}, a \link{lm} object is returned. 
+  ### \code{EXP OR LIN}, a \link{lm} object is returned. \cr
+  ### The formula \code{Formula} is returned as R expression for further evaluation.
   ### Additionally a plot is returned.
   
   ##details<<
@@ -984,7 +1085,9 @@ if(fun==TRUE){sTeve()}
   ## \deqn{y = m*x+n}
   ## \code{EXP}: try to fit a function of the form 
   ## \deqn{y = a*(1-exp(-(x+c)/b))}
-  ## Parameters b and c are approximated by a linear fit using \link{lm}.\cr
+  ## Parameters b and c are approximated by a linear fit using \link{lm}.
+  ## Note: b = D0\cr
+  ##
   ## \code{EXP OR LIN}: works for some cases where an \code{EXP} fit fails. 
   ## If the \code{EXP} fit fails, a \code{LIN} fit is done instead. \cr
   ## \code{EXP+LIN}: tries to fit an exponential plus linear function of the 
@@ -1035,20 +1138,21 @@ if(fun==TRUE){sTeve()}
   ## A D02 value is provided for the function \code{EXP+EXP} only.
 
 }, ex=function(){
-  ##(1) plot growth curve for a dummy data.set
+  ##(1) plot growth curve for a dummy data.set and show De value
   data(ExampleData.LxTxData, envir = environment())
-  plot_GrowthCurve(LxTxData)
+  temp <- plot_GrowthCurve(LxTxData)
+  get_RLum.Results(temp)
   
-  
+  ##(1a) to access the fitting value try
+  get_RLum.Results(temp, data.object = "Fit")
+    
   ##(2) plot the growth curve only - uncomment to use
-  
   ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
   plot_GrowthCurve(LxTxData)
   ##dev.off()                                   
   
-  ##(3) plot growth curve with pdf output - uncomment to use
-  
+  ##(3) plot growth curve with pdf output - uncomment to use, single output
   ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
-  plot_GrowthCurve(LxTxData)
+  plot_GrowthCurve(LxTxData, output.plotExtended.single = TRUE)
   ##dev.off()  
 })

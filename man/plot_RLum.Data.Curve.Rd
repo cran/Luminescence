@@ -3,13 +3,16 @@
 \title{Plot function for an RLum.Data.Curve S4 class object}
 \description{The function provides a standardised plot output for curve data of an 
 RLum.Data.Curve S4 class object }
-\usage{plot_RLum.Data.Curve(object, par.local = TRUE, ...)}
+\usage{plot_RLum.Data.Curve(object, par.local = TRUE, norm = FALSE, 
+    ...)}
 \arguments{
   \item{object}{\code{\linkS4class{RLum.Data.Curve}} (\bold{required}): 
 S4 object of class \code{RLum.Data.Curve}}
   \item{par.local}{\code{\link{logical}} (with default): use local graphical parameters for plotting, e.g.
 the plot is shown in one column and one row. If \code{par.local = FALSE},  
 global parameters are inherited.}
+  \item{norm}{\code{\link{logical}} (with default): allows curve normalisation to the 
+highest count value }
   \item{\dots}{further arguments and graphical parameters that will be passed to the 
 \code{plot} function}
 }
@@ -17,7 +20,7 @@ global parameters are inherited.}
 Arguments according to \code{\link{plot}}.}
 \value{Returns a plot.}
 \references{#}
-\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
+\author{Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
 R Luminescence Package Team}
 \note{Not all arguments of \code{\link{plot}} will be passed!}
 
@@ -39,4 +42,4 @@ plot_RLum.Data.Curve(temp)
 }
 
 \keyword{aplot}
-\section{Function version}{0.1.3 (2014-04-13 14:30:59)}
+\section{Function version}{0.1.5 (2014-11-26 08:18:36)}

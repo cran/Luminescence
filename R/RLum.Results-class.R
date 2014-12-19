@@ -3,9 +3,9 @@
 ##//////////////////////////////////////////////////////////////////////////////
 ##==============================================================================
 ##author: Sebastian Kreutzer
-##organisation: JLU Giessen/Freiberg Instruments
-##version: 0.2.2
-##date: 2013-11-21
+##organisation: IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+##version: 0.2.6
+
 ##==============================================================================
 
 ##class definition
@@ -123,7 +123,7 @@ setMethod("get_RLum.Results",
               if(is.null(try(object@data[[data.object]])) == TRUE){
                 
                 error.message1 <- paste(names(object@data), collapse = ", ")
-                error.message <- paste("[get_RLum.Results] Error: data.object unknown. Valid object names are: ", error.message1)
+                error.message <- paste("[get_RLum.Results()] data.object unknown. Valid object names are: ", error.message1)
                
                 stop(error.message)
                 
@@ -140,17 +140,68 @@ setMethod("get_RLum.Results",
             ##calc_OSLLxTxRatio            
             if(object@originator == "calc_OSLLxTxRatio") {
               
-              return(as.data.frame(object@data))
+              if(missing(data.object)==TRUE){
+                
+                return(object@data$LxTx.table)
+                
+              }else{
+                
+                if(data.object%in%names(object@data)==FALSE){
+                  
+                  #valid.names <- names(object@data))
+                  stop(paste("\n[get_RLum.Results()] Error: 'data.object' is unknown for this RLum.Results object produced by ", object@originator,"()! 
+                             Valid 'data.objects' are: ",paste(names(object@data), collapse=", "), sep=""))
+                  
+                }else{
+                  
+                  return(object@data[data.object][[1]])
+                  
+                }
+                
+              }
               
             }
-            
+              
+     
             ##-------------------------------------------------------------
             ##calc_TLLxTxRatio            
             if(object@originator == "calc_TLLxTxRatio") {
               
-              return(as.data.frame(object@data))
+              
+              if(missing(data.object)==TRUE){
+                
+                return(object@data$LxTx.table)
+                
+              }else{
+                
+                if(data.object%in%names(object@data)==FALSE){
+                  
+                  #valid.names <- names(object@data))
+                  stop(paste("\n[get_RLum.Results()] Error: 'data.object' is unknown for this RLum.Results object produced by ", object@originator,"()! 
+                             Valid 'data.objects' are: ",paste(names(object@data), collapse=", "), sep=""))
+                  
+                }else{
+                  
+                  return(object@data[data.object][[1]])
+                  
+                }
+                
+              }
+              
+              
+              
               
             }
+            
+            ##-------------------------------------------------------------
+            ##calc_SourceDoseRate        
+            if(object@originator == "calc_SourceDoseRate") {
+              
+              return(object@data[[1]])
+              
+            }
+            
+            
             
             ##-------------------------------------------------------------
             ##plot_GrowthCurve         
@@ -180,7 +231,7 @@ setMethod("get_RLum.Results",
             
             ##-------------------------------------------------------------
             ##analyse_SAR.CWOSL        
-            if(object@originator == "analyse_SAR.CWOSL") {
+            if(object@originator == "analyse_SAR.CWOSL" | object@originator == "analyse_pIRIRSequence") {
               
               return(object@data[[1]])
               
@@ -237,6 +288,14 @@ setMethod("get_RLum.Results",
             ##-------------------------------------------------------------
             ## calc_CentralDose   
             if(object@originator == "calc_CentralDose") {
+              
+              return(object@data$results)
+              
+            }
+            
+            ##-------------------------------------------------------------
+            ## calc_CosmicDoseRate 
+            if(object@originator == "calc_CosmicDoseRate") {
               
               return(object@data$results)
               

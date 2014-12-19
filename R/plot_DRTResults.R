@@ -4,14 +4,11 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany),
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France),
   ## Michael Dietze, GFZ Potsdam (Germany), \cr
   
-  ## FIXED ISSUES
-  ## - code added: ca. line 505, when only one boxplot is to be done, a label is added
-  
   ##section<<
-  ## version 0.1.2
+  ## version 0.1.6
   # ===========================================================================
 
   values, 
@@ -22,8 +19,14 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   ### must be provided (e.g. \code{list(dataset.1, dataset.2)}).
   
   given.dose,
-  ### \code{\link{numeric}}: given dose from the dose recovery test 
-  ### (in Seconds or Gray, unit has to be the same as from the input values).
+  ### \code{\link{numeric}} (optional):
+  ### given dose used for the dose recovery test to normalise data. If only one given dose is 
+  ### provided this given dose is valid for all input data sets (i.e., \code{values} is a list). 
+  ### Otherwise a given dose for each input data set has to be provided 
+  ### (e.g., \code{given.dose = c(100,200)}).
+  ### If no \code{given.dose} values are plotted without normalisation (might be useful for 
+  ### preheat plateau tests).
+  ### Note: Unit has to be the same as from the input values (e.g., Seconds or Gray).
   
   error.range = 10,
   ### \code{\link{numeric}}: symmetric error range in percent will be shown 
@@ -67,7 +70,12 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   ### position coordinates or keyword (e.g. \code{"topright"}) for the legend
   ### to be plotted.
   
-  na.exclude  = FALSE, 
+  par.local = TRUE,
+  ### \code{\link{logical}} (with default): use local graphical parameters for plotting, e.g.
+  ### the plot is shown in one column and one row. If \code{par.local = FALSE},  
+  ### global parameters are inherited.
+  
+  na.rm  = FALSE, 
   ### \code{\link{logical}}: indicating wether \code{NA} values are removed 
   ### before plotting from the input data set
   
@@ -77,8 +85,15 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   ){
 
   ## Validity checks ----------------------------------------------------------
-  if(missing(given.dose)){stop("[plot_DRTResults: 'given.dose' missing!")}
-
+  
+  ##avoid crash for wrongly set boxlot argument
+  if(missing(preheat) & boxplot == TRUE){
+    
+    warning("[plot_DRTResults()] Option 'boxplot' not valid without any value in 'preheat'. Reset to FALSE.")
+    boxplot  <- FALSE
+    
+  }
+  
   if(missing(summary) == TRUE) {summary <- NULL}
   if(missing(summary.pos) == TRUE) {summary.pos <- "topleft"}
   if(missing(legend.pos) == TRUE) {legend.pos <- "topright"}
@@ -90,7 +105,7 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   for(i in 1:length(values)) {
     if(is(values[[i]], "RLum.Results")==FALSE & 
          is(values[[i]], "data.frame")==FALSE){
-      stop(paste("[plot_DRTResults] Error: Wrong input data format",
+      stop(paste("[plot_DRTResults()] Wrong input data format",
                  "(!= 'data.frame' or 'RLum.Results')"))
     } else {
       if(is(values[[i]], "RLum.Results")==TRUE){
@@ -101,15 +116,31 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   
   ## Check input arguments ----------------------------------------------------
   for(i in 1:length(values)) {
-    if(na.exclude  == TRUE){
-      values[[i]] <- na.exclude(values[[i]])
-    }
     
+    ##check for preheat temperature values
     if(missing(preheat) == FALSE) {
       if(length(preheat) != nrow(values[[i]])){
-        stop("[plot_DRTResults: number of preheat temperatures != De values!")
+        stop("[plot_DRTResults()] number of preheat temperatures != De values!")
       }
     }
+    
+    ##remove NA values; yes Micha, it is not that simple 
+    if(na.rm  == TRUE){
+      
+      ##currently we assume that all input data sets comprise a similar of data 
+      if(!missing(preheat) & i == length(values)){
+        
+        ##find and mark NA value indicies
+        temp.NA.values <- unique(c(which(is.na(values[[i]][,1])), which(is.na(values[[i]][,2]))))
+       
+        ##remove preheat entries
+        preheat <- preheat[-temp.NA.values]
+        
+      }
+         
+       values[[i]] <- na.exclude(values[[i]])
+     
+    }      
   }
   
   ## create global data set
@@ -130,14 +161,16 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
     ifelse(missing(preheat) == TRUE, "# Aliquot", "Preheat temperature [\u00B0C]")
   }
   
-  ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylabs} else
-  {expression(paste("Normalised ", D[e], sep=""))}
+  ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} else
+  {if(!missing(given.dose)){
+    expression(paste("Normalised ", D[e], sep=""))
+   }else{expression(paste(D[e], " [s]"), sep = "")}}
   
   xlim <- if("xlim" %in% names(extraArgs)) {extraArgs$xlim} else
   {c(1, max(n.values) + 1)}
   
   ylim <- if("ylim" %in% names(extraArgs)) {extraArgs$ylim} else
-  {c(0.75, 1.25)}
+  {c(0.75, 1.25)} #check below for further corrections if boundaries exceed set range
 
   cex <- if("cex" %in% names(extraArgs)) {extraArgs$cex} else {1}
   
@@ -149,11 +182,44 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
 
   ## calculations and settings-------------------------------------------------
 
-  ## normalise data
-  for(i in 1:length(values)) {
-    values[[i]] <- values[[i]]/given.dose
-  }
+  ## normalise data if given.dose is given
+  if(!missing(given.dose)){
   
+    if(length(given.dose) > 1){
+    
+      if(length(values) < length(given.dose)){
+      
+        stop("[plot_DRTResults()] 'given.dose' > number of input data sets!")
+      
+      }
+    
+      for(i in 1:length(values)) {
+        values[[i]] <- values[[i]]/given.dose[i]
+      }
+        
+    }else{
+    
+        for(i in 1:length(values)) {
+          values[[i]] <- values[[i]]/given.dose
+        }
+      
+    }
+  }
+ 
+  ##correct ylim for data set which exceed boundaries
+  if((max(sapply(1:length(values), function(x){max(values[[x]][,1], na.rm = TRUE)}))>1.25 |
+      min(sapply(1:length(values), function(x){min(values[[x]][,1], na.rm = TRUE)}))<0.75) &
+      ("ylim" %in% names(extraArgs)) == FALSE){
+        
+    ylim <- c(
+      min(sapply(1:length(values), function(x){
+      min(values[[x]][,1], na.rm = TRUE) - max(values[[x]][,2], na.rm = TRUE)})), 
+      max(sapply(1:length(values), function(x){
+        max(values[[x]][,1], na.rm = TRUE) + max(values[[x]][,2], na.rm = TRUE)})))
+    
+  }
+ 
+
   ## optionally group data by preheat temperature
   if(missing(preheat) == FALSE) {
     modes <- as.numeric(rownames(as.matrix(table(preheat))))
@@ -363,9 +429,12 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   } else {1}
   
   ## setup plot area
-  
+  if(par.local){
+    
+  par.default <- par()[c("mfrow", "cex", "oma")]
   par(mfrow = c(1, 1), cex = cex, oma = c(0, 1, shift.lines - 1, 1))
-  
+  }
+
   ## optionally plot values and error bars
   if(boxplot == FALSE) {
     ## plot data and error
@@ -376,7 +445,11 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
            ylim = ylim,
            xlab = xlab,
            ylab = ylab,
+           xaxt = "n",
            main = "")
+      
+      ##add x-axis ... this avoids digits in the axis labeling
+      axis(side = 1, at = 1:(nrow(values[[1]])+1), labels = 1:(nrow(values[[1]])+1))
       
       ## add title
       title(main = main,
@@ -489,7 +562,7 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
       }
     }
   }
-  
+    
   ## optionally, plot boxplot
   if(boxplot == TRUE) {
     ## create empty plot
@@ -565,9 +638,17 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
         line = shift.lines,
         text = mtext, 
         cex = 0.8 * cex)
+ 
+  ##reset par()
+  if(par.local){
+  par(par.default)
+  rm(par.default)
+  }
   
   ##FUN by R Luminescence Team
   if(fun == TRUE) {sTeve()}
+  
+ 
   
   ##details<<
   ## Procedure to test the accuracy of a measurement protocol to reliably 
@@ -643,7 +724,12 @@ plot_DRTResults <- structure(function(# Visualise dose recovery test results
   plot_DRTResults(values = ExampleData.DeValues[7:11,], 
                   given.dose = 2800,
                   preheat = c(200, 200, 200, 240, 240))
+  ## read example data set and misapply them for this plot type
+  data(ExampleData.DeValues, envir = environment())
   
+  ## plot values 
+  plot_DRTResults(values = ExampleData.DeValues[7:11,], 
+                  given.dose = 2800, mtext = "Example data")
   ## plot two data sets grouped by preheat temperatures
   plot_DRTResults(values = list(x.1, x.2), 
                   given.dose = 2800,

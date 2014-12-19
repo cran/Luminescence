@@ -4,10 +4,10 @@ plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve 
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
   
   ##section<<
-  ## version 0.1.3
+  ## version 0.1.5
   # ===========================================================================
 
   object, 
@@ -19,6 +19,10 @@ plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve 
   ### the plot is shown in one column and one row. If \code{par.local = FALSE},  
   ### global parameters are inherited.
   
+  norm = FALSE, 
+  ### \code{\link{logical}} (with default): allows curve normalisation to the 
+  ### highest count value 
+  
   ...
   ### further arguments and graphical parameters that will be passed to the 
   ### \code{plot} function
@@ -29,7 +33,7 @@ plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve 
   ##check if object is of class RLum.Data.Curve
   if(class(object) != "RLum.Data.Curve"){
     
-    stop("[plot_RLum.Data.Curve]: Input object is not of type RLum.Data.Curve")
+    stop("[plot_RLum.Data.Curve()] Input object is not of type RLum.Data.Curve")
     
   }
 
@@ -59,7 +63,14 @@ plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve 
     
   }
   
-  ##deal with addition arguments 
+  ##normalise curves if argument has been set
+  if(norm == TRUE){
+    
+    object@data[,2] <- object@data[,2]/max(object@data[,2])
+    
+  }
+  
+  ##deal with additional arguments 
   extraArgs <- list(...) 
   
   main <- if("main" %in% names(extraArgs)) {extraArgs$main} else 
@@ -80,7 +91,12 @@ plot_RLum.Data.Curve<- structure(function(#Plot function for an RLum.Data.Curve 
   { 
     if((grepl("TL", object@recordType) == TRUE) & "RATE" %in% names(object@info)){
       paste("(",object@info$RATE," K/s)", sep = "")
-    }                
+    }
+    
+    if((grepl("OSL", object@recordType) | grepl("IRSL", object@recordType)) & "interval" %in% names(object@info)){
+      paste("(resolution: ",object@info$interval," s)", sep = "")
+    }
+    
   }
   cex <- if("cex" %in% names(extraArgs)) {extraArgs$cex} else 
   {1}

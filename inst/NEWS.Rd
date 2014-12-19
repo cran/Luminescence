@@ -1,548 +1,645 @@
-\name{NEWS}
+  \name{NEWS}
 \title{NEWS for the R Package Luminescence}
 
-\section{Changes in version 0.3.4 (7th June, 2014)}{
+\section{Changes in version 0.4.0 (December 19th, 2014)}{
 
-   \subsection{Bugfixes and changes}{
-       \itemize{
-        \item \code{calc_CentralDose()}: fixed an error that occurred when 
-        \code{output.plot = FALSE} (#106, reported by Peter Dobak)
-        \item \code{analyse_SAR.CWOSL()}: fixed an error that forced a chrash if no
-        information in the irradiation time was found in the measurement data
-        \item \code{plot_GrowthCurve()}: 
-        \itemize{
-        
-         \item Fixed an error that forced a chrash when 'par.default' was 
-          not found (for option \code{output.plotExtended = FALSE}),
-        
-          \item confusing vector label for De '(intercept)' occurred when using 
-          \code{fit.method = "LIN"} removed (#117, reported by Thomas Kolb),
-        
-          \item direct argument \code{xlab} removed, but it can still be used 
-          via the \code{...} argument,
-          
-          \item support \code{ylim} and \code{xlim} for the growth curve via 
-        the \code{...} argument,
-        
-          \item remove some minor output errors (mostly due to negative values),
-          
-          \item prevent function chrash for rare cases using \code{fit.method = "LIN"} 
-          where the Lx/Tx error become negative (#118, reported by Thomas Kolb).
-        }
-        
-        \item \code{apply_CosmicRayRemoval()}:
-        
-        \itemize{
-          
-          \item Optional argument \code{method.Pych.histogram.plot} 
-                added to provide a graphical feedback of the removal process,
-                
-          \item terminal output providing the number of recognised channels effected by 
-          cosmic-rays per frame has been added. (#113 requested by Johanna Lomax),
-          
-          \item argument \code{silent} added to suppress terminal output.
-        
-        }
-        
-        \item \code{calc_FiniteMixture()}: fixed a bug when plotting (layout removed, #114)
-        \item \code{plot_KDE()}: calculation of median corrected
-        
-        \item \code{plot_RadialPlot()}: 
-        
-        \itemize{
-        
-        \item Tick positions for +/- 2 option corrected (#109), 
-        \item option to handle negative values reduced to 'removed'.
-        
-        }
-        
-        \item \code{plot_AbanicoPlot()}:
-        
-        \itemize{
-        
-        \item Overplotting of plot outline fixed, 
-        \item tick positions for +/- 2 option corrected (#109), 
-        \item transparency for 2-sigma-bar added (#108), 
-        \item option to handle negative values disabled.
+ \subsection{Preface}{
+ \itemize{
+  \item Amongst a few minor changes with this release we continued the homogenisation process to further unify our function arguments.  
+  So far meaningful similar function arguments can be used over all functions in the package to produce similar effects 
+  (e.g., na.rm = TRUE/FALSE). For you as package user it means that self-written R scripts using package functions 
+  are likely to break. Please check the list of changes below.
 
-        }
-        
-        \item \code{readXSYG2R()}: Corrected for \code{NA} values appearing rarely during 
-        TL curve recalculation. 
-        
-       }
+  We apologise for any inconvenience!
+  
+  }}
+
+
+   \subsection{New S4-classes, methods}{
+   \itemize{   
+  
+    \item \code{RLum.Data.Image}: S4-class for handling image data including. Image
+    data in slot \code{data} are stored as \code{RasterBrick}
+    
+    \item \code{RLum.Results}: homogenised structure for containing the following base items in the 
+    slot data:  'summary', 'args' and 'call'. Where applicable the 'data' slot contains the original input data. 
+    Depending on the function various further slots are added containing additional (intermediate) data and objects, 
+
+    \item \code{set_RLum.Data.Image()}: Set method for class \code{RLum.Data.Image}
+    
+    \item \code{get_RLum.Data.Image()}: get method for class \code{RLum.Data.Image}
+    
+    \item further: corresponding show and coercing methods added for class \code{RLum.Data.Image}. 
+  }
+  }
+
+
+   \subsection{New functions}{
+   \itemize{   
+  
+  \item \code{analyse_pIRIRSequence()}: Function to analyse post-IR IRSL sequence
+   measurements (#133),
+   
+   \item \code{calc_MinDose()}: the previous \code{calc_MinDose3()} and \code{calc_MinDose4()} 
+   functions were merged to the new \code{calc_MinDose()} function, which was rewritten from 
+   scratch and now contains both the 3- and 4-parametric 
+   Minimum Age Models (introducing the new argument \code{par}). 
+   Detailed changes and bugfixes are listed further below,
+   
+   \item \code{calc_MaxDose()}: a wrapper function that calls \code{calc_MinDose()}, 
+    but transforms the data set similar to the method described in Olley et al. (2006). 
+    Rather than estimating the minimum dose of a De distribution, this function estimates the maximum dose.
+   
+    \item \code{calc_SourceDoseRate()}: calculating the dose rate of the irradiation source at the 
+    date of measurement based on: source calibration date, source dose rate, dose rate error.
+   
+  \item \code{get_Layout()}: Helper function to return a list with layout definitions for
+  more homogenous plotting,
+      
+   \item \code{get_RLum()}: Wrapper function for various get methods for \code{RLum}-objects (#148),
+   
+   \item \code{merge_RLum.Analysis()}: Function allows merging of RLum.Analysis objects and adding 
+   of objects an RLum.Analysis object consists of (#138),
+   
+   \item \code{merge_RLum()}: Wrapper function for various merge methods for \code{RLum}-objects (#139),
+  
+   \item \code{plot_RLum.Data.Image()}: Plot function for \code{RLum.Data.Image} object.
+   Function also added to wrapper function \code{plot_RLum},
+   
+   \item \code{plot_RLum.Results()}: Plot function for \code{RLum.Results} objects. 
+    RLum.Results objects created, e.g. by the age model functions may now be passed to \code{plot_RLum.Results()}
+    to create specific plots that previously were generated by the functions themselves.
+    Function also added to wrapper function \code{plot_RLum},
+  
+  \item \code{readSPE2R()}: Add support Princenton Instruments *.SPE files
+    (camera and spectrometer measurements). Function output is a \code{RLum.Data.Spectrum}
+    or \code{RLum.Data.Image} object.   
+    
+   
+   
+   
   }
   
-   \subsection{Internals}{
+  
+  }
+  
+  
+   \subsection{New example data sets}{
+   \itemize{   
+  
+  \item \code{ExampleData.RLum.Data.Image}: Example data for \code{\linkS4class{RLum.Data.Image}} object
+  (part of #135).
+     
+  }
+  
+  
+  }
+  
+
+
+  \subsection{Changes S4-objects, methods, classes}{
+   \itemize{   
+    
+     \item \code{get_RLum.Analysis()}: Add support for inverse \code{record.id} selection, e.g. \code{record.id = -1} selects
+     all objects except the first. 
+    
+        
+    \item \code{get_RLum.Results()}:
+    
+    
+     \itemize{
+    
+    \item Add support for data objects for objects
+    produced by the function \code{calc_OSLLxTxRatio()},
+    
+    \item match access behavoir of objects produced by the function
+    \code{calc_TLLxTxRatio()}. Now it works similar to the function \code{calc_OSLLxTxRatio()}.
+    
+    
+    }
+    
+    
+   \item \code{Risoe.BINfileData-class}: Description updated due to established changes 
+   made for a better file format support. 
+    
+    \item \code{Risoe.BINfileData2RLum.Analysis()}: If the \code{pos} value
+    is invalid now the function does not return an error any longer. Instead 
+    \code{NA} is returned.
+
+    
+  
+  }
+  }
+  
+   \subsection{Bugfixes and changes}{
+   \itemize{   
+   
+     \item \code{analyse_IRSAR.RF()}:
+      \itemize{
+      
+        \item Add \code{...} support for \code{mtext},
+        
+        \item argument \code{method} added to allow selection between the method \code{"FIT"} and
+        \code{"SLIDE"}. The latter method has been newly implemented (#143). 
+      
+      }
+   
+   
+    \item \code{analyse_SAR.CWOSL()}:
+      \itemize{
+      
+        \item Allow 'IRSL' curves as input to support rough data analysis of the 
+        post-IR IRSL protocol (#132, Alice Versendaal, #140, Georgina King),
+        
+        \item support multiple recuperation measurements, 
+        
+        \item correct wrong TL curve figure scaling,
+        
+        \item argument \code{log} moved to the \code{...} argument, 
+      
+        \item correct wrong regeneration point numbering (#144),
+        
+        \item arguments \code{cex}, \code{main} now supported via the \code{...} argument,
+        
+        \item argument \code{mtext.outer} added,
+        
+        \item output object \code{Formula} added to return the fromula of the 
+         growth curve, 
+         
+         \item output object \code{De.values} extended for D01, D02 and information
+         on the applied fittin, 
+        
+        \item numerical output extended for information on the choosen signal and
+        background integration limits (#122), 
+        
+        \item enhance argument \code{output.plot.single} for numerical values. 
+        This allows to select each single plot output individually, 
+        
+        \item details from the argument \code{rejection.criteria} were removed 
+        from the argument list to allow a more flexible handling (e.g. changing only
+        one parameter at time) and to clean up the argument list. However, the argument
+        work still as excpected (#145),
+        
+        \item reformat of rejection criteria output to allow easier further treatment, 
+        
+        \item support graphical output of rejection criteria and IRSL curve (if exists),
+        
+        \item minor bug fixes (e.g., not properly caluculated TL curve resolution) and graphical adjustements.
+      
+      }
+      
+       \item \code{Analyse_SAR.OSLdata()}:
+       
+       \itemize{
+       
+        \item Error message implemented for non OSL data sets (#130, Georgina King),
+        
+        \item add argument \code{dtype} to provide further curve limitation options,
+        
+        \item add argument \code{keep.SEL} to allow a manual curve selection (advanced users),
+        
+        \item minor code polishing. 
+       
+       }
+   
+   
+  \item \code{calc_AliquotSize()}:
+  
+  \itemize{
+    
+    \item new argument \code{plot} (logical): option to (dis-)allow plotting of the Monte Carlo estimation,
+    \item argument \code{MC.estimate} was renamed to \code{MC},
+    \item new structure of the returned \code{RLum.Results} object, containing the elements 
+    'summary', 'args', 'call' and 'MC'.
+    \item plotting now done by \code{plot_RLum.Results()}.
+  
+  }
+  
+  \item \code{calc_CentralDose()}:
+  
+  \itemize{
+  
+  \item removed argument \code{sample.id},
+  \item removed argument \code{print.iterations},
+  \item renamed argument \code{input.data} to \code{data},
+  \item new argument \code{'...'}, which is checked for arguments \code{verbose} (logical) and \code{trace} 
+  (logical) to (dis-)allow (extended) console output,
+  \item new structure of the returned \code{RLum.Results} object, containing the elemennts 'summary', 'data', 'args', 'call' and 'profile',
+  \item fixed a bug that occured for non-dispersed data sets and resulted in a virtually infinite loop using up all available memory,
+  \item plotting now done by \item{plot_RLum.Results()}.
+
+  }
+
+  \item \code{calc_CommonDose()}:
+  
+  \itemize{
+  
+  \item removed argument \code{sample.id}, 
+  \item renamed argument \code{input.data} to \code{data},
+  \item new argument \code{'...'} (currently not used),
+  \item new structure of the returned \code{RLum.Results} object, containing the elements 'summary', 'data', 'args' and 'call'.
+
+  
+  }
+
+  \item \code{calc_CosmicDoseRate()}:
+  \itemize{
+  
+  \item new structure of the returned RLum.Results object, containing the elements 'summary', 'args' and 'call'
+  
+  }
+   
+  \item \code{calc_FiniteMixture()}:
+  
+  \itemize{
+  
+  \item removed argument \code{sample.id},
+  \item removed argument \code{n.iterations},
+  \item removed argument \code{main},
+  \item renamed argument \code{input.data} to \code{data},
+  \item new argument \code{plot} option to (dis-)allow plotting when a vector of length > 1 is provided for \code{n.components},
+  \item new argument \code{'...'}, which is checked for arguments \code{verbose} (logical) and \code{trace} 
+    (logical) to (dis-)allow (extended) console output. \code{main} may be used to set the title of the plot,
+  \item new structure of the returned \code{RLum.Results} object, containing the elements
+  'summary', 'data', 'args', 'call', 'mle', 'BIC', 'llik', 'grain.probability', 'components' and 'single.comp',
+  \item plotting now done by \code{plot_RLum.Results()}.
+
+  }
+
+   \item \code{calc_FuchsLang2001()}:
    
    \itemize{
    
-   \item The PDF with the S4-class object structure has not been linked properly.
-   Fixed by using a self generated HTML index file. 
+   \item removed argument \code{sample.mtext},
+   \item removed argument \code{sample.id},
+   \item removed argument \code{output.terminal},
+   \item renamed argument \code{sample} to \code{data},
+   \item renamed argument \code{output.plot} to \code{plot},
+   \item the argument \code{'...'} is checked for \code{verbose} (logical) to (dis-)allow console output,
+   \item new structure of the returned \code{RLum.Results} object, containing the elements 'summary', 'data', 'args', 'call' and 'usedDeValues',
+   \item plotting now done by \code{plot_RLum.Results()}.
+   
+   }
+ 
+   \item \code{calc_HomogeneityTest()}:
+   
+   \itemize{
+   
+   \item removed argument \code{sample.id},
+   \item renamed argument \code{input.data} to \code{data},
+   \item the argument \code{'...'} is checked for \code{verbose} (logical) to (dis-)allow console output,
+   \item new structure of the returned \code{RLum.Results} object, containing the elements 'summary', 'data', 'args' and 'call'.
+   
+   }
+
+   \item \code{calc_MaxDose3()}:
+   
+   \itemize{
+   
+   \item Function renamed to \code{calc_MaxDose()},
+   \item this is now just a wrapper function that calls the new \code{calc_MinDose()} function, 
+   but transforms the data set similar to the method described in Olley et al. (2006). 
+   For further details please see the changes/bugfixes for the \code{calc_MinDose3()} / \code{calc_MinDose4()} functions,
+  \item plotting now done by \code{plot_RLum.Results()}.
+   
    
    }
    
+   \item \code{calc_MinDose3()} and \code{calc_MinDose4()}
+   
+   \itemize{
+   
+   \item the functions \code{calc_MinDose3()} and \code{calc_MinDose4()} were merged in the new function \code{calc_MinDose()},
+   \item renamed argument \code{input.data} to \code{data},
+   \item renamed argument \code{output.plot} to \code{plot},
+   \item removed arguments \code{sample.id}, \code{gamma.xlb}, \code{gamma.xub}, \code{sigma.xlb}, \code{sigma.xub}, 
+   \code{mu.xlb}, \code{mu.xub}, \code{init.gamma}, \code{init.sigma}, \code{init.p0}, \code{init.mu}, \code{ignore.NA}, 
+   \code{calc.ProfileLikelihoods}, \code{console.ProfileLikelihoods}, \code{console.extendedOutput}, \code{output.indices},
+   \item new argument \code{par} that accepts a numeric value (either 3 or 4) to set whether the 3- or 4-parametric Minimum Age Model should be applied,
+   \item new argument \code{bootstrap} (logical) to apply the recycled bootstrap approach of Cunningham & Wallinga (2012),
+   \item new argument \code{boundaries} that accepts a named list containing values for the lower and upper boundaries for all parameters,
+   \item new argument \code{init.values} that accepts a named list containing the starting values for all  parameters,
+   \item new argument \code{'...'} that, amongst others, checks for \code{debug} (logical) and \code{verbose} (logical) to (dis-)allow (extended) console
+    output. Further allowed arguments are \code{bs.M}, \code{bs.N}, \code{bs.h} and \code{sigmab.sd} to set various bootstrap parameters,
+   \item implemented (recycled) bootstrap method as described in Cunningham & Wallinga (2012),
+   \item function now iteratively adjusts boundaries for sigma when the estimator reaches the upper boundary,
+   \item function now tries to estimate reasonable starting values for all parameters,
+   \item calculation and plotting of the maximum log likelihood functions/profiles are now done using the mle2() function of the 'bbmle' package
+   \item the optimisation routine was changed from 'nlminb' to 'optim' using the 'L-BFGS-B' method,
+   \item confidence intervals for all parameters are now calculated by the 'confint()' method and exclusively on the 95\% confidence level
+   \item the asymmetric error on gamma (i.e., the minimum dose) is now exclusively determined on the 95\% confidence interval of the 
+   profile log likelihood function for gamma
+   \item a symmetric standard error for gamma is automatically derived from the 95\% confidence interval of the 
+   profile log likelihood function by dividing the length of this interval by 3.92 (see Galbraith & Roberts, 2012).
+   \item new structure of the returned \code{RLum.Results} object, containing the elements 'summary', 'data', 
+   'args', 'call', 'mle', 'BIC', 'confint', 'profile', 'bootstrap',
+   \item plotting now done by \code{plot_RLum.Results()}.  
+
    }
    
    
-}
-
-
-\section{Changes in version 0.3.3 (13th April, 2014)}{
-
-
- 
-     \subsection{New functions}{
-       \itemize{
-       \item \code{plot_AbanicoPlot()}: New function for standard De distribution plots
-       \item \code{plot_DRTResults()}: New function to visualise dose recovery test results
-       \item \code{calc_Statistics()}: New function to calculate De/Age/Distribution
-       statistics that are often used by functions in the package
-       \item \code{apply_CosmicRayRemoval()}: New function to remove cosmic rays in 
-       \code{RLum.Data.Spectrum} objects (#80)
-       \item \code{apply_EfficiencyCorrection()}: New function to allow spectral efficiency corrections 
-       on \code{RLum.Data.Spectrum} objects using a given spectral response data set for the used system
-     
-      }
-    }
-    
-     \subsection{New Data Sets}{
-    \itemize{
-      \item \code{ExampleData.XSYG}: SAR measurement and TL spectrum imported 
-      from a Freiberg Instruments XSYG file.
- 
-    }}
-    
-    
-     \subsection{Changes within the \code{RLum} classes and methods}{
-     
+    \item \code{calc_OSLLxTxRatio()}: 
       \itemize{
       
-      \item \code{get_RLum.Analysis()}: Add argument \code{keep.object} to allow 
-      returing an \code{RLum.Analysis} object instead of single records when using 
-      the method. For the sake of consistency with previous examples the default
-      option is \code{keep.object = FALSE}
+      \item Correct an error that causes \code{NA} values
+      within the curve errors for rare combinations of signal and background 
+      integreation limits, 
+      \item provide a name for the output data frame \code{LxTx.table} for the
+      \code{RLum.Results} object,
       
+      \item error fixed for the marginal case that k = 2 and exceed the maximal curve length. In that 
+      case accidentially no error was calculated, 
       
-      \item \code{get_RLum.Analysis()}: In cases for that the output contains only one
-      element the element is returned as non-list element (no list is returned)
+      \item argument \code{sigmab} was listed but was so far not implement. Fixed (#166)
+      
       }
-     }
-       
-     \subsection{Further bugfixes and changes}{
-       \itemize{
-            
-       \item \code{calc_OSLLxTxRatio()}: Considering the case that the number of backround intergral
-       channels is smaller than the number for signal integral channels by implementing 
-       suggestions from Rex Galbraith (2014) (#78, reported by Alexandra Rowell). 
-       
-       \item \code{calc_OSLLxTxRatio()}: Add preset argument \code{background.count.distribution}
-       
-       \item \code{calc_OSLLxTxRatio()}: Add optional argument \code{sigmab} and extend value
-       output
-       
-       \item \code{plot_RLum.Analysis()}: Pass \code{col} argument to the plot
-       
-       \item \code{calc_FiniteMixture()}: The \code{n.components} argument 
-       now accepts vectors in the form of \code{c(min:max)} 
-       to calculate the finite mixtures while increasing stepwise the number of 
-       k components to be fitted
-       
-       \item \code{calc_FiniteMixture()}: Added plot output when a vector is provided for 
-       \code{n.components}      
-       \item \code{calc_FiniteMixture()}: Evaluation of BIC scores and maximum 
-       log-likelihoods estimates when a vector is provided for \code{n.components}
-       
-        \item \code{calc_FiniteMixture()}:Tolerance increased when solving the covariance matrix from 
-        \code{$double.eps (~10^-16) to $double.xmin (~10^-308)}
+      
+        \item \code{calc_OSLLxTxRatio()}: 
+      \itemize{
+      
+      \item support of data without given uncertainties. 
+      
+      }
+      
+     \item \code{calc_Statistics()}: 
+      \itemize{
+      
+      \item support of data with \code{NA} or zero errors
+      
+      }
+      
+      
+      
+    \item \code{calc_TLLxTxRatio()}: 
+    
+          \itemize{
+          
+          \item Lx/Tx ratio wrongly calculated as due to a coding error just the first value of 
+          the signal integral was taken for summing up the values and not the range of the values,
+          
+          \item Output produced by the function now is a \code{list} (data slot in the RLum object), to 
+          equal behavoir of the functions.
+          
+          
+          }
+    
+    \item \code{fit_CWCurve()}: 
+      \itemize{
+      
+      \item Implement \code{...} argument to replace explicit arguments \code{ylab}, 
+      \code{xlab} and \code{main},
+      
+      \item Fix an issue that causes an error when input values were <= 0
+      (#123 reported by Johanna Lomax),
+      
+      \item Correct wrong y-axis labelling (wrong channel resolution value).        
+      }
+      
+      
+      
+    \item \code{plot_AbanicoPlot()}:
+      \itemize{
+      
+        \item numeric values allowed for parameter centrality,
+        \item KDE label value fixed,
+        \item layout functionality added,
+        \item not supported summary keywords fixed,
+        \item dispersion polygon bug fixed,
+        \item dispersion type enriched by userdefined confidence interval,
+        \item rug option added,
+        \item multiple 2-sigma-bars allowed,
+        \item rotate-Option added to Abanico Plot,
+        \item minor modifications of layout definitions (#124),
+        \item \code{grid.col} bug fixed (#149),
+        \item error message for data with zero or without errors added (#154),
+        \item age models as input for lines supported (#107),
+        \item support of \code{par(mfcol())}l,
+        \item bug in lower z-axis limit eliminated,
+        \item example list updated (i.e. fast CAM instead of slow MAM)
+        \item bug for small values fixed, rounding to 0 decimals replaced by 3 significant digits,
+        \item parameter \code{at} to allow user-defined z-tick positions,
+        \item individual statistical summary order supported (#184).
         
-          \item \code{calc_FiniteMixture()}: New examples added
-          
-          \item \code{analyse_IRSAR.RF()}: Correct an error that occurred when \code{NaN} 
-          are produced during De calculation
-          
-          \item \code{analyse_IRSAR.RF()}: Implement automatic \code{predefined} curve
-          removal from the \code{RLum.Analysis} input object for data imported
-          from XSYG files
-          
-          \item \code{analyse_IRSAR.RF()}: Add limitation of points used for 
-          natural signal calculation by using \code{fit.range.min}
-          
-           \item \code{analyse_IRSAR.RF()}: Correct an error for the case that a fitting 
-           could not be applied 
-          
-          \item \code{analyse_SAR.CWOSL()}: Add support for palaeodose error 
-           as rejection criteria
-           
-           \item \code{Risoe.BINfileData2RLum.Analysis()}: Setting of arguments \code{run}, 
-           \code{set} and \code{ltype} had no effect: Corrected (#87, reported by Thomas Kolb).
-           
-           \item \code{plot_Histogram()}: Add summary options and y-limits
-           
-           \item \code{plot_Histogram()}: Fix odd plotting (#89)
-           
-           \item \code{plot_KDE()}: Fix bug for using multiple datasets. KDE can now
-           calculated with error-weights; however per default set to \code{FALSE} as
-           it will be a PD plot otherwise
-           
-           \item \code{plot_KDE()}: Add argument \code{values.cumulative} to show 
-           cummulative values individually (#88)
-           
-           \item \code{plot_KDE()}, \code{plot_Histogram}, \code{plot_RadialPlot}: flexible
-           placement of statistical summary and legend added
-           
-                 
-           \item \code{plot_RLum.Data.Spectrum()}: Add plot type \code{single} to 
-           allow single curve output and optimise code
-           
-           \item \code{plot_RLum.Data.Spectrum()}: Add arguments for horizontal
-           (\code{bin.rows}) and vertical binning (\code{bin.cols})
-           
-            \item \code{plot_RLum.Data.Spectrum()}: Add argument \code{bg.channels}
-            to allow the specification of background channels that are subtracted from 
-            the other channels.
-             
-            \item \code{plot_RLum.Data.Spectrum()}: Correct an error that occurred if no xlab or
-            ylab information are provided
-            
-            \item \code{plot_RLum.Data.Spectrum()}: Add new plot option \code{mutiple.lines}, 
-            allowing to draw all frames in one plot
-            
-            \item \code{plot_GrowthCurve()}: Correct \code{mtext} behaviour as expected 
-            (#91)
-            
-            \item \code{plot_GrowthCurve()}: Now resets global \code{par} parameter 
-            after plotting
-            
-            \item \code{plot_RadialPlot()}: Provide note on polygone behaviour (#90)
-            
-            \item \code{plot_RadialPlot()}: Correct 2-sigma label plotting (#92)
-            
-            \item \code{plot_RadialPlot()}: Some minor graphical adjustments 
-             
-            \item \code{merge_Risoe.BINfileData()}: New argument added 
-             \code{position.number.append.gap} allowing to account for a specific 
-             position number structure within the data sets (#94, requested by 
-             Thomas Kolb)
-             
-             \item \code{merge_Risoe.BINfileData()}: Correct an error that occured 
-             for merging more than two BIN-files (#93, reported by Thomas Kolb)
-             
-            \item \code{readXSYG2R()}: Rewritten TL curve recalculation routine;
-            argument \code{recalculate.TL.curves} set now to \code{TRUE} by default.
-            (#86)
-            
-            \item \code{calc_FuchsLang2001()}: Function now allows \code{RLum.Results} object
-            as input and returns an \code{RLum.Results} object.
-            
-            \item \code{calc_FuchsLang2001()}: Now supports the \code{...} argument. 
-            The arguments \code{cex.global}, \code{main}, \code{xlab}, \code{sample.mtext} 
-            have been therefore removed. 
-            
-            \item \code{calc_AliquotSize()}: added the option to estimate the
-            amount of grains on an aliquot by monte carlo simulation; implement \code{RLum.Results}
-            object handling (output)
-
-            \item \code{calc_MaxDose3()}: removed the option to print results to a file
-
-            \item \code{calc_MinDose3()}: removed the option to print results to a file
-
-            \item \code{calc_MinDose4()}: removed the option to print results to a file
-
-            \item \code{calc_CosmicDoseRate()}: Implement \code{RLum.Results} object handling (output)
-            
-            \item \code{fit_CWCurve()}: Now uses package colour library and \code{par} settings will 
-            be reset after plotting
-            
-            \item \code{fit_LMCurve()}: Now uses package colour library and \code{par} settings will 
-            be reset after plotting
-  
-    }}
-    
-}
-
-\section{Changes in version 0.3.2 (7th January, 2014)}{
-       
-     \subsection{Bugfixes and changes}{
-       \itemize{
-       \item \code{calc_OSLLxTxRatio}: Correct critical error that calculates 
-       the Lx/Tx ratio without background subtraction since version 0.3. This
-       error had been fixed previously (version 0.2.2), however, it had been accidentally 
-       reintroduced with version 0.3. (#82)
-       \item \code{analyse_SAR.TL}: Added option \code{"EXCLUDE"} 
-       in the argument \code{sequence.structure} to support exclusion of TL curves
-       (this fixes #27)
-       \item \code{calc_TLLxTxRatio}: Added \code{NULL} object support for background 
-       curves
-       \item \code{fit_LMCurve}: Extent \code{component.contribution.matrix} to allow
-       calculation of absolute contributions to sum signal of each component (#67)
-       \item \code{fit_CWCurve}: Extent \code{component.contribution.matrix} to allow
-       calculation of absolute contributions to sum signal of each component (#67)
-        \item \code{CW2pHMi}: Implement a warning message when \code{NA} values are produced
-        by the function \code{approx} are deteted (#8)
-         \item \code{CW2pHMi}: Remove unwanted data output accidentally introduced during 
-         bug fixing 
-         
-       \item \code{plot_RadialPlot}: added parameters: line, line.col, 
-       line.label, centrality, negatives
-       \item \code{plot_RadialPlot}: robust coding of x-axes labels
-       \item \code{plot_RadialPlot}: major bug fixed: polygon ends now at 
-       highest data value, not at z-axis
-         \item \code{plot_RadialPlot}: z-axis now scales with user-defined x-axis limits
-            \item \code{plot_RadialPlot}: axes lengths when user-define 
-          \item \code{plot_RadialPlot}: some minor tweaks for code and plot polishing
-       \item \code{plot_GrowthCurve}: prevent rare error occured during MC simulation for EXP+LIN error estimation
-       \item \code{plot_RLum}: fix error for passing \code{RLum.Data.Spectrum} objects
-       \item \code{analyse_SAR.CWOSL}: add argument \code{dose.points}
-       \item \code{calc_CosmicDoseRate}: remove unwanted terminal output
-          
-       
-       
-    }}
-       
+      }
       
-}
-
-
-\section{Changes in version 0.3.1 (15th December, 2013)}{
-       
-     \subsection{S4-classes and methods}{
-       \itemize{
-    
-      \item Added S4-class \code{RLum.Data.Spectrum} for TL/OSL spectra. 
-	    \item \code{set_RLum.Data.Spectrum()}: Constructor method for 
-             \code{RLum.Data.Spectrum} objects
-      \item \code{merge_RLum.Results()}: Correct an error that results in a false
-            combination of list elements   
-		 \item \code{get_Risoe.BINfileData()}: get-method has been added formally. 
-            In fact it does not allow a direct access, but is showing 
-            a message.        
-
-		 \item \code{get_RLum.Analysis()}: Added argument \code{curveType} to method. 
-     \item \code{get_RLum.Analysis()}: Allow more flexibility using the argument 
-     \code{recordType} to method. 
-     \item \code{get_RLum.Analysis()}: Added argument \code{RLum.type} to method.
-     \item \code{RLum.Results()}: Add generic show method (#68)
-     \item \code{RLum.Data.Curve()}: get-method for object class has been added (#57)
-       }}
-       
-       
-    \subsection{New functions}{
-       \itemize{
-
-     \item \code{plot_RLum.Data.Spectrum()}: Plot function for corresponding 
-     S4-class object
-     
-     \item \code{length_RLum.Analyis()}: Return length (i.e. number of records) for
-     \code{RLum.Analysis} objects
-     
-     \item \code{calc_MaxDose3()}: Apply the maximum age model to a given De distribution 
-     (#45, suggestion by Kathryn Fitzsimmons)
-    
-    
-    }}
-
-	   \subsection{Bugfixes and changes}{
-       \itemize{
-       
-       \item \code{calc_MinDose3()}: Graphical output has been changed from 
-       postscript to display device output; \code{output.plot = TRUE} as default
-       \item \code{calc_MinDose3()}: Implement \code{RLum.Results} object 
-       handling (input/output)
-		 \item \code{calc_MinDose4()}: Graphical output has been changed from 
-     postscript to display device output; \code{output.plot = TRUE} as default 
-      \item \code{calc_MinDose4()}: Implement \code{RLum.Results} object 
-      handling (input/output)
-      \item \code{calc_CommonDose()}: Implement \code{RLum.Results} object handling (input/output)
-      \item \code{calc_FiniteMixture()}: Implement \code{RLum.Results} object handling (input/output)
-      \item \code{calc_HomogenityTest()}: Implement \code{RLum.Results} object handling (input/output)
-        \item \code{calc_CentralDose()}: Implement \code{RLum.Results} object handling (input/output)
-        \item \code{calc_CentralDose()}: Now working with data sets with no overdispersion (#65)
-		 \item \code{plot_KDE()}: Option \code{na.exclude} did not work as expected and ended up with an error message; corrected
-     \item \code{plot_KDE()}: Add statistic paramter for kurtosis and skewness
-     for the argument \code{summary}
-     \item \code{plot_KDE()}: Add argument \code{output}
-     \item \code{plot_KDE()}: Add output values \code{summary.pos}
-       \item \code{plot_KDE()}: Now allows keywords for \code{summary.pos}, e.g. 'topleft'
-		 \item \code{plot_RLum.Analysis()}: \code{log} argument will now be passed to the output plot
-    \item \code{plot_GrowthCurve()}: Now an additional \code{Formula} object containing the equation used
-    for fitting is provided with the output.
-    \item \code{analyse_SAR.CWOSL()}: Argument \code{output.plot.single} added to allow for separate plot outputs
-    \item \code{plot_RadialPlot}: Function has been completely new written
-	 \item \code{readXSYG2R}: Add support for TL/OSL spectra has been added by using \code{RLum.Data.Spectrum} objects
-   \item \code{plot_RLum}: Add support for \code{RLum.Data.Spectrum}
-	\item \code{plot_RLum.Analysis}: Add support for \code{RLum.Data.Spectrum}
-  \item \code{plot_RLum.Data.Curve}: Forward further plot arguments, like \code{lwd}. 
-  \code{pch}, \code{lty}
-  \item \code{readXSYG2R}: Considerably import performance improvements by using the argument \code{useInternalNodes = TRUE} during XML parsing 
-  \item \code{readXSYG2R}: Add argument \code{recalculate.TL.curves} to allow temperature 
-  values instead of time values in the x-axis for TL curves; along with this option 
-  the heating rate will be calculated and stored in the info element \code{RATE} 
-  \item \code{plot_RLum.Data.Curve}: Allow for more flexible \code{TL} curve detection
-  \item \code{calc_AliquotSize()}: Fix return values (#66)
-  \item \code{calc_CosmicDoseRate()}: Fitting procedure for the soft-component optimised (#75)
-\item \code{calc_CosmicDoseRate()}: Erroneous estimation of parameters F, J and H fixed. Non-linear parts now fitted with a 3-degree polynomial (#76)
-\item \code{calc_CosmicDoseRate()}: Conversion from geographic to geomagnetic latitude fixed (#71)
-  \item \code{fit_LMCurve()}: Correct for an error in the plotting of the component
-  to sum contribution
-   \item \code{fit_CWCurve()}: Correct for an error in the plotting of the component
-  to sum contribution
-     \item \code{fit_CWCurve()}: Improve convergence stability during fitting by using 
-     a two step fitting approach; add comment that the functions has beta status
-          \item \code{fit_CWCurve()}: Correct for an error, for component signal 
-          plotting (#77)
-          \item \code{calc_OSLLxTxRatio}: Add error message for the case signal integral > background integral
-  
-    
-       }}
-
-		\subsection{Example data}{
-		\itemize{
-
-		\item \code{ExampleData.RLum.Analysis}: data set has been replaced, as the containing curve elements did not fit the changed \code{RLum.Data.Curve} object
-		
-		}	
-		}
-
-       \subsection{Internals}{
-       \itemize{
-       
-       \item Complete conversion to \code{inlinedoc} documentation for the entire 
-       package
-       
-       \item Allow more fun during plotting. 
-       
-       }}
-
-
-}
-
-\section{Changes in version 0.3 (1st October, 2013)}{
- 
-  \subsection{Substantial Changes}{
-  	
-  	\itemize{ 
-     \item The most substantial changes in this package version are introduced by 
-     the usage of S4 objects. Inherited classes have been designed to store input
-     and output data for luminescence dating data analysis. Most of the existing 
-     functions now allow RLum objects as input data along with generic 
-     R objects. The S4-class structure in this package is shown in the additional 
-     PDF provided with this package. The following S4 object classes are implemented:
-     }}
-     
-  
-    \subsection{Added S4-classes}{
-	\itemize{
-     
-  	  \item \code{RLum} (virtual class)
-      \item \code{RLum.Data} (virtual class)
-      \item \code{RLum.Data.Curve} (object containing one measured curve)
-      \item \code{RLum.Analysis} (contains RLum.Data (e.g. RLum.Data.Curve) objects for protocol analysis)
-      \item \code{RLum.Results} (contains output of package functions)
-  	  }}
-  
-     \subsection{Added S4-class methods}{ 
-     \itemize{
-      \item \code{set_RLum.Data.Curve()}: Constructor method for \code{RLum.Data.Curve} objects
-	    \item \code{set_RLum.Analysis()}: Constructor method for \code{RLum.Analysis} objects
-	    \item \code{get_RLum.Analyis()}: Accessor method for \code{RLum.Analysis} objects
-	    \item \code{set_RLum.Results()}: Constructor method for \code{RLum.Results} objects
-    	\item \code{get_RLum.Results()}: Accessor method for \code{RLum.Results} objects
-      \item \code{merge_RLum.Results()}: Function to merge \code{RLum.Results} objects
-	    \item \code{get_structure.RLum.Analysis()}: to parse the structure of an \code{RLum.Analysis} object
-	    \item \code{set_Risoe.BINfileData()}: Constructor method for \code{Risoe.BINfileData} objects
-    }}
-    
-    \subsection{New Functions}{
-    \itemize{
-     \item \code{plot_RLum()}: Wrapper function for plotting various \code{RLum}-objects
-     \item \code{plot_RLum.Data.Curve()}: Plot function for \code{RLum.Data.Curve} objects. Usually accessed by \code{plot_RLum()}
-     \item \code{plot_RLum.Analysis()}: Plot function for \code{RLum.Analysis} objects. Usually accessed by \code{plot_RLum()}
-	 \item \code{Risoe.BINfileData2RLum.Analysis()}: Converts parts of an \code{Risoe.BINfileData} object to an \code{RLum.Analysis} object, depending on the chosen position, run/set or record id.
-     \item \code{Risoe.BINfileData2RLum.Data.Curve()}: Lossy conversion of an \code{Risoe.BINfileData} object to an \code{RLum.Data.Curve} object
-	 \item \code{writeR2BIN()}: Function to export \code{Risoe.BINfileData} objects to BIN or BINX files
-	 \item \code{merge_Risoe.BINfileData()}: Merge BIN/BINX files or \code{Risoe.BINfileData} objects
-	 \item \code{analyse_SAR.CWOSL()}: Function to analyse SAR CW-OSL measurements, will at some time replace the exisiting function \code{Analyse_SAR.OSLdata}
-	 \item \code{analyse_SAR.TL()}: Function to analyse SAR TL measurements (beta version)
-	 \item \code{calc_TLLxTxRatio()}: Function to calculate Lx/Tx ratios for TL curves used by \code{analyse_SAR.TL()} (beta version)
-	 \item \code{analyse_IRSAR.RF()}: Function to analyse IRSAR RF measurements according to Erfurt et al. (2003)
-   \item \code{calc_CosmicDoseRate()}: Function to calculate the cosmic dose rate
-   \item \code{calc_HomogeneityTest()}: Function to apply the homogenity test after Galbraith (2003)
-   \item \code{calc_AliquotSize()}: Function to estimate the amount of grains on an aliquot
-   \item \code{readXSYG2R()}: Function to support the Freiberg Instruments XSYG file format
-  
-    }}
-
-     \subsection{New Data Sets}{
-    \itemize{
-      \item \code{ExampleData.RLum.Analysis}: Luminescence dating measurement dataset as \code{RLum.Analysis} object
-     	\item \code{BaseDataSet.CosmicDoseRate}: Data set used by the function \code{calc_CosmicDoseRate()}
-      \item \code{ExampleData.BINfileData}: dataset now contains two objects \code{CWOSL.SAR.Data} and \code{TL.SAR.Data} (depending examples have been modified)
- 
-    }}
       
-    \subsection{Function Renaming}{
-    \itemize{
-     \item \code{Calc_OSLLxTxRatio()}: Function renamed to \code{calc_OSLLxTxRatio()}
-     \item \code{Calc_CommonDose()}: Function renamed to \code{calc_CommonDose()}
-     \item \code{Calc_CentralDose()}: Function renamed to \code{calc_CentralDose()}
-	   \item \code{Calc_FiniteMixture()}: Function renamed to \code{calc_FiniteMixture()}
-	   \item \code{Calc_MinDose3()}: Function renamed to \code{calc_MinDose3()}
-	   \item \code{Calc_MinDose4()}: Function renamed to \code{calc_MinDose4()}
-	   \item \code{Calc_FadingCorr()}: Function renamed to \code{calc_FadingCorr()}
-	   \item \code{Calc_FuchsLang2001()}: Function renamed to \code{calc_FuchsLang2001()}
-     \item \code{plot_BINfileData()}: Function renamed to \code{plot_Risoe.BINfileData()} for the sake of consistency 
-  
-    }}
-      
-    \subsection{Bug Fixes and Further Changes}{
+      \item \code{plot_DRTResults()}:
       \itemize{
-    
-     \item \code{calc_OSLLxTxRatio()}: Function now allows for a \code{matrix} as input object 
-     \item \code{calc_OSLLxTxRatio()}: Function now returns an \code{RLum.Results} object
-	   \item \code{Analyse_SAR.OSLdata()}: Function modified according to the changes in the function \code{calc_OSLLxTxRatio()}
-	    \item \code{Analyse_SAR.OSLdata()}: Function corrected for an error that occured with more than one recyling point
-	    \item \code{Analyse_SAR.OSLdata()}: Function corrected for an error that occured when the dose of the first recycling point was used twice
-     \item \code{Risoe.BINfileData-class}: An error in the show method has been corrected 
-     \item \code{plot_GrowthCurve()}: An error occurred if no fitting could be applied. Corrected by setting De to NA
-	   \item \code{plot_GrowthCurve()}: The function now checks if at least two regeneration points are given
-     \item \code{plot_GrowthCurve()}: Function corrected for an infinite loop error occured using only two dose points and the EXP fit option
-     \item \code{plot_GrowthCurve()}: The function now provides an extra argument \code{na.exclude} to exclude \code{NA} values
-     \item \code{plot_KDE()}: The function now provides an extra argument \code{na.exclude} to exclude \code{NA} values
-     \item \code{plot_KDE()}: The function now allows for an \code{RLum.Results} object as input object
-     \item \code{plot_KDE()}: The function now allows for plotting multiple data sets
-     \item \code{plot_Histogram()}: The function now provides an extra argument \code{na.exclude} to exclude \code{NA} values
-     \item \code{plot_Histogram()}: The function now allows for an \code{RLum.Results} object as input object
-     \item \code{plot_RadialPlot()}: The function now provides an extra argument \code{na.exclude} to exclude \code{NA} values
-	   \item \code{CW2pLMi()}: A test has been implemented to check if  P=0 (which is not allowed)
-	   \item \code{CW2pLMi()}: Now an \code{RLum.Data.Curve} object is allowed as input and an object of the same data type as the input will be returned
-	  \item \code{CW2pHMi()}: Now an \code{RLum.Data.Curve} object is allowed as input and an object of the same data type as the input will be returned
-	   \item \code{CW2pPMi()}: Now an \code{RLum.Data.Curve} object is allowed as input and an object of the same data type as the input will be returned
-	   \item \code{CW2pLM()}: Now an \code{RLum.Data.Curve} object is allowed as input and an object of the same data type as the input will be returned
-	   \item \code{fit_CWCurve()}: The function now returns an \code{RLum.Results} object and as input an \code{RLum.Data.Curve} object is now allowed
-       \item \code{fit_CWCure()}: An additional \code{component.contribution.matrix} is now returned to allow 
-     for individual component to sum contribution plots 
-     \item \code{fit_CWCure()}: A critical error has been corrected in the used fitting equation. Now it has been set to f(t) = I0[i]*lambda[i]*exp(-lambda[i]*t)
-       \item \code{fit_LMCurve()}: The function now returns an \code{RLum.Results} object and as input an \code{RLum.Data.Curve} object is now allowed
-     \item \code{fit_LMCure()}: An additional \code{component.contribution.matrix} is now returned to allow 
-     for individual component to sum contribution plots 
-     \item \code{readBIN2R()}: BINX file format support has been added 
-     \item \code{readBIN2R()}: An argument \code{forced.VersionNumber} has been added to cheat the internal version check routine if needed
-     \item \code{Risoe.BINfileData-class}: The *.binx file format support has been added 
-	  \item \code{RLum.Analysis}: Add argument \code{get.index} just to show the index values
+      
+        \item Argument \code{na.exclude} renamed to \code{na.rm}, 
+        
+        \item by default ylim scaling now is set to the minimum and  maximum extend of the
+        data set,
+        
+        \item argument \code{given.dose} now allows a vector as input, e.g., if more then one data set
+        is provided (#156),
+        
+        \item argument \code{given.dose} are not required any longer (became an optional argument).
+        With this the plot function can be easily re-used, e.g. for preheat plateau tests,
+        
+        \item change behaviour of the argument \code{na.rm}. If a data set is provided containing 
+        \code{NA} values also the corresponding values in provided by the argument \code{preheat} are
+        cleaned up. This allows a proper usage of the function in combination with grouping option 
+        (e.g., \code{boxplot = TRUE}, 
+        
+        \item add argument \code{par.local} to allow to combine output plots in broader plot 
+        frameworks, 
+        
+        \item minor corrections in error handling and graphical appearance.
+      
+      }
+      
+         
+      \item \code{plot_Histogram()}:
+      \itemize{
+      
+        \item Change default y-axis labelling from 'Counts' to 'Frequency',
+        \item support of \code{par(mfcol())} (#146),
+        \item support of data without and \code{NA}-values for error values (#152, #162),
+        \item implementation of \code{calc_Stats()}-call for extended statistic summary,
+        \item support of summary keywords "kurtosis" and "skewness",
+        \item example y-lim bug removed (#177),
+        \item individual statistical summary order supported (#184).
+        
+      
+      }
+      
+      \item \code{plot_KDE()}:
+      \itemize{
+      
+        \item wrong x-axis and y-axis limit calculation fixed (#158),
+        \item renaming and extension of summary and \code{summary.pos} parameter,
+        \item plot now longer shows a density error when no error exists (#160),
+        \item De.stats error fixed (#163),
+        \item support of \code{par(mfcol())},
+        \item support of error-free data extended (now also for calculation of kde max) (#178),
+        \item individual statistical summary order supported (#184).
+      
+      }
+      
+      
+      \item \code{plot_GrowthCurve()}:
+      \itemize{
+      
+        \item Minor graphical and code polishing,
+        
+        \item fix wrong regneration point plotting, if sequence contains more then
+        one zero dose point,
+        
+        \item argument \code{na.exclude} for the sake consistency replaced by \code{na.rm},
+                
+        \item proper error message provided if nothing is left after \code{NA} value removal, 
+        
+        \item overshoot of normal distribution curve in MC simulation plot corrected
+        (#111),
+        
+        \item argument \code{output.plotExtended.single} added allowing a single
+        window plot output of all plots,
+        
+        \item formula of the fitted function is now returend as R expression 
+        instead of a \code{formula} object. The return object remains, however, 
+        \code{Formula},
+        
+        \item correct wrong error message and graphical output for cases where no De can be 
+        calculated for Ln/Tn values much higher than the highest Lx/Tx value,
+        
+        \item fix \code{'EXP+EXP'} fit as is was broken, due to a coding error,
+        
+        \item correct for wrong \code{par()} resetting, 
+        
+        \item minor code polishing and adjustment. 
+      
+      }   
+   
+   \item \code{plot_RadialPlot()}:
+      \itemize{
+      
+     \item support of user-defined centrality value,
+     \item rug option added,
+     \item bug for small values fixed, rounding to 0 decimals replaced by 3 significant digits,
+     \item individual statistical summary order supported (#184), 
+     \item minor fixes for the graphical output. 
+    }
+   
+    \item \code{plot_RLum.Analysis()}:
+      \itemize{
+      
+      \item Add argument \code{abline} to allow inserting similar vertical or horizontal lines 
+      in every plot. The decision to implement this argument in this function instead the function 
+      \code{plot_RLum.Data.Curve()} was made because in a single plot modus \code{abline} is more
+      sufficiently used as separat function call,
+      
+      \item now reset \code{par} parameters suffciently,
+      
+      \item add argument \code{combine} to allow fast combining of curves in single plot window.
+      
+      }
+   
+      
+      \item \code{plot_RLum.Data.Curve()}:
+      \itemize{
+      
+        \item Add argument \code{norm} to allow for curve normalisation to 
+        the highest value (#129),
+        
+        \item Correct for insufficient information on the channel resolution when data was imported
+        from an XSYG file.
+      
+      }
+   
+   
+   
+      \item \code{plot_RLum.Data.Spectrum()}:
+      \itemize{
+      
+        \item Correct an error that caused a chrash when \code{xlim} was set 
+        in a way that only one wavelength (colour value) was remained,
+        
+        \item correct zebra-colour-pattern for rare cases of \code{xlim} settings
+        using \code{plot.type = "persp"} or \code{plot.type = "persp3d"},
+        
+        \item add argument new plot type \code{"transect"} for plotting a transect
+        along the time/temperature axis for a specific wavelength/channel intervall
+        (#120, requested by Regina DeWitt),
+        
+        \item correct function break for a single column matrix (single frame spectrum)
+        by automatically resetting \code{plot.type} to \code{single} 
+        for single frame spectra,
+        
+        \item colour rug (\code{rug = TRUE}) implemented for plot type \code{"multiple.lines"}
+        (#130), 
+        
+        \item argument \code{xaxis.energy} for wavelength energy conversion for
+        2D plots added (#141).
+         
+      }
+      
+   
+   \item \code{readBIN2R()}:
+      \itemize{
+      
+        \item Integrity checks added to avoid unspecific errors for wrong input 
+        formats, 
+        
+        \item complete format support as now a more throughtful distinction is made between
+        version 03 and 04 (also made for function \code{writeR2BIN()}) (#182),
+        
+        \item \code{TAG} bit is now used to trigger the \code{SEL} element during import. 
+        With this, previous curve selections made with other software are kept 
+        (#181, Norbert Mercier). 
+        
+      
+      }
+      
+   \item \code{readXSYG2R()}:
+      \itemize{
+      
+        \item If the stimulator is infrared light the \code{recordType} will be set to \code{IRSL}. This 
+        makes the curve types more consistent with the commonly applied nomenclature,
+        
+        \item now the function automatically converts time values to temperature values also 
+        for spectra data (#121); behavious is triggered with the argument \code{recalculate.TL.curves}.
+      
+      }
+      
+      
+    \item \code{Second2Gray()}:
+      \itemize{
+      
+       \item Minor code and example adjustments in along with creating a new function 
+       \code{calc_SourceDoseRate()} (#56). 
+      
+      }
+      
+      
+   \item \code{writeBIN2R()}:
+      \itemize{
+      
+       \item Complete format support as now a more throughtful distinction is made between
+        version 03 and 04 (also made for function \code{readBIN2R()}) (#182), 
+        
+        \item \code{SEL} will now be kept using the \code{TAG} bit, releated to changes made
+        in function \code{readBIN2R} (#181, Norbert Mercier).
+      
+      }
+      
+   }
+   
+ }
+ 
+  \subsection{Internals}{
+   \itemize{   
   
-    }}
+    \item Add new dependency for package \code{raster} and \code{sp}, which is used 
+    for the \code{RLum.Data.Image-class},
 
-    \subsection{Internals}{
-    \itemize{
-     \item We partially started to create package documentation using the R pacakge 'inlinedocs', meaning that 
-     the documentation is now be part of the source code itself
-     \item A namespace .LuminescenceEnv in zzz.R has been added 
-     \item A variable \code{col} has been added to the namespace \code{.LuminescenceEnv} in the file zzz.R to define a standard colour palette for graphical output in package
-     \item NEWS are now provided as *.Rd file; der corresponding ASCII file is produced using the function Rd2txt
-     \item An unicode character for the temperature degree symbol 'deg. C' has been added
-     \item The S4-object structure has been added as PDF documentation to the package
+    \item dependency to package 'Rserve' removed, 
     
-    }}
-
+    \item dependcy to package 'zoo' added (used for running means),
+    
+    \item dependency to package 'bbmle' added (used for maximum likelihood estimations).
+  
   }
+  }
+
+}

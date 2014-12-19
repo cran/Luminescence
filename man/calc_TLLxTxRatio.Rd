@@ -14,25 +14,26 @@ y = counts). If no data are provided no background subtraction is performed.}
   \item{Tx.data.background}{\link{data.frame} (optional): TL data (x = temperature, 
 y = counts). If no data are provided no background subtraction is performed. }
   \item{signal.integral.min}{\link{integer} (\bold{required}): channel number for the 
-upper signal integral bound (e.g. \code{signal.integral.min = 100})}
+lower signal integral bound (e.g. \code{signal.integral.min = 100})}
   \item{signal.integral.max}{\link{integer} (\bold{required}): channel number for the 
 upper signal integral bound (e.g. \code{signal.integral.max = 200})}
 }
 \details{-}
 \value{Returns an S4 object of type \code{\linkS4class{RLum.Results}}. 
-Slot \code{data} contains a \link{data.frame} with the following 
+Slot \code{data} contains a \link{list} with the following 
 structure:\cr\cr 
-$ LnLx  \cr        
-$ LnLx.BG   \cr     
-$ TnTx    \cr       
-$ TnTx.BG    \cr   
-$ Net_LnLx   \cr   
-$ Net_LnLx.Error\cr }
+$ LxTx.table \cr
+.. $ LnLx  \cr        
+.. $ LnLx.BG   \cr     
+.. $ TnTx    \cr       
+.. $ TnTx.BG    \cr   
+.. $ Net_LnLx   \cr   
+.. $ Net_LnLx.Error\cr }
 \references{-}
-\author{Sebastian Kreutzer, JLU Giessen/Freiberg Instruments (Germany),
+\author{Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France),
 Christoph Schmidt, University of Bayreuth (Germany),\cr
 R Luminescence Package Team}
-\note{\bold{This function is a beta version!}}
+\note{\bold{This function has still BETA status!}}
 
 
 \seealso{\code{\linkS4class{RLum.Results}}, \code{\link{analyse_SAR.TL}}}
@@ -61,4 +62,4 @@ get_RLum.Results(output)
 }
 
 \keyword{datagen}
-\section{Function version}{0.2.1 (2014-04-13 14:29:01)}
+\section{Function version}{0.3 (2014-12-18 17:35:13)}

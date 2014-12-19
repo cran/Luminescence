@@ -5,9 +5,9 @@
 scale.}
 \usage{plot_RadialPlot(data, na.exclude = TRUE, negatives = "remove", 
     log.z = TRUE, central.value, centrality = "mean.weighted", 
-    mtext, summary, summary.pos, legend, legend.pos, stats, plot.ratio, 
-    bar.col, y.ticks = TRUE, grid.col, line, line.col, line.label, 
-    output = FALSE, ...)}
+    mtext, summary, summary.pos, legend, legend.pos, stats, rug = FALSE, 
+    plot.ratio, bar.col, y.ticks = TRUE, grid.col, line, line.col, 
+    line.label, output = FALSE, ...)}
 \arguments{
   \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object 
 (required): for \code{data.frame} two columns: De (\code{data[,1]})
@@ -22,10 +22,11 @@ is \code{"remove"} (i.e. negative values are removed from the data set).}
 in logarithmic scale. Default is \code{TRUE}.}
   \item{central.value}{\code{\link{numeric}}: User-defined central value, primarily used for
 horizontal centering of the z-axis.}
-  \item{centrality}{\code{\link{character}} (with default): measure of centrality, used for
-automatically centering the plot and drawing the central line. Can be
-one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
-and \code{"median.weighted"}. Default is \code{"mean.weighted"}.}
+  \item{centrality}{\code{\link{character}} or \code{\link{numeric}} (with default): 
+measure of centrality, used for automatically centering the plot and 
+drawing the central line. Can either be one out of \code{"mean"}, 
+\code{"median"}, \code{"mean.weighted"} and \code{"median.weighted"} 
+or a numeric value used for the standardisation.}
   \item{mtext}{\code{\link{character}}: additional text below the plot title.}
   \item{summary}{\code{\link{character}} (optional): adds numerical output to the plot. 
 Can be one or more out of: \code{"n"} (number of samples), \code{"mean"} (mean De 
@@ -47,6 +48,8 @@ to be plotted.}
   \item{stats}{\code{\link{character}}: additional labels of statistically important
 values in the plot. One or more out of the following: \code{"min"}, 
 \code{"max"}, \code{"median"}.}
+  \item{rug}{\code{\link{logical}}: Option to add a rug to the z-scale, to indicate
+the location of individual values}
   \item{plot.ratio}{\code{\link{numeric}}: User-defined plot area ratio (i.e. curvature of
 the z-axis). If omitted, the default value (\code{4.5/5.5}) is used and
 modified automatically to optimise the z-axis curvature. 
@@ -111,8 +114,8 @@ Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL,
 Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
 dose and error calculation and display in OSL dating: An overview and 
 some recommendations. Quaternary Geochronology, 11, 1-27. }
-\author{Michael Dietze, GFZ Potsdam (Germany), Sebastian Kreutzer, JLU Giessen 
-(Germany)\cr
+\author{Michael Dietze, GFZ Potsdam (Germany),\cr
+Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr
 Based on a rewritten S script of Rex Galbraith, 2010\cr
 R Luminescence Package Team}
 
@@ -122,8 +125,7 @@ R Luminescence Package Team}
 \examples{
 ## load example data
 data(ExampleData.DeValues, envir = environment())
-ExampleData.DeValues <- 
-  Second2Gray(values = ExampleData.DeValues, dose_rate = c(0.0438,0.0019))
+ExampleData.DeValues <- Second2Gray(ExampleData.DeValues, c(0.0438,0.0019))
 
 ## plot the example data straightforward
 plot_RadialPlot(data = ExampleData.DeValues)
@@ -150,6 +152,10 @@ plot_RadialPlot(data = ExampleData.DeValues,
 ## now with user-defined central value, in log-scale again
 plot_RadialPlot(data = ExampleData.DeValues,
                 central.value = 150)
+
+## now with a rug, indicating individual De values at the z-scale
+plot_RadialPlot(data = ExampleData.DeValues,
+                rug = TRUE)
 
 ## now with legend, colour, different points and smaller scale
 plot_RadialPlot(data = ExampleData.DeValues,
@@ -206,4 +212,4 @@ plot_RadialPlot(data = data.3,
                 summary.pos = "sub",
                 legend = c("Sample 1", "Sample 2"))
 }
-\section{Function version}{0.5.2 (2014-06-05 13:42:41)}
+\section{Function version}{0.5.2 (2014-12-18 15:41:59)}

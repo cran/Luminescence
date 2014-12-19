@@ -3,11 +3,11 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen/Freiberg Instruments (Germany),
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France),
   ## Christoph Schmidt, University of Bayreuth (Germany),\cr
   
   ##section<<
-  ## version 0.2.1
+  ## version 0.3
   # ===========================================================================
 
   Lx.data.signal,
@@ -28,7 +28,7 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
   
   signal.integral.min,
   ### \link{integer} (\bold{required}): channel number for the 
-  ### upper signal integral bound (e.g. \code{signal.integral.min = 100})
+  ### lower signal integral bound (e.g. \code{signal.integral.min = 100})
   
   signal.integral.max
   ###   \link{integer} (\bold{required}): channel number for the 
@@ -51,20 +51,20 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
                          if(missing(signal.integral.max) == TRUE){"signal.integral.max"}),
                        collapse = ", ")
                         
-          stop(paste("[calc_TLLxTxRatio] Error: Arguments are missing: ",temp.missing, ".", sep=""))               
+          stop(paste("[calc_TLLxTxRatio()] Arguments are missing: ",temp.missing, ".", sep=""))               
                          
      }
      
       
      ##check DATA TYPE differences
      if(is(Lx.data.signal)[1]!=is(Tx.data.signal)[1]){
-       stop("[calc_TLLxTxRatio.R] >> Error: Data type of Lx and Tx data differs!")}
+       stop("[calc_TLLxTxRatio()] Data type of Lx and Tx data differs!")}
    
      ##check for allowed data.types
      if(is(Lx.data.signal, "data.frame") == FALSE &
         is(Lx.data.signal, "RLum.Data.Curve") == FALSE){
        
-       stop("[calc_TLLxTxRatio] Error: Input data type for not allowed. Allowed are 'RLum.Data.Curve' and 'data.frame'")
+       stop("[calc_TLLxTxRatio()] Input data type for not allowed. Allowed are 'RLum.Data.Curve' and 'data.frame'")
        
      }
       
@@ -93,14 +93,12 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
   ##(d) - check if Lx and Tx curves have the same channel length
      if(length(Lx.data.signal[,2])!=length(Tx.data.signal[,2])){
   
-       stop("[calc_TLLxTxRatio.R] >> Error: Channel number of Lx and Tx data differs!")}
+       stop("[calc_TLLxTxRatio()] Channel number of Lx and Tx data differs!")}
    
-   ##set signal.integral
-   signal.integral <- c(signal.integral.min, signal.integral.max)
     
    ##(e) - check if signal integral is valid
-   if(min(signal.integral)<1 | max(signal.integral>length(Lx.data.signal[,2]))){
-     stop("[calc_TLLxTxRatio.R] >> Error: signal.integral is not valid!")}
+   if(signal.integral.min < 1 | signal.integral.max > length(Lx.data.signal[,2])){
+     stop("[calc_TLLxTxRatio()] Signal.integral is not valid!")}
 
 
      
@@ -111,7 +109,7 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
    ##Lx.data
    if(missing(Lx.data.background)==FALSE){
      
-     LnLx.BG <- sum(Lx.data.background[signal.integral,2])
+     LnLx.BG <- sum(Lx.data.background[signal.integral.min:signal.integral.max,2])
  
     }else{
      
@@ -122,7 +120,7 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
    ##Tx.data
       if(missing(Tx.data.background)==FALSE){
   
-        TnTx.BG <- sum(Tx.data.background[signal.integral,2])
+        TnTx.BG <- sum(Tx.data.background[signal.integral.min:signal.integral.max,2])
       
       }else{
         
@@ -132,9 +130,9 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
      
 # Calculate Lx/Tx values --------------------------------------------------  
  
-    LnLx <- sum(Lx.data.signal[signal.integral,2])
-    TnTx <- sum(Tx.data.signal[signal.integral,2])
-     
+    LnLx <- sum(Lx.data.signal[signal.integral.min:signal.integral.max,2])
+    TnTx <- sum(Tx.data.signal[signal.integral.min:signal.integral.max,2])
+  
      
      ##calculate variance of background
      if(is.na(LnLx.BG) == FALSE & is.na(TnTx.BG) == FALSE){
@@ -197,7 +195,9 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
 
 # Return values -----------------------------------------------------------
 
-   newRLumResults.calc_TLLxTxRatio <- set_RLum.Results(data=temp.results)
+   newRLumResults.calc_TLLxTxRatio <- set_RLum.Results(
+     data=list(LxTx.table = temp.results))
+
    return(newRLumResults.calc_TLLxTxRatio)
      
 # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
@@ -207,20 +207,21 @@ calc_TLLxTxRatio <- structure(function(#Calculate the Lx/Tx ratio for a given se
      
      ##value<<
      ## Returns an S4 object of type \code{\linkS4class{RLum.Results}}. 
-     ## Slot \code{data} contains a \link{data.frame} with the following 
+     ## Slot \code{data} contains a \link{list} with the following 
      ## structure:\cr\cr 
-     ## $ LnLx  \cr        
-     ## $ LnLx.BG   \cr     
-     ## $ TnTx    \cr       
-     ## $ TnTx.BG    \cr   
-     ## $ Net_LnLx   \cr   
-     ## $ Net_LnLx.Error\cr 
+     ## $ LxTx.table \cr
+     ## .. $ LnLx  \cr        
+     ## .. $ LnLx.BG   \cr     
+     ## .. $ TnTx    \cr       
+     ## .. $ TnTx.BG    \cr   
+     ## .. $ Net_LnLx   \cr   
+     ## .. $ Net_LnLx.Error\cr 
 
      ##references<<
      ## -
      
      ##note<<
-     ## \bold{This function is a beta version!}
+     ## \bold{This function has still BETA status!}
      
      ##seealso<<
      ## \code{\linkS4class{RLum.Results}}, \code{\link{analyse_SAR.TL}}

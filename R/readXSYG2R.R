@@ -3,10 +3,10 @@ readXSYG2R <- structure(function(#Import XSYG files to R
 
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
   
   ##section<<
-  ## version 0.3.1
+  ## version 0.4
   # ===========================================================================
   
   file,
@@ -16,7 +16,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ### \link{logical} (with default): if set to \code{TRUE}, TL curves are returned 
   ### as temperature against count values (see details for more information)
   ### Note: The option overwrites the time vs. count TL curve. Select \code{FALSE}
-  ### to import the raw data delivered by the lexsyg.
+  ### to import the raw data delivered by the lexsyg. Works for TL curves and spectra.
   
   import = TRUE,
   ### \link{logical} (with default): if set to \code{FALSE}, only the XSYG file structure
@@ -38,7 +38,15 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ##check if file exists 
   if(file.exists(file) == FALSE){
     
-    stop("[readXSYG2R] Wrong file name or file does not exsits!")
+    stop("[readXSYG2R()] Wrong file name or file does not exsits!")
+    
+  }
+  
+  ##check if file is XML file
+  if(tail(unlist(strsplit(file, split = "\\.")), 1) != "xsyg" & 
+       tail(unlist(strsplit(file, split = "\\.")), 1) != "XSYG" ){
+    
+    stop("[readXSYG2R()] File is not of type 'XSYG'!")
     
   }
   
@@ -148,7 +156,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ##IMPORT XSYG FILE
   
   ##Display output
-  cat("[readXSYG2R]\n")
+  cat("[readXSYG2R()]\n")
     
   ##PROGRESS BAR
   if(txtProgressBar == TRUE){
@@ -173,6 +181,20 @@ readXSYG2R <- structure(function(#Import XSYG files to R
       ##get recordType
       temp.sequence.object.recordType <- xmlAttrs(temp[[x]][[i]])["recordType"]
       
+      ##correct record type in depending on the stimulator
+      if(temp.sequence.object.recordType == "OSL"){
+        
+        if(xmlAttrs(temp[[x]][[i]][[
+          xmlSize(temp[[x]][[i]])]])["stimulator"] == "ir_LED_850"){
+          
+          temp.sequence.object.recordType  <- "IRSL"
+          
+        }
+
+      }
+        
+      
+       ##loop 3rd level      
        lapply(1:xmlSize(temp[[x]][[i]]), function(j){       
          
          ##get values
@@ -186,37 +208,94 @@ readXSYG2R <- structure(function(#Import XSYG files to R
          temp.sequence.object.detector <- as.character(
            xmlAttrs(temp[[x]][[i]][[j]])["detector"])
          
+         
+         ##get stimulator
+         temp.sequence.object.stimulator <- as.character(
+           xmlAttrs(temp[[x]][[i]][[j]])["stimulator"])
+         
+         
+         ##get parentID
+         temp.sequence.object.parentID <- as.numeric(
+           xmlAttrs(temp[[x]][[i]][[j]])["partentID"])
+         
          ##get additional information
          temp.sequence.object.info <- as.list(xmlAttrs(temp.sequence.object.curveValue)) 
-
+         
+         ##add stimulator and detector
+         temp.sequence.object.info <- c(temp.sequence.object.info, 
+                                        detector = temp.sequence.object.detector,
+                                        stimulator = temp.sequence.object.stimulator,
+                                        partentID = temp.sequence.object.parentID)
+                                        
+         
   
          ## TL curve recalculation ============================================
          if(recalculate.TL.curves == TRUE){
          
-         ##TL curve heating values is stored in the 3rd curve of every 
-         if(temp.sequence.object.recordType == "TL" && 
-            "Spectrometer" %in% temp.sequence.object.detector == FALSE &&
-            j == 1){
+         ##TL curve heating values is stored in the 3rd curve of every set
+         if(temp.sequence.object.recordType == "TL" && j == 1){
            
-            #grep values from PMT measurement 
-            temp.sequence.object.curveValue.PMT <- get_XSYG.curve.values(
-              temp[[x]][[i]][[j]])
-            
+            #grep values from PMT measurement or spectrometer
+            if("Spectrometer" %in% temp.sequence.object.detector == FALSE){
+              
+             temp.sequence.object.curveValue.PMT <- get_XSYG.curve.values(
+                temp[[x]][[i]][[j]])
+             
+           
+             ##round values (1 digit is technical resolution of the heating element)
+             temp.sequence.object.curveValue.PMT[,1] <- round(
+               temp.sequence.object.curveValue.PMT[,1], digits = 1)
+             
+             #grep values from heating element
+             temp.sequence.object.curveValue.heating.element <- get_XSYG.curve.values(
+                 temp[[x]][[i]][[3]])
+             
+             
+             
+            }else{
+              
+              temp.sequence.object.curveValue.spectrum <- get_XSYG.spectrum.values(
+                temp.sequence.object.curveValue)
+              
+              ##get time values which are stored in the row labels
+              temp.sequence.object.curveValue.spectrum.time <- as.numeric(
+                colnames(temp.sequence.object.curveValue.spectrum))
+              
               ##round values (1 digit is technical resolution of the heating element)
-              temp.sequence.object.curveValue.PMT[,1] <- round(
-                temp.sequence.object.curveValue.PMT[,1], digits = 1)
-            
+              temp.sequence.object.curveValue.spectrum.time <- round(
+                temp.sequence.object.curveValue.spectrum.time, digits = 1)
+                                      
+            }
+                 
             #grep values from heating element
             temp.sequence.object.curveValue.heating.element <- get_XSYG.curve.values(
               temp[[x]][[i]][[3]])
+                        
             
-             #reduce matrix values to values of the heating element
+            if("Spectrometer" %in% temp.sequence.object.detector == FALSE){
+              
+             #reduce matrix values to values of the detection
              temp.sequence.object.curveValue.heating.element <- 
               temp.sequence.object.curveValue.heating.element[
                 temp.sequence.object.curveValue.heating.element[,1] >=
                   min(temp.sequence.object.curveValue.PMT[,1]) &
                 temp.sequence.object.curveValue.heating.element[,1] <=
                   max(temp.sequence.object.curveValue.PMT[,1]),]
+            
+             }else{
+              
+               #reduce matrix values to values of the detection
+               temp.sequence.object.curveValue.heating.element <- 
+                 temp.sequence.object.curveValue.heating.element[
+                   temp.sequence.object.curveValue.heating.element[,1] >=
+                     min(temp.sequence.object.curveValue.spectrum.time) &
+                     temp.sequence.object.curveValue.heating.element[,1] <=
+                     max(temp.sequence.object.curveValue.spectrum.time),]
+
+            }
+            
+            
+            
             
                 ## calculate corresponding heating rate, this makes only sense
                 ## for linear heating, therefore is has to be the maximum value
@@ -243,6 +322,8 @@ readXSYG2R <- structure(function(#Import XSYG files to R
                 
                 ##PERFORM RECALCULATION
                 ##check which object contains more data
+            
+                if("Spectrometer" %in% temp.sequence.object.detector == FALSE){
             
                 ##CASE (1)
                 if(nrow(temp.sequence.object.curveValue.PMT) > 
@@ -284,14 +365,54 @@ readXSYG2R <- structure(function(#Import XSYG files to R
                   count.values <- temp.sequence.object.curveValue.PMT[,2]
                 
                 }
+                
+                ##combine as matrix
+                temp.sequence.object.curveValue <- as.matrix(cbind(
+                  temperature.values,
+                  count.values))
+                
+                ##set curve identifier 
+                temp.sequence.object.info$curveDescripter <- "Temperature [\u00B0C]; Counts [a.u.]"
+
+                
+              }else{
+                
+                ##CASE (1) here different approach. in contrast to the PMT measurements, as
+                ##         usually the resolution should be much, much lower for such measurements
+                ##         Otherwise we would introduce some pseudo signals, as we have to 
+                ##         take care of noise later one
+                
+                if(length(temp.sequence.object.curveValue.spectrum.time) != 
+                     nrow(temp.sequence.object.curveValue.heating.element)){
+                  
+                  temp.sequence.object.curveValue.heating.element.i <- approx(
+                    x = temp.sequence.object.curveValue.heating.element[,1],
+                    y = temp.sequence.object.curveValue.heating.element[,2],
+                    xout = temp.sequence.object.curveValue.spectrum.time, 
+                    rule = 2)
+                  
+                  temperature.values <- 
+                    temp.sequence.object.curveValue.heating.element.i$y
+              
+                ##CASE (2)  (equal)
+                }else{
+                  
+                  temperature.values <- 
+                    temp.sequence.object.curveValue.heating.element[,2]
+                                    
+                }
+  
+                ##reset values of the matrix
+                colnames(temp.sequence.object.curveValue.spectrum) <- temperature.values
+                temp.sequence.object.curveValue <- temp.sequence.object.curveValue.spectrum
+                
+                ##change curve descriptor 
+                temp.sequence.object.info$curveDescripter <- "Temperature [\u00B0C]; Wavelength [nm]; Counts [1/ch]"
+                
+              }
             
-            ##combine as matrix
-            temp.sequence.object.curveValue <- as.matrix(cbind(
-                           temperature.values,
-                           count.values))
-            
-            ##set curve identifier 
-            temp.sequence.object.info$curveDescripter <- "Temperature [\u00B0C]; Counts [a.u.]"
+
+         
           
           }##endif          
          }##endif recalculate.TL.curves == TRUE
@@ -306,10 +427,10 @@ readXSYG2R <- structure(function(#Import XSYG files to R
                 get_XSYG.curve.values(temp.sequence.object.curveValue)
               
             }
-          
-           
+            
+            
          set_RLum.Data.Curve(recordType = paste(temp.sequence.object.recordType, 
-                                                " (",temp.sequence.object.detector,")",
+                                                " (", temp.sequence.object.detector,")",
                                                 sep = ""),
                     curveType = temp.sequence.object.curveType,
                     data = temp.sequence.object.curveValue,
@@ -317,25 +438,34 @@ readXSYG2R <- structure(function(#Import XSYG files to R
          
          }else if("Spectrometer" %in% temp.sequence.object.detector == TRUE) {
     
+           
+           if(is(temp.sequence.object.curveValue, "matrix") == FALSE){
+             
+             temp.sequence.object.curveValue <- 
+               get_XSYG.curve.values(temp.sequence.object.curveValue)
+             
+           }
+           
+           
            set_RLum.Data.Spectrum(recordType = paste(temp.sequence.object.recordType, 
                                                   " (",temp.sequence.object.detector,")",
                                                   sep = ""),
                                curveType = temp.sequence.object.curveType,
-                               data = get_XSYG.spectrum.values(
-                                 temp.sequence.object.curveValue),
+                               data = temp.sequence.object.curveValue,
                                info = temp.sequence.object.info)  
 
          }
          
        })   
+    
       
      }))
-
+    
      ##set RLum.Analysis object
      temp.sequence.object <-  set_RLum.Analysis(
                                 records = temp.sequence.object, 
                                 protocol = as.character(
-                                  temp.sequence.header["protocol",1]))
+                                temp.sequence.header["protocol",1]))
     
     
     ##update progress bar
@@ -428,8 +558,7 @@ readXSYG2R <- structure(function(#Import XSYG files to R
   ## A new matrix is produced using temperature values from the heating 
   ## element and count values from the PMT. \cr
   ##
-  ## \emph{Note: Temperature values for spectrum curves are currently 
-  ## not supported. Please further note that due to the recalculation of the 
+  ## \emph{Note: Please note that due to the recalculation of the 
   ## temperature values based on values delivered by the heating element, it 
   ## may happen that mutiple count values exists for each temperature value and 
   ## temperature values may also decrease during heating, not only increase. }
@@ -473,5 +602,15 @@ readXSYG2R <- structure(function(#Import XSYG files to R
     
     ##search for specific subnodes with curves containing 'OSL'
     #getNodeSet(temp, "//Sample/Sequence/Record[@recordType = 'OSL']/Curve")
+  
+  ##(2) How to extract single curves ... after import
+  data(ExampleData.XSYG, envir = environment())
+  
+  ##grep one OSL curves and plot the first curve
+  OSLcurve <- get_RLum.Analysis(OSL.SARMeasurement$Sequence.Object, recordType="OSL")[[1]]
+  
+  ##(3) How to see the structure of an object?
+  get_structure.RLum.Analysis(OSL.SARMeasurement$Sequence.Object)
+  
     
 })

@@ -1,7 +1,7 @@
 \name{sTeve}
 \alias{sTeve}
 \title{
-sTeve - sophisticated Tool for efficient data validation and evaluation
+sTeve - sophisticated tool for efficient data validation and evaluation
 }
 \description{
 This function provides a sophisticated routine for comprehensive luminescence dating 

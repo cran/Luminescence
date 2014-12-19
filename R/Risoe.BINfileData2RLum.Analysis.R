@@ -7,7 +7,7 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
   ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
   
   ##section<<
-  ## version 0.1.1
+  ## version 0.1.2
   # ===========================================================================
 
   object,
@@ -16,6 +16,7 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
   pos,
   ### \code{\link{integer}} (\bold{required}): position number of the \code{Risoe.BINfileData}
   ### object for which the curves are stored in the \code{RLum.Analysis} object.
+  ### If the position is not valid \code{NA} is returned.
   
   run,
   ### \code{\link{vector}, \link{numeric}} (optional): run number from the measurement to limit
@@ -55,8 +56,16 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
   positions.valid <- paste(as.character(unique(object@METADATA[,"POSITION"])), collapse=", ")
 
   if ((pos %in% unique(object@METADATA[,"POSITION"])) == FALSE){
-   stop(paste("[Risoe.BINfileData2RLum.Analysis] Error: pos=",pos, " is no valid position. 
+   warning(paste("[Risoe.BINfileData2RLum.Analysis] Error: pos=",pos, " invalid. 
               Valid positions are: ", positions.valid, sep=""))
+   
+   ##flag position
+   pos.valid <- FALSE
+   
+  }else{
+    
+   pos.valid <- TRUE
+    
   }
 
   ##WARNINGS
@@ -68,7 +77,7 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
 
 # Grep run and set data ---------------------------------------------------
 
-
+  if(pos.valid == TRUE){
   ##grep values according to their criteria and check for validity 
   ##run
   if(missing(run) == TRUE){run <- unique(object@METADATA[, "RUN"])} else{
@@ -138,8 +147,8 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
     
 # Convert values ----------------------------------------------------------
 
-  new("RLum.Analysis", 
-      records = lapply(1:length(object@DATA),function(x){
+  object <- set_RLum.Analysis(
+    records = lapply(1:length(object@DATA),function(x){
         
         ##calculate values for matrix 
         i<-seq(object@METADATA[x,"HIGH"]/object@METADATA[x,"NPOINTS"],
@@ -157,7 +166,14 @@ Risoe.BINfileData2RLum.Analysis<- structure(function(#Convert Risoe.BINfileData 
       }),
       protocol = protocol
   )
+  
+  return(object)
 
+  }else{
+    
+    return(NA)
+    
+  }
   # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
 
   ##details<<

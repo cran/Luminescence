@@ -5,11 +5,11 @@ Analyse_SAR.OSLdata<- structure(function(#Analyse SAR CW-OSL measurements.
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany), 
-  ## Margret C. Fuchs, AWI Potsdam (Germany), \cr
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), 
+  ## Margret C. Fuchs, AWI Potsdam (Germany), TU Bergakademie Freiberg (Germany)\cr
   
   ##section<<
-  ## version 0.2.12
+  ## version 0.2.15
   # ===========================================================================
   
   input.data,
@@ -38,6 +38,17 @@ Analyse_SAR.OSLdata<- structure(function(#Analyse SAR CW-OSL measurements.
   ### \link{vector} (optional): range of sets used for the analysis. 
   ### If no value is given the range of the sets in the sequence is deduced 
   ### from the \code{Risoe.BINfileData} object.
+  
+  dtype, 
+  ### \code{\link{character}} (optional): allows to further limit the curves 
+  ### by their data type (\code{DTYPE}), e.g., \code{dtype = c("Natural", "Dose")}
+  ### limits the curves to this two data types. By default all values are allowed.
+  ### See \link{Risoe.BINfileData-class} for allowed data types. 
+  
+  keep.SEL = FALSE,
+  ### \code{\link{logical}} (default): option allowing to use the \code{SEL} element of the 
+  ### \link{Risoe.BINfileData-class} manually. NOTE: In this case any limitation provided by
+  ### \code{run}, \code{set} and \code{dtype} are ignored!
   
   info.measurement = "unkown measurement",
   ### \link{character} (with default): option to provide information about
@@ -80,10 +91,20 @@ Analyse_SAR.OSLdata<- structure(function(#Analyse SAR CW-OSL measurements.
                                      
   ##set values for run and set if they are not defined by the user 
   if(missing(position)==TRUE){position<-min(sample.data@METADATA[,"POSITION"]):max(sample.data@METADATA[,"POSITION"])}
+  
   if(missing(run)==TRUE){run<-min(sample.data@METADATA[,"RUN"]):max(sample.data@METADATA[,"RUN"])}
+  
   if(missing(set)==TRUE){set<-min(sample.data@METADATA[,"SET"]):max(sample.data@METADATA[,"SET"])}  
- 
-    
+  
+  if(missing(dtype)){dtype <- c("Natural",
+                                "N+dose",
+                                "Bleach", 
+                                "Bleach+dose",
+                                "Natural (Bleach)",
+                                "N+dose (Bleach)",
+                                "Dose",
+                                "Background")}
+
 ##============================================================================##
 ##CALCULATIONS 
 ##============================================================================##
@@ -95,11 +116,21 @@ for (i in position){
 ##checking if position is valid   
 if(length(which(sample.data@METADATA["POSITION"]==i))>0){
   
-    ##select OSL data
+    ##check if OSL curves are part of the data set
+    if(nrow(sample.data@METADATA[sample.data@METADATA[,"LTYPE"]=="OSL",]) == 0){
+      
+      stop("[Analyse_SAR.OSLdata()] No 'OSL' curves found!")
+      
+    }
+  
+    if(!keep.SEL){
+    ##select all OSL data depending on the run and set
     sample.data@METADATA[,"SEL"]<-FALSE
     sample.data@METADATA[sample.data@METADATA[,"LTYPE"]=="OSL" & 
       sample.data@METADATA[,"RUN"]%in%run==TRUE &
-      sample.data@METADATA[,"SET"]%in%set==TRUE,"SEL"]<-TRUE
+      sample.data@METADATA[,"SET"]%in%set==TRUE &
+      sample.data@METADATA[,"DTYPE"]%in%dtype==TRUE, "SEL"] <- TRUE
+    }
     
     ##grep all OSL curve IDs 
     OSL.curveID<-sample.data@METADATA[sample.data@METADATA["SEL"]==TRUE &
@@ -267,7 +298,7 @@ if(output.plot==TRUE){
  }     
     ##warning if number of curves exceed colour values
     if(length(col)<length(LnLx.curveID)){
-      cat("\n[Analyse_OSLCurves.R] Warning: To many curves! Only the first",
+      cat("\n[Analyse_SAR.OSLdata()] Warning: To many curves! Only the first",
           length(col),"curves are plotted!")
     }
  
@@ -468,7 +499,7 @@ if(output.plot==TRUE){
      mtext(side=4,info.measurement,outer=TRUE,line=-1.5,cex=0.6*cex.global, col="blue")
 
     ##output on terminal for plot
-    writeLines(paste("\n[Analyse_OSLCurves] >> Figure for position ",i," produced.",sep=""))
+    writeLines(paste("\n[Analyse_SAR.OSLdata()] >> Figure for position ",i," produced.",sep=""))
  
     ##reset mfrow
     par(mfrow=c(1,1))
@@ -485,7 +516,7 @@ if(output.plot==TRUE){
     rm(LnLxTnTx)
   
 
-}else{writeLines(paste("[Analyse_OSLCurves.R] >> Position ",i," is not valid and has been omitted!",sep=""))} #end if position checking
+}else{writeLines(paste("[Analyse_SAR.OSLdata()] >> Position ",i," is not valid and has been omitted!",sep=""))} #end if position checking
 
 }#end for loop
 
@@ -541,15 +572,15 @@ if(output.plot==TRUE){
     ## (not valid for all types of measurements).}
     
     ##references<<
-    ## Aitken, M.J. & Smith, B.W., 1988. Optical dating: recuperation after 
-    ## bleaching. Quaternary Science Reviews, 7, pp. 387-393.
+    ## Aitken, M.J. and Smith, B.W., 1988. Optical dating: recuperation after 
+    ## bleaching. Quaternary Science Reviews 7, 387-393.
     ## 
     ## Duller, G., 2003. Distinguishing quartz and feldspar in single grain 
-    ## luminescence measurements. Radiation Measurements, 37 (2), pp. 161-165. 
+    ## luminescence measurements. Radiation Measurements, 37 (2), 161-165. 
     ##
-    ## Murray, A.S. & Wintle, A.G.,  2000. Luminescence dating of quartz using 
+    ## Murray, A.S. and Wintle, A.G., 2000. Luminescence dating of quartz using 
     ## an improved single-aliquot regenerative-dose protocol. 
-    ## Radiation Measurements, 32, pp. 57-73. 
+    ## Radiation Measurements 32, 57-73. 
     
     ##note<<
     ## Rejection criteria are calculated but not considered during 

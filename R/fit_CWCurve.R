@@ -6,10 +6,10 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany),\cr
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr
   
   ##section<<
-  ## version 0.4.3
+  ## version 0.4.4
   # ===========================================================================
 
   values,
@@ -40,25 +40,12 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
   ### \bold{Note:} The value is used for the calculation of the absolute 
   ### photoionisation cross section.
 
-  log = "", 
-  ### \link{character} (optional): option for log-scaled axis, 
-  ### works as in \link{plot}
-  
   cex.global = 0.6,
   ### \link{numeric} (with default): global scaling factor.
-  
-  main = "CW-OSL Curve Fit",
-  ### \link{character} (with default): header for plot output.
 
   sample_code = "Default", 
   ### \link{character} (optional): sample code used for the plot and the 
   ### optional output table (mtext).
-  
-  ylab, 
-  ### \link{character} (with default): alternative y-axis labelling 
-  
-  xlab, 
-  ### \link{character} (with default): alternative x-axis labelling 
                   
   output.path, 
   ### \link{character} (optional): output path for table output containing the 
@@ -73,8 +60,11 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
   ### Requires \code{output.terminal = TRUE}.
   ### If \code{output.terminal = FALSE} no advanced output is possible.
                                                                                            
-  output.plot = TRUE
+  output.plot = TRUE,
   ### \link{logical} (with default): returns a plot of the fitted curves.
+   
+  ...
+  ### further arguments and graphical parameters passed to \code{\link{plot}}.
 ){
                                   		
     
@@ -111,7 +101,24 @@ fit_CWCurve<- structure(function(#Nonlinear Least Squares Fit for CW-OSL curves 
       }
       
      
-      
+# Deal with extra arguments -----------------------------------------------
+  
+    ##deal with addition arguments 
+    extraArgs <- list(...) 
+
+    main <- if("main" %in% names(extraArgs)) {extraArgs$main} else 
+    {"CW-OSL Curve Fit"}
+
+    log <- if("log" %in% names(extraArgs)) {extraArgs$log} else 
+    {""}
+
+    xlab <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} else 
+    {"Time [s]"}
+
+    ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} else 
+    {paste("OSL [cts/",round(max(x)/length(x), digits = 2)," s]",sep="")}  
+    
+
 ##============================================================================##		
 ## FITTING
 ##============================================================================##
@@ -152,10 +159,16 @@ while(fit.trigger==TRUE & n.components <= n.components.max){
     ##rough automatic start parameter estimation
     I0<-rep(values[1,2]/3,n.components)
     
-    ##fit an linear function a first guess
-    temp.values<-data.frame(log(y),x)
     
-    temp<-lm(temp.values)
+    ##ensure that no values <=0 are included remove them for start parameter
+    ##estimation and fit an linear function a first guess
+    if(y<=0){
+      temp.values<-data.frame(x[-which(y<=0)], log(y[-which(y<=0)]))
+    }else{
+      temp.values<-data.frame(x, log(y))
+    }
+    
+    temp<-lm(temp.values)    
     lambda<-abs(temp$coefficient[2])
     
     k<-2;  
@@ -539,10 +552,7 @@ if(output.plot==TRUE){
           ylim=if(log=="xy"){c(1,max(y))}else{c(0,max(y))},
           xlab="",
           xaxt="n",
-          ylab=if(missing(ylab)==TRUE){
-            paste("OSL [cts/",length(x)/max(x)," s]",sep="")}else{
-            ylab  
-            },
+          ylab=ylab,
           main=main, 
           log=log)
    
@@ -580,7 +590,7 @@ if(output.plot==TRUE){
     par(mar=c(4.2,4,0,0))
     plot(x,residuals(fit), 
          xlim=c(min(x),max(x)), 
-         xlab=if(missing(xlab)==TRUE){"Time [s]"}else{xlab}, 
+         xlab=xlab, 
          type="l", 
          col="grey", 
          ylab="Residual [a.u.]",
@@ -602,7 +612,7 @@ if(output.plot==TRUE){
              xlim=c(min(x),max(x)),
              ylim=c(0,100),
              ylab="Contribution [%]",
-             xlab=if(missing(xlab)==TRUE){"Time [s]"}else{xlab},
+             xlab=xlab,
              main="Component contribution to sum curve",
              log=if(log=="x" | log=="xy"){log="x"}else{""})
   
@@ -679,7 +689,7 @@ if(output.plot==TRUE){
    ## \code{fit}: an \code{nls} object (\code{$fit}) for which generic R functions 
    ## are provided, e.g. \link{summary}, \link{confint}, \link{profile}. 
    ## For more details, see \link{nls}.\cr\cr
-   ## \code{output.table}:  a \link{data.frame} containing the summarized 
+   ## \code{output.table}: a \link{data.frame} containing the summarised 
    ## parameters including the error\cr
    ## \code{component.contribution.matrix}: \link{matrix} containing the values 
    ## for the component to sum contribution plot 

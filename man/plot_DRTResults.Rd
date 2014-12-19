@@ -5,15 +5,21 @@
 measurements.}
 \usage{plot_DRTResults(values, given.dose, error.range = 10, preheat, 
     boxplot = FALSE, mtext, summary, summary.pos, legend, legend.pos, 
-    na.exclude = FALSE, ...)}
+    par.local = TRUE, na.rm = FALSE, ...)}
 \arguments{
   \item{values}{\code{\linkS4class{RLum.Results}} or
 \code{\link{data.frame}}, (\bold{required}): input values 
 containing at least De and De error. To plot more than one data
 set in one figure, a \code{list} of the individual data sets
 must be provided (e.g. \code{list(dataset.1, dataset.2)}).}
-  \item{given.dose}{\code{\link{numeric}}: given dose from the dose recovery test 
-(in Seconds or Gray, unit has to be the same as from the input values).}
+  \item{given.dose}{\code{\link{numeric}} (optional):
+given dose used for the dose recovery test to normalise data. If only one given dose is 
+provided this given dose is valid for all input data sets (i.e., \code{values} is a list). 
+Otherwise a given dose for each input data set has to be provided 
+(e.g., \code{given.dose = c(100,200)}).
+If no \code{given.dose} values are plotted without normalisation (might be useful for 
+preheat plateau tests).
+Note: Unit has to be the same as from the input values (e.g., Seconds or Gray).}
   \item{error.range}{\code{\link{numeric}}: symmetric error range in percent will be shown 
 as dashed lines in the plot. Set \code{error.range} to 0 to void  
 plotting of error ranges.}
@@ -40,7 +46,10 @@ to the plot.}
   \item{legend.pos}{\code{\link{numeric}} or \code{\link{character}} (with default): optional  
 position coordinates or keyword (e.g. \code{"topright"}) for the legend
 to be plotted.}
-  \item{na.exclude}{\code{\link{logical}}: indicating wether \code{NA} values are removed 
+  \item{par.local}{\code{\link{logical}} (with default): use local graphical parameters for plotting, e.g.
+the plot is shown in one column and one row. If \code{par.local = FALSE},  
+global parameters are inherited.}
+  \item{na.rm}{\code{\link{logical}}: indicating wether \code{NA} values are removed 
 before plotting from the input data set}
   \item{\dots}{further arguments and graphical parameters passed to \code{\link{plot}}.}
 }
@@ -56,7 +65,7 @@ De/Given Dose.}
 \references{Wintle, A.G., Murray, A.S., 2006. A review of quartz optically stimulated 
 luminescence characteristics and their relevance in single-aliquot 
 regeneration dating protocols. Radiation Measurements, 41, 369-391.}
-\author{Sebastian Kreutzer, JLU Giessen (Germany),
+\author{Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France),
 Michael Dietze, GFZ Potsdam (Germany), \cr
 R Luminescence Package Team}
 \note{Further data and plot arguments can be added by using the appropiate
@@ -109,7 +118,12 @@ plot_DRTResults(values = list(x.1, x.2),
 plot_DRTResults(values = ExampleData.DeValues[7:11,], 
                 given.dose = 2800,
                 preheat = c(200, 200, 200, 240, 240))
+## read example data set and misapply them for this plot type
+data(ExampleData.DeValues, envir = environment())
 
+## plot values 
+plot_DRTResults(values = ExampleData.DeValues[7:11,], 
+                given.dose = 2800, mtext = "Example data")
 ## plot two data sets grouped by preheat temperatures
 plot_DRTResults(values = list(x.1, x.2), 
                 given.dose = 2800,
@@ -123,4 +137,4 @@ plot_DRTResults(values = ExampleData.DeValues[7:11,],
 }
 
 \keyword{dplot}
-\section{Function version}{0.1.2 (2014-04-13 14:30:15)}
+\section{Function version}{0.1.6 (2014-12-08 12:54:45)}

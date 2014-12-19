@@ -3,10 +3,10 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
   
   # ===========================================================================
   ##author<<
-  ## Sebastian Kreutzer, JLU Giessen (Germany), \cr
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
   
   ##section<<
-  ## version 0.1
+  ## version 0.3
   # ===========================================================================
 
   object, 
@@ -35,9 +35,11 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
   
     switch (object.class,
             
-            RLum.Data.Curve = plot_RLum.Data.Curve (object, ...),
-            RLum.Data.Spectrum = plot_RLum.Data.Spectrum (object, ...),
-            RLum.Analysis = plot_RLum.Analysis (object, ...)
+            RLum.Data.Curve = plot_RLum.Data.Curve(object, ...),
+            RLum.Data.Spectrum = plot_RLum.Data.Spectrum(object, ...),
+            RLum.Data.Image = plot_RLum.Data.Image(object, ...),
+            RLum.Analysis = plot_RLum.Analysis(object, ...),
+            RLum.Results = plot_RLum.Results(object, ...)
   
            )
 
@@ -53,7 +55,10 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
    ## \bold{object} \tab \tab \bold{corresponding plot function} \cr
    ##    
    ## \code{\linkS4class{RLum.Data.Curve}} \tab : \tab \code{\link{plot_RLum.Data.Curve}} \cr
-   ## \code{\linkS4class{RLum.Analysis}} \tab : \tab \code{\link{plot_RLum.Analysis}}
+   ## \code{\linkS4class{RLum.Data.Spectrum}} \tab : \tab \code{\link{plot_RLum.Data.Spectrum}}\cr
+   ## \code{\linkS4class{RLum.Data.Image}} \tab : \tab \code{\link{plot_RLum.Data.Image}}\cr
+   ## \code{\linkS4class{RLum.Analysis}} \tab : \tab \code{\link{plot_RLum.Analysis}}\cr
+   ## \code{\linkS4class{RLum.Results}} \tab : \tab \code{\link{plot_RLum.Results}}
    ## }
    
    ##value<<
@@ -66,8 +71,11 @@ plot_RLum<- structure(function(#General plot function for RLum S4 class objects
    ## The provided plot output depends on the input object.
    
    ##seealso<<
-   ## \code{\link{plot_RLum.Data.Curve}}, 
-   ## \code{\linkS4class{RLum.Data.Curve}}
+   ## \code{\link{plot_RLum.Data.Curve}}, \code{\linkS4class{RLum.Data.Curve}},
+   ## \code{\link{plot_RLum.Data.Spectrum}}, \code{\linkS4class{RLum.Data.Spectrum}},
+   ## \code{\link{plot_RLum.Data.Image}}, \code{\linkS4class{RLum.Data.Image}},
+   ## \code{\link{plot_RLum.Analysis}}, \code{\linkS4class{RLum.Analysis}},
+   ## \code{\link{plot_RLum.Results}}, \code{\linkS4class{RLum.Results}}
    
    ##keyword<<
    ## dplot

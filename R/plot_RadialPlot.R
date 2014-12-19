@@ -4,8 +4,8 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   
   # ===========================================================================
   ##author<<
-  ## Michael Dietze, GFZ Potsdam (Germany), Sebastian Kreutzer, JLU Giessen 
-  ## (Germany)\cr
+  ## Michael Dietze, GFZ Potsdam (Germany),\cr
+  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr
   ## Based on a rewritten S script of Rex Galbraith, 2010\cr
 
   ##section<<
@@ -36,10 +36,11 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   ### horizontal centering of the z-axis.
   
   centrality = "mean.weighted",
-  ### \code{\link{character}} (with default): measure of centrality, used for
-  ### automatically centering the plot and drawing the central line. Can be
-  ### one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
-  ### and \code{"median.weighted"}. Default is \code{"mean.weighted"}.
+  ### \code{\link{character}} or \code{\link{numeric}} (with default): 
+  ### measure of centrality, used for automatically centering the plot and 
+  ### drawing the central line. Can either be one out of \code{"mean"}, 
+  ### \code{"median"}, \code{"mean.weighted"} and \code{"median.weighted"} 
+  ### or a numeric value used for the standardisation.
   
   mtext,
   ### \code{\link{character}}: additional text below the plot title.
@@ -73,6 +74,10 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   ### \code{\link{character}}: additional labels of statistically important
   ### values in the plot. One or more out of the following: \code{"min"}, 
   ### \code{"max"}, \code{"median"}.
+  
+  rug = FALSE,
+  ### \code{\link{logical}}: Option to add a rug to the z-scale, to indicate
+  ### the location of individual values
   
   plot.ratio,
   ### \code{\link{numeric}}: User-defined plot area ratio (i.e. curvature of
@@ -134,7 +139,10 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   if(missing(stats) == TRUE) {stats <- numeric(0)}
   if(missing(summary) == TRUE) {
     summary <- c("n", "in.ci")
-    summary.pos = "sub"
+  }
+  
+  if(missing(summary.pos) == TRUE) {
+    summary.pos <- "sub"
   }
   if(missing(bar.col) == TRUE) {bar.col <- rep("grey80", length(data))}
   if(missing(grid.col) == TRUE) {grid.col <- rep("grey70", length(data))}
@@ -174,6 +182,7 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
     limits.z <- c((ifelse(min(De.global) <= 0, 1.1, 0.9) - z.span) * min(De.global),
                   (1.1 + z.span) * max(De.global))
   }
+  
   ticks <- round(pretty(limits.z, n = 5), 3)
   De.delta <- ticks[2] - ticks[1]
   
@@ -255,18 +264,18 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   rm(se)
   
   ## calculate central values
-  if(centrality == "mean") {
-    z.central <- sapply(1:length(data), function(x){
+  if(centrality[1] == "mean") {
+    z.central <- lapply(1:length(data), function(x){
       rep(mean(data[[x]][,3], na.rm = TRUE), length(data[[x]][,3]))})
-  } else if(centrality == "median") {
-    z.central <- sapply(1:length(data), function(x){
+  } else if(centrality[1] == "median") {
+    z.central <- lapply(1:length(data), function(x){
       rep(median(data[[x]][,3], na.rm = TRUE), length(data[[x]][,3]))})
-  } else  if(centrality == "mean.weighted") {
-    z.central <- sapply(1:length(data), function(x){
+  } else  if(centrality[1] == "mean.weighted") {
+    z.central <- lapply(1:length(data), function(x){
       sum(data[[x]][,3] / data[[x]][,4]^2) / 
         sum(1 / data[[x]][,4]^2)})
-  } else if(centrality == "median.weighted") {
-    ## define function after isotone::weighted.mean
+  } else if(centrality[1] == "median.weighted") {
+    ## define function after isotone::weighted.median
     median.w <- function (y, w)
     {
       ox <- order(y)
@@ -280,14 +289,26 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
         if (df[k] < 0) 
           k <- k + 1
         else if (df[k] == 0) 
-          return((w[k] * y[k] + w[k - 1] * y[k - 1])/(w[k] + 
-                                                        w[k - 1]))
+          return((w[k] * y[k] + w[k - 1] * y[k - 1]) / (w[k] + w[k - 1]))
         else return(y[k - 1])
       }
     }
-    z.central <- sapply(1:length(data), function(x){
+    z.central <- lapply(1:length(data), function(x){
       rep(median.w(y = data[[x]][,3], 
                    w = data[[x]][,4]), length(data[[x]][,3]))})
+  } else if(is.numeric(centrality) == TRUE & 
+              length(centrality) == length(data)) {
+    z.central.raw <- if(log.z == TRUE) {
+      log(centrality)
+    } else {
+      centrality
+    }
+    z.central <- lapply(1:length(data), function(x){
+      rep(z.central.raw[x], length(data[[x]][,3]))})
+  } else if(is.numeric(centrality) == TRUE & 
+              length(centrality) > length(data)) {
+    z.central <- lapply(1:length(data), function(x){
+      rep(median(data[[x]][,3], na.rm = TRUE), length(data[[x]][,3]))})
   } else {
     stop("Measure of centrality not supported!")
   }
@@ -334,36 +355,39 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
                              "std.estimate", 
                              "std.estimate.plot")
 
-  ## calculate global central value
-  if(centrality == "mean") {
-    z.central.global <- mean(data.global[,3], na.rm = TRUE)
-  } else if(centrality == "median") {
-    z.central.global <- median(data.global[,3], na.rm = TRUE)
-  } else  if(centrality == "mean.weighted") {
-    z.central.global <- sum(data.global[,3] / data.global[,4]^2) / 
-      sum(1 / data.global[,4]^2)
-  } else if(centrality == "median.weighted") {
-    ## define function after isotone::weighted.mean
-    median.w <- function (y, w) 
-    {
-      ox <- order(y)
-      y <- y[ox]
-      w <- w[ox]
-      k <- 1
-      low <- cumsum(c(0, w))
-      up <- sum(w) - low
-      df <- low - up
-      repeat {
-        if (df[k] < 0) 
-          k <- k + 1
-        else if (df[k] == 0) 
-          return((w[k] * y[k] + w[k - 1] * y[k - 1])/(w[k] + 
-                                                        w[k - 1]))
-        else return(y[k - 1])
-      }
+## calculate global central value
+if(centrality[1] == "mean") {
+  z.central.global <- mean(data.global[,3], na.rm = TRUE)
+} else if(centrality[1] == "median") {
+  z.central.global <- median(data.global[,3], na.rm = TRUE)
+} else  if(centrality[1] == "mean.weighted") {
+  z.central.global <- sum(data.global[,3] / data.global[,4]^2) / 
+    sum(1 / data.global[,4]^2)
+} else if(centrality[1] == "median.weighted") {
+  ## define function after isotone::weighted.mean
+  median.w <- function (y, w) 
+  {
+    ox <- order(y)
+    y <- y[ox]
+    w <- w[ox]
+    k <- 1
+    low <- cumsum(c(0, w))
+    up <- sum(w) - low
+    df <- low - up
+    repeat {
+      if (df[k] < 0) 
+        k <- k + 1
+      else if (df[k] == 0) 
+        return((w[k] * y[k] + w[k - 1] * y[k - 1])/(w[k] + 
+                                                      w[k - 1]))
+      else return(y[k - 1])
     }
-    z.central.global <- median.w(y = data.global[,3], w = data.global[,4])
   }
+  z.central.global <- median.w(y = data.global[,3], w = data.global[,4])
+} else if(is.numeric(centrality) == TRUE & 
+            length(centrality == length(data))) {
+  z.central.global <- mean(data.global[,3], na.rm = TRUE)
+} 
   
   ## optionally adjust zentral value by user-defined value
   if(missing(central.value) == FALSE) {
@@ -534,14 +558,16 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
       plot.ratio <- 4.5 / 5.5
     }
   } 
-  
+
+  if(plot.ratio > 10^6) {plot.ratio <- 10^6}
+
   ## calculate conversion factor for plot coordinates
   f <- (max(data.global[,6]) - min(data.global[,6])) / 
        (max(data.global[,7]) - min(data.global[,7])) * plot.ratio
-  
+
   ## calculate major and minor z-tick values
-  tick.values.major <- round(pretty(limits.z, n = 5), 0)
-  tick.values.minor <- round(pretty(limits.z, n = 25), 0)
+  tick.values.major <- signif(pretty(limits.z, n = 5), 3)
+  tick.values.minor <- signif(pretty(limits.z, n = 25), 3)
   
   tick.values.major <- tick.values.major[tick.values.major >= 
     min(tick.values.minor)]
@@ -596,9 +622,9 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   
   ## create z-axes labels
   if(log.z == TRUE) {
-    label.z.text <- round(exp(tick.values.major), 0)
+    label.z.text <- signif(exp(tick.values.major), 3)
   } else {
-    label.z.text <- round(tick.values.major, 0)
+    label.z.text <- signif(tick.values.major, 3)
   }
 
   ## subtract De.add from label values
@@ -641,7 +667,7 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   ellipse.y <- (ellipse.values - z.central.global) * ellipse.x
   ellipse <- cbind(ellipse.x, ellipse.y)
   ellipse.lims <- rbind(range(ellipse[,1]), range(ellipse[,2]))
-  
+
   ## calculate statistical labels
   if(length(stats == 1)) {stats <- rep(stats, 2)}
   stats.data <- matrix(nrow = 3, ncol = 3)
@@ -664,7 +690,7 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
     stats.data[3, 1] <- data.global[data.stats == stats.data[3, 3], 6][1]
     stats.data[3, 2] <- data.global[data.stats == stats.data[3, 3], 8][1]
   }
-  
+
   ## recalculate axes limits if necessary
   limits.z.x <- range(ellipse[,1])
   limits.z.y <- range(ellipse[,2])
@@ -683,123 +709,216 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
     }
   }
 
-  ## calculate and paste statistical summary
-  label.text = list(NA)
+## calculate and paste statistical summary
+De.stats <- matrix(nrow = length(data), ncol = 14)
+colnames(De.stats) <- c("n",
+                        "mean", 
+                        "mean.weighted",
+                        "median",
+                        "median.weighted",
+                        "kde.max",
+                        "sd.abs",
+                        "sd.rel",
+                        "se.abs",
+                        "se.rel",
+                        "q25",
+                        "q75",
+                        "skewness",
+                        "kurtosis")
+
+for(i in 1:length(data)) {
+  statistics <- calc_Statistics(data[[i]])
+  De.stats[i,1] <- statistics$weighted$n
+  De.stats[i,2] <- statistics$unweighted$mean
+  De.stats[i,3] <- statistics$weighted$mean
+  De.stats[i,4] <- statistics$unweighted$median
+  De.stats[i,5] <- statistics$weighted$median
+  De.stats[i,7] <- statistics$weighted$sd.abs
+  De.stats[i,8] <- statistics$weighted$sd.rel
+  De.stats[i,9] <- statistics$weighted$se.abs
+  De.stats[i,10] <- statistics$weighted$se.rel
+  De.stats[i,11] <- quantile(data[[i]][,1], 0.25)
+  De.stats[i,12] <- quantile(data[[i]][,1], 0.75)
+  De.stats[i,13] <- statistics$unweighted$skewness
+  De.stats[i,14] <- statistics$unweighted$kurtosis
+}
+
+label.text = list(NA)
+
+if(summary.pos[1] != "sub") {
+  n.rows <- length(summary)
   
-  if(summary.pos[1] != "sub") {
-    n.rows <- length(summary)
+  for(i in 1:length(data)) {
+    stops <- paste(rep("\n", (i - 1) * n.rows), collapse = "")
     
-    for(i in 1:length(data)) {
-      stops <- paste(rep("\n", (i - 1) * n.rows), collapse = "")
-      label.text[[length(label.text) + 1]] <- paste(stops, paste(
-        ifelse("n" %in% summary == TRUE,
-               paste("n = ", 
-                     nrow(data[[i]]), 
-                     "\n", 
-                     sep = ""),
-               ""),
-        ifelse("mean" %in% summary == TRUE,
-               paste("mean = ", 
-                     round(mean(data[[i]][,1]), 2), 
-                     "\n", 
-                     sep = ""),
-               ""),
-        ifelse("mean.weighted" %in% summary == TRUE,
-               paste("weighted mean = ", 
-                     round(weighted.mean(x = data[[i]][,1],
-                                         w = 1 / data[[i]][,2]), 2), 
-                     "\n", 
-                     sep = ""),
-               ""),
-        ifelse("median" %in% summary == TRUE,
-               paste("median = ", 
-                     round(median(data[[i]][,1]), 2), 
-                     "\n", 
-                     sep = ""),
-               ""),
-        ifelse("sdrel" %in% summary == TRUE,
-               paste("sd = ", 
-                     round(sd(data[[i]][,1]) / mean(data[[i]][,1]) * 100,
-                           2), " %",
-                     "\n", 
-                     sep = ""),
-               ""),
-        ifelse("sdabs" %in% summary == TRUE,
-               paste("sd = ", 
-                     round(sd(data[[i]][,1]), 2),
-                     "\n", 
-                     sep = ""),
-               ""),
-        ifelse("in.ci" %in% summary == TRUE,
-               paste("in confidence interval = ", 
-                     round(sum(data[[i]][,7] > -2 & data[[i]][,7] < 2) /
-                             nrow(data[[i]]) * 100 , 1),
-                     " % \n", 
-                     sep = ""),
-               ""),
-        sep = ""), stops, sep = "")
+    summary.text <- character(0)
+    
+    for(j in 1:length(summary)) {
+      summary.text <- c(summary.text, 
+                        paste(
+                          "",
+                          ifelse("n" %in% summary[j] == TRUE,
+                                 paste("n = ", 
+                                       De.stats[i,1], 
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("mean" %in% summary[j] == TRUE,
+                                 paste("mean = ", 
+                                       round(De.stats[i,2], 2), 
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("mean.weighted" %in% summary[j] == TRUE,
+                                 paste("weighted mean = ", 
+                                       round(De.stats[i,3], 2), 
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("median" %in% summary[j] == TRUE,
+                                 paste("median = ", 
+                                       round(De.stats[i,4], 2), 
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("median.weighted" %in% summary[j] == TRUE,
+                                 paste("weighted median = ", 
+                                       round(De.stats[i,5], 2), 
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("sdabs" %in% summary[j] == TRUE,
+                                 paste("sd = ", 
+                                       round(De.stats[i,7], 2),
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("sdrel" %in% summary[j] == TRUE,
+                                 paste("rel. sd = ", 
+                                       round(De.stats[i,8], 2), " %",
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("seabs" %in% summary[j] == TRUE,
+                                 paste("se = ", 
+                                       round(De.stats[i,9], 2),
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("serel" %in% summary[j] == TRUE,
+                                 paste("rel. se = ", 
+                                       round(De.stats[i,10], 2), " %",
+                                       "\n", 
+                                       sep = ""),
+                                 ""),
+                          ifelse("in.ci" %in% summary[j] == TRUE,
+                                 paste("in confidence interval = ", 
+                                       round(sum(data[[i]][,7] > -2 & 
+                                                   data[[i]][,7] < 2) /
+                                               nrow(data[[i]]) * 100 , 1),
+                                       " %", 
+                                       sep = ""),
+                                 ""),
+                          sep = ""))
       
     }
-  } else {
-    for(i in 1:length(data)) {
+    
+    summary.text <- paste(summary.text, collapse = "")
+    
+    label.text[[length(label.text) + 1]] <- paste(stops, 
+                                                  summary.text, 
+                                                  stops, 
+                                                  sep = "")
+  }
+} else {
+  for(i in 1:length(data)) {
+    
+    summary.text <- character(0)
+    
+    for(j in 1:length(summary)) {
+      summary.text <- c(summary.text, 
+                        ifelse("n" %in% summary[j] == TRUE,
+                               paste("n = ", 
+                                     De.stats[i,1], 
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("mean" %in% summary[j] == TRUE,
+                               paste("mean = ", 
+                                     round(De.stats[i,2], 2), 
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("mean.weighted" %in% summary[j] == TRUE,
+                               paste("weighted mean = ", 
+                                     round(De.stats[i,3], 2), 
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("median" %in% summary[j] == TRUE,
+                               paste("median = ", 
+                                     round(De.stats[i,4], 2), 
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("median.weighted" %in% summary[j] == TRUE,
+                               paste("weighted median = ", 
+                                     round(De.stats[i,5], 2), 
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("sdrel" %in% summary[j] == TRUE,
+                               paste("rel. sd = ", 
+                                     round(De.stats[i,8], 2), " %",
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("sdabs" %in% summary[j] == TRUE,
+                               paste("abs. sd = ", 
+                                     round(De.stats[i,7], 2),
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("serel" %in% summary[j] == TRUE,
+                               paste("rel. se = ", 
+                                     round(De.stats[i,10], 2), " %",
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("seabs" %in% summary[j] == TRUE,
+                               paste("abs. se = ", 
+                                     round(De.stats[i,9], 2),
+                                     " | ", 
+                                     sep = ""),
+                               ""),
+                        ifelse("in.ci" %in% summary[j] == TRUE,
+                               paste("in confidence interval = ", 
+                                       round(sum(data[[i]][,7] > -2 & 
+                                                   data[[i]][,7] < 2) /
+                                               nrow(data[[i]]) * 100 , 1),
+                                       " %   ", 
+                                       sep = ""),
+                                 ""))
+      }
+    
+      summary.text <- paste(summary.text, collapse = "")
+    
       label.text[[length(label.text) + 1]]  <- paste(
-        "| ",
-        ifelse("n" %in% summary == TRUE,
-               paste("n = ", 
-                     nrow(data[[i]]), 
-                     " | ", 
-                     sep = ""),
-               ""),
-        ifelse("mean" %in% summary == TRUE,
-               paste("mean = ", 
-                     round(mean(data[[i]][,1]), 2), 
-                     " | ", 
-                     sep = ""),
-               ""),
-        ifelse("mean.weighted" %in% summary == TRUE,
-               paste("weighted mean = ", 
-                     round(weighted.mean(x = data[[i]][,1],
-                                         w = 1 / data[[i]][,2]), 2), 
-                     " | ", 
-                     sep = ""),
-               ""),
-        ifelse("median" %in% summary == TRUE,
-               paste("median = ", 
-                     round(median(data[[i]][,1]), 2), 
-                     " | ", 
-                     sep = ""),
-               ""),
-        ifelse("sdrel" %in% summary == TRUE,
-               paste("sd = ", 
-                     round(sd(data[[i]][,1]) / mean(data[[i]][,1]) * 100,
-                           2), " %",
-                     " | ", 
-                     sep = ""),
-               ""),
-        ifelse("sdabs" %in% summary == TRUE,
-               paste("sd = ", 
-                     round(sd(data[[i]][,1]), 2),
-                     " | ", 
-                     sep = ""),
-               ""),
-        ifelse("in.ci" %in% summary == TRUE,
-               paste("in confidence interval = ", 
-                     round(sum(data[[i]][,7] > -2 & data[[i]][,7] < 2) /
-                             nrow(data[[i]]) * 100 , 1),
-                     " % | ", 
-                     sep = ""),
-                      ""),
+        "  ",
+        summary.text,
         sep = "")
     }
+  
     ## remove outer vertical lines from string
-    label.text[[2]] <- substr(x = label.text[[2]], 
-                              start = 3, 
-                              stop = nchar(label.text[[2]]) - 2)
+    for(i in 2:length(label.text)) {
+      label.text[[i]] <- substr(x = label.text[[i]], 
+                                start = 3, 
+                                stop = nchar(label.text[[i]]) - 3)
+    }
   }
-  
-  ## remove dummy list element
-  label.text[[1]] <- NULL
-  
+
+## remove dummy list element
+label.text[[1]] <- NULL  
   ## convert keywords into summary placement coordinates
   if(missing(summary.pos) == TRUE) {
     summary.pos <- c(limits.x[1], limits.y[2])
@@ -896,6 +1015,27 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
       line.label <- rep("", length(line.coords))
     }
   }
+
+  ## calculate rug coordinates
+  if(missing(rug) == FALSE) {
+    if(log.z == TRUE) {
+      rug.values <- log(De.global)
+    } else {
+      rug.values <- De.global
+    }
+  
+    rug.coords <- list(NA)
+  
+    for(i in 1:length(rug.values)) {
+      rug.x <- c(r / sqrt(1 + f^2 * (rug.values[i] - z.central.global)^2) * 0.988, 
+                 r / sqrt(1 + f^2 * (rug.values[i] - z.central.global)^2) * 0.995)
+      rug.y <- c((rug.values[i] - z.central.global) * rug.x[1],
+                 (rug.values[i] - z.central.global) * rug.x[2])
+      rug.coords[[length(rug.coords) + 1]] <- rbind(rug.x, rug.y)
+    }
+    
+    rug.coords[1] <- NULL
+  }
   
   ## Generate plot ------------------------------------------------------------
   
@@ -908,8 +1048,7 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
     } else {shift.lines <- 1}
     
     ## setup plot area
-    par(oma = c(1, 1, 0, 0),
-        mar = c(4, 4, shift.lines + 1.5, 7),
+    par(mar = c(4, 4, shift.lines + 1.5, 7),
         xpd = TRUE,
         cex = cex)
     
@@ -1080,6 +1219,14 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
           cex = cex,
           text = zlab)
     
+    ## optionally add rug
+    if(rug == TRUE) {
+      for(i in 1:length(rug.coords)) {
+        lines(x = rug.coords[[i]][1,],
+              y = rug.coords[[i]][2,])
+      }
+    }
+    
     ## plot values
     for(i in 1:length(data)) {
       points(data[[i]][,6][data[[i]][,6] <= limits.x[2]], 
@@ -1223,8 +1370,7 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
 }, ex=function(){
   ## load example data
   data(ExampleData.DeValues, envir = environment())
-  ExampleData.DeValues <- 
-    Second2Gray(values = ExampleData.DeValues, dose_rate = c(0.0438,0.0019))
+  ExampleData.DeValues <- Second2Gray(ExampleData.DeValues, c(0.0438,0.0019))
   
   ## plot the example data straightforward
   plot_RadialPlot(data = ExampleData.DeValues)
@@ -1251,6 +1397,10 @@ plot_RadialPlot <- structure(function(# Function to create a Radial Plot
   ## now with user-defined central value, in log-scale again
   plot_RadialPlot(data = ExampleData.DeValues,
                   central.value = 150)
+  
+  ## now with a rug, indicating individual De values at the z-scale
+  plot_RadialPlot(data = ExampleData.DeValues,
+                  rug = TRUE)
   
   ## now with legend, colour, different points and smaller scale
   plot_RadialPlot(data = ExampleData.DeValues,

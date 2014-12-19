@@ -9,7 +9,7 @@
   \item{recalculate.TL.curves}{\link{logical} (with default): if set to \code{TRUE}, TL curves are returned 
 as temperature against count values (see details for more information)
 Note: The option overwrites the time vs. count TL curve. Select \code{FALSE}
-to import the raw data delivered by the lexsyg.}
+to import the raw data delivered by the lexsyg. Works for TL curves and spectra.}
   \item{import}{\link{logical} (with default): if set to \code{FALSE}, only the XSYG file structure
 is shown.}
   \item{txtProgressBar}{\link{logical} (with default): enables \code{TRUE} or disables \code{FALSE}
@@ -67,8 +67,7 @@ CASE (3): \code{nrow(matrix(PMT))} == \code{nrow(matrix(HE))} \cr
 A new matrix is produced using temperature values from the heating 
 element and count values from the PMT. \cr
 
-\emph{Note: Temperature values for spectrum curves are currently 
-not supported. Please further note that due to the recalculation of the 
+\emph{Note: Please note that due to the recalculation of the 
 temperature values based on values delivered by the heating element, it 
 may happen that mutiple count values exists for each temperature value and 
 temperature values may also decrease during heating, not only increase. }}
@@ -85,7 +84,7 @@ A list is provided, the list elements contain:
 Unpublished Technical Note. Freiberg, Germany \cr\cr
 \bold{Further reading} \cr\cr
 XML: \url{http://en.wikipedia.org/wiki/XML}}
-\author{Sebastian Kreutzer, JLU Giessen (Germany), \cr
+\author{Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
 R Luminescence Package Team}
 \note{This function is a beta version as the XSYG file format is not yet fully
 specified. 
@@ -115,8 +114,18 @@ Corresponding values in the XSXG file are skipped. }
   
   ##search for specific subnodes with curves containing 'OSL'
   #getNodeSet(temp, "//Sample/Sequence/Record[@recordType = 'OSL']/Curve")
+
+##(2) How to extract single curves ... after import
+data(ExampleData.XSYG, envir = environment())
+
+##grep one OSL curves and plot the first curve
+OSLcurve <- get_RLum.Analysis(OSL.SARMeasurement$Sequence.Object, recordType="OSL")[[1]]
+
+##(3) How to see the structure of an object?
+get_structure.RLum.Analysis(OSL.SARMeasurement$Sequence.Object)
+
   
 }
 
 \keyword{IO}
-\section{Function version}{0.3.1 (2014-06-06 14:35:51)}
+\section{Function version}{0.4 (2014-12-02 11:50:22)}

@@ -3,16 +3,16 @@
 \title{Fit and plot a growth curve for luminescence data (Lx/Tx against dose)}
 \description{A dose response curve is produced for luminescence measurements using a 
 regenerative protocol.}
-\usage{plot_GrowthCurve(sample, na.exclude = TRUE, main = "Growth curve", 
+\usage{plot_GrowthCurve(sample, na.rm = TRUE, main = "Growth curve", 
     fit.method = "EXP", fit.weights = TRUE, fit.includingRepeatedRegPoints = TRUE, 
     fit.NumberRegPoints, fit.NumberRegPointsReal, fit.bounds = TRUE, 
     NumberIterations.MC = 100, output.plot = TRUE, output.plotExtended = TRUE, 
-    cex.global = 1, ...)}
+    output.plotExtended.single = FALSE, cex.global = 1, ...)}
 \arguments{
   \item{sample}{\code{\link{data.frame}} (\bold{required}): data frame with three columns
 for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx. The column for the test dose 
 response is optional, but requires 'TnTx' as column name if used.}
-  \item{na.exclude}{\code{\link{logical}} (with default): excludes \code{NA} values from the data 
+  \item{na.rm}{\code{\link{logical}} (with default): excludes \code{NA} values from the data 
 set prior to any further operations.}
   \item{main}{\code{\link{character}} (with default): header of the plot.}
   \item{fit.method}{\code{\link{character}} (with default): function used for fitting. 
@@ -40,6 +40,10 @@ area are provided: (1) growth curve, (2) histogram from Monte
 Carlo error simulation and (3) a test dose response plot. If \code{FALSE}, 
 just the growth curve will be plotted. \bold{Requires:} 
 \code{output.plot = TRUE}.}
+  \item{output.plotExtended.single}{\code{\link{logical}} (with default): 
+single plot output (\code{TRUE/FALSE}) to allow for plotting the results 
+in single plot windows. 
+Requires \code{output.plot = TRUE} and \code{output.plotExtended = TRUE}.}
   \item{cex.global}{\code{\link{numeric}} (with default): global scaling factor.}
   \item{\dots}{Further arguments and graphical parameters to be passed. Note: Standard 
 arguments will only be passed to the growth curve plot}
@@ -51,7 +55,9 @@ the \link{nls} function with the \code{port} algorithm is used. \cr
 \deqn{y = m*x+n}
 \code{EXP}: try to fit a function of the form 
 \deqn{y = a*(1-exp(-(x+c)/b))}
-Parameters b and c are approximated by a linear fit using \link{lm}.\cr
+Parameters b and c are approximated by a linear fit using \link{lm}.
+Note: b = D0\cr
+
 \code{EXP OR LIN}: works for some cases where an \code{EXP} fit fails. 
 If the \code{EXP} fit fails, a \code{LIN} fit is done instead. \cr
 \code{EXP+LIN}: tries to fit an exponential plus linear function of the 
@@ -87,10 +93,11 @@ To avoid plotting the subtitle information, provide an empty user mtext
 \value{\code{RLum.Results} object containing the De (De, De Error, D01 value, D02 value and Fit 
 type) and fit object \link{nls} object for \code{EXP}, \code{EXP+LIN} 
 and \code{EXP+EXP}. In case of a resulting linear fit when using 
-\code{EXP OR LIN}, a \link{lm} object is returned. 
+\code{EXP OR LIN}, a \link{lm} object is returned. \cr
+The formula \code{Formula} is returned as R expression for further evaluation.
 Additionally a plot is returned.}
 
-\author{Sebastian Kreutzer, Universite Bordeaux Montaigne (France), 
+\author{Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
 Michael Dietze, GFZ Potsdam (Germany), \cr
 R Luminescence Package Team}
 
@@ -98,21 +105,22 @@ R Luminescence Package Team}
 
 
 \examples{
-##(1) plot growth curve for a dummy data.set
+##(1) plot growth curve for a dummy data.set and show De value
 data(ExampleData.LxTxData, envir = environment())
-plot_GrowthCurve(LxTxData)
+temp <- plot_GrowthCurve(LxTxData)
+get_RLum.Results(temp)
 
-
+##(1a) to access the fitting value try
+get_RLum.Results(temp, data.object = "Fit")
+  
 ##(2) plot the growth curve only - uncomment to use
-
 ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
 plot_GrowthCurve(LxTxData)
 ##dev.off()                                   
 
-##(3) plot growth curve with pdf output - uncomment to use
-
+##(3) plot growth curve with pdf output - uncomment to use, single output
 ##pdf(file = "~/Desktop/Growth_Curve_Dummy.pdf", paper = "special")
-plot_GrowthCurve(LxTxData)
+plot_GrowthCurve(LxTxData, output.plotExtended.single = TRUE)
 ##dev.off()  
 }
-\section{Function version}{1.2.6 (2014-06-04 19:45:24)}
+\section{Function version}{1.2.15 (2014-12-17 14:31:29)}

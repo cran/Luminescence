@@ -6,9 +6,10 @@ precision and its dispersion around a central value as well as
 illustration of a kernel density estimate of the dose values.}
 \usage{plot_AbanicoPlot(data, na.exclude = TRUE, log.z = TRUE, central.value, 
     centrality = "mean.weighted", dispersion = "sd", plot.ratio = 0.75, 
-    mtext, summary, summary.pos, legend, legend.pos, stats, y.axis = TRUE, 
-    error.bars = FALSE, polygon.col, bar.col, line, line.col, 
-    line.label, grid.col, bw = "nrd0", output = FALSE, ...)}
+    rotate = FALSE, mtext, summary, summary.pos, legend, legend.pos, 
+    stats, rug = FALSE, y.axis = TRUE, error.bars = FALSE, polygon.col, 
+    bar.col, line, line.col, line.label, grid.col, bw = "nrd0", 
+    output = FALSE, ...)}
 \arguments{
   \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object 
 (required): for \code{data.frame} two columns: De (\code{data[,1]})
@@ -21,16 +22,24 @@ set prior to any further operations.}
 in logarithmic scale. Default is \code{TRUE}.}
   \item{central.value}{\code{\link{numeric}}: User-defined central value, primarily used for
 horizontal centering of the z-axis.}
-  \item{centrality}{\code{\link{character}} (with default): measure of centrality, used for
-automatically centering the plot and drawing the central line. Can be
-one out of \code{"mean"}, \code{"median"}, \code{"mean.weighted"}, 
-and \code{"median.weighted"}. Default is \code{"mean.weighted"}.}
+  \item{centrality}{\code{\link{character}} or \code{\link{numeric}} (with default): 
+measure of centrality, used for automatically centering the plot and 
+drawing the central line. Can either be one out of \code{"mean"}, 
+\code{"median"}, \code{"mean.weighted"} and \code{"median.weighted"} 
+or one or more numeric values used for the standardisation. If more 
+than one value is specified, more than one 2-sigma bar will be 
+plotted and the dataset is centered using the median. Default is 
+\code{"mean.weighted"}.}
   \item{dispersion}{\code{\link{character}} (with default): measure of dispersion, used for
 drawing the polygon that depicts the dose distribution. One out of
-\code{"sd"} (standard deviation),\code{"2sd"} (2 standard deviations) 
-\code{"qr"} (quartile range), default is \code{"sd"}.}
+\code{"sd"} (standard deviation),\code{"2sd"} (2 standard deviations), 
+\code{"qr"} (quartile range) or \code{"cinn"} (confidence interval 
+with nn specifying the level, e.g. \code{"ci95"} meaning the 95 \% 
+confidence interval, i.e. data between the quantiles 0.025 and 0.975), 
+default is \code{"sd"}.}
   \item{plot.ratio}{\code{\link{numeric}}: Relative space, given to the radial versus the
 cartesian plot part, deault is \code{0.75}.}
+  \item{rotate}{\code{\link{logical}}: Option to turn the plot by 90 degrees.}
   \item{mtext}{\code{\link{character}}: additional text below the plot title.}
   \item{summary}{\code{\link{character}} (optional): adds numerical output to the plot. 
 Can be one or more out of: "n" (number of samples), "mean" (mean De 
@@ -52,6 +61,8 @@ to be plotted.}
   \item{stats}{\code{\link{character}}: additional labels of statistically important
 values in the plot. One or more out of the following: \code{"min"}, 
 \code{"max"}, \code{"median"}.}
+  \item{rug}{\code{\link{logical}}: Option to add a rug to the KDE part, to indicate
+the location of individual values}
   \item{y.axis}{\code{\link{logical}}: Option to hide y-axis labels. Useful for data  
 with small scatter.}
   \item{error.bars}{\code{\link{logical}}: Option to show De-errors as error bars on 
@@ -104,18 +115,31 @@ centrality. When it is obvious that the data is not (log-)normally
 distributed, the mean (weighted or not) cannot be a valid measure of
 centrality and hence central dose. Accordingly, the median and the
 weighted median can be chosen as well to represent a proper measure of
-centrality (e.g. \code{centrality = "median.weighted"}).\cr
+centrality (e.g. \code{centrality = "median.weighted"}). Also 
+user-defined numeric values (e.g. from the central age model) can be 
+used if this appears appropriate. \cr
 The proportion of the polar part and the cartesian part of the Abanico
 Plot can be modfied for display reasons (\code{plot.ratio = 0.75}). By 
 default, the polar part spreads over 75 \% and leaves 25 \% for the part
-that shows the KDE graph.}
+that shows the KDE graph.\cr\cr
+The optional parameter \code{layout} allows to modify the entire plot
+more sophisticated. Each element of the plot can be addressed and its
+properties can be defined. This includes font type, size and decoration,
+colours and sizes of all plot items. To infer the definition of a 
+specific layout style cf. \code{get_Layout()} or type eg. for the layout
+type \code{"journal"} \code{get_Layout("journal")}. A layout type can be
+modified by the user by assigning new values to the list object.\cr\cr
+It is possible for the z-scale to specify where ticks are to be drawn by 
+using the parameter \code{at}, e.g. \code{at = seq(80, 200, 20)}, 
+cf. function documentation of \code{axis}. Specifying tick positions 
+manually overrides a \code{zlim}-definition.}
 \value{returns a plot object and, optionally, a list with plot calculus data.}
 \references{Galbraith, R. & Green, P., 1990. Estimating the component ages in a 
 finite mixture. International Journal of Radiation Applications and 
 Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 
 (3), pp. 197-206. }
-\author{Michael Dietze, GFZ Potsdam (Germany), Sebastian Kreutzer, JLU Giessen 
-(Germany)\cr
+\author{Michael Dietze, GFZ Potsdam (Germany),\cr
+Sebastian Kreutzer, IRAMAT-CRP2A, Unversite Bordeaux Montaigne (France)\cr
 Inspired by a plot introduced by Galbraith & Green (1990)\cr
 R Luminescence Package Team}
 
@@ -124,11 +148,13 @@ R Luminescence Package Team}
 \seealso{\code{\link{plot_RadialPlot}}, \code{\link{plot_KDE}}, 
 \code{\link{plot_Histogram}}}
 \examples{
+## store original graphics parameters
+par.old <- par(no.readonly = TRUE)
+
 ## load example data and recalculate to Gray
 data(ExampleData.DeValues, envir = environment())
-ExampleData.DeValues <- 
-  Second2Gray(values = ExampleData.DeValues, dose_rate = c(0.0438,0.0019))
-
+ExampleData.DeValues <- Second2Gray(ExampleData.DeValues, c(0.0438,0.0019))
+ 
 ## plot the example data straightforward
 plot_AbanicoPlot(data = ExampleData.DeValues)
 
@@ -150,6 +176,10 @@ plot_AbanicoPlot(data = ExampleData.DeValues,
 plot_AbanicoPlot(data = ExampleData.DeValues,
                  xlim = c(0, 60))
 
+## now with rug to indicate individual values in KDE part
+plot_AbanicoPlot(data = ExampleData.DeValues,
+                 rug = TRUE)
+
 ## now with user-defined plot ratio
 plot_AbanicoPlot(data = ExampleData.DeValues,
                  plot.ratio = 0.5)
@@ -167,37 +197,14 @@ plot_AbanicoPlot(data = ExampleData.DeValues,
                  centrality = "median", 
                  dispersion = "qr")
 
-## now with user-defined green line for MAM3 (i.e. 2936.3)
-MAM <- calc_MinDose3(input.data = ExampleData.DeValues,
-                     sigmab = 0.3,
-                     gamma.xub = 7000, 
-                     output.plot = FALSE)
-
-MAM <- as.numeric(get_RLum.Results(object = MAM, 
-                                   data.object = "results")$mindose)
+## now with user-defined green line for minimum age model
+CAM <- calc_CentralDose(ExampleData.DeValues,
+                        plot = FALSE)
 
 plot_AbanicoPlot(data = ExampleData.DeValues,
-                 xlim = c(0, 50),
-                 line = MAM,
+                 line = CAM,
                  line.col = "darkgreen",
-                 line.label = "MAM3-dose")
-
-## now add lines (e.g. De = 100) completely manually
-## 1. infer extra data
-extra <- plot_AbanicoPlot(data = ExampleData.DeValues,
-                          output = TRUE)
-
-## 2. transform De value to plot coordinates, only use log when 
-##    log.z = TRUE. Don't mind the cryptic equation too much.
-De <- 100
-y.De <- (log(De) - extra$data.global$z.central[1]) * extra$polar.box[2]
-
-## 3. create line coordinates (origin - polar margin - cartesian margin)
-line.x <- c(0, extra$polar.box[2], extra$cartesian.box[2])
-line.y <- c(0, y.De, y.De)
-
-## 4. draw the line
-lines(x = line.x, y = line.y, lwd = 2, lty = 4, col = "tomato")
+                 line.label = "CAM")
 
 ## now create plot with legend, colour, different points and smaller scale
 plot_AbanicoPlot(data = ExampleData.DeValues,
@@ -225,7 +232,8 @@ plot_AbanicoPlot(data = ExampleData.DeValues,
 ## now with user-defined axes labels
 plot_AbanicoPlot(data = ExampleData.DeValues,
                  xlab = c("Data error [\%]",
-                          "Data precision"),
+                          "Data precision",
+                          "Kernel density"),
                  ylab = "Scatter",
                  zlab = "Equivalent dose [Gy]")
 
@@ -242,6 +250,11 @@ plot_AbanicoPlot(data = ExampleData.DeValues,
 plot_AbanicoPlot(data = ExampleData.DeValues,
                 summary = c("mean.weighted", "median"),
                 summary.pos = "sub")
+
+## now a plot with two 2-sigma bars for one data set
+plot_AbanicoPlot(data = ExampleData.DeValues, 
+                 centrality = c(120, 160),
+                 mtext = "n = 25")
 
 ## now the data set is split into sub-groups, one is manipulated
 data.1 <- ExampleData.DeValues[1:15,]
@@ -262,5 +275,23 @@ plot_AbanicoPlot(data = data.3,
                  density = c(10, 20),
                  angle = c(30, 50),
                  summary = c("n", "in.ci"))
+
+## create Abanico plot with predefined layout definition
+plot_AbanicoPlot(data = ExampleData.DeValues,
+                 layout = "journal")
+
+## now with predefined layout definition and further modifications
+plot_AbanicoPlot(data = data.3,
+                 layout = "journal",
+                 col = c("steelblue4", "orange4"),
+                 bar.col = adjustcolor(c("steelblue3", "orange3"), 
+                                       alpha.f = 0.5),
+                 polygon.col = c("steelblue3", "orange3"))
+
+## for further information on layout definitions see documentation
+## of function get_Layout()
+
+## restore original graphical parameters
+par(par.old)
 }
-\section{Function version}{0.1 (2014-06-05 13:42:28)}
+\section{Function version}{0.1.1 (2014-12-18 15:42:24)}

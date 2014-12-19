@@ -5,13 +5,12 @@
 differing known standard errors. Parameters (doses and mixing proportions)
 are estimated by maximum likelihood assuming that the log dose estimates 
 are from a mixture of normal distributions.}
-\usage{calc_FiniteMixture(input.data, sigmab, n.components, sample.id = "unknown sample", 
-    n.iterations = 200, grain.probability = FALSE, main = "Finite Mixture Model", 
+\usage{calc_FiniteMixture(data, sigmab, n.components, grain.probability = FALSE, 
     dose.scale, pdf.weight = TRUE, pdf.sigma = "sigmab", pdf.colors = "gray", 
-    pdf.scale, plot.proportions = TRUE)}
+    pdf.scale, plot.proportions = TRUE, plot = TRUE, ...)}
 \arguments{
-  \item{input.data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
-for \code{data.frame}: two columns with De \code{(input.data[,1])} and
+  \item{data}{\code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
+for \code{data.frame}: two columns with De \code{(data[,1])} and
 De error \code{(values[,2])}}
   \item{sigmab}{\code{\link{numeric}}  (\bold{required}): spread in De values given as a
 fraction (e.g. 0.2). This value represents the expected overdispersion in
@@ -22,12 +21,8 @@ fitted. If a vector is provided (e.g. \code{c(2:8)}) the finite
 mixtures for 2, 3 ... 8 components are calculated and a plot and a
 statistical evaluation of the model performance (BIC score and maximum
 log-likelihood) is provided.}
-  \item{sample.id}{\code{\link{character}} (with default): sample id}
-  \item{n.iterations}{\code{\link{numeric}}  (with default): number of iterations for maximum 
-log likelihood estimates}
   \item{grain.probability}{\code{\link{logical}} (with default): prints the estimated probabilities
 of which component each grain is in}
-  \item{main}{\code{\link{character}} (with default): plot main title}
   \item{dose.scale}{\code{\link{numeric}}: manually set the scaling of the y-axis of  
 the first plot with a vector in the form of \code{c(min,max)}}
   \item{pdf.weight}{\code{\link{logical}} (with default): weight the probability density 
@@ -44,6 +39,9 @@ in the the plot. Possible options are "gray", "colors" and "none"}
 proper scaling of the x-axis of the first plot}
   \item{plot.proportions}{\code{\link{logical}} (with default): plot barplot showing the 
 proportions of components}
+  \item{plot}{\code{\link{logical}} (with default): plot output}
+  \item{\dots}{further arguments to pass. 
+See details for their usage.}
 }
 \details{This model uses the maximum likelihood and Bayesian Information Criterion 
 (BIC) approaches. \cr\cr
@@ -70,50 +68,53 @@ instead.\cr
 The stacked barplot shows the proportion of each component (in per cent)
 calculated by the FFM. The last plot shows the achieved BIC scores
 and maximum log-likelihood estimates for each iteration of k.}
-\value{Returns a terminal output. In addition a list
-is returned containing the following elements:
-\item{mle.matrix}{\link{matrix} covariance matrix of maximum likelihood
-estimates.}
-\item{grain.probability}{\link{matrix} with estimated probabilities 
-of which component each grain is in.}
-\item{meta}{\link{data.frame} containing model parameters 
-(sample.id, sigmab, n.components, llik, bic).}
-\item{components}{\link{data.frame} containing fitted components.}
-\item{single.comp}{\link{data.frame} containing log likelihood and 
-BIC for a single component.}
+\value{Returns a plot (optional) and terminal output. In addition an 
+\code{\linkS4class{RLum.Results}} object is 
+returned containing the following elements:
+
+\item{summary}{\link{data.frame} summary of all relevant model results.}
+\item{data}{\link{data.frame} original input data}
+\item{args}{\link{list} used arguments}
+\item{call}{\link{call} the function call}
+\item{mle}{ covariance matrices of the log likelhoods}
+\item{BIC}{ BIC score}
+\item{llik}{ maximum log likelihood}
+\item{grain.probability}{ probabilities of a grain belonging to a component}
+\item{components}{\link{matrix} estimates of the de, de error and proportion for each component}
+\item{single.comp}{\link{data.frame} single componente FFM estimate}
 
 If a vector for \code{n.components} is provided (e.g. 
-\code{c(2:8)}), \code{mle.matrix, grain.probability} and \code{meta} are
+\code{c(2:8)}), \code{mle} and \code{grain.probability} are
 lists containing matrices of the results for each iteration of the model.
 
 The output should be accessed using the function 
 \code{\link{get_RLum.Results}}}
 \references{Galbraith, R.F. & Green, P.F., 1990. Estimating the component ages in a 
-finite mixture. Nuclear Tracks and Radiation Measurements, 17, pp. 197-206.
+finite mixture. Nuclear Tracks and Radiation Measurements 17, 197-206.
 \cr\cr
 Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
-track ages. Nuclear Tracks Radiation Measurements, 4, pp. 459-470.\cr\cr
+track ages. Nuclear Tracks Radiation Measurements 4, 459-470.\cr\cr
 Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
 dose and error calculation and display in OSL dating: An overview and some
-recommendations. Quaternary Geochronology, 11, pp. 1-27.\cr\cr
+recommendations. Quaternary Geochronology 11, 1-27.\cr\cr
 Roberts, R.G., Galbraith, R.F., Yoshida, H., Laslett, G.M. & Olley, J.M., 
 2000. Distinguishing dose populations in sediment mixtures: a test of 
 single-grain optical dating procedures using mixtures of laboratory-dosed
-quartz. Radiation Measurements, 32, pp. 459-465.\cr\cr
+quartz. Radiation Measurements 32, 459-465.\cr\cr
 Galbraith, R.F., 2005. Statistics for Fission Track Analysis, Chapman & 
 Hall/CRC, Boca Raton.\cr\cr
 \bold{Further reading}\cr\cr
 Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain 
 equivalent dose (De) distributions: Implications for OSL dating of sediment
-mixtures. Quaternary Geochronology, 4, pp. 204-230.\cr\cr
+mixtures. Quaternary Geochronology 4, 204-230.\cr\cr
 Cunningham, A.C. & Wallinga, J., 2012. Realizing the potential of fluvial
-archives using robust OSL chronologies. Quaternary Geochronology, 12, 
-pp. 98-106.\cr\cr
+archives using robust OSL chronologies. Quaternary Geochronology 12, 
+98-106.\cr\cr
 Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing the
 reproducibility and accuracy of optical dating of fluvial deposits. 
-Quaternary Geochronology, 1, pp. 109-120.\cr\cr
+Quaternary Geochronology 1, 109-120.\cr\cr
 Rodnight, H. 2008. How many equivalent dose values are needed to obtain a 
-reproducible distribution?. Ancient TL, 26, pp. 3-10.}
+reproducible distribution?. Ancient TL 26, 3-10.}
 \author{Christoph Burow, University of Cologne (Germany) \cr
 Based on a rewritten S script of Rex Galbraith, 2006. \cr\cr
 R Luminescence Package Team}
@@ -122,7 +123,7 @@ R Luminescence Package Team}
 
 \seealso{\code{\link{calc_CentralDose}},
 \code{\link{calc_CommonDose}}, \code{\link{calc_FuchsLang2001}},
-\code{\link{calc_MinDose3}}, \code{\link{calc_MinDose4}}    }
+\code{\link{calc_MinDose}}  }
 \examples{
 ## load example data
 data(ExampleData.DeValues, envir = environment())
@@ -148,7 +149,5 @@ calc_FiniteMixture(ExampleData.DeValues,
 ## show the results on equivalent dose, standard error and proportion of
 ## fitted components
 #get_RLum.Results(object=res, data.object="components")
-
-
 }
-\section{Function version}{0.32 (2014-05-09 17:14:59)}
+\section{Function version}{0.4 (2014-12-17 12:50:55)}

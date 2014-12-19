@@ -4,9 +4,9 @@
 
 # ===========================================================================
 ##author<<
-## Sebastian Kreutzer, JLU Giessen (Germany), \cr
+## Sebastian Kreutzer, IRAMAT-CPR2A, Universite Bordeaux Montaigne (France), \cr
 ##
-## version 0.3.1
+## version 0.3.2
 # ===========================================================================
 
 setClass("Risoe.BINfileData",
@@ -42,7 +42,7 @@ setMethod("show", signature(object = "Risoe.BINfileData"),
  
             ##print
             cat("\nRisoe.BINfileData Object")
-            cat("\n\tBIN Format Version:  ", version)
+            cat("\n\t BIN/BINX Format Version:  ", version)
             if(version>=6){
               cat("\n\tFile Name:           ", filename)
             }
@@ -87,7 +87,7 @@ setMethod("get_Risoe.BINfileData",
           signature=signature(object = "Risoe.BINfileData"), 
           definition = function(object) {
                      
-            cat("[get_Risoe.BINfileData]: No direct access is provided object type. Use the function 'Risoe.BINfileData2RLum.Analysis' for object coercing instead.")
+            cat("[get_Risoe.BINfileData()]: No direct access is provided object type. Use the function 'Risoe.BINfileData2RLum.Analysis' for object coercing instead.")
             
           })##end setMethod
 
