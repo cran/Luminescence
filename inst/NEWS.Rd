@@ -1,6 +1,163 @@
   \name{NEWS}
 \title{NEWS for the R Package Luminescence}
 
+\section{Changes in version 0.4.1 (January 29th, 2015)}{
+
+  \subsection{New functions}{
+  
+  \itemize{
+  
+  \item \code{merge_RLum.Data.Curve()}: Function allows merging of \code{RLum.Data.Curve} 
+  objects in different ways (#128).
+
+  }}
+  
+  
+   \subsection{Changes S4-objects, methods, classes}{
+   \itemize{   
+    
+    
+        
+    \item \code{RLum.Analysis-class}:
+    
+    
+     \itemize{
+    
+    \item Show warnings messages when empty object are produced by a \code{get_RLum.Analysis()} 
+    request (implemented in get method and show method). 
+    
+  
+    
+    }
+
+  
+  }}
+  
+
+  \subsection{Bugfixes and changes}{
+   \itemize{
+
+
+   \item \code{analyse_SAR.CWOSL()}
+    
+     \itemize{
+    
+    \item rename argument \code{output.plot} to \code{plot}, 
+    \item rename argument \code{output.plot.single} to \code{plot.single},
+    \item rejection criteria added 'De > max. dose point'. These avoids that
+    values are accepted even the De from the fitting should be considered as invalid.
+    
+    
+    }
+
+
+    \item \code{analyse_IRSAR.RF()}
+    
+     \itemize{
+    
+    \item Add enhanced support for \code{...}, e.g. \code{log}, \code{xlim}, \code{ylim},
+    \item rename argument \code{output.plot} to \code{plot}.
+    
+    }
+  
+    \item \code{analyse_pIRIRSequence()}
+    
+     \itemize{
+    
+    \item Fix an error that causes problems during plotting (Error in plot.new(): figure margins too large),
+     \item rename argument \code{output.plot} to \code{plot}, 
+    \item rename argument \code{output.plot.single} to \code{plot.single}.
+    
+    }
+
+    \item \code{merge_RLum()}: Function extended accordingly with the newly implemented function
+    \code{merge_RLum.Data.Curve()} (#128).
+
+  
+  
+   \item \code{plot_AbanicoPlot()}:
+    
+    
+     \itemize{
+    
+    \item ticks removed from error bars,
+    \item line value output removed,
+    \item placement of y- and z-labels set to center of plot,
+    \item weights-option for KDE integrated,
+    \item warning for linear z-scale removed,
+    \item fixed an error that occured in Abanico Plot for a large data range (#188),
+    \item function output extended by data points in/out of confidence interval,
+    \item histogram option added,
+    \item dot plot option added,
+    \item KDE bandwidth added to plot output,
+    \item KDE bandwidth default changed to "SJ",
+    \item rugs coloured according to subsets, 
+    \item examples section extended.
+    
+    
+    }
+    
+    \item \code{plot_GrowthCurve()}:
+    
+      \itemize{
+      
+    \item Thanks to a querry from Rachel Smedly (#194) the De error calculation method has been updated.
+    So far only the Lx/Tx values have been re-sampled using a Monte Carlo simlation approach to estimate
+    the error. In contrast to the Analyst the Ln/Tn value was just considered without any error. This 
+    has been changed for all fitting methods and the final De error is calculated now also using the Ln/Tn error. 
+    Note: Usually this change results in a larger De error, however this approach is much more realistic,
+    
+    \item consequently to the changes made in the error calculation the corresponding De resulting from 
+    the MC simulation is now added to the output object (\code{$De$De.MC}),
+    
+    \item Ln/Tn point including the error is now added on the plot output as red circle,
+    
+    \item fix a bug occasionally occurred for \code{fit.method = "EXP+EXP"} and the function broke
+    subsequently (#159). 
+      
+      
+    }
+    
+   \item \code{readBIN2R()}:
+    
+    
+     \itemize{
+    
+    \item critical bug fixed: \code{GRAIN} and \code{GRAINNUMBER} were not imported properely 
+    (thanks to Norber Mercier), 
+    
+    \item import speed has been improved by at least an order of magnitude, due to a different
+    internal data handling (using of \code{data.table} instead of \code{data.frame}). This may become
+    relevant for hugh BIN-files like they are produced by single grain measurements (#191). 
+    Note: The \code{Risoe.BINfileData-class} remained untouched. 
+    
+    
+    }
+    
+    
+     \item \code{writeR2BIN()}:
+    
+    
+     \itemize{
+    
+    \item minor changes due to the changes in the function \code{readBIN2R()},
+    \item confusing warnings during writing are suppressed.
+    
+    
+    }
+  
+}}
+
+ \subsection{Internals}{
+   \itemize{   
+  
+    \item Add new dependency for package \code{data.table} (used in the function \code{readBIN2R()}).
+  
+  }}
+  
+
+}
+
 \section{Changes in version 0.4.0 (December 19th, 2014)}{
 
  \subsection{Preface}{

@@ -2,17 +2,16 @@
 \alias{Luminescence-package}
 \alias{Luminescence}
 \docType{package}
-\title{Collection of functions for luminescence dating data analysis}
+\title{Comprehensive Luminescence Dating Data Analysis}
 \description{
-This package provides various functions developed for the purpose
-of Luminescence Dating data analysis. 
+A collection of various R functions for the purpose of Luminescence dating data analysis. This includes, amongst others, data import, export, application of age models, curve deconvolution, sequence analysis and plotting of equivalent dose distributions. 
 }
 \details{
 \tabular{ll}{
 Package: \tab Luminescence\cr
 Type: \tab Package\cr
-Version: \tab 0.4.0\cr
-Date: \tab 2014-12-19\cr
+Version: \tab 0.4.1\cr
+Date: \tab 2015-01-29\cr
 License: \tab GPL-3\cr
 }
 %~~ An overview of how to use the package, including the most important functions ~~
@@ -29,15 +28,21 @@ Sebastian Kreutzer \tab IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac, Fra
 Christoph Schmidt \tab University of Bayreuth, Germany
 }
 
+
+\bold{Beta-Tester}
+
+Thomas Kobl, University of Bayreuth, Germany\cr
+
 \bold{Supervisor}
 
-Markus Fuchs, Justus-Liebig-University Giessen, Germany
+Markus Fuchs, Justus-Liebig-University Giessen, Germany\cr
 
 \bold{Support contact}
 
-\url{http://forum.r-luminescence.de}
-
 \email{team@r-luminescence.de}\cr
+
+We may further encourage the usage of our support forum. 
+For this please visit our project website (link below).
 
 \bold{Bug reporting}
 
