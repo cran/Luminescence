@@ -1,14 +1,15 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.4.1
-Date: 2015-01-29
+Version: 0.4.2
+Date: 2015-03-23
 Author: Sebastian Kreutzer [aut, trl, cre],
   Michael Dietze [aut],
   Christoph Burow [aut],
   Margret C. Fuchs [aut],
   Christoph Schmidt [aut],
   Manfred Fischer [aut, trl],
+  Rachel K. Smedley [aut],
   Markus Fuchs [ths]
 Authors@R: c(person("Sebastian", "Kreutzer", role = c("aut","trl","cre"),
                           email = "sebastian.kreutzer@u-bordeaux-montaigne.fr"),
@@ -17,6 +18,7 @@ Authors@R: c(person("Sebastian", "Kreutzer", role = c("aut","trl","cre"),
              person("Margret C.", "Fuchs", role = c("aut")),
              person("Christoph", "Schmidt", role = c("aut")),
 				     person("Manfred", "Fischer", role = c("aut","trl")),
+             person("Rachel K.", "Smedley", role = c("aut")),
 				     person("Markus", "Fuchs", role = "ths"))
 Maintainer: Sebastian Kreutzer <sebastian.kreutzer@u-bordeaux-montaigne.fr>
 Description: A collection of various R functions for the purpose of Luminescence dating data analysis. This includes, amongst others, data import, export, application of age models, curve deconvolution, sequence analysis and plotting of equivalent dose distributions. 
@@ -24,7 +26,8 @@ Contact: Package Developer Team <team@r-luminescence.de>
 License: GPL-3
 Depends: R (>= 3.1.2), utils
 Imports: methods, XML, shape, rgl, matrixStats, raster, sp, zoo, bbmle,
-        data.table
+        data.table, Rcpp (>= 0.11.4), parallel
+LinkingTo: Rcpp
 URL: http://CRAN.R-project.org/package=Luminescence
 Collate: Analyse_SAR.OSLdata.R analyse_SAR.CWOSL.R analyse_SAR.TL.R
         analyse_IRSAR.RF.R CW2pLM.R CW2pLMi.R CW2pHMi.R CW2pPMi.R
@@ -46,8 +49,9 @@ Collate: Analyse_SAR.OSLdata.R analyse_SAR.CWOSL.R analyse_SAR.TL.R
         RLum.Data.Image-class.R plot_RLum.Data.Image.R get_Layout.R
         analyse_pIRIRSequence.R merge_RLum.R get_RLum.R
         merge_RLum.Analysis.R plot_RLum.Results.R calc_SourceDoseRate.R
-        merge_RLum.Data.Curve.R zzz.R
-NeedsCompilation: no
-Packaged: 2015-01-29 07:37:57 UTC; kreutzer
+        merge_RLum.Data.Curve.R calc_IEU.R extract_IrradiationTimes.R
+        RcppExports.R zzz.R
+NeedsCompilation: yes
+Packaged: 2015-03-23 12:44:59 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2015-01-29 11:08:19
+Date/Publication: 2015-03-23 13:54:58

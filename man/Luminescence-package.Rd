@@ -10,8 +10,8 @@ A collection of various R functions for the purpose of Luminescence dating data 
 \tabular{ll}{
 Package: \tab Luminescence\cr
 Type: \tab Package\cr
-Version: \tab 0.4.1\cr
-Date: \tab 2015-01-29\cr
+Version: \tab 0.4.2\cr
+Date: \tab 2015-03-23\cr
 License: \tab GPL-3\cr
 }
 %~~ An overview of how to use the package, including the most important functions ~~
@@ -25,13 +25,14 @@ Michael Dietze \tab GFZ Helmholtz Centre Potsdam, Germany \cr
 Manfred Fischer\tab University of Bayreuth, Germany \cr 
 Margret C. Fuchs \tab Alfred Wegener Insitute for Polar and Marine Research, Potsdam, Germany\cr
 Sebastian Kreutzer \tab IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac, France\cr
-Christoph Schmidt \tab University of Bayreuth, Germany
+Christoph Schmidt \tab University of Bayreuth, Germany\cr
+Rachel K. Smedley\tab Aberystwyth University, United Kingdom
 }
 
 
 \bold{Beta-Tester}
 
-Thomas Kobl, University of Bayreuth, Germany\cr
+Thomas Kolb, University of Bayreuth, Germany\cr
 
 \bold{Supervisor}
 
@@ -39,7 +40,7 @@ Markus Fuchs, Justus-Liebig-University Giessen, Germany\cr
 
 \bold{Support contact}
 
-\email{team@r-luminescence.de}\cr
+\email{developer@r-luminescence.de}\cr
 
 We may further encourage the usage of our support forum. 
 For this please visit our project website (link below).

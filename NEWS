@@ -1,5 +1,284 @@
 NEWS for the R Package Luminescence
 
+Changes in version 0.4.2 (March 23th 2015):
+
+  New functions:
+
+         • ‘calc_IEU()’: Apply the internal-external-uncertainty (IEU)
+           model after Thomsen et al. (2007) to a given De distribution
+
+         • ‘extract_IrradiationTimes()’: Extract irradiation times from
+           an XSYG file
+
+  Changes S4-objects, methods, classes:
+
+         • ‘RLum.Analysis-class’:
+
+             • Fix: Argument ‘keep.object == TRUE’ was not respected
+               for the case after using the function
+               ‘get_RLum.Analysis()’ the object just contained a single
+               object. In such cases only the object itself, but no
+               ‘RLum.Analysis’ object was returned (#200).
+
+         • ‘RisoeBINfileData-class’:
+
+             • Slot ‘.RESERVED’ added to allow transfering undocumented
+               raw binary values to a new BIN/BINX-file. For this all
+               reserved bytes are just copied and pasted into the new
+               slot ‘.RESERVED’ using the function ‘readBIN2R()’. Using
+               the function ‘writeR2BIN()’ transfers the values
+               unchanged to the new BIN/BINX-file. Allc corresponding
+               functions have been updated in accordance
+               (‘readBIN2R()’, ‘writeR2BIN()’ and
+               ‘merge_Risoe.BINfileData()’. Other functions are not
+               affected as they can simply ignore the new slot.
+
+  Bugfixes and changes:
+
+         • ‘analyse_IRSAR.RF()’
+
+             • Function now checks the number of channels in each
+               curve. If the number of the channels in the first curve
+               is > than in the 2nd curve the execution of the function
+               is stopped,
+
+             • add error estimation using bootstraping and MC loops for
+               ‘method = "SLIDE"’,
+
+             • add scaled KDE for distribution of De,
+
+             • the functions no longer stops with an error if a
+               undefined ‘method’ was choosen. Instead a warning
+               message is shown and the available curves are shown in a
+               plot anyway,
+
+             • the labelling for the residuals is replaced by a greek
+               letter (epsilon, ‘"\u03b5"’),
+
+             • new argument ‘rejection.criteria’ provided to allow for
+               setting rejection criteria. The argument works similar
+               as for other ‘analyse_...’ functions. Details are
+               provided in the manual,
+
+             • speed up caculation time for ‘method = "SLIDE"’ by
+               re-writting the sliding process as C++ function. It does
+               not the affect readability of the R-code at all, as just
+               the sum of the residual squares is calculated in this
+               way, i.e. the steps are simple, but now much faster.
+
+         • ‘analyse_SAR.CWOSL()’
+
+             • For the case that no recycling ratio and no recuperation
+               rate could be calculated the functions chrashed. This
+               has bee corrected.
+
+         • ‘analyse_pIRIRSequence()’
+
+             • For the case that no recycling ratio and no recuperation
+               rate could be calculated the functions chrashed. This
+               has bee corrected; in accordance with the similar
+               behaviour in the function analyse_SAR.CWOSL().
+
+         • ‘calc_FadingCorr()’
+
+             • Change the way the equation is solved using the R
+               function ‘uniroot’. This markedly speeds up the
+               computation process,
+
+             • now additionally an ‘RLum.Results’ object is returned,
+
+             • minor code polishing.
+
+         • ‘calc_MinDose()’
+
+             • Major changes in terms of reliablity and perfomance to
+               the optimisation of the log likelihood function. Amongst
+               minor fixes these include:
+
+             • Optimiser of the log likelihood function changed from
+               'optim' to 'nlminb' and switch from 'L-BFGS-B' method to
+               default PORT routine,
+
+             • Removed parameter: ‘boundaries’
+
+             • Boundaries for the model parameters are now hard-coded
+               and suffice all input data,
+
+             • Warning messages are now suppressed unless ‘debug=TRUE’,
+
+             • Improved error handling and fallback for profiling the
+               log likelihood function,
+
+             • Start value for gamma and mu are changed to lower
+               quartile of the dose values,
+
+             • fixed an error in the documentation that prevented the
+               'value' section from being displayed
+
+             • additional information on bootstrapping added in
+               'details' section,
+
+             • new example added,
+
+             • add multicore support for bootstrapping,
+
+             • new arguments: ‘multicore’ (logical), ‘cores’ (numeric).
+
+         • ‘calc_Statistics()’
+
+             • argument ‘na.rm’ added (#198).
+
+         • ‘CW2pHMi()’
+
+             • Functions was rather inflexible selecting the allowed
+               curves, e.g. ‘"OSL"’ worked, ‘"OSL (UVVIS)"’ not.
+               Corrected.
+
+         • ‘CW2pLMi()’
+
+             • Functions was rather inflexible selecting the allowed
+               curves, e.g. ‘"OSL"’ worked, ‘"OSL (UVVIS)"’ not.
+               Corrected.
+
+         • ‘CW2pLM()’
+
+             • Functions was rather inflexible selecting the allowed
+               curves, e.g. ‘"OSL"’ worked, ‘"OSL (UVVIS)"’ not.
+               Corrected.
+
+         • ‘CW2pPMi()’
+
+             • Functions was rather inflexible selecting the allowed
+               curves, e.g. ‘"OSL"’ worked, ‘"OSL (UVVIS)"’ not.
+               Corrected.
+
+         • ‘merge_Risoe.BINfileData()’
+
+             • Support for the changes in the corresponding S4-class
+               are implemented.
+
+         • ‘plot_AbanicoPlot()’
+
+             • Missing summary keywords ‘"kdemax"’, ‘"skewness"’ and
+               ‘"kurtosis"’ added (#205)
+
+         • ‘plot_Histogram()’
+
+             • Missing summary keywords ‘"kdemax"’, ‘"skewness"’ and
+               ‘"kurtosis"’ added (#205)
+
+         • ‘plot_KDE()’
+
+             • Missing summary keywords ‘"kdemax"’, ‘"skewness"’ and
+               ‘"kurtosis"’ added (#205)
+
+         • ‘plot_GrowthCurve()’
+
+             • Fix an error that causes a function chrash if the input
+               data.frame (argument ‘sample’) comprises row names. Now
+               all preset row names are removed automatically,
+
+             • using the option ‘fit.weights = FALSE’ in combination
+               with ‘fit.method = "LIN"’ caused an error. Corrected,
+
+             • avoid confusing warning messages in case ‘fit.weights’
+               was set to ‘FALSE’,
+
+             • fix an error that causes a chrash for the combination
+               ‘fit.method = "LIN"’ and error column just comprises 0,
+
+             • argument ‘main’ was not working as expected, corrected.
+               Furthermore the argument is removed from the argument
+               list, but is still available via ‘...’,
+
+             • the slow self-written approach to calculate the De for
+               ‘fit.method = "EXP+LIN"’ and ‘fit.method = "EXP+EXP"’
+               has been replaced by the function ‘uniroot’. This
+               markedly reduces the computation times for the MC
+               simulation (partly addresses issue #100)
+
+         • ‘plot_RadialPlot()’
+
+             • Missing summary keywords ‘"kdemax"’, ‘"skewness"’ and
+               ‘"kurtosis"’ added (#205)
+
+         • ‘plot_RLum.Analysis()’
+
+             • Fix an error appeared for ‘combine = TRUE’ if only one
+               single object was in the ‘RLum.Analysis’ object (#199),
+
+             • added logical argument ‘plot.single’. In fact this just
+               resets ‘ncols’ and ‘nrows’ to ‘1’ (#201),
+
+             • added argument ‘curve.transformation’ to allow a quick
+               dataoverview using the pseudo-LM curve transformation
+               methods.
+
+         • ‘plot_RLum.Results()’
+
+             • Improved error handling for ‘RLum.Results’ objects
+               originating from ‘calc_MinDose()’
+
+         • ‘plot_RLum.Data.Spectrum()’
+
+             • For ‘plot.type="multiple.lines"’ the legend was placed
+               odd, corrected using ‘par()$usr’ parameters,
+
+             • argument ‘legend.text’ added for plot types which
+               support a legend (e.g., ‘plot.type="multiple.lines"’).
+
+         • ‘readBIN2R()’
+
+             • Improved handling of odd time formats,
+
+             • support for the changes in the corresponding S4-class
+               implemented.
+
+         • ‘writeR2BIN()’
+
+             • Part of the manual was missing due to an error in the
+               inlinedoc documentation. Fixed.,
+
+             • the argument ‘version’ no expects a ‘character’ as impot
+               instead of a ‘raw’ object,
+
+             • further suppressing of confusing warning messages,
+
+             • date has not been written properly in accordance with
+               the format description (fixed),
+
+             • time values have been not properly exported in same
+               cases, corrected.
+
+             • added support for changes in corresponding S4-class,
+               means that reserved values are transfered,
+
+             • the version conversion was partly broken due to the new
+               routines implemented with last update (fixed),
+
+             • if empty comments or sample names are provided these are
+               replaced by ‘" "’ (double empty space),
+
+             • if the BIN-file is stored in a different version, the
+               version number and the record lengths are now changed
+               accordingly.
+
+  New example data sets:
+
+         • ExampleData.DeValues is now a list with two elements
+           containing an additional single grain quartz data set (#203)
+
+  Internals:
+
+         • Adding dependency for package 'Rcpp'. This is used in
+           particular to export some time consuming calculations to
+           compiled C++ code to speed up the functions. Currently it is
+           used e.g. in the function ‘analyse_IRSAR.RF()’,
+
+         • adding dependency (import) for the packages ‘parallel’. With
+           this the multicore support is realised within in the
+           package. First implemented in the function ‘calc_MinDose()’.
+
 Changes in version 0.4.1 (January 29th, 2015):
 
   New functions:
