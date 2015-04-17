@@ -1,5 +1,149 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.4.3 (17th, 2015)}{
+
+\subsection{Note on the update}{
+
+  \itemize{
+  \item This is an unplanned update but it was necessary as with the last package version (0.4.2)
+  unfortunately we introduced (again) a bug in the error calculation routine of the function plot_GrowthCurve().
+  Due to this the error of the resulting De became unrealistically small.
+
+
+}}
+
+  \subsection{Bugfixes and changes}{
+   \itemize{
+
+
+      \item \code{calc_OSLLxTxRatio()}
+       \itemize{
+          \item Support for \code{RLum.Data.Curve} objects implemented.
+       }
+
+      \item \code{calc_MinDose()}
+       \itemize{
+          \item Fixed a false argument in \code{parallel::makeCluster()} that unintentionally required the 'snow' package.
+       }
+
+
+      \item \code{analyse_SAR.CWOSL()}
+       \itemize{
+          \item If the threshold for the rejection criteria was reached due an error this information
+          was not properly stored in the output object (i.e. every time 'RC.Status' was set to 'OK' instead of 'FAILED');
+          corrected (#180).
+       }
+
+
+      \item \code{extract_IrradiationTimes()}
+       \itemize{
+          \item Argument \code{file.XSYG} replaced by \code{object} for the sake of argument consistency on the package,
+          \item allow input for \code{RLum.Analysis} object. In such cases the arguments \code{file.BINX}
+          and \code{recordType} are ignored. This mode allows for more flexibility in applying this function,
+          \item new argument \code{compatibility.mode} to trigger the binary write output of the BIN/BINX-file,
+          \item additionally now the time between the steps is exported (\code{TIMESINCELAST.STEP}).
+
+          }
+
+
+      \item \code{fit_CWVCurve()}
+       \itemize{
+          \item The function broke with an error under rare circumstances when no fit was made (reported by Alexandra Rowell); corrected,
+          \item change start parameter estimation to better account for the input data,
+              this hopefully further stabilise the fitting (thanks to Alexandra Rowell),
+          \item more proper re-scaling of the graphical output if no fit could be produced,
+          \item new argument add \code{fit.method} to allow using the function \code{nlsLM} from the
+          \code{minpack.lm package} and with this the Levenberg-Marquardt algorithm,
+          \item argument \code{cex.global} replaced by \code{cex} and moved to the \code{...} argument,
+          \item argument \code{output.plot} changed to \code{plot},
+          \item changing the way how warnings are surpressed.
+
+        }
+
+
+      \item \code{plot_Histogram()}
+       \itemize{
+          \item Argument 'breaks' was without function due to a coding error. Corrected (#217).,
+          \item argument 'breaks' removed from the argument list, however, it remains supported via the \code{'...'}
+          argument.
+       }
+
+      \item \code{plot_GrowthCurve()}
+       \itemize{
+          \item Error estimation using the Monte Carlo runs for the
+          fitting function \code{fit.method = "EXP+LIN"} and \code{fit.method = "EXP+EXP"} results in unrealistic values, as the Monte Carlo simulation
+          was fed by mistake with wrong input variables (introduced in version 0.4.2 with the uniroot function) ... fixed,
+          \item the function broke if the uniroot algorithm was not be able to find a solution within the given ranges, fixed. Now the De will become
+          NA insteadly and the function will not stop,
+          \item error messages coming from the fitting process itself are now surpressed.
+       }
+
+
+    \item \code{plot_RLum.Data.Spectrum()}
+       \itemize{
+          \item Colour handing changed towards a more logical behaviour for \code{plot.type = 'single'}.
+          The colour now changes only the colour of the points and the argument \code{rug} is now recognised also
+          by this plot type. Automatic wavelength colouring for points for in this plot type has been removed.
+          \item same changes are made for  \code{plot.type = 'multiple.lines'},
+          \item instead of just plotting a new x-axis when the argument \code{xaxis.energy = TRUE} is used,
+          the spectrum (intensity) is now proper re-calculated (#192),
+          \item minor code polishing.
+
+       }
+
+      \item \code{plot_RLum.Anaysis()}
+       \itemize{
+          \item Setting the argument \code{combine = TRUE} for 'OSL' and 'IRSL' caused an error related
+          to the missing argument 'curve.transformation'; corrected.,
+          \item colour handling for setting \code{combine = TRUE} improved. It now works as for \code{plot.default},
+          \item support for \code{xlim} and \code{ylim} in the non-combined mode,
+          \item combine mode (\code{combine = TRUE}) is no more limited to an input object of similar curves. Now
+          the plot function tries to combine curves of similar type automatically.
+
+       }
+
+
+      \item \code{readBIN2R()}
+       \itemize{
+          \item Support for BIN/BINX-file version 07 added thanks to the support by Torben Lapp (#215).
+       }
+
+       \item \code{readXSYG2R()}
+       \itemize{
+
+          \item Info objects from the sequence header like 'name' and 'position' are now be additionally
+          transferred to each single output object. With this the information is kept within the curve object.
+
+
+       }
+
+      \item \code{writeR2BIN()}
+       \itemize{
+          \item Support for BIN/BINX-file version 07 added thanks to the support by Torben Lapp (#215),
+          \item new argument \code{compatibility.mode} to avoid position numbers >48 as this caused
+          errors using external software like the Analyst. The old version number is kept and added
+          in the comment field.
+       }
+
+
+    }
+  }
+
+  \subsection{Internals}{
+   \itemize{
+
+      \item Description on the class \code{Risoe.BINfileData} updated in accordance with the implemented
+      changes on the import (no change in the S4-object class chart),
+
+      \item added dependency to package \code{minpack.lm} to support the Levenberg-Marquardt algorithm
+      for fitting in the function \code{fit_LMCurve()}
+
+
+    }
+  }
+
+}
+
 
 \section{Changes in version 0.4.2 (March 23th, 2015)}{
 

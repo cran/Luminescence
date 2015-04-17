@@ -7,11 +7,16 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
   ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
 
   ##section<<
-  ## version 0.1
+  ## version 0.2.1
   # ===========================================================================
 
-  file.XSYG,
-  ### \code{\link{character}} (\bold{required}): path and file name of the XSYG file.
+  object,
+  ### \code{\link{character}} (\bold{required}) or \code{\linkS4class{RLum.Analysis}} object:
+  ### path and file name of the XSYG file or an \code{\linkS4class{RLum.Analysis}} produced by the
+  ### function \code{\link{readXSYG2R}}. \cr
+  ###
+  ### \bold{Note}: If an \code{\linkS4class{RLum.Analysis}} is used, any input for the arguments
+  ### \code{file.BINX} and \code{recordType} will be ignored!
 
   file.BINX,
   ### \code{\link{character}} (optional): path and file name of an existing BINX-file. If a file name
@@ -20,7 +25,8 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
   ### Note: The XSYG and the BINX-file have to be originate from the same measurement!
 
   recordType = c("irradiation (NA)", "IRSL (UVVIS)", "OSL (UVVIS)", "TL (UVVIS)"),
-  ### \code{\link{character}} (with default): select relevant curves types from the XSYG file.
+  ### \code{\link{character}} (with default): select relevant curves types from the XSYG file or
+  ### \code{\linkS4class{RLum.Analysis}} object.
   ### As the XSYG-file format comprises much more information than usually needed for routine
   ### data analysis and allowed in the BINX-file format, only the relevant curves are selected
   ### by using the function \code{\link{get_RLum.Analysis}}. The argument
@@ -28,6 +34,10 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
   ###
   ### Note: A wrong selection will causes a function error. Please change this argument only
   ### if you have reasons to do so.
+
+  compatibility.mode = TRUE,
+  ### \code{\link{logical}} (with default): this option is parsed only if a BIN/BINX file is produced
+  ### and it will reset all position values to a max. value of 48, cf.\code{\link{writeR2BIN}}
 
   txtProgressBar = TRUE
   ### \code{\link{logical}} (with default): enables \code{TRUE} or disables \code{FALSE}
@@ -37,70 +47,93 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
 
   # Integrity tests -----------------------------------------------------------------------------
 
-  ##XSYG
-  ##check if file exists
-  if(file.exists(file.XSYG) == FALSE){
+  ##check whether an character or an RLum.Analysis object is provided
+  if(is(object)[1] != "character" & is(object)[1] != "RLum.Analysis"){
 
-    stop("[extract_IrradiationTimes()] Wrong XSYG file name or file does not exsits!")
+    stop("[extract_IrradiationTImes()] Input object is neither of type 'character' nor of type 'RLum.Analysis'.")
+
+  }else if(is(object)[1] == "character"){
+
+    ##set object to file.XSYG
+    file.XSYG <- object
+
+    ##XSYG
+    ##check if file exists
+    if(file.exists(file.XSYG) == FALSE){
+
+      stop("[extract_IrradiationTimes()] Wrong XSYG file name or file does not exsits!")
+
+    }
+
+    ##check if file is XML file
+    if(tail(unlist(strsplit(file.XSYG, split = "\\.")), 1) != "xsyg" &
+       tail(unlist(strsplit(file.XSYG, split = "\\.")), 1) != "XSYG" ){
+
+      stop("[extract_IrradiationTimes()] File is not of type 'XSYG'!")
+
+    }
+
+    ##BINX
+    if(!missing(file.BINX)){
+
+      ##check if file exists
+      if(file.exists(file.BINX) == FALSE){
+
+        stop("[extract_IrradiationTimes()] Wrong BINX file name or file does not exsits!")
+
+      }
+
+      ##check if file is XML file
+      if(tail(unlist(strsplit(file.BINX, split = "\\.")), 1) != "binx" &
+         tail(unlist(strsplit(file.BINX, split = "\\.")), 1) != "BINX" ){
+
+        stop("[extract_IrradiationTimes()] File is not of type 'BINX'!")
+
+      }
+
+    }
+
+    # Settings and import XSYG --------------------------------------------------------------------
+
+    temp.XSYG <- readXSYG2R(file.XSYG, txtProgressBar = txtProgressBar)
+
+    if(!missing(file.BINX)){
+      temp.BINX <- readBIN2R(file.BINX, txtProgressBar = txtProgressBar)
+      temp.BINX.dirname <- (dirname(file.XSYG))
+    }
+
+
+    # Some data preparation -----------------------------------------------------------------------
+    ##set list
+    temp.sequence.list <- list()
+
+    ##select all analysis objects and combinde them
+    for(i in 1:length(temp.XSYG)){
+
+      ##select sequence and reduce the data set to really wanted values
+      temp.sequence.list[[i]] <- get_RLum.Analysis(temp.XSYG[[i]]$Sequence.Object,
+                                                   recordType = recordType,
+                                                   keep.object = TRUE)
+
+
+      ##get corresponding position number, this will be needed later on
+      temp.sequence.position <- as.numeric(as.character(temp.XSYG[[i]]$Sequence.Header["position",]))
+
+    }
+
+
+
+  }else{
+
+    ##now we assume a single RLum.Analysis object
+    ##select sequence and reduce the data set to really wanted values, note that no
+    ##record selection was made!
+    temp.sequence.list <- list(object)
 
   }
 
-  ##check if file is XML file
-  if(tail(unlist(strsplit(file.XSYG, split = "\\.")), 1) != "xsyg" &
-     tail(unlist(strsplit(file.XSYG, split = "\\.")), 1) != "XSYG" ){
-
-    stop("[extract_IrradiationTimes()] File is not of type 'XSYG'!")
-
-  }
-
-  ##BINX
-  if(!missing(file.BINX)){
-
-  ##check if file exists
-  if(file.exists(file.BINX) == FALSE){
-
-    stop("[extract_IrradiationTimes()] Wrong BINX file name or file does not exsits!")
-
-  }
-
-  ##check if file is XML file
-  if(tail(unlist(strsplit(file.BINX, split = "\\.")), 1) != "binx" &
-     tail(unlist(strsplit(file.BINX, split = "\\.")), 1) != "BINX" ){
-
-    stop("[extract_IrradiationTimes()] File is not of type 'BINX'!")
-
-   }
-
-  }
 
 
-  # Settings and import XSYG --------------------------------------------------------------------
-
-  temp.XSYG <- readXSYG2R(file.XSYG, txtProgressBar = txtProgressBar)
-
-  if(!missing(file.BINX)){
-   temp.BINX <- readBIN2R(file.BINX, txtProgressBar = txtProgressBar)
-   temp.BINX.dirname <- (dirname(file.XSYG))
-  }
-
-
-  # Some data preparation -----------------------------------------------------------------------
-  ##set list
-  temp.sequence.list <- list()
-
-  ##select all analysis objects and combinde them
-  for(i in 1:length(temp.XSYG)){
-
-    ##select sequence and reduce the data set to really wanted values
-    temp.sequence.list[[i]] <- get_RLum.Analysis(temp.XSYG[[i]]$Sequence.Object,
-                                     recordType = recordType,
-                                     keep.object = TRUE)
-
-
-  ##get corresponding position number, this will be needed later on
-  temp.sequence.position <- as.numeric(as.character(temp.XSYG[[i]]$Sequence.Header["position",]))
-
-  }
 
 
   ##merge objects
@@ -124,7 +157,7 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
 
   })
 
-   #START time of each step
+  #START time of each step
   temp.START <- unname(sapply(1:length_RLum.Analysis(temp.sequence), function(x){
 
     get_RLum.Data.Curve(get_RLum.Analysis(temp.sequence, record.id = x), info.object = c("startDate"))
@@ -138,14 +171,37 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
 
   })
 
+
+
  ##a little bit reformatting.
  START <- strptime(temp.START, format = "%Y%m%d%H%M%S", tz = "GMT")
 
  ##Calculate END time of each STEP
  END <- START + DURATION.STEP
 
- ##add position number
- POSITION <- rep(temp.sequence.position, each = length_RLum.Analysis(temp.sequence))
+ ##add position number so far an XSYG file was the input
+ if(exists("file.XSYG")){
+
+    POSITION <- rep(temp.sequence.position, each = length_RLum.Analysis(temp.sequence))
+
+  }else if(!inherits(try(
+    get_RLum.Data.Curve(
+      get_RLum.Analysis(temp.sequence, record.id = 1), info.object = "position"),
+    silent = TRUE), "try-error")){
+
+    ##DURATION of each STEP
+    POSITION <- unname(sapply(1:length_RLum.Analysis(temp.sequence), function(x){
+
+      get_RLum.Data.Curve(get_RLum.Analysis(temp.sequence, record.id = x),info.object = "position")
+
+    }))
+
+ }else{
+
+   POSITION <- NA
+
+ }
+
 
  ##Combine the results
  temp.results <- data.frame(POSITION,STEP,START,DURATION.STEP,END)
@@ -208,12 +264,30 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
 
   }))
 
+
+
+  # Calculate time since last step --------------------------------------------------------------
+
+
+  TIMESINCELAST.STEP <- unlist(sapply(1:nrow(temp.results), function(x){
+
+    if(x == 1){
+      return(0)
+    }else{
+    return(difftime(temp.results[x,"START"],temp.results[x-1, "END"], units = "secs"))
+    }
+
+
+  }))
+
+
   # Combine final results -----------------------------------------------------------------------
 
   ##results table, export as CSV
-  results <- cbind(temp.results,IRR_TIME, TIMESINCEIRR)
+  results <- cbind(temp.results,IRR_TIME, TIMESINCEIRR,TIMESINCELAST.STEP)
 
   # Write BINX-file if wanted -------------------------------------------------------------------
+  if(!missing(file.BINX)){
 
     ##(1) remove all irradiation steps as there is no record in the BINX file and update information
     results.BINX <- results[-which(results[,"STEP"] == "irradiation (NA)"),]
@@ -229,6 +303,7 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
         ##update BINX-file
         writeR2BIN(temp.BINX, version = "06",
                    file = paste0(file.BINX,"_extract_IrradiationTimes.BINX"),
+                   compatibility.mode =  compatibility.mode,
                    txtProgressBar = txtProgressBar)
 
 
@@ -238,6 +313,7 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
       warning("XSYG and BINX-file do not contain similar entries. BINX-file update skipped!")
 
     }
+  }
 
 
   # Output --------------------------------------------------------------------------------------
@@ -249,7 +325,8 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
   ##
   ## If a BINX-file path and name is set, the output will be additionally transferred
   ## to a new BINX-file with the function name as suffix. For the output
-  ## the path of the input BINX-file itself is used.
+  ## the path of the input BINX-file itself is used. Note that this will not work if the input
+  ## object is a file path to an XSYG-file. In this case the argument input is ignored.
 
   ##details<<
   ## The function was written to compensate missing information in the BINX-file output of
@@ -272,10 +349,19 @@ extract_IrradiationTimes <- structure(function(#Extract irradiation times from a
   ## does not allow irradiations as separat sequences steps.\cr
   ##
   ## Know issue: The 'fading correction' menu in the Analyst will not work appear with the produced
-  ## BIN/BINX-file due to hidden bits, which are not reproduced by the function \code{writeR2BIN()}.
+  ## BIN/BINX-file due to hidden bits, which are not reproduced by the function \code{writeR2BIN()}
+  ## or if it appears it stops with a floating point error. \cr
+  ##
+  ## Negative values for \code{TIMESINCELAS.STEP}? Yes, this is possible and no bug, as in the XSYG
+  ## file multiple curves are stored for one step. Example:
+  ## A TL step may comprise three curves: (a) counts vs. time, (b) measured temperature
+  ## vs. time and (c) predefined temperature vs. time. Three curves, but they are all belonging
+  ## to one TL measurement step, but with regard to the time stamps this could produce negative
+  ## values as the important function (\code{\link{readXSYG2R}}) do not change the order of entries
+  ## for one step towards a correct time order.
 
   ##seealso<<
-  ## \code{\linkS4class{RLum.Results}}, \code{\linkS4class{Risoe.BINfileData}},
+  ## \code{\linkS4class{RLum.Analysis}}, \code{\linkS4class{RLum.Results}}, \code{\linkS4class{Risoe.BINfileData}},
   ## \code{\link{readXSYG2R}}, \code{\link{readBIN2R}},
   ## \code{\link{writeR2BIN}}
 

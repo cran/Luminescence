@@ -128,4 +128,4 @@ get_structure.RLum.Analysis(OSL.SARMeasurement$Sequence.Object)
 }
 
 \keyword{IO}
-\section{Function version}{0.4.1 (2015-03-21 03:09:47)}
+\section{Function version}{0.4.3 (2015-04-07 11:39:31)}

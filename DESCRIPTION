@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.4.2
-Date: 2015-03-23
+Version: 0.4.3
+Date: 2015-04-17
 Author: Sebastian Kreutzer [aut, trl, cre],
   Michael Dietze [aut],
   Christoph Burow [aut],
@@ -26,7 +26,7 @@ Contact: Package Developer Team <team@r-luminescence.de>
 License: GPL-3
 Depends: R (>= 3.1.2), utils
 Imports: methods, XML, shape, rgl, matrixStats, raster, sp, zoo, bbmle,
-        data.table, Rcpp (>= 0.11.4), parallel
+        data.table, Rcpp (>= 0.11.4), parallel, minpack.lm
 LinkingTo: Rcpp
 URL: http://CRAN.R-project.org/package=Luminescence
 Collate: Analyse_SAR.OSLdata.R analyse_SAR.CWOSL.R analyse_SAR.TL.R
@@ -52,6 +52,6 @@ Collate: Analyse_SAR.OSLdata.R analyse_SAR.CWOSL.R analyse_SAR.TL.R
         merge_RLum.Data.Curve.R calc_IEU.R extract_IrradiationTimes.R
         RcppExports.R zzz.R
 NeedsCompilation: yes
-Packaged: 2015-03-23 12:44:59 UTC; kreutzer
+Packaged: 2015-04-17 11:12:47 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2015-03-23 13:54:58
+Date/Publication: 2015-04-18 08:55:38
