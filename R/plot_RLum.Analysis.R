@@ -1,53 +1,90 @@
-plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 class object
-  ### The function provides a standardised plot output for curve data of an
-  ### RLum.Analysis S4 class object
-
-  # ===========================================================================
-  ##author<<
-  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), \cr
-
-  ##section<<
-  ## version 0.2.3
-  # ===========================================================================
-
+#' Plot function for an RLum.Analysis S4 class object
+#'
+#' The function provides a standardised plot output for curve data of an
+#' RLum.Analysis S4 class object
+#'
+#' The function produces a multiple plot output. A file output is recommended
+#' (e.g., \code{\link{pdf}}).
+#'
+#' \bold{curve.transformation}\cr
+#'
+#' This argument allows transforming continuous wave (CW) curves to pseudo
+#' (linear) modulated curves. For the transformation, the functions of the
+#' package are used. Currently, it is not possible to pass further arguments to
+#' the transformation functions. The argument works only for \code{ltype}
+#' \code{OSL} and \code{IRSL}.\cr
+#'
+#' Please note: The curve transformation within this functions works roughly,
+#' i.e. every IRSL or OSL curve is transformed, without considerung whether it
+#' is measured with the PMT or not! However, for a fast look it might be
+#' helpful.
+#'
+#' @param object \code{\linkS4class{RLum.Analysis}} (\bold{required}): S4
+#' object of class \code{RLum.Analysis}
+#' @param nrows \code{\link{integer}} (with default): sets number of rows for
+#' plot output
+#' @param ncols \code{\link{integer}} (with default): sets number of columns
+#' for plot output
+#' @param abline \code{\link{list}} (optional): allows to set similar ablines
+#' in each plot. This option uses the function \code{\link{do.call}}, meaning
+#' that every argument in the \code{list} has to be provided as \code{list},
+#' e.g. \code{abline = list(list(v = 120), list(v = 350))} produces two
+#' vertical ablines: One at 150 and another one at 350. Within the call all
+#' arguments supported by \code{\link{abline}} are fully supported,
+#' @param combine \code{\link{logical}} (with default): allows to combine all
+#' code\linkS4class{RLum.Data.Curve} objects in one single plot.
+#' @param curve.transformation \code{\link{character}} (optional): allows
+#' transforming CW-OSL and CW-IRSL curves to pseudo-LM curves via
+#' transformation functions. Allowed values are: \code{CW2pLM}, \code{CW2pLMi},
+#' \code{CW2pHMi} and \code{CW2pPMi}. See details.
+#' @param plot.single \code{\link{logical}} (with default): each curve is
+#' plotted in a single window, overwrites the settings of \code{norws} and
+#' \code{ncols}
+#' @param \dots further arguments and graphical parameters will be passed to
+#' the \code{plot} function. Supported arguments: \code{main}, \code{mtext},
+#' \code{log}, \code{lwd}, \code{lty} \code{type}, \code{pch}, \code{col},
+#' \code{norm}, \code{ylim}, \code{xlab} ... and for \code{combine = TRUE}
+#' also: \code{xlim}, \code{ylab}, \code{sub}, \code{legend.text},
+#' \code{legend.pos} (typical plus 'outside'), \code{legend.col}
+#' @return Returns multiple plots.
+#' @note Not all arguments available for \code{\link{plot}} will be passed!
+#' Only plotting of \code{RLum.Data.Curve} and \code{RLum.Data.Spectrum}
+#' objects are currently supported.
+#'
+#' @section Function version: 0.2.4
+#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
+#' (France)
+#'
+#' @seealso \code{\link{plot}}, \code{\link{plot_RLum}},
+#' \code{\link{plot_RLum.Data.Curve}}
+#' @references #
+#' @keywords aplot
+#' @examples
+#'
+#'
+#' ###load data
+#' data(ExampleData.BINfileData, envir = environment())
+#'
+#' ##convert values for position 1
+#' temp <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
+#'
+#' ##plot all values
+#' plot_RLum.Analysis(temp)
+#'
+#' ##plot (combine) TL curves in one plot
+#' temp.sel <- get_RLum.Analysis(temp, recordType = "TL", keep.object = TRUE)
+#' plot_RLum.Analysis(temp.sel, combine = TRUE, norm = TRUE, main = "TL combined")
+#'
+#'
+plot_RLum.Analysis <- function(
   object,
-  ### \code{\linkS4class{RLum.Analysis}} (\bold{required}): S4 object of class
-  ### \code{RLum.Analysis}
-
   nrows = 3,
-  ### \code{\link{integer}} (with default): sets number of rows for plot output
-
   ncols = 2,
-  ### \code{\link{integer}} (with default): sets number of columns for plot output
-
   abline,
-  ### \code{\link{list}} (optional): allows to set similar ablines in each plot. This option
-  ### uses the function \code{\link{do.call}}, meaning that every argument in the \code{list} has
-  ### to be provided as \code{list}, e.g. \code{abline = list(list(v = 120), list(v = 350))} produces
-  ### two vertical ablines: One at 150 and another one at 350. Within the call all arguments
-  ### supported by \code{\link{abline}} are fully supported,
-
   combine = FALSE,
-  ### \code{\link{logical}} (with default): allows to combine all
-  ### code{\linkS4class{RLum.Data.Curve}} objects in one single plot.
-
   curve.transformation,
-  ### \code{\link{character}} (optional): allows transforming CW-OSL and CW-IRSL curves
-  ### to pseudo-LM curves via transformation functions.
-  ### Allowed values are: \code{CW2pLM}, \code{CW2pLMi}, \code{CW2pHMi} and
-  ### \code{CW2pPMi}. See details.
-
   plot.single = FALSE,
-  ### \code{\link{logical}} (with default): each curve is plotted in a single window, overwrites the
-  ### settings of \code{norws} and \code{ncols}
-
   ...
-  ### further arguments and graphical parameters will be passed to the \code{plot} function.
-  ### Supported arguments: \code{main}, \code{mtext}, \code{log}, \code{lwd}, \code{lty}
-  ### \code{type}, \code{pch}, \code{col}, \code{norm}, \code{ylim}, \code{xlab} ...
-  ### and for \code{combine = TRUE} also: \code{xlim},
-  ### \code{ylab}, \code{sub}, \code{legend.text}, \code{legend.pos}
-
 ){
 
   # Integrity check ----------------------------------------------------------------------------
@@ -126,160 +163,160 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
   ##(1) NORMAL (combine == FALSE)
   if(combine == FALSE || length(object@records) == 1){
 
-      ##show warning message
-      if(combine == TRUE & length(object@records) == 1){
+    ##show warning message
+    if(combine == TRUE & length(object@records) == 1){
 
-        warning("Nothing to combine, object contains a single curve.")
+      warning("Nothing to combine, object contains a single curve.")
 
-      }
+    }
 
-      ##grep RLum.Data.Curve or RLum.Data.Spectrum objects
-      temp <- lapply(1:length(object@records), function(x){
+    ##grep RLum.Data.Curve or RLum.Data.Spectrum objects
+    temp <- lapply(1:length(object@records), function(x){
 
-                if(is(object@records[[x]], "RLum.Data.Curve") == TRUE ||
-                   is(object@records[[x]], "RLum.Data.Spectrum") == TRUE){
+      if(is(object@records[[x]], "RLum.Data.Curve") == TRUE ||
+           is(object@records[[x]], "RLum.Data.Spectrum") == TRUE){
 
-                  object@records[[x]]
+        object@records[[x]]
 
-                }})
+      }})
 
-      ##calculate number of pages for mtext
-      if(length(temp)%%(nrows*ncols)>0){
+    ##calculate number of pages for mtext
+    if(length(temp)%%(nrows*ncols)>0){
 
-        n.pages <- round(length(temp)/(nrows*ncols), digits=0)+1
+      n.pages <- round(length(temp)/(nrows*ncols), digits=0)+1
 
-      }else{
+    }else{
 
-        n.pages <- length(temp)/(nrows*ncols)
+      n.pages <- length(temp)/(nrows*ncols)
 
-      }
+    }
 
-      ##set par
-      par.default <- par("mfrow")
-      par(mfrow=c(nrows,ncols))
+    ##set par
+    par.default <- par("mfrow")
+    par(mfrow=c(nrows,ncols))
 
-      ##plot curves
-      for(i in 1:length(temp)){
+    ##plot curves
+    for(i in 1:length(temp)){
 
-            if(is(temp[[i]], "RLum.Data.Curve") == TRUE){
+      if(is(temp[[i]], "RLum.Data.Curve") == TRUE){
 
-              ##set curve transformation if wanted
-              if((grepl("IRSL", temp[[i]]@recordType) | grepl("OSL", temp[[i]]@recordType)) &
-                  !missing(curve.transformation)){
+        ##set curve transformation if wanted
+        if((grepl("IRSL", temp[[i]]@recordType) | grepl("OSL", temp[[i]]@recordType)) &
+             !missing(curve.transformation)){
 
-                if(curve.transformation=="CW2pLM"){
+          if(curve.transformation=="CW2pLM"){
 
-                  temp[[i]] <- CW2pLM(temp[[i]])
+            temp[[i]] <- CW2pLM(temp[[i]])
 
-                }else if(curve.transformation=="CW2pLMi"){
+          }else if(curve.transformation=="CW2pLMi"){
 
-                  temp[[i]] <- CW2pLMi(temp[[i]])
+            temp[[i]] <- CW2pLMi(temp[[i]])
 
-                }else if(curve.transformation=="CW2pHMi"){
+          }else if(curve.transformation=="CW2pHMi"){
 
-                  temp[[i]]<- CW2pHMi(temp[[i]])
+            temp[[i]]<- CW2pHMi(temp[[i]])
 
-                }else if(curve.transformation=="CW2pPMi"){
+          }else if(curve.transformation=="CW2pPMi"){
 
-                  temp[[i]] <- CW2pPMi(temp[[i]])
+            temp[[i]] <- CW2pPMi(temp[[i]])
 
-                }else{
+          }else{
 
-                  warning("Function for 'curve.transformation' is unknown. No transformation is performed.")
+            warning("Function for 'curve.transformation' is unknown. No transformation is performed.")
 
-                }
-
-              }
-
-
-              ##check xlim and ylim values and adjust if where necessary
-              ##xlim
-              if (!is.null(xlim)) {
-                xlim.set <- xlim
-                if (xlim[1] < min(temp[[i]]@data[,1])) {
-                  xlim.set[1] <- min(temp[[i]]@data[,1])
-                }
-                if (xlim[2] > max(temp[[i]]@data[,1])) {
-                  xlim.set[2] <- max(temp[[i]]@data[,1])
-                }
-
-              }else{
-                xlim.set <- xlim
-
-              }
-
-              ##ylim
-              if (!is.null(ylim)) {
-                ylim.set <- ylim
-                if (ylim[1] < min(temp[[i]]@data[,2])) {
-                  ylim.set[1] <- min(temp[[i]]@data[,2])
-                }
-                if (ylim[2] > max(temp[[i]]@data[,2])) {
-                  ylim.set[2] <- max(temp[[i]]@data[,2])
-                }
-
-              }else{
-                ylim.set <- ylim
-
-              }
-
-            plot_RLum.Data.Curve(temp[[i]],
-                 col = if(unique(col) != "black"){col} else{
-                   if(grepl("IRSL", temp[[i]]@recordType) == TRUE){"red"} else
-                     if(grepl("OSL", temp[[i]]@recordType) == TRUE){"blue"} else
-                     {col}
-                 },
-                     mtext = paste("#",i,sep=""),
-                     par.local = FALSE,
-                     main = if(main==""){temp[[i]]@recordType}else{main},
-                     log = log,
-                     lwd = lwd,
-                     type = type,
-                     lty = lty,
-                     xlim = xlim.set,
-                     ylim = ylim.set,
-                     pch = pch,
-                     norm = norm,
-                     cex = cex)
-
-            ##add abline
-            if(!missing(abline)){
-
-              for(k in 1:length(abline)){
-
-                do.call("abline", abline[[k]])
-
-              }
-
-            }
-
-
-           } else if(is(temp[[i]], "RLum.Data.Spectrum") == TRUE) {
-
-             plot_RLum.Data.Spectrum(temp[[i]],
-
-                  mtext = paste("#",i,sep=""),
-                  par.local = FALSE,
-                  main = if(main==""){temp[[i]]@recordType}else{main})
-
-           }
-
-          if(i%%(nrows*ncols)==0){
-              mtext(mtext, outer = TRUE, side=3, line=-2)
           }
 
-        }#end for loop
+        }
 
 
-        ##reset par
-        par(mfrow = par.default)
+        ##check xlim and ylim values and adjust if where necessary
+        ##xlim
+        if (!is.null(xlim)) {
+          xlim.set <- xlim
+          if (xlim[1] < min(temp[[i]]@data[,1])) {
+            xlim.set[1] <- min(temp[[i]]@data[,1])
+          }
+          if (xlim[2] > max(temp[[i]]@data[,1])) {
+            xlim.set[2] <- max(temp[[i]]@data[,1])
+          }
 
-   }else{
+        }else{
+          xlim.set <- xlim
 
-   ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   ##(2) NORMAL (combine == TRUE)
+        }
 
-   ##(1) check RLum objects in the set
+        ##ylim
+        if (!is.null(ylim)) {
+          ylim.set <- ylim
+          if (ylim[1] < min(temp[[i]]@data[,2])) {
+            ylim.set[1] <- min(temp[[i]]@data[,2])
+          }
+          if (ylim[2] > max(temp[[i]]@data[,2])) {
+            ylim.set[2] <- max(temp[[i]]@data[,2])
+          }
+
+        }else{
+          ylim.set <- ylim
+
+        }
+
+        plot_RLum.Data.Curve(temp[[i]],
+                             col = if(unique(col) != "black"){col} else{
+                               if(grepl("IRSL", temp[[i]]@recordType) == TRUE){"red"} else
+                                 if(grepl("OSL", temp[[i]]@recordType) == TRUE){"blue"} else
+                                 {col}
+                             },
+                             mtext = paste("#",i,sep=""),
+                             par.local = FALSE,
+                             main = if(main==""){temp[[i]]@recordType}else{main},
+                             log = log,
+                             lwd = lwd,
+                             type = type,
+                             lty = lty,
+                             xlim = xlim.set,
+                             ylim = ylim.set,
+                             pch = pch,
+                             norm = norm,
+                             cex = cex)
+
+        ##add abline
+        if(!missing(abline)){
+
+          for(k in 1:length(abline)){
+
+            do.call("abline", abline[[k]])
+
+          }
+
+        }
+
+
+      } else if(is(temp[[i]], "RLum.Data.Spectrum") == TRUE) {
+
+        plot_RLum.Data.Spectrum(temp[[i]],
+
+                                mtext = paste("#",i,sep=""),
+                                par.local = FALSE,
+                                main = if(main==""){temp[[i]]@recordType}else{main})
+
+      }
+
+      if(i%%(nrows*ncols)==0){
+        mtext(mtext, outer = TRUE, side=3, line=-2)
+      }
+
+    }#end for loop
+
+
+    ##reset par
+    par(mfrow = par.default)
+
+  }else{
+
+    ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ##(2) NORMAL (combine == TRUE)
+
+    ##(1) check RLum objects in the set
     object.list <- get_RLum.Analysis(object)
 
 
@@ -332,7 +369,7 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
       temp.data.list <- lapply(1:length(object.list), function(x) {
         ##set curve transformation if wanted
         if (grepl("IRSL", object.list[[x]]@recordType) |
-            grepl("OSL", object.list[[x]]@recordType)) {
+              grepl("OSL", object.list[[x]]@recordType)) {
           if (curve.transformation == "CW2pLM") {
             object.list[[x]] <- CW2pLM(object.list[[x]])
 
@@ -447,6 +484,16 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
           paste("Curve", 1:length(object.list))
         }
 
+      ##legend.col
+      legend.col <-
+        if ("legend.col" %in% names(extraArgs)) {
+          extraArgs$legend.col
+        } else
+        {
+          NULL
+        }
+
+
       ##legend.pos
       legend.pos <-
         if ("legend.pos" %in% names(extraArgs)) {
@@ -456,6 +503,10 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
           "topright"
         }
 
+      if (legend.pos == "outside") {
+        par.default.outside <- par()[c("mar", "xpd")]
+        par(mar = c(5.1, 4.1, 4.1, 8.1), xpd = TRUE)
+      }
 
 
       ##open plot area
@@ -483,11 +534,12 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
 
       ##legend
       legend(
-        legend.pos,
+        x = ifelse(legend.pos == "outside", par()$usr[2], legend.pos),
+        y = ifelse(legend.pos == "outside", par()$usr[4], NULL),
         legend = legend.text,
         lwd = lwd,
         lty = lty,
-        col = col[1:length(object.list)],
+        col = if(is.null(legend.col)){col[1:length(object.list)]}else{legend.col},
         bty = "n",
         cex = 0.9 * cex
       )
@@ -496,60 +548,13 @@ plot_RLum.Analysis<- structure(function(#Plot function for an RLum.Analysis S4 c
     }
 
     ##reset graphic settings
+    if (exists("par.default.outside")) {
+      par(par.default.outside)
+      rm(par.default.outside)
+    }
     par(par.default)
     rm(par.default)
 
   }
 
-  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
-
-  ##details<<
-  ## The function produces a multiple plot output.
-  ## A file output is recommended (e.g., \code{\link{pdf}}).
-  ##
-  ##
-  ## \bold{curve.transformation}\cr
-  ##
-  ## This argument allows transforming continuous wave (CW) curves to pseudo (linear)
-  ## modulated curves. For the transformation, the functions of the package are used.
-  ## Currently, it is not possible to pass further arguments to the transformation functions.
-  ## The argument works only for \code{ltype} \code{OSL} and \code{IRSL}.\cr
-  ##
-  ## Please note: The curve transformation within this functions works roughly, i.e. every
-  ## IRSL or OSL curve is transformed, without considerung whether it is measured with the PMT
-  ## or not! However, for a fast look it might be helpful.
-
-  ##value<<
-  ## Returns multiple plots.
-
-  ##references<<
-  ## #
-
-  ##note<<
-  ## Not all arguments available for \code{\link{plot}} will be passed!
-  ## Only plotting of \code{RLum.Data.Curve} and \code{RLum.Data.Spectrum}
-  ## objects are currently supported.
-
-  ##seealso<<
-  ## \code{\link{plot}}, \code{\link{plot_RLum}},
-  ## \code{\link{plot_RLum.Data.Curve}}
-
-  ##keyword<<
-  ## aplot
-
-}, ex=function(){
-
-  ###load data
-  data(ExampleData.BINfileData, envir = environment())
-
-  ##convert values for position 1
-  temp <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
-
-  ##plot all values
-  plot_RLum.Analysis(temp)
-
-  ##plot (combine) TL curves in one plot
-  temp.sel <- get_RLum.Analysis(temp, recordType = "TL", keep.object = TRUE)
-  plot_RLum.Analysis(temp.sel, combine = TRUE, norm = TRUE, main = "TL combined")
-
-})#END OF STRUCTURE
+}

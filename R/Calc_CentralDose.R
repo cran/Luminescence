@@ -1,66 +1,111 @@
-calc_CentralDose<- structure(function( # Apply the central age model (CAM) after Galbraith et al. (1999) to a given De distribution
-  ### This function calculates the central dose and dispersion of the De 
-  ### distribution, their standard errors and the profile log likelihood
-  ### function for sigma.
-  
-  # ===========================================================================
-  ##author<< 
-  ## Christoph Burow, University of Cologne (Germany) \cr
-  ## Based on a rewritten S script of Rex Galbraith, 2010 \cr \cr
-  
-  ##section<<
-  ## version 1.3 
-  # ===========================================================================
-  
+#' Apply the central age model (CAM) after Galbraith et al. (1999) to a given
+#' De distribution
+#'
+#' This function calculates the central dose and dispersion of the De
+#' distribution, their standard errors and the profile log likelihood function
+#' for sigma.
+#'
+#' This function uses the equations of Galbraith et al. (1999, 358-359).  The
+#' parameter \code{sigma} is estimated using the maximum likelihood approach. A
+#' detailed explanation on maximum likelihood estimation can be found in the
+#' appendix of Galbraith & Laslett (1993, 468-470)
+#'
+#' @param data \code{\linkS4class{RLum.Results}} or \link{data.frame}
+#' (\bold{required}): for \code{data.frame}: two columns with De
+#' \code{(data[,1])} and De error \code{(values[,2])}
+#' @param sigmab \code{\link{numeric}} (with default): spread in De values
+#' given as a fraction (e.g. 0.2). This value represents the expected
+#' overdispersion in the data should the sample be well-bleached (Cunningham &
+#' Walling 2012, p. 100).
+#' @param plot \code{\link{logical}} (with default): plot output
+#' @param \dots further arguments (\code{trace, verbose}).
+#' @return Returns a plot (optional) and terminal output. In addition an
+#' \code{\linkS4class{RLum.Results}} object is returned containing the
+#' following element:
+#'
+#' \item{summary}{\link{data.frame} summary of all relevant model results.}
+#' \item{data}{\link{data.frame} original input data} \item{args}{\link{list}
+#' used arguments} \item{call}{\link{call} the function call}
+#' \item{profile}{\link{data.frame} the log likelihood profile for sigma}
+#'
+#' The output should be accessed using the function
+#' \code{\link{get_RLum.Results}}
+#' @section Function version: 1.3
+#' @author Christoph Burow, University of Cologne (Germany) \cr Based on a
+#' rewritten S script of Rex Galbraith, 2010 \cr
+#' @seealso \code{\link{plot}}, \code{\link{calc_CommonDose}},
+#' \code{\link{calc_FiniteMixture}}, \code{\link{calc_FuchsLang2001}},
+#' \code{\link{calc_MinDose}}
+#' @references Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for
+#' mixed fission track ages. Nuclear Tracks Radiation Measurements 4, 459-470.
+#' \cr \cr Galbraith, R.F., Roberts, R.G., Laslett, G.M., Yoshida, H. & Olley,
+#' J.M., 1999. Optical dating of single grains of quartz from Jinmium rock
+#' shelter, northern Australia. Part I: experimental design and statistical
+#' models.  Archaeometry 41, 339-364. \cr \cr Galbraith, R.F. & Roberts, R.G.,
+#' 2012. Statistical aspects of equivalent dose and error calculation and
+#' display in OSL dating: An overview and some recommendations. Quaternary
+#' Geochronology 11, 1-27. \cr \cr \bold{Further reading} \cr \cr Arnold, L.J.
+#' & Roberts, R.G., 2009. Stochastic modelling of multi-grain equivalent dose
+#' (De) distributions: Implications for OSL dating of sediment mixtures.
+#' Quaternary Geochronology 4, 204-230. \cr \cr Bailey, R.M. & Arnold, L.J.,
+#' 2006. Statistical modelling of single grain quartz De distributions and an
+#' assessment of procedures for estimating burial dose. Quaternary Science
+#' Reviews 25, 2475-2502. \cr \cr Cunningham, A.C. & Wallinga, J., 2012.
+#' Realizing the potential of fluvial archives using robust OSL chronologies.
+#' Quaternary Geochronology 12, 98-106. \cr \cr Rodnight, H., Duller, G.A.T.,
+#' Wintle, A.G. & Tooth, S., 2006. Assessing the reproducibility and accuracy
+#' of optical dating of fluvial deposits.  Quaternary Geochronology, 1 109-120.
+#' \cr \cr Rodnight, H., 2008. How many equivalent dose values are needed to
+#' obtain a reproducible distribution?. Ancient TL 26, 3-10.
+#' @examples
+#'
+#' ##load example data
+#' data(ExampleData.DeValues, envir = environment())
+#'
+#' ##apply the central dose model
+#' calc_CentralDose(ExampleData.DeValues$CA1)
+#'
+#'
+calc_CentralDose <- function(
   data,
-  ### \code{\linkS4class{RLum.Results}} or \link{data.frame} (\bold{required}):
-  ### for \code{data.frame}: two columns with De \code{(data[,1])} and
-  ### De error \code{(values[,2])}
   sigmab,
-  ### \code{\link{numeric}} (with default): spread in De values given as
-  ### a fraction (e.g. 0.2). This value represents the expected overdispersion
-  ### in the data should the sample be well-bleached (Cunningham & Walling 2012, 
-  ### p. 100).
   plot=TRUE,
-  ### \code{\link{logical}} (with default): plot output
   ...
-  ### further arguments (\code{trace, verbose}). 
-) {                     
-  
-  
+) {
+
   ##============================================================================##
   ## CONSISTENCY CHECK OF INPUT DATA
   ##============================================================================##
-  
+
   if(missing(data)==FALSE){
     if(is(data, "data.frame") == FALSE & is(data,"RLum.Results") == FALSE){
-      stop("[calc_CentralDose] Error: 'data' object has to be of type 
+      stop("[calc_CentralDose] Error: 'data' object has to be of type
            'data.frame' or 'RLum.Results'!")
     }else{
       if(is(data, "RLum.Results") == TRUE){
         data <- get_RLum.Results(data, signature(object = "De.values"))
       }
     }
-  }  
+  }
   try(colnames(data)<- c("ED","ED_Error"), silent = TRUE)
-  if(colnames(data[1])!="ED"||colnames(data[2])!="ED_Error") { 
+  if(colnames(data[1])!="ED"||colnames(data[2])!="ED_Error") {
     cat(paste("Columns must be named 'ED' and 'ED_Error'"), fill = FALSE)
-    stop(domain=NA) 
+    stop(domain=NA)
   }
   if(!missing(sigmab)) {
     if(sigmab <0 | sigmab >1) {
-      cat(paste("sigmab needs to be given as a fraction between", 
+      cat(paste("sigmab needs to be given as a fraction between",
                 "0 and 1 (e.g. 0.2)"), fill = FALSE)
       stop(domain=NA)
     }
   }
-  
+
   ##============================================================================##
   ## ... ARGUMENTS
   ##============================================================================##
-  
+
   extraArgs <- list(...)
-  
+
   ## console output
   if("verbose" %in% names(extraArgs)) {
     verbose<- extraArgs$verbose
@@ -73,61 +118,61 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
   } else {
     trace<- FALSE
   }
-  
+
   ##============================================================================##
   ## CALCULATIONS
   ##============================================================================##
-  
+
   # set default value of sigmab
   if(missing(sigmab)) sigmab<- 0
-  
+
   # calculate  yu = log(ED) and su = se(logED)
   yu<- log(data$ED)
   su<- sqrt((data$ED_Error/data$ED)^2 + sigmab^2)
-  
-  # calculate starting values and weights 
+
+  # calculate starting values and weights
   sigma<- 0.15
   wu<- 1/(sigma^2 + su^2)
   delta<- sum(wu*yu)/sum(wu)
   n<- length(yu)
-  
+
   # compute mle's
   for(j in 1:200){
     delta<- sum(wu*yu)/sum(wu)
     sigma<- sigma*sqrt(sum( (wu^2)*(yu-delta)^2/sum(wu) ))
     wu<- 1/(sigma^2 + su^2)
-    
+
     # print iterations
     if(trace==TRUE) {
       print(round(c(delta, sigma),4))
     }
   }
-  
+
   # save parameters for terminal output
   out.delta<- exp(delta)
   out.sigma<- sigma*100
-  
-  # log likelihood	
+
+  # log likelihood
   llik<-  0.5*sum(log(wu)) - 0.5*sum(wu*(yu-delta)^2)
   # save parameter for terminal output
   out.llik<- round(llik,4)
   Lmax<- llik
-  
+
   # standard errors
   sedelta<- 1/sqrt(sum(wu))
   sesigma<- 1/sqrt(2*sigma*sum(wu^2))
-  
-  # save parameters for terminal output	
+
+  # save parameters for terminal output
   out.sedelta<- sedelta*100
   out.sesigma<- sesigma
-  
+
   # profile log likelihood
   sigmax<- sigma
   llik<- 0
   sig0<- max(0,sigmax-8*sesigma)
   sig1<- sigmax + 9.5*sesigma
   sig<- try(seq(sig0,sig1,sig1/1000), silent = TRUE)
-  
+
   if(class(sig) != "try-error") {
     # TODO: rewrite this loop as a function and maximise with mle2
     # ll is the actual log likelihood, llik is a vector of all ll
@@ -139,11 +184,11 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
     }
     llik<- llik[-1] - Lmax
   }#endif::try-error
-  
-  ##============================================================================##  
+
+  ##============================================================================##
   ## TERMINAL OUTPUT
-  ##============================================================================##  
-  
+  ##============================================================================##
+
   if(verbose==TRUE) {
     cat("\n [calc_CentralDose]")
     cat(paste("\n\n----------- meta data ----------------"))
@@ -157,34 +202,34 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
     cat(paste("\n OD [%]:                 ",round(out.sigma,2)))
     cat(paste("\n SE:                     ",if(class(sig) != "try-error") {
       round(out.sesigma,4)*100 } else {"-"}))
-    cat(paste("\n-------------------------------------\n\n"))  
+    cat(paste("\n-------------------------------------\n\n"))
   }
-  
-  ##============================================================================##  
+
+  ##============================================================================##
   ## RETURN VALUES
   ##============================================================================##
-  
+
   if(class(sig) == "try-error") {
     out.sigma<- 0
     out.sesigma<- NA
   }
-  
+
   summary<- data.frame(de=out.delta,
                        de_err=out.delta*out.sedelta/100,
                        OD=out.sigma,
                        OD_err=out.sesigma*100,
                        Lmax=Lmax)
-  
+
   call<- sys.call()
   args<- list(log="TRUE", sigmab=sigmab)
-  
+
   newRLumResults.calc_CentralDose<- set_RLum.Results(
     data = list(summary = summary,
                 data = data,
                 args = args,
                 call = call,
                 profile=data.frame(sig=sig, llik=llik)))
-  
+
   ##=========##
   ## PLOTTING
   if(plot==TRUE) {
@@ -192,64 +237,7 @@ calc_CentralDose<- structure(function( # Apply the central age model (CAM) after
       try(plot_RLum.Results(newRLumResults.calc_CentralDose, ...))
     }#endif::try-error
   }#endif::plot
-  
+
   invisible(newRLumResults.calc_CentralDose)
-  ### Returns a plot (optional) and terminal output. In addition an 
-  ### \code{\linkS4class{RLum.Results}} object is 
-  ### returned containing the following element:
-  ###
-  ### \item{summary}{\link{data.frame} summary of all relevant model results.}
-  ### \item{data}{\link{data.frame} original input data}
-  ### \item{args}{\link{list} used arguments}
-  ### \item{call}{\link{call} the function call}
-  ### \item{profile}{\link{data.frame} the log likelihood profile for sigma}
-  ###
-  ### The output should be accessed using the function 
-  ### \code{\link{get_RLum.Results}}
-  
-  
-  ##details<<
-  ## This function uses the equations of Galbraith et al. (1999,  358-359). 
-  ## The parameter \code{sigma} is estimated using the maximum likelihood 
-  ## approach. A detailed explanation on maximum likelihood estimation can be 
-  ## found in the appendix of Galbraith & Laslett (1993,  468-470)
-  
-  ##references<<
-  ## Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
-  ## track ages. Nuclear Tracks Radiation Measurements 4,  459-470. \cr \cr
-  ## Galbraith, R.F., Roberts, R.G., Laslett, G.M., Yoshida, H. & Olley, J.M., 
-  ## 1999. Optical dating of single grains of quartz from Jinmium rock shelter, 
-  ## northern Australia. Part I: experimental design and statistical models. 
-  ## Archaeometry 41,  339-364. \cr \cr
-  ## Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent 
-  ## dose and error calculation and display in OSL dating: An overview and some 
-  ## recommendations. Quaternary Geochronology 11,  1-27. \cr \cr
-  ## \bold{Further reading} \cr \cr
-  ## Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain 
-  ## equivalent dose (De) distributions: Implications for OSL dating of sediment
-  ## mixtures. Quaternary Geochronology 4,  204-230. \cr \cr
-  ## Bailey, R.M. & Arnold, L.J., 2006. Statistical modelling of single grain 
-  ## quartz De distributions and an assessment of procedures for estimating 
-  ## burial dose. Quaternary Science Reviews 25,  2475-2502. \cr \cr
-  ## Cunningham, A.C. & Wallinga, J., 2012. Realizing the potential of fluvial 
-  ## archives using robust OSL chronologies. Quaternary Geochronology 12,
-  ##  98-106. \cr \cr
-  ## Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing 
-  ## the reproducibility and accuracy of optical dating of fluvial deposits. 
-  ## Quaternary Geochronology, 1  109-120. \cr \cr
-  ## Rodnight, H., 2008. How many equivalent dose values are needed to obtain a 
-  ## reproducible distribution?. Ancient TL 26,  3-10.
-  
-  ##seealso<<
-  ## \code{\link{plot}}, \code{\link{calc_CommonDose}}, 
-  ## \code{\link{calc_FiniteMixture}}, \code{\link{calc_FuchsLang2001}},
-  ## \code{\link{calc_MinDose}}
-  
-},  ex=function(){
-  ##load example data
-  data(ExampleData.DeValues, envir = environment())
-  
-  ##apply the central dose model
-  calc_CentralDose(ExampleData.DeValues$CA1)
-  
-})#END OF STRUCTURE
+
+}

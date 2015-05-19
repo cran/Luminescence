@@ -1,117 +1,179 @@
-calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves
-  ### Calculate Lx/Tx ratios from a given set of CW-OSL curves.
-
-  # ===========================================================================
-  ##author<<
-  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France) \cr
-
-  ##section<<
-  ## version 0.5.0
-  # ===========================================================================
-
+#' Calculate Lx/Tx ratio for CW-OSL curves
+#'
+#' Calculate Lx/Tx ratios from a given set of CW-OSL curves.
+#'
+#' The integrity of the chosen values for the signal and background integral is
+#' checked by the function; the signal integral limits have to be lower than
+#' the background integral limits. If a \link{vector} is given as input instead
+#' of a \link{data.frame}, an artificial \code{data.frame} is produced. The
+#' error calculation is done according to Galbraith (2002).\cr
+#'
+#' \bold{background.count.distribution}\cr
+#'
+#' This argument allows selecting the distribution assumption that is used for
+#' the error calculation. According to Galbraith (2002, 2014) the background
+#' counts may be overdispersed (i.e. do not follow a poisson distribution,
+#' which is assumed for the photomultiplier counts). In that case (might be the
+#' normal case) it has to be accounted for the overdispersion by estimating
+#' \eqn{\sigma^2} (i.e. the overdispersion value). Therefore the relative
+#' standard error is calculated as:\cr\cr (a) \code{poisson}\cr
+#' \deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2)/Y_{0} - Y_{1}/k} (b)
+#' \code{non-poisson}\cr \deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2 +
+#' \sigma^2(1+1/k))/Y_{0} - Y_{1}/k}
+#'
+#' \bold{Please note that when using the early background subtraction method in combination with the
+#' 'non-poisson' distribution argument, the corresponding Lx/Tx error may considerably increase due
+#' to a high sigmab value. Please check whether this is valid for your data set and  if necessary
+#' consider to provide an own sigmab value using the corresponding argument \code{sigmab}.}
+#'
+#' @param Lx.data \code{\linkS4class{RLum.Data.Curve}} or \link{data.frame}
+#' (\bold{required}): requires a CW-OSL shine down curve (x = time, y = counts)
+#'
+#' @param Tx.data \code{\linkS4class{RLum.Data.Curve}} or \link{data.frame}
+#' (optional): requires a CW-OSL shine down curve (x = time, y = counts). If no
+#' input is given the Tx.data will be treated as \code{NA} and no Lx/Tx ratio
+#' is calculated.
+#'
+#' @param signal.integral \link{vector} (\bold{required}): vector with the
+#' limits for the signal integral.
+#'
+#' @param background.integral \link{vector} (\bold{required}): vector with the
+#' bounds for the background integral.
+#'
+#' @param background.count.distribution \link{character} (with default): Sets
+#' the count distribution assumed for the error calculation. Possible arguments
+#' \code{poisson} or \code{non-poisson}. See details for further information
+#'
+#' @param sigmab \link{numeric} (optional): Option to set a manual value for
+#' the overdispersion (for LnTx and TnTx), used for the Lx/Tx error
+#' calculation. The value should be provided as absolute squared count values,
+#' e.g. \code{sigmab = c(300,300)}. Note: If only one value is provided this
+#' value is taken for both (LnTx and TnTx) signals.
+#'
+#' @return Returns an S4 object of type \code{\linkS4class{RLum.Results}}. Slot
+#' \code{data} contains a \code{\link{list}} with the following structure:\cr $
+#' LxTx.table (data.frame) .. $ LnLx \cr .. $ LnLx.BG \cr .. $ TnTx \cr .. $
+#' TnTx.BG \cr .. $ Net_LnLx \cr .. $ Net_LnLx.Error\cr .. $ Net_TnTx.Error\cr
+#' .. $ LxTx\cr .. $ LxTx.Error \cr $ calc.parameters (list)\cr .. $
+#' sigmab.LnTx\cr .. $ sigmab.TnTx\cr .. $ k
+#'
+#' @note The results of this function have been cross-checked with the Analyst
+#' (vers. 3.24b). Access to the results object via
+#' \code{\link{get_RLum.Results}}.
+#'
+#' @section Function version: 0.5.1
+#'
+#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
+#' (France)
+#'
+#' @seealso \code{\linkS4class{RLum.Data.Curve}},
+#' \code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}},
+#' \code{\link{analyse_SAR.CWOSL}}
+#'
+#'  @references Duller, G., 2007. Analyst.
+#' \url{http://www.nutech.dtu.dk/english/~/media/Andre_Universitetsenheder/Nutech/Produkter\%20og\%20services/Dosimetri/radiation_measurement_instruments/tl_osl_reader/Manuals/analyst_manual_v3_22b.ashx}\cr
+#'
+#' Galbraith, R.F., 2002. A note on the variance of a background-corrected OSL
+#' count. Ancient TL, 20 (2), 49-51.
+#'
+#' Galbraith, R.F., 2014. A further note on the variance of a
+#' background-corrected OSL count. Ancient TL, 31 (2), 1-3.
+#' @keywords datagen
+#' @examples
+#'
+#'
+#' ##load data
+#' data(ExampleData.LxTxOSLData, envir = environment())
+#'
+#' ##calculate Lx/Tx ratio
+#' results <- calc_OSLLxTxRatio(Lx.data, Tx.data, signal.integral = c(1:2),
+#'                              background.integral = c(85:100))
+#'
+#' ##get results object
+#' get_RLum.Results(results)
+#'
+#'
+calc_OSLLxTxRatio <- function(
   Lx.data,
-  ### \code{\linkS4class{RLum.Data.Curve}} or \link{data.frame} (\bold{required}): requires a CW-OSL shine down curve
-  ### (x = time, y = counts)
-
   Tx.data,
-  ### \code{\linkS4class{RLum.Data.Curve}} or \link{data.frame} (optional): requires a CW-OSL shine down curve
-  ### (x = time, y = counts). If no input is given the Tx.data will
-  ### be treated as \code{NA} and no Lx/Tx ratio is calculated.
-
   signal.integral,
-  ### \link{vector} (\bold{required}): vector with the limits
-  ### for the signal integral.
-
   background.integral,
-  ### \link{vector} (\bold{required}): vector with the bounds for the
-  ### background integral.
-
   background.count.distribution = "non-poisson",
-  ### \link{character} (with default): Sets the count distribution assumed for the
-  ### error calculation. Possible arguments \code{poisson} or \code{non-poisson}.
-  ### See details for further information
-
   sigmab
-  ### \link{numeric} (optional): Option to set a manual value for the overdispersion (for LnTx and
-  ### TnTx), used for the Lx/Tx error calculation. The value should be provided as absolute
-  ### squared count values, e.g. \code{sigmab = c(300,300)}.
-  ### Note: If only one value is provided
-  ### this value is taken for both (LnTx and TnTx) signals.
-
 ){
-
 
   ##--------------------------------------------------------------------------##
   ##(1) - integrity checks
 
 
-   if(missing(Tx.data) == FALSE){
+  if(missing(Tx.data) == FALSE){
 
-     ##(a) - check data type
-     if(is(Lx.data)[1]!=is(Tx.data)[1]){
-       stop("[calc_OSLLxTxRatio()] Data type of Lx and Tx data differs!")
-     }
-
-     ##(b) - test if data.type is valid in general
-
-     if(is(Lx.data)[1] == "RLum.Data.Curve"){
-
-        Lx.data <- as(Lx.data, "data.frame")
-        Tx.data <- as(Tx.data, "data.frame")
-
-
-     }else{
-
-     ##go further
-     if((is(Lx.data)[1] != "data.frame" &
-         is(Lx.data)[1] != "numeric") &
-         is(Lx.data)[1] != "matrix"){
-       stop("[calc_OSLLxTxRatio()] Data type error! Required types are data.frame or numeric vector.")
-     }
+    ##(a) - check data type
+    if(is(Lx.data)[1]!=is(Tx.data)[1]){
+      stop("[calc_OSLLxTxRatio()] Data type of Lx and Tx data differs!")
     }
 
-     ##(c) - convert vector to data.frame if nescessary
-     if(is(Lx.data)[1] != "data.frame" &
-        is(Lx.data)[1] != "matrix"){
-       Lx.data <- data.frame(x=1:length(Lx.data),y=Lx.data)
-       Tx.data <- data.frame(x=1:length(Tx.data),y=Tx.data)
-     }
+    ##(b) - test if data.type is valid in general
 
-     ##(d) - check if Lx and Tx curves have the same channel length
-     if(length(Lx.data[,2]) != length(Tx.data[,2])){
-       stop("[calc_OSLLxTxRatio()] Channel number of Lx and Tx data differs!")}
+    if(is(Lx.data)[1] == "RLum.Data.Curve"){
 
-   }else{
+      Lx.data <- as(Lx.data, "data.frame")
+      Tx.data <- as(Tx.data, "data.frame")
+
+
+    }else{
+
+      ##go further
+      if((is(Lx.data)[1] != "data.frame" &
+            is(Lx.data)[1] != "numeric") &
+           is(Lx.data)[1] != "matrix"){
+        stop("[calc_OSLLxTxRatio()] Data type error! Required types are data.frame or numeric vector.")
+      }
+    }
+
+    ##(c) - convert vector to data.frame if nescessary
+    if(is(Lx.data)[1] != "data.frame" &
+         is(Lx.data)[1] != "matrix"){
+      Lx.data <- data.frame(x=1:length(Lx.data),y=Lx.data)
+      Tx.data <- data.frame(x=1:length(Tx.data),y=Tx.data)
+    }
+
+    ##(d) - check if Lx and Tx curves have the same channel length
+    if(length(Lx.data[,2]) != length(Tx.data[,2])){
+      stop("[calc_OSLLxTxRatio()] Channel number of Lx and Tx data differs!")}
+
+  }else{
 
     Tx.data<-data.frame(x=NA,y=NA)
     if(is(Lx.data)[1]!="data.frame"){Lx.data<-data.frame(x=1:length(Lx.data),y=Lx.data)}
 
-   }#endif::missing Tx.data
+  }#endif::missing Tx.data
 
-   ##(e) - check if signal integral is valid
-   if(min(signal.integral) < 1 | max(signal.integral>length(Lx.data[,2]))){
-     stop("[calc_OSLLxTxRatio()] Signal.integral is not valid!")}
+  ##(e) - check if signal integral is valid
+  if(min(signal.integral) < 1 | max(signal.integral>length(Lx.data[,2]))){
+    stop("[calc_OSLLxTxRatio()] Signal.integral is not valid!")}
 
-   ##(f) - check if background integral is valid
-   if(min(background.integral)<1 | max(background.integral>length(Lx.data[,2]))){
-     stop(paste("[calc_OSLLxTxRatio()] Background.integral is not valid! Max: ",length(Lx.data[,2]),sep=""))}
+  ##(f) - check if background integral is valid
+  if(min(background.integral)<1 | max(background.integral>length(Lx.data[,2]))){
+    stop(paste("[calc_OSLLxTxRatio()] Background.integral is not valid! Max: ",length(Lx.data[,2]),sep=""))}
 
-   ##(g) - check if signal and background integral overlapping
-   if(min(background.integral)<=max(signal.integral)){
-     stop("[calc_OSLLxTxRatio()] Overlapping of 'signal.integral' and 'background.integral' is not permitted!")}
+  ##(g) - check if signal and background integral overlapping
+  if(min(background.integral)<=max(signal.integral)){
+    stop("[calc_OSLLxTxRatio()] Overlapping of 'signal.integral' and 'background.integral' is not permitted!")}
 
 
-   ##check sigmab
-   if(!missing(sigmab)){
+  ##check sigmab
+  if (!missing(sigmab)) {
+    if (!is.null(sigmab)) {
+      if (!is(sigmab, "numeric")) {
+        stop("[calc_OSLLxTxRatio()] 'sigmab' has to be of type numeric.")
+      }
 
-     if(!is(sigmab, "numeric")){
-       stop("[calc_OSLLxTxRatio()] 'sigmab' has to be of type numeric.")
-     }
-
-     if(length(sigmab)>2){
-       stop("[calc_OSLLxTxRatio()] Maximum allowed vector length for 'sigmab' is 2.")
-     }
-   }
+      if (length(sigmab) > 2) {
+        stop("[calc_OSLLxTxRatio()] Maximum allowed vector length for 'sigmab' is 2.")
+      }
+    }
+  }
 
 
   ##--------------------------------------------------------------------------##
@@ -156,27 +218,27 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves
   ## Galbraith (2002), Galbraith (2014)
   ## If else condition for the case that k < 2
 
-   if(round(k,digits = 1) >= 2 & ((min(background.integral) + length(signal.integral)*(2+1)) <= length(Lx.curve))){
+  if(round(k,digits = 1) >= 2 & ((min(background.integral) + length(signal.integral)*(2+1)) <= length(Lx.curve))){
 
     ##(b)(1)(1)
     ## note that m = n*k = multiple of background.integral from signal.integral
     Y.i <- sapply(0:round(k,digits=0), function(i){
       sum(Lx.curve[
         (min(background.integral)+length(signal.integral)*i):
-        (min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
-   })
+          (min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
+    })
 
-   Y.i <- na.exclude(Y.i)
-   sigmab.LnLx <- abs(var(Y.i) - mean(Y.i))  ##sigmab is denoted as sigma^2 = s.Y^2-Y.mean
-                                        ##therefore here absolute values are given
+    Y.i <- na.exclude(Y.i)
+    sigmab.LnLx <- abs(var(Y.i) - mean(Y.i))  ##sigmab is denoted as sigma^2 = s.Y^2-Y.mean
+    ##therefore here absolute values are given
 
-   ##(b)(1)(2)
-   ## also for the TnTx signal
-   Y.i_TnTx <- sapply(0:round(k,digits=0), function(i){
-    sum(Tx.curve[
-      (min(background.integral)+length(signal.integral)*i):
-      (min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
-  })
+    ##(b)(1)(2)
+    ## also for the TnTx signal
+    Y.i_TnTx <- sapply(0:round(k,digits=0), function(i){
+      sum(Tx.curve[
+        (min(background.integral)+length(signal.integral)*i):
+          (min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
+    })
 
     Y.i_TnTx <- na.exclude(Y.i_TnTx)
     sigmab.TnTx <- abs(var(Y.i_TnTx) - mean(Y.i_TnTx))
@@ -194,27 +256,25 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves
     }
 
     sigmab.LnLx<- abs((var(Lx.curve[background.integral]) -
-                   mean(Lx.curve[background.integral]))*n)
+                         mean(Lx.curve[background.integral]))*n)
     sigmab.TnTx <- abs((var(Tx.curve[background.integral]) -
-                      mean(Tx.curve[background.integral]))*n)
+                          mean(Tx.curve[background.integral]))*n)
 
   }
 
   ##account for a manually set sigmab value
-  if(!missing(sigmab)){
-
-      if(length(sigmab)==2){
-
+  if (!missing(sigmab)) {
+    if (!is.null(sigmab)) {
+      if (length(sigmab) == 2) {
         sigmab.LnLx <- sigmab[1]
         sigmab.TnTx <- sigmab[2]
 
       }else{
-
         sigmab.LnLx <- sigmab[1]
         sigmab.TnTx <- sigmab[1]
 
       }
-
+    }
   }
 
   ##(c)
@@ -234,12 +294,12 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves
 
     ##(c.2) estimate relative standard error for a non-poisson distribution
     if(background.count.distribution != "non-poisson"){
-    warning("Unknown value for background.count.distribution. A non-poisson distribution is assumed!")}
+      warning("Unknown method for background.count.distribution. A non-poisson distribution is assumed!")}
 
     LnLx.relError <- sqrt(Y.0 + Y.1/k^2 + sigmab.LnLx*(1+1/k))/
-                          (Y.0 - Y.1/k)
+      (Y.0 - Y.1/k)
     TnTx.relError <- sqrt(Y.0_TnTx + Y.1_TnTx/k^2 + sigmab.TnTx*(1+1/k))/
-                          (Y.0_TnTx - Y.1_TnTx/k)
+      (Y.0_TnTx - Y.1_TnTx/k)
 
   }
 
@@ -275,7 +335,7 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves
 
   ##calculate Ln/Tx error
   LxTx.relError <- sqrt(LnLx.relError^2 + TnTx.relError^2)
-  LxTx.Error <- LxTx * LxTx.relError
+  LxTx.Error <- abs(LxTx * LxTx.relError)
 
   ##return combined values
   temp <- cbind(LnLxTnTx,LxTx,LxTx.Error)
@@ -289,80 +349,4 @@ calc_OSLLxTxRatio<- structure(function(#Calculate Lx/Tx ratio for CW-OSL curves
 
   invisible(temp.return)
 
-
-  # DOCUMENTATION - INLINEDOC LINES -----------------------------------------
-
-  ##details<<
-  ## The integrity of the chosen values for the signal and background integral
-  ## is checked by the function;
-  ## the signal integral limits have to be lower than the background integral limits.
-  ## If a \link{vector} is given as input instead of a \link{data.frame},
-  ## an artificial \code{data.frame}
-  ## is produced. The error calculation is done according to Galbraith (2002).\cr
-  ##
-  ## \bold{background.count.distribution}\cr
-  ##
-  ## This argument allows selecting the distribution assumption that is used for
-  ## the error calculation. According to Galbraith (2002, 2014) the background
-  ## counts may be overdispersed (i.e. do not follow a poisson distribution, which
-  ## is assumed for the photomultiplier counts).
-  ## In that case (might be the normal case) it has to be accounted for the
-  ## overdispersion by estimating \eqn{\sigma^2} (i.e. the overdispersion value).
-  ## Therefore the relative standard error is calculated as:\cr\cr
-  ## (a) \code{poisson}\cr
-  ## \deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2)/Y_{0} - Y_{1}/k}
-  ## (b) \code{non-poisson}\cr
-  ## \deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2 + \sigma^2(1+1/k))/Y_{0} - Y_{1}/k}
-
-
-  ##value<<
-  ## Returns an S4 object of type \code{\linkS4class{RLum.Results}}.
-  ## Slot \code{data} contains a \code{\link{list}} with the following structure:\cr
-  ## $ LxTx.table (data.frame)
-  ## .. $ LnLx  \cr
-  ## .. $ LnLx.BG   \cr
-  ## .. $ TnTx    \cr
-  ## .. $ TnTx.BG    \cr
-  ## .. $ Net_LnLx   \cr
-  ## .. $ Net_LnLx.Error\cr
-  ## .. $ Net_TnTx.Error\cr
-  ## .. $ LxTx\cr
-  ## .. $ LxTx.Error \cr
-  ## $ calc.parameters (list)\cr
-  ## .. $ sigmab.LnTx\cr
-  ## .. $ sigmab.TnTx\cr
-  ## .. $ k
-
-  ##references<<
-  ## Duller, G., 2007. Analyst. \url{http://www.nutech.dtu.dk/english/~/media/Andre_Universitetsenheder/Nutech/Produkter%20og%20services/Dosimetri/radiation_measurement_instruments/tl_osl_reader/Manuals/analyst_manual_v3_22b.ashx}\cr
-  ##
-  ## Galbraith, R.F., 2002. A note on the variance of a background-corrected
-  ## OSL count. Ancient TL, 20 (2), 49-51.
-  ##
-  ## Galbraith, R.F., 2014. A further note on the variance of a background-corrected OSL count.
-  ## Ancient TL, 31 (2), 1-3.
-
-  ##note<<
-  ## The results of this function have been cross-checked with the Analyst (vers. 3.24b).
-  ## Access to the results object via \code{\link{get_RLum.Results}}.
-
-  ##seealso<<
-  ## \code{\linkS4class{RLum.Data.Curve}}, \code{\link{Analyse_SAR.OSLdata}}, \code{\link{plot_GrowthCurve}},
-  ## \code{\link{analyse_SAR.CWOSL}}
-
-  ##keyword<<
-  ## datagen
-
-}, ex=function(){
-
-  ##load data
-  data(ExampleData.LxTxOSLData, envir = environment())
-
-  ##calculate Lx/Tx ratio
-  results <- calc_OSLLxTxRatio(Lx.data, Tx.data, signal.integral = c(1:2),
-                               background.integral = c(85:100))
-
-  ##get results object
-  get_RLum.Results(results)
-
-})#END OF STRUCTURE
+}

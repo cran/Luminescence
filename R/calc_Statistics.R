@@ -1,31 +1,43 @@
-calc_Statistics <- structure(function(# Function to calculate statistic measures
-  ### This function calculates a number of descriptive statistics for De-data,
-  ### most fundamentally using error-weighted approaches.
-
-  # ===========================================================================
-  ##author<<
-  ## Michael Dietze, GFZ Potsdam (Germany),\cr
-
-  ##section<<
-  ## version 0.1.1
-  # ===========================================================================
-
+#' Function to calculate statistic measures
+#'
+#' This function calculates a number of descriptive statistics for De-data,
+#' most fundamentally using error-weighted approaches.
+#'
+#'
+#' @param data \code{\link{data.frame}} or \code{\linkS4class{RLum.Results}}
+#' object (required): for \code{data.frame} two columns: De (\code{data[,1]})
+#' and De error (\code{data[,2]}). To plot several data sets in one plot the
+#' data sets must be provided as \code{list}, e.g. \code{list(data.1, data.2)}.
+#' @param weight.calc \code{\link{character}}: type of weight calculation. One
+#' out of \code{"reciprocal"} (weight is 1/error), \code{"square"} (weight is
+#' 1/error^2).
+#' @param na.rm \code{\link{logical}} (with default): indicating whether NA
+#' values should be stripped before the computation proceeds.
+#' @return Returns a list with weighted and unweighted statistic measures.
+#' @section Function version: 0.1.2
+#' @author Michael Dietze, GFZ Potsdam (Germany)
+#' @examples
+#'
+#' ## load example data
+#' data(ExampleData.DeValues, envir = environment())
+#'
+#' ## show a rough plot of the data to illustrate the non-normal distribution
+#' plot_KDE(ExampleData.DeValues$BT998)
+#'
+#' ## calculate statistics and show output
+#' str(calc_Statistics(ExampleData.DeValues$BT998))
+#'
+#' ## now the same for 10000 normal distributed random numbers with equal errors
+#' x <- as.data.frame(cbind(rnorm(n = 10^5, mean = 0, sd = 1),
+#'                          rep(0.001, 10^5)))
+#'
+#' ## note the congruent results for weighted and unweighted measures
+#' str(calc_Statistics(x))
+#'
+calc_Statistics <- function(
   data,
-  ### \code{\link{data.frame}} or \code{\linkS4class{RLum.Results}} object
-  ### (required): for \code{data.frame} two columns: De (\code{data[,1]})
-  ### and De error (\code{data[,2]}). To plot several data sets in one plot
-  ### the data sets must be provided as \code{list}, e.g.
-  ### \code{list(data.1, data.2)}.
-
   weight.calc = "reciprocal",
-  ### \code{\link{character}}: type of weight calculation. One out of
-  ### \code{"reciprocal"} (weight is 1/error), \code{"square"} (weight is
-  ### 1/error^2).
-
   na.rm = TRUE
-  ### \code{\link{logical}} (with default):  indicating whether NA values should be stripped before
-  ### the computation proceeds.
-
 ) {
   ## Check input data
   if(is(data, "RLum.Results") == FALSE &
@@ -48,7 +60,7 @@ calc_Statistics <- structure(function(# Function to calculate statistic measures
     data <- cbind(data, rep(NA, length(data)))
   }
 
-  ## check/set weight calculation type
+  ## replace Na values in error by 0
   data[is.na(data[,2]),2] <- 0
 
   if(sum(data[,2]) == 0) {
@@ -135,39 +147,21 @@ calc_Statistics <- structure(function(# Function to calculate statistic measures
   S.weighted <- list(n = S.n,
                      mean = S.wg.mean,
                      median = S.wg.median,
-                     sd.abs = S.sd.abs,
-                     sd.rel = S.sd.rel,
-                     se.abs = S.se.abs,
-                     se.rel = S.se.rel)
+                     sd.abs = S.wg.sd.abs,
+                     sd.rel = S.wg.sd.rel,
+                     se.abs = S.wg.se.abs,
+                     se.rel = S.wg.se.rel)
 
   S.unweighted <- list(n = S.n,
                        mean = S.mean,
                        median = S.median,
-                       sd.abs = S.wg.sd.abs,
-                       sd.rel = S.wg.sd.rel,
-                       se.abs = S.wg.se.abs,
-                       se.rel = S.wg.se.rel,
+                       sd.abs = S.sd.abs,
+                       sd.rel = S.sd.rel,
+                       se.abs = S.se.abs,
+                       se.rel = S.se.rel,
                        skewness = S.skewness,
                        kurtosis = S.kurtosis)
 
   list(weighted = S.weighted,
        unweighted = S.unweighted)
-  ### Returns a list with weighted and unweighted statistic measures.
-
-}, ex=function(){
-  ## load example data
-  data(ExampleData.DeValues, envir = environment())
-
-  ## show a rough plot of the data to illustrate the non-normal distribution
-  plot_KDE(ExampleData.DeValues$BT998)
-
-  ## calculate statistics and show output
-  str(calc_Statistics(ExampleData.DeValues$BT998))
-
-  ## now the same for 10000 normal distributed random numbers with equal errors
-  x <- as.data.frame(cbind(rnorm(n = 10^5, mean = 0, sd = 1),
-                           rep(0.001, 10^5)))
-
-  ## note the congruent results for weighted and unweighted measures
-  str(calc_Statistics(x))
-})
+}

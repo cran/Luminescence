@@ -1,40 +1,78 @@
-merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects or Risoe BIN-files
-  ### Function allows merging Risoe BIN/BINX files or Risoe.BINfileData objects.
-
-  # ===========================================================================
-  ##author<<
-  ## Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France),\cr
-
-  ##section<<
-  ## version 0.2.2
-  # ===========================================================================
-
+#' Merge Risoe.BINfileData objects or Risoe BIN-files
+#'
+#' Function allows merging Risoe BIN/BINX files or Risoe.BINfileData objects.
+#'
+#' The function allows merging different measurements to one file or one
+#' object.\cr The record IDs are recalculated for the new object. Other values
+#' are kept for each object. The number of input objects is not limited. \cr
+#'
+#' \code{position.number.append.gap} option \cr
+#'
+#' If the option \code{keep.position.number = FALSE} is used, the position
+#' numbers of the new data set are recalculated by adding the highest position
+#' number of the previous data set to the each position number of the next data
+#' set. For example: The highest position number is 48, then this number will
+#' be added to all other position numbers of the next data set (e.g. 1 + 48 =
+#' 49)\cr
+#'
+#' However, there might be cases where an additional addend (summand) is needed
+#' before the next position starts. Example: \cr
+#'
+#' Position number set (A): \code{1,3,5,7}\cr Position number set (B):
+#' \code{1,3,5,7} \cr
+#'
+#' With no additional summand the new position numbers would be:
+#' \code{1,3,5,7,8,9,10,11}. That might be unwanted. Using the argument
+#' \code{position.number.append.gap = 1} it will become:
+#' \code{1,3,5,7,9,11,13,15,17}.
+#'
+#' @param input.objects \code{\link{character}} or
+#' \code{\linkS4class{Risoe.BINfileData}} (\bold{required}): Character vector
+#' with path and files names (e.g. \code{input.objects = c("path/file1.bin",
+#' "path/file2.bin")} or \code{\linkS4class{Risoe.BINfileData}} objects (e.g.
+#' \code{input.objects = c(object1, object2)})
+#' @param output.file \code{\link{character}} (optional): File output path and
+#' name. \cr If no value is given, a \code{\linkS4class{Risoe.BINfileData}} is
+#' returned instead of a file.
+#' @param keep.position.number \code{\link{logical}} (with default): Allows
+#' keeping the original position numbers of the input objects. Otherwise the
+#' position numbers are recalculated.
+#' @param position.number.append.gap \code{\link{integer}} (with default): Set
+#' the position number gap between merged BIN-file sets, if the option
+#' \code{keep.position.number = FALSE} is used. See details for further
+#' information.
+#' @return Returns a \code{file} or a \code{\linkS4class{Risoe.BINfileData}}
+#' object.
+#' @note The validity of the output objects is not further checked.
+#' @section Function version: 0.2.2
+#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
+#' (France)
+#' @seealso \code{\linkS4class{Risoe.BINfileData}}, \code{\link{readBIN2R}},
+#' \code{\link{writeR2BIN}}
+#' @references Duller, G., 2007. Analyst.
+#' @keywords IO manip
+#' @examples
+#'
+#'
+#' ##merge two objects
+#' data(ExampleData.BINfileData, envir = environment())
+#'
+#' object1 <- CWOSL.SAR.Data
+#' object2 <- CWOSL.SAR.Data
+#'
+#' object.new <- merge_Risoe.BINfileData(c(object1, object2))
+#'
+#'
+#'
+merge_Risoe.BINfileData <- function(
   input.objects,
-  ### \code{\link{character}} or \code{\linkS4class{Risoe.BINfileData}} (\bold{required}):
-  ### Character vector with path and files names
-  ### (e.g. \code{input.objects = c("path/file1.bin", "path/file2.bin")}
-  ### or \code{\linkS4class{Risoe.BINfileData}} objects
-  ### (e.g. \code{input.objects = c(object1, object2)})
-
   output.file,
-  ### \code{\link{character}} (optional): File output path and name. \cr
-  ### If no value is given, a \code{\linkS4class{Risoe.BINfileData}}
-  ### is returned instead of a file.
-
   keep.position.number = FALSE,
-  ### \code{\link{logical}} (with default): Allows keeping the original
-  ### position numbers of the input objects. Otherwise the position numbers
-  ### are recalculated.
-
   position.number.append.gap = 0
-  ### \code{\link{integer}} (with default): Set the position number gap between
-  ### merged BIN-file sets, if the option \code{keep.position.number = FALSE} is
-  ### used. See details for further information.
-
 ){
 
 
-# Integrity Checks --------------------------------------------------------
+  # Integrity Checks --------------------------------------------------------
 
   if(length(input.objects) < 2){
 
@@ -44,15 +82,15 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
 
   if(is(input.objects, "character") == TRUE){
 
-      for(i in 1:length(input.objects)){
+    for(i in 1:length(input.objects)){
 
-        if(file.exists(input.objects[i])==FALSE){
+      if(file.exists(input.objects[i])==FALSE){
 
-          stop("[merge_Risoe.BINfileData()] File",input.objects[i],"does not exists!")
-
-        }
+        stop("[merge_Risoe.BINfileData()] File",input.objects[i],"does not exists!")
 
       }
+
+    }
 
   }else{
 
@@ -68,17 +106,17 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
 
       }
 
-      }else{
+    }else{
 
-        stop("[merge_Risoe.BINfileData()]
+      stop("[merge_Risoe.BINfileData()]
                 Error: Input object is not a 'character' nor a 'list'!")
 
-      }
+    }
 
   }
 
 
-# Import Files ------------------------------------------------------------
+  # Import Files ------------------------------------------------------------
 
 
 
@@ -98,11 +136,11 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
 
   }else{
 
-   temp <- input.objects
+    temp <- input.objects
 
   }
 
-# Get POSITION vales -------------------------------------------------------
+  # Get POSITION vales -------------------------------------------------------
 
   ##grep maximum position value from the first file
   temp.position.max <- max(temp[[1]]@METADATA[, "POSITION"])
@@ -121,7 +159,7 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
 
   temp.position.values <- c(temp[[1]]@METADATA[, "POSITION"], temp.position.values)
 
-# Get overall record length -----------------------------------------------
+  # Get overall record length -----------------------------------------------
 
   temp.record.length <- sum(sapply(1:length(temp), function(x){
 
@@ -130,44 +168,44 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
   }))
 
 
-# Merge Files -------------------------------------------------------------
+  # Merge Files -------------------------------------------------------------
 
-    ##loop for similar input objects
-    for(i in 1:length(input.objects)){
+  ##loop for similar input objects
+  for(i in 1:length(input.objects)){
 
-     if(exists("temp.new.METADATA") == FALSE){
+    if(exists("temp.new.METADATA") == FALSE){
 
-       temp.new.METADATA <- temp[[i]]@METADATA
-       temp.new.DATA <- temp[[i]]@DATA
+      temp.new.METADATA <- temp[[i]]@METADATA
+      temp.new.DATA <- temp[[i]]@DATA
 
 
-        if(is(try(temp[[i]]@.RESERVED, silent = TRUE)) == "try-error"){
+      if(is(try(temp[[i]]@.RESERVED, silent = TRUE)) == "try-error"){
 
-          temp.new.RESERVED <- list()
-
-        }else{
-
-          temp.new.RESERVED <- temp[[i]]@.RESERVED
-
-        }
+        temp.new.RESERVED <- list()
 
       }else{
 
-       temp.new.METADATA <- rbind(temp.new.METADATA, temp[[i]]@METADATA)
-       temp.new.DATA <- c(temp.new.DATA, temp[[i]]@DATA)
+        temp.new.RESERVED <- temp[[i]]@.RESERVED
 
-       if(is(try(temp[[i]]@.RESERVED, silent = TRUE)) == "try-error"){
+      }
 
-         temp.new.RESERVED <- c(temp.new.RESERVED, list())
+    }else{
 
-       }else{
+      temp.new.METADATA <- rbind(temp.new.METADATA, temp[[i]]@METADATA)
+      temp.new.DATA <- c(temp.new.DATA, temp[[i]]@DATA)
 
-         temp.new.RESERVED <- c(temp.new.RESERVED, temp[[i]]@.RESERVED)
+      if(is(try(temp[[i]]@.RESERVED, silent = TRUE)) == "try-error"){
 
-       }
+        temp.new.RESERVED <- c(temp.new.RESERVED, list())
 
-     }
+      }else{
+
+        temp.new.RESERVED <- c(temp.new.RESERVED, temp[[i]]@.RESERVED)
+
+      }
+
     }
+  }
 
 
   ##SET RECORD ID in METADATA
@@ -180,8 +218,8 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
 
   }
 
-##TODO version number?
-# Produce BIN file object -------------------------------------------------
+  ##TODO version number?
+  # Produce BIN file object -------------------------------------------------
 
   temp.new <- set_Risoe.BINfileData(
     METADATA = temp.new.METADATA,
@@ -192,7 +230,7 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
 
 
 
-# OUTPUT ------------------------------------------------------------------
+  # OUTPUT ------------------------------------------------------------------
 
   if(missing(output.file) == FALSE){
 
@@ -204,59 +242,4 @@ merge_Risoe.BINfileData <- structure(function(#Merge Risoe.BINfileData objects o
 
   }
 
-# DOCUMENTATION - INLINEDOC LINES -----------------------------------------
-
-##details<<
-## The function allows merging different measurements to one file or one object.\cr
-## The record IDs are recalculated for the new object. Other values
-## are kept for each object. The number of input objects is not limited. \cr
-##
-## \code{position.number.append.gap} option \cr
-##
-## If the option \code{keep.position.number = FALSE} is used, the position numbers
-## of the new data set are recalculated by adding the highest position
-## number of the previous data set to the each position number of the next data
-## set. For example: The highest position number is 48, then this number
-## will be added to all other position numbers of the next data set
-## (e.g. 1 + 48 = 49)\cr
-##
-## However, there might be cases where an additional addend (summand) is needed
-## before the next position starts. Example: \cr
-##
-## Position number set (A): \code{1,3,5,7}\cr
-## Position number set (B): \code{1,3,5,7} \cr
-##
-## With no additional summand the new position numbers would be:
-## \code{1,3,5,7,8,9,10,11}.
-## That might be unwanted. Using the argument \code{position.number.append.gap = 1}
-## it will become: \code{1,3,5,7,9,11,13,15,17}.
-
-##value<<
-## Returns a \code{file} or a \code{\linkS4class{Risoe.BINfileData}} object.
-
-##references<<
-## Duller, G., 2007. Analyst.
-
-##note<<
-## The validity of the output objects is not further checked.
-
-##seealso<<
-## \code{\linkS4class{Risoe.BINfileData}},
-## \code{\link{readBIN2R}}, \code{\link{writeR2BIN}}
-
-##keyword<<
-## IO
-## manip
-
-}, ex=function(){
-
-  ##merge two objects
-  data(ExampleData.BINfileData, envir = environment())
-
-  object1 <- CWOSL.SAR.Data
-  object2 <- CWOSL.SAR.Data
-
-  object.new <- merge_Risoe.BINfileData(c(object1, object2))
-
-
-})
+}

@@ -1,6 +1,161 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
-\section{Changes in version 0.4.3 (17th, 2015)}{
+\section{Changes in version 0.4.4 (19th, May 2015)}{
+
+
+  \subsection{Changes S4-objects, methods, classes}{
+   \itemize{
+
+      \item \code{merge_RLum.Results()} clear break implemented when objects cannot be merged.
+
+  }
+  }
+
+ \subsection{Bugfixes and changes}{
+
+
+  \itemize{
+
+  \item \code{analyse_SAR.CWOSL()}
+
+  \itemize{
+    \item Add support for \code{...} argument for \code{calc_OSLLxTxRatio()} arguments
+    \code{background.count.distribution} and \code{sigmab}.
+
+   }
+
+  \item \code{Analyse_SAR.OSLdata()}
+
+  \itemize{
+    \item Add support for \code{...} argument for \code{calc_OSLLxTxRatio()} arguments
+    \code{background.count.distribution} and \code{sigmab} similar as done for the function \code{analyse_SAR.CWOSL()}.
+
+   }
+
+  \item \code{calc_OSLLxTxRatio()}
+
+  \itemize{
+    \item 'LxTx.Error' could become negative, which is not meaningful by definition (corrected),
+    \item minor internal changes to allow for \code{sigmab = NULL}, which has the same
+    effect as a missing \code{sigmab} argument.
+
+   }
+
+  \item \code{calc_FadingCorr()}
+
+  \itemize{
+    \item Argument \code{seed} added to allow to recreate previously determined results by
+    using a similar seed of the R random number generator,
+    \item argument\code{n.MCruns} no allows an option \code{'auto'}. Using this mode the error
+    estimation is continued until a stable error is reached,
+    \item added argument \code{txtProgressBar},
+    \item output table enhanced by input options and values resulting from the new arguments.
+
+   }
+
+
+    \item \code{calc_Statistics()}
+
+    \itemize{
+    \item Wrongly assigned output values corrected.
+
+    }
+
+  \item \code{fit_CWCurve()}
+
+  \itemize{
+    \item 'component.contribution.matrix' is now returned as list, as otherwise the merging
+    of the objects will break.
+
+   }
+
+  \item \code{fit_LMCurve()}
+
+  \itemize{
+    \item 'component.contribution.matrix' is now returned as list, as otherwise the merging
+    of the objects will break.
+
+   }
+
+   \item \code{plot_GrowthCurve()}
+
+  \itemize{
+    \item Function crashed with unclear error if the number of regenerations points was <=3), fixed,
+    \item fitting is now allowed with at leat two regenerations points.
+
+   }
+
+   \item \code{plot_AbanicoPlot()}
+
+  \itemize{
+      \item Argument \code{na.exclude} changed to \code{na.rm},
+      \item add sample group specific colours for rugs,
+      \item summary and legend placement bugs for rotated abanico plot fixed,
+      \item labelling errors fixed,
+      \item argument \code{frame} added to abanico plot,
+      \item adjustment of colours for polygon and bar in abanico plot,
+      \item summary keyword list extended and corrected.
+
+
+   }
+
+  \item \code{plot_Histogram()}
+
+  \itemize{
+      \item Argument \code{na.exclude} changed to \code{na.rm},
+      \item summary keyword list extended and corrected.
+
+   }
+
+    \item \code{plot_KDE()}
+
+  \itemize{
+      \item Argument \code{na.exclude} changed to \code{na.rm},
+      \item argument weights removed,
+      \item summary keyword list extended and corrected.
+
+   }
+
+       \item \code{plot_RadialPlot()}
+
+  \itemize{
+      \item Argument \code{na.exclude} changed to \code{na.rm},
+      \item summary keyword list extended and corrected.
+
+   }
+
+
+
+  \item \code{plot_RLum.Analysis()}
+
+  \itemize{
+    \item Add \code{...} argument support \code{legend.pos = "ouside"} and \code{legend.col} for
+    argument \code{combine = TRUE}
+
+   }
+
+  \item \code{writeR2BIN()}
+
+  \itemize{
+    \item Function broke if information in SEQUENCE, COMMENT or USER was always NA. Corrected.
+
+  }
+
+   }
+
+}
+
+\subsection{Internals}{
+   \itemize{
+    \item Switch from inlinedocs to roxygen2 to build the manuals (#193),
+    \item remove dependency to package 'sp'.
+
+   }
+  }
+
+}
+
+\section{Changes in version 0.4.3 (17th, April 2015)}{
 
 \subsection{Note on the update}{
 

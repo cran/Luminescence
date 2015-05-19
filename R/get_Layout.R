@@ -1,31 +1,54 @@
-get_Layout <- structure(function( # Collection of layout definitions
-  ### This helper function returns a list with layout definitions for
-  ### homogeneous plotting.
-  
-  # ===========================================================================
-  ##author<<
-  ## Michael Dietze, GFZ Potsdam (Germany) \cr 
-  
-  ##section<<
-  ## version 0.1
-  # ===========================================================================
-  
+#' Collection of layout definitions
+#'
+#' This helper function returns a list with layout definitions for homogeneous
+#' plotting.
+#'
+#' The easiest way to create a user-specific layout definition is perhaps to
+#' create either an empty or a default layout object and fill/modify the
+#' definitions (\code{user.layout <- get_Layout(data = "empty")}).
+#'
+#' @param layout \code{\link{character}} or \code{\link{list}} object
+#' (required): name of the layout definition to be returned. If name is
+#' provided the respective definition is returned. One of the following
+#' supported layout definitions is possible: \code{"default"},
+#' \code{"journal.1"}, \code{"small"}, \code{"empty"}. User-specific layout
+#' definitions must be provided as a list object of predefined structure, see
+#' details.
+#' @return A list object with layout definitions for plot functions.
+#' @section Function version: 0.1
+#' @author Michael Dietze, GFZ Potsdam (Germany)
+#' @examples
+#'
+#' ## read example data set
+#' data(ExampleData.DeValues, envir = environment())
+#'
+#' ## show structure of the default layout definition
+#' layout.default <- get_Layout(layout = "default")
+#' str(layout.default)
+#'
+#' ## show colour definitions for Abanico plot, only
+#' layout.default$abanico$colour
+#'
+#' ## set Abanico plot title colour to orange
+#' layout.default$abanico$colour$main <- "orange"
+#'
+#' ## create Abanico plot with modofied layout definition
+#' plot_AbanicoPlot(data = ExampleData.DeValues,
+#'                  layout = layout.default)
+#'
+#' ## create Abanico plot with predefined layout "journal"
+#' plot_AbanicoPlot(data = ExampleData.DeValues,
+#'                  layout = "journal")
+#'
+get_Layout <- function(
   layout
-  ### \code{\link{character}} or \code{\link{list}} object (required): 
-  ### name of the layout definition to be returned. If name is provided
-  ### the respective definition is returned. One of the following 
-  ### supported layout definitions is possible: \code{"default"},
-  ### \code{"journal.1"}, \code{"small"}, \code{"empty"}. User-specific  
-  ### layout definitions must be provided as a list object of predefined 
-  ### structure, see details.
-  
 ) {
 
   ## pre-defined layout selections
   if(is.character(layout) == TRUE & length(layout) == 1) {
-    
+
     if(layout == "empty") {
-      
+
       # empty layout definition -------------------------------------------------
       layout = list(
         abanico = list(
@@ -60,7 +83,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             mtext   = numeric(1),
             summary = numeric(1), # optionally vector
             stats   = numeric(1), # optionally vector
-            legend  = numeric(1)  # optionally vector      
+            legend  = numeric(1)  # optionally vector
           ),
           font.deco = list(
             main    = character(1),
@@ -77,7 +100,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             mtext   = character(1),
             summary = character(1), # optionally vector
             stats   = character(1), # optionally vector
-            legend  = character(1) # optionally vector      
+            legend  = character(1) # optionally vector
           ),
           colour = list(
             main    = numeric(1), # plot title colour
@@ -98,6 +121,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             centrality = numeric(1), # Centrality line colour
             value.dot  = numeric(1), # De value dot colour
             value.bar  = numeric(1), # De value error bar colour
+            value.rug  = numeric(1), # De value rug colour
             poly.line  = numeric(1), # polygon line colour
             poly.fill  = numeric(1), # polygon fill colour
             bar.line   = numeric(1), # polygon line colour
@@ -128,6 +152,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             xtcl3           = numeric(1), # tick length in %
             ytcl            = numeric(1), # tick length in %
             ztcl            = numeric(1), # tick length in %
+            rugl            = numeric(1), # rug length in %
             mtext           = numeric(1), # line height in %
             summary.line    = numeric(1) # line height in %
           )),
@@ -181,6 +206,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             kde.fill        = numeric(1), # KDE fill colour
             value.dot       = numeric(1), # De value dot colour
             value.bar       = numeric(1), # De value error bar colour
+            value.rug       = numeric(1), # De value rug colour
             mean            = numeric(1), # mean line colour
             median          = numeric(1), # median line colour
             mean.weighted   = numeric(1), # weighted mean line colour
@@ -208,7 +234,7 @@ get_Layout <- structure(function( # Collection of layout definitions
         )
       )
     } else if(layout == "default") {
-      
+
       # default layout definition -----------------------------------------------
       layout = list(
         abanico = list(
@@ -243,7 +269,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             mtext   = 10,
             summary = 10, # optionally vector
             stats   = 10, # optionally vector
-            legend  = 10 # optionally vector      
+            legend  = 10 # optionally vector
           ),
           font.deco = list(
             main    = "bold",
@@ -260,7 +286,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             mtext   = "normal",
             summary = "normal", # optionally vector
             stats   = "normal", # optionally vector
-            legend  = "normal" # optionally vector      
+            legend  = "normal" # optionally vector
           ),
           colour = list(
             main    = 1, # plot title colour
@@ -281,10 +307,11 @@ get_Layout <- structure(function( # Collection of layout definitions
             centrality = 1, # Centrality line colour
             value.dot  = 1, # De value dot colour
             value.bar  = 1, # De value error bar colour
+            value.rug = 1, # De value rug colour
             poly.line  = NA, # polygon line colour
-            poly.fill  = "grey60", # polygon fill colour
+            poly.fill  = adjustcolor("grey75", alpha.f = 0.6), # polygon fill colour
             bar.line   = NA, # polygon line colour
-            bar.fill   = adjustcolor("grey90", alpha.f = 0.7), # polygon fill colour
+            bar.fill   = "grey60", # bar fill colour
             kde.line   = 1,
             kde.fill   = NA,
             grid.major = "grey80",
@@ -296,9 +323,9 @@ get_Layout <- structure(function( # Collection of layout definitions
             figure.height   = "auto", # figure height in mm
             margin = c(10, 10, 10, 10), # margin sizes in mm
             main.line       = 100, # line height in %
-            xlab1.line      = 100, # line height in %
-            xlab2.line      = 100, # line height in %
-            xlab3.line      = 100, # line height in %
+            xlab1.line      = 90, # line height in %
+            xlab2.line      = 90, # line height in %
+            xlab3.line      = 90, # line height in %
             ylab.line       = 100, # line height in %
             zlab.line       = 70, # line height in %
             xtck1.line      = 100, # line height in %
@@ -311,6 +338,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             xtcl3           = 100, # tick length in %
             ytcl            = 100, # tick length in %
             ztcl            = 100, # tick length in %
+            rugl            = 100, # rug length in %
             mtext           = 100, # line height in %
             summary.line    = 100 # line height in %
           )),
@@ -364,6 +392,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             kde.fill        = "none", # KDE fill colour
             value.dot       = 1, # De value dot colour
             value.bar       = 1, # De value error bar colour
+            value.rug       = 1, # De value rug colour
             mean   = 1, # mean line colour
             median = 1, # median line colour
             mean.weighted   = 1, # weighted mean line colour
@@ -391,7 +420,7 @@ get_Layout <- structure(function( # Collection of layout definitions
         )
       )
     } else if(layout == "journal") {
-      
+
       # journal layout definition -----------------------------------------------
       layout = list(
         abanico = list(
@@ -426,7 +455,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             mtext   = 6,
             summary = 6, # optionally vector
             stats   = 6, # optionally vector
-            legend  = 6 # optionally vector      
+            legend  = 6 # optionally vector
           ),
           font.deco = list(
             main    = "bold",
@@ -443,7 +472,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             mtext   = "normal",
             summary = "normal", # optionally vector
             stats   = "normal", # optionally vector
-            legend  = "normal" # optionally vector      
+            legend  = "normal" # optionally vector
           ),
           colour = list(
             main    = 1, # plot title colour
@@ -464,10 +493,11 @@ get_Layout <- structure(function( # Collection of layout definitions
             centrality = 1, # Centrality line colour
             value.dot  = 1, # De value dot colour
             value.bar  = 1, # De value error bar colour
+            value.rug  = 1, # De value rug colour
             poly.line  = NA, # polygon line colour
-            poly.fill  = "grey60", # polygon fill colour
+            poly.fill  = adjustcolor("grey75", alpha.f = 0.6), # polygon fill colour
             bar.line   = NA, # polygon line colour
-            bar.fill   = adjustcolor("grey90", alpha.f = 0.7), # polygon fill colour
+            bar.fill   = "grey60", # bar fill colour
             kde.line   = 1,
             kde.fill   = NA,
             grid.major = "grey80",
@@ -494,6 +524,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             xtcl3           = 50, # tick length in %
             ytcl            = 50, # tick length in %
             ztcl            = 70, # tick length in %
+            rugl            = 70, # rug length in %
             mtext           = 100, # line height in %
             summary.line    = 70, # line height in %
             pch             = 50  # point size in %
@@ -548,6 +579,7 @@ get_Layout <- structure(function( # Collection of layout definitions
             kde.fill        = "none", # KDE fill colour
             value.dot       = 1, # De value dot colour
             value.bar       = 1, # De value error bar colour
+            value.rug       = 1, # De value rug colour
             mean   = 1, # mean line colour
             median = 1, # median line colour
             mean.weighted   = 1, # weighted mean line colour
@@ -578,39 +610,11 @@ get_Layout <- structure(function( # Collection of layout definitions
       stop("Layout definition not supported!")
     }
   } else if(is.list(layout) == TRUE) {
-    
+
     ## user-specific layout definition assignment
     layout <- layout
   }
-  
+
+  ## return layout parameters
   return(layout)
-  ### A list object with layout definitions for plot functions.
-  
-  ##details<<
-  ## The easiest way to create a user-specific layout definition is
-  ## perhaps to create either an empty or a default layout object and 
-  ## fill/modify the definitions (\code{user.layout <- 
-  ## get_Layout(data = "empty")}).
-  
-}, ex=function(){
-  ## read example data set
-  data(ExampleData.DeValues, envir = environment())
-  
-  ## show structure of the default layout definition
-  layout.default <- get_Layout(layout = "default")
-  str(layout.default)
-  
-  ## show colour definitions for Abanico plot, only
-  layout.default$abanico$colour
-  
-  ## set Abanico plot title colour to orange
-  layout.default$abanico$colour$main <- "orange"
-  
-  ## create Abanico plot with modofied layout definition
-  plot_AbanicoPlot(data = ExampleData.DeValues,
-                   layout = layout.default)
-  
-  ## create Abanico plot with predefined layout "journal"
-  plot_AbanicoPlot(data = ExampleData.DeValues,
-                   layout = "journal")
-})
+}
