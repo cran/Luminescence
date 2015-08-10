@@ -32,7 +32,7 @@
 #' used arguments} \item{call}{\link{call} the function call}
 #'
 #' The output should be accessed using the function
-#' \code{\link{get_RLum.Results}}
+#' \code{\link{get_RLum}}
 #' @section Function version: 0.1
 #' @author Christoph Burow, University of Cologne (Germany)
 #' @seealso \code{\link{calc_CentralDose}}, \code{\link{calc_FiniteMixture}},
@@ -72,18 +72,18 @@ calc_CommonDose <- function(
   log=TRUE,
   ...
 ) {
-
+  
   ##============================================================================##
   ## CONSISTENCY CHECK OF INPUT DATA
   ##============================================================================##
-
+  
   if(missing(data)==FALSE){
     if(is(data, "data.frame") == FALSE & is(data,"RLum.Results") == FALSE){
       stop("[calc_CentralDose] Error: 'data' object has to be of type
            'data.frame' or 'RLum.Results'!")
     }else{
       if(is(data, "RLum.Results") == TRUE){
-        data <- get_RLum.Results(data, signature(object = "De.values"))
+        data <- get_RLum(data, signature(object = "De.values"))
       }
     }
   }
@@ -99,16 +99,23 @@ calc_CommonDose <- function(
       stop(domain=NA)
     }
   }
-
+  
+  
+  ##============================================================================##
+  ## ADDITIONAL ARGUMENTS
+  ##============================================================================##
+  settings <- list(verbose = TRUE)
+  settings <- modifyList(settings, list(...))
+  
   ##============================================================================##
   ## CALCULATIONS
   ##============================================================================##
-
+  
   # set default value of sigmab
-  if(missing(sigmab)) sigmab<- 0
-
+  if (missing(sigmab)) sigmab<- 0
+  
   # calculate  yu = log(ED) and su = se(logED)
-  if(log==TRUE) {
+  if (log) {
     yu<- log(data$ED)
     su<- sqrt( (data$ED_Error/data$ED)^2 + sigmab^2 )
   }
@@ -116,52 +123,55 @@ calc_CommonDose <- function(
     yu<- data$ED
     su<- sqrt((data$ED_Error)^2 + sigmab^2)
   }
-
+  
   # calculate weights
   wu<- 1/su^2
   delta<- sum(wu*yu)/sum(wu)
   n<- length(yu)
-
+  
   #standard error
   sedelta<- 1/sqrt(sum(wu))
-  if(log==FALSE) {
+  if (!log) {
     sedelta<- sedelta/delta
   }
-
-  if(log==TRUE){
+  
+  if (log){
     delta<- exp(delta)
   }
-
+  
   ##============================================================================##
   ## TERMINAL OUTPUT
   ##============================================================================##
-
-  cat("\n [calc_CommonDose]")
-  cat(paste("\n\n----------- meta data --------------"))
-  cat(paste("\n n:                      ",n))
-  cat(paste("\n log:                    ",if(log==TRUE){"TRUE"}else{"FALSE"}))
-  cat(paste("\n----------- dose estimate ----------"))
-  cat(paste("\n common dose:            ", round(delta,2)))
-  cat(paste("\n SE:                     ", round(delta*sedelta, 2)))
-  cat(paste("\n rel. SE [%]:            ", round(sedelta*100,2)))
-  cat(paste("\n------------------------------------\n\n"))
-
+  
+  if (settings$verbose) {
+    cat("\n [calc_CommonDose]")
+    cat(paste("\n\n----------- meta data --------------"))
+    cat(paste("\n n:                      ",n))
+    cat(paste("\n log:                    ",if(log==TRUE){"TRUE"}else{"FALSE"}))
+    cat(paste("\n----------- dose estimate ----------"))
+    cat(paste("\n common dose:            ", round(delta,2)))
+    cat(paste("\n SE:                     ", round(delta*sedelta, 2)))
+    cat(paste("\n rel. SE [%]:            ", round(sedelta*100,2)))
+    cat(paste("\n------------------------------------\n\n"))
+  }
+  
   ##============================================================================##
   ## RETURN VALUES
   ##============================================================================##
-
+  
   summary<- data.frame(de=delta,
                        de_err=delta*sedelta)
-
+  
   call<- sys.call()
   args<- list(log=log, sigmab=sigmab)
-
-  newRLumResults.calc_CommonDose<- set_RLum.Results(
+  
+  newRLumResults.calc_CommonDose<- set_RLum(
+    class = "RLum.Results",
     data = list(summary = summary,
                 data = data,
                 args = args,
                 call = call))
-
+  
   invisible(newRLumResults.calc_CommonDose)
-
+  
 }

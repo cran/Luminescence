@@ -4,8 +4,8 @@
 \alias{readXSYG2R}
 \title{Import XSYG files to R}
 \usage{
-readXSYG2R(file, recalculate.TL.curves = TRUE, import = TRUE,
-  txtProgressBar = TRUE)
+readXSYG2R(file, recalculate.TL.curves = TRUE, fastForward = FALSE,
+  import = TRUE, txtProgressBar = TRUE)
 }
 \arguments{
 \item{file}{\link{character} (\bold{required}): path and file name of the
@@ -16,6 +16,9 @@ XSYG file.}
 details for more information) Note: The option overwrites the time vs. count
 TL curve. Select \code{FALSE} to import the raw data delivered by the
 lexsyg. Works for TL curves and spectra.}
+
+\item{fastForward}{\code{\link{logical}} (with default): if \code{TRUE} for a
+more efficient data processing only a list of \code{RLum.Analysis} objects is returned.}
 
 \item{import}{\link{logical} (with default): if set to \code{FALSE}, only
 the XSYG file structure is shown.}
@@ -94,7 +97,7 @@ be done using the functions provided with the package \code{\link{xml}}.\cr
 the XSXG file are skipped.
 }
 \section{Function version}{
- 0.4.3 (2015-04-30 12:02:09)
+ 0.4.5 (2015-08-03 20:39:30)
 }
 \examples{
 ##(1) import XSYG file to R (uncomment for usage)
@@ -107,7 +110,7 @@ the XSXG file are skipped.
 
   ##import entire XML file
   #FILE <- file.choose()
-  #temp <- xmlRoot(xmlTreeParse(FILE))
+  #temp <- XML::xmlRoot(XML::xmlTreeParse(FILE))
 
   ##search for specific subnodes with curves containing 'OSL'
   #getNodeSet(temp, "//Sample/Sequence/Record[@recordType = 'OSL']/Curve")
@@ -116,10 +119,10 @@ the XSXG file are skipped.
 data(ExampleData.XSYG, envir = environment())
 
 ##grep one OSL curves and plot the first curve
-OSLcurve <- get_RLum.Analysis(OSL.SARMeasurement$Sequence.Object, recordType="OSL")[[1]]
+OSLcurve <- get_RLum(OSL.SARMeasurement$Sequence.Object, recordType="OSL")[[1]]
 
 ##(3) How to see the structure of an object?
-get_structure.RLum.Analysis(OSL.SARMeasurement$Sequence.Object)
+structure_RLum(OSL.SARMeasurement$Sequence.Object)
 }
 \author{
 Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
@@ -128,6 +131,7 @@ Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 \references{
 Grehl, S., Kreutzer, S., Hoehne, M., 2013. Documentation of the
 XSYG file format. Unpublished Technical Note. Freiberg, Germany \cr\cr
+
 \bold{Further reading} \cr\cr XML: \url{http://en.wikipedia.org/wiki/XML}
 }
 \seealso{

@@ -59,7 +59,7 @@
 #'
 #' @note The results of this function have been cross-checked with the Analyst
 #' (vers. 3.24b). Access to the results object via
-#' \code{\link{get_RLum.Results}}.
+#' \code{\link{get_RLum}}.
 #'
 #' @section Function version: 0.5.1
 #'
@@ -78,7 +78,9 @@
 #'
 #' Galbraith, R.F., 2014. A further note on the variance of a
 #' background-corrected OSL count. Ancient TL, 31 (2), 1-3.
+#'
 #' @keywords datagen
+#'
 #' @examples
 #'
 #'
@@ -90,7 +92,7 @@
 #'                              background.integral = c(85:100))
 #'
 #' ##get results object
-#' get_RLum.Results(results)
+#' get_RLum(results)
 #'
 #'
 calc_OSLLxTxRatio <- function(
@@ -114,7 +116,6 @@ calc_OSLLxTxRatio <- function(
     }
 
     ##(b) - test if data.type is valid in general
-
     if(is(Lx.data)[1] == "RLum.Data.Curve"){
 
       Lx.data <- as(Lx.data, "data.frame")
@@ -125,15 +126,15 @@ calc_OSLLxTxRatio <- function(
 
       ##go further
       if((is(Lx.data)[1] != "data.frame" &
-            is(Lx.data)[1] != "numeric") &
-           is(Lx.data)[1] != "matrix"){
+          is(Lx.data)[1] != "numeric") &
+         is(Lx.data)[1] != "matrix"){
         stop("[calc_OSLLxTxRatio()] Data type error! Required types are data.frame or numeric vector.")
       }
     }
 
     ##(c) - convert vector to data.frame if nescessary
     if(is(Lx.data)[1] != "data.frame" &
-         is(Lx.data)[1] != "matrix"){
+       is(Lx.data)[1] != "matrix"){
       Lx.data <- data.frame(x=1:length(Lx.data),y=Lx.data)
       Tx.data <- data.frame(x=1:length(Tx.data),y=Tx.data)
     }
@@ -344,8 +345,8 @@ calc_OSLLxTxRatio <- function(
                           k = k)
 
   ##set results object
-  temp.return <- set_RLum.Results(data = list(LxTx.table = temp,
-                                              calc.parameters = calc.parameters))
+  temp.return <- set_RLum(class = "RLum.Results", data = list(LxTx.table = temp,
+                                                              calc.parameters = calc.parameters))
 
   invisible(temp.return)
 

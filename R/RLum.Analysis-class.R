@@ -1,16 +1,46 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//RLum.Analysis-class.R
-##//////////////////////////////////////////////////////////////////////////////
-##==============================================================================
-##author: Sebastian Kreutzer
-##organisation: IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-##version: 0.1.8
-##date: 2015-02-03
-##==============================================================================
+#' @include get_RLum.R set_RLum.R length_RLum.R structure_RLum.R
+NULL
 
-##class definition
+#' Class \code{"RLum.Analysis"}
+#'
+#' Object class containing analysis data for protocol analysis.
+#'
+#'
+#' @name RLum.Analysis-class
+#'
+#' @docType class
+#'
+#' @slot records Object of class "list" containing objects of class RLum.Data
+#'
+#' @slot protocol Object of class "character" describing the applied measurement protocol
+#'
+#' @note The method \code{get_structure} is currently just
+#' avaiblable for objects containing \code{\linkS4class{RLum.Data.Curve}}.
+#'
+#' @section Objects from the Class: Objects can be created by calls of the form
+#' \code{new("RLum.Analysis", ...)}.
+#'
+#' @section Class version: 0.2.0
+#'
+#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
+#' (France)
+#'
+#' @seealso \code{\link{Risoe.BINfileData2RLum.Analysis}},
+#' \code{\linkS4class{Risoe.BINfileData}}, \code{\linkS4class{RLum}}
+#'
+#' @keywords classes methods
+#'
+#' @examples
+#'
+#' showClass("RLum.Analysis")
+#'
+#' ## usage of get_RLum() with returning an RLum.Analysis object
+#' #  get_RLum(object, keep.object = TRUE)
+#'
+
+##SET CLASS DEFINITION
 setClass("RLum.Analysis",
-         representation(
+         slots = list(
            records = "list",
            protocol = "character"
          ),
@@ -18,51 +48,50 @@ setClass("RLum.Analysis",
          prototype = list (
            records = list(),
            protocol = character()
-         ),
-         S3methods = FALSE
+         )
 )
 
 
 # show method for object -------------------------------------------------------
 
-  setMethod("show",
-            signature(object = "RLum.Analysis"),
-             function(object){
+setMethod("show",
+          signature(object = "RLum.Analysis"),
+          function(object){
 
-              ##print
-              cat("\n [RLum.Analysis]")
-              cat("\n\t protocol:", object@protocol)
-              cat("\n\t number of records:", length(object@records))
+            ##print
+            cat("\n [RLum.Analysis]")
+            cat("\n\t protocol:", object@protocol)
+            cat("\n\t number of records:", length(object@records))
 
-              #skip this part if nothing is included in the object
-              if(length(object@records) > 0){
+            #skip this part if nothing is included in the object
+            if(length(object@records) > 0){
 
-                ##get object class types
-                temp <- sapply(1:length(object@records), function(x){
+              ##get object class types
+              temp <- sapply(1:length(object@records), function(x){
 
-                              is(object@records[[x]])[1]
+                is(object@records[[x]])[1]
 
-                             })
+              })
 
-                ##print object class types
-                sapply(1:length(table(temp)), function(x){
+              ##print object class types
+              sapply(1:length(table(temp)), function(x){
 
-                  ##show RLum class type
-                  cat("\n\t .. :",names(table(temp)[x]),":",table(temp)[x])
+                ##show RLum class type
+                cat("\n\t .. :",names(table(temp)[x]),":",table(temp)[x])
 
 
-                  ##show structure
-                  ##set width option ... just an implementation for the tutorial output
-                  ifelse(getOption("width")<=50, temp.width <- 4, temp.width  <- 10)
+                ##show structure
+                ##set width option ... just an implementation for the tutorial output
+                ifelse(getOption("width")<=50, temp.width <- 4, temp.width  <- 10)
 
-                  cat("\n\t .. .. : ",
-                      unlist(sapply(1:length(object@records),  function(i) {
+                cat("\n\t .. .. : ",
+                    unlist(sapply(1:length(object@records),  function(i) {
 
-                        if(names(table(temp)[x]) == is(object@records[[i]])[1]){
-                           paste(object@records[[i]]@recordType,
-                           if(i%%temp.width==0 & i!=length(object@records)){"\n\t .. .. : "})
-                        }
-                      })))
+                      if(names(table(temp)[x]) == is(object@records[[i]])[1]){
+                        paste(object@records[[i]]@recordType,
+                              if(i%%temp.width==0 & i!=length(object@records)){"\n\t .. .. : "})
+                      }
+                    })))
 
               })
 
@@ -73,23 +102,23 @@ setClass("RLum.Analysis",
             }
 
 
-            }
-            )##end show method
+          }
+)##end show method
 
 # get object structure ----------------------------------------------------
 
-##method to show the object structure
-setGeneric("get_structure.RLum.Analysis",
-           function(object) {standardGeneric("get_structure.RLum.Analysis")})
-
-setMethod("get_structure.RLum.Analysis",
-          signature=signature(object = "RLum.Analysis"),
+#' @describeIn RLum.Analysis
+#' Method to show the structure of an \code{\linkS4class{RLum.Analysis}} object.
+#'
+#' @param object [\code{structure_RLum}] an object of class \code{\linkS4class{RLum.Analysis}} (\bold{required})
+setMethod("structure_RLum",
+          signature= "RLum.Analysis",
           definition = function(object) {
 
             ##check if the object containing other elements than allowed
             if(length(grep(FALSE, sapply(object@records, is, class="RLum.Data.Curve")))!=0){
 
-              stop("[get_structure.RLum.Analysis()]  Only 'RLum.Data.Curve' objects are allowed!" )
+              stop("[structure_RLum()]  Only 'RLum.Data.Curve' objects are allowed!" )
 
             }
 
@@ -132,11 +161,11 @@ setMethod("get_structure.RLum.Analysis",
             ##info elements as character value
             temp.info.elements <- unlist(sapply(1:temp.object.length, function(x){
 
-                  if(length(object@records[[x]]@info)!=0){
-                    do.call(paste, as.list(names(object@records[[x]]@info)))
-                  }else{NA}
+              if(length(object@records[[x]]@info)!=0){
+                do.call(paste, as.list(names(object@records[[x]]@info)))
+              }else{NA}
 
-                  }))
+            }))
 
             ##combine output to a data.frame
             return(data.frame(id=temp.id, recordType=temp.recordType,
@@ -149,16 +178,22 @@ setMethod("get_structure.RLum.Analysis",
           })
 
 
-# constructor (set) method for object class ------------------------------------------
+# constructor (set) method for object  ------------------------------------------
 
-setGeneric("set_RLum.Analysis",
-           function(records, protocol) {standardGeneric("set_RLum.Analysis")})
+#' @describeIn RLum.Analysis
+#' Construction method for \code{\linkS4class{RLum.Analysis}} objects.
+#'
+#' @param class [\code{set_RLum}] \code{\link{character}} (\bold{required}): name of the \code{RLum} class to be created
+#'
+#' @param records [\code{set_RLum}] \code{\link{list}} (\bold{required}): list of \code{\linkS4class{RLum.Analysis}} objects
+#'
+#' @param protocol [\code{set_RLum}] \code{\link{character}} (optional): sets protocol type for
+#' analysis object. Value may be used by subsequent analysis functions. \code{UNKNOWN}
+#' by default.
+setMethod("set_RLum",
+          signature = "RLum.Analysis",
 
-
-setMethod("set_RLum.Analysis",
-          signature = c(records = "list", protocol= "ANY"),
-
-          function(records, protocol){
+          definition = function(class, records, protocol) {
 
             if(missing(protocol)){
 
@@ -166,35 +201,57 @@ setMethod("set_RLum.Analysis",
 
             }else if (is(protocol, "character") == FALSE){
 
-              stop("[set_RLum.Analysis] Error: 'protocol' has to be of type 'charcter'!")
+              stop("[set_RLum] 'protocol' has to be of type 'character'!")
 
             }
 
             new("RLum.Analysis",
                 records = records,
                 protocol = protocol
-               )
+            )
 
           })
 
 # constructor (set) method for object class ------------------------------------------
 
-setGeneric("get_RLum.Analysis",
-           function(object, record.id, recordType, curveType, RLum.type, info.object, get.index, keep.object = FALSE) {
-             standardGeneric("get_RLum.Analysis")})
+#' @describeIn RLum.Analysis
+#' Accessor method for RLum.Analysis object.
+#'
+#' The slots record.id, recordType, curveType and RLum.type are optional to allow for records
+#' limited by their id (list index number), their record type (e.g. recordType = "OSL")
+#' or object type.
+#'
+#' Example: curve type (e.g. curveType = "predefined" or curveType ="measured")
+#'
+#' The selection of a specific RLum.type object superimposes the default selection.
+#' Currently supported objects are: RLum.Data.Curve and RLum.Data.Spectrum
+#'
+#' @param record.id [\code{get_RLum}] \code{\link{numeric}} (optional): IDs of specific records
+#'
+#' @param recordType [\code{get_RLum}] \code{\link{character}} (optional): record type (e.g. "OSL")
+#'
+#' @param curveType [\code{get_RLum}] \code{\link{character}} (optional): curve type (e.g. "predefined" or "measured")
+#'
+#' @param RLum.type [\code{get_RLum}] \code{\link{character}} (optional): RLum object type. Defaults to "RLum.Data.Curve"
+#' and "RLum.Data.Spectrum".
+#'
+#' @param info.object [\code{get_RLum}] currently not used.
+#'
+#' @param get.index [\code{get_RLum}] \code{\link{logical}} (optional): return a numeric vector with the index of each
+#' element in the RLum.Analysis object.
+#'
+#' @param recursive [\code{get_RLum}] \code{\link{logical}} (with default): if \code{TRUE} (the default)
+#' and the result of the 'get_RLum' request is a single object this object will be unlisted, means
+#' only the object itself and no list containing exactly one object is returned. Mostly this makes things
+#' easier, however, if this method in a loop this might become annoying
+#'
+#' @param keep.object [\code{get_RLum}] \code{\link{logical}} (with default):
+#' return an RLum.Analysis object instead of the single elements.
+setMethod("get_RLum",
+          signature = ("RLum.Analysis"),
 
-
-setMethod("get_RLum.Analysis",
-          signature = c(object = "RLum.Analysis",
-                        record.id = "ANY",
-                        recordType = "ANY",
-                        curveType = "ANY",
-                        RLum.type = "ANY",
-                        info.object = "ANY",
-                        get.index = "ANY",
-                        keep.object = "ANY"),
-
-          function(object, record.id, recordType, curveType, RLum.type, info.object, get.index, keep.object = FALSE){
+          function(object, record.id, recordType, curveType, RLum.type,
+                   protocol = "UNKNOWN", info.object, get.index, keep.object = FALSE, recursive = TRUE){
 
             ##record.id
             if(missing(record.id) == TRUE){
@@ -203,14 +260,14 @@ setMethod("get_RLum.Analysis",
 
             }else if (is(record.id, "numeric") == FALSE){
 
-              stop("[get_RLum.Analysis()] 'record.id' has to be of type 'numeric'!")
+              stop("[get_RLum()] 'record.id' has to be of type 'numeric'!")
 
             }
 
             ##check if record.id exists
             if(FALSE%in%(abs(record.id)%in%(1:length(object@records)))){
 
-              stop("[get_RLum.Analysis()] At least one 'record.id' is invalid!")
+              stop("[get_RLum()] At least one 'record.id' is invalid!")
 
             }
 
@@ -218,31 +275,31 @@ setMethod("get_RLum.Analysis",
             if(missing(recordType) == TRUE){
 
               recordType <- unique(
-                              unlist(
-                                lapply(1:length(object@records),
-                                       function(x){object@records[[x]]@recordType})))
+                unlist(
+                  lapply(1:length(object@records),
+                         function(x){object@records[[x]]@recordType})))
 
             }else{
 
               if (is(recordType, "character") == FALSE){
 
-                stop("[get_RLum.Analysis()] Error: 'recordType' has to be of type 'character'!")
+                stop("[get_RLum()] 'recordType' has to be of type 'character'!")
 
               }
 
             }
 
             ##curveType
-            if(missing(curveType) == TRUE){
+            if(missing(curveType)){
 
               curveType <- unique(
                 unlist(
                   lapply(1:length(object@records),
                          function(x){object@records[[x]]@curveType})))
 
-            }else if (is(curveType, "character") == FALSE){
+            }else if (!is(curveType, "character")){
 
-              stop("[get_RLum.Analysis()] Error: 'curveType' has to be of type 'character'!")
+              stop("[get_RLum()] Error: 'curveType' has to be of type 'character'!")
 
             }
 
@@ -253,35 +310,35 @@ setMethod("get_RLum.Analysis",
 
             }else if (is(RLum.type, "character") == FALSE){
 
-              stop("[get_RLum.Analysis()] Error: 'RLum.type' has to be of type 'character'!")
+              stop("[get_RLum()] 'RLum.type' has to be of type 'character'!")
 
             }
 
             ##get.index
             if(missing(get.index) == TRUE){
 
-             get.index <- FALSE
+              get.index <- FALSE
 
             }else if (is(get.index, "logical") == FALSE){
 
-              stop("[get_RLum.Analysis()] Error: 'get.index' has to be of type 'logical'!")
+              stop("[get_RLum()] 'get.index' has to be of type 'logical'!")
 
             }
 
 
 
 
-           ##-----------------------------------------------------------------##
+            ##-----------------------------------------------------------------##
 
-           ##a pre-selection is necessary to support negative index selection
-           object@records <- object@records[record.id]
-           record.id <- 1:length(object@records)
+            ##a pre-selection is necessary to support negative index selection
+            object@records <- object@records[record.id]
+            record.id <- 1:length(object@records)
 
 
-           ##select curves according to the chosen parameter
-           if(length(record.id)>1){
+            ##select curves according to the chosen parameter
+            if(length(record.id)>1){
 
-            temp <- sapply(record.id, function(x){
+              temp <- sapply(record.id, function(x){
 
                 if(is(object@records[[x]])[1]%in%RLum.type == TRUE){
 
@@ -289,14 +346,14 @@ setMethod("get_RLum.Analysis",
                   temp <- sapply(1:length(recordType), function(k){
 
 
-                     ##translate input to regular expression
-                     recordType[k] <- glob2rx(recordType[k])
-                     recordType[k] <- substr(recordType[k],
-                                          start = 2,
-                                          stop = nchar(recordType[k])-1)
+                    ##translate input to regular expression
+                    recordType[k] <- glob2rx(recordType[k])
+                    recordType[k] <- substr(recordType[k],
+                                            start = 2,
+                                            stop = nchar(recordType[k])-1)
 
-                     if(grepl(recordType[k],object@records[[x]]@recordType) == TRUE &
-                          object@records[[x]]@curveType%in%curveType){
+                    if(grepl(recordType[k],object@records[[x]]@recordType) == TRUE &
+                       object@records[[x]]@curveType%in%curveType){
 
                       if(get.index == FALSE){
 
@@ -304,9 +361,9 @@ setMethod("get_RLum.Analysis",
 
                       }else{x}
 
-                     }
+                    }
 
-                   })
+                  })
 
                   ##remove empty entries and select just one to unlist
                   temp <- temp[!sapply(temp, is.null)]
@@ -319,81 +376,83 @@ setMethod("get_RLum.Analysis",
               })
 
 
-            ##remove empty list element
-            temp <- temp[!sapply(temp, is.null)]
+              ##remove empty list element
+              temp <- temp[!sapply(temp, is.null)]
 
-            ##check if produced object is empty and show warning message
-            if(length(temp) == 0){
+              ##check if produced object is empty and show warning message
+              if(length(temp) == 0){
 
-              warning("This request has produced an empty 'RLum.Analysis' object!")
+                warning("This request has produced an empty 'RLum.Analysis' object!")
 
-            }
+              }
 
-            ##remove list for get.index
-            if(get.index == TRUE){
+              ##remove list for get.index
+              if(get.index == TRUE){
 
-              return(unlist(temp))
-
-            }else{
-
-              if(keep.object == TRUE){
-
-                temp <- set_RLum.Analysis(records = temp, protocol = object@protocol)
-                return(temp)
+                return(unlist(temp))
 
               }else{
 
-                if(length(temp) == 1){
+                if(keep.object == TRUE){
 
-                  return(temp[[1]])
+                  temp <- set_RLum(class = "RLum.Analysis",
+                                   records = temp,
+                                   protocol = object@protocol)
+                  return(temp)
 
                 }else{
 
-                  return(temp)
+                  if(length(temp) == 1 & recursive == TRUE){
+
+                    return(temp[[1]])
+
+                  }else{
+
+                    return(temp)
+
+                  }
 
                 }
 
               }
 
+            }else{
+
+              if(get.index == FALSE){
+
+
+                if(keep.object == TRUE){
+
+                  ##needed to keep the argument keep.object == TRUE
+                  temp <- set_RLum(class = "RLum.Analysis",
+                                   records = list(object@records[[record.id]]),
+                                   protocol = object@protocol)
+                  return(temp)
+
+                }else{
+
+                  return(object@records[[record.id]])
+
+                }
+
+
+              }else{
+
+                return(record.id)
+
+              }
             }
-
-           }else{
-
-             if(get.index == FALSE){
-
-
-               if(keep.object == TRUE){
-
-                 ##needed to keep the argument keep.object == TRUE
-                 temp <- set_RLum.Analysis(records = list(object@records[[record.id]]),
-                                           protocol = object@protocol)
-                 return(temp)
-
-               }else{
-
-                 return(object@records[[record.id]])
-
-               }
-
-
-             }else{
-
-               return(record.id)
-
-             }
-           }
 
 
           })
 
 # constructor (length) method for object class ------------------------------------------
 
-setGeneric("length_RLum.Analysis",
-           function(object) {
-             standardGeneric("length_RLum.Analysis")})
-
-setMethod("length_RLum.Analysis",
-          signature(object = "RLum.Analysis"),
+#' @describeIn RLum.Analysis
+#' Returns the length of the object, i.e., number of stored records.
+#'
+setMethod("length_RLum",
+          "RLum.Analysis",
           function(object){
 
             length(object@records)

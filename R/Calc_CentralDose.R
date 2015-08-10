@@ -29,8 +29,8 @@
 #' \item{profile}{\link{data.frame} the log likelihood profile for sigma}
 #'
 #' The output should be accessed using the function
-#' \code{\link{get_RLum.Results}}
-#' @section Function version: 1.3
+#' \code{\link{get_RLum}}
+#' @section Function version: 1.3.1
 #' @author Christoph Burow, University of Cologne (Germany) \cr Based on a
 #' rewritten S script of Rex Galbraith, 2010 \cr
 #' @seealso \code{\link{plot}}, \code{\link{calc_CommonDose}},
@@ -83,7 +83,7 @@ calc_CentralDose <- function(
            'data.frame' or 'RLum.Results'!")
     }else{
       if(is(data, "RLum.Results") == TRUE){
-        data <- get_RLum.Results(data, signature(object = "De.values"))
+        data <- get_RLum(data, signature(object = "De.values"))
       }
     }
   }
@@ -173,16 +173,16 @@ calc_CentralDose <- function(
   sig1<- sigmax + 9.5*sesigma
   sig<- try(seq(sig0,sig1,sig1/1000), silent = TRUE)
 
-  if(class(sig) != "try-error") {
+  if (class(sig) != "try-error") {
     # TODO: rewrite this loop as a function and maximise with mle2
     # ll is the actual log likelihood, llik is a vector of all ll
-    for(sigma in sig) {
-      wu<- 1/(sigma^2 + su^2)
-      mu<- sum(wu*yu)/sum(wu)
-      ll<-  0.5*sum(log(wu)) - 0.5*sum(wu*(yu-mu)^2)
-      llik<- c(llik,ll)
+    for (sigma in sig) {
+      wu <- 1 / (sigma ^ 2 + su ^ 2)
+      mu <- sum(wu * yu) / sum(wu)
+      ll <-  0.5 * sum(log(wu)) - 0.5 * sum(wu * (yu - mu) ^ 2)
+      llik <- c(llik,ll)
     }
-    llik<- llik[-1] - Lmax
+    llik <- llik[-1] - Lmax
   }#endif::try-error
 
   ##============================================================================##
@@ -223,12 +223,16 @@ calc_CentralDose <- function(
   call<- sys.call()
   args<- list(log="TRUE", sigmab=sigmab)
 
-  newRLumResults.calc_CentralDose<- set_RLum.Results(
+  newRLumResults.calc_CentralDose<- set_RLum(
+    class = "RLum.Results",
     data = list(summary = summary,
                 data = data,
                 args = args,
                 call = call,
-                profile=data.frame(sig=sig, llik=llik)))
+                profile=data.frame(
+                  sig=ifelse(inherits(sig,"try-error"), NA,sig), llik=llik)
+                )
+    )
 
   ##=========##
   ## PLOTTING

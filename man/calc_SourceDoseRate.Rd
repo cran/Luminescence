@@ -8,10 +8,10 @@ calc_SourceDoseRate(measurement.date, calib.date, calib.dose.rate, calib.error,
   source.type = "Sr-90", dose.rate.unit = "Gy/s")
 }
 \arguments{
-\item{measurement.date}{\code{\link{character}} (\bold{required}): date of
-measurement in "YYYY-MM-DD"}
+\item{measurement.date}{\code{\link{character}} or \code{\link{Date}} (\bold{required}): date of
+measurement in "YYYY-MM-DD". Exceptionally, if no value is provided, the date will be set to today.}
 
-\item{calib.date}{\code{\link{character}} (\bold{required}): date of source
+\item{calib.date}{\code{\link{character}} or \code{\link{Date}} (\bold{required}): date of source
 calibration in "YYYY-MM-DD"}
 
 \item{calib.dose.rate}{\code{\link{numeric}} (\bold{required}): dose rate at
@@ -65,7 +65,7 @@ National Laboratory }
 #
 }
 \section{Function version}{
- 0.1 (2015-04-30 11:54:25)
+ 0.2.0 (2015-08-05 11:28:41)
 }
 \examples{
 ##(1) Simple function usage
@@ -76,7 +76,7 @@ dose.rate <-  calc_SourceDoseRate(measurement.date = "2012-01-27",
                                   calib.error = 0.0019)
 
 ##show results
-get_RLum.Results(dose.rate)
+get_RLum(dose.rate)
 
 ##(2) Usage in combination with another function (e.g., Second2Gray() )
 ## load example data
@@ -87,8 +87,8 @@ data(ExampleData.DeValues, envir = environment())
 Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 }
 \author{
-Margret C. Fuchs, AWI Potsdam (Germany), \cr Sebastian Kreutzer,
-IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+Margret C. Fuchs, HZDR, Helmholtz-Institute Freiberg for Resource Technology (Germany),
+\cr Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
 \cr R Luminescence Package Team}
 \references{
 NNDC, Brookhaven National Laboratory
