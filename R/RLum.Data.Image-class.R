@@ -37,7 +37,7 @@ NULL
 #' showClass("RLum.Data.Image")
 #'
 #' ##so far no further example available
-#'
+#' @importClassesFrom raster RasterBrick
 setClass(
   "RLum.Data.Image",
   slots = list(
@@ -50,7 +50,7 @@ setClass(
   prototype = list (
     recordType = character(),
     curveType = character(),
-    data = raster::brick(raster::raster()),
+    data = raster::brick(raster::raster(matrix())),
     info = list()
   )
 )

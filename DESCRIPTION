@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.4.5
-Date: 2015-08-10
+Version: 0.4.6
+Date: 2015-09-21
 Author: Sebastian Kreutzer [aut, trl, cre],
     Michael Dietze [aut],
     Christoph Burow [aut],
@@ -63,6 +63,6 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'plot_RadialPlot.R' 'plot_Risoe.BINfileData.R' 'readBIN2R.R'
         'readSPE2R.R' 'readXSYG2R.R' 'writeR2BIN.R' 'zzz.R'
 NeedsCompilation: yes
-Packaged: 2015-08-09 22:08:52 UTC; kreutzer
+Packaged: 2015-09-21 13:44:38 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2015-08-10 09:09:43
+Date/Publication: 2015-09-21 21:36:10
