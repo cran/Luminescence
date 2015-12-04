@@ -17,7 +17,8 @@
 #' Please note: The curve transformation within this functions works roughly,
 #' i.e. every IRSL or OSL curve is transformed, without considerung whether it
 #' is measured with the PMT or not! However, for a fast look it might be
-#' helpful.
+#' helpful.\cr
+#'
 #'
 #' @param object \code{\linkS4class{RLum.Analysis}} (\bold{required}): S4
 #' object of class \code{RLum.Analysis}
@@ -26,11 +27,11 @@
 #' arguments in the named \code{\link{list}} will be directly passed to the function \code{\link{get_RLum}}
 #' (e.g., \code{subset = list(curveType = "measured")})
 #'
-#' @param nrows \code{\link{integer}} (with default): sets number of rows for
-#' plot output
+#' @param nrows \code{\link{integer}} (optional): sets number of rows for
+#' plot output, if nothing is set the function tries to find a value.
 #'
-#' @param ncols \code{\link{integer}} (with default): sets number of columns
-#' for plot output
+#' @param ncols \code{\link{integer}} (optional): sets number of columns
+#' for plot output, if nothing is set the function tries to find a value.
 #'
 #' @param abline \code{\link{list}} (optional): allows to set similar ablines
 #' in each plot. This option uses the function \code{\link{do.call}}, meaning
@@ -40,7 +41,7 @@
 #' arguments supported by \code{\link{abline}} are fully supported,
 #'
 #' @param combine \code{\link{logical}} (with default): allows to combine all
-#' code\linkS4class{RLum.Data.Curve} objects in one single plot.
+#' \code{\linkS4class{RLum.Data.Curve}} objects in one single plot.
 #'
 #' @param curve.transformation \code{\link{character}} (optional): allows
 #' transforming CW-OSL and CW-IRSL curves to pseudo-LM curves via
@@ -51,7 +52,8 @@
 #' considered, normally this should end in one plot per page
 #'
 #' @param \dots further arguments and graphical parameters will be passed to
-#' the \code{plot} function. Supported arguments: \code{main}, \code{mtext},
+#' the \code{plot} function. Supported arguments: \code{main} (can be provided as
+#' vector for \code{combine = TRUE}), \code{mtext},
 #' \code{log}, \code{lwd}, \code{lty} \code{type}, \code{pch}, \code{col},
 #' \code{norm}, \code{ylim}, \code{xlab} ... and for \code{combine = TRUE}
 #' also: \code{xlim}, \code{ylab}, \code{sub}, \code{legend.text},
@@ -63,14 +65,18 @@
 #' Only plotting of \code{RLum.Data.Curve} and \code{RLum.Data.Spectrum}
 #' objects are currently supported.
 #'
-#' @section Function version: 0.2.6
+#' @section Function version: 0.2.9
+#'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France)
 #'
 #' @seealso \code{\link{plot}}, \code{\link{plot_RLum}},
 #' \code{\link{plot_RLum.Data.Curve}}
+#'
 #' @references #
+#'
 #' @keywords aplot
+#'
 #' @examples
 #'
 #'
@@ -84,15 +90,16 @@
 #' plot_RLum.Analysis(temp)
 #'
 #' ##plot (combine) TL curves in one plot
-#' temp.sel <- get_RLum(temp, recordType = "TL", keep.object = TRUE)
+#' temp.sel <- get_RLum(temp, recordType = "TL", drop = FALSE)
 #' plot_RLum.Analysis(temp.sel, combine = TRUE, norm = TRUE, main = "TL combined")
 #'
 #'
+#' @export
 plot_RLum.Analysis <- function(
   object,
   subset,
-  nrows = 3,
-  ncols = 2,
+  nrows,
+  ncols,
   abline,
   combine = FALSE,
   curve.transformation,
@@ -109,16 +116,90 @@ plot_RLum.Analysis <- function(
 
   }
 
+  ##try to find optimal parameters, this is however, a little bit stupid, but
+  ##better than without any
+
+  if(combine){
+    n.plots <- length(unique(as.character(structure_RLum(object)$recordType)))
+
+  }else{
+    n.plots <- length_RLum(object)
+
+  }
+
+  if (missing(ncols) | missing(nrows)) {
+    if (missing(ncols) & !missing(nrows)) {
+      if (n.plots  == 1) {
+        ncols <- 1
+
+      } else{
+        ncols <- 2
+
+      }
+
+    }
+    else if (!missing(ncols) & missing(nrows)) {
+      if (n.plots  == 1) {
+        nrows <- 1
+
+      }
+      else if (n.plots  > 1 & n.plots <= 4) {
+        nrows <- 2
+
+      } else{
+        nrows <- 3
+
+      }
+
+
+    } else{
+      if (n.plots  == 1) {
+        nrows <- 1
+        ncols <- 1
+
+      }
+      else if (n.plots  > 1 & n.plots  <= 2) {
+        nrows <- 1
+        ncols <- 2
+
+      } else if (n.plots  > 2 & n.plots <= 4) {
+        nrows <- 2
+        ncols <- 2
+
+      }
+      else{
+        nrows <- 3
+        ncols <- 2
+
+      }
+
+    }
+
+  }
+
+
+
   ##deal with addition arguments
   extraArgs <- list(...)
 
   ##main
-  main <- if("main" %in% names(extraArgs)) {extraArgs$main} else
-  {""}
+  main <- if ("main" %in% names(extraArgs)) {
+
+      ##main - allow to set different mains
+      if(length(extraArgs$main) == 1 | length(extraArgs$main) < length(object)){
+        rep(x =  extraArgs$main, length(object))
+
+      } else{
+        extraArgs$main
+
+      }
+    } else{
+      NULL
+    }
 
   ##mtext
   mtext <- if("mtext" %in% names(extraArgs)) {extraArgs$mtext} else
-  {""}
+  {NULL}
 
   ##log
   log <- if("log" %in% names(extraArgs)) {extraArgs$log} else
@@ -163,9 +244,9 @@ plot_RLum.Analysis <- function(
   # Make selection if wanted  -------------------------------------------------------------------
   if(!missing(subset)){
 
-    ##check whether the user set the keep.object option ...
-    subset <- subset[!sapply(names(subset), function(x){"keep.object" %in% x})]
-    object <- do.call(get_RLum,c(object,subset, keep.object = TRUE))
+    ##check whether the user set the drop option ...
+    subset <- subset[!sapply(names(subset), function(x){"drop" %in% x})]
+    object <- do.call(get_RLum, c(object = object, subset, drop = FALSE))
 
   }
 
@@ -280,7 +361,7 @@ plot_RLum.Analysis <- function(
                              },
                              mtext = paste("#",i,sep=""),
                              par.local = FALSE,
-                             main = if(main==""){temp[[i]]@recordType}else{main},
+                             main = if(is.null(main)){temp[[i]]@recordType}else{main[i]},
                              log = log,
                              lwd = lwd,
                              type = type,
@@ -289,7 +370,8 @@ plot_RLum.Analysis <- function(
                              ylim = ylim.set,
                              pch = pch,
                              norm = norm,
-                             cex = cex)
+                             cex = cex,
+                             ...)
 
         ##add abline
         if(!missing(abline)){
@@ -309,7 +391,7 @@ plot_RLum.Analysis <- function(
 
                                 mtext = paste("#",i,sep=""),
                                 par.local = FALSE,
-                                main = if(main==""){temp[[i]]@recordType}else{main})
+                                main = if(main==""){temp[[i]]@recordType}else{main[i]})
 
       }
 
@@ -351,7 +433,12 @@ plot_RLum.Analysis <- function(
     ##change graphic settings
     if(!plot.single){
       par.default <- par()[c("cex", "mfrow")]
-      par(mfrow = c(nrows, ncols))
+
+      if(!missing(ncols) & !missing(nrows)){
+        par(mfrow = c(nrows, ncols))
+
+      }
+
 
       ##this 2nd par request is needed as seeting mfrow resets the par settings ... this might
       ##not be wanted
@@ -373,7 +460,7 @@ plot_RLum.Analysis <- function(
 
       ###get type of curves
       temp.object <-
-        get_RLum(object, recordType = temp.recordType[k], keep.object = TRUE)
+        get_RLum(object, recordType = temp.recordType[k], drop = FALSE)
 
       ##get structure
       object.structure  <- structure_RLum(temp.object)
@@ -430,6 +517,7 @@ plot_RLum.Analysis <- function(
       {
         ""
       }
+
 
       ##xlab
       xlab <- if ("xlab" %in% names(extraArgs)) {
@@ -532,13 +620,18 @@ plot_RLum.Analysis <- function(
         par(mar = c(5.1, 4.1, 4.1, 8.1), xpd = TRUE)
       }
 
+      ##main - allow to set different mains
+      if(length(main) == 1 | length(main) < length(temp.recordType)){
+        main <- rep(x = main, length(temp.recordType))
+
+      }
 
       ##open plot area
       plot(
         NA,NA,
         xlim = xlim,
         ylim = ylim,
-        main = main,
+        main = main[k],
         xlab = xlab,
         ylab = ylab,
         log = log,
@@ -549,7 +642,8 @@ plot_RLum.Analysis <- function(
       for (i in 1:length(object.list)) {
         lines(temp.data.list[[i]],
               col = col[i],
-              lty = lty)
+              lty = lty,
+              lwd = lwd)
 
       }
 

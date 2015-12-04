@@ -49,9 +49,9 @@
 #' \bold{\code{plot.type = "persp"}}
 #'
 #' Arguments that will be passed to \code{\link{persp}}: \itemize{ \item
-#' \code{shade}: default is \code{0.4} \item \code{phi}: default is \code{30}
-#' \item \code{theta}: default is \code{30} \item \code{expand}: default is
-#' \code{1} \item \code{ticktype}: default is \code{detailed} }
+#' \code{shade}: default is \code{0.4} \item \code{phi}: default is \code{15}
+#' \item \code{theta}: default is \code{-30} \item \code{expand}: default is
+#' \code{1} \item \code{ticktype}: default is \code{detailed}, \code{r}: default is \code{10}}
 #'
 #' \emph{Note: Further parameters can be adjusted via \code{par}. For example
 #' to set the background transparent and reduce the thickness of the lines use:
@@ -132,7 +132,7 @@
 #'
 #' @note Not all additional arguments (\code{...}) will be passed similarly!
 #'
-#' @section Function version: 0.4.0
+#' @section Function version: 0.4.2
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France)
@@ -160,7 +160,7 @@
 #'                         bin.rows=10,
 #'                         bin.cols = 1)
 #'
-#' ##(2) plot simple spectrum (2D) - multiple.lines (with ylim)
+#' ##(2) plot spectrum (3D)
 #' plot_RLum.Data.Spectrum(TL.Spectrum,
 #'                         plot.type="persp",
 #'                         xlim = c(310,750),
@@ -168,13 +168,22 @@
 #'                         bin.rows=10,
 #'                         bin.cols = 1)
 #'
-#' ##(3) plot 3d spectrum (uncomment for usage)
-#' # plot_RLum.Data.Spectrum(TL.Spectrum, plot.type="persp",
-#' # xlim = c(310,750), ylim = c(0,300), bin.rows=10,
-#' # bin.cols = 1)
+#' ##(3) plot multiple lines (2D) - multiple.lines (with ylim)
+#' plot_RLum.Data.Spectrum(TL.Spectrum,
+#'                         plot.type="multiple.lines",
+#'                         xlim = c(310,750),
+#'                         ylim = c(0,100),
+#'                         bin.rows=10,
+#'                         bin.cols = 1)
 #'
+#' \dontrun{
+#'  ##(4) plot real 3d spectrum using rgl
+#'  plot_RLum.Data.Spectrum(TL.Spectrum, plot.type="persp3d",
+#'  xlim = c(310,750), ylim = c(0,300), bin.rows=10,
+#'  bin.cols = 1)
+#' }
 #'
-#'
+#' @export
 plot_RLum.Data.Spectrum <- function(
   object,
   par.local = TRUE,
@@ -270,10 +279,13 @@ plot_RLum.Data.Spectrum <- function(
   {1}
 
   phi <- if("phi" %in% names(extraArgs)) {extraArgs$phi} else
-  {0}
+  {15}
 
   theta <- if("theta" %in% names(extraArgs)) {extraArgs$theta} else
-  {-150}
+  {-30}
+
+  r <- if("r" %in% names(extraArgs)) {extraArgs$r} else
+  {10}
 
   shade <- if("shade" %in% names(extraArgs)) {extraArgs$shade} else
   {0.4}
@@ -594,7 +606,7 @@ plot_RLum.Data.Spectrum <- function(
   ##rest plot type for 1 column matrix
   if(ncol(temp.xyz) == 1){
     plot.type = "single"
-    warning("Single column matrix: plot.type has been automatically reset to 'single'")
+    warning("[plot_RLum.Data.Spectrum()] Single column matrix: plot.type has been automatically reset to 'single'")
   }
 
   if(plot.type == "persp3d" && ncol(temp.xyz) > 1){
@@ -602,6 +614,15 @@ plot_RLum.Data.Spectrum <- function(
     ## ==========================================================================#
     ##perspective plot 3D screen (package rgl)
     ## ==========================================================================#
+
+    ##check whether rgl is available
+    ##code snippet taken from
+    ##http://r-pkgs.had.co.nz/description.html
+    if (!requireNamespace("rgl", quietly = TRUE)) {
+      stop("[plot_RLum.Data.Spectrum()] Package 'rgl' needed for this plot type. Please install it.",
+           call. = FALSE)
+    }
+
     rgl::persp3d(x, y, temp.xyz,
             xlab = xlab,
             ylab = ylab,
@@ -629,6 +650,7 @@ plot_RLum.Data.Spectrum <- function(
           expand = expand,
           border = border,
           box = box,
+          r = r,
           ticktype = ticktype)
 
 

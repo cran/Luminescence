@@ -50,6 +50,11 @@
 #' \code{\linkS4class{RLum.Data.Curve}} object in the input list. The slot
 #' 'curveType' is filled with the name \code{merged}.
 #'
+#' @section S3-generic support:
+#'
+#' This function fully operational via S3-generics:
+#' \code{`+`}, \code{`-`}, \code{`/`}, \code{`*`}, \code{merge}
+#'
 #' @section Function version: 0.1.1
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
@@ -80,7 +85,7 @@
 #' TL.curve.merged <- merge_RLum.Data.Curve(list(TL.curve.3, TL.curve.1), merge.method = "/")
 #' plot_RLum(TL.curve.merged)
 #'
-#'
+#' @export
 merge_RLum.Data.Curve<- function(
   object,
   merge.method = "mean",
@@ -139,7 +144,7 @@ merge_RLum.Data.Curve<- function(
 
       }
 
-      warning("The channel between the curves differes. Resulting curve has length of shortest curve.")
+      warning("[merge_RLum.Data.Curve()] The number of channels between the curves differes. Resulting curve has the length of shortest curve.")
 
       ##if this is ok, we cann continue and shorten the rest of the objects
       return(object[[x]]@data[1:min(check.length),2])
@@ -235,6 +240,7 @@ merge_RLum.Data.Curve<- function(
 
   temp.new.Data.Curve <- set_RLum(
     class = "RLum.Data.Curve",
+    originator = "merge_RLum.Data.Curve",
     recordType = object[[1]]@recordType,
     curveType =  "merged",
     data = temp.matrix,

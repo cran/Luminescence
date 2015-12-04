@@ -1,33 +1,74 @@
-#' General accessor function for RLum S4 class objects
+#' General set function for RLum S4 class objects
 #'
 #' Function calls object-specific set functions for RLum S4 class objects.
 #'
 #' The function provides a generalised access point for specific
-#' \code{\linkS4class{RLum}} objects.\cr Depending on the input object, the
-#' corresponding set function will be selected.  Allowed arguments can be found
-#' in the documentations of the corresponding \code{\linkS4class{RLum}} class.
+#' \code{\linkS4class{RLum}} objects.\cr Depending on the given class, the
+#' corresponding method to create an object from this class will be selected.
+#' Allowed additional arguments can be found in the documentations of the
+#' corresponding \code{\linkS4class{RLum}} class: \code{\linkS4class{RLum.Data.Curve}},
+#' \code{\linkS4class{RLum.Data.Image}}, \code{\linkS4class{RLum.Data.Spectrum}},
+#' \code{\linkS4class{RLum.Analysis}} and \code{\linkS4class{RLum.Results}}
 #'
 #' @param class \code{\linkS4class{RLum}} (\bold{required}): name of the S4 class to
 #' create
+#'
+#' @param originator \code{\link{character}} (automatic): contains the name of the calling function
+#' (the function that produces this object); can be set manually.
+#'
 #' @param \dots further arguments that one might want to pass to the specific
-#' get function
-#' @return Return is the same as input objects as provided in the list.
-#' @section Function version: 0.1
+#' set method
+#'
+#' @return Returns an object of the specified class.
+#'
+#' @section Function version: 0.2.0
+#'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France)
+#'
 #' @seealso
 #' \code{\linkS4class{RLum.Data.Curve}},
 #' \code{\linkS4class{RLum.Data.Image}},
 #' \code{\linkS4class{RLum.Data.Spectrum}},
 #' \code{\linkS4class{RLum.Analysis}},
 #' \code{\linkS4class{RLum.Results}}
+#'
 #' @keywords utilities
+#'
 #' @aliases set_RLum.Data.Curve set_RLum.Data.Image set_RLum.Data.Spectrum
 #' set_RLum.Analysis set_RLum.Results
 #'
-setGeneric("set_RLum", function (class, ...) { 
+#' @examples
+#'
+#' ##produce empty objects from each class
+#' set_RLum(class = "RLum.Data.Curve")
+#' set_RLum(class = "RLum.Data.Spectrum")
+#' set_RLum(class = "RLum.Data.Spectrum")
+#' set_RLum(class = "RLum.Analysis")
+#' set_RLum(class = "RLum.Results")
+#'
+#' ##produce a curve object with arbitrary curve values
+#' object <- set_RLum(
+#' class = "RLum.Data.Curve",
+#' curveType = "arbitrary",
+#' recordType = "OSL",
+#' data = matrix(c(1:100,exp(-c(1:100))),ncol = 2))
+#'
+#' ##plot this curve object
+#' plot_RLum(object)
+#'
+#' @export
+setGeneric("set_RLum", function (class, originator, ... ) {
   class(class) <- as.character(class)
-  standardGeneric("set_RLum") 
+
+  if(missing(originator)) {
+    if (is(sys.call(which = -1)[[1]], "name")) {
+      originator <- as.character(sys.call(which = -1)[[1]])
+    } else{
+      originator <- NA_character_
+    }
+  }
+  standardGeneric("set_RLum")
 })
 
 
@@ -37,31 +78,80 @@ setGeneric("set_RLum", function (class, ...) {
 # Removed in 0.6.0
 
 #' @noRd
+#' @export
 set_RLum.Analysis <- function(...) {
   .Deprecated("set_RLum")
+
+  if(missing(originator)) {
+    if (is(sys.call(which = -1)[[1]], "name")) {
+      originator <- as.character(sys.call(which = -1)[[1]])
+    } else{
+      originator <- NA_character_
+    }
+  }
+
   set_RLum("RLum.Analysis", ...)
 }
 
 #' @noRd
+#' @export
 set_RLum.Data.Curve <- function(...) {
   .Deprecated("set_RLum")
+
+  if(missing(originator)) {
+    if (is(sys.call(which = -1)[[1]], "name")) {
+      originator <- as.character(sys.call(which = -1)[[1]])
+    } else{
+      originator <- NA_character_
+    }
+  }
+
   set_RLum("RLum.Data.Curve", ...)
 }
 
 #' @noRd
+#' @export
 set_RLum.Data.Image <- function(...) {
   .Deprecated("set_RLum")
+
+  if(missing(originator)) {
+    if (is(sys.call(which = -1)[[1]], "name")) {
+      originator <- as.character(sys.call(which = -1)[[1]])
+    } else{
+      originator <- NA_character_
+    }
+  }
+
   set_RLum("RLum.Data.Image", ...)
 }
 
 #' @noRd
+#' @export
 set_RLum.Data.Spectrum <- function(...) {
   .Deprecated("set_RLum")
+
+  if(missing(originator)) {
+    if (is(sys.call(which = -1)[[1]], "name")) {
+      originator <- as.character(sys.call(which = -1)[[1]])
+    } else{
+      originator <- NA_character_
+    }
+  }
+
   set_RLum("RLum.Data.Spectrum", ...)
 }
 
 #' @noRd
-set_RLum.Results <- function(...) {
+#' @export
+set_RLum.Results <- function(originator,...) {
   .Deprecated("set_RLum")
-  set_RLum("RLum.Results", ...)
+
+  if(missing(originator)) {
+    if (is(sys.call(which = -1)[[1]], "name")) {
+      originator <- as.character(sys.call(which = -1)[[1]])
+    } else{
+      originator <- NA_character_
+    }
+  }
+  set_RLum(class = "RLum.Results", originator = originator, ...)
 }

@@ -63,14 +63,18 @@
 #' object (required): for \code{data.frame} two columns: De (\code{data[,1]})
 #' and De error (\code{data[,2]}). To plot several data sets in one plot the
 #' data sets must be provided as \code{list}, e.g. \code{list(data.1, data.2)}.
+#'
 #' @param na.rm \code{\link{logical}} (with default): exclude NA values
 #' from the data set prior to any further operations.
+#'
 #' @param log.z \code{\link{logical}} (with default): Option to display the
 #' z-axis in logarithmic scale. Default is \code{TRUE}.
+#'
 #' @param z.0 \code{\link{character}} or \code{\link{numeric}}: User-defined
 #' central value, used for centering of data. One out of \code{"mean"},
 #' \code{"mean.weighted"} and \code{"median"} or a numeric value (not its
 #' logarithm). Default is \code{"mean.weighted"}.
+#'
 #' @param dispersion \code{\link{character}} (with default): measure of
 #' dispersion, used for drawing the scatter polygon. One out of \code{"qr"}
 #' (quartile range), \code{"pnn"} (symmetric percentile range with nn the lower
@@ -79,74 +83,101 @@
 #' default is \code{"qr"}. Note that \code{"sd"} and \code{"2sd"} are only
 #' meaningful in combination with \code{"z.0 = 'mean'"} because the unweighted
 #' mean is used to center the polygon.
+#'
 #' @param plot.ratio \code{\link{numeric}}: Relative space, given to the radial
 #' versus the cartesian plot part, deault is \code{0.75}.
+#'
 #' @param rotate \code{\link{logical}}: Option to turn the plot by 90 degrees.
+#'
 #' @param mtext \code{\link{character}}: additional text below the plot title.
+#'
 #' @param summary \code{\link{character}} (optional): add statistic measures of
 #' centrality and dispersion to the plot. Can be one or more of several
 #' keywords. See details for available keywords.
+#'
 #' @param summary.pos \code{\link{numeric}} or \code{\link{character}} (with
 #' default): optional position coordinates or keyword (e.g. \code{"topright"})
 #' for the statistical summary. Alternatively, the keyword \code{"sub"} may be
 #' specified to place the summary below the plot header. However, this latter
 #' option in only possible if \code{mtext} is not used.
+#'
 #' @param legend \code{\link{character}} vector (optional): legend content to
 #' be added to the plot.
+#'
 #' @param legend.pos \code{\link{numeric}} or \code{\link{character}} (with
 #' default): optional position coordinates or keyword (e.g. \code{"topright"})
 #' for the legend to be plotted.
+#'
 #' @param stats \code{\link{character}}: additional labels of statistically
 #' important values in the plot. One or more out of the following:
 #' \code{"min"}, \code{"max"}, \code{"median"}.
+#'
 #' @param rug \code{\link{logical}}: Option to add a rug to the KDE part, to
 #' indicate the location of individual values.
+#'
 #' @param kde \code{\link{logical}}: Option to add a KDE plot to the dispersion
 #' part, default is \code{TRUE}.
+#'
 #' @param hist \code{\link{logical}}: Option to add a histogram to the
 #' dispersion part. Only meaningful when not more than one data set is plotted.
+#'
 #' @param dots \code{\link{logical}}: Option to add a dot plot to the
 #' dispersion part. If number of dots exceeds space in the dispersion part, a
 #' square indicates this.
+#'
 #' @param y.axis \code{\link{logical}}: Option to hide y-axis labels. Useful
 #' for data with small scatter.
+#'
 #' @param error.bars \code{\link{logical}}: Option to show De-errors as error
 #' bars on De-points. Useful in combination with \code{y.axis = FALSE, bar.col
 #' = "none"}.
+#'
 #' @param bar \code{\link{numeric}} (with default): option to add one or more
 #' dispersion bars (i.e., bar showing the 2-sigma range) centered at the
 #' defined values. By default a bar is drawn according to \code{"z.0"}. To omit
 #' the bar set \code{"bar = FALSE"}.
+#'
 #' @param bar.col \code{\link{character}} or \code{\link{numeric}} (with
 #' default): colour of the dispersion bar. Default is \code{"grey60"}.
+#'
 #' @param polygon.col \code{\link{character}} or \code{\link{numeric}} (with
 #' default): colour of the polygon showing the data scatter. Sometimes this
 #' polygon may be omitted for clarity. To disable it use \code{FALSE} or
 #' \code{polygon = FALSE}. Default is \code{"grey80"}.
+#'
 #' @param line \code{\link{numeric}}: numeric values of the additional lines to
 #' be added.
+#'
 #' @param line.col \code{\link{character}} or \code{\link{numeric}}: colour of
 #' the additional lines.
+#'
 #' @param line.label \code{\link{character}}: labels for the additional lines.
+#'
 #' @param grid.col \code{\link{character}} or \code{\link{numeric}} (with
 #' default): colour of the grid lines (originating at [0,0] and strechting to
 #' the z-scale). To disable grid lines use \code{FALSE}. Default is
 #' \code{"grey"}.
+#'
 #' @param frame \code{\link{numeric}} (with default): option to modify the
 #' plot frame type. Can be one out of \code{0} (no frame), \code{1} (frame
 #' originates at 0,0 and runs along min/max isochrons), \code{2} (frame
 #' embraces the 2-sigma bar), \code{3} (frame embraces the entire plot as a
 #' rectangle).Default is \code{1}.
+#'
 #' @param bw \code{\link{character}} (with default): bin-width for KDE, choose
 #' a numeric value for manual setting.
+#'
 #' @param output \code{\link{logical}}: Optional output of numerical plot
 #' parameters. These can be useful to reproduce similar plots. Default is
 #' \code{FALSE}.
+#'
 #' @param \dots Further plot arguments to pass. \code{xlab} must be a vector of
 #' length 2, specifying the upper and lower x-axes labels.
+#'
 #' @return returns a plot object and, optionally, a list with plot calculus
 #' data.
-#' @section Function version: 0.1.2
+#'
+#' @section Function version: 0.1.7
 #'
 #' @author Michael Dietze, GFZ Potsdam (Germany),\cr Sebastian Kreutzer,
 #' IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr Inspired by a plot
@@ -158,11 +189,13 @@
 #' @references Galbraith, R. & Green, P., 1990. Estimating the component ages
 #' in a finite mixture. International Journal of Radiation Applications and
 #' Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3),
-#' pp. 197-206.
-#' @examples
+#' 197-206.
 #'
-#' ## store original graphics parameters
-#' par.old <- par(no.readonly = TRUE)
+#' Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2015.
+#' The abanico plot: visualising chronometric data with individual standard errors.
+#' Quaternary Geochronology. doi:10.1016/j.quageo.2015.09.003
+#'
+#' @examples
 #'
 #' ## load example data and recalculate to Gray
 #' data(ExampleData.DeValues, envir = environment())
@@ -219,7 +252,7 @@
 #' plot_AbanicoPlot(data = ExampleData.DeValues,
 #'                  z.0 = 70)
 #'
-#' ## now with weighted median as central value
+#' ## now with median as central value
 #' plot_AbanicoPlot(data = ExampleData.DeValues,
 #'                  z.0 = "median")
 #'
@@ -271,11 +304,11 @@
 #' plot_AbanicoPlot(data = ExampleData.DeValues,
 #'                  stats = c("min", "max", "median"))
 #'
-#' ## now with a brief statistical summary
+#' ## now with a brief statistical summary as subheader
 #' plot_AbanicoPlot(data = ExampleData.DeValues,
 #'                  summary = c("n", "in.2s"))
 #'
-#' ## now with another statistical summary as subheader
+#' ## now with another statistical summary
 #' plot_AbanicoPlot(data = ExampleData.DeValues,
 #'                  summary = c("mean.weighted", "median"),
 #'                  summary.pos = "topleft")
@@ -320,9 +353,7 @@
 #' ## for further information on layout definitions see documentation
 #' ## of function get_Layout()
 #'
-#' ## restore original graphical parameters
-#' par(par.old)
-#'
+#' @export
 plot_AbanicoPlot <- function(
   data,
   na.rm = TRUE,
@@ -366,11 +397,24 @@ plot_AbanicoPlot <- function(
   for(i in 1:length(data)) {
     if(is(data[[i]], "RLum.Results") == FALSE &
          is(data[[i]], "data.frame") == FALSE) {
-      stop(paste("[plot_AbanicoPlot()] Error: Input data format is neither",
+      stop(paste("[plot_AbanicoPlot()] Input data format is neither",
                  "'data.frame' nor 'RLum.Results'"))
     } else {
       if(is(data[[i]], "RLum.Results") == TRUE) {
-        data[[i]] <- get_RLum(data[[i]], "data")
+        data[[i]] <- get_RLum(data[[i]])[,c(1:2)]
+      }
+    }
+  }
+
+  ## Check input data
+  for(i in 1:length(data)) {
+    if(is(data[[i]], "RLum.Results") == FALSE &
+         is(data[[i]], "data.frame") == FALSE) {
+      stop(paste("[plot_AbanicoPlot()] Input data format is neither",
+                 "'data.frame' nor 'RLum.Results'"))
+    } else {
+      if(is(data[[i]], "RLum.Results") == TRUE) {
+        data[[i]] <- get_RLum(data[[i]])[,c(1:2)]
       }
     }
   }
@@ -381,13 +425,43 @@ plot_AbanicoPlot <- function(
 
       n.NA <- sum(!complete.cases(data[[i]]))
 
-      if(n.NA == 1) {print("1 NA value excluded.")
+      if(n.NA == 1) {message(paste0("[plot_AbanicoPlot()] data set (", i, "): 1 NA value excluded."))
       } else if(n.NA > 1) {
-        print(paste(n.NA, "NA values excluded."))
+        message(paste0("[plot_AbanicoPlot()] data set (", i,"): ",n.NA, " NA values excluded."))
       }
 
       data[[i]] <- na.exclude(data[[i]])
     }
+  }
+
+  ##AFTER NA removal, we should check the data set carefully again ...
+  ##(1)
+  ##check if there is still data left in the entire set
+  if(all(sapply(data, nrow) == 0)){
+
+    warning("[plot_AbanicoPlot()] Nothing plotted, your data set is empty!")
+    return(NULL)
+
+  }
+  ##(2)
+  ##check for sets with only 1 row or 0 rows at all
+  else if(any(sapply(data, nrow) <= 1)){
+
+    ##select problematic sets and remove the entries from the list
+    NArm.id <- which(sapply(data, nrow) <= 1)
+    data[NArm.id] <- NULL
+
+    warning(paste0("[plot_AbanicoPlot()] Data sets ",paste(NArm.id, collapse = ", ")," are found to be empty or consisting of only 1 row. Sets removed!"))
+
+    rm(NArm.id)
+
+    ##unfortunately, the data set might become now empty at all
+    if(length(data) == 0){
+      warning("[plot_AbanicoPlot()] After removing invalid entries, nothing is plotted!")
+      return(NULL)
+
+    }
+
   }
 
   ## check for zero-error values
@@ -398,18 +472,23 @@ plot_AbanicoPlot <- function(
     }
 
     if(sum(data[[i]][,2] == 0) > 0) {
-      stop("Values with zero errors cannot be displayed!")
+      data[[i]] <- data[[i]][data[[i]][,2] > 0,]
+
+      if(nrow(data[[i]]) < 1) {
+        stop("Data set contains only values with zero errors.")
+      }
+
+      warning("Values with zero errors cannot be displayed and were removed!")
     }
   }
 
-  ## save original plot parameters
-  par.old.bg <- par()$bg
-  par.old.mar <- par()$mar
-  par.old.xpd <- par()$xpd
-  par.old.cex <- par()$cex
-  par.old.mai <- par()$mai
-  par.old.pin <- par()$pin
-  par.old.family <- par()$family
+  ## save original plot parameters and restore them when the function ends or stops
+  par.old.full <- par(no.readonly = TRUE)
+
+  ##this ensures, that par() for several plots on one page is  respected ...
+  if(sum(par()$mfrow) == 2 & sum(par()$mfcol) == 2){
+    on.exit(par(par.old.full))
+  }
 
   ## check/set layout definitions
   if("layout" %in% names(list(...))) {
@@ -503,6 +582,17 @@ plot_AbanicoPlot <- function(
     breaks <- "Sturges"
   }
 
+  ## check/set bw-parameter
+  for(i in 1:length(data)) {
+    bw.test <- try(density(x = data[[i]][,1],
+                           bw = bw),
+                   silent = TRUE)
+    if(grepl(pattern = "Error", x = bw.test[1]) == TRUE) {
+      bw <- "nrd0"
+      warning("Option for bw not possible. Set to nrd0!")
+    }
+  }
+
   if ("fun" %in% names(extraArgs)) {
     fun <- list(...)$fun
 
@@ -510,9 +600,10 @@ plot_AbanicoPlot <- function(
     fun <- FALSE
   }
 
-  ## check for negative values
+  ## check for negative values, stoppp function, but do not stop
   if(min(De.global) <= 0) {
-    stop("[plot_AbanicoPlot] Error: Data contains negative or zero values.")
+    message("\n [plot_AbanicoPlot()] Data contains negative or zero values. Nothing plotted!")
+    return(NULL)
   }
 
   ## calculate and append statistical measures --------------------------------
@@ -552,28 +643,22 @@ plot_AbanicoPlot <- function(
   ## calculate initial data statistics
   stats.init <- list(NA)
   for(i in 1:length(data)) {
-    stats.init[[length(stats.init) + 1]] <- calc_Statistics(data = data[[i]])
+    stats.init[[length(stats.init) + 1]] <- calc_Statistics(data = data[[i]][,3:4])
   }
   stats.init[[1]] <- NULL
 
   ## calculate central values
   if(z.0 == "mean") {
     z.central <- lapply(1:length(data), function(x){
-      rep(ifelse(log.z == TRUE,
-                 log(stats.init[[x]]$unweighted$mean),
-                 stats.init[[x]]$unweighted$mean),
+      rep(stats.init[[x]]$unweighted$mean,
           length(data[[x]][,3]))})
   } else if(z.0 == "median") {
     z.central <- lapply(1:length(data), function(x){
-      rep(ifelse(log.z == TRUE,
-                 log(stats.init[[x]]$unweighted$median),
-                 stats.init[[x]]$unweighted$median),
+      rep(stats.init[[x]]$unweighted$median,
           length(data[[x]][,3]))})
   } else  if(z.0 == "mean.weighted") {
     z.central <- lapply(1:length(data), function(x){
-      rep(ifelse(log.z == TRUE,
-                 log(stats.init[[x]]$weighted$mean),
-                 stats.init[[x]]$weighted$mean),
+      rep(stats.init[[x]]$weighted$mean,
           length(data[[x]][,3]))})
   } else if(is.numeric(z.0) == TRUE) {
     z.central <- lapply(1:length(data), function(x){
@@ -683,21 +768,15 @@ plot_AbanicoPlot <- function(
                              "data set")
 
   ## calculate global data statistics
-  stats.global <- calc_Statistics(data = data.global)
+  stats.global <- calc_Statistics(data = data.global[,3:4])
 
   ## calculate global central value
   if(z.0 == "mean") {
-    z.central.global <- ifelse(log.z == TRUE,
-                               log(stats.global$unweighted$mean),
-                               stats.global$unweighted$mean)
+    z.central.global <- stats.global$unweighted$mean
   } else if(z.0 == "median") {
-    z.central.global <- ifelse(log.z == TRUE,
-                               log(stats.global$unweighted$median),
-                               stats.global$unweighted$median)
+    z.central.global <- stats.global$unweighted$median
   } else  if(z.0 == "mean.weighted") {
-    z.central.global <- ifelse(log.z == TRUE,
-                               log(stats.global$weighted$mean),
-                               stats.global$weighted$mean)
+    z.central.global <- stats.global$weighted$mean
   } else if(is.numeric(z.0) == TRUE) {
     z.central.global <- ifelse(log.z == TRUE,
                                log(z.0),
@@ -732,11 +811,10 @@ plot_AbanicoPlot <- function(
   }
   data.global[,8] <- data.global.plot
 
-  ## print warning for too small scatter
+  ## print message for too small scatter
   if(max(abs(1 / data.global[6])) < 0.02) {
     small.sigma <- TRUE
-    print(paste("Attention, small standardised estimate scatter.",
-                "Toggle off y.axis?"))
+    message("[plot_AbanicoPlot()] Attention, small standardised estimate scatter. Toggle off y.axis?")
   }
 
   ## read out additional arguments---------------------------------------------
@@ -756,7 +834,11 @@ plot_AbanicoPlot <- function(
 
   if("xlab" %in% names(extraArgs)) {
     if(length(extraArgs$xlab) != 2) {
-      stop("Argmuent xlab is not of length 2!")
+      if (length(extraArgs$xlab) == 3) {
+        xlab <- c(extraArgs$xlab[1:2], "Density")
+      } else {
+        stop("Argmuent xlab is not of length 2!")
+      }
     } else {xlab <- c(extraArgs$xlab, "Density")}
   } else {
     xlab <- c(if(log.z == TRUE) {
@@ -953,10 +1035,15 @@ plot_AbanicoPlot <- function(
                                            min(tick.values.minor)]
   tick.values.major <- tick.values.major[tick.values.major <=
                                            max(tick.values.minor)]
+  tick.values.major <- tick.values.major[tick.values.major >=
+                                           limits.z[1]]
+  tick.values.major <- tick.values.major[tick.values.major <=
+                                           limits.z[2]]
   tick.values.minor <- tick.values.minor[tick.values.minor >=
                                            limits.z[1]]
   tick.values.minor <- tick.values.minor[tick.values.minor <=
                                            limits.z[2]]
+
 
   if(log.z == TRUE) {
 
@@ -988,6 +1075,9 @@ plot_AbanicoPlot <- function(
                                  limits.z[2]),
                           tick.values.major,
                           tick.values.minor))
+
+  ## correct for unpleasant value
+  ellipse.values[ellipse.values == -Inf] <- 0
 
   if(rotate == FALSE) {
     ellipse.x <- r / sqrt(1 + f^2 * (ellipse.values - z.central.global)^2)
@@ -1074,10 +1164,12 @@ plot_AbanicoPlot <- function(
 
   for(i in 1:length(data)) {
     statistics <- calc_Statistics(data[[i]])
+    statistics.2 <- calc_Statistics(data[[i]][,3:4])
+    
     De.stats[i,1] <- statistics$weighted$n
-    De.stats[i,2] <- statistics$unweighted$mean
-    De.stats[i,3] <- statistics$weighted$mean
-    De.stats[i,4] <- statistics$unweighted$median
+    De.stats[i,2] <- statistics.2$unweighted$mean
+    De.stats[i,3] <- statistics.2$weighted$mean
+    De.stats[i,4] <- statistics.2$unweighted$median
     De.stats[i,7] <- statistics$unweighted$sd.abs
     De.stats[i,8] <- statistics$unweighted$sd.rel
     De.stats[i,9] <- statistics$unweighted$se.abs
@@ -1090,6 +1182,11 @@ plot_AbanicoPlot <- function(
     De.stats[i,16] <- statistics$weighted$sd.rel
     De.stats[i,17] <- statistics$weighted$se.abs
     De.stats[i,18] <- statistics$weighted$se.rel
+    
+    ## account for log.z-option
+    if(log.z == TRUE) {
+      De.stats[i,2:4] <- exp(De.stats[i,2:4])
+    }
 
     ##kdemax - here a little doubled as it appears below again
     De.density <-density(x = data[[i]][,1],
@@ -1306,7 +1403,7 @@ plot_AbanicoPlot <- function(
                                  ""),
                           ifelse("sdabs.weighted" %in% summary[j] == TRUE,
                                  paste("abs. weighted sd = ",
-                                       round(De.stats[i,15], 2), " %",
+                                       round(De.stats[i,15], 2),
                                        " | ",
                                        sep = ""),
                                  ""),
@@ -3211,15 +3308,6 @@ plot_AbanicoPlot <- function(
       }
     }
   }
-
-  ## restore potentially modified parameters
-  par(bg = par.old.bg,
-      mar = par.old.mar,
-      xpd = par.old.xpd,
-      cex = par.old.cex,
-      mai = par.old.mai,
-      pin = par.old.pin,
-      family = par.old.family)
 
   ##sTeve
   if(fun){sTeve()}

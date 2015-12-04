@@ -54,7 +54,7 @@
 #' to the specific plot functions.
 #' @return Returns a plot.
 #' @note This function has been created to faciliate the plotting of image data
-#' imported by the function \code{\link{readSPE2R}}. However, so far the
+#' imported by the function \code{\link{read_SPE2R}}. However, so far the
 #' function is not optimized to handle image data > ca. 200 MByte and thus
 #' plotting of such data is extremely slow.
 #' @section Function version: 0.1
@@ -73,7 +73,7 @@
 #' ##plot data
 #' plot_RLum.Data.Image(ExampleData.RLum.Data.Image)
 #'
-#'
+#' @export
 plot_RLum.Data.Image <- function(
   object,
   par.local = TRUE,

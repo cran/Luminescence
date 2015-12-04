@@ -1,4 +1,4 @@
-#' Merge Risoe.BINfileData objects or Risoe BIN-files
+  #' Merge Risoe.BINfileData objects or Risoe BIN-files
 #'
 #' Function allows merging Risoe BIN/BINX files or Risoe.BINfileData objects.
 #'
@@ -56,15 +56,15 @@
 #' @note The validity of the output objects is not further checked.
 #'
 #'
-#' @section Function version: 0.2.3
+#' @section Function version: 0.2.4
 #'
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France)
 #'
 #'
-#' @seealso \code{\linkS4class{Risoe.BINfileData}}, \code{\link{readBIN2R}},
-#' \code{\link{writeR2BIN}}
+#' @seealso \code{\linkS4class{Risoe.BINfileData}}, \code{\link{read_BIN2R}},
+#' \code{\link{write_R2BIN}}
 #'
 #'
 #' @references Duller, G., 2007. Analyst.
@@ -85,7 +85,7 @@
 #' object.new <- merge_Risoe.BINfileData(c(object1, object2))
 #'
 #'
-#'
+#' @export
 merge_Risoe.BINfileData <- function(
   input.objects,
   output.file,
@@ -131,7 +131,7 @@ merge_Risoe.BINfileData <- function(
     }else{
 
       stop("[merge_Risoe.BINfileData()]
-                Error: Input object is not a 'character' nor a 'list'!")
+                Input object is not a 'character' nor a 'list'!")
 
     }
 
@@ -152,7 +152,7 @@ merge_Risoe.BINfileData <- function(
   if(is(input.objects, "character") == TRUE){
     for(i in 1:length(input.objects)){
 
-      temp[i] <- readBIN2R(input.objects[i])
+      temp[i] <- read_BIN2R(input.objects[i])
 
     }
 
@@ -162,7 +162,7 @@ merge_Risoe.BINfileData <- function(
 
   }
 
-  # Get POSITION vales -------------------------------------------------------
+  # Get POSITION values -------------------------------------------------------
 
   ##grep maximum position value from the first file
   temp.position.max <- max(temp[[1]]@METADATA[, "POSITION"])
@@ -174,15 +174,15 @@ merge_Risoe.BINfileData <- function(
       temp.position.max +
       position.number.append.gap
 
-    temp.position.max <- max(temp)
+    temp.position.max <<- max(temp)
 
     return(temp)
   }))
 
   temp.position.values <- c(temp[[1]]@METADATA[, "POSITION"], temp.position.values)
 
-  # Get overall record length -----------------------------------------------
 
+  # Get overall record length -----------------------------------------------
   temp.record.length <- sum(sapply(1:length(temp), function(x){
 
     length(temp[[x]]@METADATA[,"ID"])
@@ -256,7 +256,7 @@ merge_Risoe.BINfileData <- function(
 
   if(missing(output.file) == FALSE){
 
-    writeR2BIN(temp.new, output.file)
+    write_R2BIN(temp.new, output.file)
 
   }else{
 

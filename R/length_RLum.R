@@ -21,12 +21,14 @@
 #' \code{\linkS4class{RLum.Results}}
 #' @keywords utilities
 #' @aliases length_RLum.Analysis
-#' 
+#'
+#' @export
 setGeneric("length_RLum", function(object) {
   standardGeneric("length_RLum")
 })
 
 #' @noRd
+#' @export
 length_RLum.Analysis <- function(...) {
   .Deprecated("length_RLum")
   length_RLum(...)

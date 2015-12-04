@@ -13,12 +13,15 @@
 #' out of \code{"reciprocal"} (weight is 1/error), \code{"square"} (weight is
 #' 1/error^2). Default is \code{"square"}.
 #'
+#' @param digits \code{\link{integer}} (with default): round numbers to the specified digits. If
+#' digits is set to \code{NULL} nothing is rounded.
+#'
 #' @param na.rm \code{\link{logical}} (with default): indicating whether NA
 #' values should be stripped before the computation proceeds.
 #'
 #' @return Returns a list with weighted and unweighted statistic measures.
 #'
-#' @section Function version: 0.1.3
+#' @section Function version: 0.1.4
 #'
 #' @author Michael Dietze, GFZ Potsdam (Germany)
 #'
@@ -40,9 +43,11 @@
 #' ## note the congruent results for weighted and unweighted measures
 #' str(calc_Statistics(x))
 #'
+#' @export
 calc_Statistics <- function(
   data,
   weight.calc = "square",
+  digits = NULL,
   na.rm = TRUE
 ) {
   ## Check input data
@@ -84,32 +89,6 @@ calc_Statistics <- function(
 
   S.weights <- S.weights / sum(S.weights)
 
-  ## define function after isotone::weighted.median
-  median.w <- function (y, w)
-  {
-    ox <- order(y)
-    y <- y[ox]
-    w <- w[ox]
-    k <- 1
-    low <- cumsum(c(0, w))
-    up <- sum(w) - low
-    df <- low - up
-
-    if(!anyNA(df)){
-      repeat {
-        if (df[k] < 0)
-          k <- k + 1
-        else if (df[k] == 0)
-          return((w[k] * y[k] + w[k - 1] * y[k - 1]) / (w[k] + w[k - 1]))
-        else
-          return(y[k - 1])
-      }
-    }else{
-      return(NA)
-
-    }
-  }
-
   ## calculate n
   S.n <- nrow(data)
 
@@ -125,8 +104,7 @@ calc_Statistics <- function(
   S.median <- median(x = data[,1],
                      na.rm = na.rm)
 
-  S.wg.median <- median.w(y = data[,1],
-                          w = S.weights)
+  S.wg.median <- S.median
 
   ## calculate absolute standard deviation
   S.sd.abs <- sd(x = data[,1],
@@ -165,6 +143,15 @@ calc_Statistics <- function(
                      se.abs = S.wg.se.abs,
                      se.rel = S.wg.se.rel)
 
+
+  if(!is.null(digits)){
+     S.weighted <- sapply(names(S.weighted), simplify = FALSE, USE.NAMES = TRUE, function(x){
+      round(S.weighted[[x]], digits = digits)
+
+    })
+
+  }
+
   S.unweighted <- list(n = S.n,
                        mean = S.mean,
                        median = S.median,
@@ -175,6 +162,16 @@ calc_Statistics <- function(
                        skewness = S.skewness,
                        kurtosis = S.kurtosis)
 
+  if(!is.null(digits)){
+    S.unweighted  <- sapply(names(S.unweighted), simplify = FALSE, USE.NAMES = TRUE, function(x){
+      round(S.unweighted [[x]], digits = digits)
+
+    })
+
+  }
+
   list(weighted = S.weighted,
        unweighted = S.unweighted)
+
 }
+

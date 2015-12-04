@@ -43,7 +43,7 @@
 #'
 #' temp.merged <- merge_RLum.Analysis(list(curve, IRSAR.RF.Data, IRSAR.RF.Data))
 #'
-#'
+#' @export
 merge_RLum.Analysis<- function(
   objects
 ){
@@ -120,6 +120,7 @@ merge_RLum.Analysis<- function(
 
   temp.new.RLum.Analysis <- set_RLum(
     class = "RLum.Analysis",
+    originator = "merge_RLum.Analysis",
     records = temp.element.list,
     protocol = temp.meta.data.first)
 

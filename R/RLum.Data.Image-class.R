@@ -1,34 +1,37 @@
-#' @include get_RLum.R set_RLum.R
+#' @include get_RLum.R set_RLum.R names_RLum.R
 NULL
 
 #' Class \code{"RLum.Data.Image"}
 #'
-#' Class for luminescence image data (TL/OSL/RF).
+#' Class for representing luminescence image data (TL/OSL/RF). Such data are for example produced
+#' by the function \code{\link{read_SPE2R}}
 #'
 #' @name RLum.Data.Image-class
 #'
 #' @docType class
 #'
-#' @slot recordType Object of class "character" containing the type of the curve (e.g. "OSL image", "TL image")
+#' @slot recordType Object of class \code{\link{character}}
+#' containing the type of the curve (e.g. "OSL image", "TL image")
 #'
-#' @slot curveType Object of class "character" containing curve type, allowed values are measured or predefined
+#' @slot curveType Object of class \code{\link{character}} containing curve type, allowed values
+#' are measured or predefined
 #'
-#' @slot data Object of class "RasterBrick" containing images (raster data).
+#' @slot data Object of class \code{\link[raster]{brick}} containing images (raster data).
 #'
-#' @slot info Object of class "list" containing further meta information objects
+#' @slot info Object of class \code{\link{list}} containing further meta information objects
 #'
 #' @note The class should only contain data for a set of images. For additional
 #' elements the slot \code{info} can be used.
 #'
 #' @section Objects from the Class: Objects can be created by calls of the form
-#' \code{new("RLum.Data.Image", ...)}.
+#' \code{set_RLum("RLum.Data.Image", ...)}.
 #'
-#' @section Class version: 0.2.0
+#' @section Class version: 0.3.0
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
 #'
 #' @seealso \code{\linkS4class{RLum}}, \code{\linkS4class{RLum.Data}},
-#' \code{\link{plot_RLum}}
+#' \code{\link{plot_RLum}}, \code{\link{read_SPE2R}}
 #'
 #' @keywords classes
 #'
@@ -36,8 +39,11 @@ NULL
 #'
 #' showClass("RLum.Data.Image")
 #'
-#' ##so far no further example available
+#' ##create empty RLum.Data.Image object
+#' set_RLum(class = "RLum.Data.Image")
+#'
 #' @importClassesFrom raster RasterBrick
+#' @export
 setClass(
   "RLum.Data.Image",
   slots = list(
@@ -56,12 +62,28 @@ setClass(
 )
 
 
-# setAs - coerce methods ------------------------------------------------------
+####################################################################################################
+###as()
+####################################################################################################
 
-##note: This conversion will not work for multi layers!
-##----------------------------------------------
-##COERCE FROM AND TO data.frame
-
+##DATA.FRAME
+##COERCE RLum.Data.Image >> data.frame AND data.frame >> RLum.Data.Image
+#' as()
+#'
+#' for \code{[RLum.Data.Image]}
+#'
+#' \bold{[RLum.Data.Image]}\cr
+#'
+#' \tabular{ll}{
+#'  \bold{from} \tab \bold{to}\cr
+#'   \code{data.frame} \tab \code{data.frame}\cr
+#'   \code{matrix} \tab \code{matrix}
+#'
+#' }
+#'
+#' @name as
+#'
+#'
 setAs("data.frame", "RLum.Data.Image",
       function(from,to){
 
@@ -81,9 +103,8 @@ setAs("RLum.Data.Image", "data.frame",
       })
 
 
-# ##----------------------------------------------
-##COERCE FROM AND TO matrix
-
+##MATRIX
+##COERCE RLum.Data.Image >> matrix AND matrix >> RLum.Data.Image
 setAs("matrix", "RLum.Data.Image",
       function(from,to){
 
@@ -103,10 +124,12 @@ setAs("RLum.Data.Image", "matrix",
       })
 
 
-
-
-# show method for object ------------------------------------------------------
-
+####################################################################################################
+###show()
+####################################################################################################
+#' @describeIn RLum.Data.Image
+#' Show structure of \code{RLum.Data.Image} object
+#' @export
 setMethod("show",
           signature(object = "RLum.Data.Image"),
           function(object){
@@ -131,76 +154,106 @@ setMethod("show",
 )
 
 
-# # constructor (set) method for object class -----------------------------------
-
+####################################################################################################
+###set_RLum()
+####################################################################################################
 #' @describeIn RLum.Data.Image
 #' Construction method for RLum.Data.Image object. The slot info is optional
 #' and predefined as empty list by default..
 #'
-#' @param class \code{\link{character}}: name of the \code{RLum} class to create
-#' @param recordType \code{\link{character}}: record type (e.g. "OSL")
-#' @param curveType \code{\link{character}}: curve type (e.g. "predefined" or "measured")
-#' @param data \code{\link{matrix}}: raw curve data
-#' @param info \code{\link{list}}: info elements
+#' @param class \code{[set_RLum]}\code{\link{character}}: name of the \code{RLum} class to create
+#' @param originator \code{[set_RLum]} \code{\link{character}} (automatic):
+#' contains the name of the calling function (the function that produces this object); can be set manually.
+#' @param recordType \code{[set_RLum]} \code{\link{character}}: record type (e.g. "OSL")
+#' @param curveType \code{[set_RLum]} \code{\link{character}}: curve type (e.g. "predefined" or "measured")
+#' @param data \code{[set_RLum]} \code{\link{matrix}}: raw curve data. If data is of type \code{RLum.Data.Image}
+#' this can be used to re-construct the object.
+#' @param info \code{[set_RLum]} \code{\link{list}}: info elements
+#'
+#' @return
+#'
+#' \bold{\code{set_RLum}}\cr
+#'
+#' Returns an object from class \code{RLum.Data.Image}
+#'
+#' @export
 setMethod("set_RLum",
           signature = signature("RLum.Data.Image"),
 
-          definition = function(class, recordType, curveType, data, info){
+          definition = function(class,
+                                originator,
+                                recordType = "Image",
+                                curveType = NA_character_,
+                                data = raster::brick(raster::raster(matrix())),
+                                info = list()){
 
-            ##check for missing curveType
-            if(missing(curveType)==TRUE){
+            if (is(data, "RLum.Data.Image")) {
 
-              curveType <- "NA"
+              ##check for missing curveType
+              if (missing(curveType)) {
+                curveType <- data@curveType
 
-            }else if (is(curveType, "character") == FALSE){
+              }
 
-              stop("[set_RLum()] Error: 'curveType' has to be of type 'character'!")
+              ##check for missing recordType
+              if(missing(recordType)){
+                recordType <- data@recordType
 
-            }
+              }
 
-            ##check for missing arguments
-            if(missing(recordType) | missing(data)){
+              ##check for missing data ... not possible as data is the object itself
 
-              temp.error.missing <- paste(c(
+              ##check for missing info
+              if(missing(info)){
+                info <- data@info
 
-                if(missing(recordType)){"'recordType'"}else{},
-                if(missing(data)){"'data'"}else{}),
-                collapse=", ")
+              }
 
-              ##set error message
-              temp.error.message <- paste("[set_RLum()] Missing required arguments " ,
-                                          temp.error.missing,"!", sep="")
-              stop(temp.error.message)
-            }
 
-            ##handle missing info argument
-            if(missing(info)){
+            new(
+              Class = "RLum.Data.Image",
+              originator = originator,
+              recordType = recordType,
+              curveType = curveType,
+              data = data@data,
+              info = info
+            )
 
-              info <- list()
+            }else{
 
-            }else if (is(info, "list") == FALSE){
-
-              stop("[set_RLum()] 'info' has to be of type 'list'!")
-
-            }
-
-            new("RLum.Data.Image",
+              new(
+                Class = "RLum.Data.Image",
+                originator = originator,
                 recordType = recordType,
                 curveType = curveType,
                 data = data,
-                info = info)
+                info = info
+              )
+
+            }
 
           })
 
-# constructor (get) method for object class -----------------------------------
-
+####################################################################################################
+###get_RLum()
+####################################################################################################
 #' @describeIn RLum.Data.Image
 #' Accessor method for RLum.Data.Image object. The argument info.object is
 #'  optional to directly access the info elements. If no info element name is
 #'  provided, the raw image data (RasterBrick) will be returned.
 #'
-#' @param object an object of class \code{\linkS4class{RLum.Data.Image}}
-#' @param info.object object of class "list" containing further meta information objects
+#' @param object \code{[show_RLum]}\code{[get_RLum]}\code{[names_RLum]} an object
+#' of class \code{\linkS4class{RLum.Data.Image}}
+#' @param info.object \code{[get_RLum]} \code{\link{character}} name of the info object to returned
+#'
+#' @return
+#'
+#' \bold{\code{get_RLum}}\cr
+#'
+#' (1) Returns the data object (\code{\link[raster]{brick}})\cr
+#' (2) only the info object if \code{info.object} was set.\cr
+#'
+#' @export
 setMethod("get_RLum",
           signature("RLum.Data.Image"),
           definition = function(object, info.object) {
@@ -217,7 +270,7 @@ setMethod("get_RLum",
             if(missing(info.object) == FALSE){
 
               if(is(info.object, "character") == FALSE){
-                stop("[get_RLum] Error: 'info.object' has to be a character!")
+                stop("[get_RLum] 'info.object' has to be a character!")
               }
 
               if(info.object %in% names(object@info) == TRUE){
@@ -229,7 +282,7 @@ setMethod("get_RLum",
                 ##grep names
                 temp.element.names <- paste(names(object@info), collapse = ", ")
 
-                stop.text <- paste("[get_RLum] Error: Invalid element name. Valid names are:", temp.element.names)
+                stop.text <- paste("[get_RLum] Invalid element name. Valid names are:", temp.element.names)
 
                 stop(stop.text)
 
@@ -241,4 +294,24 @@ setMethod("get_RLum",
               object@data
 
             }
+          })
+
+####################################################################################################
+###names_RLum()
+####################################################################################################
+#' @describeIn RLum.Data.Image
+#' Returns the names info elements coming along with this curve object
+#'
+#' @return
+#'
+#' \bold{\code{names_RLum}}\cr
+#'
+#' Returns the names of the info elements
+#'
+#' @export
+setMethod("names_RLum",
+          "RLum.Data.Image",
+          function(object) {
+            names(object@info)
+
           })

@@ -38,7 +38,7 @@
 #' @section Function version: 0.3.0
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
-#' #' (France), Christoph Schmidt, University of Bayreuth (Germany)
+#' (France), Christoph Schmidt, University of Bayreuth (Germany)
 #'
 #' @seealso \code{\linkS4class{RLum.Results}}, \code{\link{analyse_SAR.TL}}
 #'
@@ -69,7 +69,7 @@
 #'                            signal.integral.min, signal.integral.max)
 #' get_RLum(output)
 #'
-#'
+#' @export
 calc_TLLxTxRatio <- function(
   Lx.data.signal,
   Lx.data.background,

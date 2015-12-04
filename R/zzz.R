@@ -5,7 +5,7 @@
 ##==============================================================================
 ##author: R Luminescence Package Team
 ##organisation:
-##version.: 0.2.0
+##version.: 0.2.1
 ##date: 2013-11-10
 ##==============================================================================
 # Set namespace .LuminescenceEnv ------------------------------------------
@@ -29,7 +29,9 @@ assign("col",
                               packageDescription(pkg="Luminescence")$Version,
                               " [Built: ",
                               strsplit(packageDescription(pkg="Luminescence")$Packaged, ";")[[1]][1],
-                             "]", sep="")), silent=TRUE)
+                             "]", sep=""),
+                            "\n",
+                            get_Quote()), silent=TRUE)
 }
 
 ##==============================================================================
@@ -59,6 +61,7 @@ assign("col",
 #'
 #' ##no example available
 #'
+#' @export
 sTeve<- function(n_frames = 10, t_animation = 2, n.tree = 7, type) {
 
   ## allow new overlay plot

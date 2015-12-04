@@ -3,62 +3,89 @@
 #' The function performs an analysis of post-IR IRSL sequences including curve
 #' fitting on \code{\linkS4class{RLum.Analysis}} objects.
 #'
-#' To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement analysis
+#'
+#' To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement analyses
 #' this function has been written as extended wrapper function for the function
 #' \code{\link{analyse_SAR.CWOSL}}, facilitating an entire sequence analysis in
 #' one run. With this, its functionality is strictly limited by the
-#' functionality of the function \code{\link{analyse_SAR.CWOSL}}.
+#' functionality of the function \code{\link{analyse_SAR.CWOSL}}.\cr
 #'
-#' @param object \code{\linkS4class{RLum.Analysis}}(\bold{required}): input
-#' object containing data for analysis
+#' \bold{If the input is a \code{list}}\cr
+#'
+#' If the input is a list of RLum.Analysis-objects, every argument can be provided as list to allow
+#' for different sets of parameters for every single input element.
+#' For further information see \code{\link{analyse_SAR.CWOSL}}.
+#'
+#'
+#' @param object \code{\linkS4class{RLum.Analysis}} (\bold{required}) or \code{\link{list}} of
+#' \code{\linkS4class{RLum.Analysis}} objects: input object containing data for analysis. If a \code{\link{list}}
+#' is provided the functions tries to iteratre over the list.
+#'
 #' @param signal.integral.min \code{\link{integer}} (\bold{required}): lower
 #' bound of the signal integral. Provide this value as vector for different
 #' integration limits for the different IRSL curves.
+#'
 #' @param signal.integral.max \code{\link{integer}} (\bold{required}): upper
 #' bound of the signal integral. Provide this value as vector for different
 #' integration limits for the different IRSL curves.
+#'
 #' @param background.integral.min \code{\link{integer}} (\bold{required}):
 #' lower bound of the background integral. Provide this value as vector for
 #' different integration limits for the different IRSL curves.
+#'
 #' @param background.integral.max \code{\link{integer}} (\bold{required}):
 #' upper bound of the background integral. Provide this value as vector for
 #' different integration limits for the different IRSL curves.
+#'
 #' @param dose.points \code{\link{numeric}} (optional): a numeric vector
 #' containing the dose points values. Using this argument overwrites dose point
 #' values in the signal curves.
+#'
 #' @param sequence.structure \link{vector} \link{character} (with default):
 #' specifies the general sequence structure. Allowed values are \code{"TL"} and
 #' any \code{"IR"} combination (e.g., \code{"IR50"},\code{"pIRIR225"}).
 #' Additionally a parameter \code{"EXCLUDE"} is allowed to exclude curves from
 #' the analysis (Note: If a preheat without PMT measurement is used, i.e.
 #' preheat as non TL, remove the TL step.)
+#'
 #' @param plot \code{\link{logical}} (with default): enables or disables plot
 #' output.
+#'
 #' @param plot.single \code{\link{logical}} (with default): single plot output
 #' (\code{TRUE/FALSE}) to allow for plotting the results in single plot
 #' windows. Requires \code{plot = TRUE}.
+#'
 #' @param \dots further arguments that will be passed to the function
 #' \code{\link{analyse_SAR.CWOSL}} and \code{\link{plot_GrowthCurve}}
+#'
 #' @return Plots (optional) and an \code{\linkS4class{RLum.Results}} object is
 #' returned containing the following elements:
-#' \item{De.values}{\link{data.frame} containing De-values, De-error and
-#' further parameters}. \item{LnLxTnTx.values}{\link{data.frame} of all
-#' calculated Lx/Tx values including signal, background counts and the dose
-#' points.} \item{rejection.criteria}{\link{data.frame} with values that might
-#' by used as rejection criteria. NA is produced if no R0 dose point
-#' exists.}\cr
+#'
+#' \tabular{lll}{
+#' \bold{DATA.OBJECT} \tab \bold{TYPE} \tab \bold{DESCRIPTION} \cr
+#' \code{..$De.values} : \tab  \code{data.frame} \tab Table with De values \cr
+#' \code{..$LnLxTnTx.table} : \tab \code{data.frame} \tab with the LnLxTnTx values \cr
+#' \code{..$rejection.criteria} : \tab \code{\link{data.frame}} \tab rejection criteria \cr
+#' \code{..$Formula} : \tab \code{\link{list}} \tab Function used for fitting of the dose response curve \cr
+#' \code{..$call} : \tab \code{\link{call}} \tab the original function call
+#' }
 #'
 #' The output should be accessed using the function
 #' \code{\link{get_RLum}}.
+#'
 #' @note Best graphical output can be achieved by using the function \code{pdf}
 #' with the following options:\cr \code{pdf(file = "...", height = 15, width =
 #' 15)}
-#' @section Function version: 0.1.4
+#'
+#' @section Function version: 0.2.0
+#'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France)
+#'
 #' @seealso \code{\link{analyse_SAR.CWOSL}}, \code{\link{calc_OSLLxTxRatio}},
 #' \code{\link{plot_GrowthCurve}}, \code{\linkS4class{RLum.Analysis}},
 #' \code{\linkS4class{RLum.Results}} \code{\link{get_RLum}}
+#'
 #' @references Murray, A.S., Wintle, A.G., 2000. Luminescence dating of quartz
 #' using an improved single-aliquot regenerative-dose protocol. Radiation
 #' Measurements 32, 57-73. doi:10.1016/S1350-4487(99)00253-X
@@ -67,7 +94,9 @@
 #' fading rates of various luminescence signals from feldspar-rich sediment
 #' extracts. Radiation Measurements 43, 1474-1486.
 #' doi:10.1016/j.radmeas.2008.06.002
+#'
 #' @keywords datagen plot
+#'
 #' @examples
 #'
 #'
@@ -99,46 +128,115 @@
 #' ##(2) Perform pIRIR analysis (for this example with quartz OSL data!)
 #' ## Note: output as single plots to avoid problems with this example
 #' results <- analyse_pIRIRSequence(object,
-#'                              signal.integral.min = 1,
-#'                              signal.integral.max = 2,
-#'                              background.integral.min = 900,
-#'                              background.integral.max = 1000,
-#'                              fit.method = "EXP",
-#'                              sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
-#'                              main = "Pseudo pIRIR data set based on quartz OSL",
-#'                              plot.single = TRUE)
+#'      signal.integral.min = 1,
+#'      signal.integral.max = 2,
+#'      background.integral.min = 900,
+#'      background.integral.max = 1000,
+#'      fit.method = "EXP",
+#'      sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
+#'      main = "Pseudo pIRIR data set based on quartz OSL",
+#'      plot.single = TRUE)
 #'
 #'
 #' ##(3) Perform pIRIR analysis (for this example with quartz OSL data!)
 #' ## Alternative for PDF output, uncomment and complete for usage
-#' ##
-#' # pdf(file = "...", height = 15, width = 15)
-#' #  results <- analyse_pIRIRSequence(object,
-#' #         signal.integral.min = 1,
-#' #         signal.integral.max = 2,
-#' #         background.integral.min = 900,
-#' #         background.integral.max = 1000,
-#' #         fit.method = "EXP",
-#' #         main = "Pseudo pIRIR data set based on quartz OSL")
-#' #
-#' #  dev.off()
+#' \dontrun{
+#' pdf(file = "...", height = 15, width = 15)
+#'   results <- analyse_pIRIRSequence(object,
+#'          signal.integral.min = 1,
+#'          signal.integral.max = 2,
+#'          background.integral.min = 900,
+#'          background.integral.max = 1000,
+#'          fit.method = "EXP",
+#'          main = "Pseudo pIRIR data set based on quartz OSL")
 #'
+#'   dev.off()
+#' }
 #'
-#'
+#' @export
 analyse_pIRIRSequence <- function(
   object,
   signal.integral.min,
   signal.integral.max,
   background.integral.min,
   background.integral.max,
-  dose.points,
+  dose.points = NULL,
   sequence.structure = c("TL", "IR50", "pIRIR225"),
   plot = TRUE,
   plot.single = FALSE,
   ...
 ){
 
-# CONFIG  -----------------------------------------------------------------
+# SELF CALL -----------------------------------------------------------------------------------
+ if(is.list(object)){
+
+    ##make live easy
+    if(missing("signal.integral.min")){
+      signal.integral.min <- 1
+      warning("[analyse_pIRIRSequence()] 'signal.integral.min' missing, set to 1", call. = FALSE)
+    }
+
+    if(missing("signal.integral.max")){
+      signal.integral.max <- 2
+      warning("[analyse_pIRIRSequence()] 'signal.integral.max' missing, set to 2", call. = FALSE)
+    }
+
+
+    ##now we have to extend everything to allow list of arguments ... this is just consequent
+    signal.integral.min <- rep(list(signal.integral.min), length = length(object))
+    signal.integral.max <- rep(list(signal.integral.max), length = length(object))
+    background.integral.min <- rep(list(background.integral.min), length = length(object))
+    background.integral.max <- rep(list(background.integral.max), length = length(object))
+    sequence.structure <- rep(list(sequence.structure), length = length(object))
+
+    if(!is.null(dose.points)){
+
+      if(is(dose.points, "list")){
+        dose.points <- rep(dose.points, length = length(object))
+
+      }else{
+        dose.points <- rep(list(dose.points), length = length(object))
+
+      }
+
+    }else{
+      dose.points <- rep(list(NULL), length(object))
+
+    }
+
+    ##run analysis
+    temp <- lapply(1:length(object), function(x){
+
+      analyse_pIRIRSequence(object[[x]],
+                        signal.integral.min = signal.integral.min[[x]],
+                        signal.integral.max = signal.integral.max[[x]],
+                        background.integral.min = background.integral.min[[x]],
+                        background.integral.max = background.integral.max[[x]] ,
+                        dose.points = dose.points[[x]],
+                        sequence.structure = sequence.structure[[x]],
+                        plot = plot,
+                        plot.single = plot.single,
+                        main = ifelse("main"%in% names(list(...)), list(...)$main, paste0("ALQ #",x)),
+                        ...)
+
+    })
+
+    ##combine everything to one RLum.Results object as this as what was written ... only
+    ##one object
+
+    ##merge results and check if the output became NULL
+    results <- merge_RLum(temp)
+
+    ##DO NOT use invisible here, this will stop the function from stopping
+    if(length(results) == 0){
+      return(NULL)
+
+    }else{
+      return(results)
+
+    }
+
+  }
 
 
 # General Integrity Checks ---------------------------------------------------
@@ -204,7 +302,8 @@ analyse_pIRIRSequence <- function(
 
   ##removed record from data set
   object <- get_RLum(object, record.id = -temp.sequence.rm.id,
-                              keep.object = TRUE)
+        drop = FALSE
+      )
 
   ##compile warning message
   temp.sequence.rm.warning <- paste(
@@ -233,7 +332,7 @@ analyse_pIRIRSequence <- function(
 
     ##remove from object
     object  <- get_RLum(
-      object, record.id = -temp.sequence.rm.id, keep.object = TRUE)
+      object, record.id = -temp.sequence.rm.id, drop = FALSE)
 
     ##remove from sequence structure
     sequence.structure  <- sequence.structure[sequence.structure != "EXCLUDE"]
@@ -276,7 +375,7 @@ analyse_pIRIRSequence <- function(
   ## unfortunately a little bit more complicated then expected previously due
   ## the order of the produced plots by the previous functions
 
-  if(plot.single == FALSE){
+  if(plot.single == FALSE & plot == TRUE){
   ##first (Tx,Tn, Lx,Ln)
   temp.IRSL.layout.vector.first <- c(3,5,6,7,3,5,6,8)
 
@@ -350,15 +449,15 @@ analyse_pIRIRSequence <- function(
   ##layout.show(nf)
 
   }
-  
+
   ##(1) INFO PLOT
-  if (plot == TRUE) {
+  if (plot) {
     plot(NA,NA,
          ylim = c(0,1), xlab = "",
          xlim = c(0,1), ylab = "",
          axes = FALSE,
          main = main)
-    
+
     text(0.5,0.5, paste(sequence.structure, collapse = "\n"), cex = cex *2)
   }
 
@@ -371,7 +470,7 @@ analyse_pIRIRSequence <- function(
       sort(c(TL.curves.id, IRSL.curves.id[seq(i,length(IRSL.curves.id),by=n.loops)]))
 
     ##(a) select data set (TL curves has to be considered for the data set)
-    temp.curves<- get_RLum(object, record.id = temp.id.sel, keep.object = TRUE)
+    temp.curves <- get_RLum(object, record.id = temp.id.sel, drop = FALSE)
 
     ##(b) grep integral limits as they might be different for different curves
     if(length(signal.integral.min)>1){
@@ -409,57 +508,68 @@ analyse_pIRIRSequence <- function(
 
     ##start analysis
     temp.results <- analyse_SAR.CWOSL(
-                    temp.curves,
-                    signal.integral.min = temp.signal.integral.min,
-                    signal.integral.max = temp.signal.integral.max,
-                    background.integral.min = temp.background.integral.min,
-                    background.integral.max = temp.background.integral.max,
-                    plot = plot,
-                    dose.points = dose.points,
-                    plot.single = temp.plot.single,
-                    output.plotExtended.single = TRUE,
-                    cex.global = cex,
-                    ...) ##TODO should be replaced be useful explizit arguments
+      temp.curves,
+      signal.integral.min = temp.signal.integral.min,
+      signal.integral.max = temp.signal.integral.max,
+      background.integral.min = temp.background.integral.min,
+      background.integral.max = temp.background.integral.max,
+      plot = plot,
+      dose.points = dose.points,
+      plot.single = temp.plot.single,
+      output.plotExtended.single = TRUE,
+      cex.global = cex,
+      ...
+    ) ##TODO should be replaced be useful explizit arguments
 
 
-    ##add signal nformation to the protocol step
-    temp.results.pIRIR.De <- as.data.frame(
-      c(get_RLum(temp.results, "De.values"),
-        data.frame(Signal = pIRIR.curve.names[i])))
+      ##check whether NULL was return
+      if (is.null(temp.results)) {
+        warning("[plot_pIRIRSequence()] An error occurred, analysis skipped. Check your sequence!", call. = FALSE)
+        return(NULL)
+      }
 
-    temp.results.pIRIR.LnLxTnTx <- as.data.frame(
-     c(get_RLum(temp.results, "LnLxTnTx.table"),
-       data.frame(Signal = pIRIR.curve.names[i])))
+      ##add signal information to the protocol step
+      temp.results.pIRIR.De <- as.data.frame(c(
+        get_RLum(temp.results, "De.values"),
+        data.frame(Signal = pIRIR.curve.names[i])
+      ))
 
-    temp.results.pIRIR.rejection.criteria <- as.data.frame(
-      c(get_RLum(temp.results, "rejection.criteria"),
-      data.frame(Signal = pIRIR.curve.names[i])))
+      temp.results.pIRIR.LnLxTnTx <- as.data.frame(c(
+        get_RLum(temp.results, "LnLxTnTx.table"),
+        data.frame(Signal = pIRIR.curve.names[i])
+      ))
 
-    temp.results.pIRIR.formula <- list(get_RLum(temp.results,
-                                                             "Formula"))
-    names(temp.results.pIRIR.formula)  <- pIRIR.curve.names[i]
+      temp.results.pIRIR.rejection.criteria <- as.data.frame(c(
+        get_RLum(temp.results, "rejection.criteria"),
+        data.frame(Signal = pIRIR.curve.names[i])
+      ))
 
-    ##create now object
-    temp.results  <- set_RLum(
-      class = "RLum.Results",
-      data = list(
-        De.values = temp.results.pIRIR.De,
-        LnLxTnTx.table = temp.results.pIRIR.LnLxTnTx,
-        rejection.criteria = temp.results.pIRIR.rejection.criteria,
-        Formula =temp.results.pIRIR.formula))
+      temp.results.pIRIR.formula <- list(get_RLum(temp.results,
+                                                  "Formula"))
+      names(temp.results.pIRIR.formula)  <- pIRIR.curve.names[i]
+
+      ##create now object
+      temp.results  <- set_RLum(
+        class = "RLum.Results",
+        data = list(
+          De.values = temp.results.pIRIR.De,
+          LnLxTnTx.table = temp.results.pIRIR.LnLxTnTx,
+          rejection.criteria = temp.results.pIRIR.rejection.criteria,
+          Formula = temp.results.pIRIR.formula,
+          call = sys.call()
+        )
+      )
 
 
-    ##merge results
-    if(exists("temp.results.final")){
+      ##merge results
+      if (exists("temp.results.final")) {
+        temp.results.final <- merge_RLum(list(temp.results.final, temp.results))
 
-      temp.results.final <- merge_RLum.Results(
-        list(temp.results.final, temp.results))
+      } else{
+        temp.results.final <- temp.results
 
-    }else{
+      }
 
-      temp.results.final <- temp.results
-
-   }
 
   }
 
@@ -468,7 +578,7 @@ analyse_pIRIRSequence <- function(
 # Plotting additionals--------------------------------------------------------
 ##============================================================================##
 
-if(plot == TRUE){
+if(plot){
 
   ##plot growth curves
   plot(NA, NA,
@@ -480,7 +590,7 @@ if(plot == TRUE){
          max(get_RLum(temp.results.final, "LnLxTnTx.table")$LxTx.Error)),
        xlab = "Dose [s]",
        ylab = expression(L[x]/T[x]),
-       main = "Summarised growth curves")
+       main = "Summarised Dose Response Curves")
 
 
     ##set x for expression evaluation
@@ -710,7 +820,7 @@ if(plot == TRUE){
 # Return Values -----------------------------------------------------------
 ##============================================================================##
 
-  temp.results.final
+  return(temp.results.final)
 
 
 }

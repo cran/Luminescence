@@ -4,7 +4,7 @@ NULL
 #' Class \code{"Risoe.BINfileData"}
 #'
 #' S4 class object for luminescence data in R. The object is produced as output
-#' of the function \code{\link{readBIN2R}}.
+#' of the function \code{\link{read_BIN2R}}.
 #'
 #'
 #' @name Risoe.BINfileData-class
@@ -99,7 +99,7 @@ NULL
 #'
 #' Note that the \code{Risoe.BINfileData} object combines all values from
 #' different versions from the BIN-file, reserved bits are skipped, however,
-#' the function \code{\link{writeR2BIN}} reset arbitrary reserved bits. Invalid
+#' the function \code{\link{write_R2BIN}} reset arbitrary reserved bits. Invalid
 #' values for a specific version are set to \code{NA}. Furthermore, the
 #' internal R data types do not necessarily match the required data types for
 #' the BIN-file data import! Data types are converted during data import.\cr
@@ -139,8 +139,8 @@ NULL
 #' (France)
 #'
 #' @seealso
-#' \code{\link{plot_Risoe.BINfileData}}, \code{\link{readBIN2R}},
-#' \code{\link{writeR2BIN}},\code{\link{merge_Risoe.BINfileData}},
+#' \code{\link{plot_Risoe.BINfileData}}, \code{\link{read_BIN2R}},
+#' \code{\link{write_R2BIN}},\code{\link{merge_Risoe.BINfileData}},
 #' \code{\link{Risoe.BINfileData2RLum.Analysis}},
 #' \code{\link{Risoe.BINfileData2RLum.Data.Curve}}
 #'
@@ -155,9 +155,7 @@ NULL
 #'
 #' showClass("Risoe.BINfileData")
 #'
-
-
-##DEFINE CLASS
+#' @export
 setClass("Risoe.BINfileData",
          slots = list(
            METADATA="data.frame",
@@ -167,6 +165,9 @@ setClass("Risoe.BINfileData",
          )
 
 ##set generic S4 function for object
+#' @describeIn Risoe.BINfileData
+#' Show structure of RLum and Risoe.BINfile class objects
+#' @export
 setMethod("show", signature(object = "Risoe.BINfileData"),
           function(object){
 
@@ -179,6 +180,7 @@ setMethod("show", signature(object = "Risoe.BINfileData"),
             date<-paste(unique(as.character(object@METADATA[,"DATE"])), collapse = ", ")
             run.range<-range(object@METADATA[,"RUN"])
             set.range<-range(object@METADATA[,"SET"])
+            grain.range <- range(object@METADATA[,"GRAIN"])
             pos.range<-range(object@METADATA[,"POSITION"])
 
             records.type.count <- sapply(1:length(records.type),
@@ -201,6 +203,7 @@ setMethod("show", signature(object = "Risoe.BINfileData"),
             cat("\n\tOverall records:     ", records.overall)
             cat("\n\tRecords type:        ", records.type.count)
             cat("\n\tPosition range:      ",pos.range[1],":",pos.range[2])
+            cat("\n\tGrain range:         ",grain.range[1],":",grain.range[2])
             cat("\n\tRun range:           ",run.range[1],":",run.range[2])
             cat("\n\tSet range:           ",set.range[1],":",set.range[2])
           }#end function
@@ -210,7 +213,7 @@ setMethod("show", signature(object = "Risoe.BINfileData"),
 # constructor (set) method for object class -----------------------------------
 
 #' @describeIn Risoe.BINfileData
-#' The Risoe.BINfileData is normally produced as output of the function readBIN2R.
+#' The Risoe.BINfileData is normally produced as output of the function read_BIN2R.
 #' This construction method is intended for internal usage only.
 #'
 #' @param METADATA Object of class "data.frame" containing the meta information
@@ -220,6 +223,7 @@ setMethod("show", signature(object = "Risoe.BINfileData"),
 #'
 #' @param .RESERVED Object of class "list" containing list of undocumented raw
 #' values for internal use only.
+#' @export
 setMethod("set_Risoe.BINfileData",
           signature = c(
             METADATA = "data.frame", DATA = "list", .RESERVED = "ANY"
@@ -247,11 +251,15 @@ setMethod("set_Risoe.BINfileData",
 #' the object directly, it is just showing a terminal message.
 #'
 #' @param object an object of class \code{\linkS4class{Risoe.BINfileData}}
+#'
+#' @param ... other arguments that might be passed
+#'
+#' @export
 setMethod("get_Risoe.BINfileData",
           signature= "Risoe.BINfileData",
-          definition = function(object) {
+          definition = function(object, ...) {
 
-            cat("[get_Risoe.BINfileData()]: No direct access is provided for this object type. Use the function 'Risoe.BINfileData2RLum.Analysis' for object coercing.")
+            cat("[get_Risoe.BINfileData()] No direct access is provided for this object type. Use the function 'Risoe.BINfileData2RLum.Analysis' for object coercing.")
 
           })##end setMethod
 

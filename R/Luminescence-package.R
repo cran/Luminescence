@@ -6,7 +6,7 @@
 #' plotting of equivalent dose distributions.
 #'
 #' \tabular{ll}{ Package: \tab Luminescence\cr Type: \tab Package\cr Version:
-#' \tab 0.4.6\cr Date: \tab 2015-09-21\cr License: \tab GPL-3\cr }
+#' \tab 0.5.0\cr Date: \tab 2015-12-04 \cr License: \tab GPL-3\cr }
 #'
 #' @name Luminescence-package
 #' @aliases Luminescence-package Luminescence
@@ -32,7 +32,7 @@
 #'
 #' \bold{Support contact}
 #'
-#' \email{developer@@r-luminescence.de}\cr
+#' \email{developers@@r-luminescence.de}\cr
 #'
 #' We may further encourage the usage of our support forum. For this please
 #' visit our project website (link below).
@@ -63,28 +63,36 @@
 #' funded by the DFG (SCHM 3051/3-1) in the framework of the program
 #' "Scientific Networks". Project title: "Lum.Network: Ein
 #' Wissenschaftsnetzwerk zur Analyse von Lumineszenzdaten mit R" (2014-2017)
+#'
 #' @references Dietze, M., Kreutzer, S., Fuchs, M.C., Burow, C., Fischer, M.,
-#' Schmidt, C., 2013. A practical guide to the R package Luminescence.  Ancient
-#' TL, 31, pp. 11-18.
+#' Schmidt, C., 2013. A practical guide to the R package Luminescence.
+#' Ancient TL, 31, 11-18.
+#'
+#' Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2015. The abanico plot:
+#' visualising chronometric data with individual standard errors. Quaternary Geochronology, 1-7.
+#' http://dx.doi.org/10.1016/j.quageo.2015.09.003
 #'
 #' Fuchs, M.C., Kreutzer, S., Burow, C., Dietze, M., Fischer, M., Schmidt, C.,
 #' Fuchs, M., 2015. Data processing in luminescence dating analysis: An
 #' exemplary workflow using the R package 'Luminescence'. Quaternary
-#' International, 362, pp. 8-13. http://dx.doi.org/10.1016/j.quaint.2014.06.034
+#' International, 362,8-13. http://dx.doi.org/10.1016/j.quaint.2014.06.034
 #'
 #' Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M.,
 #' 2012. Introducing an R package for luminescence dating analysis. Ancient TL,
-#' 30, pp. 1-8.
+#' 30, 1-8.
+#'
+#' Smedley, R.K., 2015. A new R function for the Internal External Uncertainty (IEU) model.
+#' Ancient TL 33, 16-21.
 #'
 #' @keywords package
 #'
 #' @import utils methods data.table bbmle
-#' @importFrom graphics abline mtext text lines par layout lines arrows axTicks axis barplot box boxplot contour curve grconvertX grconvertY hist legend persp points polygon rug segments title
+#' @importFrom raster nlayers raster contour plotRGB brick
+#' @importFrom graphics abline mtext text lines par layout lines arrows axTicks axis barplot box boxplot contour curve grconvertX grconvertY hist legend persp points polygon rug segments title grid
 #' @importFrom grDevices adjustcolor axisTicks colorRampPalette gray.colors rgb topo.colors
 #' @importFrom stats approx as.formula complete.cases density dnorm glm lm median na.exclude na.omit nls nls.control pchisq pnorm quantile rnorm runif sd smooth smooth.spline spline t.test uniroot var weighted.mean
 #' @importFrom parallel parLapply makeCluster stopCluster
 #' @importFrom Rcpp evalCpp
-#' @exportPattern ^[[:alpha:]]+
 #' @useDynLib Luminescence
 NULL
 
@@ -414,7 +422,7 @@ NULL
 #' Example data as \code{\linkS4class{RLum.Data.Image}} objects
 #'
 #' Measurement of Princton Instruments camera imported with the function
-#' \code{\link{readSPE2R}} to R to produce an
+#' \code{\link{read_SPE2R}} to R to produce an
 #' \code{\linkS4class{RLum.Data.Image}} object.
 #'
 #'
@@ -452,7 +460,7 @@ NULL
 #'
 #' Example data from a SAR OSL measurement and a TL spectrum for package
 #' Luminescence imported from a Freiberg Instruments XSYG file using the
-#' function \code{\link{readXSYG2R}}.
+#' function \code{\link{read_XSYG2R}}.
 #'
 #'
 #' @format
@@ -471,7 +479,7 @@ NULL
 #' \code{apply_CosmicRayRemoval}. Note that no quantum efficiency calibration
 #' was performed.
 #' @section Version: 0.1
-#' @seealso \code{\link{readXSYG2R}}, \code{\linkS4class{RLum.Analysis}},\cr
+#' @seealso \code{\link{read_XSYG2R}}, \code{\linkS4class{RLum.Analysis}},\cr
 #' \code{\linkS4class{RLum.Data.Spectrum}}, \code{\link{plot_RLum}},\cr
 #' \code{\link{plot_RLum.Analysis}}, \code{\link{plot_RLum.Data.Spectrum}}
 #' @references Unpublished data measured to serve as example data for that
@@ -569,20 +577,21 @@ NULL
 #' Coarse grain quartz (200-250 microns) measured on single grain discs on a
 #' Risoe TL/OSL DA-20 reader\cr Units: \tab Values are given in Gray \cr
 #' Measurement Date: \tab 2012 }
+#' @keywords datasets
 #' @examples
 #'
 #' ##(1) plot values as histogram
 #' data(ExampleData.DeValues, envir = environment())
 #' plot_Histogram(ExampleData.DeValues$BT998, xlab = "De [s]")
 #'
-#' ##(2) plot value as histogram (with Second to Gray convertion)
+#' ##(2) plot values as histogram (with second to gray conversion)
 #' data(ExampleData.DeValues, envir = environment())
 #'
 #' De.values <- Second2Gray(ExampleData.DeValues$BT998,
-#'                          dose.rate = c(0.0438, 0.0019),
-#'                          method = "gaussian")
+#'                          dose.rate = c(0.0438, 0.0019))
+#'
 #'
 #' plot_Histogram(De.values, xlab = "De [Gy]")
 #'
-#'
-#'
+#' @name ExampleData.DeValues
+NULL

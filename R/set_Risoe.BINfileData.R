@@ -10,7 +10,7 @@
 #' @param METADATA x
 #' @param DATA x
 #' @param .RESERVED x
-#' 
+#'
 #' @return Return is the same as input objects as provided in the list.
 #' @section Function version: 0.1
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
@@ -18,6 +18,8 @@
 #' @seealso
 #' \code{\linkS4class{Risoe.BINfileData}}
 #' @keywords utilities
+#' 
+#' @export
 setGeneric("set_Risoe.BINfileData", function(METADATA, DATA, .RESERVED) {
   standardGeneric("set_Risoe.BINfileData")
 })
