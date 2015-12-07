@@ -6,7 +6,7 @@
 #' plotting of equivalent dose distributions.
 #'
 #' \tabular{ll}{ Package: \tab Luminescence\cr Type: \tab Package\cr Version:
-#' \tab 0.5.0\cr Date: \tab 2015-12-04 \cr License: \tab GPL-3\cr }
+#' \tab 0.5.1\cr Date: \tab 2015-12-07 \cr License: \tab GPL-3\cr }
 #'
 #' @name Luminescence-package
 #' @aliases Luminescence-package Luminescence
@@ -18,7 +18,7 @@
 #' Fischer\tab University of Bayreuth, Germany \cr Margret C. Fuchs \tab
 #' Helmholtz-Zentrum Dresden-Rossendorf, Helmholtz-Institute Freiberg for Resource Technology,
 #' Freiberg, Germany \cr
-#' Sebastian Kreutzer \tab IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac,
+#' Sebastian Kreutzer \tab IRAMAT-CRP2A, Universite Bordeaux Montaigne, France,
 #' France\cr Christoph Schmidt \tab University of Bayreuth, Germany\cr Rachel
 #' K. Smedley\tab Aberystwyth University, United Kingdom }
 #'
@@ -68,8 +68,8 @@
 #' Schmidt, C., 2013. A practical guide to the R package Luminescence.
 #' Ancient TL, 31, 11-18.
 #'
-#' Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2015. The abanico plot:
-#' visualising chronometric data with individual standard errors. Quaternary Geochronology, 1-7.
+#' Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2016. The abanico plot:
+#' visualising chronometric data with individual standard errors. Quaternary Geochronology 31, 12-18.
 #' http://dx.doi.org/10.1016/j.quageo.2015.09.003
 #'
 #' Fuchs, M.C., Kreutzer, S., Burow, C., Dietze, M., Fischer, M., Schmidt, C.,

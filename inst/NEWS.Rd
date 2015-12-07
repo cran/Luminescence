@@ -1,5 +1,32 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.5.1 (7th December, 2015)}{
+
+ \subsection{Changes with unplanned version 0.5.1}{
+   \itemize{
+
+      \item Due to problems in the package 'sp' a couple of subsequent binary packages could not
+      built for Mac OSX Mavericks, including the package 'raster' which is imported by
+      the package 'Luminescence'. Consequently no recent Mac OSX version of 'Luminescence'
+      was available on CRAN. This update fixes this by reducing the required version
+      number for 'raster' down to the last binary version available for Mac OSX for Mavericks on CRAN.
+
+      \item With this version the version requirement for 'rgl' has been also reduced down to
+      0.95.1201 (last binary version available for Mac OSX Mavericks on CRAN)
+
+         \item \code{plot_RLum.Analysis()}
+      \itemize{
+
+        \item If the option \code{subset} was used, the automatic par() setting was a little bit
+        overruled. Corrected.
+
+      }
+
+      }
+
+}
+}
+
 \section{Changes in version 0.5.0 (4th, December, 2015)}{
 
   \subsection{General remarks}{
@@ -544,14 +571,9 @@
         \item \code{as.matrix()}:  \code{RLum.Data.Curve}
         \item \code{merge()}: \code{RLum}
         \item \code{rep()}: \code{RLum}
-
-
       }
-
-
    }
-  }
 
 
-
+}
 }
