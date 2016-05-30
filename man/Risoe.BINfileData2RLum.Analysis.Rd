@@ -4,7 +4,8 @@
 \alias{Risoe.BINfileData2RLum.Analysis}
 \title{Convert Risoe.BINfileData object to an RLum.Analysis object}
 \usage{
-Risoe.BINfileData2RLum.Analysis(object, pos, grain, run, set, ltype,
+Risoe.BINfileData2RLum.Analysis(object, pos = NULL, grain = NULL,
+  run = NULL, set = NULL, ltype = NULL, dtype = NULL,
   protocol = "unknown", txtProgressBar = FALSE)
 }
 \arguments{
@@ -31,8 +32,11 @@ the measurement to limit the converted data set (e.g., \code{set =
 c(1:48)}).}
 
 \item{ltype}{\code{\link{vector}, \link{character}} (optional): curve type
-to limit the converted data. Allowed values are: \code{IRSL}, \code{OSL},
-\code{TL}, \code{RIR}, \code{RBR} and \code{USER}}
+to limit the converted data. Commonly allowed values are: \code{IRSL}, \code{OSL},
+\code{TL}, \code{RIR}, \code{RBR} and \code{USER} (see also \code{\linkS4class{Risoe.BINfileData}})}
+
+\item{dtype}{\code{\link{vector}, \link{character}} (optional): data type to
+limit the converted data. Commonly allowed values are listed in \code{\linkS4class{Risoe.BINfileData}}}
 
 \item{protocol}{\code{\link{character}} (optional): sets protocol type for
 analysis object. Value may be used by subsequent analysis functions.}
@@ -45,8 +49,7 @@ Returns an \code{\linkS4class{RLum.Analysis}} object.
 }
 \description{
 Converts values from one specific position of a Risoe.BINfileData S4-class
-object to an RLum.Analysis object. Internally the function uses the function
-\code{\link{Risoe.BINfileData2RLum.Data.Curve}} to recalculate the curves.
+object to an RLum.Analysis object.
 }
 \details{
 The \code{\linkS4class{RLum.Analysis}} object requires a set of curves for
@@ -60,7 +63,7 @@ The \code{protocol} argument of the \code{\linkS4class{RLum.Analysis}}
 object is set to 'unknown' if not stated otherwise.
 }
 \section{Function version}{
- 0.2.2 (2015-12-05 15:52:49)
+ 0.4.1 (2016-05-19 23:33:15)
 }
 \examples{
 
@@ -78,8 +81,7 @@ Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
 #
 }
 \seealso{
-\code{\linkS4class{Risoe.BINfileData}}, \code{\link{Risoe.BINfileData2RLum.Data.Curve}}
-\code{\linkS4class{RLum.Analysis}}, \code{\link{read_BIN2R}}
+\code{\linkS4class{Risoe.BINfileData}}, \code{\linkS4class{RLum.Analysis}}, \code{\link{read_BIN2R}}
 }
 \keyword{manip}
 

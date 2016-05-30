@@ -6,7 +6,7 @@
 to a given De distribution}
 \usage{
 calc_MinDose(data, sigmab, log = TRUE, par = 3, bootstrap = FALSE,
-  init.values, plot = TRUE, multicore = FALSE, ...)
+  init.values, level = 0.95, plot = TRUE, multicore = FALSE, ...)
 }
 \arguments{
 \item{data}{\code{\linkS4class{RLum.Results}} or \link{data.frame}
@@ -32,6 +32,9 @@ bootstrap approach of Cunningham & Wallinga (2012).}
 starting values for gamma, sigma, p0 and mu (e.g. \code{list(gamma=100
 sigma=1.5, p0=0.1, mu=100)}). If no values are provided reasonable values
 are tried to be estimated from the data.}
+
+\item{level}{\code{\link{logical}} (with default): the confidence level
+required (defaults to 0.95).}
 
 \item{plot}{\code{\link{logical}} (with default): plot output
 (\code{TRUE}/\code{FALSE})}
@@ -96,9 +99,12 @@ provided for \code{init.values} reasonable starting values are estimated
 from the input data.  If the final estimates of \emph{gamma}, \emph{mu},
 \emph{sigma} and \emph{p0} are totally off target, consider providing custom
 starting values via \code{init.values}. \cr In contrast to previous versions
-of this function the boundaries for the individual model parameters can no
-longer be specified. Appropriate boundary are now hard-coded and are valid
-for all input data sets. \cr\cr \bold{Bootstrap} \cr\cr When
+of this function the boundaries for the individual model parameters are no
+longer required to be explicitly specified. If you want to override the default
+boundary values use the arguments \code{gamma.lower}, \code{gamma.upper},
+\code{sigma.lower}, \code{sigma.upper}, \code{p0.lower}, \code{p0.upper},
+\code{mu.lower} and \code{mu.upper}.  \cr\cr
+\bold{Bootstrap} \cr\cr When
 \code{bootstrap=TRUE} the function applies the bootstrapping method as
 described in Wallinga & Cunningham (2012). By default, the minimum age model
 produces 1000 first level and 3000 second level bootstrap replicates
@@ -132,7 +138,7 @@ model with \code{debug=TRUE} which provides extended console output and
 forwards all internal warning messages.
 }
 \section{Function version}{
- 0.4.1 (2015-11-29 17:27:48)
+ 0.4.3 (2016-05-24 12:14:20)
 }
 \examples{
 
@@ -159,7 +165,7 @@ res
 
 # Plot the log likelihood profiles retroactively, because before
 # we set plot = FALSE
-plot_RLum.Results(mam)
+plot_RLum(mam)
 
 # Plot the dose distribution in an abanico plot and draw a line
 # at the minimum dose estimate
@@ -183,46 +189,47 @@ plot_AbanicoPlot(data = ExampleData.DeValues$CA1,
                                   sigma == .(round(res$sig, 1)) ~ ", " ~
                                   rho == .(round(res$p0, 2))))
 
+
+\dontrun{
 # (3) Run the minimum age model with bootstrap
-# NOTE: Bootstrapping is computationally intensive, which is why the
-# following example is commented out. To run the examples just
-# uncomment the code.
+# NOTE: Bootstrapping is computationally intensive
 # (3.1) run the minimum age model with default values for bootstrapping
-#calc_MinDose(data = ExampleData.DeValues$CA1,
-#             sigmab = 0.15,
-#             bootstrap = TRUE)
+calc_MinDose(data = ExampleData.DeValues$CA1,
+             sigmab = 0.15,
+             bootstrap = TRUE)
 
 # (3.2) Bootstrap control parameters
-#mam <- calc_MinDose(data = ExampleData.DeValues$CA1,
-#                    sigmab = 0.15,
-#                    bootstrap = TRUE,
-#                    bs.M = 300,
-#                    bs.N = 500,
-#                    bs.h = 4,
-#                    sigmab.sd = 0.06,
-#                    plot = FALSE)
+mam <- calc_MinDose(data = ExampleData.DeValues$CA1,
+                    sigmab = 0.15,
+                    bootstrap = TRUE,
+                    bs.M = 300,
+                    bs.N = 500,
+                    bs.h = 4,
+                    sigmab.sd = 0.06,
+                    plot = FALSE)
 
 # Plot the results
-#plot_RLum(mam)
+plot_RLum(mam)
 
 # save bootstrap results in a separate variable
-#bs <- get_RLum(mam, "bootstrap")
+bs <- get_RLum(mam, "bootstrap")
 
 # show structure of the bootstrap results
-#str(bs, max.level = 2, give.attr = FALSE)
+str(bs, max.level = 2, give.attr = FALSE)
 
 # print summary of minimum dose and likelihood pairs
-#summary(bs$pairs$gamma)
+summary(bs$pairs$gamma)
 
 # Show polynomial fits of the bootstrap pairs
-#bs$poly.fits$poly.three
+bs$poly.fits$poly.three
 
 # Plot various statistics of the fit using the generic plot() function
-#par(mfcol=c(2,2))
-#plot(bs$poly.fits$poly.three, ask = FALSE)
+par(mfcol=c(2,2))
+plot(bs$poly.fits$poly.three, ask = FALSE)
 
 # Show the fitted values of the polynomials
-#summary(bs$poly.fits$poly.three$fitted.values)
+summary(bs$poly.fits$poly.three$fitted.values)
+}
 
 }
 \author{

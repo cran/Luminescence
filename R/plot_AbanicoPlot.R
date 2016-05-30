@@ -35,17 +35,30 @@
 #' and leaves 25 \% for the part that shows the KDE graph.\cr\cr
 #' A statistic summary, i.e. a collection of statistic measures of
 #' centrality and dispersion (and further measures) can be added by specifying
-#' one or more of the following keywords: \code{"n"} (number of samples),
-#' \code{"mean"} (mean De value), \code{"mean.weighted"} (error-weighted mean),
-#' \code{"median"} (median of the De values), \code{"sdrel"} (relative standard
-#' deviation in percent), \code{"sdrel.weighted"} (error-weighted relative
-#' standard deviation in percent), \code{"sdabs"} (absolute standard deviation),
-#' \code{"sdabs.weighted"} (error-weighted absolute standard deviation),
-#' \code{"serel"} (relative standard error), \code{"serel.weighted"} (
-#' error-weighted relative standard error), \code{"seabs"} (absolute standard
-#' error), \code{"seabs.weighted"} (error-weighted absolute standard error),
-#' \code{"in.2s"} (percent of samples in 2-sigma range),
-#' \code{"kurtosis"} (kurtosis) and \code{"skewness"} (skewness). \cr\cr
+#' one or more of the following keywords:
+#'
+#' \itemize{
+#' \item \code{"n"} (number of samples)
+#' \item \code{"mean"} (mean De value)
+#' \item \code{"median"} (median of the De values)
+#' \item \code{"sd.rel"} (relative standard deviation in percent)
+#' \item \code{"sd.abs"} (absolute standard deviation)
+#' \item \code{"se.rel"} (relative standard error)
+#' \item \code{"se.abs"} (absolute standard error)
+#' \item \code{"in.2s"} (percent of samples in 2-sigma range)
+#' \item \code{"kurtosis"} (kurtosis)
+#' \item \code{"skewness"} (skewness)
+#' }
+#'
+#' Note that the input data for the statistic summary is sent to the function
+#' \code{calc_Statistics()} depending on the log-option for the z-scale. If
+#' \code{"log.z = TRUE"}, the summary is based on the logarithms of the input
+#' data. If \code{"log.z = FALSE"} the linearly scaled data is used. \cr
+#' Note as well, that \code{"calc_Statistics()"} calculates these statistic
+#' measures in three different ways: \code{unweighted}, \code{weighted} and
+#' \code{MCM-based} (i.e., based on Monte Carlo Methods). By default, the
+#' MCM-based version is used. If you wish to use another method, indicate this
+#' with the appropriate keyword using the argument \code{summary.method}.\cr\cr
 #'
 #' The optional parameter \code{layout} allows to modify the entire plot more
 #' sophisticated. Each element of the plot can be addressed and its properties
@@ -93,13 +106,19 @@
 #'
 #' @param summary \code{\link{character}} (optional): add statistic measures of
 #' centrality and dispersion to the plot. Can be one or more of several
-#' keywords. See details for available keywords.
+#' keywords. See details for available keywords. Results differ depending on
+#' the log-option for the z-scale (see details).
 #'
 #' @param summary.pos \code{\link{numeric}} or \code{\link{character}} (with
 #' default): optional position coordinates or keyword (e.g. \code{"topright"})
 #' for the statistical summary. Alternatively, the keyword \code{"sub"} may be
 #' specified to place the summary below the plot header. However, this latter
 #' option in only possible if \code{mtext} is not used.
+#'
+#' @param summary.method \code{\link{character}} (with default): keyword
+#' indicating the method used to calculate the statistic summary. One out of
+#' \code{"unweighted"}, \code{"weighted"} and \code{"MCM"}. See
+#' \code{\link{calc_Statistics}} for details.
 #'
 #' @param legend \code{\link{character}} vector (optional): legend content to
 #' be added to the plot.
@@ -124,6 +143,9 @@
 #' @param dots \code{\link{logical}}: Option to add a dot plot to the
 #' dispersion part. If number of dots exceeds space in the dispersion part, a
 #' square indicates this.
+#'
+#' @param boxplot \code{\link{logical}}: Option to add a boxplot to the
+#' dispersion part, default is \code{FALSE}.
 #'
 #' @param y.axis \code{\link{logical}}: Option to hide y-axis labels. Useful
 #' for data with small scatter.
@@ -171,13 +193,16 @@
 #' parameters. These can be useful to reproduce similar plots. Default is
 #' \code{FALSE}.
 #'
+#' @param interactive \code{\link{logical}} (with default): create an interactive
+#' abanico plot (requires the 'plotly' package)
+#'
 #' @param \dots Further plot arguments to pass. \code{xlab} must be a vector of
 #' length 2, specifying the upper and lower x-axes labels.
 #'
 #' @return returns a plot object and, optionally, a list with plot calculus
 #' data.
 #'
-#' @section Function version: 0.1.7
+#' @section Function version: 0.1.8
 #'
 #' @author Michael Dietze, GFZ Potsdam (Germany),\cr Sebastian Kreutzer,
 #' IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr Inspired by a plot
@@ -298,7 +323,7 @@
 #'                  xlab = c("Data error (%)",
 #'                           "Data precision"),
 #'                  ylab = "Scatter",
-#'                  zlab = "Equivalent dose (Gy)")
+#'                  zlab = "Equivalent dose [Gy]")
 #'
 #' ## now with minimum, maximum and median value indicated
 #' plot_AbanicoPlot(data = ExampleData.DeValues,
@@ -365,6 +390,7 @@ plot_AbanicoPlot <- function(
   mtext,
   summary,
   summary.pos,
+  summary.method = "MCM",
   legend,
   legend.pos,
   stats,
@@ -372,6 +398,7 @@ plot_AbanicoPlot <- function(
   kde = TRUE,
   hist = FALSE,
   dots = FALSE,
+  boxplot = FALSE,
   y.axis = TRUE,
   error.bars = FALSE,
   bar,
@@ -384,6 +411,7 @@ plot_AbanicoPlot <- function(
   frame = 1,
   bw = "SJ",
   output = FALSE,
+  interactive = FALSE,
   ...
 ) {
   ## check data and parameter consistency--------------------------------------
@@ -391,17 +419,17 @@ plot_AbanicoPlot <- function(
   ## Homogenise input data format
   if(is(data, "list") == FALSE) {
     data <- list(data)
-    }
+  }
 
   ## Check input data
   for(i in 1:length(data)) {
     if(is(data[[i]], "RLum.Results") == FALSE &
-         is(data[[i]], "data.frame") == FALSE) {
+       is(data[[i]], "data.frame") == FALSE) {
       stop(paste("[plot_AbanicoPlot()] Input data format is neither",
                  "'data.frame' nor 'RLum.Results'"))
     } else {
       if(is(data[[i]], "RLum.Results") == TRUE) {
-        data[[i]] <- get_RLum(data[[i]])[,c(1:2)]
+        data[[i]] <- get_RLum(data[[i]], "data")[,c(1:2)]
       }
     }
   }
@@ -409,7 +437,7 @@ plot_AbanicoPlot <- function(
   ## Check input data
   for(i in 1:length(data)) {
     if(is(data[[i]], "RLum.Results") == FALSE &
-         is(data[[i]], "data.frame") == FALSE) {
+       is(data[[i]], "data.frame") == FALSE) {
       stop(paste("[plot_AbanicoPlot()] Input data format is neither",
                  "'data.frame' nor 'RLum.Results'"))
     } else {
@@ -425,9 +453,11 @@ plot_AbanicoPlot <- function(
 
       n.NA <- sum(!complete.cases(data[[i]]))
 
-      if(n.NA == 1) {message(paste0("[plot_AbanicoPlot()] data set (", i, "): 1 NA value excluded."))
+      if(n.NA == 1) {message(paste0("[plot_AbanicoPlot()] data set (",
+                                    i, "): 1 NA value excluded."))
       } else if(n.NA > 1) {
-        message(paste0("[plot_AbanicoPlot()] data set (", i,"): ",n.NA, " NA values excluded."))
+        message(paste0("[plot_AbanicoPlot()] data set (", i,"): ",
+                       n.NA, " NA values excluded."))
       }
 
       data[[i]] <- na.exclude(data[[i]])
@@ -451,7 +481,9 @@ plot_AbanicoPlot <- function(
     NArm.id <- which(sapply(data, nrow) <= 1)
     data[NArm.id] <- NULL
 
-    warning(paste0("[plot_AbanicoPlot()] Data sets ",paste(NArm.id, collapse = ", ")," are found to be empty or consisting of only 1 row. Sets removed!"))
+    warning(paste0("[plot_AbanicoPlot()] Data sets ",
+                   paste(NArm.id, collapse = ", "),
+                   " are found to be empty or consisting of only 1 row. Sets removed!"))
 
     rm(NArm.id)
 
@@ -475,17 +507,17 @@ plot_AbanicoPlot <- function(
       data[[i]] <- data[[i]][data[[i]][,2] > 0,]
 
       if(nrow(data[[i]]) < 1) {
-        stop("Data set contains only values with zero errors.")
+        stop("[plot_AbanicoPlot()] Data set contains only values with zero errors.", call. = FALSE)
       }
 
-      warning("Values with zero errors cannot be displayed and were removed!")
+      warning("[plot_AbanicoPlot()] values with zero errors cannot be displayed and were removed!",call. = FALSE)
     }
   }
 
-  ## save original plot parameters and restore them when the function ends or stops
+  ## save original plot parameters and restore them upon end or stop
   par.old.full <- par(no.readonly = TRUE)
 
-  ##this ensures, that par() for several plots on one page is  respected ...
+  ## this ensures par() is respected for several plots on one page
   if(sum(par()$mfrow) == 2 & sum(par()$mfcol) == 2){
     on.exit(par(par.old.full))
   }
@@ -507,20 +539,20 @@ plot_AbanicoPlot <- function(
 
   if(missing(bar.col) == TRUE) {
     bar.fill <- rep(x = rep(x = layout$abanico$colour$bar.fill,
-                    length.out = length(data)), length(bar))
+                            length.out = length(data)), length(bar))
     bar.line <- rep(rep(layout$abanico$colour$bar.line,
-                    length.out = length(data)), length(bar))
+                        length.out = length(data)), length(bar))
   } else {
     bar.fill <- bar.col
     bar.line <- NA
   }
 
-    if(missing(polygon.col) == TRUE) {
-      polygon.fill <- rep(layout$abanico$colour$poly.fill,
-                          length.out = length(data))
-      polygon.line <- rep(layout$abanico$colour$poly.line,
-                          length.out = length(data))
-    } else {
+  if(missing(polygon.col) == TRUE) {
+    polygon.fill <- rep(layout$abanico$colour$poly.fill,
+                        length.out = length(data))
+    polygon.line <- rep(layout$abanico$colour$poly.line,
+                        length.out = length(data))
+  } else {
     polygon.fill <- polygon.col
     polygon.line <- NA
   }
@@ -539,7 +571,7 @@ plot_AbanicoPlot <- function(
   }
 
   if(missing(summary) == TRUE) {
-    summary <- c("n", "in.ci")
+    summary <- c("n", "in.2s")
   }
 
   if(missing(summary.pos) == TRUE) {
@@ -589,7 +621,7 @@ plot_AbanicoPlot <- function(
                    silent = TRUE)
     if(grepl(pattern = "Error", x = bw.test[1]) == TRUE) {
       bw <- "nrd0"
-      warning("Option for bw not possible. Set to nrd0!")
+      warning("[plot_AbanicoPlot()] Option for bw not possible. Set to nrd0!", call. = FALSE)
     }
   }
 
@@ -601,9 +633,23 @@ plot_AbanicoPlot <- function(
   }
 
   ## check for negative values, stoppp function, but do not stop
-  if(min(De.global) <= 0) {
-    message("\n [plot_AbanicoPlot()] Data contains negative or zero values. Nothing plotted!")
+  if(min(De.global) < 0) {
+    message("\n [plot_AbanicoPlot()] data contains negative values. Nothing plotted!")
     return(NULL)
+  }
+
+  ##check for 0 dose values and adjust for plotting ...
+  if((min(De.global) == 0) && log.z == TRUE){
+    warning("\n [plot_AbanicoPlot()] data contains 0 values, values positively shifted by 0.01",
+            call. = FALSE)
+    data <- lapply(1:length(data), function(x){
+      df <- data.frame(
+        data[[x]][,1] + 0.01, data[[x]][,2])
+      colnames(df) <- colnames(data)
+      return(df)
+
+    })
+
   }
 
   ## calculate and append statistical measures --------------------------------
@@ -612,32 +658,32 @@ plot_AbanicoPlot <- function(
   z <- lapply(1:length(data), function(x){
     if(log.z == TRUE) {
       log(data[[x]][,1])
-      } else {
-        data[[x]][,1]
-        }
-    })
+    } else {
+      data[[x]][,1]
+    }
+  })
   if(is(z, "list") == FALSE) {
     z <- list(z)
-    }
+  }
   data <- lapply(1:length(data), function(x) {
     cbind(data[[x]], z[[x]])
-    })
+  })
   rm(z)
 
   ## calculate dispersion based on log-option
   se <- lapply(1:length(data), function(x){
     if(log.z == TRUE) {
       data[[x]][,2] / data[[x]][,1]
-      } else {
-        data[[x]][,2]
-        }
-    })
+    } else {
+      data[[x]][,2]
+    }
+  })
   if(is(se, "list") == FALSE) {
     se <- list(se)
-    }
+  }
   data <- lapply(1:length(data), function(x) {
     cbind(data[[x]], se[[x]])
-    })
+  })
   rm(se)
 
   ## calculate initial data statistics
@@ -823,14 +869,14 @@ plot_AbanicoPlot <- function(
   main <- if("main" %in% names(extraArgs)) {
     extraArgs$main
   } else {
-      expression(paste(D[e], " distribution"))
-    }
+    expression(paste(D[e], " distribution"))
+  }
 
   sub <- if("sub" %in% names(extraArgs)) {
     extraArgs$sub
   } else {
-      ""
-    }
+    ""
+  }
 
   if("xlab" %in% names(extraArgs)) {
     if(length(extraArgs$xlab) != 2) {
@@ -859,7 +905,7 @@ plot_AbanicoPlot <- function(
   zlab <- if("zlab" %in% names(extraArgs)) {
     extraArgs$zlab
   } else {
-    expression(paste(D[e], " (Gy)"))
+    expression(paste(D[e], " [Gy]"))
   }
 
   if("zlim" %in% names(extraArgs)) {
@@ -992,6 +1038,17 @@ plot_AbanicoPlot <- function(
 
   ## define auxiliary plot parameters -----------------------------------------
 
+  ## set space between z-axis and baseline of cartesian part
+  if(boxplot == TRUE) {
+
+    lostintranslation <- 1.03
+  } else {
+
+    lostintranslation <- 1.03
+    plot.ratio <- plot.ratio * 1.05
+  }
+
+
   ## create empty plot to update plot parameters
   if(rotate == FALSE) {
     plot(NA,
@@ -1057,6 +1114,7 @@ plot_AbanicoPlot <- function(
   ## calculate z-axis radius
   r <- max(sqrt((limits.x[2])^2 + (data.global[,7] * f)^2))
 
+
   ## create z-axes labels
   if(log.z == TRUE) {
     label.z.text <- signif(exp(tick.values.major), 3)
@@ -1088,7 +1146,6 @@ plot_AbanicoPlot <- function(
   }
 
   ellipse <- cbind(ellipse.x, ellipse.y)
-
 
   ## calculate statistical labels
   if(length(stats == 1)) {stats <- rep(stats, 2)}
@@ -1142,47 +1199,36 @@ plot_AbanicoPlot <- function(
   }
 
   ## calculate and paste statistical summary
-  De.stats <- matrix(nrow = length(data), ncol = 18)
+  De.stats <- matrix(nrow = length(data), ncol = 12)
   colnames(De.stats) <- c("n",
                           "mean",
-                          "mean.weighted",
                           "median",
-                          "median.weighted",
                           "kde.max",
                           "sd.abs",
                           "sd.rel",
                           "se.abs",
                           "se.rel",
-                          "q25",
-                          "q75",
+                          "q.25",
+                          "q.75",
                           "skewness",
-                          "kurtosis",
-                          "sd.abs.weighted",
-                          "sd.rel.weighted",
-                          "se.abs.weighted",
-                          "se.rel.weighted")
+                          "kurtosis")
 
   for(i in 1:length(data)) {
-    statistics <- calc_Statistics(data[[i]])
-    statistics.2 <- calc_Statistics(data[[i]][,3:4])
-    
-    De.stats[i,1] <- statistics$weighted$n
-    De.stats[i,2] <- statistics.2$unweighted$mean
-    De.stats[i,3] <- statistics.2$weighted$mean
-    De.stats[i,4] <- statistics.2$unweighted$median
-    De.stats[i,7] <- statistics$unweighted$sd.abs
-    De.stats[i,8] <- statistics$unweighted$sd.rel
-    De.stats[i,9] <- statistics$unweighted$se.abs
-    De.stats[i,10] <- statistics$weighted$se.rel
-    De.stats[i,11] <- quantile(data[[i]][,1], 0.25)
-    De.stats[i,12] <- quantile(data[[i]][,1], 0.75)
-    De.stats[i,13] <- statistics$unweighted$skewness
-    De.stats[i,14] <- statistics$unweighted$kurtosis
-    De.stats[i,15] <- statistics$weighted$sd.abs
-    De.stats[i,16] <- statistics$weighted$sd.rel
-    De.stats[i,17] <- statistics$weighted$se.abs
-    De.stats[i,18] <- statistics$weighted$se.rel
-    
+    statistics <- calc_Statistics(data[[i]])[[summary.method]]
+    statistics.2 <- calc_Statistics(data[[i]][,3:4])[[summary.method]]
+
+    De.stats[i,1] <- statistics$n
+    De.stats[i,2] <- statistics.2$mean
+    De.stats[i,3] <- statistics.2$median
+    De.stats[i,5] <- statistics$sd.abs
+    De.stats[i,6] <- statistics$sd.rel
+    De.stats[i,7] <- statistics$se.abs
+    De.stats[i,8] <- statistics$se.rel
+    De.stats[i,9] <- quantile(data[[i]][,1], 0.25)
+    De.stats[i,10] <- quantile(data[[i]][,1], 0.75)
+    De.stats[i,11] <- statistics$skewness
+    De.stats[i,12] <- statistics$kurtosis
+
     ## account for log.z-option
     if(log.z == TRUE) {
       De.stats[i,2:4] <- exp(De.stats[i,2:4])
@@ -1195,7 +1241,7 @@ plot_AbanicoPlot <- function(
                          from = limits.z[1],
                          to = limits.z[2])
 
-    De.stats[i,6] <- De.density$x[which.max(De.density$y)]
+    De.stats[i,4] <- De.density$x[which.max(De.density$y)]
   }
 
   label.text = list(NA)
@@ -1224,57 +1270,51 @@ plot_AbanicoPlot <- function(
                                          "\n",
                                          sep = ""),
                                    ""),
-                            ifelse("mean.weighted" %in% summary[j] == TRUE,
-                                   paste("weighted mean = ",
+                            ifelse("median" %in% summary[j] == TRUE,
+                                   paste("median = ",
                                          round(De.stats[i,3], 2),
                                          "\n",
                                          sep = ""),
                                    ""),
-                            ifelse("median" %in% summary[j] == TRUE,
-                                   paste("median = ",
-                                         round(De.stats[i,4], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("kdemax" %in% summary[j] == TRUE,
+                            ifelse("kde.max" %in% summary[j] == TRUE,
                                    paste("kdemax = ",
-                                         round(De.stats[i,6], 2),
+                                         round(De.stats[i,4], 2),
                                          " \n ",
                                          sep = ""),
                                    ""),
-                            ifelse("sdabs" %in% summary[j] == TRUE,
+                            ifelse("sd.abs" %in% summary[j] == TRUE,
                                    paste("sd = ",
+                                         round(De.stats[i,5], 2),
+                                         "\n",
+                                         sep = ""),
+                                   ""),
+                            ifelse("sd.rel" %in% summary[j] == TRUE,
+                                   paste("rel. sd = ",
+                                         round(De.stats[i,6], 2), " %",
+                                         "\n",
+                                         sep = ""),
+                                   ""),
+                            ifelse("se.abs" %in% summary[j] == TRUE,
+                                   paste("se = ",
                                          round(De.stats[i,7], 2),
                                          "\n",
                                          sep = ""),
                                    ""),
-                            ifelse("sdrel" %in% summary[j] == TRUE,
-                                   paste("rel. sd = ",
-                                         round(De.stats[i,8], 2), " %",
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("seabs" %in% summary[j] == TRUE,
-                                   paste("se = ",
-                                         round(De.stats[i,9], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("serel" %in% summary[j] == TRUE,
+                            ifelse("se.rel" %in% summary[j] == TRUE,
                                    paste("rel. se = ",
-                                         round(De.stats[i,10], 2), " %",
+                                         round(De.stats[i,8], 2), " %",
                                          "\n",
                                          sep = ""),
                                    ""),
                             ifelse("skewness" %in% summary[j] == TRUE,
                                    paste("skewness = ",
-                                         round(De.stats[i,13], 2),
+                                         round(De.stats[i,11], 2),
                                          "\n",
                                          sep = ""),
                                    ""),
                             ifelse("kurtosis" %in% summary[j] == TRUE,
                                    paste("kurtosis = ",
-                                         round(De.stats[i,14], 2),
+                                         round(De.stats[i,12], 2),
                                          "\n",
                                          sep = ""),
                                    ""),
@@ -1284,30 +1324,6 @@ plot_AbanicoPlot <- function(
                                                      data[[i]][,7] < 2) /
                                                  nrow(data[[i]]) * 100 , 1),
                                          " %",
-                                         sep = ""),
-                                   ""),
-                            ifelse("sdabs.weighted" %in% summary[j] == TRUE,
-                                   paste("abs. weighted sd = ",
-                                         round(De.stats[i,15], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("sdrel.weighted" %in% summary[j] == TRUE,
-                                   paste("rel. weighted sd = ",
-                                         round(De.stats[i,16], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("seabs.weighted" %in% summary[j] == TRUE,
-                                   paste("abs. weighted se = ",
-                                         round(De.stats[i,17], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("serel.weighted" %in% summary[j] == TRUE,
-                                   paste("rel. weighted se = ",
-                                         round(De.stats[i,18], 2),
-                                         "\n",
                                          sep = ""),
                                    ""),
                             sep = ""))
@@ -1339,57 +1355,51 @@ plot_AbanicoPlot <- function(
                                        " | ",
                                        sep = ""),
                                  ""),
-                          ifelse("mean.weighted" %in% summary[j] == TRUE,
-                                 paste("weighted mean = ",
+                          ifelse("median" %in% summary[j] == TRUE,
+                                 paste("median = ",
                                        round(De.stats[i,3], 2),
                                        " | ",
                                        sep = ""),
                                  ""),
-                          ifelse("median" %in% summary[j] == TRUE,
-                                 paste("median = ",
+                          ifelse("kde.max" %in% summary[j] == TRUE,
+                                 paste("kdemax = ",
                                        round(De.stats[i,4], 2),
                                        " | ",
                                        sep = ""),
                                  ""),
-                          ifelse("kdemax" %in% summary[j] == TRUE,
-                                 paste("kdemax = ",
+                          ifelse("sd.rel" %in% summary[j] == TRUE,
+                                 paste("rel. sd = ",
+                                       round(De.stats[i,5], 2), " %",
+                                       " | ",
+                                       sep = ""),
+                                 ""),
+                          ifelse("sd.abs" %in% summary[j] == TRUE,
+                                 paste("abs. sd = ",
                                        round(De.stats[i,6], 2),
                                        " | ",
                                        sep = ""),
                                  ""),
-                          ifelse("sdrel" %in% summary[j] == TRUE,
-                                 paste("rel. sd = ",
-                                       round(De.stats[i,8], 2), " %",
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("sdabs" %in% summary[j] == TRUE,
-                                 paste("abs. sd = ",
-                                       round(De.stats[i,7], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("serel" %in% summary[j] == TRUE,
+                          ifelse("se.rel" %in% summary[j] == TRUE,
                                  paste("rel. se = ",
-                                       round(De.stats[i,10], 2), " %",
+                                       round(De.stats[i,7], 2), " %",
                                        " | ",
                                        sep = ""),
                                  ""),
-                          ifelse("seabs" %in% summary[j] == TRUE,
+                          ifelse("se.abs" %in% summary[j] == TRUE,
                                  paste("abs. se = ",
-                                       round(De.stats[i,9], 2),
+                                       round(De.stats[i,8], 2),
                                        " | ",
                                        sep = ""),
                                  ""),
                           ifelse("skewness" %in% summary[j] == TRUE,
                                  paste("skewness = ",
-                                       round(De.stats[i,13], 2),
+                                       round(De.stats[i,11], 2),
                                        " | ",
                                        sep = ""),
                                  ""),
                           ifelse("kurtosis" %in% summary[j] == TRUE,
                                  paste("kurtosis = ",
-                                       round(De.stats[i,14], 2),
+                                       round(De.stats[i,12], 2),
                                        " | ",
                                        sep = ""),
                                  ""),
@@ -1400,32 +1410,8 @@ plot_AbanicoPlot <- function(
                                                nrow(data[[i]]) * 100 , 1),
                                        " %   ",
                                        sep = ""),
-                                 ""),
-                          ifelse("sdabs.weighted" %in% summary[j] == TRUE,
-                                 paste("abs. weighted sd = ",
-                                       round(De.stats[i,15], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("sdrel.weighted" %in% summary[j] == TRUE,
-                                 paste("rel. weighted sd = ",
-                                       round(De.stats[i,16], 2), " %",
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("seabs.weighted" %in% summary[j] == TRUE,
-                                 paste("abs. weighted se = ",
-                                       round(De.stats[i,17], 2), " %",
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("serel.weighted" %in% summary[j] == TRUE,
-                                 paste("rel. weighted se = ",
-                                       round(De.stats[i,18], 2), " %",
-                                       " | ",
-                                       sep = ""),
                                  "")
-                          )
+        )
       }
 
       summary.text <- paste(summary.text, collapse = "")
@@ -1595,9 +1581,9 @@ plot_AbanicoPlot <- function(
 
   ## define cartesian plot origins
   if(rotate == FALSE) {
-    xy.0 <- c(min(ellipse[,1]) * 1.03, min(ellipse[,2]))
+    xy.0 <- c(min(ellipse[,1]) * lostintranslation, min(ellipse[,2]))
   } else {
-    xy.0 <- c(min(ellipse[,1]), min(ellipse[,2]) * 1.03)
+    xy.0 <- c(min(ellipse[,1]), min(ellipse[,2]) * lostintranslation)
   }
 
   ## calculate coordinates for dispersion polygon overlay
@@ -1746,6 +1732,9 @@ plot_AbanicoPlot <- function(
                          bars[i,3] - 2)
     }
   }
+  if (rotate == TRUE) {
+    bars <- matrix(bars[, rev(seq_len(ncol(bars)))], ncol = 8)
+  }
 
   ## calculate error bar coordinates
   if(error.bars == TRUE) {
@@ -1837,6 +1826,20 @@ plot_AbanicoPlot <- function(
       KDE.max.plot
   }
 
+  ## calculate boxplot data without plotting
+
+  ## create dummy list
+  boxplot.data <- list(NA)
+
+  for(i in 1:length(data)) {
+    boxplot.i <- boxplot(x = data[[i]][,3],
+                   plot = FALSE)
+    boxplot.data[[length(boxplot.data) + 1]] <- boxplot.i
+  }
+
+  ## remove dummy list object
+  boxplot.data[[1]] <- NULL
+
   ## calculate line coordinates and further parameters
   if(missing(line) == FALSE) {
 
@@ -1845,11 +1848,11 @@ plot_AbanicoPlot <- function(
       if(is.list(line) == TRUE) {
         if(is(line[[i]], "RLum.Results")) {
           line[[i]] <- as.numeric(get_RLum(object = line[[i]],
-                                                   data.object = "summary")$de)
+                                           data.object = "summary")$de)
         }
       } else if(is(object = line, class2 = "RLum.Results")) {
         line <- as.numeric(get_RLum(object = line,
-                                            data.object = "summary")$de)
+                                    data.object = "summary")$de)
       }
     }
 
@@ -1942,7 +1945,7 @@ plot_AbanicoPlot <- function(
         cex = cex)
 
     if(layout$abanico$dimension$figure.width != "auto" |
-         layout$abanico$dimension$figure.height != "auto") {
+       layout$abanico$dimension$figure.height != "auto") {
       par(mai = layout$abanico$dimension$margin / 25.4,
           pin = c(layout$abanico$dimension$figure.width / 25.4 -
                     layout$abanico$dimension$margin[2] / 25.4 -
@@ -2294,6 +2297,7 @@ plot_AbanicoPlot <- function(
             col = layout$abanico$colour$ztck)
     }
 
+
     ## plot major z-ticks
     for(i in 1:length(tick.values.major)) {
       lines(x = c(par()$usr[2],
@@ -2311,6 +2315,7 @@ plot_AbanicoPlot <- function(
     lines(rep(par()$usr[2], nrow(ellipse)), ellipse[,2],
           col = layout$abanico$colour$ztck)
 
+
     ## plot z-axis text
     text(x = (1 + 0.04 * cex * layout$abanico$dimension$ztcl / 100) *
            par()$usr[2],
@@ -2321,6 +2326,7 @@ plot_AbanicoPlot <- function(
          font = (1:4)[c("plain", "bold", "italic", "bold italic") ==
                         layout$abanico$font.deco$ztck],
          cex = cex * layout$abanico$font.size$ztck/12)
+
 
     ## plot z-label
     mtext(text = zlab,
@@ -2362,9 +2368,21 @@ plot_AbanicoPlot <- function(
 
     ## calculate KDE width
     KDE.max <- 0
+
     for(i in 1:length(data)) {
-      KDE.max <- ifelse(KDE.max < max(KDE[[i]][,2]), max(KDE[[i]][,2]), KDE.max)
+
+      KDE.max <- ifelse(test = KDE.max < max(KDE[[i]][,2]),
+                        yes = max(KDE[[i]][,2]),
+                        no = KDE.max)
+
     }
+
+    ## optionally adjust KDE width for boxplot option
+    if(boxplot == TRUE) {
+
+      KDE.max <- 1.25 * KDE.max
+    }
+
     KDE.scale <- (par()$usr[2] - xy.0[1]) / (KDE.max * 1.05)
 
     ## optionally add KDE plot
@@ -2511,7 +2529,7 @@ plot_AbanicoPlot <- function(
                                  dots.y.i <= max(ellipse[,2])]
 
           if(max(c(0, dots.x.i), na.rm = TRUE) >= (par()$usr[2] -
-                                                     par()$cxy[1] * 0.4)) {
+                                                   par()$cxy[1] * 0.4)) {
             dots.y.i <- dots.y.i[dots.x.i < (par()$usr[2] - par()$cxy[1] * 0.4)]
             dots.x.i <- dots.x.i[dots.x.i < (par()$usr[2] - par()$cxy[1] * 0.4)]
             pch.dots <- c(rep(20, length(dots.x.i) - 1), 15)
@@ -2527,6 +2545,74 @@ plot_AbanicoPlot <- function(
                  col = kde.line[i])
 
         }
+      }
+    }
+
+    ## optionally add box plot
+    if(boxplot == TRUE) {
+
+      for(i in 1:length(data)) {
+
+        ## draw median line
+        lines(x = c(xy.0[1] + KDE.max * 0.85, xy.0[1] + KDE.max * 0.95),
+              y = c((boxplot.data[[i]]$stats[3,1] - z.central.global) *
+                      min(ellipse[,1]),
+                    (boxplot.data[[i]]$stats[3,1] - z.central.global) *
+                      min(ellipse[,1])),
+              lwd = 2,
+              col = kde.line[i])
+
+        ## draw p25-p75-polygon
+        polygon(x = c(xy.0[1] + KDE.max * 0.85,
+                      xy.0[1] + KDE.max * 0.85,
+                      xy.0[1] + KDE.max * 0.95,
+                      xy.0[1] + KDE.max * 0.95),
+                y = c((boxplot.data[[i]]$stats[2,1] - z.central.global) *
+                        min(ellipse[,1]),
+                      (boxplot.data[[i]]$stats[4,1] - z.central.global) *
+                        min(ellipse[,1]),
+                      (boxplot.data[[i]]$stats[4,1] - z.central.global) *
+                        min(ellipse[,1]),
+                      (boxplot.data[[i]]$stats[2,1] - z.central.global) *
+                        min(ellipse[,1])),
+                border = kde.line[i])
+
+        ## draw whiskers
+        lines(x = c(xy.0[1] + KDE.max * 0.9,
+                    xy.0[1] + KDE.max * 0.9),
+              y = c((boxplot.data[[i]]$stats[2,1] - z.central.global) *
+                      min(ellipse[,1]),
+                    (boxplot.data[[i]]$stats[1,1] - z.central.global) *
+                      min(ellipse[,1])),
+              col = kde.line[i])
+
+        lines(x = c(xy.0[1] + KDE.max * 0.87,
+                    xy.0[1] + KDE.max * 0.93),
+              y = rep((boxplot.data[[i]]$stats[1,1] - z.central.global) *
+                        min(ellipse[,1]), 2),
+              col = kde.line[i])
+
+        lines(x = c(xy.0[1] + KDE.max * 0.9,
+                    xy.0[1] + KDE.max * 0.9),
+              y = c((boxplot.data[[i]]$stats[4,1] - z.central.global) *
+                      min(ellipse[,1]),
+                    (boxplot.data[[i]]$stats[5,1] - z.central.global) *
+                      min(ellipse[,1])),
+              col = kde.line[i])
+
+        lines(x = c(xy.0[1] + KDE.max * 0.87,
+                    xy.0[1] + KDE.max * 0.93),
+              y = rep((boxplot.data[[i]]$stats[5,1] - z.central.global) *
+                        min(ellipse[,1]), 2),
+              col = kde.line[i])
+
+        ## draw outlier points
+        points(x = rep(xy.0[1] + KDE.max * 0.9,
+                       length(boxplot.data[[i]]$out)),
+               y = (boxplot.data[[i]]$out - z.central.global) *
+                 min(ellipse[,1]),
+               cex = cex * 0.8,
+               col = kde.line[i])
       }
     }
 
@@ -2647,7 +2733,7 @@ plot_AbanicoPlot <- function(
         cex = cex)
 
     if(layout$abanico$dimension$figure.width != "auto" |
-         layout$abanico$dimension$figure.height != "auto") {
+       layout$abanico$dimension$figure.height != "auto") {
       par(mai = layout$abanico$dimension$margin / 25.4,
           pin = c(layout$abanico$dimension$figure.width / 25.4 -
                     layout$abanico$dimension$margin[2] / 25.4 -
@@ -2690,25 +2776,15 @@ plot_AbanicoPlot <- function(
       as.character(round(1/axTicks(side = 2)[-1], 1))
     }
 
-#     ## optionally, plot 2-sigma-bar
-#     if(bar.fill[1] != "none") {
-#
-#       if(is.numeric(centrality) == TRUE & length(centrality) > length(data)) {
-#         for(i in 1:length(centrality)) {
-#           polygon(x = bars[i,1:4],
-#                   y = bars[i,5:8],
-#                   col = bar.fill[i],
-#                   border = bar.line[i])
-#         }
-#       } else {
-#         for(i in 1:length(data)) {
-#           polygon(y = bars[i,1:4],
-#                   x = bars[i,5:8],
-#                   col = bar.fill[i],
-#                   border = bar.line[i])
-#         }
-#       }
-#     }
+    # optionally, plot 2-sigma-bar
+    if(bar[1] != FALSE) {
+      for(i in 1:length(bar)) {
+        polygon(x = bars[i,1:4],
+                y = bars[i,5:8],
+                col = bar.fill[i],
+                border = bar.line[i])
+      }
+    }
 
     ## remove unwanted parts
     polygon(y = c(par()$usr[2],
@@ -2766,19 +2842,22 @@ plot_AbanicoPlot <- function(
       }
     }
 
-#     ## optionally, plot central value lines
-#     if(lwd[1] > 0 & lty[1] > 0) {
-#       for(i in 1:length(data)) {
-#         x2 <- r / sqrt(1 + f^2 * (
-#           data[[i]][1,5] - z.central.global)^2)
-#         y2 <- (data[[i]][1,5] - z.central.global) * x2
-#         lines(y = c(limits.x[1], x2, xy.0[2],y.max),
-#               x = c(0, y2, y2, y2),
-#               lty = lty[i],
-#               lwd = lwd[i],
-#               col = centrality.col[i])
-#       }
-#     }
+    ## optionally, plot lines for each bar
+    if(lwd[1] > 0 & lty[1] > 0 & bar[1] != FALSE & length(data) == 1) {
+      if(bar[1] == TRUE & length(bar) == 1) {
+        bar[1] <- z.central.global
+      }
+      for(i in 1:length(bar)) {
+        x2 <- r / sqrt(1 + f^2 * (
+          bar[i] - z.central.global)^2)
+        y2 <- (bar[i] - z.central.global) * x2
+        lines(x = c(0, y2, y2, y2),
+              y = c(limits.x[1], x2, xy.0[2], par()$usr[4]),
+              lty = lty[i],
+              lwd = lwd[i],
+              col = centrality.col[i])
+      }
+    }
 
     ## optionally add further lines
     if(missing(line) == FALSE) {
@@ -3045,11 +3124,20 @@ plot_AbanicoPlot <- function(
 
     ## calculate KDE width
     KDE.max <- 0
-    for(i in 1:length(data)) {
-      KDE.max <- ifelse(KDE.max < max(KDE[[i]][,2]), max(KDE[[i]][,2]), KDE.max)
-    }
-    KDE.scale <- (par()$usr[4] - xy.0[2]) / (KDE.max * 1.05)
 
+    for(i in 1:length(data)) {
+      KDE.max <- ifelse(test = KDE.max < max(KDE[[i]][,2]),
+                        yes = max(KDE[[i]][,2]),
+                        no = KDE.max)
+    }
+
+    ## optionally adjust KDE width for boxplot option
+    if(boxplot == TRUE) {
+
+      KDE.max <- 1.3 * KDE.max
+    }
+
+    KDE.scale <- (par()$usr[4] - xy.0[2]) / (KDE.max * 1.05)
 
     ## optionally add KDE plot
     if(kde == TRUE) {
@@ -3195,7 +3283,7 @@ plot_AbanicoPlot <- function(
                                  dots.y.i <= max(ellipse[,1])]
 
           if(max(c(0, dots.x.i), na.rm = TRUE) >= (par()$usr[4] -
-                                                     par()$cxy[2] * 0.4)) {
+                                                   par()$cxy[2] * 0.4)) {
             dots.y.i <- dots.y.i[dots.x.i < (par()$usr[4] - par()$cxy[2] * 0.4)]
             dots.x.i <- dots.x.i[dots.x.i < (par()$usr[4] - par()$cxy[2] * 0.4)]
             pch.dots <- c(rep(20, length(dots.x.i) - 1), 15)
@@ -3210,6 +3298,76 @@ plot_AbanicoPlot <- function(
                  cex = 0.7 * cex,
                  col = kde.line[i])
         }
+      }
+    }
+
+    ## optionally add box plot
+    if(boxplot == TRUE) {
+
+      for(i in 1:length(data)) {
+
+        ## draw median line
+        lines(x = c((boxplot.data[[i]]$stats[3,1] - z.central.global) *
+                      min(ellipse[,2]),
+                    (boxplot.data[[i]]$stats[3,1] - z.central.global) *
+                      min(ellipse[,2])),
+              y = c(min(ellipse[,2]) + KDE.max * 0.91,
+                    xy.0[2] + KDE.max * 0.96),
+              lwd = 2,
+              col = kde.line[i])
+
+        ## draw p25-p75-polygon
+        polygon(y = c(min(ellipse[,2]) + KDE.max * 0.91,
+                      min(ellipse[,2]) + KDE.max * 0.91,
+                      xy.0[2] + KDE.max * 0.96,
+                      xy.0[2] + KDE.max * 0.96),
+                x = c((boxplot.data[[i]]$stats[2,1] - z.central.global) *
+                        min(ellipse[,2]),
+                      (boxplot.data[[i]]$stats[4,1] - z.central.global) *
+                        min(ellipse[,2]),
+                      (boxplot.data[[i]]$stats[4,1] - z.central.global) *
+                        min(ellipse[,2]),
+                      (boxplot.data[[i]]$stats[2,1] - z.central.global) *
+                        min(ellipse[,2])),
+                border = kde.line[i])
+
+        ## draw whiskers
+        lines(y = rep(mean(c(min(ellipse[,2]) + KDE.max * 0.91,
+                             xy.0[2] + KDE.max * 0.96)), 2),
+              x = c((boxplot.data[[i]]$stats[2,1] - z.central.global) *
+                      min(ellipse[,2]),
+                    (boxplot.data[[i]]$stats[1,1] - z.central.global) *
+                      min(ellipse[,2])),
+              col = kde.line[i])
+
+        lines(y = c(min(ellipse[,2]) + KDE.max * 0.91,
+                    xy.0[2] + KDE.max * 0.96),
+              x = rep((boxplot.data[[i]]$stats[1,1] - z.central.global) *
+                        min(ellipse[,2]), 2),
+              col = kde.line[i])
+
+        lines(y = rep(mean(c(min(ellipse[,2]) + KDE.max * 0.91,
+                             xy.0[2] + KDE.max * 0.96)), 2),
+              x = c((boxplot.data[[i]]$stats[4,1] - z.central.global) *
+                      min(ellipse[,2]),
+                    (boxplot.data[[i]]$stats[5,1] - z.central.global) *
+                      min(ellipse[,2])),
+              col = kde.line[i])
+
+        lines(y = c(min(ellipse[,2]) + KDE.max * 0.91,
+                    xy.0[2] + KDE.max * 0.96),
+              x = rep((boxplot.data[[i]]$stats[5,1] - z.central.global) *
+                        min(ellipse[,2]), 2),
+              col = kde.line[i])
+
+        ## draw outlier points
+        points(y = rep(mean(c(min(ellipse[,2]) + KDE.max * 0.91,
+                              xy.0[2] + KDE.max * 0.96)),
+                       length(boxplot.data[[i]]$out)),
+               x = (boxplot.data[[i]]$out - z.central.global) *
+                 min(ellipse[,2]),
+               cex = cex * 0.8,
+               col = kde.line[i])
       }
     }
 
@@ -3310,25 +3468,186 @@ plot_AbanicoPlot <- function(
   }
 
   ##sTeve
-  if(fun){sTeve()}
+  if(fun & !interactive){sTeve()}
 
+  ## create numeric output
+  plot.output <- list(xlim = limits.x,
+                      ylim = limits.y,
+                      zlim = limits.z,
+                      polar.box = c(limits.x[1],
+                                    limits.x[2],
+                                    min(ellipse[,2]),
+                                    max(ellipse[,2])),
+                      cartesian.box = c(xy.0[1],
+                                        par()$usr[2],
+                                        xy.0[2],
+                                        max(ellipse[,2])),
+                      plot.ratio = plot.ratio,
+                      data = data,
+                      data.global = data.global,
+                      KDE = KDE)
+
+  ## INTERACTIVE PLOT ----------------------------------------------------------
+  if (interactive) {
+    if (!requireNamespace("plotly", quietly = TRUE))
+      stop("The interactive abanico plot requires the 'plotly' package. To install",
+           " this package run 'install.packages('plotly')' in your R console.",
+           call. = FALSE)
+
+    ##cheat R check (global visible binding error)
+    x <- NA
+    y <- NA
+
+
+    ## tidy data ----
+    data <- plot.output
+    kde <- data.frame(x = data$KDE[[1]][ ,2], y = data$KDE[[1]][ ,1])
+
+    # radial scatter plot ----
+    point.text <- paste0("Measured value:</br>",
+                         data$data.global$De, " &plusmn; ", data$data.global$error,"</br>",
+                         "P(",format(data$data.global$precision,  digits = 2, nsmall = 1),", ",
+                         format(data$data.global$std.estimate,  digits = 2, nsmall = 1),")")
+
+    IAP <- plotly::plot_ly(data = data$data.global, x = precision, y = std.estimate,
+                           type = "scatter", mode = "markers",
+                           hoverinfo = "text", text = point.text,
+                           name = "Points",
+                           yaxis = "y")
+
+    ellipse <- as.data.frame(ellipse)
+    IAP <- plotly::add_trace(IAP, data = ellipse,
+                             x = ellipse.x, y = ellipse.y,
+                             hoverinfo = "none",
+                             name = "z-axis (left)",
+                             type = "scatter", mode = "lines",
+                             line = list(color = "black",
+                                         width = 1),
+                             yaxis = "y")
+
+    ellipse.right <- ellipse
+    ellipse.right$ellipse.x <- ellipse.right$ellipse.x * 1/0.75
+
+    IAP <- plotly::add_trace(IAP, data = ellipse.right,
+                             x = ellipse.x, y = ellipse.y,
+                             hoverinfo = "none",
+                             name = "z-axis (right)",
+                             type = "scatter", mode = "lines",
+                             line = list(color = "black",
+                                         width = 1),
+                             yaxis = "y")
+
+    # z-axis ticks
+    major.ticks.x <- c(data$xlim[2] * 1/0.75,
+                       (1 + 0.015 * layout$abanico$dimension$ztcl / 100) *
+                         data$xlim[2] * 1/0.75)
+    minor.ticks.x <- c(data$xlim[2] * 1/0.75,
+                       (1 + 0.01 * layout$abanico$dimension$ztcl / 100) *
+                         data$xlim[2] * 1/0.75)
+    major.ticks.y <- (tick.values.major - z.central.global) *  min(ellipse[ ,1])
+    minor.ticks.y <- (tick.values.minor - z.central.global) *  min(ellipse[ ,1])
+
+    # major z-tick lines
+    for (i in 1:length(major.ticks.y)) {
+      major.tick <- data.frame(x = major.ticks.x, y = rep(major.ticks.y[i], 2))
+      IAP <- plotly::add_trace(IAP, data = major.tick,
+                               x = x, y = y, showlegend = FALSE,
+                               hoverinfo = "none",
+                               type = "scatter", mode = "lines",
+                               line = list(color = "black",
+                                           width = 1),
+                               yaxis = "y")
+    }
+
+    # minor z-tick lines
+    for (i in 1:length(minor.ticks.y)) {
+      minor.tick <- data.frame(x = minor.ticks.x, y = rep(minor.ticks.y[i], 2))
+      IAP <- plotly::add_trace(IAP, data = minor.tick,
+                               hoverinfo = "none",
+                               x = x, y = y, showlegend = FALSE,
+                               type = "scatter", mode = "lines",
+                               line = list(color = "black",
+                                           width = 1),
+                               yaxis = "y")
+    }
+
+
+    # z-tick label
+    tick.text <- paste(" ", exp(tick.values.major))
+    tick.pos <- data.frame(x = major.ticks.x[2],
+                           y = major.ticks.y)
+
+    IAP <- plotly::add_trace(IAP, data = tick.pos,
+                             x = x, y = y, showlegend = FALSE,
+                             text = tick.text, textposition = "right",
+                             hoverinfo = "none",
+                             type = "scatter", mode = "text",
+                             yaxis = "y")
+
+    # Central Line ----
+    central.line <- data.frame(x = c(-100, data$xlim[2]*1/0.75), y = c(0, 0))
+    central.line.text <- paste0("Central value: ",
+                                format(exp(z.central.global), digits = 2, nsmall = 1))
+
+    IAP <- plotly::add_trace(IAP, data = central.line,
+                             x = x, y = y, name = "Central line",
+                             type = "scatter", mode = "lines",
+                             hoverinfo = "text", text = central.line.text,
+                             yaxis = "y",
+                             line = list(color = "black",
+                                         width = 0.5,
+                                         dash = 2))
+
+    # KDE plot ----
+    KDE.x <- xy.0[1] + KDE[[1]][ ,2] * KDE.scale
+    KDE.y <- (KDE[[1]][ ,1] - z.central.global) * min(ellipse[,1])
+    KDE.curve <- data.frame(x = KDE.x, y = KDE.y)
+    KDE.curve <- KDE.curve[KDE.curve$x != xy.0[1], ]
+
+    KDE.text <- paste0("Value:",
+                       format(exp(KDE[[1]][ ,1]), digits = 2, nsmall = 1), "</br>",
+                       "Density:",
+                       format(KDE[[1]][ ,2], digits = 2, nsmall = 1))
+
+    IAP <- plotly::add_trace(IAP, data = KDE.curve,
+                             hoverinfo = "text",
+                             text = KDE.text,
+                             x = x, y = y, name = "KDE",
+                             type = "scatter", mode = "lines",
+                             line = list(color = "red"),
+                             yaxis = "y")
+
+    # set layout ----
+    IAP <- plotly::layout(IAP,
+                          hovermode = "closest",
+                          dragmode = "pan",
+                          xaxis = list(range = c(data$xlim[1], data$xlim[2] * 1/0.65),
+                                       zeroline = FALSE,
+                                       showgrid = FALSE,
+                                       tickmode = "array",
+                                       tickvals = x.axis.ticks),
+                          yaxis = list(range = data$ylim,
+                                       zeroline = FALSE,
+                                       showline = FALSE,
+                                       showgrid = FALSE,
+                                       tickmode = "array",
+                                       tickvals = c(-2, 0, 2)),
+                          shapes = list(list(type = "rect", # 2 sigma bar
+                                             x0 = 0, y0 = -2,
+                                             x1 = bars[1,3], y1 = 2,
+                                             xref = "x", yref = "y",
+                                             fillcolor = "grey",
+                                             opacity = 0.2))
+
+    )
+
+    # show interactive plot ----
+    #print(plotly::subplot(IAP, IAP.kde))
+    print(IAP)
+  }
 
   ## create and resturn numeric output
   if(output == TRUE) {
-    return(list(xlim = limits.x,
-                ylim = limits.y,
-                zlim = limits.z,
-                polar.box = c(limits.x[1],
-                              limits.x[2],
-                              min(ellipse[,2]),
-                              max(ellipse[,2])),
-                cartesian.box = c(xy.0[1],
-                                  par()$usr[2],
-                                  xy.0[2],
-                                  max(ellipse[,2])),
-                plot.ratio = plot.ratio,
-                data = data,
-                data.global = data.global,
-                KDE = KDE))
+    return(plot.output)
   }
 }

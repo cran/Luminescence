@@ -45,7 +45,7 @@
 #' plot_RLum.Results(mam)
 #'
 #' # estimate the number of grains on an aliquot
-#' grains<- calc_AliquotSize(grain.size = c(100,150), sample.diameter = 1, plot = FALSE)
+#' grains<- calc_AliquotSize(grain.size = c(100,150), sample.diameter = 1, plot = FALSE, MC.iter = 100)
 #'
 #' ##plot
 #' plot_RLum.Results(grains)
@@ -998,64 +998,126 @@ plot_RLum.Results<- function(
 
 
     ##plot settings
-      plot.settings <- list(
-        main = "Source Dose Rate Prediction",
-        xlab = "Date",
-        ylab = paste0(
-          "Dose rate/(",get_RLum(object = object, data.object = "parameters")$dose.rate.unit,")"),
-        log = "",
-        cex = 1,
-        xlim = NULL,
-        ylim = c(min(df[,1]) - max(df[,2]), max(df[,1]) + max(df[,2])),
-        pch = 1,
-        mtext = paste0(
-          "source type: ", get_RLum(object = object, data.object = "parameters")$source.type,
-          " | ",
-          "half-life: ", get_RLum(object = object, data.object = "parameters")$halflife,
-          " a"
-        ),
-        grid = expression(nx = 10, ny = 10),
-        col = 1,
-        type = "b",
-        lty = 1,
-        lwd = 1,
-        segments = ""
-      )
+    plot.settings <- list(
+      main = "Source Dose Rate Prediction",
+      xlab = "Date",
+      ylab = paste0(
+        "Dose rate/(",get_RLum(object = object, data.object = "parameters")$dose.rate.unit,")"),
+      log = "",
+      cex = 1,
+      xlim = NULL,
+      ylim = c(min(df[,1]) - max(df[,2]), max(df[,1]) + max(df[,2])),
+      pch = 1,
+      mtext = paste0(
+        "source type: ", get_RLum(object = object, data.object = "parameters")$source.type,
+        " | ",
+        "half-life: ", get_RLum(object = object, data.object = "parameters")$halflife,
+        " a"
+      ),
+      grid = expression(nx = 10, ny = 10),
+      col = 1,
+      type = "b",
+      lty = 1,
+      lwd = 1,
+      segments = ""
+    )
 
-      ##modify list if something was set
-      plot.settings <- modifyList(plot.settings, list(...))
+    ##modify list if something was set
+    plot.settings <- modifyList(plot.settings, list(...))
 
 
     ##plot
-      plot(
-        df[,3], df[,1],
-        main = plot.settings$main,
-        xlab = plot.settings$xlab,
-        ylab = plot.settings$ylab,
-        xlim = plot.settings$xlim,
-        ylim = plot.settings$ylim,
-        log = plot.settings$log,
-        pch = plot.settings$pch,
-        col = plot.settings$pch,
-        type = plot.settings$type,
-        lty = plot.settings$lty,
-        lwd = plot.settings$lwd
+    plot(
+      df[,3], df[,1],
+      main = plot.settings$main,
+      xlab = plot.settings$xlab,
+      ylab = plot.settings$ylab,
+      xlim = plot.settings$xlim,
+      ylim = plot.settings$ylim,
+      log = plot.settings$log,
+      pch = plot.settings$pch,
+      col = plot.settings$pch,
+      type = plot.settings$type,
+      lty = plot.settings$lty,
+      lwd = plot.settings$lwd
+    )
+
+    if(!is.null(plot.settings$segments)){
+      segments(
+        x0 = df[,3], y0 = df[,1] + df[,2],
+        x1 = df[,3], y1 = df[,1] - df[,2]
       )
+    }
 
-      if(!is.null(plot.settings$segments)){
-        segments(
-          x0 = df[,3], y0 = df[,1] + df[,2],
-          x1 = df[,3], y1 = df[,1] - df[,2]
-        )
-      }
+    mtext(side = 3, plot.settings$mtext)
 
-      mtext(side = 3, plot.settings$mtext)
+    if(!is.null(plot.settings$grid)){
+      grid(eval(plot.settings$grid))
 
-      if(!is.null(plot.settings$grid)){
-        grid(eval(plot.settings$grid))
-
-      }
+    }
 
   }#EndOf::Case 6 - calc_SourceDoseRate()
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+  ## CASE 7: Fast Ratio
+  if (object@originator=="calc_FastRatio") {
+
+    # graphical settings
+    settings <- list(main = "Fast Ratio",
+                     xlab = "t/s",
+                     ylab = "Signal/cts",
+                     cex = 1.0)
+    settings <- modifyList(settings, list(...))
+
+    par(cex = settings$cex)
+
+    # fetch data from RLum.Results object
+    curve <- get_RLum(object, "data")
+    if (inherits(curve, "RLum.Data.Curve"))
+      curve <- get_RLum(curve)
+    res <- get_RLum(object, "summary")
+    fit <- get_RLum(object, "fit")
+
+    # calculate the dead channel time offset
+    offset <- res$dead.channels.start * res$channel.width
+
+    # plot the OSL curve
+    plot(curve, type = "p", main = settings$main,
+         xlab = settings$xlab, ylab = settings$ylab)
+
+    # plot points to show measured data points (i.e., the channels)
+    points(curve[(res$dead.channels.start + 1):(nrow(curve) - res$dead.channels.end),],
+           pch = 16)
+
+    # plot dead channels as empty circles
+    if (res$dead.channels.start > 0)
+      points(curve[1:res$dead.channels.start,])
+    if (res$dead.channels.end > 0)
+      points(curve[(nrow(curve) - res$dead.channels.end):nrow(curve), ])
+
+    # optional: plot fitted CW curve
+    if (!is.null(fit)) {
+      nls.fit <- get_RLum(fit, "fit")
+      if (!inherits(fit, "try-error") & "fitCW.curve" %in% names(object@data$args)) {
+        if (object@data$args$fitCW.curve == "T" | object@data$args$fitCW.curve == TRUE) {
+          lines(curve[(res$dead.channels.start + 1):(nrow(curve) - res$dead.channels.end), 1],
+                predict(nls.fit), col = "red", lty = 1)
+        }
+      }
+    }
+
+    lines(curve)
+
+
+    # add vertical lines and labels for L1, L2, L3
+    L_times <- c(curve[res$Ch_L1, 1],
+                 curve[res$Ch_L2, 1],
+                 curve[res$Ch_L3_start, 1],
+                 curve[res$Ch_L3_end, 1]) + offset
+    abline(v = L_times,
+           lty = 2)
+    text(L_times, max(curve[ ,2]) * 0.95, pos = c(4,4,2,2),
+         labels = expression('L'[1], 'L'[2], 'L'[3['start']], 'L'[3['end']]))
+
+  }#EndOf::Case7 - calc_FastRatio()
 }

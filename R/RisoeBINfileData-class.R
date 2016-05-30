@@ -142,7 +142,6 @@ NULL
 #' \code{\link{plot_Risoe.BINfileData}}, \code{\link{read_BIN2R}},
 #' \code{\link{write_R2BIN}},\code{\link{merge_Risoe.BINfileData}},
 #' \code{\link{Risoe.BINfileData2RLum.Analysis}},
-#' \code{\link{Risoe.BINfileData2RLum.Data.Curve}}
 #'
 #' @references Risoe DTU, 2013. The Sequence Editor User Manual - Feb 2013 and Risoe DTU, 2015. The
 #' Sequence Editor User Manual - March 2015
@@ -158,7 +157,7 @@ NULL
 #' @export
 setClass("Risoe.BINfileData",
          slots = list(
-           METADATA="data.frame",
+           METADATA = "data.frame",
            DATA = "list",
            .RESERVED = "list"
            )

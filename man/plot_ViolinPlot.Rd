@@ -5,7 +5,7 @@
 \title{Create a violin plot}
 \usage{
 plot_ViolinPlot(data, boxplot = TRUE, rug = TRUE, summary = NULL,
-  summary.pos = "sub", na.rm = FALSE, ...)
+  summary.pos = "sub", na.rm = TRUE, ...)
 }
 \arguments{
 \item{data}{\code{\link{numeric}} or \code{\linkS4class{RLum.Results}}
@@ -43,12 +43,13 @@ The general idea for the Violin Plot seems to be introduced by Hintze and Nelson
 }
 \details{
 The function is passing several arguments to the function \code{\link{plot}},
-\code{\link[stats]{density}}, \code{\link[graphics]{boxplot}}: Supported arguments are: \code{xlim}, \code{main}, \code{xlab},
+\code{\link[stats]{density}}, \code{\link[graphics]{boxplot}}:
+Supported arguments are: \code{xlim}, \code{main}, \code{xlab},
 \code{ylab}, \code{col.violin}, \code{col.boxplot}, \code{mtext}, \code{cex}, \code{mtext}
 
 \bold{\code{Valid summary keywords}}\cr
 
-'n', 'mean', 'median', 'sd.abs', 'sd.rel', 'se.abs', 'se.rel', 'skewness', 'kurtosis' \cr
+'n', 'mean', 'median', 'sd.abs', 'sd.rel', 'se.abs', 'se.rel', 'skewness', 'kurtosis'
 }
 \note{
 Although the code for this function was developed independently and just the idea for the plot
@@ -57,7 +58,7 @@ two other R packages exist providing a possibility to produces this kind of plot
 'vioplot' and 'violinmplot' (see References for details).
 }
 \section{Function version}{
- 0.1.0 (2015-12-05 15:52:49)
+ 0.1.2 (2016-05-17 13:27:04)
 }
 \examples{
 ## read example data set

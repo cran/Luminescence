@@ -35,7 +35,7 @@
 #' operations and functions presented in standard books on R can be used without knowing the specifica
 #' of the R package 'Luminescence'. For examples see the example section.
 #'
-#' @param x \code{\linkS4class{RLum}} (\bold{required}): input opject
+#' @param x \code{\linkS4class{RLum}} or \code{\linkS4class{Risoe.BINfileData}} (\bold{required}): input opject
 #'
 #' @param object \code{\linkS4class{RLum}} (\bold{required}): input opject
 #'
@@ -46,6 +46,10 @@
 #' @param i \code{\link{character}} (optional): name of the wanted record type or data object
 #'
 #' @param drop \code{\link{logical}} (with default): keep object structure or drop it
+#'
+#' @param subset \code{[subset]} \code{\link{expression}} (\bold{required}): logical expression indicating elements or rows to keep,
+#' this function works in \code{\linkS4class{Risoe.BINfileData}} objects like \code{\link{subset.data.frame}}, but takes care
+#' of the object structure
 #'
 #' @param row.names \code{\link{logical}} (with default): enables or disables row names (\code{as.data.frame})
 #'
@@ -71,26 +75,32 @@ NULL
 # methods for generic: plot()
 # ##################################################################################################
 #' @rdname methods_RLum
+#' @method plot RLum.Results
 #' @export
 plot.RLum.Results <- function(x, y, ...) plot_RLum(object = x, ...)
 
 #' @rdname methods_RLum
+#' @method plot RLum.Analysis
 #' @export
 plot.RLum.Analysis <- function(x, y, ...) plot_RLum(object = x, ...)
 
 #' @rdname methods_RLum
+#' @method plot RLum.Data.Curve
 #' @export
 plot.RLum.Data.Curve <- function(x, y, ...) plot_RLum(object = x, ...)
 
 #' @rdname methods_RLum
+#' @method plot RLum.Data.Spectrum
 #' @export
 plot.RLum.Data.Spectrum <- function(x, y, ...) plot_RLum(object = x, ...)
 
 #' @rdname methods_RLum
+#' @method plot RLum.Data.Image
 #' @export
 plot.RLum.Data.Image <- function(x, y, ...) plot_RLum(object = x, ...)
 
 #' @rdname methods_RLum
+#' @method plot Risoe.BINfileData
 #' @export
 plot.Risoe.BINfileData <- function(x, y, ...) plot_Risoe.BINfileData(BINfileData = x, ...)
 
@@ -120,22 +130,67 @@ hist.RLum.Analysis <- function(x, ...) lapply(1:length_RLum(x), function(z){
 # ##################################################################################################
 # methods for generic: summary()
 #' @rdname methods_RLum
+#' @method summary RLum.Results
 #' @export
 summary.RLum.Results <- function(object, ...) get_RLum(object = object, ...)
 
 #' @rdname methods_RLum
+#' @method summary RLum.Analysis
 #' @export
 summary.RLum.Analysis <- function(object, ...) lapply(object@records, function(x) summary(x@data))
 
 #' @rdname methods_RLum
+#' @method summary RLum.Data.Image
 #' @export
 summary.RLum.Data.Image <- function(object, ...) summary(object@data@data@values)
 
 # summary.RLum.Data.Spectrum <- function(object, ...)
 
 #' @rdname methods_RLum
+#' @method summary RLum.Data.Curve
 #' @export
 summary.RLum.Data.Curve <- function(object, ...) summary(object@data, ...)
+
+####################################################################################################
+# methods for generic: subset()
+# ##################################################################################################
+#' @rdname methods_RLum
+#' @method subset Risoe.BINfileData
+#' @export
+subset.Risoe.BINfileData <- function(x, subset, ...) {
+
+  if(length(list(...))){
+    warning(paste("Argument not supported and skipped:", names(list(...))))
+
+  }
+
+  ##select relevant rows
+  sel <- eval(
+    expr = substitute(subset),
+    envir = x@METADATA,
+    enclos = parent.frame()
+  )
+
+  ##probably everything is FALSE now?
+  if (any(sel)) {
+    x@METADATA <- x@METADATA[sel,]
+    x@DATA <- x@DATA[sel]
+    x@METADATA[["ID"]] <- 1:length(x@METADATA[["ID"]])
+    return(x)
+
+  } else{
+    return(NULL)
+
+  }
+
+}
+
+####################################################################################################
+# methods for generic: bin()
+# ##################################################################################################
+#' @rdname methods_RLum
+#' @export
+bin.RLum.Data.Curve <- function(x, ...) bin_RLum.Data(x)
 
 ####################################################################################################
 # methods for generic: length()
@@ -247,6 +302,40 @@ as.matrix.RLum.Data.Curve <- function(x, ...) as(x, "matrix")
 #' @export
 as.matrix.RLum.Data.Spectrum <- function(x, ...) as(x, "matrix")
 # for RLum.Results ... makes no sense and may yield in unpredictable behaviour
+
+####################################################################################################
+# methods for generic: is()
+####################################################################################################
+#For this function no S4 method was written, as this would come at the cost of performance and
+#is totally unnecessary
+
+#' @rdname methods_RLum
+#' @export
+is.RLum <- function(x, ...) is(x, "RLum")
+
+#' @rdname methods_RLum
+#' @export
+is.RLum.Data <- function(x, ...) is(x, "RLum.Data")
+
+#' @rdname methods_RLum
+#' @export
+is.RLum.Data.Curve <- function(x, ...) is(x, "RLum.Data.Curve")
+
+#' @rdname methods_RLum
+#' @export
+is.RLum.Data.Spectrum <- function(x, ...) is(x, "RLum.Data.Spectrum")
+
+#' @rdname methods_RLum
+#' @export
+is.RLum.Data.Image <- function(x, ...) is(x, "RLum.Data.Image")
+
+#' @rdname methods_RLum
+#' @export
+is.RLum.Analysis <- function(x, ...) is(x, "RLum.Analysis")
+
+#' @rdname methods_RLum
+#' @export
+is.RLum.Results <- function(x, ...) is(x, "RLum.Results")
 
 ####################################################################################################
 # methods for generic: merge()
@@ -369,6 +458,10 @@ unlist.RLum.Analysis <- function(x, recursive = TRUE, ...){
 ####################################################################################################
 # methods for generic: `$`
 ####################################################################################################
+#' @rdname methods_RLum
+#' @export
+`$.RLum.Data.Curve` <- function(x, i) {get_RLum(x, info.object = i)}
+
 #' @rdname methods_RLum
 #'
 #' @examples

@@ -5,7 +5,7 @@
 \title{Plot a histogram with separate error plot}
 \usage{
 plot_Histogram(data, na.rm = TRUE, mtext, cex.global, se, rug, normal_curve,
-  summary, summary.pos, colour, ...)
+  summary, summary.pos, colour, interactive = FALSE, ...)
 }
 \arguments{
 \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}}
@@ -31,8 +31,8 @@ default is \code{TRUE}.}
 curve to the histogram. Mean and sd are calculated from the input data. More
 see details section.}
 
-\item{summary}{\code{\link{character}} (optional): add statistic measures of 
-centrality and dispersion to the plot. Can be one or more of several 
+\item{summary}{\code{\link{character}} (optional): add statistic measures of
+centrality and dispersion to the plot. Can be one or more of several
 keywords. See details for available keywords.}
 
 \item{summary.pos}{\code{\link{numeric}} or \code{\link{character}} (with
@@ -48,6 +48,9 @@ plot items in exactly this order: histogram bars, rug lines, normal
 distribution curve and standard error points\cr (e.g., \code{c("grey",
 "black", "red", "grey")}).}
 
+\item{interactive}{\code{\link{logical}} (with default): create an interactive
+histogram plot (requires the 'plotly' package)}
+
 \item{\dots}{further arguments and graphical parameters passed to
 \code{\link{plot}} or \code{\link{hist}}. If y-axis labels are provided,
 these must be specified as a vector of length 2 since the plot features two
@@ -62,25 +65,25 @@ suggested by Rex Galbraith at the UK LED in Oxford 2010.
 }
 \details{
 If the normal curve is added, the y-axis in the histogram will show the
-probability density.\cr\cr 
-A statistic summary, i.e. a collection of statistic measures of 
-centrality and dispersion (and further measures) can be added by specifying 
+probability density.\cr\cr
+A statistic summary, i.e. a collection of statistic measures of
+centrality and dispersion (and further measures) can be added by specifying
 one or more of the following keywords: \code{"n"} (number of samples),
 \code{"mean"} (mean De value), \code{"mean.weighted"} (error-weighted mean),
 \code{"median"} (median of the De values), \code{"sdrel"} (relative standard
-deviation in percent), \code{"sdrel.weighted"} (error-weighted relative 
+deviation in percent), \code{"sdrel.weighted"} (error-weighted relative
 standard deviation in percent), \code{"sdabs"} (absolute standard deviation),
-\code{"sdabs.weighted"} (error-weighted absolute standard deviation), 
+\code{"sdabs.weighted"} (error-weighted absolute standard deviation),
 \code{"serel"} (relative standard error), \code{"serel.weighted"} (
 error-weighted relative standard error), \code{"seabs"} (absolute standard
-error), \code{"seabs.weighted"} (error-weighted absolute standard error), 
+error), \code{"seabs.weighted"} (error-weighted absolute standard error),
 \code{"kurtosis"} (kurtosis) and \code{"skewness"} (skewness).
 }
 \note{
 The input data is not restricted to a special type.
 }
 \section{Function version}{
- 0.4.4 (2015-11-29 17:27:48)
+ 0.4.4 (2016-05-19 23:47:19)
 }
 \examples{
 

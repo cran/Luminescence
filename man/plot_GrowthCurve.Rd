@@ -6,16 +6,17 @@
 \usage{
 plot_GrowthCurve(sample, na.rm = TRUE, fit.method = "EXP",
   fit.force_through_origin = FALSE, fit.weights = TRUE,
-  fit.includingRepeatedRegPoints = TRUE, fit.NumberRegPoints,
-  fit.NumberRegPointsReal, fit.bounds = TRUE, NumberIterations.MC = 100,
-  output.plot = TRUE, output.plotExtended = TRUE,
-  output.plotExtended.single = FALSE, cex.global = 1,
-  txtProgressBar = TRUE, verbose = TRUE, ...)
+  fit.includingRepeatedRegPoints = TRUE, fit.NumberRegPoints = NULL,
+  fit.NumberRegPointsReal = NULL, fit.bounds = TRUE,
+  NumberIterations.MC = 100, output.plot = TRUE,
+  output.plotExtended = TRUE, output.plotExtended.single = FALSE,
+  cex.global = 1, txtProgressBar = TRUE, verbose = TRUE, ...)
 }
 \arguments{
 \item{sample}{\code{\link{data.frame}} (\bold{required}): data frame with
 three columns for x=Dose,y=LxTx,z=LxTx.Error, y1=TnTx. The column for the
-test dose response is optional, but requires 'TnTx' as column name if used.}
+test dose response is optional, but requires 'TnTx' as column name if used. For exponential
+fits at least three dose points (including the natural) should be provided.}
 
 \item{na.rm}{\code{\link{logical}} (with default): excludes \code{NA} values
 from the data set prior to any further operations.}
@@ -151,7 +152,7 @@ To avoid plotting the subtitle information, provide an empty user mtext \code{mt
 To plot any other subtitle text, use \code{mtext}.
 }
 \section{Function version}{
- 1.8.1 (2015-12-06 23:16:02)
+ 1.8.12 (2016-05-29 17:57:29)
 }
 \examples{
 

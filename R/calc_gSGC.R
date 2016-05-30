@@ -33,18 +33,21 @@
 #'
 #' @param ... parameters will be passed to the plot output
 #'
-#' @return Returns an S4 object of type \code{\linkS4class{RLum.Results}}.
-#' Slot \code{data} contains a \code{\link{list}} with the following structure:\cr
+#' @return Returns an S4 object of type \code{\linkS4class{RLum.Results}}.\cr
+#'
+#' \bold{@data}\cr
 #' $ De.value (data.frame) \cr
 #'  .. $ De  \cr
 #'  .. $ De.error \cr
 #'  .. $ Eta \cr
 #' $ De.MC (list) contains the matricies from the error estimation.\cr
-#' $ uniroot (list) contains the uniroot outputs of the De estimations
+#' $ uniroot (list) contains the uniroot outputs of the De estimations\cr
+#'
+#' \bold{@info}\cr
 #' $ call (call) the original function call
 #'
 #'
-#' @section Function version: 0.1.0
+#' @section Function version: 0.1.1
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montagine (France)\cr
 #'
@@ -145,9 +148,9 @@ calc_gSGC<- function(
 
     ##Define size of output objects
     output.data <- data.table(
-      De = numeric(length = nrow(data)),
-      De.error =  numeric(length = nrow(data)),
-      Eta =  numeric(length = nrow(data))
+      DE = numeric(length = nrow(data)),
+      DE.ERROR =  numeric(length = nrow(data)),
+      ETA =  numeric(length = nrow(data))
     )
 
     ##set list for De.MC
@@ -212,7 +215,7 @@ calc_gSGC<- function(
 
 
       ##run uniroot to get the De
-      temp.MC.matrix[,7] <- sapply(1:n.MC, function(x){
+      temp.MC.matrix[,7] <- vapply(X = 1:n.MC, FUN = function(x){
 
         uniroot(f,
                 interval = c(0.1,450),
@@ -229,7 +232,7 @@ calc_gSGC<- function(
                 maxiter = 1000
                 )$root
 
-      })
+      }, FUN.VALUE = vector(mode = "numeric", length = 1))
 
       ##calculate also the normalisation factor
       temp.MC.matrix[,8] <- (temp.MC.matrix[,3] * (1 - exp( - Dr1 / temp.MC.matrix[,4])) +
@@ -270,13 +273,13 @@ calc_gSGC<- function(
     ##set plot settings
     plot.settings <- list(
       main = "gSGC and resulting De",
-      xlab = "Dose/(a.u.)",
+      xlab = "Dose [a.u.]",
       ylab = expression(paste("Re-norm. ", L[x]/T[x])),
       xlim = NULL,
       ylim = NULL,
       lwd = 1,
       lty = 1,
-      pch = 1,
+      pch = 21,
       col = "red",
       grid = expression(nx = 10, ny = 10),
       mtext = ""
@@ -306,11 +309,60 @@ calc_gSGC<- function(
 
     }
 
-    points(temp$root,Eta*LnTn, col = plot.settings$col, pch = plot.settings$pch)
-    segments(De - De.error,Eta * LnTn,
-             De + De.error,Eta * LnTn)
+    if(!inherits(temp, "try-error")){
 
-    hist(temp.MC.matrix[,7], freq = FALSE,add = TRUE)
+      if(temp$root < 450 & temp$root > 0){
+        points(temp$root,Eta*LnTn, col = plot.settings$col, pch = plot.settings$pch)
+
+        segments(De - De.error,Eta * LnTn,
+                 De + De.error,Eta * LnTn)
+
+        hist <-
+          hist(
+            temp.MC.matrix[, 7],
+            freq = FALSE,
+            add = TRUE,
+            col = rgb(0, 0, 0, 0.2),
+            border = rgb(0, 0, 0, 0.5)
+          )
+        lines(hist$mids,hist$density)
+
+      }else{
+
+        if(temp$root < 450){
+          shape::Arrows(
+            x0 = 450,
+            y0 = par()$usr[4] - 0.2,
+            x1 = 500,
+            y1 = par()$usr[4] - 0.2,
+            arr.type = "triangle",
+            col = "red"
+          )
+
+        }else{
+
+            shape::Arrows(
+              x0 = 50,
+              y0 = par()$usr[4] - 0.2,
+              x1 = 0,
+              y1 = par()$usr[4] - 0.2,
+              arr.type = "triangle",
+              col = "red"
+            )
+
+
+        }
+
+        mtext(side = 1, text = "Out of bounds!", col = "red")
+
+
+      }
+
+
+    }else{
+      mtext(side = 1, text = "No solution found!", col = "red")
+
+    }
 
 
   }
@@ -345,9 +397,9 @@ calc_gSGC<- function(
     temp.Eta <- Eta
 
     ##replace values in the data.table with values
-    output.data[i, `:=` (De = temp.De,
-                         De.error = temp.De.error,
-                         Eta = temp.Eta)]
+    output.data[i, `:=` (DE = temp.De,
+                         DE.ERROR = temp.De.error,
+                         ETA = temp.Eta)]
 
     rm(list = c('temp.De', 'temp.De.error', 'temp.Eta'))
 
@@ -387,9 +439,9 @@ calc_gSGC<- function(
       data = list(
         De = as.data.frame(output.data),
         De.MC =  output.De.MC,
-        uniroot = output.uniroot,
-        call = sys.call()
-      )
+        uniroot = output.uniroot
+      ),
+      info = list( call = sys.call())
     )
 
   return(temp.RLum.Results)

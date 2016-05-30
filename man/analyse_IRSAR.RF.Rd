@@ -4,16 +4,18 @@
 \alias{analyse_IRSAR.RF}
 \title{Analyse IRSAR RF measurements}
 \usage{
-analyse_IRSAR.RF(object, sequence.structure = c("NATURAL", "REGENERATED"),
-  RF_nat.lim, RF_reg.lim, method = "FIT", method.control, test_parameter,
-  n.MC = 10, txtProgressBar = TRUE, plot = TRUE, ...)
+analyse_IRSAR.RF(object, sequence_structure = c("NATURAL", "REGENERATED"),
+  RF_nat.lim = NULL, RF_reg.lim = NULL, method = "FIT",
+  method.control = NULL, test_parameters = NULL, n.MC = 10,
+  txtProgressBar = TRUE, plot = TRUE, plot_reduced = FALSE, ...)
 }
 \arguments{
-\item{object}{\code{\linkS4class{RLum.Analysis}} (\bold{required}): input
+\item{object}{\code{\linkS4class{RLum.Analysis}} or a \code{\link{list}} of \code{RLum.Analysis} objects (\bold{required}): input
 object containing data for protocol analysis. The function expects to find at least two curves in the
-\code{\linkS4class{RLum.Analysis}} object: (1) RF_nat, (2) RF_reg}
+\code{\linkS4class{RLum.Analysis}} object: (1) RF_nat, (2) RF_reg. If a \code{list} is provided as
+input all other parameters can be provided as \code{list} as well to gain full control.}
 
-\item{sequence.structure}{\code{\link{vector}} \link{character} (with
+\item{sequence_structure}{\code{\link{vector}} \link{character} (with
 default): specifies the general sequence structure. Allowed steps are
 \code{NATURAL}, \code{REGENERATED}. In addition any other character is
 allowed in the sequence structure; such curves will be ignored during the analysis.}
@@ -31,9 +33,10 @@ for the data analysis. Possible options are \code{"FIT"} or \code{"SLIDE"}.}
 
 \item{method.control}{\code{\link{list}} (optional): parameters to control the method, that can
 be passed to the choosen method. These are for (1) \code{method = "FIT"}: 'trace', 'maxiter', 'warnOnly',
-'minFactor' and for (2) \code{method = "SLIDE"}: 'correct_onset', 'show_density'. See details.}
+'minFactor' and for (2) \code{method = "SLIDE"}: 'correct_onset', 'show_density',  'show_fit', 'trace'.
+See details.}
 
-\item{test_parameter}{\code{\link{list} (with default)}: set test parameter
+\item{test_parameters}{\code{\link{list} (with default)}: set test parameters.
 Supported parameters are: \code{curves_ratio}, \code{residuals_slope} (only for
 \code{method = "SLIDE"}), \code{curves_bounds}, \code{dynamic_ratio},
 \code{lambda}, \code{beta} and \code{delta.phi}. All input: \code{\link{numeric}}
@@ -52,16 +55,21 @@ disables \code{FALSE} the progression bar during MC runs}
 \item{plot}{\code{\link{logical}} (with default): plot output (\code{TRUE}
 or \code{FALSE})}
 
+\item{plot_reduced}{\code{\link{logical}} (optional): provides a reduced plot output if enabled
+to allow common R plot combinations, e.g., \code{par(mfrow(...))}. If \code{TRUE} no residual plot
+is returned; it has no effect if \code{plot = FALSE}}
+
 \item{\dots}{further arguments that will be passed to the plot output.
 Currently supported arguments are \code{main}, \code{xlab}, \code{ylab},
-\code{xlim}, \code{ylim}, \code{log}, \code{legend.pos} (passes argument to x,y in
-\code{\link[graphics]{legend}})}
+\code{xlim}, \code{ylim}, \code{log}, \code{legend} (\code{TRUE/FALSE}),
+\code{legend.pos}, \code{legend.text} (passes argument to x,y in
+\code{\link[graphics]{legend}}), \code{xaxt}}
 }
 \value{
 A plot (optional) and an \code{\linkS4class{RLum.Results}} object is
-returned. The slot data contains the following elements: \cr
+returned:\cr
 
-
+\bold{@data}\cr
 $ De.values: \code{\link{data.frame}} table with De and corresponding values\cr
 ..$ DE : \code{numeric}: the obtained equivalent dose\cr
 ..$ DE.ERROR : \code{numeric}: (only method = "SLIDE") standard deviation obtained from MC runs \cr
@@ -74,9 +82,11 @@ $ De.values: \code{\link{data.frame}} table with De and corresponding values\cr
 ..$ DATE : \code{character}: (optional) measurement date\cr
 ..$ SEQUENCE_NAME : \code{character}: (optional) sequence name\cr
 ..$ UID : \code{character}: unique data set ID \cr
-$ test_parameter : \code{\link{data.frame}} table test parameters \cr
+$ test_parameters : \code{\link{data.frame}} table test parameters \cr
 $ fit : {\code{\link{nls}} \code{nlsModel} object} \cr
 $ slide : \code{\link{list}} data from the sliding process, including the sliding matrix\cr
+
+\bold{@info}\cr
 $ call : \code{\link[methods]{language-class}}: the orignal function call \cr
 
 The output (\code{De.values}) should be accessed using the
@@ -149,6 +159,8 @@ shifts the curves along the x-axis by the first channel, as light is expected in
  The default value is \code{TRUE}.\cr
 \code{show_density} \tab \code{SLIDE}       \tab \code{\link{logical}} (with default)
 enables or disables KDE plots for MC run results. If the distribution is too narrow nothing is shown.\cr
+\code{show_fit} \tab \code{SLIDE}       \tab \code{\link{logical}} (with default)
+enables or disables the plot of the fitted curve rountinly obtained during the evaluation.\cr
 \code{n.MC}                  \tab \code{SLIDE}       \tab    \code{\link{integer}} (wiht default):
 This controls the number of MC runs within the sliding (assesing the possible minimum values).
 The default \code{n.MC = 1000}. Note: This parameter is not the same as controlled by the
@@ -168,7 +180,7 @@ are returned with the function output. \cr
 
 \bold{Test parameters}\cr
 
-The argument \code{test_parameter} allows to pass some thresholds for several test parameters,
+The argument \code{test_parameters} allows to pass some thresholds for several test parameters,
 which will be evaluated during the function run. If a threshold is set and it will be exceeded the
 test parameter status will be set to "FAILED". Intentionally this parameter is not termed
 'rejection criteria' as not all test parameters are evaluated for both methods and some parameters
@@ -186,9 +198,12 @@ and should not exceed the threshold value. \cr
 
 \code{intersection_ratio} \code{\link{numeric}} (default: \code{NA}):\cr
 
-Calculated as absolute difference from 1 of the ratio of the integral of the normalised RF-curves.
+Calculated as absolute difference from 1 of the ratio of the integral of the normalised RF-curves,
 This value indicates intersection of the RF-curves and should be close to 0 if the curves
-have a similar shape.\cr
+have a similar shape. For this calculation first the corresponding time-count pair value on the RF_reg
+curve is obtained using the maximum count value of the RF_nat curve and only this segment (fitting to
+the RF_nat curve) on the RF_reg curve is taken for further calculating this ratio. If nothing is
+found at all, \code{Inf} is returned. \cr
 
 \code{residuals_slope} \code{\link{numeric}} (default: \code{NA}; only for \code{method = "SLIDE"}): \cr
 
@@ -229,20 +244,32 @@ for this function and to allow a part of such tests the re-newed code was made p
 of the current package.\cr
 }
 \section{Function version}{
- 0.5.1 (2015-12-05 15:52:49)
+ 0.6.9 (2016-05-27 10:40:45)
 }
 \examples{
 
 ##load data
 data(ExampleData.RLum.Analysis, envir = environment())
 
-##perform analysis
-temp <- analyse_IRSAR.RF(object = IRSAR.RF.Data)
+##(1) perform analysis using the method 'FIT'
+results <- analyse_IRSAR.RF(object = IRSAR.RF.Data)
 
 ##show De results and test paramter results
-get_RLum(temp, data.object = "De.values")
-get_RLum(temp, data.object = "test_parameter")
+get_RLum(results, data.object = "De.values")
+get_RLum(results, data.object = "test_parameters")
 
+##(2) perform analysis using the method 'SLIDE'
+results <- analyse_IRSAR.RF(object = IRSAR.RF.Data, method = "SLIDE", n.MC = 1)
+
+\dontrun{
+##(3) perform analysis using the method 'SLIDE' and method control option
+## 'trace
+results <- analyse_IRSAR.RF(
+ object = IRSAR.RF.Data,
+ method = "SLIDE",
+ method.control = list(trace = TRUE))
+
+}
 
 }
 \author{

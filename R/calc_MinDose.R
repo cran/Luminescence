@@ -30,9 +30,12 @@
 #' from the input data.  If the final estimates of \emph{gamma}, \emph{mu},
 #' \emph{sigma} and \emph{p0} are totally off target, consider providing custom
 #' starting values via \code{init.values}. \cr In contrast to previous versions
-#' of this function the boundaries for the individual model parameters can no
-#' longer be specified. Appropriate boundary are now hard-coded and are valid
-#' for all input data sets. \cr\cr \bold{Bootstrap} \cr\cr When
+#' of this function the boundaries for the individual model parameters are no
+#' longer required to be explicitly specified. If you want to override the default
+#' boundary values use the arguments \code{gamma.lower}, \code{gamma.upper},
+#' \code{sigma.lower}, \code{sigma.upper}, \code{p0.lower}, \code{p0.upper},
+#' \code{mu.lower} and \code{mu.upper}.  \cr\cr
+#' \bold{Bootstrap} \cr\cr When
 #' \code{bootstrap=TRUE} the function applies the bootstrapping method as
 #' described in Wallinga & Cunningham (2012). By default, the minimum age model
 #' produces 1000 first level and 3000 second level bootstrap replicates
@@ -74,6 +77,8 @@
 #' starting values for gamma, sigma, p0 and mu (e.g. \code{list(gamma=100
 #' sigma=1.5, p0=0.1, mu=100)}). If no values are provided reasonable values
 #' are tried to be estimated from the data.
+#' @param level \code{\link{logical}} (with default): the confidence level
+#' required (defaults to 0.95).
 #' @param plot \code{\link{logical}} (with default): plot output
 #' (\code{TRUE}/\code{FALSE})
 #' @param multicore \code{\link{logical}} (with default): enable parallel
@@ -108,7 +113,7 @@
 #' when running this function. If the results seem odd consider re-running the
 #' model with \code{debug=TRUE} which provides extended console output and
 #' forwards all internal warning messages.
-#' @section Function version: 0.4.1
+#' @section Function version: 0.4.3
 #' @author Christoph Burow, University of Cologne (Germany) \cr Based on a
 #' rewritten S script of Rex Galbraith, 2010 \cr The bootstrap approach is
 #' based on a rewritten MATLAB script of Alastair Cunningham. \cr Alastair
@@ -167,7 +172,7 @@
 #'
 #' # Plot the log likelihood profiles retroactively, because before
 #' # we set plot = FALSE
-#' plot_RLum.Results(mam)
+#' plot_RLum(mam)
 #'
 #' # Plot the dose distribution in an abanico plot and draw a line
 #' # at the minimum dose estimate
@@ -191,46 +196,47 @@
 #'                                   sigma == .(round(res$sig, 1)) ~ ", " ~
 #'                                   rho == .(round(res$p0, 2))))
 #'
+#'
+#' \dontrun{
 #' # (3) Run the minimum age model with bootstrap
-#' # NOTE: Bootstrapping is computationally intensive, which is why the
-#' # following example is commented out. To run the examples just
-#' # uncomment the code.
+#' # NOTE: Bootstrapping is computationally intensive
 #' # (3.1) run the minimum age model with default values for bootstrapping
-#' #calc_MinDose(data = ExampleData.DeValues$CA1,
-#' #             sigmab = 0.15,
-#' #             bootstrap = TRUE)
+#' calc_MinDose(data = ExampleData.DeValues$CA1,
+#'              sigmab = 0.15,
+#'              bootstrap = TRUE)
 #'
 #' # (3.2) Bootstrap control parameters
-#' #mam <- calc_MinDose(data = ExampleData.DeValues$CA1,
-#' #                    sigmab = 0.15,
-#' #                    bootstrap = TRUE,
-#' #                    bs.M = 300,
-#' #                    bs.N = 500,
-#' #                    bs.h = 4,
-#' #                    sigmab.sd = 0.06,
-#' #                    plot = FALSE)
+#' mam <- calc_MinDose(data = ExampleData.DeValues$CA1,
+#'                     sigmab = 0.15,
+#'                     bootstrap = TRUE,
+#'                     bs.M = 300,
+#'                     bs.N = 500,
+#'                     bs.h = 4,
+#'                     sigmab.sd = 0.06,
+#'                     plot = FALSE)
 #'
 #' # Plot the results
-#' #plot_RLum(mam)
+#' plot_RLum(mam)
 #'
 #' # save bootstrap results in a separate variable
-#' #bs <- get_RLum(mam, "bootstrap")
+#' bs <- get_RLum(mam, "bootstrap")
 #'
 #' # show structure of the bootstrap results
-#' #str(bs, max.level = 2, give.attr = FALSE)
+#' str(bs, max.level = 2, give.attr = FALSE)
 #'
 #' # print summary of minimum dose and likelihood pairs
-#' #summary(bs$pairs$gamma)
+#' summary(bs$pairs$gamma)
 #'
 #' # Show polynomial fits of the bootstrap pairs
-#' #bs$poly.fits$poly.three
+#' bs$poly.fits$poly.three
 #'
 #' # Plot various statistics of the fit using the generic plot() function
-#' #par(mfcol=c(2,2))
-#' #plot(bs$poly.fits$poly.three, ask = FALSE)
+#' par(mfcol=c(2,2))
+#' plot(bs$poly.fits$poly.three, ask = FALSE)
 #'
 #' # Show the fitted values of the polynomials
-#' #summary(bs$poly.fits$poly.three$fitted.values)
+#' summary(bs$poly.fits$poly.three$fitted.values)
+#' }
 #'
 #' @export
 calc_MinDose <- function(
@@ -240,10 +246,26 @@ calc_MinDose <- function(
   par = 3,
   bootstrap = FALSE,
   init.values,
+  level = 0.95,
   plot = TRUE,
   multicore = FALSE,
   ...
 ){
+
+  ## ============================================================================##
+  ## CONSISTENCY CHECK OF INPUT DATA
+  ## ============================================================================##
+  if (!missing(data)) {
+    if (!is(data, "data.frame") & !is(data, "RLum.Results")) {
+      stop("[calc_MinDose] Error: 'data' object has to be of type\n
+           'data.frame' or 'RLum.Results'!")
+    } else {
+      if (is(data, "RLum.Results")) {
+        data <- get_RLum(data, "data")
+      }
+    }
+  }
+
 
   ##============================================================================##
   ## ... ARGUMENTS
@@ -339,24 +361,39 @@ calc_MinDose <- function(
   ## ESTIMATE BOUNDARY PARAMETERS
   ##============================================================================##
 
-  gamma.xlb <- min(data[ ,1]/10)
-  gamma.xub <- max(data[ ,1]*1.1)
-  sigma.xlb <- 0
-  sigma.xub <- 5
-  mu.xlb <- min(data[ ,1])/10
-  mu.xub <- max(data[ ,1]*1.1)
+  boundaries <- list(
+    # gamma.lower = min(data[ ,1]/10),
+    # gamma.upper = max(data[ ,1]*1.1),
+    # sigma.lower = 0,
+    # sigma.upper = 5,
+    # mu.lower = min(data[ ,1])/10,
+    # mu.upper = max(data[ ,1]*1.1)
+    gamma.lower = -Inf,
+    gamma.upper = Inf,
+
+    sigma.lower = 0,
+    sigma.upper = Inf,
+
+    p0.lower = 0,
+    p0.upper = 1,
+
+    mu.lower = -Inf,
+    mu.upper = Inf
+  )
+
+  boundaries <- modifyList(boundaries, list(...))
 
   # combine lower and upper boundary values to vectors
   if (log) {
-    xlb <- c(log(gamma.xlb), sigma.xlb, 0)
-    xub <- c(log(gamma.xub), sigma.xub, 1)
+    xlb <- c(log(boundaries$gamma.lower), boundaries$sigma.lower, boundaries$p0.lower)
+    xub <- c(log(boundaries$gamma.upper), boundaries$sigma.upper, boundaries$p0.lower)
   } else {
-    xlb <- c(gamma.xlb, sigma.xlb, 0)
-    xub <- c(gamma.xub, exp(sigma.xub), 1)
+    xlb <- c(boundaries$gamma.lower, boundaries$sigma.lower, boundaries$p0.lower)
+    xub <- c(boundaries$gamma.upper, exp(boundaries$sigma.upper), boundaries$p0.lower)
   }
   if (par==4) {
-    xlb <- c(xlb, ifelse(log, log(mu.xlb), mu.xlb))
-    xub <- c(xub, ifelse(log, log(mu.xub), mu.xub))
+    xlb <- c(xlb, ifelse(log, log(boundaries$mu.lower), boundaries$mu.lower))
+    xub <- c(xub, ifelse(log, log(boundaries$mu.upper), boundaries$mu.upper))
   }
 
   ##============================================================================##
@@ -402,8 +439,14 @@ calc_MinDose <- function(
     tryCatch({
       mle <- bbmle::mle2(data = list(data = data),
                          optimizer = "nlminb",
-                         lower = c(gamma = -Inf, sigma = 0, p0 = 0, mu = -Inf),
-                         upper = c(gamma = Inf, sigma = Inf, p0 = 1, mu = Inf),
+                         lower=c(gamma = boundaries$gamma.lower,
+                                 sigma = boundaries$sigma.lower,
+                                 p0 = boundaries$p0.lower,
+                                 mu = boundaries$mu.lower),
+                         upper=c(gamma = boundaries$gamma.upper,
+                                 sigma = boundaries$sigma.upper,
+                                 p0 = boundaries$p0.upper,
+                                 mu = boundaries$mu.upper),
                          minuslogl = Neglik_f,
                          control = list(iter.max = 1000L),
                          start = start)
@@ -439,10 +482,10 @@ calc_MinDose <- function(
   ests <- Get_mle(dat)
 
   # check if any standard errors are NA or NaN
-  coef_err <- t(as.data.frame(summary(ests)@coef[ ,2]))
+  coef_err <- t(as.data.frame(bbmle::summary(ests)@coef[ ,2]))
 
   if (debug)
-    print(summary(ests))
+    print(bbmle::summary(ests))
 
   if (any(is.nan(coef_err)))
     coef_err[which(is.nan(coef_err))] <- t(as.data.frame(ests@coef))/100
@@ -462,8 +505,14 @@ calc_MinDose <- function(
                          quietly = TRUE,
                          tol.newmin = Inf,
                          skiperrs = TRUE,
-                         prof.lower=c(gamma = -Inf, sigma = 0, p0 = 0, mu = -Inf),
-                         prof.upper=c(gamma = Inf, sigma = Inf, p0 = 1, mu = Inf)
+                         prof.lower=c(gamma = -Inf,
+                                      sigma = 0,
+                                      p0 = 0,
+                                      mu = -Inf),
+                         prof.upper=c(gamma = Inf,
+                                      sigma = Inf,
+                                      p0 = 1,
+                                      mu = Inf)
   )
   # Fallback when profile() returns a 'better' fit
   maxsteps <- 100
@@ -474,16 +523,22 @@ calc_MinDose <- function(
       stop(paste("Sorry, but I can't find a converging fit for the profile log-likelihood."),
            call. = FALSE)
 
-    prof <- profile(ests,
-                    which = which,
-                    std.err = as.vector(coef_err),
-                    try_harder = TRUE,
-                    quietly = TRUE,
-                    maxsteps = maxsteps,
-                    tol.newmin = Inf,
-                    skiperrs = TRUE,
-                    prof.lower = xlb,
-                    prof.upper = xub
+    prof <- bbmle::profile(ests,
+                           which = which,
+                           std.err = as.vector(coef_err),
+                           try_harder = TRUE,
+                           quietly = TRUE,
+                           maxsteps = maxsteps,
+                           tol.newmin = Inf,
+                           skiperrs = TRUE,
+                           prof.lower=c(gamma = -Inf,
+                                        sigma = 0,
+                                        p0 = 0,
+                                        mu = -Inf),
+                           prof.upper=c(gamma = Inf,
+                                        sigma = Inf,
+                                        p0 = 1,
+                                        mu = Inf)
     )
     maxsteps <- maxsteps - 10
     cnt <- cnt + 1
@@ -531,7 +586,8 @@ calc_MinDose <- function(
   #### METHOD 1: follow the instructions of Galbraith & Roberts (2012) ####
   # "If the likelihood profile is symmetrical about the parameter, an approximate standard error
   #  can be calculated by dividing the length of this interval by 3.92"
-  conf <- as.data.frame(bbmle::confint(prof, tol.newmin = Inf, quietly = TRUE))
+  conf <- as.data.frame(bbmle::confint(prof, tol.newmin = Inf, quietly = TRUE, level = level))
+  class(conf[,1]) <- class(conf[,2]) <- "numeric"
 
   if (invert) {
     conf[1, ] <- (conf[1, ]-x.offset)*-1
@@ -549,6 +605,7 @@ calc_MinDose <- function(
   ## AGGREGATE RESULTS
   summary <- data.frame(de=pal,
                         de_err=gamma_err,
+                        ci_level = level,
                         "ci_lower"=ifelse(log, exp(conf["gamma",1]), conf["gamma",1]),
                         "ci_upper"=ifelse(log, exp(conf["gamma",2]), conf["gamma",2]),
                         par=par,
@@ -783,6 +840,12 @@ calc_MinDose <- function(
 
   if (!debug)
     options(warn = 0)
+
+  if (!is.na(summary$mu) && !is.na(summary$de)) {
+    if (log(summary$de) > summary$mu)
+      warning("Gamma is larger than mu. Consider re-running the model",
+              " with new boundary values (see details '?calc_MinDose').", call. = FALSE)
+  }
 
   invisible(newRLumResults.calc_MinDose)
 

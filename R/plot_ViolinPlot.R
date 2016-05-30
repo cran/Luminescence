@@ -7,12 +7,13 @@
 #' The general idea for the Violin Plot seems to be introduced by Hintze and Nelson (1998).
 #'
 #' The function is passing several arguments to the function \code{\link{plot}},
-#' \code{\link[stats]{density}}, \code{\link[graphics]{boxplot}}: Supported arguments are: \code{xlim}, \code{main}, \code{xlab},
+#' \code{\link[stats]{density}}, \code{\link[graphics]{boxplot}}:
+#' Supported arguments are: \code{xlim}, \code{main}, \code{xlab},
 #' \code{ylab}, \code{col.violin}, \code{col.boxplot}, \code{mtext}, \code{cex}, \code{mtext}
 #'
 #' \bold{\code{Valid summary keywords}}\cr
 #'
-#' 'n', 'mean', 'median', 'sd.abs', 'sd.rel', 'se.abs', 'se.rel', 'skewness', 'kurtosis' \cr
+#' 'n', 'mean', 'median', 'sd.abs', 'sd.rel', 'se.abs', 'se.rel', 'skewness', 'kurtosis'
 #'
 #' @param data \code{\link{numeric}} or \code{\linkS4class{RLum.Results}}
 #' object (required): input data for plotting. Alternatively a \code{\link{data.frame}} or
@@ -45,7 +46,7 @@
 #' two other R packages exist providing a possibility to produces this kind of plot, namely:
 #' 'vioplot' and 'violinmplot' (see References for details).
 #'
-#' @section Function version: 0.1.0
+#' @section Function version: 0.1.2
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
 #'
@@ -79,7 +80,7 @@ plot_ViolinPlot <- function(
   rug = TRUE,
   summary = NULL,
   summary.pos = "sub",
-  na.rm = FALSE,
+  na.rm = TRUE,
   ...
 ) {
 
@@ -95,7 +96,7 @@ plot_ViolinPlot <- function(
 
       ##check for RLum.Results object
       if(is(data, "RLum.Results")){
-        data <- get_RLum(data)
+        data <- get_RLum(data, "data")
 
       }
 
@@ -111,6 +112,9 @@ plot_ViolinPlot <- function(
     if(na.rm){
       data <- na.exclude(data)
 
+      warning(paste("[plot_ViolinPlot()]",
+        length(attr(x = na.exclude(c(NA,1,2, NA)), which = "na.action", exact = TRUE))), " NA values removed!", call. = FALSE)
+
     }
 
     #Further checks
@@ -119,15 +123,30 @@ plot_ViolinPlot <- function(
 
     }
 
+  ##stop if only one or 0 values are left in data
+  if(length(data) == 0){
+    warning("[plot_ViolinePlot()] Actually it is rather hard to plot 0 values. NULL returned", call. = FALSE)
+    return()
+  }
+
   # Pre-calculations ----------------------------------------------------------------------------
 
+
   ##density for the violin
-  density <-
-    density(x = data,
-            bw = ifelse("bw" %in% names(list(...)),list(...)$bw,"nrd0"))
+  if(length(data)>1){
+    density <-
+      density(x = data,
+              bw = ifelse("bw" %in% names(list(...)),list(...)$bw,"nrd0"))
+
+  }else{
+    density <- NULL
+    warning("[plot_ViolinePlot()] single data point found, no density calculated.", call. = FALSE)
+
+  }
+
 
   ##some statistical parameter, get rid of the weighted statistics
-  stat.summary <- suppressWarnings(calc_Statistics(as.data.frame(data), digits = 2))[[-1]]
+  stat.summary <- suppressWarnings(calc_Statistics(as.data.frame(data), digits = 2)[["unweighted"]])
 
     ##make valid summary string
     if(is.null(summary)){
@@ -158,10 +177,10 @@ plot_ViolinPlot <- function(
 
   ##set default values
   plot.settings <- list(
-    xlim = range(density$x),
+    xlim = if(!is.null(density)){range(density$x)}else{c(data[1]*0.9, data[1]*1.1)},
     main = "Violin Plot",
-    xlab = expression(paste(D[e], "/(a.u.)")),
-    ylab = "Density",
+    xlab = expression(paste(D[e], " [a.u.]")),
+    ylab = if(!is.null(density)){"Density"}else{" "},
     col.violin = rgb(0,0,0,0.2),
     col.boxplot = NULL,
     mtext = ifelse(summary.pos != 'sub', "", stat.mtext),
@@ -187,13 +206,17 @@ plot_ViolinPlot <- function(
   )
 
   ##add polygon ... the violin
-  polygon(
-    x = c(density$x, rev(density$x)),
-    y = c(1 + density$y / max(density$y) * 0.5,
-          rev(1 - density$y / max(density$y) * 0.5)),
-    col = plot.settings$col.violin,
-    border = plot.settings$col.violin
-  )
+  if(!is.null(density)){
+    polygon(
+      x = c(density$x, rev(density$x)),
+      y = c(1 + density$y / max(density$y) * 0.5,
+            rev(1 - density$y / max(density$y) * 0.5)),
+      col = plot.settings$col.violin,
+      border = plot.settings$col.violin
+    )
+
+
+  }
 
   ##add the boxplot
   if(boxplot){
