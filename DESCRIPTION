@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.6.0
-Date: 2016-05-30
+Version: 0.6.1
+Date: 2016-07-05
 Author: Sebastian Kreutzer [aut, trl, cre],
     Michael Dietze [aut],
     Christoph Burow [aut, trl, dtc],
@@ -42,8 +42,8 @@ Imports: bbmle (>= 1.0.18), data.table (>= 1.9.6), httr (>= 1.1.0),
         (>= 1.2-0), raster (>= 2.5-2), readxl (>= 0.1.1), shape (>=
         1.4.2), parallel, XML (>= 3.98-1.4), zoo (>= 1.7-13)
 Suggests: RLumShiny (>= 0.1.0), RLumModel (>= 0.1.1), plotly (>=
-        3.4.13), rmarkdown (>= 0.9.6), rjags (>= 4-6), pander (>=
-        0.6.0), rstudioapi (>= 0.5)
+        3.4.13), rmarkdown (>= 0.9.6), rjags (>= 4-6), coda (>=
+        0.18-1), pander (>= 0.6.0), rstudioapi (>= 0.5)
 URL: http://CRAN.R-project.org/package=Luminescence
 Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'CW2pPMi.R' 'Luminescence-package.R' 'RcppExports.R'
@@ -85,6 +85,6 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'verify_SingleGrainData.R' 'write_R2BIN.R' 'zzz.R'
 RoxygenNote: 5.0.1
 NeedsCompilation: yes
-Packaged: 2016-05-30 16:47:30 UTC; kreutzer
+Packaged: 2016-07-04 21:53:31 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2016-05-30 20:26:01
+Date/Publication: 2016-07-05 08:54:57

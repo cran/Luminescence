@@ -254,9 +254,9 @@ plot_KDE <- function(
     for(i in 1:length(data)) {
       n.NA <- sum(is.na(data[[i]][,1]))
       if(n.NA == 1) {
-        print(paste("1 NA value excluded from data set", i, "."))
+        message(paste("1 NA value excluded from data set", i, "."))
       } else if(n.NA > 1) {
-        print(paste(n.NA, "NA values excluded from data set", i, "."))
+        message(paste(n.NA, "NA values excluded from data set", i, "."))
       }
       data[[i]] <- na.exclude(data[[i]])
     }
@@ -549,7 +549,7 @@ plot_KDE <- function(
   if("xlab" %in% names(list(...))) {
     xlab <- list(...)$xlab
   } else {
-    xlab <- expression(paste(D[e], " [Gy}"))
+    xlab <- expression(paste(D[e], " [Gy]"))
   }
 
   if("ylab" %in% names(list(...))) {

@@ -75,6 +75,21 @@ NULL
 # methods for generic: plot()
 # ##################################################################################################
 #' @rdname methods_RLum
+#' @method plot list
+#' @export
+plot.list <- function(x, y, ...) {
+  if (all(sapply(x, function(x) inherits(x, "RLum")))) {
+    plot_RLum(object = x, ...)
+  }
+  else {
+    if (missing(y))
+      y <- NULL
+    plot.default(x, y, ...)
+  }
+}
+
+
+#' @rdname methods_RLum
 #' @method plot RLum.Results
 #' @export
 plot.RLum.Results <- function(x, y, ...) plot_RLum(object = x, ...)
@@ -156,8 +171,10 @@ summary.RLum.Data.Curve <- function(object, ...) summary(object@data, ...)
 # ##################################################################################################
 #' @rdname methods_RLum
 #' @method subset Risoe.BINfileData
+#' @param records.rm [subset] \code{\link{logical}} (with default): remove records from data set, can
+#' be disabled, to just set the column \code{SET} to \code{TRUE} or \code{FALSE}
 #' @export
-subset.Risoe.BINfileData <- function(x, subset, ...) {
+subset.Risoe.BINfileData <- function(x, subset, records.rm = TRUE, ...) {
 
   if(length(list(...))){
     warning(paste("Argument not supported and skipped:", names(list(...))))
@@ -172,14 +189,20 @@ subset.Risoe.BINfileData <- function(x, subset, ...) {
   )
 
   ##probably everything is FALSE now?
-  if (any(sel)) {
-    x@METADATA <- x@METADATA[sel,]
-    x@DATA <- x@DATA[sel]
-    x@METADATA[["ID"]] <- 1:length(x@METADATA[["ID"]])
-    return(x)
+  if (records.rm) {
+    if (any(sel)) {
+      x@METADATA <- x@METADATA[sel, ]
+      x@DATA <- x@DATA[sel]
+      x@METADATA[["ID"]] <- 1:length(x@METADATA[["ID"]])
+      return(x)
 
-  } else{
-    return(NULL)
+    } else{
+      return(NULL)
+
+    }
+  }else{
+    x@METADATA[["SEL"]] <- sel
+    return(x)
 
   }
 

@@ -54,6 +54,7 @@
 \alias{plot.RLum.Data.Spectrum}
 \alias{plot.RLum.Results}
 \alias{plot.Risoe.BINfileData}
+\alias{plot.list}
 \alias{rep.RLum}
 \alias{row.names.RLum.Data.Spectrum}
 \alias{subset.Risoe.BINfileData}
@@ -64,6 +65,8 @@
 \alias{unlist.RLum.Analysis}
 \title{methods_RLum}
 \usage{
+\method{plot}{list}(x, y, ...)
+
 \method{plot}{RLum.Results}(x, y, ...)
 
 \method{plot}{RLum.Analysis}(x, y, ...)
@@ -92,7 +95,7 @@
 
 \method{summary}{RLum.Data.Curve}(object, ...)
 
-\method{subset}{Risoe.BINfileData}(x, subset, ...)
+\method{subset}{Risoe.BINfileData}(x, subset, records.rm = TRUE, ...)
 
 bin.RLum.Data.Curve(x, ...)
 
@@ -198,6 +201,9 @@ is.RLum.Results(x, ...)
 \item{subset}{\code{[subset]} \code{\link{expression}} (\bold{required}): logical expression indicating elements or rows to keep,
 this function works in \code{\linkS4class{Risoe.BINfileData}} objects like \code{\link{subset.data.frame}}, but takes care
 of the object structure}
+
+\item{records.rm}{[subset] \code{\link{logical}} (with default): remove records from data set, can
+be disabled, to just set the column \code{SET} to \code{TRUE} or \code{FALSE}}
 
 \item{row.names}{\code{\link{logical}} (with default): enables or disables row names (\code{as.data.frame})}
 
