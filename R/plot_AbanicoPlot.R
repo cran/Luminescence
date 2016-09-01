@@ -380,6 +380,28 @@
 #' ## for further information on layout definitions see documentation
 #' ## of function get_Layout()
 #'
+#' ## now with manually added plot content
+#' ## create empty plot with numeric output
+#' AP <- plot_AbanicoPlot(data = ExampleData.DeValues,
+#'                        pch = NA,
+#'                        output = TRUE)
+#'
+#' ## identify data in 2 sigma range
+#' in_2sigma <- AP$data[[1]]$data.in.2s
+#'
+#' ## restore function-internal plot parameters
+#' par(AP$par)
+#'
+#' ## add points inside 2-sigma range
+#' points(x = AP$data[[1]]$precision[in_2sigma],
+#'        y = AP$data[[1]]$std.estimate.plot[in_2sigma],
+#'        pch = 16)
+#'
+#' ## add points outside 2-sigma range
+#' points(x = AP$data[[1]]$precision[!in_2sigma],
+#'        y = AP$data[[1]]$std.estimate.plot[!in_2sigma],
+#'        pch = 1)
+#'
 #' @export
 plot_AbanicoPlot <- function(
   data,
@@ -519,6 +541,7 @@ plot_AbanicoPlot <- function(
 
   ## save original plot parameters and restore them upon end or stop
   par.old.full <- par(no.readonly = TRUE)
+  cex_old <- par()$cex
 
   ## this ensures par() is respected for several plots on one page
   if(sum(par()$mfrow) == 2 & sum(par()$mfcol) == 2){
@@ -1411,7 +1434,7 @@ plot_AbanicoPlot <- function(
                                        round(sum(data[[i]][,7] > -2 &
                                                    data[[i]][,7] < 2) /
                                                nrow(data[[i]]) * 100 , 1),
-                                       " %   ",
+                                       " % |  ",
                                        sep = ""),
                                  "")
         )
@@ -3496,7 +3519,8 @@ plot_AbanicoPlot <- function(
                       plot.ratio = plot.ratio,
                       data = data,
                       data.global = data.global,
-                      KDE = KDE)
+                      KDE = KDE,
+                      par = par(no.readonly = TRUE))
 
   ## INTERACTIVE PLOT ----------------------------------------------------------
   if (interactive) {
@@ -3657,7 +3681,10 @@ plot_AbanicoPlot <- function(
     print(IAP)
   }
 
-  ## create and resturn numeric output
+  ## restore initial cex
+  par(cex = cex_old)
+
+  ## create and return numeric output
   if(output == TRUE) {
     return(plot.output)
   }

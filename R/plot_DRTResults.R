@@ -61,7 +61,8 @@
 #' for the legend to be plotted.
 #' @param par.local \code{\link{logical}} (with default): use local graphical
 #' parameters for plotting, e.g. the plot is shown in one column and one row.
-#' If \code{par.local = FALSE}, global parameters are inherited.
+#' If \code{par.local = FALSE}, global parameters are inherited, i.e. parameters
+#' provided via \code{par()} work
 #' @param na.rm \code{\link{logical}}: indicating wether \code{NA} values are
 #' removed before plotting from the input data set
 #' @param \dots further arguments and graphical parameters passed to
@@ -327,7 +328,6 @@ plot_DRTResults <- function(
     } else {
       rep(seq(from = 1, to = length(values)), length(modes))
     }
-
   }
 
   ## calculate and paste statistical summary
@@ -377,6 +377,18 @@ plot_DRTResults <- function(
                      "\n",
                      sep = ""),
                ""),
+        ifelse("serel" %in% summary == TRUE,
+               paste("se = ",
+                     round(calc_Statistics(values[[i]])$unweighted$se.rel, 2),
+                     " %\n",
+                     sep = ""),
+               ""),
+        ifelse("seabs" %in% summary == TRUE,
+               paste("se = ",
+                     round(calc_Statistics(values[[i]])$unweighted$se.abs, 2),
+                     "\n",
+                     sep = ""),
+               ""),
         sep = ""), stops, sep = "")
 
     }
@@ -422,7 +434,20 @@ plot_DRTResults <- function(
                      " | ",
                      sep = ""),
                ""),
+        ifelse("serel" %in% summary == TRUE,
+               paste("se = ",
+                     round(calc_Statistics(values[[i]])$unweighted$se.rel, 2),
+                     " % | ",
+                     sep = ""),
+               ""),
+        ifelse("seabs" %in% summary == TRUE,
+               paste("se = ",
+                     round(calc_Statistics(values[[i]])$unweighted$se.abs, 2),
+                     " | ",
+                     sep = ""),
+               ""),
         sep = "")
+
     }
   }
 
@@ -511,6 +536,8 @@ plot_DRTResults <- function(
   ## setup plot area
   if(par.local){
 
+    if (shift.lines <= 0)
+      shift.lines <- 1
     par.default <- par()[c("mfrow", "cex", "oma")]
     par(mfrow = c(1, 1), cex = cex, oma = c(0, 1, shift.lines - 1, 1))
   }
@@ -565,10 +592,11 @@ plot_DRTResults <- function(
 
       ## add data and error bars
       for(i in 1:length(values)) {
+
         points(x = c(1:nrow(values[[i]])),
                y = values[[i]][,1],
-               pch = pch[i],
-               col = col[i],
+               pch = if(nrow(values[[i]]) == length(pch)){ pch } else { pch[i] },
+               col = if(nrow(values[[i]]) == length(col)){ col } else { col[i] },
                cex = 1.2 * cex)
 
         arrows(c(1:nrow(values[[i]])),
@@ -578,7 +606,7 @@ plot_DRTResults <- function(
                angle = 90,
                length = 0.075,
                code = 3,
-               col = col[i])
+               col = if(nrow(values[[i]]) == length(col)){ col } else { col[i] })
 
         ## add summary content
         if(summary.pos[1] != "sub") {
