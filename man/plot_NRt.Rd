@@ -121,10 +121,12 @@ for (i in 1:length(aliquot)) {
 par(mfrow = c(1, 1))
 
 
+} 
+
+\section{How to cite}{
+Burow, C. (2017). plot_NRt(): Visualise natural/regenerated signal ratios. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.0. https://CRAN.R-project.org/package=Luminescence
 }
-\author{
-Christoph Burow, University of Cologne (Germany)
-}
+
 \references{
 Steffen, D., Preusser, F., Schlunegger, F., 2009. OSL quartz underestimation due to
 unstable signal components. Quaternary Geochronology, 4, 353-362.
@@ -132,4 +134,6 @@ unstable signal components. Quaternary Geochronology, 4, 353-362.
 \seealso{
 \code{\link{plot}}
 }
-
+\author{
+Christoph Burow, University of Cologne (Germany)
+}

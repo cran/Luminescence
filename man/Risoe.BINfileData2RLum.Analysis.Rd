@@ -6,7 +6,7 @@
 \usage{
 Risoe.BINfileData2RLum.Analysis(object, pos = NULL, grain = NULL,
   run = NULL, set = NULL, ltype = NULL, dtype = NULL,
-  protocol = "unknown", txtProgressBar = FALSE)
+  protocol = "unknown", keep.empty = TRUE, txtProgressBar = FALSE)
 }
 \arguments{
 \item{object}{\code{\linkS4class{Risoe.BINfileData}} (\bold{required}):
@@ -41,6 +41,10 @@ limit the converted data. Commonly allowed values are listed in \code{\linkS4cla
 \item{protocol}{\code{\link{character}} (optional): sets protocol type for
 analysis object. Value may be used by subsequent analysis functions.}
 
+\item{keep.empty}{\code{\link{logical}} (with default): If \code{TRUE} (default)
+an \code{RLum.Analysis} object is returned even if it does not contain any
+records. Set to \code{FALSE} to discard all empty objects.}
+
 \item{txtProgressBar}{\link{logical} (with default): enables or disables
 \code{\link{txtProgressBar}}.}
 }
@@ -63,8 +67,9 @@ The \code{protocol} argument of the \code{\linkS4class{RLum.Analysis}}
 object is set to 'unknown' if not stated otherwise.
 }
 \section{Function version}{
- 0.4.1 (2016-09-09 10:32:17)
+ 0.4.1 (2017-01-24 21:10:47)
 }
+
 \examples{
 
 ##load data
@@ -73,15 +78,19 @@ data(ExampleData.BINfileData, envir = environment())
 ##convert values for position 1
 Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1)
 
+} 
+
+\section{How to cite}{
+Kreutzer, S. (2017). Risoe.BINfileData2RLum.Analysis(): Convert Risoe.BINfileData object to an RLum.Analysis object. Function version 0.4.1. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.0. https://CRAN.R-project.org/package=Luminescence
 }
-\author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-\cr R Luminescence Package Team}
+
 \references{
 #
 }
 \seealso{
 \code{\linkS4class{Risoe.BINfileData}}, \code{\linkS4class{RLum.Analysis}}, \code{\link{read_BIN2R}}
 }
+\author{
+Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+\cr R Luminescence Package Team}
 \keyword{manip}
-

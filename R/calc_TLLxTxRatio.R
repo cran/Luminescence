@@ -2,7 +2,15 @@
 #'
 #' Calculate Lx/Tx ratio for a given set of TL curves.
 #'
-#' -
+#' \bold{Uncertainty estimation}\cr
+#'
+#' The standard errors are calculated using the following generalised equation:
+#'
+#' \deqn{SE_{signal} <- abs(Signal_{net} * BG_f /BG_{signal}}
+#'
+#' where \eqn{BG_f} is a term estimated by calculating the standard deviation of the sum of
+#' the \eqn{L_x} background counts and the sum of the \eqn{T_x} background counts. However,
+#' if both signals are similar the error becomes zero.
 #'
 #' @param Lx.data.signal \code{\linkS4class{RLum.Data.Curve}} or
 #' \code{\link{data.frame}} (\bold{required}): TL data (x =
@@ -33,7 +41,8 @@
 #' $ LxTx.table \cr .. $ LnLx \cr .. $ LnLx.BG \cr .. $ TnTx \cr .. $ TnTx.BG
 #' \cr .. $ Net_LnLx \cr .. $ Net_LnLx.Error\cr
 #'
-#' @note \bold{This function has still BETA status!}
+#' @note \bold{This function has still BETA status!} Please further note that a similar
+#' background for both curves results in a zero error.
 #'
 #' @section Function version: 0.3.0
 #'

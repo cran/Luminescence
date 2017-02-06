@@ -8,9 +8,9 @@
 #' \bold{Fitting function}\cr\cr The function for the CW-OSL fitting has the
 #' general form: \deqn{y = I0_{1}*\lambda_{1}*exp(-\lambda_1*x) + ,\ldots, +
 #' I0_{i}*\lambda_{i}*exp(-\lambda_i*x) } where \eqn{0 < i < 8}\cr\cr and
-#' \eqn{\lambda} is the decay constant and \eqn{N0} the intial number of
+#' \eqn{\lambda} is the decay constant and \eqn{I0} the intial number of
 #' trapped electrons.\cr (for the used equation cf. Boetter-Jensen et al.,
-#' 2003)\cr\cr \bold{Start values}\cr
+#' 2003, Eq. 2.31)\cr\cr \bold{Start values}\cr
 #'
 #' Start values are estimated automatically by fitting a linear function to the
 #' logarithmized input data set. Currently, there is no option to manually
@@ -104,9 +104,12 @@
 #' is currently not considered.\cr\cr The function \bold{does not} ensure that
 #' the fitting procedure has reached a global minimum rather than a local
 #' minimum!
-#' @section Function version: 0.5.1
+#'
+#' @section Function version: 0.5.2
+#'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France)
+#'
 #' @seealso \code{\link{fit_LMCurve}}, \code{\link{plot}},\code{\link{nls}},
 #' \code{\linkS4class{RLum.Data.Curve}}, \code{\linkS4class{RLum.Results}},
 #' \code{\link{get_RLum}}, \code{\link[minpack.lm]{nlsLM}}
@@ -156,7 +159,7 @@ fit_CWCurve<- function(
 
   ##INPUT OBJECTS
   if(is(values, "RLum.Data.Curve") == FALSE & is(values, "data.frame") == FALSE){
-    stop("[fit_CWCurve()] Input object is not of type 'RLum.Data.Curve' or 'data.frame'!")
+    stop("[fit_CWCurve()] Input object is not of type 'RLum.Data.Curve' or 'data.frame'!", call. = FALSE)
   }
 
 
@@ -317,7 +320,7 @@ fit_CWCurve<- function(
 
     }else{
 
-      stop("[fit_CWCurve()] fit.method unknown.")
+      stop("[fit_CWCurve()] fit.method unknown.", call. = FALSE)
 
     }
 
@@ -345,15 +348,15 @@ fit_CWCurve<- function(
                                               maxiter = 500
                                             )),
                                       silent = TRUE))
-        
-        ## HACK: 
+
+        ## HACK:
         # minpack.lm::nlsLM() stores the 'lower' argument as class "call" rather
         # than "numeric" as nls() does. Before running confint() on this object
-        # we overwrite the "lower" slot with the numeric values again. 
+        # we overwrite the "lower" slot with the numeric values again.
         if (!inherits(fit.try, "try-error")) {
           fit.try$call$lower <- rep(0,n.components * 2)
         }
-        
+
       }else{
 
 
@@ -375,7 +378,7 @@ fit_CWCurve<- function(
 
       }#fit.method
     }
-    
+
     ##count failed attempts for fitting
     if(inherits(fit.try,"try-error")==FALSE){
 
@@ -803,9 +806,12 @@ fit_CWCurve<- function(
   newRLumResults.fit_CWCurve <- set_RLum(
     class = "RLum.Results",
     data = list(
+      data = output.table,
       fit = fit,
-      output.table = output.table,
-      component.contribution.matrix = list(component.contribution.matrix)))
+      component.contribution.matrix = list(component.contribution.matrix)
+    ),
+    info = list(call = sys.call())
+  )
 
   rm(fit)
   rm(output.table)

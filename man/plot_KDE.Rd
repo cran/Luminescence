@@ -6,7 +6,7 @@
 \usage{
 plot_KDE(data, na.rm = TRUE, values.cumulative = TRUE, order = TRUE,
   boxplot = TRUE, rug = TRUE, summary, summary.pos,
-  summary.method = "MCM", bw = "nrd0", output = FALSE, ...)
+  summary.method = "MCM", bw = "nrd0", output = TRUE, ...)
 }
 \arguments{
 \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}}
@@ -16,7 +16,7 @@ data sets, these must be provided as \code{list} (e.g. \code{list(dataset1,
 dataset2)}).}
 
 \item{na.rm}{\code{\link{logical}} (with default): exclude NA values
-from the data set prior to any further operations.}
+from the data set prior to any further operation.}
 
 \item{values.cumulative}{\code{\link{logical}} (with default): show
 cumulative individual data.}
@@ -51,7 +51,7 @@ value for manual setting.}
 
 \item{output}{\code{\link{logical}}: Optional output of numerical plot
 parameters. These can be useful to reproduce similar plots. Default is
-\code{FALSE}.}
+\code{TRUE}.}
 
 \item{\dots}{further arguments and graphical parameters passed to
 \code{\link{plot}}.}
@@ -102,8 +102,9 @@ The plot output is no 'probability density' plot (cf. the discussion
 of Berger and Galbraith in Ancient TL; see references)!
 }
 \section{Function version}{
- 3.5.3 (2016-09-09 10:32:17)
+ 3.5.4 (2017-02-04 18:12:06)
 }
+
 \examples{
 
 ## read example data set
@@ -159,11 +160,15 @@ KDE_out <- plot_KDE(data = ExampleData.DeValues,
 output = TRUE)
 
 }
+\seealso{
+\code{\link{density}}, \code{\link{plot}}
+}
 \author{
 Michael Dietze, GFZ Potsdam (Germany),\cr Sebastian Kreutzer,
 IRAMAT-CRP2A, Universite Bordeaux Montaigne
-\cr R Luminescence Package Team}
-\seealso{
-\code{\link{density}}, \code{\link{plot}}
+\cr R Luminescence Package Team} 
+
+\section{How to cite}{
+Dietze, M., Kreutzer, S. (2017). plot_KDE(): Plot kernel density estimate with statistics. Function version 3.5.4. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.0. https://CRAN.R-project.org/package=Luminescence
 }
 

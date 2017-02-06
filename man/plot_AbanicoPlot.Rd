@@ -10,7 +10,7 @@ plot_AbanicoPlot(data, na.rm = TRUE, log.z = TRUE, z.0 = "mean.weighted",
   rug = FALSE, kde = TRUE, hist = FALSE, dots = FALSE,
   boxplot = FALSE, y.axis = TRUE, error.bars = FALSE, bar, bar.col,
   polygon.col, line, line.col, line.lty, line.label, grid.col, frame = 1,
-  bw = "SJ", output = FALSE, interactive = FALSE, ...)
+  bw = "SJ", output = TRUE, interactive = FALSE, ...)
 }
 \arguments{
 \item{data}{\code{\link{data.frame}} or \code{\linkS4class{RLum.Results}}
@@ -134,7 +134,7 @@ a numeric value for manual setting.}
 
 \item{output}{\code{\link{logical}}: Optional output of numerical plot
 parameters. These can be useful to reproduce similar plots. Default is
-\code{FALSE}.}
+\code{TRUE}.}
 
 \item{interactive}{\code{\link{logical}} (with default): create an interactive
 abanico plot (requires the 'plotly' package)}
@@ -221,8 +221,9 @@ z-scale to specify where ticks are to be drawn by using the parameter
 \code{zlim}-definition.
 }
 \section{Function version}{
- 0.1.10 (2016-09-09 10:32:17)
+ 0.1.10 (2017-01-24 21:10:47)
 }
+
 \examples{
 
 ## load example data and recalculate to Gray
@@ -402,12 +403,12 @@ points(x = AP$data[[1]]$precision[!in_2sigma],
        y = AP$data[[1]]$std.estimate.plot[!in_2sigma],
        pch = 1)
 
+} 
+
+\section{How to cite}{
+Dietze, M., Kreutzer, S. (2017). plot_AbanicoPlot(): Function to create an Abanico Plot.. Function version 0.1.10. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.0. https://CRAN.R-project.org/package=Luminescence
 }
-\author{
-Michael Dietze, GFZ Potsdam (Germany),\cr Sebastian Kreutzer,
-IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr Inspired by a plot
-introduced by Galbraith & Green (1990)
-\cr R Luminescence Package Team}
+
 \references{
 Galbraith, R. & Green, P., 1990. Estimating the component ages
 in a finite mixture. International Journal of Radiation Applications and
@@ -422,4 +423,8 @@ Quaternary Geochronology. doi:10.1016/j.quageo.2015.09.003
 \code{\link{plot_RadialPlot}}, \code{\link{plot_KDE}},
 \code{\link{plot_Histogram}}
 }
-
+\author{
+Michael Dietze, GFZ Potsdam (Germany),\cr Sebastian Kreutzer,
+IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr Inspired by a plot
+introduced by Galbraith & Green (1990)
+\cr R Luminescence Package Team}

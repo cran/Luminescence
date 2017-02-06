@@ -98,8 +98,9 @@ every sequence should be checked carefully before running long calculations usin
 hundreds of channels.
 }
 \section{Function version}{
- 0.1.0 (2016-05-19 23:48:19)
+ 0.1.1 (2017-01-24 21:10:47)
 }
+
 \examples{
 
 \dontrun{
@@ -120,10 +121,12 @@ plot_DetPlot(object,
 )
 }
 
+} 
+
+\section{How to cite}{
+Kreutzer, S. (2017). plot_DetPlot(): Create De(t) plot. Function version 0.1.1. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.0. https://CRAN.R-project.org/package=Luminescence
 }
-\author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-\cr R Luminescence Package Team}
+
 \references{
 Bailey, R.M., Singarayer, J.S., Ward, S., Stokes, S., 2003. Identification of partial resetting
 using De as a function of illumination time. Radiation Measurements 37, 511-518.
@@ -132,4 +135,6 @@ doi:10.1016/S1350-4487(03)00063-5
 \seealso{
 \code{\link{plot}}, \code{\link{analyse_SAR.CWOSL}}, \code{\link{analyse_pIRIRSequence}}
 }
-
+\author{
+Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+\cr R Luminescence Package Team}

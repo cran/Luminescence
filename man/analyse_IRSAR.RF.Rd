@@ -32,7 +32,7 @@ will be treated as minimum value and the maximum limit will be added automatical
 for the data analysis. Possible options are \code{"FIT"} or \code{"SLIDE"}.}
 
 \item{method.control}{\code{\link{list}} (optional): parameters to control the method, that can
-be passed to the choosen method. These are for (1) \code{method = "FIT"}: 'trace', 'maxiter', 'warnOnly',
+be passed to the chosen method. These are for (1) \code{method = "FIT"}: 'trace', 'maxiter', 'warnOnly',
 'minFactor' and for (2) \code{method = "SLIDE"}: 'correct_onset', 'show_density',  'show_fit', 'trace'.
 See details.}
 
@@ -46,8 +46,8 @@ values, \code{NA} and \code{NULL} (s. Details)
 
 \item{n.MC}{\code{\link{numeric}} (with default): set number of Monte
 Carlo runs for start parameter estimation (\code{method = "FIT"}) or
-error estimation (\code{method = "SLIDE"}). Note: Large values will
-significantly increase the computation time}
+error estimation (\code{method = "SLIDE"}). This value can be set to \code{NULL} to skip the
+MC runs. Note: Large values will significantly increase the computation time}
 
 \item{txtProgressBar}{\code{\link{logical}} (with default): enables \code{TRUE} or
 disables \code{FALSE} the progression bar during MC runs}
@@ -66,31 +66,87 @@ Currently supported arguments are \code{main}, \code{xlab}, \code{ylab},
 \code{\link[graphics]{legend}}), \code{xaxt}}
 }
 \value{
-A plot (optional) and an \code{\linkS4class{RLum.Results}} object is
-returned:\cr
+The function returns numerical output and an (optional) plot.
 
-\bold{@data}\cr
-$ data: \code{\link{data.frame}} table with De and corresponding values\cr
-..$ DE : \code{numeric}: the obtained equivalent dose\cr
-..$ DE.ERROR : \code{numeric}: (only method = "SLIDE") standard deviation obtained from MC runs \cr
-..$ DE.LOWER : \code{numeric}: 2.5\% quantile for De values obtained by MC runs \cr
-..$ DE.UPPER : \code{numeric}: 97.5\% quantile for De values obtained by MC runs  \cr
-..$ DE.STATUS  : \code{character}: test parameter status\cr
-..$ RF_NAT.LIM  : \code{charcter}: used RF_nat curve limits \cr
-..$ RF_REG.LIM : \code{character}: used RF_reg curve limits\cr
-..$ POSITION : \code{integer}: (optional) position of the curves\cr
-..$ DATE : \code{character}: (optional) measurement date\cr
-..$ SEQUENCE_NAME : \code{character}: (optional) sequence name\cr
-..$ UID : \code{character}: unique data set ID \cr
-$ test_parameters : \code{\link{data.frame}} table test parameters \cr
-$ fit : {\code{\link{nls}} \code{nlsModel} object} \cr
-$ slide : \code{\link{list}} data from the sliding process, including the sliding matrix\cr
+-----------------------------------\cr
+[ NUMERICAL OUTPUT ]\cr
+-----------------------------------\cr
+\bold{\code{RLum.Reuslts}}-object\cr
 
-\bold{@info}\cr
-$ call : \code{\link[methods]{language-class}}: the orignal function call \cr
+\bold{slot:} \bold{\code{@data}} \cr
+
+[.. $data : \code{data.frame}]\cr
+
+\tabular{lll}{
+\bold{Column} \tab \bold{Type} \tab \bold{Description}\cr
+ DE \tab \code{numeric} \tab the obtained equivalent dose\cr
+ DE.ERROR \tab \code{numeric} \tab (only \code{method = "SLIDE"}) standard deviation obtained from MC runs \cr
+ DE.LOWER \tab \code{numeric}\tab 2.5\% quantile for De values obtained by MC runs \cr
+ DE.UPPER \tab \code{numeric}\tab 97.5\% quantile for De values obtained by MC runs  \cr
+ DE.STATUS  \tab \code{character}\tab test parameter status\cr
+ RF_NAT.LIM  \tab \code{charcter}\tab used RF_nat curve limits \cr
+ RF_REG.LIM \tab \code{character}\tab used RF_reg curve limits\cr
+ POSITION \tab \code{integer}\tab (optional) position of the curves\cr
+ DATE \tab \code{character}\tab (optional) measurement date\cr
+ SEQUENCE_NAME \tab \code{character}\tab (optional) sequence name\cr
+ UID \tab \code{character}\tab unique data set ID
+}
+
+[.. $De.MC : \code{numeric}]\cr
+
+A \code{numeric} vector with all the De values obtained by the MC runs.\cr
+
+[.. $test_parameters : \code{data.frame}]\cr
+
+\tabular{lll}{
+\bold{Column} \tab \bold{Type} \tab \bold{Description}\cr
+ POSITION \tab \code{numeric} \tab aliquot position \cr
+ PARAMETER \tab \code{character} \tab test parameter name \cr
+ THRESHOLD \tab \code{numeric} \tab set test parameter threshold value \cr
+ VALUE \tab \code{numeric} \tab the calculated test parameter value (to be compared with the threshold)\cr
+ STATUS \tab \code{character} \tab test parameter status either \code{"OK"} or \code{"FAILED"} \cr
+ SEQUENCE_NAME \tab \code{character} \tab name of the sequence, so far available \cr
+ UID \tab \code{character}\tab unique data set ID
+}
+
+[.. $fit : \code{data.frame}]\cr
+
+An \code{\link{nls}} object produced by the fitting.\cr
+
+[.. $slide : \code{list}]\cr
+
+A \code{\link{list}} with data produced during the sliding. Some elements are previously
+reported with the summary object data. List elements are:
+
+\tabular{lll}{
+\bold{Element} \tab \bold{Type} \tab \bold{Description}\cr
+ De \tab \code{numeric} \tab the final De obtained with the sliding approach \cr
+ De.MC \tab \code{numeric} \tab all De values obtained by the MC runs \cr
+ residuals \tab \code{numeric} \tab the obtained residuals for each channel of the curve \cr
+ trend.fit \tab \code{lm} \tab fitting results produced by the fitting of the residuals \cr
+ RF_nat.slided \tab \code{matrix} \tab the slided RF_nat curve \cr
+ t_n.id \tab \code{numeric} \tab the index of the t_n offset \cr
+ I_n \tab \code{numeric} \tab the vertical intensity offset if a vertical slide was applied \cr
+ algorithm_error \tab \code{numeric} \tab the vertical sliding suffers from a systematic effect induced by the used
+ algorithm. The returned value is the standard deviation of all obtained De values while expanding the
+ vertical sliding range. I can be added as systematic error to the final De error; so far wanted.\cr
+ vslide_range \tab \code{numeric} \tab the range used for the vertical sliding \cr
+ squared_residuals \tab \code{numeric} \tab the squared residuals (horizontal sliding)
+}
+
+
+\bold{slot:} \bold{\code{@info}} \cr
+
+The original function call (\code{\link[methods]{language-class}}-object)
 
 The output (\code{data}) should be accessed using the
 function \code{\link{get_RLum}}
+
+------------------------\cr
+[ PLOT OUTPUT ]\cr
+------------------------\cr
+
+The slided IR-RF curves with the finally obtained De
 }
 \description{
 Function to analyse IRSAR RF measurements on K-feldspar samples, performed
@@ -123,7 +179,7 @@ Erfurt et al., 2003. For the fitting the mean count value of the RF_nat curve is
 Function used for the fitting (according to Erfurt et al. (2003)): \cr
 
 \deqn{\phi(D) = \phi_{0}-\Delta\phi(1-exp(-\lambda*D))^\beta}
-with \eqn{\phi(D)} the dose dependent IR-RF flux, \eqn{\phi_{0}} the inital
+with \eqn{\phi(D)} the dose dependent IR-RF flux, \eqn{\phi_{0}} the initial
 IR-RF flux, \eqn{\Delta\phi} the dose dependent change of the IR-RF flux,
 \eqn{\lambda} the exponential parameter, \eqn{D} the dose and \eqn{\beta}
 the dispersive factor.\cr\cr To obtain the palaeodose \eqn{D_{e}} the
@@ -139,7 +195,8 @@ allows to work with the original data without the need of any physical
 model. This approach was introduced for RF curves by Buylaert et al., 2012
 and Lapp et al., 2012.
 
-Here the sliding is done by searching for the minimum of the squared residuals.\cr
+Here the sliding is done by searching for the minimum of the squared residuals.
+For the mathematical details of the implementation see Frouin et al., 2017 \cr
 
 \bold{\code{method.control}}\cr
 
@@ -151,20 +208,29 @@ handled using the argument \code{method.control} only, e.g.,
 \tabular{lll}{
 ARGUMENT       \tab METHOD               \tab DESCRIPTION\cr
 \code{trace}   \tab \code{FIT}, \code{SLIDE} \tab as in \code{\link{nls}}; shows sum of squared residuals\cr
+\code{trace_vslide} \tab \code{SLIDE} \tab \code{\link{logical}} argument to enable or disable the tracing of the vertical sliding\cr
 \code{maxiter} \tab \code{FIT}            \tab as in \code{\link{nls}}\cr
 \code{warnOnly} \tab \code{FIT}           \tab as in \code{\link{nls}}\cr
 \code{minFactor} \tab \code{FIT}            \tab as in \code{\link{nls}}\cr
-\code{correct_onset} \tab \code{SLIDE}      \tab The logical argument literally spoken,
-shifts the curves along the x-axis by the first channel, as light is expected in the first channel.
- The default value is \code{TRUE}.\cr
+\code{correct_onset} \tab \code{SLIDE}      \tab The logical argument shifts the curves along the x-axis by the first channel,
+as light is expected in the first channel. The default value is \code{TRUE}.\cr
 \code{show_density} \tab \code{SLIDE}       \tab \code{\link{logical}} (with default)
 enables or disables KDE plots for MC run results. If the distribution is too narrow nothing is shown.\cr
 \code{show_fit} \tab \code{SLIDE}       \tab \code{\link{logical}} (with default)
-enables or disables the plot of the fitted curve rountinly obtained during the evaluation.\cr
-\code{n.MC}                  \tab \code{SLIDE}       \tab    \code{\link{integer}} (wiht default):
-This controls the number of MC runs within the sliding (assesing the possible minimum values).
+enables or disables the plot of the fitted curve routinely obtained during the evaluation.\cr
+\code{n.MC}                  \tab \code{SLIDE}       \tab    \code{\link{integer}} (with default):
+This controls the number of MC runs within the sliding (assessing the possible minimum values).
 The default \code{n.MC = 1000}. Note: This parameter is not the same as controlled by the
-function argument \code{n.MC} \cr
+function argument \code{n.MC}. \cr
+\code{vslide_range} \tab \code{SLDE} \tab \code{\link{logical}} or \code{\link{numeric}} or \code{\link{character}} (with default):
+This argument sets the boundaries for a vertical curve
+sliding. The argument expects a vector with an absolute minimum and a maximum (e.g., \code{c(-1000,1000)}).
+Alternatively the values \code{NULL} and \code{'auto'} are allowed. The automatic mode detects the
+reasonable vertical sliding range (\bold{recommended}). \code{NULL} applies no vertical sliding.
+The default is \code{NULL}.\cr
+\code{cores} \tab \code{SLIDE} \tab \code{number} or \code{character} (with default): set number of cores to be allocated
+for a parallel processing of the Monte-Carlo runs. The default value is \code{NULL} (single thread),
+the recommended values is \code{'auto'}. An optional number (e.g., \code{cores} = 8) assigns a value manually.
 }
 
 \bold{Error estimation}\cr
@@ -233,19 +299,18 @@ given above. Note: As this procedure requests more computation time, setting of 
 to \code{NULL} also prevents a calculation of the remaining two.
 }
 \note{
-\bold{[THIS FUNCTION HAS BETA-STATUS]}\cr
-
 This function assumes that there is no sensitivity change during the
 measurements (natural vs. regenerated signal), which is in contrast to the
-findings from Buylaert et al. (2012). Furthermore: In course of ongoing research this function has
+findings by Buylaert et al. (2012). Furthermore: In course of ongoing research this function has
 been almost fully re-written, but further thoughtful tests are still pending!
 However, as a lot new package functionality was introduced with the changes made
 for this function and to allow a part of such tests the re-newed code was made part
 of the current package.\cr
 }
 \section{Function version}{
- 0.6.11 (2016-07-16 11:28:11)
+ 0.7.2 (2017-02-03 16:46:20)
 }
+
 \examples{
 
 ##load data
@@ -271,10 +336,12 @@ results <- analyse_IRSAR.RF(
 
 }
 
+} 
+
+\section{How to cite}{
+Kreutzer, S. (2017). analyse_IRSAR.RF(): Analyse IRSAR RF measurements. Function version 0.7.2. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.0. https://CRAN.R-project.org/package=Luminescence
 }
-\author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-\cr R Luminescence Package Team}
+
 \references{
 Buylaert, J.P., Jain, M., Murray, A.S., Thomsen, K.J., Lapp, T.,
 2012. IR-RF dating of sand-sized K-feldspar extracts: A test of accuracy.
@@ -295,6 +362,10 @@ Erfurt, G., Krbetschek, M.R., Bortolot, V.J., Preusser, F., 2003. A fully
 automated multi-spectral radioluminescence reading system for geochronometry
 and dosimetry. Nuclear Instruments and Methods in Physics Research Section
 B: Beam Interactions with Materials and Atoms 207, 487-499.
+
+Frouin, M., Huot, S., Kreutzer, S., Lahaye, C., Lamothe, M., Philippe, A., Mercier, N., 2017.
+An improved radiofluorescence single-aliquot regenerative dose protocol for K-feldspars.
+Quaternary Geochronology 38, 13-24. doi:10.1016/j.quageo.2016.11.004
 
 Lapp, T., Jain, M., Thomsen, K.J., Murray, A.S., Buylaert, J.P., 2012. New
 luminescence measurement facilities in retrospective dosimetry. Radiation
@@ -319,7 +390,9 @@ Measurements 32, 685-690.
 \seealso{
 \code{\linkS4class{RLum.Analysis}},
 \code{\linkS4class{RLum.Results}}, \code{\link{get_RLum}},
-\code{\link{nls}}, \code{\link[minpack.lm]{nlsLM}}
+\code{\link{nls}}, \code{\link[minpack.lm]{nlsLM}}, \code{\link[parallel]{mclapply}}
 }
+\author{
+Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+\cr R Luminescence Package Team}
 \keyword{datagen}
-
