@@ -1,6 +1,6 @@
 //analyse_IRSARRF_SRS.cpp
 //author: Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-//version: 0.3.4 [2017-01-25]
+//version: 0.3.5 [2017-02-06]
 //Function calculates the squared residuals for the R function analyse_IRSAR.RF()
 //including MC runs for the obtained minimum. The function allows a horizontal and
 //a vertical sliding of the curve
@@ -12,9 +12,9 @@
 using namespace Rcpp;
 
 // [[Rcpp::export(".analyse_IRSARRF_SRS")]]
-RcppExport SEXP analyse_IRSARRF_SRS(IntegerVector values_regenerated_limited,
-                                    IntegerVector values_natural_limited,
-                                    IntegerVector vslide_range,
+RcppExport SEXP analyse_IRSARRF_SRS(NumericVector values_regenerated_limited,
+                                    NumericVector values_natural_limited,
+                                    NumericVector vslide_range,
                                     int n_MC,
                                     bool trace = false
                                     ){
