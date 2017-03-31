@@ -42,9 +42,9 @@
 #' \cr .. $ Net_LnLx \cr .. $ Net_LnLx.Error\cr
 #'
 #' @note \bold{This function has still BETA status!} Please further note that a similar
-#' background for both curves results in a zero error.
+#' background for both curves results in a zero error and is therefore set to \code{NA}.
 #'
-#' @section Function version: 0.3.0
+#' @section Function version: 0.3.2
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France), Christoph Schmidt, University of Bayreuth (Germany)
@@ -81,9 +81,9 @@
 #' @export
 calc_TLLxTxRatio <- function(
   Lx.data.signal,
-  Lx.data.background,
+  Lx.data.background = NULL,
   Tx.data.signal,
-  Tx.data.background,
+  Tx.data.background = NULL,
   signal.integral.min,
   signal.integral.max
 ){
@@ -93,8 +93,8 @@ calc_TLLxTxRatio <- function(
   ##(1) - a few integrity check
 
      ##check for MISSING objects
-     if(missing(Lx.data.signal) == TRUE | missing(Tx.data.signal) == TRUE |
-        missing(signal.integral.min) == TRUE |  missing(signal.integral.max) == TRUE){
+     if(missing(Lx.data.signal) | missing(Tx.data.signal) |
+        missing(signal.integral.min) |  missing(signal.integral.max)){
 
        temp.missing <- paste(
                        c(if(missing(Lx.data.signal)){"Lx.data.signal"},
@@ -103,7 +103,7 @@ calc_TLLxTxRatio <- function(
                          if(missing(signal.integral.max)){"signal.integral.max"}),
                        collapse = ", ")
 
-          stop(paste("[calc_TLLxTxRatio()] Arguments are missing: ",temp.missing, ".", sep=""))
+          stop(paste("[calc_TLLxTxRatio()] Arguments are missing: ",temp.missing, ".", sep=""), call. = FALSE)
 
      }
 
@@ -144,7 +144,6 @@ calc_TLLxTxRatio <- function(
 
   ##(d) - check if Lx and Tx curves have the same channel length
      if(length(Lx.data.signal[,2])!=length(Tx.data.signal[,2])){
-
        stop("[calc_TLLxTxRatio()] Channel number of Lx and Tx data differs!")}
 
 
@@ -157,25 +156,20 @@ calc_TLLxTxRatio <- function(
 
 #  Background Consideration --------------------------------------------------
 
-
    ##Lx.data
-   if(missing(Lx.data.background)==FALSE){
-
+   if(!is.null(Lx.data.background)){
      LnLx.BG <- sum(Lx.data.background[signal.integral.min:signal.integral.max,2])
 
     }else{
-
      LnLx.BG <- NA
 
     }
 
    ##Tx.data
-      if(missing(Tx.data.background)==FALSE){
-
+      if(!is.null(Tx.data.background)){
         TnTx.BG <- sum(Tx.data.background[signal.integral.min:signal.integral.max,2])
 
       }else{
-
         TnTx.BG <- NA
 
       }
@@ -185,21 +179,27 @@ calc_TLLxTxRatio <- function(
     LnLx <- sum(Lx.data.signal[signal.integral.min:signal.integral.max,2])
     TnTx <- sum(Tx.data.signal[signal.integral.min:signal.integral.max,2])
 
-
      ##calculate variance of background
      if(is.na(LnLx.BG) == FALSE & is.na(TnTx.BG) == FALSE){
-
        BG.Error <- sd(c(LnLx.BG, TnTx.BG))
+
+       if(BG.Error == 0) {
+         warning(
+           "[calc_TLLxTxRatio()] The background signals for Lx and Tx appear to be similar, no background error was calculated.",
+           call. = FALSE
+         )
+         BG.Error <- NA
+
+       }
+
      }
 
 
     if(is.na(LnLx.BG) == FALSE){
-
       net_LnLx <-  LnLx - LnLx.BG
       net_LnLx.Error <- abs(net_LnLx * BG.Error/LnLx.BG)
 
     }else{
-
       net_LnLx <- NA
       net_LnLx.Error <- NA
 
@@ -218,8 +218,7 @@ calc_TLLxTxRatio <- function(
     }
 
 
-    if(is.na(net_TnTx) == TRUE){
-
+    if(is.na(net_TnTx)){
       LxTx <- LnLx/TnTx
       LxTx.Error <- NA
 
@@ -247,9 +246,11 @@ calc_TLLxTxRatio <- function(
 
 # Return values -----------------------------------------------------------
 
-   newRLumResults.calc_TLLxTxRatio <- set_RLum(
-     class = "RLum.Results",
-     data=list(LxTx.table = temp.results))
+    newRLumResults.calc_TLLxTxRatio <- set_RLum(
+      class = "RLum.Results",
+      data = list(LxTx.table = temp.results),
+      info = list(call = sys.call())
+    )
 
    return(newRLumResults.calc_TLLxTxRatio)
 

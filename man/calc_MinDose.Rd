@@ -140,7 +140,19 @@ work for your machine. Also the performance gain increases for larger number
 of bootstrap replicates. Also note that with each additional core and hence
 R instance and depending on the number of bootstrap replicates the memory
 usage can significantly increase. Make sure that memory is always availabe,
-otherwise there will be a massive perfomance hit.
+otherwise there will be a massive perfomance hit. \cr\cr
+
+\bold{Likelihood profiles}
+
+The likelihood profiles are generated and plotted by the \code{bbmle} package.
+The profile likelihood plots look different to ordinary profile likelihood as \cr\cr
+"[...] the plot method for likelihood profiles displays the square root of
+the the deviance difference (twice the difference in negative log-likelihood from
+the best fit), so it will be V-shaped for cases where the quadratic approximation
+works well [...]." (Bolker 2016). \cr\cr
+For more details on the profile likelihood
+calculations and plots please see the vignettes of the \code{bbmle} package
+(also available here: \url{https://CRAN.R-project.org/package=bbmle}).
 }
 \note{
 The default starting values for \emph{gamma}, \emph{mu}, \emph{sigma}
@@ -152,7 +164,7 @@ model with \code{debug=TRUE} which provides extended console output and
 forwards all internal warning messages.
 }
 \section{Function version}{
- 0.4.4 (2017-01-26 14:30:08)
+ 0.4.4 (2017-02-24 10:30:49)
 }
 
 \examples{
@@ -249,7 +261,7 @@ summary(bs$poly.fits$poly.three$fitted.values)
 } 
 
 \section{How to cite}{
-Burow, C. (2017). calc_MinDose(): Apply the (un-)logged minimum age model (MAM) after Galbraith et al. (1999) to a given De distribution. Function version 0.4.4. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.3. https://CRAN.R-project.org/package=Luminescence
+Burow, C. (2017). calc_MinDose(): Apply the (un-)logged minimum age model (MAM) after Galbraith et al. (1999) to a given De distribution. Function version 0.4.4. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.4. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{
@@ -281,6 +293,10 @@ Reviews 25, 2469-2474.\cr\cr
 Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain equivalent dose
 (De) distributions: Implications for OSL dating of sediment mixtures.
 Quaternary Geochronology 4, 204-230. \cr\cr
+
+Bolker, B., 2016. Maximum likelihood estimation analysis with the bbmle package.
+In: Bolker, B., R Development Core Team, 2016. bbmle: Tools for General Maximum Likelihood Estimation.
+R package version 1.0.18. https://CRAN.R-project.org/package=bbmle \cr\cr
 
 Bailey, R.M. & Arnold, L.J., 2006. Statistical modelling of single grain quartz De distributions and an
 assessment of procedures for estimating burial dose. Quaternary Science

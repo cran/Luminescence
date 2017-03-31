@@ -1,5 +1,125 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.7.4 (31st March, 2017)}{
+
+
+    \subsection{Changes in S4-classes and methods}{
+      \itemize{
+        \item \code{get_RLum} for \code{RLum.Analysis}-objects now returns an error and \code{NULL} if the
+        \code{record.id} is not valid.
+
+      }
+  }
+
+  \subsection{Bugfixes and changes}{
+    \itemize{
+
+
+
+     \item \code{analyse_baSAR()}{
+        \itemize{
+           \item The option to force the dose response curve trough the origin was not correctly
+           implemented; fixed.
+
+      }
+
+    }
+
+     \item \code{analyse_FadingMeasurement()}{
+        \itemize{
+           \item The function returned unreliable results since the time since irradiation had
+           been doubled. This bug only affected Lx/Tx data imported from an XSYG-file.
+
+      }
+
+    }
+
+    \item \code{analyse_SAR.TL()}{
+        \itemize{
+           \item A test code snippet made it into the final package. With this the Lx/Tx error was
+           taken as fixed value (10/100) from the Lx/Tx value itself. The calculated error was not
+           considered; corrected,
+           \item function returns \code{NA} for the error if the background signals are similar
+           and the error would become 0,
+           \item new argument \code{integral_input} added to allow for an integral definition based
+           on temperatures and not channels.
+
+      }
+
+    }
+
+     \item \code{calc_TLLxTxRatio()}{
+        \itemize{
+           \item Arguments \code{Lx.data.background} and  \code{Tx.data.background} are now
+           pre-set to \code{NULL}, i.e. the function does not longer check for missing entries.
+
+      }
+
+    }
+
+
+
+   \item \code{plot_KDE()}{
+        \itemize{
+           \item Further support for layout options as requested by Christopher Luethgens.
+     }
+     }
+
+ \item \code{plot_GrowthCurve)}{
+        \itemize{
+           \item Rename argument options for argument \code{mode} to \code{'interpolation'} and
+           \code{'extrapolation'} instead of \code{'regenerative'} and \code{'additive'}.
+           \item fix a rather rare bug using the combination \code{fit.force_through_origin = FALSE} and
+           \code{mode = "extrapolation"},
+           \item the graphical representation for \code{mode = "extrapolation"} was not correct (#38).
+
+     }
+     }
+
+  \item \code{plot_RLum.Data.Spectrum)}{
+        \itemize{
+           \item Fixwrong axtick labels for interactive plot option (#39),
+           \item correct manual.
+     }
+     }
+
+  \item \code{plot_RLum.Analysis)}{
+        \itemize{
+           \item Add support for the argument 'type' of the argument 'combine = TRUE' is used.
+     }
+     }
+
+     \item \code{read_BIN2R()}{
+        \itemize{
+           \item Correct minor bug while importing corrupt BIN-files,
+           \item add support for internet connections,
+           \item if a directory was provided the functions was trapped in an endless loop (#36)
+     }
+     }
+
+     \item \code{write_R2BIN()}{
+        \itemize{
+           \item Argument 'BL_UNIT' was not correctly exported; fixed,
+           \item export behaviour for BIN-file version 08 improved.
+     }
+
+    }
+   }
+  }
+
+  \subsection{Miscellaneous}{
+     \itemize{
+
+     \item BIN-file example data sets can now be exported without error to BIN-files using
+      \code{write_R2BIN()}.
+    }
+  }
+
+
+}
+
+
+
 \section{Changes in version 0.7.3 (8th Feburary, 2017)}{
 
   \subsection{Bugfixes and changes}{
@@ -32,7 +152,7 @@
 }
 
 
-\section{Changes in version 0.7.2 (7th Feburary (evening), 2017)}{
+\section{Changes in version 0.7.2 (7th February (evening), 2017)}{
 
   \itemize{
   \item The CRAN check on the Solaris machines gave an error while performing

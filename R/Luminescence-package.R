@@ -6,7 +6,7 @@
 #' plotting of equivalent dose distributions.
 #'
 #' \tabular{ll}{ Package: \tab Luminescence\cr Type: \tab Package\cr Version:
-#' \tab 0.7.3 \cr Date: \tab 2017-02-08 \cr License: \tab GPL-3\cr }
+#' \tab 0.7.4 \cr Date: \tab 2017-03-31 \cr License: \tab GPL-3\cr }
 #'
 #' @name Luminescence-package
 #' @aliases Luminescence-package Luminescence
@@ -101,7 +101,7 @@
 #' @importFrom stats approx as.formula complete.cases density dnorm glm lm median na.exclude na.omit nls nls.control pchisq pnorm quantile rnorm runif sd smooth smooth.spline spline t.test uniroot var weighted.mean setNames coef confint predict update residuals
 #' @importFrom parallel parLapply makeCluster stopCluster
 #' @importFrom httr GET accept_json status_code content
-#' @useDynLib Luminescence
+#' @useDynLib Luminescence, .registration = TRUE
 NULL
 
 
@@ -712,7 +712,7 @@ NULL
 #'
 #' ## Calculate the De of the IR50 signal
 #' IR50_De <- plot_GrowthCurve(IR50_De.LxTx,
-#'                                 mode = "regenerative",
+#'                                 mode = "interpolation",
 #'                                 fit.method = "EXP")
 #'
 #' ## Extract the calculated De and its error

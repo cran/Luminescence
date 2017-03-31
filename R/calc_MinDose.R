@@ -69,7 +69,19 @@
 #' of bootstrap replicates. Also note that with each additional core and hence
 #' R instance and depending on the number of bootstrap replicates the memory
 #' usage can significantly increase. Make sure that memory is always availabe,
-#' otherwise there will be a massive perfomance hit.
+#' otherwise there will be a massive perfomance hit. \cr\cr
+#'
+#' \bold{Likelihood profiles}
+#'
+#' The likelihood profiles are generated and plotted by the \code{bbmle} package.
+#' The profile likelihood plots look different to ordinary profile likelihood as \cr\cr
+#' "[...] the plot method for likelihood profiles displays the square root of
+#' the the deviance difference (twice the difference in negative log-likelihood from
+#' the best fit), so it will be V-shaped for cases where the quadratic approximation
+#' works well [...]." (Bolker 2016). \cr\cr
+#' For more details on the profile likelihood
+#' calculations and plots please see the vignettes of the \code{bbmle} package
+#' (also available here: \url{https://CRAN.R-project.org/package=bbmle}).
 #'
 #' @param data \code{\linkS4class{RLum.Results}} or \link{data.frame}
 #' (\bold{required}): for \code{data.frame}: two columns with De \code{(data[
@@ -179,7 +191,11 @@
 #' Arnold, L.J. & Roberts, R.G., 2009. Stochastic modelling of multi-grain equivalent dose
 #' (De) distributions: Implications for OSL dating of sediment mixtures.
 #' Quaternary Geochronology 4, 204-230. \cr\cr
-#'
+#' 
+#' Bolker, B., 2016. Maximum likelihood estimation analysis with the bbmle package.
+#' In: Bolker, B., R Development Core Team, 2016. bbmle: Tools for General Maximum Likelihood Estimation.
+#' R package version 1.0.18. https://CRAN.R-project.org/package=bbmle \cr\cr
+#' 
 #' Bailey, R.M. & Arnold, L.J., 2006. Statistical modelling of single grain quartz De distributions and an
 #' assessment of procedures for estimating burial dose. Quaternary Science
 #' Reviews 25, 2475-2502. \cr\cr

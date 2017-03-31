@@ -73,7 +73,8 @@ value!}
 \value{
 A plot (optional) and an \code{\linkS4class{RLum.Results}} object is
 returned containing the following elements:
-\item{De.values}{\link{data.frame} containing De-values, De-error and
+
+\item{data}{\link{data.frame} containing De-values, De-error and
 further parameters} \item{LnLxTnTx.values}{\link{data.frame} of all
 calculated Lx/Tx values including signal, background counts and the dose
 points} \item{rejection.criteria}{\link{data.frame} with values that might
@@ -145,7 +146,7 @@ This function must not be mixed up with the function
 \bold{The function currently does only support 'OSL' or 'IRSL' data!}
 }
 \section{Function version}{
- 0.7.9 (2017-01-24 21:10:47)
+ 0.7.9 (2017-02-28 14:48:30)
 }
 
 \examples{
@@ -184,7 +185,7 @@ get_RLum(results, data.object = "LnLxTnTx.table")
 } 
 
 \section{How to cite}{
-Kreutzer, S. (2017). analyse_SAR.CWOSL(): Analyse SAR CW-OSL measurements. Function version 0.7.9. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.3. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S. (2017). analyse_SAR.CWOSL(): Analyse SAR CW-OSL measurements. Function version 0.7.9. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.4. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{

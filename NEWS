@@ -1,5 +1,95 @@
 NEWS for the R Package Luminescence
 
+Changes in version 0.7.4 (31st March, 2017):
+
+  Changes in S4-classes and methods:
+
+         • ‘get_RLum’ for ‘RLum.Analysis’-objects now returns an error
+           and ‘NULL’ if the ‘record.id’ is not valid.
+
+  Bugfixes and changes:
+
+         • ‘analyse_baSAR()’
+
+             • The option to force the dose response curve trough the
+               origin was not correctly implemented; fixed.
+
+         • ‘analyse_FadingMeasurement()’
+
+             • The function returned unreliable results since the time
+               since irradiation had been doubled. This bug only
+               affected Lx/Tx data imported from an XSYG-file.
+
+         • ‘analyse_SAR.TL()’
+
+             • A test code snippet made it into the final package. With
+               this the Lx/Tx error was taken as fixed value (10/100)
+               from the Lx/Tx value itself. The calculated error was
+               not considered; corrected,
+
+             • function returns ‘NA’ for the error if the background
+               signals are similar and the error would become 0,
+
+             • new argument ‘integral_input’ added to allow for an
+               integral definition based on temperatures and not
+               channels.
+
+         • ‘calc_TLLxTxRatio()’
+
+             • Arguments ‘Lx.data.background’ and ‘Tx.data.background’
+               are now pre-set to ‘NULL’, i.e. the function does not
+               longer check for missing entries.
+
+         • ‘plot_KDE()’
+
+             • Further support for layout options as requested by
+               Christopher Luethgens.
+
+         • ‘plot_GrowthCurve)’
+
+             • Rename argument options for argument ‘mode’ to
+               ‘'interpolation'’ and ‘'extrapolation'’ instead of
+               ‘'regenerative'’ and ‘'additive'’.
+
+             • fix a rather rare bug using the combination
+               ‘fit.force_through_origin = FALSE’ and ‘mode =
+               "extrapolation"’,
+
+             • the graphical representation for ‘mode =
+               "extrapolation"’ was not correct (#38).
+
+         • ‘plot_RLum.Data.Spectrum)’
+
+             • Fixwrong axtick labels for interactive plot option
+               (#39),
+
+             • correct manual.
+
+         • ‘plot_RLum.Analysis)’
+
+             • Add support for the argument 'type' of the argument
+               'combine = TRUE' is used.
+
+         • ‘read_BIN2R()’
+
+             • Correct minor bug while importing corrupt BIN-files,
+
+             • add support for internet connections,
+
+             • if a directory was provided the functions was trapped in
+               an endless loop (#36)
+
+         • ‘write_R2BIN()’
+
+             • Argument 'BL_UNIT' was not correctly exported; fixed,
+
+             • export behaviour for BIN-file version 08 improved.
+
+  Miscellaneous:
+
+         • BIN-file example data sets can now be exported without error
+           to BIN-files using ‘write_R2BIN()’.
+
 Changes in version 0.7.3 (8th Feburary, 2017):
 
   Bugfixes and changes:
@@ -18,7 +108,7 @@ Changes in version 0.7.3 (8th Feburary, 2017):
 
          • Add NEWS again to the package.
 
-Changes in version 0.7.2 (7th Feburary (evening), 2017):
+Changes in version 0.7.2 (7th February (evening), 2017):
 
         • The CRAN check on the Solaris machines gave an error while
           performing the (on all other platform sucessful) unit tests.
