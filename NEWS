@@ -1,5 +1,64 @@
 NEWS for the R Package Luminescence
 
+Changes in version 0.7.5 (30th June, 2017):
+
+  Bugfixes and changes:
+
+         • ‘analyse_SAR.CWOSL()’
+
+             • If the signal integral was wrong, the default value was
+               not set correctly (#46).
+
+         • ‘calc_AverageDose()’
+
+             • Update documentation and add produced output,
+
+             • unify data.frame return output arguments (all capital
+               letters).
+
+         • ‘calc_FastRatio()’
+
+             • Update slot names, which led to an output error.
+
+         • ‘extract_IrradiationTimes()’
+
+             • The exported BINX-file now works with the Analyst and
+               the g-value can be calculated therein (thanks to Geoff
+               Duller).
+
+         • ‘plot_FilterCombinations()’
+
+             • Calculate optical density and return it,
+
+             • fix calclation of transmission window,
+
+             • improve plot output.
+
+         • ‘plot_RadialPlot()’
+
+             • Fix error which occasionally occurred if a list of
+               ‘data.frame’s are provided (thanks to Christina Neudorf
+               for spotting the bug).
+
+         • ‘read_BIN2R()’
+
+             • Improve error messages for corrupted BIN/BINX-files,
+
+             • ensure that the file connection is closed sufficiently.
+
+         • ‘RisoeBINfileData2RLum.Analysis()’
+
+             • The grain selection was not accepted and caused a
+               constant error (#45).
+
+         • ‘use_DRAC()’
+
+             • The DRAC URL had changed; fixed.
+
+  Miscellaneous:
+
+         • Fix package welcome message.
+
 Changes in version 0.7.4 (31st March, 2017):
 
   Changes in S4-classes and methods:

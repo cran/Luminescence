@@ -1,5 +1,115 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.7.5 (30th June, 2017)}{
+
+  \subsection{Bugfixes and changes}{
+    \itemize{
+
+
+      \item \code{analyse_SAR.CWOSL()}
+
+        \itemize{
+
+          \item If the signal integral was wrong, the default value was not set correctly (#46).
+
+        }
+
+
+      \item \code{calc_AverageDose()}
+
+        \itemize{
+
+          \item Update documentation and add produced output,
+          \item unify data.frame return output arguments (all capital letters).
+
+        }
+
+
+
+      \item \code{calc_FastRatio()}
+
+        \itemize{
+
+          \item Update slot names, which led to an output error.
+
+        }
+
+
+      \item \code{extract_IrradiationTimes()}
+
+        \itemize{
+
+          \item The exported BINX-file now works with the Analyst and the g-value can be
+          calculated therein (thanks to Geoff Duller).
+
+        }
+
+      \item \code{plot_FilterCombinations()}
+
+        \itemize{
+
+          \item Calculate optical density and return it,
+          \item fix calclation of transmission window,
+          \item improve plot output.
+
+        }
+
+          \item \code{plot_RadialPlot()}
+
+        \itemize{
+
+          \item Fix error which occasionally occurred if a list of \code{data.frame}s are provided (thanks to Christina Neudorf for spotting the bug).
+
+        }
+
+
+     \item \code{read_BIN2R()}
+
+        \itemize{
+
+          \item Improve error messages for corrupted BIN/BINX-files,
+          \item ensure that the file connection is closed sufficiently.
+
+        }
+
+      \item \code{RisoeBINfileData2RLum.Analysis()}
+
+        \itemize{
+
+          \item The grain selection was not accepted and caused a constant error (#45).
+
+        }
+
+         \item \code{use_DRAC()}
+
+        \itemize{
+
+          \item The DRAC URL had changed; fixed.
+
+        }
+
+
+
+
+
+    }
+  }
+
+
+   \subsection{Miscellaneous}{
+    \itemize{
+
+        \item Fix package welcome message.
+
+
+    }
+
+   }
+
+
+
+}
+
 \section{Changes in version 0.7.4 (31st March, 2017)}{
 
 
