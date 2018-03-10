@@ -7,26 +7,25 @@
 calc_HomogeneityTest(data, log = TRUE, ...)
 }
 \arguments{
-\item{data}{\code{\linkS4class{RLum.Results}} or \link{data.frame}
-(\bold{required}): for \code{data.frame}: two columns with De
-\code{(data[,1])} and De error \code{(values[,2])}}
+\item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
+for \link{data.frame}: two columns with De \code{(data[,1])} and De error \code{(values[,2])}}
 
-\item{log}{\code{\link{logical}} (with default): peform the homogeniety test
-with (un-)logged data}
+\item{log}{\link{logical} (\emph{with default}):
+perform the homogeneity test with (un-)logged data}
 
-\item{\dots}{further arguments (for internal compatibility only).}
+\item{...}{further arguments (for internal compatibility only).}
 }
 \value{
 Returns a terminal output. In addition an
-\code{\linkS4class{RLum.Results}} object is returned containing the
-following element:
+\linkS4class{RLum.Results}-object is returned containing the
+following elements:
 
 \item{summary}{\link{data.frame} summary of all relevant model results.}
-\item{data}{\link{data.frame} original input data} \item{args}{\link{list}
-used arguments} \item{call}{\link{call} the function call}
+\item{data}{\link{data.frame} original input data}
+\item{args}{\link{list} used arguments}
+\item{call}{\link{call} the function call}
 
-The output should be accessed using the function
-\code{\link{get_RLum}}
+The output should be accessed using the function \link{get_RLum}
 }
 \description{
 A simple homogeneity test for De estimates
@@ -35,7 +34,7 @@ A simple homogeneity test for De estimates
 For details see Galbraith (2003).
 }
 \section{Function version}{
- 0.2 (2017-06-29 18:40:14)
+ 0.3.0 (2018-01-21 17:22:38)
 }
 
 \examples{
@@ -46,10 +45,19 @@ data(ExampleData.DeValues, envir = environment())
 ## apply the homogeneity test
 calc_HomogeneityTest(ExampleData.DeValues$BT998)
 
+## using the data presented by Galbraith (2003)
+df <-
+ data.frame(
+   x = c(30.1, 53.8, 54.3, 29.0, 47.6, 44.2, 43.1),
+   y = c(4.8, 7.1, 6.8, 4.3, 5.2, 5.9, 3.0))
+
+calc_HomogeneityTest(df)
+
+
 } 
 
 \section{How to cite}{
-Burow, C. (2017). calc_HomogeneityTest(): Apply a simple homogeneity test after Galbraith (2003). Function version 0.2. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.5. https://CRAN.R-project.org/package=Luminescence
+Burow, C., Kreutzer, S. (2018). calc_HomogeneityTest(): Apply a simple homogeneity test after Galbraith (2003). Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{
@@ -57,8 +65,9 @@ Galbraith, R.F., 2003. A simple homogeneity test for estimates
 of dose obtained using OSL. Ancient TL 21, 75-77.
 }
 \seealso{
-\code{\link{pchisq}}
+\link{pchisq}
 }
 \author{
-Christoph Burow, University of Cologne (Germany)
+Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer,
+IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 \cr R Luminescence Package Team}

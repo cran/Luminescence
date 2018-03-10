@@ -2,28 +2,50 @@
 % Please edit documentation in R/template_DRAC.R
 \name{template_DRAC}
 \alias{template_DRAC}
-\title{Create a DRAC input data template (v1.1)}
+\title{Create a DRAC input data template (v1.2)}
 \usage{
-template_DRAC(nrow = 1, notification = TRUE)
+template_DRAC(nrow = 1, preset = NULL, notification = TRUE)
 }
 \arguments{
-\item{nrow}{\code{\link{integer}} (with default): specifies the number of rows
-of the template (i.e., the number of data sets you want to submit)}
+\item{nrow}{\link{integer} (\emph{with default}):
+specifies the number of rows of the template (i.e., the number of data
+sets you want to submit).}
 
-\item{notification}{\code{\link{logical}} (with default): show or hide the
-notification}
+\item{preset}{\link{character} (\emph{optional}):
+By default, all values of the template are set to \code{NA}, which means that
+the user needs to fill in \strong{all} data first before submitting to DRAC
+using \code{use_DRAC()}. To reduce the number of values that need to be
+provided, \code{preset} can be used to create a template with at least
+a minimum of reasonable preset values.
+
+\code{preset} can be one of the following:
+\itemize{
+\item \code{quartz_coarse}
+\item \code{quartz_fine}
+\item \code{feldspar_coarse}
+\item \code{polymineral_fine}
+\item \code{DRAC-example_quartz}
+\item \code{DRAC-example_feldspar}
+\item \code{DRAC-example_polymineral}
+}
+
+Note that the last three options can be used to produce a template
+with values directly taken from the official DRAC input .csv file.}
+
+\item{notification}{\link{logical} (\emph{with default}):
+show or hide the notification}
 }
 \value{
 A list.
 }
 \description{
-This function returns a DRAC input template (v1.1) to be used in conjunction
+This function returns a DRAC input template (v1.2) to be used in conjunction
 with the use_DRAC() function
 }
 \examples{
 
 # create a new DRAC input input
-input <- template_DRAC()
+input <- template_DRAC(preset = "DRAC-example_quartz")
 
 # show content of the input
 print(input)
@@ -32,7 +54,7 @@ print(input[[4]])
 
 
 ## Example: DRAC Quartz example
-# note that you only have to assign new values where they 
+# note that you only have to assign new values where they
 # are different to the default values
 input$`Project ID` <- "DRAC-Example"
 input$`Sample ID` <- "Quartz"
@@ -68,7 +90,7 @@ output <- use_DRAC(input)
 } 
 
 \section{How to cite}{
-Burow, C. (2017). template_DRAC(): Create a DRAC input data template (v1.1). In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.5. https://CRAN.R-project.org/package=Luminescence
+Burow, C., Kreutzer, S. (2018). template_DRAC(): Create a DRAC input data template (v1.2). In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{
@@ -76,8 +98,8 @@ Durcan, J.A., King, G.E., Duller, G.A.T., 2015. DRAC: Dose Rate and Age Calculat
 Quaternary Geochronology 28, 54-61. doi:10.1016/j.quageo.2015.03.012
 }
 \seealso{
-\code{\link{as.data.frame}} \code{\link{list}}
+\link{as.data.frame}, \link{list}
 }
 \author{
-Christoph Burow, University of Cologne (Germany)
+Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 }

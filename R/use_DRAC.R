@@ -5,42 +5,55 @@
 #' results are re-imported into R.
 #'
 #'
-#' @param file \code{\link{character}}: spreadsheet to be passed
-#' to the DRAC website for calculation. Can also be a DRAC template object
-#' obtained from \code{template_DRAC()}.
+#' @param file [character] (**required**): 
+#' spreadsheet to be passed to the DRAC website for calculation. Can also be a 
+#' DRAC template object obtained from `template_DRAC()`.
 #'
-#' @param name \code{\link{character}}: Optional user name submitted to DRAC. If
-#' omitted, a random name will be generated
+#' @param name [character] (*with defautl*): 
+#' Optional user name submitted to DRAC. If omitted, a random name will be generated
+#' 
+#' @param print_references (*with default*):
+#' Print all references used in the input data table to the console.
+#' 
+#' @param citation_style (*with default*):
+#' If `print_references = TRUE` this argument determines the output style of the
+#' used references. Valid options are `"Bibtex"`, `"citation"`, `"html"`, `"latex"`
+#' or `"R"`. Default is `"text"`.
 #'
 #' @param ... Further arguments.
+#' 
+#' - `url` [character]: provide an alternative URL to DRAC
+#' - `verbose` [logical]: show or hide console output
 #'
-#' @return Returns an \code{\linkS4class{RLum.Results}} object containing the following elements:
+#' @return Returns an [RLum.Results-class] object containing the following elements:
 #'
-#' \item{DRAC}{\link{list}: a named list containing the following elements in slot \code{@@data}:
+#' \item{DRAC}{[list]: a named list containing the following elements in slot `@@data`:
 #'
 #' \tabular{lll}{
-#'    \code{$highlights} \tab \code{\link{data.frame}} \tab summary of 25 most important input/output fields \cr
-#'    \code{$header} \tab \code{\link{character}} \tab HTTP header from the DRAC server response \cr
-#'    \code{$labels} \tab \code{\link{data.frame}} \tab descriptive headers of all input/output fields \cr
-#'    \code{$content} \tab \code{\link{data.frame}} \tab complete DRAC input/output table \cr
-#'    \code{$input} \tab \code{\link{data.frame}} \tab DRAC input table \cr
-#'    \code{$output} \tab \code{\link{data.frame}} \tab DRAC output table \cr
+#'    `$highlights` \tab [data.frame] \tab summary of 25 most important input/output fields \cr
+#'    `$header` \tab [character] \tab HTTP header from the DRAC server response \cr
+#'    `$labels` \tab [data.frame] \tab descriptive headers of all input/output fields \cr
+#'    `$content` \tab [data.frame] \tab complete DRAC input/output table \cr
+#'    `$input` \tab [data.frame] \tab DRAC input table \cr
+#'    `$output` \tab [data.frame] \tab DRAC output table \cr
+#'    `references`\tab [list] \tab A list of [bibentry]s of used references \cr
 #' }
 #'
 #' }
-#' \item{data}{\link{character} or \link{list} path to the input spreadsheet or a DRAC template}
-#' \item{call}{\link{call} the function call}
-#' \item{args}{\link{list} used arguments}
+#' \item{data}{[character] or [list] path to the input spreadsheet or a DRAC template}
+#' \item{call}{[call] the function call}
+#' \item{args}{[list] used arguments}
 #'
-#' The output should be accessed using the function \code{\link{get_RLum}}.
+#' The output should be accessed using the function [get_RLum].
 #'
-#' @section Function version: 0.1.1
+#' @section Function version: 0.1.3
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France), Michael Dietze,
-#' GFZ Potsdam (Germany), Christoph Burow, University of Cologne (Germany)\cr
+#' @author 
+#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr
+#' Michael Dietze, GFZ Potsdam (Germany)\cr 
+#' Christoph Burow, University of Cologne (Germany)
 #'
 #' @references
-#'
 #' Durcan, J.A., King, G.E., Duller, G.A.T., 2015. DRAC: Dose Rate and Age Calculator for trapped charge dating.
 #' Quaternary Geochronology 28, 54-61. doi:10.1016/j.quageo.2015.03.012
 #'
@@ -60,7 +73,7 @@
 #' ## (2) Method using an R template object
 #'
 #' # Create a template
-#' input <- template_DRAC()
+#' input <- template_DRAC(preset = "DRAC-example_quartz")
 #'
 #' # Fill the template with values
 #' input$`Project ID` <- "DRAC-Example"
@@ -94,10 +107,13 @@
 #' output <- use_DRAC(input)
 #' }
 #'
+#' @md
 #' @export
 use_DRAC <- function(
   file,
   name,
+  print_references = TRUE,
+  citation_style = "text",
   ...
 ){
   ## TODO:
@@ -237,7 +253,6 @@ use_DRAC <- function(
   DRAC.response <- httr::POST(settings$url,
                               body = list("drac_data[name]"  = settings$name,
                                           "drac_data[table]" = DRAC_input))
-  
   ## check for correct response
   if (DRAC.response$status_code != 200) {
     stop(paste0("[use_DRAC()] transmission failed with HTTP status code: ",
@@ -284,9 +299,10 @@ use_DRAC <- function(
                          stringsAsFactors = FALSE)
   
   ## remove first two lines
-  DRAC.content <- read.table(text = as.character(DRAC.content.split[[1]][2]),
-                             sep = ",", skip = 2,
-                             stringsAsFactors = FALSE)
+  DRAC.content <- data.table::fread(as.character(DRAC.content.split[[1]][2]),
+                                    sep = ",", skip = 2,
+                                    stringsAsFactors = FALSE, colClasses = c(V3 = "character"), 
+                                    data.table = FALSE)
   
   ##Get rid of all the value we do not need anymore
   DRAC.content <-  subset(DRAC.content, DRAC.content$V1 %in% DRAC_results.id)
@@ -351,6 +367,16 @@ use_DRAC <- function(
   
   if (settings$verbose) lapply(messages, message)
   
+  ## Get and print used references
+  references <- get_DRAC_references(DRAC.content.input)
+  
+  if (print_references && settings$verbose) {
+    for (i in 1:length(references$refs)) {
+      message("\nReference for: ", references$desc[i])
+      print(references$refs[[i]], style = citation_style)
+    }
+  }
+  
   
   ## return output
   DRAC.return <- set_RLum("RLum.Results",
@@ -360,7 +386,8 @@ use_DRAC <- function(
                                         labels = DRAC.labels,
                                         content = DRAC.content,
                                         input = DRAC.content.input,
-                                        output = DRAC.content.output),
+                                        output = DRAC.content.output,
+                                        references = references),
                             data = file,
                             call = sys.call(),
                             args = as.list(sys.call()[-1])))

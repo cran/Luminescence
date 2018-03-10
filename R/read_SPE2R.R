@@ -1,76 +1,80 @@
 #' Import Princeton Intruments (TM) SPE-file into R
 #'
 #' Function imports Princeton Instruments (TM) SPE-files into R environment and
-#' provides \code{RLum} objects as output.
+#' provides `RLum` objects as output.
 #'
 #' Function provides an import routine for the Princton Instruments SPE format.
 #' Import functionality is based on the file format description provided by
 #' Princton Instruments and a MatLab script written by Carl Hall (s.
 #' references).
 #'
-#' @param file \link{character} (\bold{required}): spe-file name (including
-#' path), e.g. \cr [WIN]: \code{read_SPE2R("C:/Desktop/test.spe")}, \cr
-#' [MAC/LINUX]: \code{readSPER("/User/test/Desktop/test.spe")}
+#' @param file [character] (**required**):
+#' spe-file name (including path), e.g.
+#' - `[WIN]`: `read_SPE2R("C:/Desktop/test.spe")`
+#' - `[MAC/LINUX]`: `readSPER("/User/test/Desktop/test.spe")`. Additionally internet connections
+#' are supported.
 #'
-#' @param output.object \code{\link{character}} (with default): set \code{RLum}
-#' output object.  Allowed types are \code{"RLum.Data.Spectrum"},
-#' \code{"RLum.Data.Image"} or \code{"matrix"}
+#' @param output.object [character] (*with default*):
+#' set `RLum` output object.  Allowed types are `"RLum.Data.Spectrum"`,
+#' `"RLum.Data.Image"` or `"matrix"`
 #'
-#' @param frame.range \code{\link{vector}} (optional): limit frame range, e.g.
-#' select first 100 frames by \code{frame.range = c(1,100)}
+#' @param frame.range [vector] (*optional*):
+#' limit frame range, e.g. select first 100 frames by `frame.range = c(1,100)`
 #'
-#' @param txtProgressBar \link{logical} (with default): enables or disables
-#' \code{\link{txtProgressBar}}.
+#' @param txtProgressBar [logical] (*with default*):
+#' enables or disables [txtProgressBar].
 #'
-#' @return Depending on the chosen option the functions returns three different
-#' type of objects:\cr
+#' @param verbose [logical] (*with default*): enables or disables verbose mode
 #'
-#' \code{output.object}. \cr
+#' @return
+#' Depending on the chosen option the functions returns three different
+#' type of objects:
 #'
-#' \code{RLum.Data.Spectrum}\cr
+#' `output.object`
 #'
-#' An object of type \code{\linkS4class{RLum.Data.Spectrum}} is returned.  Row
+#' `RLum.Data.Spectrum`
+#'
+#' An object of type [RLum.Data.Spectrum-class] is returned.  Row
 #' sums are used to integrate all counts over one channel.
 #'
-#' \code{RLum.Data.Image}\cr
+#' `RLum.Data.Image`
 #'
-#' An object of type \code{\linkS4class{RLum.Data.Image}} is returned.  Due to
+#' An object of type [RLum.Data.Image-class] is returned.  Due to
 #' performace reasons the import is aborted for files containing more than 100
 #' frames. This limitation can be overwritten manually by using the argument
-#' \code{frame.frange}.
+#' `frame.frange`.
 #'
-#' \code{matrix}\cr
+#' `matrix`
 #'
 #' Returns a matrix of the form: Rows = Channels, columns = Frames. For the
-#' transformation the function \code{\link{get_RLum}} is used,
+#' transformation the function [get_RLum] is used,
 #' meaning that the same results can be obtained by using the function
-#' \code{\link{get_RLum}} on an \code{RLum.Data.Spectrum} or \code{RLum.Data.Image} object.
-#' @note \bold{The function does not test whether the input data are spectra or
-#' pictures for spatial resolved analysis!}\cr
+#' [get_RLum] on an `RLum.Data.Spectrum` or `RLum.Data.Image` object.
+#'
+#' @note
+#' **The function does not test whether the input data are spectra or pictures for spatial resolved analysis!**
 #'
 #' The function has been successfully tested for SPE format versions 2.x.
 #'
-#' \emph{Currently not all information provided by the SPE format are
-#' supported.}
+#' *Currently not all information provided by the SPE format are supported.*
 #'
-#' @section Function version: 0.1.0
+#' @section Function version: 0.1.2
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
-#' (France)
+#' @author
+#' Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 #'
-#' @seealso \code{\link{readBin}}, \code{\linkS4class{RLum.Data.Spectrum}},
-#' \code{\link[raster]{raster}}
+#' @seealso [readBin], [RLum.Data.Spectrum-class], [raster::raster]
 #'
-#' @references Princeton Instruments, 2014. Princeton Instruments SPE 3.0 File
+#' @references
+#' Princeton Instruments, 2014. Princeton Instruments SPE 3.0 File
 #' Format Specification, Version 1.A (for document URL please use an internet search machine)
 #'
 #' Hall, C., 2012: readSPE.m.
-#' \url{http://www.mathworks.com/matlabcentral/fileexchange/35940-readspe/content/readSPE.m}
+#' [http://www.mathworks.com/matlabcentral/fileexchange/35940-readspe/content/readSPE.m]()
 #'
 #' @keywords IO
 #'
 #' @examples
-#'
 #'
 #' ## to run examples uncomment lines and run the code
 #'
@@ -95,38 +99,70 @@
 #' #             sep = ";", row.names = FALSE)
 #'
 #'
+#' @md
 #' @export
 read_SPE2R <- function(
   file,
   output.object = "RLum.Data.Image",
   frame.range,
-  txtProgressBar = TRUE
+  txtProgressBar = TRUE,
+  verbose = TRUE
 ){
 
   # Consistency check -------------------------------------------------------
 
   ##check if file exists
-  if(file.exists(file) == FALSE){
+  if(!file.exists(file)){
 
-    stop("[read_SPE2R()] File not found!")
+    ##check if the file as an URL ... you never know
+    if(grepl(pattern = "http", x = file, fixed = TRUE)){
+      if(verbose){
+        cat("[read_SPE2R()] URL detected, checking connection ... ")
+      }
+
+      ##check URL
+      if(!httr::http_error(file)){
+        if(verbose) cat("OK")
+
+        ##dowload file
+        file_link <- tempfile("read_SPE2R_FILE", fileext = ".SPE")
+        download.file(file, destfile = file_link, quiet = if(verbose){FALSE}else{TRUE}, mode = "wb")
+        file <- file_link
+
+      }else{
+        cat("FAILED")
+        file <- NULL
+        try(stop("[read_SPE2R()] File does not exist! Return NULL!", call. = FALSE))
+        return(NULL)
+
+      }
+
+    }else{
+      file <- NULL
+      try(stop("[read_SPE2R()] File does not exist! Return NULL!", call. = FALSE))
+      return(NULL)
+
+    }
 
   }
 
   ##check file extension
-  if(strsplit(file, split = "\\.")[[1]][2] != "SPE"){
+  if(!grepl(basename(file), pattern = "SPE$", ignore.case = TRUE)){
+    if(strsplit(file, split = "\\.")[[1]][2] != "SPE"){
+      temp.text <- paste("[read_SPE2R()] Unsupported file format: *.",
+                         strsplit(file, split = "\\.")[[1]][2], sep = "")
 
-    temp.text <- paste("[read_SPE2R()] Unsupported file format: *.",
-                       strsplit(file, split = "\\.")[[1]][2], sep = "")
+      stop(temp.text, call. = FALSE)
 
-    stop(temp.text)
-
-  }
+  }}
 
 
   # Open Connection ---------------------------------------------------------
 
   #open connection
-  con<-file(file, "rb")
+  con <- file(file, "rb")
+
+
 
   # read header -------------------------------------------------------------
 
@@ -315,7 +351,7 @@ read_SPE2R <- function(
   cat(paste("\n[read_SPE2R.R]\n\t >> ",file,sep=""), fill=TRUE)
 
   ##set progressbar
-  if(txtProgressBar==TRUE){
+  if(txtProgressBar & verbose){
     pb<-txtProgressBar(min=0,max=diff(frame.range)+1, char="=", style=3)
   }
 
@@ -339,14 +375,14 @@ read_SPE2R <- function(
     }
 
     ##update progress bar
-    if(txtProgressBar==TRUE){
+    if(txtProgressBar & verbose){
       setTxtProgressBar(pb, i)
     }
 
   }
 
   ##close
-  if(txtProgressBar==TRUE){close(pb)
+  if(txtProgressBar & verbose){close(pb)
 
                            ##output
                            cat(paste("\t >> ",i," records have been read successfully!\n\n", sep=""))

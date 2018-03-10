@@ -7,31 +7,31 @@
 replicate_RLum(object, times = NULL)
 }
 \arguments{
-\item{object}{an object of class \code{\linkS4class{RLum}} (\bold{required})}
+\item{object}{\linkS4class{RLum} (\strong{required}):
+an \linkS4class{RLum} object}
 
-\item{times}{\code{\link{integer}} (optional): number for times each element is repeated
-element}
+\item{times}{\link{integer} (\emph{optional}):
+number for times each element is repeated element}
 }
 \value{
-Returns a \code{\link{list}} of the object to be repeated
+Returns a \link{list} of the object to be repeated
 }
 \description{
 Function replicates RLum S4 class objects and returns a list for this objects
 }
 \section{Function version}{
- 0.1.0 (2017-06-29 18:40:14)
+ 0.1.0 (2018-01-21 17:22:38)
 }
 
 \seealso{
-\code{\linkS4class{RLum}},
+\linkS4class{RLum}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
-(France)
+Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
 \cr R Luminescence Package Team} 
 
 \section{How to cite}{
-Kreutzer, S. (2017). replicate_RLum(): General replication function for RLum S4 class objects. Function version 0.1.0. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.5. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S. (2018). replicate_RLum(): General replication function for RLum S4 class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \keyword{utilities}

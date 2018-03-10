@@ -11,7 +11,8 @@ model_LuminescenceSignals(model, sequence, lab.dose_rate = 1,
 }
 \arguments{
 \item{model}{\code{\link{character}} (\bold{required}): set model to be used. Available models are:
-"Bailey2001", "Bailey2002", "Bailey2004", "Pagonis2007", "Pagonis2008" and "Friedrich2017".}
+"Bailey2001", "Bailey2002", "Bailey2004", "Pagonis2007", "Pagonis2008", "Friedrich2017", "Friedrich2018" and for own models "customized" (or "customised").
+Note: When model = "customized" is set, the argument 'own_parameters' has to be set.}
 
 \item{sequence}{\code{\link{list}} (\bold{required}): set sequence to model as \code{\link{list}} or as *.seq file from the
 Riso sequence editor. To simulate SAR measurements there is an extra option to set the sequence list (cf. details).}
@@ -52,8 +53,7 @@ For further details see Bailey 2001, Wintle 1975, vignette "RLumModel - Using ow
 and example 3.}
 
 \item{own_state_parameters}{\code{\link{numeric}} (with default): Some publications (e.g. Pagonis 2009)
-offer state parameters. With this argument the user can submit this state parameters. \bold{Note:} 
-You have to submit the state parameters for the conduction band and the valence band, too. For further details
+offer state parameters. With this argument the user can submit this state parameters. For further details
 see vignette ""RLumModel - Using own parameter sets" and example 3.}
 
 \item{own_start_temperature}{\code{\link{numeric}} (with default): Parameter to control the start temperature (in deg. C) of
@@ -63,20 +63,20 @@ a simulation. This parameter takes effect only when 'model = "customized"' is ch
 \code{\link{plot.default}}. See details for further information.}
 }
 \description{
-Wrapper for the function \code{\link[RLumModel]{model_LuminescenceSignals}} from the package
-\link[RLumModel]{RLumModel-package}. For the further details and examples please
+Wrapper for the function \link[RLumModel:model_LuminescenceSignals]{RLumModel::model_LuminescenceSignals} from the package
+\link[RLumModel:RLumModel-package]{RLumModel::RLumModel-package}. For the further details and examples please
 see the manual of this package.
 }
 \section{Function version}{
- 0.1.3 (2017-06-29 18:40:14)
+ 0.1.3 (2018-01-21 17:22:38)
 }
 
 \author{
-Johannes Friedrich, University of Bayreuth (Germany),\cr
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaige (France), \cr
+Johannes Friedrich, University of Bayreuth (Germany) \cr
+Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaige (France)
 \cr R Luminescence Package Team} 
 
 \section{How to cite}{
-Friedrich, J., Kreutzer, S. (2017). model_LuminescenceSignals(): Model Luminescence Signals (wrapper). Function version 0.1.3. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.5. https://CRAN.R-project.org/package=Luminescence
+Friedrich, J., Kreutzer, S. (2018). model_LuminescenceSignals(): Model Luminescence Signals (wrapper). Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.2. https://CRAN.R-project.org/package=Luminescence
 }
 

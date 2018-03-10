@@ -1,92 +1,103 @@
-#' Analyse post-IR IRSL sequences
+#' Analyse post-IR IRSL measurement sequences
 #'
 #' The function performs an analysis of post-IR IRSL sequences including curve
-#' fitting on \code{\linkS4class{RLum.Analysis}} objects.
-#'
+#' fitting on [RLum.Analysis-class] objects.
 #'
 #' To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement analyses
 #' this function has been written as extended wrapper function for the function
-#' \code{\link{analyse_SAR.CWOSL}}, facilitating an entire sequence analysis in
+#' [analyse_SAR.CWOSL], facilitating an entire sequence analysis in
 #' one run. With this, its functionality is strictly limited by the
-#' functionality of the function \code{\link{analyse_SAR.CWOSL}}.\cr
+#' functionality of the function [analyse_SAR.CWOSL].
 #'
-#' \bold{If the input is a \code{list}}\cr
+#' **Defining the sequence structure **
+#'
+#' The argument `sequence.structure` expects a shortened pattern of your sequence structure and was
+#' mainly introduced to ease the use of the function. For example: If your measurement data contains
+#' the following curves: `TL`, `IRSL`, `IRSL`, `TL`, `IRSL`, `IRSL`, the sequence pattern in `sequence.structure`
+#' becomes `c('TL', 'IRSL', 'IRSL')`. The second part of your sequence for one cycle should be
+#' similar and can be discarded. If this is not the case (e.g., additional hotbleach) such curves
+#' have to be removed before using the function.
+#'
+#' **If the input is a `list`**
 #'
 #' If the input is a list of RLum.Analysis-objects, every argument can be provided as list to allow
 #' for different sets of parameters for every single input element.
-#' For further information see \code{\link{analyse_SAR.CWOSL}}.
+#' For further information see [analyse_SAR.CWOSL].
 #'
+#' @param object [RLum.Analysis-class] or [list] of [RLum.Analysis-class] objects (**required**):
+#' input object containing data for analysis.
+#' If a [list] is provided the functions tries to iteratre over the list.
 #'
-#' @param object \code{\linkS4class{RLum.Analysis}} (\bold{required}) or \code{\link{list}} of
-#' \code{\linkS4class{RLum.Analysis}} objects: input object containing data for analysis. If a \code{\link{list}}
-#' is provided the functions tries to iteratre over the list.
-#'
-#' @param signal.integral.min \code{\link{integer}} (\bold{required}): lower
-#' bound of the signal integral. Provide this value as vector for different
+#' @param signal.integral.min [integer] (**required**):
+#' lower bound of the signal integral. Provide this value as vector for different
 #' integration limits for the different IRSL curves.
 #'
-#' @param signal.integral.max \code{\link{integer}} (\bold{required}): upper
-#' bound of the signal integral. Provide this value as vector for different
+#' @param signal.integral.max [integer] (**required**):
+#' upper bound of the signal integral. Provide this value as vector for different
 #' integration limits for the different IRSL curves.
 #'
-#' @param background.integral.min \code{\link{integer}} (\bold{required}):
+#' @param background.integral.min [integer] (**required**):
 #' lower bound of the background integral. Provide this value as vector for
 #' different integration limits for the different IRSL curves.
 #'
-#' @param background.integral.max \code{\link{integer}} (\bold{required}):
+#' @param background.integral.max [integer] (**required**):
 #' upper bound of the background integral. Provide this value as vector for
 #' different integration limits for the different IRSL curves.
 #'
-#' @param dose.points \code{\link{numeric}} (optional): a numeric vector
-#' containing the dose points values. Using this argument overwrites dose point
+#' @param dose.points [numeric] (*optional*):
+#' a numeric vector containing the dose points values. Using this argument overwrites dose point
 #' values in the signal curves.
 #'
-#' @param sequence.structure \link{vector} \link{character} (with default):
-#' specifies the general sequence structure. Allowed values are \code{"TL"} and
-#' any \code{"IR"} combination (e.g., \code{"IR50"},\code{"pIRIR225"}).
-#' Additionally a parameter \code{"EXCLUDE"} is allowed to exclude curves from
+#' @param sequence.structure [vector] [character] (*with default*):
+#' specifies the general sequence structure. Allowed values are `"TL"` and
+#' any `"IR"` combination (e.g., `"IR50"`,`"pIRIR225"`).
+#' Additionally a parameter `"EXCLUDE"` is allowed to exclude curves from
 #' the analysis (Note: If a preheat without PMT measurement is used, i.e.
-#' preheat as non TL, remove the TL step.)
+#' preheat as none TL, remove the TL step.)
 #'
-#' @param plot \code{\link{logical}} (with default): enables or disables plot
-#' output.
+#' @param plot [logical] (*with default*):
+#' enables or disables plot output.
 #'
-#' @param plot.single \code{\link{logical}} (with default): single plot output
-#' (\code{TRUE/FALSE}) to allow for plotting the results in single plot
-#' windows. Requires \code{plot = TRUE}.
+#' @param plot.single [logical] (*with default*):
+#' single plot output (`TRUE/FALSE`) to allow for plotting the results in single plot
+#' windows. Requires `plot = TRUE`.
 #'
-#' @param \dots further arguments that will be passed to the function
-#' \code{\link{analyse_SAR.CWOSL}} and \code{\link{plot_GrowthCurve}}
+#' @param ... further arguments that will be passed to the function
+#' [analyse_SAR.CWOSL] and [plot_GrowthCurve]. Furthermore, the arguments `main` (headers), `log` (IRSL curves), `cex` (control
+#' the size) and `mtext.outer` (additional text on the plot area) can be passed to influence the plotting. If the input
+#' is list, `main` can be passed as [vector] or [list].
 #'
-#' @return Plots (optional) and an \code{\linkS4class{RLum.Results}} object is
+#' @return
+#' Plots (*optional*) and an [RLum.Results-class] object is
 #' returned containing the following elements:
 #'
 #' \tabular{lll}{
-#' \bold{DATA.OBJECT} \tab \bold{TYPE} \tab \bold{DESCRIPTION} \cr
-#' \code{..$data} : \tab  \code{data.frame} \tab Table with De values \cr
-#' \code{..$LnLxTnTx.table} : \tab \code{data.frame} \tab with the LnLxTnTx values \cr
-#' \code{..$rejection.criteria} : \tab \code{\link{data.frame}} \tab rejection criteria \cr
-#' \code{..$Formula} : \tab \code{\link{list}} \tab Function used for fitting of the dose response curve \cr
-#' \code{..$call} : \tab \code{\link{call}} \tab the original function call
+#' **DATA.OBJECT** \tab **TYPE** \tab **DESCRIPTION** \cr
+#' `..$data` : \tab  `data.frame` \tab Table with De values \cr
+#' `..$LnLxTnTx.table` : \tab `data.frame` \tab with the LnLxTnTx values \cr
+#' `..$rejection.criteria` : \tab [data.frame] \tab rejection criteria \cr
+#' `..$Formula` : \tab [list] \tab Function used for fitting of the dose response curve \cr
+#' `..$call` : \tab [call] \tab the original function call
 #' }
 #'
-#' The output should be accessed using the function
-#' \code{\link{get_RLum}}.
+#' The output should be accessed using the function [get_RLum].
 #'
-#' @note Best graphical output can be achieved by using the function \code{pdf}
-#' with the following options:\cr \code{pdf(file = "...", height = 15, width =
-#' 15)}
+#' @note
+#' Best graphical output can be achieved by using the function `pdf`
+#' with the following options:
 #'
-#' @section Function version: 0.2.2
+#' `pdf(file = "...", height = 15, width = 15)`
+#'
+#' @section Function version: 0.2.4
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
 #' (France)
 #'
-#' @seealso \code{\link{analyse_SAR.CWOSL}}, \code{\link{calc_OSLLxTxRatio}},
-#' \code{\link{plot_GrowthCurve}}, \code{\linkS4class{RLum.Analysis}},
-#' \code{\linkS4class{RLum.Results}} \code{\link{get_RLum}}
+#' @seealso [analyse_SAR.CWOSL], [calc_OSLLxTxRatio], [plot_GrowthCurve],
+#' [RLum.Analysis-class], [RLum.Results-class] [get_RLum]
 #'
-#' @references Murray, A.S., Wintle, A.G., 2000. Luminescence dating of quartz
+#' @references
+#' Murray, A.S., Wintle, A.G., 2000. Luminescence dating of quartz
 #' using an improved single-aliquot regenerative-dose protocol. Radiation
 #' Measurements 32, 57-73. doi:10.1016/S1350-4487(99)00253-X
 #'
@@ -153,6 +164,7 @@
 #'   dev.off()
 #' }
 #'
+#' @md
 #' @export
 analyse_pIRIRSequence <- function(
   object,
@@ -204,6 +216,17 @@ analyse_pIRIRSequence <- function(
 
     }
 
+    ##main
+    if("main" %in% names(list(...))){
+      main_list <- rep(list(...)$main, length.out = length(object))
+
+      if(class(main_list) != "list"){
+        main_list <- as.list(main_list)
+
+      }
+
+    }
+
     ##run analysis
     temp <- lapply(1:length(object), function(x){
 
@@ -216,7 +239,7 @@ analyse_pIRIRSequence <- function(
                         sequence.structure = sequence.structure[[x]],
                         plot = plot,
                         plot.single = plot.single,
-                        main = ifelse("main"%in% names(list(...)), list(...)$main, paste0("ALQ #",x)),
+                        main = ifelse("main"%in% names(list(...)), main_list[[x]], paste0("ALQ #",x)),
                         ...)
 
     })
@@ -257,12 +280,13 @@ analyse_pIRIRSequence <- function(
     temp.collect.invalid.terms <- paste(sequence.structure[
       (!grepl("TL",sequence.structure)) &
       (!grepl("IR",sequence.structure)) &
+      (!grepl("OSL",sequence.structure)) &
       (!grepl("EXCLUDE",sequence.structure))],
       collapse = ", ")
 
     if(temp.collect.invalid.terms != ""){
       stop("[analyse_pIRIRSequence()] ",
-        temp.collect.invalid.terms, " not allowed in sequence.strucutre!")
+        temp.collect.invalid.terms, " not allowed in 'sequence.structure'!")
     }
 
 
@@ -291,11 +315,11 @@ analyse_pIRIRSequence <- function(
   ##get sequence structure
   temp.sequence.structure  <- structure_RLum(object)
 
-  ##remove data types that fit not to allow values
+  ##remove data types that fit not to the allowed values
   temp.sequence.rm.id <- temp.sequence.structure[
-    (!grepl("TL",temp.sequence.structure[, "recordType"])) &
-    (!grepl("OSL", temp.sequence.structure[, "recordType"])) &
-    (!grepl("IRSL", temp.sequence.structure[, "recordType"]))
+    (!grepl("TL",temp.sequence.structure[["recordType"]])) &
+    (!grepl("OSL", temp.sequence.structure[["recordType"]])) &
+    (!grepl("IRSL", temp.sequence.structure[["recordType"]]))
     ,"id"]
 
   if(length(temp.sequence.rm.id)>0){
@@ -312,7 +336,7 @@ analyse_pIRIRSequence <- function(
   temp.sequence.rm.warning <- paste(
     "Record types are unrecognised and have been removed:", temp.sequence.rm.warning)
 
-  warning(temp.sequence.rm.warning)
+  warning(temp.sequence.rm.warning, call. = FALSE)
   }
 
   ##(2) Apply user sequence structure
@@ -320,9 +344,25 @@ analyse_pIRIRSequence <- function(
   ##get sequence structure
   temp.sequence.structure  <- structure_RLum(object)
 
+    ##try to account for a very common mistake
+    if(!any(grepl(temp.sequence.structure[["recordType"]], pattern = "TL", fixed = TRUE))){
+      warning("[analyse_pIRIRSequence()] Your sequence does not contain 'TL' curves, trying to adapt 'sequence.structure' for your ...",
+              call. = FALSE, immediate. = TRUE)
+      sequence.structure <- sequence.structure[!grepl(sequence.structure, pattern = "TL", fixed = TRUE)]
+    }
+
   ##set values to structure data.frame
-  temp.sequence.structure[, "protocol.step"] <- rep(
-    sequence.structure, nrow(temp.sequence.structure)/2/length(sequence.structure))
+  ##but check first
+  if(2 * length(
+    rep(sequence.structure, nrow(temp.sequence.structure)/2/length(sequence.structure))) == length(temp.sequence.structure[["protocol.step"]])){
+    temp.sequence.structure[["protocol.step"]] <- rep(
+      sequence.structure, nrow(temp.sequence.structure)/2/length(sequence.structure))
+
+  }else{
+    try(stop("[analyse_pIRIRSequence()] Number of records is not a multiple of the defined sequence structure! NULL returned!", call. = FALSE))
+    return(NULL)
+
+  }
 
   ##remove values that have been excluded
   temp.sequence.rm.id <- temp.sequence.structure[
@@ -344,7 +384,7 @@ analyse_pIRIRSequence <- function(
       sequence.structure, nrow(temp.sequence.structure)/2/length(temp.sequence.structure))
 
     ##print warning message
-    warning(length(temp.sequence.rm.id), " records have been removed due to EXCLUDE!")
+    warning("[analyse_pIRIRSequence()] ", length(temp.sequence.rm.id), " records have been removed due to EXCLUDE!", call. = FALSE)
 
   }
 
@@ -526,12 +566,12 @@ analyse_pIRIRSequence <- function(
       output.plotExtended.single = TRUE,
       cex.global = cex,
       ...
-    ) ##TODO should be replaced be useful explizit arguments
+    ) ##TODO should be replaced be useful explicit arguments
 
 
       ##check whether NULL was return
       if (is.null(temp.results)) {
-        warning("[plot_pIRIRSequence()] An error occurred, analysis skipped. Check your sequence!", call. = FALSE)
+        try(stop("[plot_pIRIRSequence()] An error occurred, analysis skipped. Check your sequence!", call. = FALSE))
         return(NULL)
       }
 
@@ -766,7 +806,6 @@ if(plot){
 
    ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++##
    ##polygon for recuperation rate
-
    text(x = -.4, y = 20, "Recuperation rate", pos = 1, srt = 0)
 
    if(length(as.character(temp.rc.recuperation.rate$Threshold))>0){

@@ -9,13 +9,25 @@
 \S4method{replicate_RLum}{RLum}(object, times = NULL)
 }
 \arguments{
-\item{object}{an object of class \code{\linkS4class{RLum}} (\bold{required})}
+\item{object}{\linkS4class{RLum} (\strong{required}):
+an object of class \linkS4class{RLum}}
 
-\item{times}{\code{\link{integer}} (optional): number for times each element is repeated
-element}
+\item{times}{\link{integer} (\emph{optional}):
+number for times each element is repeated element}
 }
 \description{
 Abstract class for data in the package Luminescence
+Sublasses are:
+}
+\details{
+\strong{RLum-class}\cr
+|\cr
+|----\linkS4class{RLum.Data}\cr
+|----|-- \linkS4class{RLum.Data.Curve}\cr
+|----|-- \linkS4class{RLum.Data.Spectrum}\cr
+|----|-- \linkS4class{RLum.Data.Image}\cr
+|----\linkS4class{RLum.Analysis}\cr
+|----\linkS4class{RLum.Results}
 }
 \section{Methods (by generic)}{
 \itemize{
@@ -25,16 +37,16 @@ Abstract class for data in the package Luminescence
 \section{Slots}{
 
 \describe{
-\item{\code{originator}}{Object of class \code{\link{character}} containing the name of the producing
-function for the object. Set automatically by using the function \code{\link{set_RLum}}.}
+\item{\code{originator}}{Object of class \link{character} containing the name of the producing
+function for the object. Set automatically by using the function \link{set_RLum}.}
 
-\item{\code{info}}{Object of class \code{\link{list}} for additional information on the object itself}
+\item{\code{info}}{Object of class \link{list} for additional information on the object itself}
 
-\item{\code{.uid}}{Object of class \code{\link{character}} for a unique object identifier. This id is
-usually calculated using the internal function \code{.create_UID()} if the funtion \code{\link{set_RLum}}
+\item{\code{.uid}}{Object of class \link{character} for a unique object identifier. This id is
+usually calculated using the internal function \code{create_UID()} if the funtion \link{set_RLum}
 is called.}
 
-\item{\code{.pid}}{Object of class \code{\link{character}} for a parent id. This allows nesting RLum-objects
+\item{\code{.pid}}{Object of class \link{character} for a parent id. This allows nesting RLum-objects
 at will. The parent id can be the uid of another object.}
 }}
 
@@ -42,8 +54,8 @@ at will. The parent id can be the uid of another object.}
 \code{RLum} is a virtual class.
 }
 \section{Objects from the Class}{
- A virtual Class: No objects can be created
-from it.
+
+A virtual Class: No objects can be created from it.
 }
 
 \section{Class version}{
@@ -56,14 +68,15 @@ showClass("RLum")
 
 }
 \seealso{
-\code{\linkS4class{RLum.Data}}, \code{\linkS4class{RLum.Analysis}}
+\linkS4class{RLum.Data}, \linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Data.Spectrum}, \linkS4class{RLum.Data.Image},
+\linkS4class{RLum.Analysis}, \linkS4class{RLum.Results}, \link{methods_RLum}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 } 
 
 \section{How to cite}{
-Kreutzer, S. (2017). RLum-class(): Class 'RLum'. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.5. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S. (2018). RLum-class(): Class 'RLum'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \keyword{classes}

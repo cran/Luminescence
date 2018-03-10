@@ -2,77 +2,28 @@
 % Please edit documentation in R/calc_Kars2008.R
 \name{calc_Kars2008}
 \alias{calc_Kars2008}
-\title{Apply the Kars et al. (2008) model}
+\title{Apply the Kars et al. (2008) model (deprecated)}
 \usage{
-calc_Kars2008(data, rhop, ddot, readerDdot, normalise = TRUE,
-  summary = TRUE, plot = TRUE, ...)
+calc_Kars2008(fit.method = "EXP", ...)
 }
 \arguments{
-\item{data}{\code{\link{data.frame}} (\bold{required}):
-A three column data frame with numeric values on a) dose (s), b) LxTx and and
-c) LxTx error. If a two column data frame is provided it is automatically
-assumed that errors on LxTx are missing. A third column will be attached
-with an arbitrary 5 \% error on the provided LxTx values.\cr
-Can also be a wide table, i.e. a \code{\link{data.frame}} with a number of colums divisible by 3
-and where each triplet has the aforementioned column structure.}
+\item{fit.method}{\link{character} (\emph{with default}):
+Fit function of the dose response curve. Can either be \code{EXP} (the default)
+or \code{GOK}. Note that \code{EXP} (single saturating exponential) is the original
+function the model after Huntley (2006) and Kars et al. (2008) was
+designed to use. The use of a general-order kinetics function (\code{GOK})
+is an experimental adaption of the model and should only be used
+with great care.}
 
-\item{rhop}{\code{\link{numeric}} (\bold{required}):
-The density of recombination centres (\eqn{\rho}') and its error (see Huntley 2006),
-given as numeric vector of length two. Note that \eqn{\rho}' must \bold{not} be
-provided as the common logarithm. Example: \code{rhop = c(2.92e-06, 4.93e-07)}.}
-
-\item{ddot}{\code{\link{numeric}} (\bold{required}):
-Environmental dose rate and its error, given as a numeric vector of length two.
-Expected unit: Gy/ka. Example: \code{ddot = c(3.7, 0.4)}.}
-
-\item{readerDdot}{\code{\linkS4class{RLum.Analysis}} (\bold{required}):
-Dose rate of the irradiation source of the OSL reader and its error,
-given as a numeric vector of length two.
-Expected unit: Gy/s. Example: \code{readerDdot = c(0.08, 0.01)}.}
-
-\item{normalise}{\code{\link{logical}} (with default):
-If \code{TRUE} (the default) all measured and computed LxTx values are
-normalised by the pre-exponential factor A (see details).}
-
-\item{summary}{\code{\link{logical}} (with default):
-If \code{TRUE} (the default) various parameters provided by the user
-and calculated by the model are added as text on the right-hand side of the
-plot.}
-
-\item{plot}{\code{\link{logical}} (with default): enables/disables plot output.}
-
-\item{...}{further arguments passed to \code{\link{plot}} and
-\code{\link[Luminescence]{plot_GrowthCurve}}.}
+\item{...}{Parameters passed to \link{calc_Huntley2006}.}
 }
 \value{
-An \code{\linkS4class{RLum.Results}} object is returned:
-
-Slot: \bold{@data}\cr
-
-\tabular{lll}{
-\bold{OBJECT} \tab \bold{TYPE} \tab \bold{COMMENT}\cr
-\code{results} \tab \code{data.frame} \tab results of the of Kars et al. 2008 model \cr
-\code{data} \tab \code{data.frame} \tab original input data \cr
-\code{Ln} \tab \code{numeric} \tab Ln and its error \cr
-\code{LxTx_tables} \tab \code{list} \tab A \code{list} of \code{data.frames}
-containing data on dose, LxTx and LxTx error for each of the dose response curves.
-Note that these \bold{do not} contain the natural Ln signal, which is provided separately. \cr
-\code{fits} \tab \code{list} \tab A \code{list} of \code{nls}
- objects produced by \code{\link[minpack.lm]{nlsLM}} when fitting the dose response curves \cr
-}
-
-Slot: \bold{@info}\cr
-
-\tabular{lll}{
-\bold{OBJECT} \tab \bold{TYPE} \tab \bold{COMMENT} \cr
-\code{call} \tab \code{call} \tab the original function call \cr
-\code{args} \tab \code{list} \tab arguments of the original function call \cr
-
-}
+An \linkS4class{RLum.Results} object is returned:
 }
 \description{
 A function to calculate the expected sample specific fraction of saturation
-following Kars et al. (2008) and Huntley (2006).
+following Kars et al. (2008) and Huntley (2006). This function is deprecated
+and will eventually be removed. Please use \code{calc_Huntley2006()} instead.
 }
 \details{
 This function applies the approach described in Kars et al. (2008),
@@ -80,47 +31,16 @@ developed from the model of Huntley (2006) to calculate the expected sample
 specific fraction of saturation of a feldspar and also to calculate fading
 corrected age using this model. \eqn{\rho}' (\code{rhop}), the density of recombination
 centres, is a crucial parameter of this model and must be determined
-separately from a fading measurement. The function
-\code{\link[Luminescence]{analyse_FadingMeasurement}}
+separately from a fading measurement. The function \link{analyse_FadingMeasurement}
 can be used to calculate the sample specific \eqn{\rho}' value.
-
-Firstly the unfaded D0 value is determined through applying equation 5 of
-Kars et al. (2008) to the measured LxTx data as a function of irradiation
-time, and fitting the data with a single saturating exponential of the form:
-
-\deqn{LxTx(t*) = A x \phi(t*) x (1 - exp(-(t* / D0)))}
-
-where
-
-\deqn{\phi(t*) = exp(-\rho' x ln(1.8 x s_tilde x t*)^3)}
-
-after King et al. (2016) where \code{A} is a pre-exponential factor,
-\code{t*} (s) is the irradiation time, starting at the mid-point of
-irradiation (Auclair et al. 2003) and \code{s_tilde} (3x10^15 s^-1) is the athermal
-frequency factor after Huntley (2006). \cr
-
-Using fit parameters \code{A} and \code{D0}, the function then computes a natural dose
-response curve using the environmental dose rate, \code{D_dot} (Gy/s) and equations
-[1] and [2]. Computed LxTx values are then fitted using the
-\code{\link[Luminescence]{plot_GrowthCurve}} function and the laboratory measured LnTn can then
-be interpolated onto this curve to determine the fading corrected
-De value, from which the fading corrected age is calculated. \cr
-
-The \code{calc_Kars2008} function also calculates the level of saturation (n/N)
-and the field saturation (i.e. athermal steady state, (n/N)_SS) value for
-the sample under investigation using the sample specific \eqn{\rho}',
-unfaded \code{D0} and \code{D_dot} values, following the approach of Kars et al. (2008). \cr
-
-Uncertainties are reported at 1 sigma and are assumed to be normally
-distributed and are estimated using monte-carlo resamples (\code{n.MC = 1000})
-of \eqn{\rho}' and LxTx during dose response curve fitting, and of \eqn{\rho}'
-in the derivation of (n/N) and (n/N)_SS.
 }
 \note{
-\bold{This function has BETA status and should not be used for publication work!}
+\strong{This function is deprecated and will eventually be removed from the package.}
+\strong{Please use the function \code{\link[=calc_Huntley2006]{calc_Huntley2006()}} instead}
+\strong{(use \code{fit.method = "EXP"} to apply the model after Kars et al., 2008).}
 }
 \section{Function version}{
- 0.1.0 (2017-06-29 18:40:14)
+ 0.4.0 (2018-03-09 09:04:33)
 }
 
 \examples{
@@ -145,16 +65,18 @@ readerDdot <- c(0.134, 0.0067)
 rhop <- analyse_FadingMeasurement(fading_data, plot = TRUE, verbose = FALSE, n.MC = 10)
 
 ## (3) Apply the Kars et al. (2008) model to the data
-kars <- calc_Kars2008(data = data,
-                      rhop = rhop,
-                      ddot = ddot,
-                      readerDdot = readerDdot,
-                      n.MC = 50
-                      )
+kars <- suppressWarnings(
+  calc_Kars2008(data = data,
+                rhop = rhop,
+                ddot = ddot,
+                readerDdot = readerDdot,
+                n.MC = 25)
+)
+
 } 
 
 \section{How to cite}{
-King, G., Burow, C. (2017). calc_Kars2008(): Apply the Kars et al. (2008) model. Function version 0.1.0. In: Kreutzer, S., Dietze, M., Burow, C., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2017). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.7.5. https://CRAN.R-project.org/package=Luminescence
+King, G.E., Burow, C. (2018). calc_Kars2008(): Apply the Kars et al. (2008) model (deprecated). Function version 0.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{
@@ -167,14 +89,13 @@ Journal of Physics: Condensed Matter 18, 1359-1365. doi:10.1088/0953-8984/18/4/0
 King, G.E., Herman, F., Lambert, R., Valla, P.G., Guralnik, B., 2016.
 Multi-OSL-thermochronometry of feldspar. Quaternary Geochronology 33, 76-87. doi:10.1016/j.quageo.2016.01.004
 
-
-\bold{Further reading}
+\strong{Further reading}
 
 Morthekai, P., Jain, M., Cunha, P.P., Azevedo, J.M., Singhvi, A.K., 2011. An attempt to correct
 for the fading in million year old basaltic rocks. Geochronometria 38(3), 223-230.
 }
 \author{
-Georgina King, University of Cologne (Germany), \cr
+Georgina E. King, University of Bern (Switzerland) \cr
 Christoph Burow, University of Cologne (Germany)
 \cr R Luminescence Package Team}
 \keyword{datagen}

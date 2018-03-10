@@ -4,59 +4,70 @@
 #' opened by the Analyst software or other Risoe software.
 #'
 #' The structure of the exported binary data follows the data structure
-#' published in the Appendices of the Analyst manual p. 42.\cr\cr If
-#' \code{LTYPE}, \code{DTYPE} and \code{LIGHTSOURCE} are not of type
-#' \code{\link{character}}, no transformation into numeric values is done.
+#' published in the Appendices of the Analyst manual p. 42.
 #'
-#' @param object \code{\linkS4class{Risoe.BINfileData}} (\bold{required}):
+#' If
+#' `LTYPE`, `DTYPE` and `LIGHTSOURCE` are not of type
+#' [character], no transformation into numeric values is done.
+#'
+#' @param object [Risoe.BINfileData-class] (**required**):
 #' input object to be stored in a bin file.
 #'
-#' @param file \code{\link{character}} (\bold{required}): file name and path of
-#' the output file\cr [WIN]: \code{write_R2BIN(object, "C:/Desktop/test.bin")},
-#' \cr [MAC/LINUX]: \code{write_R2BIN("/User/test/Desktop/test.bin")}
+#' @param file [character] (**required**):
+#' file name and path of the output file
 #'
-#' @param version \code{\link{character}} (optional): version number for the
-#' output file. If no value is provided the highest version number from the
-#' \code{\linkS4class{Risoe.BINfileData}} is taken automatically.\cr\cr Note:
+#' - `[WIN]`: `write_R2BIN(object, "C:/Desktop/test.bin")`
+#' - `[MAC/LINUX]`: `write_R2BIN("/User/test/Desktop/test.bin")`
+#'
+#' @param version [character] (*optional*):
+#' version number for the output file. If no value is provided the highest
+#' version number from the [Risoe.BINfileData-class] is taken automatically.
+#'
+#' **Note:**
 #' This argument can be used to convert BIN-file versions.
 #'
-#' @param compatibility.mode \code{\link{logical}} (with default): this option
-#' recalculates the position values if necessary and set the max. value to 48.
-#' The old position number is appended as comment (e.g., 'OP: 70). This option
-#' accounts for potential compatibility problems with the Analyst software.
+#' @param compatibility.mode [logical] (*with default*):
+#' this option recalculates the position values if necessary and set the max.
+#' value to 48. The old position number is appended as comment (e.g., 'OP: 70).
+#' This option accounts for potential compatibility problems with the Analyst software.
+#' It further limits the maximum number of points per curve to 9,999. If a curve contains more
+#' data the curve data got binned using the smallest possible bin width.
 #'
-#' @param txtProgressBar \link{logical} (with default): enables or disables
-#' \code{\link{txtProgressBar}}.
+#' @param txtProgressBar [logical] (*with default*):
+#' enables or disables [txtProgressBar].
+#'
 #' @return Write a binary file.
-#' @note The function just roughly checks the data structures. The validity of
-#' the output data depends on the user.\cr\cr The validity of the file path is
-#' not further checked. \cr BIN-file conversions using the argument
-#' \code{version} may be a lossy conversion, depending on the chosen input and
-#' output data (e.g., conversion from version 08 to 07 to 06 to 04 or 03).\cr
 #'
-#' \bold{Warning}\cr
+#' @note
+#' The function just roughly checks the data structures. The validity of
+#' the output data depends on the user.
+#'
+#' The validity of the file path is not further checked. BIN-file conversions
+#' using the argument `version` may be a lossy conversion, depending on the
+#' chosen input andoutput data (e.g., conversion from version 08 to 07 to 06 to 04 or 03).
+#'
+#' **Warning**
 #'
 #' Although the coding was done carefully it seems that the BIN/BINX-files
 #' produced by Risoe DA 15/20 TL/OSL readers slightly differ on the byte level.
 #' No obvious differences are observed in the METADATA, however, the
 #' BIN/BINX-file may not fully compatible, at least not similar to the once
-#' directly produced by the Risoe readers!\cr
+#' directly produced by the Risoe readers!
 #'
-#' @section Function version: 0.4.2
+#' @section Function version: 0.4.4
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne
-#' (France)
+#' @author
+#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
 #'
-#' @note ROI definitions (introduced in BIN-file version 8) are not supported! There are furthermore
-#' ignored by the function \code{\link{read_BIN2R}}.
+#' @note
+#' ROI definitions (introduced in BIN-file version 8) are not supported!
+#' There are furthermore ignored by the function [read_BIN2R].
 #'
-#' @seealso \code{\link{read_BIN2R}}, \code{\linkS4class{Risoe.BINfileData}},
-#' \code{\link{writeBin}}
+#' @seealso [read_BIN2R], [Risoe.BINfileData-class], [writeBin]
 #'
 #' @references
-#'
 #' DTU Nutech, 2016. The Squence Editor, Users Manual, February, 2016.
-#' \url{http://www.nutech.dtu.dk/english/products-and-services/radiation-instruments/tl_osl_reader/manuals}
+#' [http://www.nutech.dtu.dk/english/products-and-services/radiation-instruments/tl_osl_reader/manuals]()
 #'
 #' @keywords IO
 #'
@@ -67,6 +78,7 @@
 #' ##data(ExampleData.BINfileData, envir = environment())
 #' ##write_R2BIN(CWOSL.SAR.Data, file="[your path]/output.bin")
 #'
+#' @md
 #' @export
 write_R2BIN <- function(
   object,
@@ -85,26 +97,91 @@ write_R2BIN <- function(
 
   ##check if input object is of type 'Risoe.BINfileData'
   if(is(object, "Risoe.BINfileData") == FALSE){
-
-    stop("[write_R2BIN()] Input object is not of type Risoe.BINfileData!")
+    stop("[write_R2BIN()] Input object is not of type Risoe.BINfileData!", call. = FALSE)
 
   }
 
-  ##check if it fullfills the latest definition
-  if(ncol(object@METADATA) != 80){
-    stop("[write_R2BIN()] The number of columns in your slot 'METADATA' does not fit to the latest definition. What you are probably trying to do is to export a Risoe.BINfileData object you generated by your own or you imported with an old package version some time ago. Please re-import the BIN-file using the function read_BIN2R().")
+  ##check if it fullfills the latest definition ...
+  if(ncol(object@METADATA) != ncol(set_Risoe.BINfileData()@METADATA)){
+    stop("[write_R2BIN()] The number of columns in your slot 'METADATA' does not fit to the latest definition. What you are probably trying to do is to export a Risoe.BINfileData object you generated by your own or you imported with an old package version some time ago. Please re-import the BIN-file using the function read_BIN2R().", call. = FALSE)
 
   }
 
   ##check if input file is of type 'character'
   if(is(file, "character") == FALSE){
-
-    stop("[write_R2BIN()] argument 'file' has to be of type character!")
+    stop("[write_R2BIN()] argument 'file' has to be of type character!", call. = FALSE)
 
   }
 
 
   # Check Risoe.BINfileData Struture ----------------------------------------
+
+  ##check wether the BIN-file DATA slot contains more than 9999 records; needs to be run all the time
+  temp_check <- vapply(object@DATA, function(x){
+    if(length(x) > 9999){
+      TRUE
+    }else{
+      FALSE
+    }
+
+  }, FUN.VALUE = logical(1))
+
+  ##force compatibility
+  if(compatibility.mode && any(temp_check)){
+
+    ##drop warning
+    warning("[write_R2BIN()] Compatibility mode selected: Some data sets are longer than 9,999 points and will be binned!", call. = FALSE)
+
+    ##BIN data to reduce amount of data if the BIN-file is too long
+    object@DATA <- lapply(object@DATA, function(x){
+      if(length(x) > 9999){
+
+        ##we want to have a minimum binning (smallest number possible)
+        bin_width <- ceiling(length(x)/9999)
+
+        ##it should be symatric, thus, remove values
+        if((length(x)/bin_width)%%2 != 0){
+          x <- x[-length(x)]
+
+        }
+
+        ##create matrix and return
+        colSums(matrix(x, nrow = bin_width))
+
+
+      }else{
+        x
+
+      }
+
+    })
+
+    ##reset temp_check
+    temp_check <- FALSE
+
+    ##get new number of points
+    temp_NPOINTS <- sapply(object@DATA, length)
+
+    ##correct LENGTH
+    object@METADATA[["LENGTH"]] <- object@METADATA[["LENGTH"]] - (4 * object@METADATA[["NPOINTS"]]) + (temp_NPOINTS * 4)
+
+    ##correct PREVIOUS
+    object@METADATA[["PREVIOUS"]] <- c(0,object@METADATA[["LENGTH"]][2:length(object@METADATA[["LENGTH"]])])
+
+    ##correct NPOINTS
+    object@METADATA[["NPOINTS"]] <- temp_NPOINTS
+
+    ##write comment
+    object@METADATA[["COMMENT"]] <- paste(object@METADATA[["COMMENT"]], " - binned")
+
+  }
+
+  if(any(temp_check))
+    stop(paste("[write_R2BIN()]", length(which(temp_check)), " out of ",length(temp_check), "records contain more than 9,999 data points. This violates the BIN/BINX-file definition!"), call. = FALSE)
+
+  ##remove
+  rm(temp_check)
+
 
   ##VERSION
 
@@ -463,7 +540,7 @@ write_R2BIN <- function(
       ##SEQUENCE
 
       ##count number of characters
-      SEQUENCE_SIZE <- as.integer(nchar(as.character(object@METADATA[ID,"SEQUENCE"]), type = "bytes"))
+      SEQUENCE_SIZE <- as.integer(nchar(as.character(object@METADATA[["SEQUENCE"]][ID]), type = "bytes", keepNA = FALSE))
 
       writeBin(SEQUENCE_SIZE,
                con,

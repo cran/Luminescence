@@ -5,8 +5,8 @@ test_that("check class and length of output", {
 
   set.seed(1)
   data(ExampleData.RLum.Analysis, envir = environment())
-  results_fit <- analyse_IRSAR.RF(object = IRSAR.RF.Data, plot = FALSE, method = "FIT")
-  results_slide <- analyse_IRSAR.RF(object = IRSAR.RF.Data, plot = FALSE, method = "SLIDE", n.MC = NULL)
+  results_fit <- analyse_IRSAR.RF(object = IRSAR.RF.Data, plot = TRUE, method = "FIT")
+  results_slide <- analyse_IRSAR.RF(object = IRSAR.RF.Data, plot = TRUE, method = "SLIDE", n.MC = NULL)
   results_slide_alt <-
     analyse_IRSAR.RF(
       object = IRSAR.RF.Data,
@@ -47,7 +47,7 @@ test_that("test controlled chrash conditions", {
       n.MC = 10,
       method.control = list(vslide_range = c(0,1e+08)),
       txtProgressBar = FALSE
-    ), regexp = "[:::.analyse_IRSAR_SRS()] 'vslide_range' exceeded maximum size (1e+08)!", fixed = TRUE)
+    ), regexp = "[:::src_analyse_IRSAR_SRS()] 'vslide_range' exceeded maximum size (1e+08)!", fixed = TRUE)
 
 
 
