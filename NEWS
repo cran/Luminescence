@@ -1,5 +1,68 @@
 NEWS for the R Package Luminescence
 
+Changes in version 0.8.3 (April 20th, 2018):
+
+  Bugfixes and changes:
+
+         • ‘analyse_SAR.CWOSL()’
+
+             • The function crashed if the ‘plot_GrowthCurve()’
+               returned ‘NULL’; fixed,
+
+             • ff the dose-response curve was not fitted, but ‘plot’
+               was set to ‘TRUE’ no plot was returned (even no empty
+               plot); fixed,
+
+             • if all curves were IRSL curves, the function crashed
+               while trying to plot the IRSL curve for the IRSL test.
+               Now only the last IRSL curve is plotted. This does not
+               make really sense since probably the user did not
+               measure quartz, however, this solution fixes the problem
+               and does not break other users code.
+
+         • ‘analyse_FiniteMixture()’
+
+             • For wrong user input and not well understood
+               assumptions, the function crashed uncontrolled; fixed.
+
+         • ‘analyse_pIRIRSequence()’
+
+             • Fixed unwanted functions crashes for very odd datasets
+               (e.g., ‘Inf’ values).
+
+         • ‘convert_RLum2Risoe.BINfileData()’
+
+             • The record type was not correclty extracted, fixed,
+
+             • the conversion now keeps the original position numbers
+               instead of assigning new.
+
+         • ‘plot_GrowthCurve()’
+
+             • If number of regeneration points was reduced for
+               plotting and fitting, an unwanted warning message
+               appeared due to a coding error,
+
+             • if the D0 values is precisely 0.0000, the fit probably
+               went wrong, in such cases now another attempt is made,
+
+             • if a value for Lx/Tx is 0 now the value is set to
+               ‘.Machine$double.eps’, instead of 0.001,
+
+             • the formula output for ‘EXP+EXP’ was not correct, fixed.
+
+         • ‘src_create_RLumDataCurve_matrix()’
+
+             • Until today, you probably did not know that this
+               function exists at all. This function is written in C++,
+               working in the back and helps to create
+               ‘RLum.Data.Curve’-objects out of BIN/BINX-files.
+               Recently we became aware of non-conform BIN/BINX-files,
+               circulating in the wild. For such files the TL curves
+               were not created correctly, more important, the user did
+               not know why. Now the function throws out a message, at
+               least.
+
 Changes in version 0.8.2 (March 10th, 2018):
 
   Internals:

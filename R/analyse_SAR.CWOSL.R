@@ -139,7 +139,7 @@
 #'
 #' **The function currently does only support 'OSL' or 'IRSL' data!**
 #'
-#' @section Function version: 0.8.0
+#' @section Function version: 0.8.3
 #'
 #' @author
 #' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
@@ -767,7 +767,6 @@ if(is.list(object)){
     LnLxTnTx[,"Name"] <- as.character(LnLxTnTx[,"Name"])
 
     # Calculate Recycling Ratio -----------------------------------------------
-
     ##Calculate Recycling Ratio
     if (length(LnLxTnTx[LnLxTnTx[,"Repeated"] == TRUE,"Repeated"]) > 0) {
       ##identify repeated doses
@@ -812,8 +811,6 @@ if(is.list(object)){
 
 
     # Calculate Recuperation Rate ---------------------------------------------
-
-
     ##Recuperation Rate (capable to handle multiple type of recuperation values)
     if (length(LnLxTnTx[LnLxTnTx[,"Name"] == "R0","Name"]) > 0) {
       Recuperation <-
@@ -837,7 +834,6 @@ if(is.list(object)){
 
 
     # Evaluate and Combine Rejection Criteria ---------------------------------
-
     temp.criteria <- c(
       if(!is.null(colnames(RecyclingRatio))){
        colnames(RecyclingRatio)}else{NA},
@@ -1363,89 +1359,124 @@ if(is.list(object)){
                                     output.plot = plot,
                                     ...)
 
+        ##if null
+        if(is.null(temp.GC)){
+          temp.GC <- data.frame(
+            De = NA,
+            De.Error = NA,
+            D01 = NA,
+            D01.ERROR = NA,
+            D02 = NA,
+            D02.ERROR = NA,
+            De.MC = NA,
+            Fit = NA,
+            RC.Status = NA
+          )
+          temp.GC.fit.Formula <- NA
 
-        ##grep information on the fit object
-        temp.GC.fit.Formula  <- get_RLum(temp.GC, "Formula")
+          ##create empty plots if needed, otherwise subsequent functions may crash
+          if(plot){
+            if("output.plotExtended" %in% list(...) && list(...)$output.plotExtended == FALSE){
+              shape::emptyplot()
 
-        ##grep results
-        temp.GC <- get_RLum(temp.GC)
+            }else{
+              shape::emptyplot()
+              shape::emptyplot()
+              shape::emptyplot()
 
-        # Provide Rejection Criteria for Palaedose error --------------------------
-        palaeodose.error.calculated <- ifelse(is.na(temp.GC[,1]) == FALSE,
-                                              round(temp.GC[,2] / temp.GC[,1], digits = 5),
-                                              NA)
-
-        palaeodose.error.threshold <-
-          rejection.criteria$palaeodose.error / 100
-
-        if (is.na(palaeodose.error.calculated)) {
-          palaeodose.error.status <- "FAILED"
-
-        }else{
-          if(!is.na(palaeodose.error.threshold)){
-            palaeodose.error.status <- ifelse(
-              palaeodose.error.calculated <= palaeodose.error.threshold,
-              "OK", "FAILED"
-            )
-
-
-          }else{
-            palaeodose.error.status <- "OK"
-
+            }
 
           }
 
-        }
+        }else{
 
-        palaeodose.error.data.frame <- data.frame(
-          Criteria = "Palaeodose error",
-          Value = palaeodose.error.calculated,
-          Threshold = palaeodose.error.threshold,
-          Status =  palaeodose.error.status,
-          stringsAsFactors = FALSE
-        )
+          ##grep information on the fit object
+          temp.GC.fit.Formula  <- get_RLum(temp.GC, "Formula")
+
+          ##grep results
+          temp.GC <- get_RLum(temp.GC)
+
+          # Provide Rejection Criteria for Palaedose error --------------------------
+          if(is.na(temp.GC[,1])){
+            palaeodose.error.calculated <- NA
+
+          }else{
+            palaeodose.error.calculated <- round(temp.GC[,2] / temp.GC[,1], digits = 5)
+
+          }
+
+          palaeodose.error.threshold <-
+            rejection.criteria$palaeodose.error / 100
+
+          if (is.na(palaeodose.error.calculated)) {
+            palaeodose.error.status <- "FAILED"
+
+          }else{
+            if(!is.na(palaeodose.error.threshold)){
+              palaeodose.error.status <- ifelse(
+                palaeodose.error.calculated <= palaeodose.error.threshold,
+                "OK", "FAILED"
+              )
 
 
-        ##add exceed.max.regpoint
-        if (!is.na(temp.GC[,1]) & !is.na(rejection.criteria$exceed.max.regpoint) && rejection.criteria$exceed.max.regpoint) {
-          status.exceed.max.regpoint <-
-            ifelse(max(LnLxTnTx$Dose) < temp.GC[,1], "FAILED", "OK")
+            }else{
+              palaeodose.error.status <- "OK"
+
+
+            }
+
+          }
+
+          palaeodose.error.data.frame <- data.frame(
+            Criteria = "Palaeodose error",
+            Value = palaeodose.error.calculated,
+            Threshold = palaeodose.error.threshold,
+            Status =  palaeodose.error.status,
+            stringsAsFactors = FALSE
+          )
+
+
+          ##add exceed.max.regpoint
+          if (!is.na(temp.GC[,1]) & !is.na(rejection.criteria$exceed.max.regpoint) && rejection.criteria$exceed.max.regpoint) {
+            status.exceed.max.regpoint <-
+              ifelse(max(LnLxTnTx$Dose) < temp.GC[,1], "FAILED", "OK")
+
+          }else{
+            status.exceed.max.regpoint <- "OK"
+
+          }
+
+          exceed.max.regpoint.data.frame <- data.frame(
+            Criteria = "De > max. dose point",
+            Value = as.numeric(temp.GC[,1]),
+            Threshold = if(is.na(rejection.criteria$exceed.max.regpoint)){
+                NA
+              }else if(!rejection.criteria$exceed.max.regpoint){
+                Inf
+              }else{
+                as.numeric(max(LnLxTnTx$Dose))
+              },
+            Status =  status.exceed.max.regpoint
+          )
+
+
+          ##add to RejectionCriteria data.frame
+          RejectionCriteria <- rbind(RejectionCriteria,
+                                     palaeodose.error.data.frame,
+                                     exceed.max.regpoint.data.frame)
+
+
+        ##add recjection status
+        if (length(grep("FAILED",RejectionCriteria$Status)) > 0) {
+          temp.GC <- data.frame(temp.GC, RC.Status = "FAILED")
+
 
         }else{
-          status.exceed.max.regpoint <- "OK"
+          temp.GC <- data.frame(temp.GC, RC.Status = "OK")
+
 
         }
-
-        exceed.max.regpoint.data.frame <- data.frame(
-          Criteria = "De > max. dose point",
-          Value = as.numeric(temp.GC[,1]),
-          Threshold = if(is.na(rejection.criteria$exceed.max.regpoint)){
-              NA
-            }else if(!rejection.criteria$exceed.max.regpoint){
-              Inf
-            }else{
-              as.numeric(max(LnLxTnTx$Dose))
-            },
-          Status =  status.exceed.max.regpoint
-        )
-
-
-        ##add to RejectionCriteria data.frame
-        RejectionCriteria <- rbind(RejectionCriteria,
-                                   palaeodose.error.data.frame,
-                                   exceed.max.regpoint.data.frame)
-
-
-      ##add recjection status
-      if (length(grep("FAILED",RejectionCriteria$Status)) > 0) {
-        temp.GC <- data.frame(temp.GC, RC.Status = "FAILED")
-
-
-      }else{
-        temp.GC <- data.frame(temp.GC, RC.Status = "OK")
-
-
-      }
+       }#endif for is.null
 
      ##end onlyLxTxTable
      }else{
@@ -1467,6 +1498,7 @@ if(is.list(object)){
           stringsAsFactors = FALSE
         )
 
+
     # Set return Values -----------------------------------------------------------
 
     ##generate unique identifier
@@ -1483,7 +1515,6 @@ if(is.list(object)){
       info = list(call = sys.call())
     )
 
-
     # Plot graphical interpretation of rejection criteria -----------------------------------------
 
     if (plot == TRUE && 7 %in% plot.single.sel) {
@@ -1493,7 +1524,6 @@ if(is.list(object)){
       }else{
         par(mfrow = c(1,1))
       }
-
 
       ##Rejection criteria
       temp.rejection.criteria <- get_RLum(temp.results.final,
@@ -1690,9 +1720,21 @@ if(is.list(object)){
     if (plot == TRUE && 8 %in% plot.single.sel) {
       ##graphical represenation of IR-curve
       temp.IRSL <- suppressWarnings(get_RLum(object, recordType = "IRSL"))
-
       if(length(temp.IRSL) != 0){
-        plot_RLum.Data.Curve(temp.IRSL, par.local = FALSE)
+         if(class(temp.IRSL) == "RLum.Data.Curve"){
+           plot_RLum.Data.Curve(temp.IRSL, par.local = FALSE)
+
+         }else if(call(temp.IRSL) == "list"){
+           plot_RLum.Data.Curve(temp.IRSL[[length(temp.IRSL)]], par.local = FALSE)
+           warning(
+             "[analyse_SAR.CWOSL()] Multiple IRSL curves detected (IRSL test), show only the last one.",
+             immediate. = TRUE,
+             call. = FALSE
+           )
+         }else{
+           shape::emptyplot()
+
+         }
 
       }else{
         plot(1, type="n", axes=F, xlab="", ylab="")

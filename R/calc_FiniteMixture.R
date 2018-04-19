@@ -359,10 +359,13 @@ calc_FiniteMixture <- function(
     vmat<- solve(invvmat, tol=.Machine$double.xmin)
     rek<- sqrt(sum(vmat[1:(k-1),1:(k-1)]))
 
-
     # calculate DE, relative standard error, standard error
     dose<- exp(mu)
     re<- sqrt(diag(vmat))[-c(1:(k-1))]
+    
+    if (any(is.nan(re)))
+      re[is.nan(re)] <- NA
+    
     sed<- dose*re
     estd<- rbind(dose,re,sed)
 
@@ -539,7 +542,7 @@ calc_FiniteMixture <- function(
 
       # print component matrix
       cat(paste("\n\n----------- k components -----------\n"))
-      print(comp.n, na.print="")
+      print(comp.n, na.print="<NA>")
 
       # print BIC scores and LLIK estimates
       cat(paste("\n----------- statistical criteria -----------\n"))
@@ -606,11 +609,14 @@ calc_FiniteMixture <- function(
       components=if(length(n.components)==1){comp.re}else{comp.n},
       single.comp=single.comp))
 
+  if (anyNA(unlist(summary)) && verbose)
+    warning("\n[calc_FiniteMixture] The model produced NA values. Either the input data are inapplicable for the model",
+            " or the the model parameters need to be adjusted (e.g. 'sigmab')", call. = FALSE)
+  
   ##=========##
   ## PLOTTING
-  if(plot==TRUE) {
+  if(plot && !anyNA(unlist(summary)))
     try(do.call(plot_RLum.Results, c(list(newRLumResults.calc_FiniteMixture), as.list(sys.call())[-c(1,2)])))
-  }#endif::plot
 
   # Return values
   invisible(newRLumResults.calc_FiniteMixture)

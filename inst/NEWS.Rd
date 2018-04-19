@@ -1,5 +1,70 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.8.3 (April 20th, 2018)}{
+
+ \subsection{Bugfixes and changes}{
+  \itemize{
+      \item \code{analyse_SAR.CWOSL()}
+    \itemize{
+      \item The function crashed if the \code{plot_GrowthCurve()} returned \code{NULL}; fixed,
+      \item ff the dose-response curve was not fitted, but \code{plot} was set to \code{TRUE} no
+      plot was returned (even no empty plot); fixed,
+      \item if all curves were IRSL curves, the function crashed while trying to plot the IRSL curve
+      for the IRSL test. Now only the last IRSL curve is plotted. This does not make really sense
+      since probably the user did not measure quartz, however, this solution fixes the problem and
+      does not break other users code.
+
+
+    }
+
+    \item \code{analyse_FiniteMixture()}
+    \itemize{
+      \item For wrong user input and not well understood assumptions, the function crashed uncontrolled; fixed.
+
+    }
+
+    \item \code{analyse_pIRIRSequence()}
+    \itemize{
+      \item Fixed unwanted functions crashes for very odd datasets (e.g., \code{Inf} values).
+
+    }
+
+
+   \item \code{convert_RLum2Risoe.BINfileData()}
+    \itemize{
+      \item The record type was not correclty extracted, fixed,
+      \item the conversion now keeps the original position numbers instead of assigning new.
+
+    }
+
+
+    \item \code{plot_GrowthCurve()}
+    \itemize{
+      \item If number of regeneration points was reduced for plotting and fitting, an unwanted
+      warning message appeared due to a coding error,
+      \item if the D0 values is precisely 0.0000, the fit probably went wrong, in such cases now another
+      attempt is made,
+      \item if a value for Lx/Tx is 0 now the value is set to \code{.Machine$double.eps}, instead of 0.001,
+      \item the formula output for \code{EXP+EXP} was not correct, fixed.
+
+    }
+
+    \item \code{src_create_RLumDataCurve_matrix()}
+    \itemize{
+
+      \item Until today, you probably did not know that this function exists at all. This function
+      is written in C++, working in the back and helps to create \code{RLum.Data.Curve}-objects out of BIN/BINX-files.
+      Recently we became aware of non-conform BIN/BINX-files, circulating in the wild. For such files the TL curves
+      were not created correctly, more important, the user did not know why. Now the function throws out a message, at least.
+
+    }
+  }
+
+ }
+
+}
+
+
 \section{Changes in version 0.8.2 (March 10th, 2018)}{
 
  \subsection{Internals}{
