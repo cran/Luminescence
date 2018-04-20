@@ -1,5 +1,19 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.8.4 (April 20th, 2018)}{
+
+ \subsection{Bugfixes and changes}{
+  \itemize{
+
+    \item The previous package versions did not pass the CRAN tests on the Solaris platform; fixed.
+
+  }
+
+ }
+
+}
+
+
 \section{Changes in version 0.8.3 (April 20th, 2018)}{
 
  \subsection{Bugfixes and changes}{
