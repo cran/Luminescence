@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.8.4
-Date: 2018-04-20
+Version: 0.8.5
+Date: 2018-06-08
 Author: Sebastian Kreutzer [aut, trl, cre, dtc]
     (<https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc]
@@ -11,7 +11,7 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc]
   Margret C. Fuchs [aut],
   Christoph Schmidt [aut] (<https://orcid.org/0000-0002-2309-3209>),
   Manfred Fischer [aut, trl],
-  Johannes Friedrich [aut],
+  Johannes Friedrich [aut] (<https://orcid.org/0000-0002-0805-9547>),
   Norbert Mercier [ctb],
   Rachel K. Smedley [ctb] (<https://orcid.org/0000-0001-7773-5193>),
   Claire Christophe [ctb],
@@ -28,7 +28,7 @@ Authors@R: c(
     person("Margret C.", "Fuchs", role = c("aut")),
     person("Christoph", "Schmidt", role = c("aut"), comment = c(ORCID = "0000-0002-2309-3209")),
     person("Manfred", "Fischer", role = c("aut", "trl")),
-    person("Johannes", "Friedrich", role = c("aut")),
+    person("Johannes", "Friedrich", role = c("aut"), comment = c(ORCID = "0000-0002-0805-9547")),
     person("Norbert", "Mercier", role = c("ctb")),
     person("Rachel K.", "Smedley", role = c("ctb"), comment = c(ORCID = "0000-0001-7773-5193")),
     person("Claire", "Christophe", role = c("ctb")),
@@ -109,6 +109,6 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'write_R2BIN.R' 'write_RLum2CSV.R' 'zzz.R'
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2018-04-20 07:31:29 UTC; kreutzer
+Packaged: 2018-06-08 13:12:19 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2018-04-20 11:18:05 UTC
+Date/Publication: 2018-06-08 13:57:56 UTC

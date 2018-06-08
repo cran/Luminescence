@@ -8,8 +8,8 @@
 #' \tabular{ll}{
 #' **Package:** \tab Luminescence \cr
 #' **Type:** \tab Package \cr
-#' **Version:** \tab 0.8.4 \cr
-#' **Date:** \tab 2018-04-20 \cr
+#' **Version:** \tab 0.8.5 \cr
+#' **Date:** \tab 2018-06-08 \cr
 #' **License:** \tab GPL-3 \cr
 #' }
 #'

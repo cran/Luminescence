@@ -1,10 +1,22 @@
 #' Al2O3:C Passive Dosimeter Measurement Analysis
 #'
 #' The function provides the analysis routines for measurements on a
-#' FI lexsyg SMART reader using Al2O3:C pellets according to Kreutzer et al., XXXX
+#' FI lexsyg SMART reader using Al2O3:C chips according to Kreutzer et al., 2018
 #'
 #' **Working with a travel dosimeter**
-#' ##ADD INFORMATION ON HOW IT WORKS WITH THE TRAVEL DOSIMETERS
+#'
+#' The function allows to define particular aliquots as travel dosimeters. For example:
+#' `travel_dosimeter = c(1,3,5)` sets aliquots 1, 3 and 5 as travel dosimeters. These dose values
+#' of this dosimeters are combined and automatically subtracted from the obtained dose values
+#' of the other dosimeters.
+#'
+#' **Calculate TL dose **
+#'
+#' The argument `calculate_TL_dose` provides the possibility to experimentally calculate a TL-dose,
+#' i.e. an apparent dose value derived from the TL curve ratio. However, it should be noted that
+#' this value is only a fallback in case something went wrong during the measurement of the optical
+#' stimulation. The TL derived dose value is corrected for cross-talk and for the irradiation time,
+#' but not considered if a travel dosimeter is defined.
 #'
 #' **Test parameters**
 #'
@@ -30,7 +42,7 @@
 #' @param dose_points [numeric] (*with default*):
 #' vector with dose points, if dose points are repeated, only the general
 #' pattern needs to be provided. Default values follow the suggestions
-#' made by Kreutzer et al., XXXX
+#' made by Kreutzer et al., 2018
 #'
 #' @param recordType [character] (*with default*): input curve selection, which is passed to
 #' function [get_RLum]. To deactivate the automatic selection set the argument to `NULL`
@@ -38,6 +50,9 @@
 #' @param irradiation_time_correction [numeric] or [RLum.Results-class] (*optional*):
 #' information on the used irradiation time correction obained by another experiements.
 #' I a `numeric` is provided it has to be of length two: mean, standard error
+#'
+#' @param calculate_TL_dose [logical] (*with default*): Enables/disables experimental dose estimation
+#' based on the TL curves. Taken is the ratio of the peak sums of each curves +/- 5 channels.
 #'
 #' @param cross_talk_correction [numeric] or [RLum.Results-class] (*optional*):
 #' information on the used irradiation time correction obained by another experiements.
@@ -78,6 +93,10 @@
 #'  `data_TDcorrected` \tab `data.frame` \tab travel dosimeter corrected results (only if TD was provided)\cr
 #' }
 #'
+#' *Note: If correction the irradiation time and the cross-talk correction method is used, the De
+#' values in the table `data` table are already corrected, i.e. if you want to get an uncorrected value,
+#' you can use the column `CT_CORRECTION` remove the correction*
+#'
 #'**slot:** **`@info`**
 #'
 #' The original function call
@@ -89,7 +108,7 @@
 #' - OSL and TL curves, combined on two plots.
 #'
 #'
-#' @section Function version: 0.1.8
+#' @section Function version: 0.2.1
 #'
 #' @author Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 #'
@@ -97,14 +116,13 @@
 #'
 #' @references
 #'
-#' Kreutzer, S., Martin, L., Guérin, G., Tribolo, C., Selva, P., Mercier, N., in press. Environmental Dose Rate
+#' Kreutzer, S., Martin, L., Guérin, G., Tribolo, C., Selva, P., Mercier, N., 2018. Environmental Dose Rate
 #' Determination Using a Passive Dosimeter: Techniques and Workflow for alpha-Al2O3:C Chips.
 #' Geochromometria 45, 56-67. doi: 10.1515/geochr-2015-0086
 #'
 #' @keywords datagen
 #'
 #' @examples
-#'
 #' ##load data
 #' data(ExampleData.Al2O3C, envir = environment())
 #'
@@ -118,6 +136,7 @@ analyse_Al2O3C_Measurement <- function(
   signal_integral = NULL,
   dose_points = c(0,4),
   recordType = c("OSL (UVVIS)", "TL (UVVIS)"),
+  calculate_TL_dose = FALSE,
   irradiation_time_correction = NULL,
   cross_talk_correction = NULL,
   travel_dosimeter = NULL,
@@ -197,6 +216,7 @@ analyse_Al2O3C_Measurement <- function(
         irradiation_time_correction = irradiation_time_correction[[x]],
         cross_talk_correction = cross_talk_correction[[x]],
         test_parameters = test_parameters[[x]],
+        calculate_TL_dose = calculate_TL_dose,
         verbose = verbose,
         plot = plot[x],
         ...
@@ -358,7 +378,8 @@ analyse_Al2O3C_Measurement <- function(
         cross_talk_correction@originator == "analyse_Al2O3C_CrossTalk") {
 
 
-        ##grep cross talk correction
+        ##grep cross talk correction and calculate values for
+        ##this particular carousel position
         cross_talk_correction <-
           as.numeric(predict(cross_talk_correction$fit,
                   newdata = data.frame(x = POSITION),
@@ -396,10 +417,38 @@ analyse_Al2O3C_Measurement <- function(
 
   }
 
-  ##calculate needed values
-  NATURAL <- sum(object[[1]][signal_integral, 2])
-  REGENERATED <- sum(object[[3]][signal_integral, 2])
-  BACKGROUND <- sum(object[[5]][signal_integral, 2])
+  ##calculate integrated light values
+  NATURAL <- sum(object@records[[1]]@data[signal_integral, 2])
+  REGENERATED <- sum(object@records[[3]]@data[signal_integral, 2])
+  BACKGROUND <- sum(object@records[[5]]@data[signal_integral, 2])
+
+  ##do the same for the TL
+  if(calculate_TL_dose){
+    NATURAL_TL <- try(sum(
+      object@records[[2]]@data[
+        (which.max(object@records[[2]]@data[,2])-5):(which.max(object@records[[2]]@data[,2])+5),2]), silent = TRUE)
+    REGENERATED_TL <- try(sum(
+      object@records[[4]]@data[
+        (which.max(object@records[[4]]@data[,2])-5):(which.max(object@records[[4]]@data[,2])+5),2]), silent = TRUE)
+
+    ##catch errors if the integration fails
+    if(class(NATURAL_TL) == "try-error"){
+      NATURAL_TL <- NA
+      warning("[analyse_Al2O3_Measurement()] Natural TL signal out of bounds, NA returned!", call. = FALSE, immediate. = TRUE)
+
+    }
+
+    if(class(REGENERATED_TL) == "try-error"){
+      REGENERATED_TL <- NA
+      warning("[analyse_Al2O3_Measurement()] Regenerated TL signal out of bounds, NA returned!", call. = FALSE, immediate. = TRUE)
+
+    }
+
+  }else{
+    NATURAL_TL <- NA
+    REGENERATED_TL <- NA
+
+  }
 
   ##combine into data.frame
   temp_df <- data.frame(
@@ -418,6 +467,8 @@ analyse_Al2O3C_Measurement <- function(
       INTEGRAL = c(NATURAL, REGENERATED),
       BACKGROUND = c(BACKGROUND, BACKGROUND),
       NET_INTEGRAL = c(NATURAL - BACKGROUND, REGENERATED - BACKGROUND),
+      NATURAL_TL = NATURAL_TL,
+      REGENERATED_TL = REGENERATED_TL,
       row.names = NULL
     )
 
@@ -443,14 +494,30 @@ analyse_Al2O3C_Measurement <- function(
    ##(2) random sampling from cross-irradiation
    CT <- runif(1000, min = cross_talk_correction[2], max = cross_talk_correction[3])
 
-   ##(3) combine the two values
-   DOSE <- DOSE_MC - CT
-
-   ##(4) signal ratio
+   ##(3) signal ratio
    INTEGRAL_RATIO <- temp_df$NET_INTEGRAL[1]/temp_df$NET_INTEGRAL[2]
 
-   ##(5) calculate DE
-   temp_DE <- (DOSE * INTEGRAL_RATIO)
+   ##(4) calculate DE
+   temp_DE <- (DOSE_MC * INTEGRAL_RATIO)
+
+   ##(5) substract cross-talk value from DE
+   temp_DE  <- temp_DE  - CT
+
+     ##(5.1) calculate TL based DE
+     ##calculate a dose based on TL
+     ##Note: we use irradiation time correction and CT correction based on GSL measurements
+     if(calculate_TL_dose){
+       TL_Ratio <- NATURAL_TL/REGENERATED_TL
+       temp_TL_DE <- (DOSE_MC * TL_Ratio) - CT
+       TL_DE <- mean(temp_TL_DE)
+       TL_DE.ERROR <- sd(temp_TL_DE)
+
+
+     }else{
+       TL_DE <- NA
+       TL_DE.ERROR <- NA
+
+     }
 
    ##(6) create final data.frame
    data <- data.frame(
@@ -462,10 +529,10 @@ analyse_Al2O3C_Measurement <- function(
      CT_CORRECTION = cross_talk_correction[1],
      CT_CORRECTION_Q2.5 = cross_talk_correction[2],
      CT_CORRECTION_Q97.5 = cross_talk_correction[3],
+     TL_DE = TL_DE,
+     TL_DE.ERROR = TL_DE.ERROR,
      row.names = NULL
-
    )
-
 
 
   ##calculate test parameters
