@@ -1,5 +1,76 @@
 \name{NEWS}
 \title{NEWS for the R Package Luminescence}
+\section{Changes in version 0.8.6 (October 5th, 2018)}{
+
+ \subsection{Bugfixes and changes}{
+  \itemize{
+
+    \item \code{analyse_Al2O3C_Measurement()}
+      \itemize{
+        \item The argument \code{signal_integral} was not treated correctly; fixed,
+        \item Set threshold for wrong stimulation power detection from 0.01 to 0.05, otherwise it
+        fires to oftern in false positive cases.
+
+      }
+
+    \item \code{analyse_SAR.CWOSL())}
+      \itemize{
+        \item The function crashed for only noise like data yielding negative Lx/Tx values (reported by Dirk Mittelstraß);
+        fixed,
+        \item In the output \code{data.frame} containg the De values, the column 'RC.Status' was of type \code{factor}, but should have
+        been of type \code{character}; fixed.
+
+    }
+
+    \item \code{analyse_pIRIRMeasurement()}
+      \itemize{
+        \item If measurements did not contain TL curves, the function showed a confusing warnings message; fixed.
+
+    }
+
+    \item \code{plot_DetPlot()}
+
+      \itemize{
+        \item Function does not break anymore if \code{signal.integral.min == signal.integral.max} (reported by Andrea Junge).
+
+    }
+
+      \item \code{plot_KDE()}
+      \itemize{
+        \item The function could not handle \code{Inf} values (#71) as reported by Dirk Mittelstraß; fixed.
+        \item The function could not handle \code{data.frames} with more than 2 columns and \code{NA} values
+        in the unused columns (reported by Dirk Mittelstraß). Now the function takes only the first two columns.
+
+    }
+
+    \item \code{plot_GrowthCurve()}
+      \itemize{
+        \item The function crashed due to problems with the start parameter estimation for negative Lx/Tx values
+        (reported by Dirk Mittelstaß); fixed.
+
+    }
+
+
+      \item \code{plot_RadialPlot()}
+      \itemize{
+        \item The function now uses only the first two columns from a \code{data.frame}, regardless its size.
+
+    }
+
+
+      \item \code{report_RLum()}
+      \itemize{
+        \item Add new argument \code{show_report} to allow file creation only without getting the RStudio viewer
+         involved.
+
+      }
+
+
+  }
+ }
+}
+
+
 \section{Changes in version 0.8.5 (June 8th, 2018)}{
 
  \subsection{Bugfixes and changes}{

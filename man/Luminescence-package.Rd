@@ -15,8 +15,8 @@ plotting of equivalent dose distributions.
 \tabular{ll}{
 \strong{Package:} \tab Luminescence \cr
 \strong{Type:} \tab Package \cr
-\strong{Version:} \tab 0.8.5 \cr
-\strong{Date:} \tab 2018-06-08 \cr
+\strong{Version:} \tab 0.8.6 \cr
+\strong{Date:} \tab 2018-10-05 \cr
 \strong{License:} \tab GPL-3 \cr
 }
 }
@@ -67,7 +67,7 @@ Sebastian Kreutzer \tab \emph{IRAMAT-CRP2A, Université Bordeaux Montaigne, Fran
 Norbert Mercier \tab \emph{IRAMAT-CRP2A, Université Bordeaux Montaigne, France} \cr
 Anne Philippe \tab  \emph{Universite de Nantes and ANJA INRIA, Rennes, France} \cr
 Christoph Schmidt \tab \emph{University of Bayreuth, Germany} \cr
-Rachel K. Smedley \tab \emph{Aberystwyth University, United Kingdom} \cr
+Rachel K. Smedley \tab \emph{Liverpool University, United Kingdom} \cr
 Antoine Zink \tab \emph{C2RMF, Palais du Louvre, Paris, France}
 }
 
