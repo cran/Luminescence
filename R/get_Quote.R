@@ -10,9 +10,9 @@
 #'
 #' @return Returns a character with quote and respective (false) author.
 #'
-#' @section Function version: 0.1.2
+#' @section Function version: 0.1.4
 #'
-#' @author Michael Dietze, GFZ Potsdam (Germany)
+#' @author Michael Dietze, GFZ Potsdam (Germany), Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @examples
 #'
@@ -43,9 +43,9 @@ get_Quote <- function(
     c("An arctic sediment outcrop", "Marmor, Stein und Eisen bricht..."),
     c("A common luminescence reader customer", "If anything can go wrong, it will."),
     c("A blue LED to a trapped electron", "Resistance is futile."),
-    c("A trapped electron to a yellow LED", "Well, that's all?"),
+    c("A trapped electron to a yellow LED", "Well, that's all you've got?"),
     c("A weathering rock", "Who wants to live forever?"),
-    c("A new pIRIR derivative", "20000 miles below the sea."),
+    c("A new pIRIR derivative", "20,000 miles below the sea."),
     c("Robert Oppenheimer", "I want this thing to work by just pressing one button."),
     c("An arbitrary member of the CRAN team", "No shirt, no shoes, no service!"),
     c("Rubber mallet to steel cylinder", "Let's rock and roll."),
@@ -62,12 +62,19 @@ get_Quote <- function(
     c("A motivated R-Team member", "We are doing this not just for statistical reasons, there is real science behind it!"),
     c("An enthusiastic cabaret artist", "Political elections are like brushing teeth: if you don't do it, things become brown."),
     c("An unbiased reviewer", "The data is too poor to be published in QG, try a higher ranked journal."),
-    c("R Team member, asked about statistical details", "No idea, I'm just here for visualisation."),
+    c("R Team member, asked about statistical details", "No idea, I'm just here for the visualisation."),
     c("An arbitrary unexperienced RLum-user", "Little by little, the bird builds its nest."),
     c("The answer to life, the universe and everything", "get_rightAnswer()"),
     c("Der Tatortreiniger", "Dreck ist nur Materie am falschen Ort."),
-    c("Die Ex vom Tatortreiniger", "Das Ziel ist im Weg.")
-
+    c("Die Ex vom Tatortreiniger", "Das Ziel ist im Weg."),
+    c("Bright grain to dim grains", "I'm so shiny!"),
+    c("Fast component to slow component", "Life is short!"),
+    c("Fast component to slow component", "What are you waiting for?"),
+    c("Violet photon to deep trap electron", "Today I'm kicking you out of your comfort zone!"),
+    c("Deep trap electron to infrared photon", "Don't bother me, I need to rest."),
+    c("A single grain", "I feel so lonley."),
+    c("Luminescence data to Bayesian process", "Don't you ever touch me again."),
+    c("Quartz grain to heating plate", "Go ahead, I need a phase change.")
     )
 
   ## Check input data
@@ -79,7 +86,6 @@ get_Quote <- function(
 
   ## check for correct ID and generate qoute
   if(length(ID) < 1 | ID > nrow(quotes)) {
-
     quote.out <- "Sorry, but this was an impossible task!"
 
   } else {

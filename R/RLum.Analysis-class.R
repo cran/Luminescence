@@ -25,7 +25,7 @@ NULL
 #' @section Objects from the Class:
 #' Objects can be created by calls of the form `set_RLum("RLum.Analysis", ...)`.
 #'
-#' @section Class version: 0.4.14
+#' @section Class version: 0.4.15
 #'
 #' @author
 #' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
@@ -70,7 +70,7 @@ setClass("RLum.Analysis",
 
 
 ####################################################################################################
-###as()
+# as() -----------------------------------------------------------------------------------------
 ####################################################################################################
 ##LIST
 ##COERCE RLum.Analyse >> list AND list >> RLum.Analysis
@@ -110,7 +110,7 @@ setAs("RLum.Analysis", "list",
 
 
 ####################################################################################################
-###show()
+# show() --------------------------------------------------------------------------------------
 ####################################################################################################
 #' @describeIn RLum.Analysis
 #' Show structure of `RLum.Analysis` object
@@ -120,6 +120,7 @@ setAs("RLum.Analysis", "list",
 setMethod("show",
           signature(object = "RLum.Analysis"),
           function(object){
+
 
             ##print
             cat("\n [RLum.Analysis-class]")
@@ -159,7 +160,6 @@ setMethod("show",
                 ##create terminal output
                 terminal_output <-
                   vapply(1:length(object@records),  function(i) {
-
                     if (names(table(temp)[x]) == is(object@records[[i]])[1]) {
                       if (i %% temp.width == 0 & i != length(object@records)) {
                         assign(x = "linebreak", value = TRUE, envir = env)
@@ -168,9 +168,11 @@ setMethod("show",
 
                       ##FIRST
                       first <-  paste0("#", i, " ", object@records[[i]]@recordType)
+
                       ##LAST
                       if (i < length(object@records) &&
                           !is.null(object@records[[i]]@info[["parentID"]]) &&
+                          !is.null(object@records[[i + 1]]@info[["parentID"]]) &&
                           (object@records[[i]]@info[["parentID"]] ==
                            object@records[[i+1]]@info[["parentID"]])) {
                         last <- " <> "
@@ -209,7 +211,6 @@ setMethod("show",
               })
 
             }else{
-
               cat("\n\t >> This is an empty object, which cannot be used for further analysis! <<")
 
             }
@@ -219,9 +220,7 @@ setMethod("show",
 )##end show method
 
 
-####################################################################################################
-###set_RLum()
-####################################################################################################
+# set_RLum() ----------------------------------------------------------------------------------
 #' @describeIn RLum.Analysis
 #' Construction method for [RLum.Analysis-class] objects.
 #'
@@ -256,22 +255,20 @@ setMethod("show",
 setMethod(
   "set_RLum",
   signature = "RLum.Analysis",
-
-  definition = function(class,
-                        originator,
-                        .uid,
-                        .pid,
-                        protocol = NA_character_,
-                        records = list(),
-                        info = list()
-                        ) {
+  definition = function(
+    class,
+    originator,
+    .uid,
+    .pid,
+    protocol = NA_character_,
+    records = list(),
+    info = list()) {
 
     ##produce empty class object
     newRLumAnalysis <- new(Class = "RLum.Analysis")
 
     ##allow self set to reset an RLum.Analysis object
-    if(is(records, "RLum.Analysis")){
-
+    if(class(records) == "RLum.Analysis"){
       #fill slots (this is much faster than the old code!)
       newRLumAnalysis@protocol <- if(missing(protocol)){records@protocol}else{protocol}
       newRLumAnalysis@originator <- originator
@@ -282,7 +279,6 @@ setMethod(
 
 
     }else{
-
       #fill slots (this is much faster than the old code!)
       newRLumAnalysis@protocol <- protocol
       newRLumAnalysis@originator <- originator
@@ -298,9 +294,7 @@ setMethod(
   }
 )
 
-####################################################################################################
-###get_RLum()
-####################################################################################################
+# get_RLum() ----------------------------------------------------------------------------------
 #' @describeIn RLum.Analysis
 #' Accessor method for RLum.Analysis object.
 #'
@@ -770,7 +764,7 @@ setMethod("structure_RLum",
 
 
 ####################################################################################################
-###length_RLum()
+# length_RLum() -------------------------------------------------------------------------------
 ####################################################################################################
 #' @describeIn RLum.Analysis
 #' Returns the length of the object, i.e., number of stored records.

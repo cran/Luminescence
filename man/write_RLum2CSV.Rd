@@ -4,7 +4,8 @@
 \alias{write_RLum2CSV}
 \title{Export RLum-objects to CSV}
 \usage{
-write_RLum2CSV(object, path = NULL, prefix = "", export = TRUE, ...)
+write_RLum2CSV(object, path = NULL, prefix = "", export = TRUE,
+  compact = TRUE, ...)
 }
 \arguments{
 \item{object}{\linkS4class{RLum} or a \link{list} of \code{RLum} objects (\strong{required}):
@@ -22,6 +23,12 @@ optional prefix to name the files. This prefix is valid for all written files}
 enable or disable the file export. If set to \code{FALSE} nothing is written to
 the file connection, but a list comprising objects of type \link{data.frame} and \link{matrix}
 is returned instead}
+
+\item{compact}{\link{logical} (\emph{with default}): if \code{TRUE} (the default) the output will be more
+simple but less comprehensive, means not all elements in the objects will be fully broken down.
+This is in particular useful for writing \code{RLum.Results} objects to CSV-files, such objects
+can be rather complex and not all information are needed in a CSV-file or can be meaningful translated
+to it.}
 
 \item{...}{further arguments that will be passed to the function
 \link[utils:write.table]{utils::write.table}. All arguments except the argument \code{file} are supported}
@@ -48,23 +55,24 @@ If the input is a \link{list} of objects all explicit function arguments can be 
 as \link{list}.
 }
 \section{Function version}{
- 0.1.1 (2018-01-21 17:22:38)
+ 0.2.0 (2019-02-13 19:55:51)
 }
 
 \examples{
 
-##transform values to a list
+##transform values to a list (and do not write)
 data(ExampleData.BINfileData, envir = environment())
 object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)[[1]]
 write_RLum2CSV(object, export = FALSE)
 
 \dontrun{
 
-##export data to CSV-files in the working directory;
-##BE CAREFUL, this example creates many files on your file system
-data(ExampleData.BINfileData, envir = environment())
-object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)[[1]]
-write_RLum2CSV(object, export = FALSE)
+##create temporary filepath
+##(for usage replace by own path)
+temp_file <- tempfile(pattern = "output", fileext = ".csv")
+
+##write CSV-file to working directory
+write_RLum2CSV(temp_file)
 
 }
 
@@ -74,11 +82,11 @@ write_RLum2CSV(object, export = FALSE)
 \link[utils:write.table]{utils::write.table}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 \cr R Luminescence Package Team} 
 
 \section{How to cite}{
-Kreutzer, S. (2018). write_RLum2CSV(): Export RLum-objects to CSV. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.6. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S. (2019). write_RLum2CSV(): Export RLum-objects to CSV. Function version 0.2.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
 }
 
 \keyword{IO}

@@ -48,11 +48,11 @@ regular expression to find and extract all relevant information. See \strong{not
 \note{
 Because this function relies heavily on regular expressions to parse
 PSL files it is currently only in beta status. If the routine fails to import
-a specific PSL file please report to \href{mailto:christoph.burow@uni-koeln.de}{christoph.burow@uni-koeln.de} so the
+a specific PSL file please report to \href{mailto:christoph.burow@gmx.net}{christoph.burow@gmx.net} so the
 function can be updated.
 }
 \section{Function version}{
- 0.0.1 (2018-01-21 17:22:38)
+ 0.0.1 (2019-01-15 15:04:23)
 }
 
 \examples{
@@ -73,7 +73,7 @@ Christoph Burow, University of Cologne (Germany)
 \cr R Luminescence Package Team} 
 
 \section{How to cite}{
-Burow, C. (2018). read_PSL2R(): Import PSL files to R. Function version 0.0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.6. https://CRAN.R-project.org/package=Luminescence
+Burow, C. (2019). read_PSL2R(): Import PSL files to R. Function version 0.0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
 }
 
 \keyword{IO}

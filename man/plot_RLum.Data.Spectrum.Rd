@@ -6,8 +6,9 @@
 \usage{
 plot_RLum.Data.Spectrum(object, par.local = TRUE,
   plot.type = "contour", optical.wavelength.colours = TRUE,
-  bg.channels, bin.rows = 1, bin.cols = 1, rug = TRUE,
-  limit_counts = NULL, xaxis.energy = FALSE, legend.text, ...)
+  bg.spectrum = NULL, bg.channels = NULL, bin.rows = 1,
+  bin.cols = 1, norm = NULL, rug = TRUE, limit_counts = NULL,
+  xaxis.energy = FALSE, legend.text, ...)
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Data.Spectrum} or \link{matrix} (\strong{required}):
@@ -27,21 +28,34 @@ or \code{transect} (along the wavelength axis) \cr}
 
 \item{optical.wavelength.colours}{\link{logical} (\emph{with default}):
 use optical wavelength colour palette. Note: For this, the spectrum range is
-limited: \code{c(350,750)}. Own colours can be set with the argument \code{col}.}
+limited: \code{c(350,750)}. Own colours can be set with the argument \code{col}. If you provide already
+binned spectra, the colour assignment is likely to be wrong, since the colour gradients are calculated
+using the bin number.}
+
+\item{bg.spectrum}{\linkS4class{RLum.Data.Spectrum} or \link{matrix} (\emph{optional}): Spectrum
+used for the background subtraction. By definition, the background spectrum should have been
+measured with the same setting as the signal spectrum. If a spectrum is provided, the
+argument \code{bg.channels} works only on the provided background spectrum.}
 
 \item{bg.channels}{\link{vector} (\emph{optional}):
 defines channel for background subtraction If a vector is provided the mean
-of the channels is used for subtraction.
+of the channels is used for subtraction. If a spectrum is provided via \code{bg.spectrum}, this
+argument only works on the \code{bg.spectrum}.
 
 \strong{Note:} Background subtraction is applied prior to channel binning}
 
-\item{bin.rows}{\link{integer} (with defaul):
+\item{bin.rows}{\link{integer} (\emph{with default}):
 allow summing-up wavelength channels (horizontal binning),
-e.g. \code{bin.rows = 2} two channels are summed up}
+e.g. \code{bin.rows = 2} two channels are summed up.
+Binning is applied after the background subtraction.}
 
 \item{bin.cols}{\link{integer} (\emph{with default}):
 allow summing-up channel counts (vertical binning) for plotting,
-e.g. \code{bin.cols = 2} two channels are summed up}
+e.g. \code{bin.cols = 2} two channels are summed up.
+Binning is applied after the background subtraction.}
+
+\item{norm}{\link{character} (\emph{optional}): Normalise data to the maximum (\code{norm = "max"}) or
+minimum (\code{norm = "min"}) count values. The normalisation is applied after the binning.}
 
 \item{rug}{\link{logical} (\emph{with default}):
 enables or disables colour rug. Currently only implemented for plot
@@ -52,8 +66,8 @@ value to limit all count values to this value, i.e. all count values above
 this threshold will be replaced by this threshold. This is helpful
 especially in case of TL-spectra.}
 
-\item{xaxis.energy}{\link{logical} (\emph{with default}):
-enables or disables energy instead of wavelength axis.
+\item{xaxis.energy}{\link{logical} (\emph{with default}): enables or disables energy instead of
+wavelength axis. For the conversion the function \link{convert_Wavelength2Energy} is used.
 
 \strong{Note:} This option means not only simnply redrawing the axis,
 instead the spectrum in terms of intensity is recalculated, s. details.}
@@ -88,30 +102,6 @@ RLum.Data.Spectrum S4 class object
 \item \code{ylim}: Limits values along the time/temperature axis
 \item \code{zlim}: Limits values along the count value axis
 }
-
-\strong{Energy axis re-calculation}
-
-If the argument \code{xaxis.energy = TRUE} is chosen, instead intensity vs.
-wavelength the spectrum is plotted as intensiyt vs. energy. Therefore the
-entire spectrum is re-recaluated (e.g., Appendix 4 in Blasse and Grabmeier,
-1994):
-
-The intensity of the spectrum (z-values) is re-calcualted using the
-following equation:
-
-\deqn{\phi_{E} = \phi_{\lambda} * \lambda^2 / (hc)}
-
-with
-\eqn{\phi_{E}} the intensity per interval of energy \eqn{E} (eV),
-\eqn{\phi_{\lambda}} the intensity per interval of wavelength \eqn{\lambda}
-(nm) and
-\eqn{h} (eV/s) the Planck constant and \eqn{c} (m/s) the velocity of light.
-
-For transforming the wavelength axis (x-values) the equation
-
-\deqn{E = hc/\lambda}
-
-is used. For further details please see the cited the literature.
 
 \strong{Details on the plot functions}
 
@@ -161,7 +151,7 @@ summed up. To select a transect use the \code{xlim} argument, e.g.
 Not all additional arguments (\code{...}) will be passed similarly!
 }
 \section{Function version}{
- 0.5.3 (2018-01-21 17:22:38)
+ 0.6.2 (2019-01-28 23:38:34)
 }
 
 \examples{
@@ -178,20 +168,32 @@ plot_RLum.Data.Spectrum(TL.Spectrum,
                         bin.cols = 1)
 
 ##(2) plot spectrum (3D)
-plot_RLum.Data.Spectrum(TL.Spectrum,
-                        plot.type="persp",
-                        xlim = c(310,750),
-                        ylim = c(0,100),
-                        bin.rows=10,
-                        bin.cols = 1)
+plot_RLum.Data.Spectrum(
+  TL.Spectrum,
+  plot.type="persp",
+  xlim = c(310,750),
+  ylim = c(0,100),
+  bin.rows=10,
+  bin.cols = 1)
 
-##(3) plot multiple lines (2D) - multiple.lines (with ylim)
+##(3) plot spectrum on energy axis
+##please note the background subtraction
 plot_RLum.Data.Spectrum(TL.Spectrum,
-                        plot.type="multiple.lines",
-                        xlim = c(310,750),
-                        ylim = c(0,100),
-                        bin.rows=10,
-                        bin.cols = 1)
+plot.type="persp",
+ylim = c(0,200),
+bin.rows=10,
+bg.channels = 10,
+bin.cols = 1,
+xaxis.energy = TRUE)
+
+##(4) plot multiple lines (2D) - multiple.lines (with ylim)
+plot_RLum.Data.Spectrum(
+ TL.Spectrum,
+ plot.type="multiple.lines",
+ xlim = c(310,750),
+ ylim = c(0,100),
+ bin.rows=10,
+ bin.cols = 1)
 
 \dontrun{
  ##(4) interactive plot using the package plotly ("surface")
@@ -219,20 +221,17 @@ plot_RLum.Data.Spectrum(TL.Spectrum,
 
 }
 
-} 
-
-\section{How to cite}{
-Kreutzer, S. (2018). plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.5.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2018). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.8.6. https://CRAN.R-project.org/package=Luminescence
-}
-
-\references{
-Blasse, G., Grabmaier, B.C., 1994. Luminescent Materials. Springer.
 }
 \seealso{
-\linkS4class{RLum.Data.Spectrum}, \link{plot}, \link{plot_RLum}, \link{persp},
+\linkS4class{RLum.Data.Spectrum}, \link{convert_Wavelength2Energy}, \link{plot}, \link{plot_RLum}, \link{persp},
 \link[plotly:plot_ly]{plotly::plot_ly}, \link{contour}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-\cr R Luminescence Package Team}
+Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
+\cr R Luminescence Package Team} 
+
+\section{How to cite}{
+Kreutzer, S. (2019). plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.6.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
+}
+
 \keyword{aplot}

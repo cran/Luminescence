@@ -1036,7 +1036,7 @@ analyse_IRSAR.RF<- function(
       ##problem: the optimisation routine slightly depends on the chosen input sliding vector
       ##and it might get trapped in a local minimum
       ##therefore we run the algorithm by expanding the sliding vector
-      if(!is.null(vslide_range) && vslide_range != 0){
+      if(!is.null(vslide_range) && any(vslide_range != 0)){
 
         ##even numbers makes it complicated, so let's make it odd if not already the case
         if(length(vslide_range) %% 2 == 0){
@@ -1880,7 +1880,7 @@ analyse_IRSAR.RF<- function(
       ##(0) density plot
       if (method.control.settings$show_density) {
         ##showing the density makes only sense when we see at least 10 data points
-        if (!is.na(De.MC) && length(unique(De.MC)) >= 15) {
+        if (!any(is.na(De.MC)) && length(unique(De.MC)) >= 15) {
 
           ##calculate density De.MC
           density.De.MC <- density(De.MC)

@@ -35,8 +35,8 @@
 #' @param object [RLum.Analysis-class] **(required)**:
 #' measurement input
 #'
-#' @param signal_integral [numeric] (*optional*):
-#' signal integral, used for the signal and the background.
+#' @param signal_integral [numeric] (*optional*): signal integral, used for the signal
+#' and the background. Example: `c(1:10)` for the first 10 channels.
 #' If nothing is provided the full range is used
 #'
 #' @param dose_points [numeric] (*with default*):
@@ -73,7 +73,7 @@
 #' @param plot [logical] (*with default*): enable/disable plot output, if `object` is of type [list],
 #' a [numeric] vector can be provided to limit the plot output to certain aliquots
 #'
-#' @param ... further arguments that can be passed to the plot output
+#' @param ... further arguments that can be passed to the plot output, supported are `norm`, `main`, `mtext`
 #'
 #' @return Function returns results numerically and graphically:
 #'
@@ -108,9 +108,9 @@
 #' - OSL and TL curves, combined on two plots.
 #'
 #'
-#' @section Function version: 0.2.2
+#' @section Function version: 0.2.4
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+#' @author Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @seealso [analyse_Al2O3C_ITC]
 #'
@@ -265,7 +265,11 @@ analyse_Al2O3C_Measurement <- function(
 
       }else{
         temp.correction <- results$data[results$data$POSITION%in%travel_dosimeter,c(1,2)]
-        correction <- c(stats::weighted.mean(temp.correction[,1],temp.correction[,2]), sd(temp.correction[,1]))
+        correction <- c(
+          stats::weighted.mean(
+            x = temp.correction[[1]],
+            w = if(all(temp.correction[[2]]==0)){rep(1, length(temp.correction[[2]]))} else {temp.correction[[2]]}),
+          sd(temp.correction[,1]))
         rm(temp.correction)
 
       }
@@ -648,6 +652,7 @@ analyse_Al2O3C_Measurement <- function(
       ##settings
       plot_settings <- list(
         main = "Sample Carousel Crosstalk",
+        norm = TRUE,
         mtext = ""
       )
 
@@ -666,7 +671,8 @@ analyse_Al2O3C_Measurement <- function(
        xlab = list("Simulation [s]", "Temperature [\u00B0C]"),
        legend.text = list(list("#1 NAT", "#3 REG", "#5 BG"), list("#2 NAT", "#4 REG")),
        legend.pos = list("topright", "topleft"),
-       main = list(paste("ALQ POS:", POSITION, "| OSL"), paste("ALQ POS:", POSITION, "| TL"))
+       main = list(paste("ALQ POS:", POSITION, "| OSL"), paste("ALQ POS:", POSITION, "| TL")),
+       norm = plot_settings$norm
      )
 
 

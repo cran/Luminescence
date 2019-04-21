@@ -2,12 +2,12 @@
 #'
 #' This function exports [RLum-class]-objects to CSV-files using the R function
 #' [utils::write.table]. All [RLum-class]-objects are supported, but the
-#' export is lossy, i.e. the pure numerical values are exported only. Information 
+#' export is lossy, i.e. the pure numerical values are exported only. Information
 #' that cannot be coerced to a [data.frame] or a [matrix] are discarded as well as
 #' metadata.
 #'
-#' However, in combination with the implemented import functions, nearly every 
-#' supported import data format can be exported to CSV-files, this gives a great 
+#' However, in combination with the implemented import functions, nearly every
+#' supported import data format can be exported to CSV-files, this gives a great
 #' deal of freedom in terms of compatibility with other tools.
 #'
 #' **Input is a list of objects**
@@ -15,35 +15,41 @@
 #' If the input is a [list] of objects all explicit function arguments can be provided
 #' as [list].
 #'
-#' @param object [RLum-class] or a [list] of `RLum` objects (**required**): 
+#' @param object [RLum-class] or a [list] of `RLum` objects (**required**):
 #' objects to be written
 #'
-#' @param path [character] (*optional*): 
+#' @param path [character] (*optional*):
 #' character string naming folder for the output to be written. If nothing
-#' is provided `path` will be set to the working directory. 
+#' is provided `path` will be set to the working directory.
 #' **Note:** this argument is ignored if the the argument `export` is set to `FALSE`.
 #'
-#' @param prefix [character] (*with default*): 
+#' @param prefix [character] (*with default*):
 #' optional prefix to name the files. This prefix is valid for all written files
 #'
-#' @param export [logical] (*with default*): 
-#' enable or disable the file export. If set to `FALSE` nothing is written to 
+#' @param export [logical] (*with default*):
+#' enable or disable the file export. If set to `FALSE` nothing is written to
 #' the file connection, but a list comprising objects of type [data.frame] and [matrix]
 #' is returned instead
 #'
-#' @param ... further arguments that will be passed to the function 
+#' @param compact [logical] (*with default*): if `TRUE` (the default) the output will be more
+#' simple but less comprehensive, means not all elements in the objects will be fully broken down.
+#' This is in particular useful for writing `RLum.Results` objects to CSV-files, such objects
+#' can be rather complex and not all information are needed in a CSV-file or can be meaningful translated
+#' to it.
+#'
+#' @param ... further arguments that will be passed to the function
 #' [utils::write.table]. All arguments except the argument `file` are supported
 #'
 #'
-#' @return 
-#' The function returns either a CSV-file (or many of them) or for the 
+#' @return
+#' The function returns either a CSV-file (or many of them) or for the
 #' option `export == FALSE` a list comprising objects of type [data.frame] and [matrix]
 #'
 #'
-#' @section Function version: 0.1.1
+#' @section Function version: 0.2.0
 #'
-#' @author 
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' @author
+#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @seealso [RLum.Analysis-class], [RLum.Data-class], [RLum.Results-class],
 #' [utils::write.table]
@@ -52,18 +58,19 @@
 #'
 #' @examples
 #'
-#' ##transform values to a list
+#' ##transform values to a list (and do not write)
 #' data(ExampleData.BINfileData, envir = environment())
 #' object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)[[1]]
 #' write_RLum2CSV(object, export = FALSE)
 #'
 #' \dontrun{
 #'
-#' ##export data to CSV-files in the working directory;
-#' ##BE CAREFUL, this example creates many files on your file system
-#' data(ExampleData.BINfileData, envir = environment())
-#' object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)[[1]]
-#' write_RLum2CSV(object, export = FALSE)
+#' ##create temporary filepath
+#' ##(for usage replace by own path)
+#' temp_file <- tempfile(pattern = "output", fileext = ".csv")
+#'
+#' ##write CSV-file to working directory
+#' write_RLum2CSV(temp_file)
 #'
 #' }
 #'
@@ -74,6 +81,7 @@ write_RLum2CSV <- function(
   path = NULL,
   prefix = "",
   export = TRUE,
+  compact = TRUE,
   ...
 
 ){
@@ -172,16 +180,40 @@ write_RLum2CSV <- function(
 
     }else if(is(object, "RLum.Results")){
 
-      ##we just try the typical R way and hope the best
-      object_list <- unlist(object@data, recursive = FALSE)
+      ##unlist what ever comes, but do not break structures like matrices, numerics and
+      names <- names(object@data)
+
+      ##get elements
+      object_list <- lapply(object@data, function(e){
+        ##only run something on the list of it is worth it and pack it in the list
+        if(class(e) == "matrix" || class(e) == "numeric" || class(e) == "data.frame")
+          return(list(e))
+
+        ##unlist the rest until the end
+        if(!compact)
+          return(unlist(e))
+
+        ##now we return whatever we have
+        return(e)
+
+      })
+
+      ##now unlist again one level
+      object_list <- unlist(object_list, recursive = FALSE)
 
       ##sort out objects we do not like and we cannot procede ...
-      object_list <- object_list[vapply(object_list, function(x) {
-        is.data.frame(x) |
-          is.matrix(x) |
-          is.numeric(x)
-      }, vector(mode = "logical", length = 1))]
+      object_list_rm <- vapply(object_list, function(x) {
+         class(x) == "matrix" || class(x) == "numeric" || class(x) == "data.frame"
 
+      }, vector(mode = "logical", length = 1))
+
+      ##remove unwanted objects
+      object_list <- object_list[object_list_rm]
+
+
+      ##set warning
+      if(any(!object_list_rm))
+        warning(paste0("[write_RLum2CSV()] ", length(which(!object_list_rm)), " elements could not be converted to a CSV-structure!"), call. = FALSE)
 
       ##adjust the names
       names(object_list) <- paste0(1:length(object_list),"_",names(object_list))

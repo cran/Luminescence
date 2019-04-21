@@ -1,4 +1,4 @@
-#' @include get_RLum.R set_RLum.R names_RLum.R
+#' @include get_RLum.R set_RLum.R names_RLum.R bin_RLum.Data.R
 NULL
 
 #' Class `"RLum.Data.Spectrum"`
@@ -30,10 +30,10 @@ NULL
 #' @section Objects from the Class:
 #' Objects can be created by calls of the form `set_RLum("RLum.Data.Spectrum", ...)`.
 #'
-#' @section Class version: 0.4.0
+#' @section Class version: 0.5.1
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @seealso [RLum-class], [RLum.Data-class], [plot_RLum]
 #'
@@ -303,7 +303,7 @@ setMethod(
 #'
 #' @return
 #'
-#' **`get_RLum`**
+#' **`[get_RLum]`**
 #'
 #' 1. A [matrix] with the spectrum values or
 #' 2. only the info object if `info.object` was set.
@@ -361,7 +361,7 @@ setMethod("get_RLum",
 #'
 #' @return
 #'
-#' **`names_RLum`**
+#' **`[names_RLum]`**
 #'
 #' The names of the info objects
 #'
@@ -373,3 +373,65 @@ setMethod("names_RLum",
             names(object@info)
 
           })
+
+####################################################################################################
+###bin_RLum.Data()
+####################################################################################################
+#' @describeIn RLum.Data.Spectrum
+#' Allows binning of RLum.Data.Spectrum data. Count values and values on the x-axis are summed-up;
+#' for wavalength/energy values the mean is calculated.
+#'
+#' @param bin_size.col [integer] (*with default*):
+#' set number of channels used for each bin, e.g. `bin_size.col = 2` means that
+#' two channels are binned. Note: The function does not check the input, very large values
+#' mean a full column binning (a single sum)
+#'
+#' @param bin_size.row [integer] (*with default*):
+#' set number of channels used for each bin, e.g. `bin_size.row = 2` means that
+#' two channels are binned. Note: The function does not check the input, very large values
+#' mean a full row binning (a single sum)
+#'
+#' @return
+#'
+#' **`[bin_RLum.Data]`**
+#'
+#' Same object as input, after applying the binning.
+#'
+#' @md
+#' @export
+setMethod(f = "bin_RLum.Data",
+          signature = "RLum.Data.Spectrum",
+          function(object, bin_size.col = 1, bin_size.row = 1) {
+
+            ##makee sure that we have no input problems
+            if(class(bin_size.col) != "numeric" || class(bin_size.row) != "numeric"){
+              stop("[bin_RLum.Data()] 'bin_size.row' and 'bin_size.col' must be of class 'numeric'!",
+                   call. = FALSE)
+            }
+
+            ##make sure that we do not get in trouble with negative values
+            bin_size.col <- abs(bin_size.col)
+            bin_size.row <- abs(bin_size.row)
+
+            ##perform binning
+            ##we want to be efficient, so we start
+            ##with the larger object
+            if(bin_size.row > bin_size.col){
+              ##row binning first
+              m <- .matrix_binning(object@data, bin_size = bin_size.row, bin_col = FALSE, names = "mean")
+              m <- .matrix_binning(m, bin_size = bin_size.col, bin_col = TRUE, names = "groups")
+
+            }else{
+              ##column binning first
+              m <- .matrix_binning(object@data, bin_size = bin_size.col, bin_col = TRUE, names = "groups")
+              m <- .matrix_binning(m, bin_size = bin_size.row, bin_col = FALSE, names = "mean")
+
+            }
+
+            ##write back to object
+            object@data <- m
+
+            ##return object
+            return(object)
+          })
+

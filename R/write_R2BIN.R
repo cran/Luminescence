@@ -1,4 +1,4 @@
-#' Export Risoe.BINfileData into Risoe BIN-file
+#' Export Risoe.BINfileData into Risø BIN/BINX-file
 #'
 #' Exports a Risoe.BINfileData object in a *.bin or *.binx file that can be
 #' opened by the Analyst software or other Risoe software.
@@ -44,20 +44,20 @@
 #'
 #' The validity of the file path is not further checked. BIN-file conversions
 #' using the argument `version` may be a lossy conversion, depending on the
-#' chosen input andoutput data (e.g., conversion from version 08 to 07 to 06 to 04 or 03).
+#' chosen input andoutput data (e.g., conversion from version 08 to 07 to 06 to 05 to 04 or 03).
 #'
 #' **Warning**
 #'
 #' Although the coding was done carefully it seems that the BIN/BINX-files
-#' produced by Risoe DA 15/20 TL/OSL readers slightly differ on the byte level.
+#' produced by Risø DA 15/20 TL/OSL readers slightly differ on the byte level.
 #' No obvious differences are observed in the METADATA, however, the
 #' BIN/BINX-file may not fully compatible, at least not similar to the once
 #' directly produced by the Risoe readers!
 #'
-#' @section Function version: 0.4.4
+#' @section Function version: 0.5.1
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @note
 #' ROI definitions (introduced in BIN-file version 8) are not supported!
@@ -73,10 +73,19 @@
 #'
 #' @examples
 #'
-#' ##uncomment for usage
+#' \dontrun{
 #'
-#' ##data(ExampleData.BINfileData, envir = environment())
-#' ##write_R2BIN(CWOSL.SAR.Data, file="[your path]/output.bin")
+#' ##load exampled dataset
+#' data(ExampleData.BINfileData, envir = environment())
+#'
+#' ##create temporary filepath
+#' ##(for usage replace by own path)
+#' temp_file <- temp_file <- tempfile(pattern = "output", fileext = ".bin")
+#'
+#' ##export to temporary file path
+#' write_R2BIN(CWOSL.SAR.Data, file = temp_file)
+#'
+#' }
 #'
 #' @md
 #' @export
@@ -91,7 +100,7 @@ write_R2BIN <- function(
   # Config ------------------------------------------------------------------
 
   ##set supported BIN format version
-  VERSION.supported <- as.raw(c(3, 4, 6, 7, 8))
+  VERSION.supported <- as.raw(c(3, 4, 5, 6, 7, 8))
 
   # Check integrity ---------------------------------------------------------
 
@@ -206,6 +215,7 @@ write_R2BIN <- function(
                                 "08" = 507,
                                 "07" = 447,
                                 "06" = 447,
+                                "05" = 423,
                                 "04" = 272,
                                 "03" = 272)
 
@@ -231,7 +241,7 @@ write_R2BIN <- function(
 
   ##check whether this file can be exported without problems due to the latest specifications
   if(ncol(object@METADATA) != 80){
-    stop("[write_R2BIN()] Your Risoe.BINfileData object seems not to be compatible with the latest specification of this S4-class object. You are probably trying to export a Risoe.BINfileData from your workspace you produced manually or with an old version.")
+    stop("[write_R2BIN()] Your Risoe.BINfileData object seems not to be compatible with the latest specification of this S4-class object. You are probably trying to export a Risoe.BINfileData from your workspace you produced manually or with an old version.", call. = FALSE)
 
   }
 
@@ -248,7 +258,7 @@ write_R2BIN <- function(
   }
 
   ##CHECK file name for version == 06 it has to be *.binx and correct for it
-  if(version == 06 | version == 07 | version == 08){
+  if(version == 05 | version == 06 | version == 07 | version == 08){
 
     ##grep file ending
     temp.file.name <- unlist(strsplit(file, "[:.:]"))
@@ -318,8 +328,7 @@ write_R2BIN <- function(
 
   ##COMMENT
   if(max(nchar(as.character(object@METADATA[,"COMMENT"]), type="bytes"))>80){
-
-    stop("[write_R2BIN()] 'COMMENT' exceed storage limit!")
+    stop("[write_R2BIN()] 'COMMENT' exceeds storage limit!", call. = FALSE)
 
   }
 
@@ -403,11 +412,16 @@ write_R2BIN <- function(
     })}
 
   ##TIME
-  object@METADATA[,"TIME"] <- sapply(1:length(object@METADATA[,"TIME"]),function(x){
+  object@METADATA[,"TIME"] <- vapply(1:length(object@METADATA[["TIME"]]),function(x){
+    if(is.na(object@METADATA[["TIME"]][x])){
+      "000000"
 
-    as.character(gsub(":","",object@METADATA[x,"TIME"]))
+    }else{
+      as.character(gsub(":","",object@METADATA[["TIME"]][x]))
 
-  })
+    }
+
+  }, character(1))
 
   ##TAG and SEL
   ##in TAG information on the SEL are storred, here the values are copied to TAG
@@ -878,9 +892,9 @@ write_R2BIN <- function(
     }
   }
   ## ====================================================
-  ## version 06
+  ## version > 06
 
-  if(version == 06 | version == 07 | version == 08){
+  if(version == 05 | version == 06 | version == 07 | version == 08){
 
     ##start loop for export BIN data
     while(ID<=n.records) {
@@ -1196,11 +1210,20 @@ write_R2BIN <- function(
                endian="little")
 
       ##IRR_DOSERATE, IRR_DOSERATEERR
-      writeBin(c(as.double(object@METADATA[ID,"IRR_DOSERATE"]),
-                 as.double(object@METADATA[ID,"IRR_DOSERATEERR"])),
-               con,
-               size = 4,
-               endian="little")
+      if(version == 05){
+        writeBin(as.double(object@METADATA[ID,"IRR_DOSERATE"]),
+                 con,
+                 size = 4,
+                 endian="little")
+
+      }else{
+        writeBin(c(as.double(object@METADATA[ID,"IRR_DOSERATE"]),
+                   as.double(object@METADATA[ID,"IRR_DOSERATEERR"])),
+                 con,
+                 size = 4,
+                 endian="little")
+
+      }
 
       ##TIMESINCEIRR
       writeBin(c(as.integer(object@METADATA[ID,"TIMESINCEIRR"])),
@@ -1264,7 +1287,21 @@ write_R2BIN <- function(
 
 
       ##add version support for V7
-      if(version == 06){
+      if(version == 05){
+        ##RESERVED 2
+        if(length(object@.RESERVED) == 0 || version.original != version){
+          writeBin(raw(length=4),
+                   con,
+                   size = 1,
+                   endian="little")
+        }else{
+          writeBin(object@.RESERVED[[ID]][[2]],
+                   con,
+                   size = 1,
+                   endian="little")
+        }
+
+      }else if(version == 06){
 
         ##RESERVED 2
         if(length(object@.RESERVED) == 0 || version.original != version){
@@ -1273,7 +1310,6 @@ write_R2BIN <- function(
                    size = 1,
                    endian="little")
         }else{
-
           writeBin(object@.RESERVED[[ID]][[2]],
                    con,
                    size = 1,

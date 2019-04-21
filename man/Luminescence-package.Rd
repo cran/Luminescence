@@ -6,19 +6,16 @@
 \alias{Luminescence}
 \title{Comprehensive Luminescence Dating Data Analysis}
 \description{
+\if{html}{
+\figure{RL_Logo.png}{options: width="50px" alt="r-luminescence.org"}\cr
+\emph{R Luminescence Developer Team}
+}
+}
+\details{
 A collection of various R functions for the purpose of Luminescence dating
 data analysis. This includes, amongst others, data import, export,
 application of age models, curve deconvolution, sequence analysis and
 plotting of equivalent dose distributions.
-}
-\details{
-\tabular{ll}{
-\strong{Package:} \tab Luminescence \cr
-\strong{Type:} \tab Package \cr
-\strong{Version:} \tab 0.8.6 \cr
-\strong{Date:} \tab 2018-10-05 \cr
-\strong{License:} \tab GPL-3 \cr
-}
 }
 \references{
 Dietze, M., Kreutzer, S., Fuchs, M.C., Burow, C., Fischer, M.,
@@ -27,47 +24,48 @@ Ancient TL, 31 (1), 11-18.
 
 Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2016. The abanico plot:
 visualising chronometric data with individual standard errors. Quaternary Geochronology 31, 1-7.
-http://dx.doi.org/10.1016/j.quageo.2015.09.003
+https://doi.org/10.1016/j.quageo.2015.09.003
 
 Fuchs, M.C., Kreutzer, S., Burow, C., Dietze, M., Fischer, M., Schmidt, C.,
 Fuchs, M., 2015. Data processing in luminescence dating analysis: An
 exemplary workflow using the R package 'Luminescence'. Quaternary
-International, 362,8-13. http://dx.doi.org/10.1016/j.quaint.2014.06.034
+International, 362,8-13. https://doi.org/10.1016/j.quaint.2014.06.034
 
 Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M.,
 2012. Introducing an R package for luminescence dating analysis. Ancient TL,
 30 (1), 1-8.
 
-Kreutzer, S., Martin, L., Guérin, G., Tribolo, C., Selva, P., Mercier, N., 2018.
-Environmental Dose Rate Determination Using a Passive Dosimeter:
-Techniques and Workflow for alpha-Al2O3:C Chips. Geochronometria 45, 56-67.
-http://dx.doi.org/10.1515/geochr-2015-0086
-
 Mercier, N., Kreutzer, S., Christophe, C., Guérin, G., Guibert, P., Lahaye, C., Lanos, P., Philippe, A.,
 Tribolo, C., 2016. Bayesian statistics in luminescence dating: The ’baSAR’-model and its
-implementation in the R package ’Luminescence’. Ancient TL 34 (2), 14–21.
+implementation in the R package ’Luminescence’. Ancient TL 34 (2), 14-21.
 
 Smedley, R.K., 2015. A new R function for the Internal External Uncertainty (IEU) model.
 Ancient TL, 33 (1), 16-21.
+
+King, E.G., Burow, C., Roberts, H., Pearce, N.J.G., 2018. Age determination
+using feldspar: evaluating fading-correction model performance. Radiation Measurements 119, 58-73.
+https://doi.org/10.1016/j.radmeas.2018.07.013
 }
 \author{
 \strong{Full list of authors and contributors} (alphabetic order)
 
 \tabular{ll}{
 Christoph Burow \tab \emph{University of Cologne, Germany}* \cr
-Claire Christophe \tab \emph{IRAMAT-CRP2A, Université Bordeaux Montaigne, France} \cr
+Claire Christophe \tab \emph{IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne, France} \cr
 Michael Dietze \tab \emph{GFZ Helmholtz Centre Potsdam, Germany} \cr
 Julie Durcan \tab \emph{University of Oxford, United Kingdom} \cr
 Manfred Fischer\tab \emph{University of Bayreuth, Germany} \cr
 Margret C. Fuchs \tab \emph{Helmholtz-Zentrum Dresden-Rossendorf, Helmholtz-Institute Freiberg for Resource Technology, Freiberg, Germany} \cr
-Johannes Friedrich \tab \emph{University of Bayreuth, Germany} \cr
-Guillaume Guérin \tab \emph{IRAMAT-CRP2A, Université Bordeaux Montaigne, France} \cr
-Georgina E. King \tab \emph{Institute of Geological Sciences, University of Bern, Switzerland} \cr
-Sebastian Kreutzer \tab \emph{IRAMAT-CRP2A, Université Bordeaux Montaigne, France} \cr
-Norbert Mercier \tab \emph{IRAMAT-CRP2A, Université Bordeaux Montaigne, France} \cr
-Anne Philippe \tab  \emph{Universite de Nantes and ANJA INRIA, Rennes, France} \cr
-Christoph Schmidt \tab \emph{University of Bayreuth, Germany} \cr
+Martin Autzen \tab \emph{DTU NUTECH Center for Nuclear Technologies} \cr
+Johannes Friedrich \tab \emph{Chair of Geomorphology, University of Bayreuth, Germany} \cr
+Guillaume Guérin \tab \emph{IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne, France} \cr
+Georgina E. King \tab \emph{University of Lausanne, Switzerland} \cr
+Sebastian Kreutzer \tab \emph{IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne, France} \cr
+Norbert Mercier \tab \emph{IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne, France} \cr
+Svenja Riedesel \tab \emph{Aberystwyth University, United Kingdom} \cr
+Christoph Schmidt \tab \emph{Chair of Geomorophology, University of Bayreuth, Germany} \cr
 Rachel K. Smedley \tab \emph{Liverpool University, United Kingdom} \cr
+Anne Philippe \tab  \emph{Universite de Nantes and ANJA INRIA, Rennes, France} \cr
 Antoine Zink \tab \emph{C2RMF, Palais du Louvre, Paris, France}
 }
 
@@ -103,19 +101,21 @@ visit our project website (link below).
 \item \url{https://cran.r-project.org/package=RLumShiny}
 \item \url{http://shiny.r-luminescence.org}
 \item \url{https://cran.r-project.org/package=RLumModel}
-\item \url{http://model.r-luminescence.org}
 }
 
 \strong{Package maintainer}
 
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne, Pessac, France,\cr
+Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS- Université Bordeaux Montaigne, France,\cr
 \email{sebastian.kreutzer@u-bordeaux-montaigne.fr}
 
-\strong{Acknowledgement}
+\strong{Funding}
 
 Cooperation and personal exchange between the developers is gratefully
 funded by the DFG (SCHM 3051/3-1) in the framework of the program
 "Scientific Networks". Project title: "RLum.Network: Ein
 Wissenschaftsnetzwerk zur Analyse von Lumineszenzdaten mit R" (2014-2018)
+
+Between 2014--2019, the work of Sebastian Kreutzer as maintainer of the package was supported
+by LabEx LaScArBxSK (ANR - n. ANR-10-LABX-52).
 }
 \keyword{package}

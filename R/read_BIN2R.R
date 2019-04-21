@@ -1,4 +1,4 @@
-#' Import Risoe BIN-file into R
+#' Import Risø BIN/BINX-files into R
 #'
 #' Import a *.bin or a *.binx file produced by a Risoe DA15 and DA20 TL/OSL
 #' reader into R.
@@ -6,7 +6,7 @@
 #' The binary data file is parsed byte by byte following the data structure
 #' published in the Appendices of the Analyst manual p. 42.
 #'
-#' For the general BIN-file structure, the reader is referred to the
+#' For the general BIN/BINX-file structure, the reader is referred to the
 #' Risoe website: [http://www.nutech.dtu.dk/]()
 #'
 #' @param file [character] or [list] (**required**): path and file name of the
@@ -85,17 +85,18 @@
 #' internal coercing is done using the function [Risoe.BINfileData2RLum.Analysis]
 #'
 #' @note
-#' The function works for BIN/BINX-format versions 03, 04, 06, 07 and 08. The
+#' The function works for BIN/BINX-format versions 03, 04, 05, 06, 07 and 08. The
 #' version number depends on the used Sequence Editor.
 #'
 #' **ROI data sets introduced with BIN-file version 8 are not supported and skipped durint import.**
 #'
-#' @section Function version: 0.15.7
+#' @section Function version: 0.16.1
 #'
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)\cr
-#' Margret C. Fuchs, HZDR Freiberg, (Germany)
+#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)\cr
+#' Margret C. Fuchs, HZDR Freiberg, (Germany) \cr
+#' based on information provided by Torben Lapp and Karsten Bracht Nielsen (Risø DTU, Denmark)
 #'
 #'
 #' @seealso [write_R2BIN], [Risoe.BINfileData-class],
@@ -152,21 +153,16 @@ read_BIN2R <- function(
             "[read_BIN2R()] Directory detected, trying to extract '*.bin'/'*.binx' files ...\n"
           )
         }
-        file <-
-          as.list(c(
-            dir(
-              file, recursive = FALSE, pattern = ".bin", full.names = TRUE,
-            ),
-            dir(
-              file, recursive = FALSE, pattern = ".binx", full.names = TRUE
-            ),
-            dir(
-              file, recursive = FALSE, pattern = ".BIN", full.names = TRUE
-            ),
-            dir(
-              file, recursive = FALSE, pattern = ".BINX", full.names = TRUE
-            )
-          ))
+
+        ##get files
+        file <- as.list(list.files(
+          path = file,
+          recursive = FALSE,
+          pattern = "\\.bin*",
+          full.names = TRUE,
+          ignore.case = TRUE
+        ))
+
 
       }
 
@@ -351,7 +347,7 @@ read_BIN2R <- function(
   # Config ------------------------------------------------------------------
 
   ##set supported BIN format version
-  VERSION.supported <- as.raw(c(03, 04, 06, 07, 08))
+  VERSION.supported <- as.raw(c(03, 04, 05, 06, 07, 08))
 
 
   # Short file parsing to get number of records -------------------------------------------------
@@ -382,10 +378,12 @@ read_BIN2R <- function(
       if(temp.ID > 0){
 
         if(is.null(n.records)){
-          warning(paste0("[read_BIN2R()] BIN-file appears to be corrupt. Import limited to the first ", temp.ID," record(s)."))
+          warning(paste0("[read_BIN2R()] BIN-file appears to be corrupt. Import limited to the first ", temp.ID," record(s)."),
+                  call. = FALSE)
 
         }else{
-          warning(paste0("[read_BIN2R()] BIN-file appears to be corrupt. 'n.records' reset to ", temp.ID,"."))
+          warning(paste0("[read_BIN2R()] BIN-file appears to be corrupt. 'n.records' reset to ", temp.ID,"."),
+                  call. = FALSE)
 
         }
 
@@ -395,10 +393,10 @@ read_BIN2R <- function(
 
       }else{
         ##show error message
-        error.text <- paste("[read_BIN2R()] BIN-format version (",temp.VERSION,") of this file seems to be not supported or the BIN-file is broken.! Supported version numbers are: ",paste(VERSION.supported,collapse=", "),".",sep="")
+        error.text <- paste("[read_BIN2R()] Found BIN/BINX-format version (",temp.VERSION,") is not supported or the BIN/BINX-file is broken.! Supported version numbers are: ",paste(VERSION.supported,collapse=", "),".",sep="")
 
         ##show error
-        stop(error.text)
+        stop(error.text, call. = FALSE)
 
       }
 
@@ -707,7 +705,7 @@ read_BIN2R <- function(
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # BINX FORMAT SUPPORT -----------------------------------------------------
-    if(temp.VERSION == 06 | temp.VERSION == 07 | temp.VERSION == 08){
+    if(temp.VERSION == 05 | temp.VERSION == 06 | temp.VERSION == 07 | temp.VERSION == 08){
 
       ##(1) Header size and strucutre
       ##LENGTH, PREVIOUS, NPOINTS, LTYPE
@@ -816,19 +814,23 @@ read_BIN2R <- function(
       }
 
       ##TIME
-      TIME_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+      TIME_SIZE <- readBin(con, what="int", 1, size=1, endian="little")
 
       ##time size corrections for wrong time formats; set n to 6 for all values
-      ##accoording the handbook of Geoff Duller, 2007
+      ##accoording the handbook by Geoff Duller, 2007
       if(length(TIME_SIZE)>0){
         temp.TIME<-readChar(con, TIME_SIZE, useBytes=TRUE)
+
+        ##correct the mess by others
+        if(nchar(temp.TIME) == 5)
+          temp.TIME <- paste(c("0", temp.TIME), collapse = "")
+
       }else{
         TIME_SIZE <- 0
 
       }
 
       if(6-TIME_SIZE>0){
-
         STEPPING<-readBin(con, what="raw", (6-TIME_SIZE),
                           size=1, endian="little")
       }
@@ -916,7 +918,8 @@ read_BIN2R <- function(
       temp.IRR_DOSERATE <- readBin(con, what="double", 1, size=4, endian="little")
 
       ##IRR_DOSERATEERR
-      temp.IRR_DOSERATEERR <- readBin(con, what="double", 1, size=4, endian="little")
+      if(temp.VERSION != 05)
+        temp.IRR_DOSERATEERR <- readBin(con, what="double", 1, size=4, endian="little")
 
       ##TIMESINCEIRR
       temp.TIMESINCEIRR <- readBin(con, what="integer", 1, size=4, endian="little")
@@ -959,12 +962,14 @@ read_BIN2R <- function(
       ##XRF_DEADTIMEF
       temp.XRF_DEADTIMEF <- readBin(con, what="double", 1, size=4, endian="little")
 
-      ###Account for differences between V6 and V7
+      ###Account for differences between V5, V6 and V7
       if(temp.VERSION == 06){
-
         ##RESERVED
         temp.RESERVED2<-readBin(con, what="raw", 24, size=1, endian="little")
 
+      }else if(temp.VERSION == 05){
+        ##RESERVED
+        temp.RESERVED2<-readBin(con, what="raw", 4, size=1, endian="little")
 
       }else{
 
@@ -1227,7 +1232,6 @@ read_BIN2R <- function(
 
 
     }else{
-
       stop("[read_BIN2R()] Unsupported BIN/BINX-file version.")
 
     }
