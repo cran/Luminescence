@@ -40,9 +40,9 @@ NULL
 #' Objects can be created by calls of the form
 #' `set_RLum(class = "RLum.Data.Curve", ...)`.
 #'
-#' @section Class version: 0.5.0
+#' @section Class version: 0.5.1
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' @author Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @seealso [RLum-class], [RLum.Data-class], [plot_RLum], [merge_RLum]
 #'
@@ -71,12 +71,9 @@ setClass("RLum.Data.Curve",
            )
          )
 
-####################################################################################################
-###as()
-####################################################################################################
+# as() ----------------------------------------------------------------------------------------
 ##LIST
 ##COERCE RLum.Data.Curve >> list AND list >> RLum.Data.Curve
-
 #' as() - RLum-object coercion
 #'
 #' for `[RLum.Data.Curve-class]`
@@ -117,7 +114,6 @@ setAs("list", "RLum.Data.Curve",
 
 setAs("RLum.Data.Curve", "list",
       function(from){
-
           list(x = from@data[,1], y = from@data[,2])
 
       })
@@ -163,10 +159,7 @@ setAs("RLum.Data.Curve", "matrix",
 
       })
 
-
-####################################################################################################
-###show()
-####################################################################################################
+# show() --------------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
 #' Show structure of `RLum.Data.Curve` object
 #'
@@ -177,7 +170,6 @@ setAs("RLum.Data.Curve", "matrix",
 setMethod("show",
           signature(object = "RLum.Data.Curve"),
           function(object){
-
 
             ##print information
             cat("\n [RLum.Data.Curve-class]")
@@ -197,10 +189,7 @@ setMethod("show",
 
 
 
-
-####################################################################################################
-###set_RLum()
-####################################################################################################
+# set_RLum() ----------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
 #' Construction method for RLum.Data.Curve object. The slot info is optional
 #' and predefined as empty list by default.
@@ -226,7 +215,8 @@ setMethod("show",
 #'
 #' @param data [`set_RLum`]; [matrix] (**required**):
 #' raw curve data. If `data` itself is a `RLum.Data.Curve`-object this can be
-#' used to re-construct the object (s. Details)
+#' used to re-construct the object (s. details), i.e. modified parameters except
+#' `.uid`, `.pid` and `originator`. The rest will be subject to copy and paste unless provided.
 #'
 #' @param info [`set_RLum`]; [list] (*optional*):
 #' info elements
@@ -242,57 +232,35 @@ setMethod("show",
 setMethod(
   "set_RLum",
   signature = signature("RLum.Data.Curve"),
-
-  definition = function(class,
-                        originator,
-                        .uid,
-                        .pid,
-                        recordType = NA_character_,
-                        curveType = NA_character_,
-                        data = matrix(0, ncol = 2),
-                        info = list()) {
+  definition = function(
+    class,
+    originator,
+    .uid,
+    .pid,
+    recordType = NA_character_,
+    curveType = NA_character_,
+    data = matrix(0, ncol = 2),
+    info = list()) {
 
     ##The case where an RLum.Data.Curve object can be provided
     ##with this RLum.Data.Curve objects can be provided to be reconstructed
     if (is(data, "RLum.Data.Curve")) {
-
       ##check for missing curveType
-      if (missing(curveType)) {
+      if (missing(curveType))
         curveType <- data@curveType
 
-      }
-
       ##check for missing recordType
-      if(missing(recordType)){
+      if(missing(recordType))
         recordType <- data@recordType
-
-      }
 
       ##check for missing data ... not possible as data is the object itself
 
       ##check for missing info
-      if(missing(info)){
-       info <- data@info
+      if(missing(info))
+        info <- data@info
 
-      }
-
-      ##check for missing .uid
-      if(missing(.uid)){
-        .uid <- data@.uid
-
-      }
-
-      ##check for missing .pid
-      if(missing(.pid)){
-        .pid <- data@.pid
-
-      }
-
-      ##check for missing originator
-      if(missing(originator)){
-        originator <- data@originator
-
-      }
+      ##check for missing .uid and .pid and originator
+      ##>> no this is always taken from the old object here
 
       ##set empty class from object
       newRLumDataCurve <- new("RLum.Data.Curve")
@@ -302,13 +270,11 @@ setMethod(
       newRLumDataCurve@curveType <- curveType
       newRLumDataCurve@data <- data@data
       newRLumDataCurve@info <- info
-      newRLumDataCurve@originator <- originator
-      newRLumDataCurve@.uid <- .uid
-      newRLumDataCurve@.pid <- .pid
+      newRLumDataCurve@originator <- data@originator
+      newRLumDataCurve@.uid <- data@.uid
+      newRLumDataCurve@.pid <- data@.pid
 
-      return(newRLumDataCurve)
-
-    }else{
+    } else {
 
       ##set empty class form object
       newRLumDataCurve <- new("RLum.Data.Curve")
@@ -322,16 +288,12 @@ setMethod(
       newRLumDataCurve@.uid <- .uid
       newRLumDataCurve@.pid <- .pid
 
-      return(newRLumDataCurve)
-
     }
-
+    return(newRLumDataCurve)
   }
 )
 
-####################################################################################################
-###get_RLum()
-####################################################################################################
+# get_RLum() ----------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
 #' Accessor method for RLum.Data.Curve object. The argument info.object is
 #' optional to directly access the info elements. If no info element name is
@@ -355,10 +317,6 @@ setMethod(
 setMethod("get_RLum",
           signature("RLum.Data.Curve"),
           definition = function(object, info.object = NULL) {
-
-           ##Check if function is of type RLum.Data.Curve
-           if(class(object) != "RLum.Data.Curve")
-             stop("[get_RLum()] Function valid for 'RLum.Data.Curve' objects only!", call. = FALSE)
 
            ##if info.object == NULL just show the curve values
            if(!is.null(info.object)) {
@@ -390,9 +348,8 @@ setMethod("get_RLum",
              }
           })
 
-####################################################################################################
-###length_RLum()
-####################################################################################################
+
+# length_RLum() -------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
 #' Returns the length of the curve object, which is the maximum of the
 #' value time/temperature of the curve (corresponding to the stimulation length)
@@ -412,9 +369,8 @@ setMethod("length_RLum",
 
           })
 
-####################################################################################################
-###names_RLum()
-####################################################################################################
+
+# names_RLum() --------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
 #' Returns the names info elements coming along with this curve object
 #'
@@ -432,9 +388,8 @@ setMethod("names_RLum",
 
           })
 
-####################################################################################################
-###bin_RLum.Data()
-####################################################################################################
+
+# bin_RLum.Data() -----------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
 #' Allows binning of specific objects
 #'
@@ -491,9 +446,8 @@ setMethod(f = "bin_RLum.Data",
 
           })
 
-####################################################################################################
-###smooth_RLum()
-####################################################################################################
+
+# smooth_RLum() -------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
 #' Smoothing of RLum.Data.Curve objects using the function [zoo::rollmean] or [zoo::rollmedian][zoo::rollmean].
 #' In particular the internal function `.smoothing` is used.

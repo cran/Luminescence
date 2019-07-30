@@ -15,9 +15,10 @@ analyse_baSAR(object, XLS_file = NULL, aliquot_range = NULL,
   plot_reduced = TRUE, plot.single = FALSE, verbose = TRUE, ...)
 }
 \arguments{
-\item{object}{\linkS4class{Risoe.BINfileData}, \linkS4class{RLum.Results}, \linkS4class{RLum.Analysis} \link{character} or \link{list} (\strong{required}):
+\item{object}{\linkS4class{Risoe.BINfileData}, \linkS4class{RLum.Results}, \link{list} of \linkS4class{RLum.Analysis},
+\link{character} or \link{list} (\strong{required}):
 input object used for the Bayesian analysis. If a \code{character} is provided the function
-assumes a file connection and tries to import a BIN-file using the provided path. If a \code{list} is
+assumes a file connection and tries to import a BIN/BINX-file using the provided path. If a \code{list} is
 provided the list can only contain either \code{Risoe.BINfileData} objects or \code{character}s
 providing a file connection. Mixing of both types is not allowed. If an \linkS4class{RLum.Results}
 is provided the function directly starts with the Bayesian Analysis (see details)}
@@ -92,8 +93,8 @@ ignored and set to \code{'user_defined'}}
 number of iterations for the Markov chain Monte Carlo (MCMC) simulations}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-fit method used for fitting the growth curve using the function
-\link{plot_GrowthCurve}. Here supported methods: \code{EXP}, \code{EXP+LIN} and \code{LIN}}
+equation used for the fitting of the dose-response curve using the function
+\link{plot_GrowthCurve} and then for the Bayesian modelling. Here supported methods: \code{EXP}, \code{EXP+LIN} and \code{LIN}}
 
 \item{fit.force_through_origin}{\link{logical} (\emph{with default}):
 force fitting through origin}
@@ -341,7 +342,7 @@ Example for two BIN-files: \code{source_doserate = list(c(0.04, 0.006), c(0.05, 
 \strong{The function is currently limited to work with standard Risoe BIN-files only!}
 }
 \section{Function version}{
- 0.1.33 (2018-06-06 14:45:55)
+ 0.1.33
 }
 
 \examples{
@@ -392,7 +393,7 @@ list(
 } 
 
 \section{How to cite}{
-Mercier, N., Kreutzer, S. (2019). analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.33. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
+Mercier, N., Kreutzer, S., 2019. analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.33. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2019. Luminescence: Comprehensive Luminescence Dating Data AnalysisR package version 0.9.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{
@@ -423,5 +424,5 @@ Plummer, M., 2017. JAGS Version 4.3.0 user manual. https://sourceforge.net/proje
 Norbert Mercier, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France) \cr
 Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France) \cr
 The underlying Bayesian model based on a contribution by Combes et al., 2015.
-\cr R Luminescence Package Team}
+, RLum Developer Team}
 \keyword{datagen}

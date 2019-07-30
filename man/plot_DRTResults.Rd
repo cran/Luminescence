@@ -75,7 +75,8 @@ i.e. parameters provided via \code{par()} work}
 \item{na.rm}{\link{logical}: indicating wether \code{NA} values are
 removed before plotting from the input data set}
 
-\item{...}{further arguments and graphical parameters passed to \link{plot}.}
+\item{...}{further arguments and graphical parameters passed to \link{plot}, supported are:
+\code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{main}, \code{cex}, \code{las} and `pch``}
 }
 \value{
 A plot is returned.
@@ -98,7 +99,7 @@ Further data and plot arguments can be added by using the appropriate R
 commands.
 }
 \section{Function version}{
- 0.1.12 (2018-02-23 22:32:54)
+ 0.1.13
 }
 
 \examples{
@@ -166,7 +167,7 @@ plot_DRTResults(values = ExampleData.DeValues$BT998[7:11,],
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M. (2019). plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.12. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., Dietze, M., 2019. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.13. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2019. Luminescence: Comprehensive Luminescence Dating Data AnalysisR package version 0.9.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{
@@ -179,7 +180,7 @@ single-aliquot regeneration dating protocols. Radiation Measurements, 41,
 \link{plot}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)\cr
+Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060 - Université Bordeaux Montaigne (France)\cr
 Michael Dietze, GFZ Potsdam (Germany)
-\cr R Luminescence Package Team}
+, RLum Developer Team}
 \keyword{dplot}

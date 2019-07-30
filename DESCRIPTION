@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
-Title: Comprehensive Luminescence Dating Data Analysis [upcoming]
-Version: 0.9.0.110
-Date: 2019-04-20
+Title: Comprehensive Luminescence Dating Data Analysis
+Version: 0.9.2
+Date: 2019-07-30
 Author: Sebastian Kreutzer [aut, trl, cre, dtc]
     (<https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc]
@@ -22,6 +22,7 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc]
   Guillaume Guerin [ctb] (<https://orcid.org/0000-0001-6298-5579>),
   Svenja Riedesel [ctb] (<https://orcid.org/0000-0003-2936-8776>),
   Martin Autzen [ctb],
+  Pierre Guibert [ctb] (<https://orcid.org/0000-0001-8969-8684>),
   Markus Fuchs [ths]
 Authors@R: c(
     person("Sebastian", "Kreutzer", role = c("aut", "trl", "cre", "dtc"), email = "sebastian.kreutzer@u-bordeaux-montaigne.fr", comment = c(ORCID = "0000-0002-0734-2199")),
@@ -41,6 +42,7 @@ Authors@R: c(
     person("Guillaume", "Guerin", role = c("ctb"), comment = c(ORCID = "0000-0001-6298-5579")),
     person("Svenja", "Riedesel", role = c("ctb"), comment = c(ORCID = "0000-0003-2936-8776")),
     person("Martin", "Autzen", role = c("ctb")),
+    person("Pierre", "Guibert", role = c("ctb"), comment = c(ORCID = "0000-0001-8969-8684")),
     person("Markus", "Fuchs", role = c("ths")))
 Maintainer: Sebastian Kreutzer <sebastian.kreutzer@u-bordeaux-montaigne.fr>
 Description: A collection of various R functions for the purpose of Luminescence
@@ -52,15 +54,15 @@ License: GPL-3
 BugReports: https://github.com/R-Lum/Luminescence/issues
 Depends: R (>= 3.4.0), utils, magrittr (>= 1.5)
 LinkingTo: Rcpp (>= 1.0.0), RcppArmadillo (>= 0.9.300.0.0)
-Imports: bbmle (>= 1.0.20), data.table (>= 1.12.0), DEoptim (>= 2.2-4),
-        httr (>= 1.4.0), matrixStats (>= 0.54.0), methods, minpack.lm
-        (>= 1.2), plotrix (>= 3.7), raster (>= 2.8-0), readxl (>=
-        1.3.0), shape (>= 1.4.3), parallel, XML (>= 3.98-1.9), zoo (>=
-        1.8)
-Suggests: RLumShiny (>= 0.2.2), RLumModel (>= 0.2.2), plotly (>=
-        4.9.0), rmarkdown (>= 1.12), rstudioapi (>= 0.7), rjags (>=
-        4-8), coda (>= 0.19-1), pander (>= 0.6.1), testthat (>= 2.0.0),
-        devtools (>= 2.0.0), R.rsp (>= 0.43.0)
+Imports: interp (>= 1.0), bbmle (>= 1.0.20), data.table (>= 1.12.0),
+        DEoptim (>= 2.2-4), httr (>= 1.4.0), matrixStats (>= 0.54.0),
+        methods, minpack.lm (>= 1.2), plotrix (>= 3.7), raster (>=
+        2.8-0), readxl (>= 1.3.0), shape (>= 1.4.3), parallel, XML (>=
+        3.98-1.9), zoo (>= 1.8)
+Suggests: RLumShiny (>= 0.2.2), plotly (>= 4.9.0), rmarkdown (>= 1.12),
+        rstudioapi (>= 0.7), rjags (>= 4-8), coda (>= 0.19-1), pander
+        (>= 0.6.1), testthat (>= 2.0.0), devtools (>= 2.0.0), R.rsp (>=
+        0.43.0)
 VignetteBuilder: R.rsp
 URL: https://CRAN.R-project.org/package=Luminescence
 Encoding: UTF-8
@@ -72,10 +74,10 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'RLum.Analysis-class.R' 'RLum.Data-class.R' 'bin_RLum.Data.R'
         'RLum.Data.Curve-class.R' 'RLum.Data.Image-class.R'
         'RLum.Data.Spectrum-class.R' 'RLum.Results-class.R'
-        'Risoe.BINfileData2RLum.Analysis.R'
-        'Risoe.BINfileData2RLum.Data.Curve.R' 'set_Risoe.BINfileData.R'
-        'get_Risoe.BINfileData.R' 'RisoeBINfileData-class.R'
-        'Second2Gray.R' 'addins_RLum.R' 'analyse_Al2O3C_CrossTalk.R'
+        'set_Risoe.BINfileData.R' 'get_Risoe.BINfileData.R'
+        'Risoe.BINfileData-class.R' 'Risoe.BINfileData2RLum.Analysis.R'
+        'Risoe.BINfileData2RLum.Data.Curve.R' 'Second2Gray.R'
+        'addins_RLum.R' 'analyse_Al2O3C_CrossTalk.R'
         'analyse_Al2O3C_ITC.R' 'analyse_Al2O3C_Measurement.R'
         'analyse_FadingMeasurement.R' 'analyse_IRSAR.RF.R'
         'analyse_SAR.CWOSL.R' 'analyse_SAR.TL.R' 'analyse_baSAR.R'
@@ -102,11 +104,10 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'merge_RLum.Analysis.R' 'merge_RLum.Data.Curve.R'
         'merge_RLum.R' 'merge_RLum.Results.R'
         'merge_Risoe.BINfileData.R' 'methods_DRAC.R' 'methods_RLum.R'
-        'model_LuminescenceSignals.R' 'plot_AbanicoPlot.R'
-        'plot_DRCSummary.R' 'plot_DRTResults.R' 'plot_DetPlot.R'
-        'plot_FilterCombinations.R' 'plot_GrowthCurve.R'
-        'plot_Histogram.R' 'plot_KDE.R' 'plot_NRt.R'
-        'plot_RLum.Analysis.R' 'plot_RLum.Data.Curve.R'
+        'plot_AbanicoPlot.R' 'plot_DRCSummary.R' 'plot_DRTResults.R'
+        'plot_DetPlot.R' 'plot_FilterCombinations.R'
+        'plot_GrowthCurve.R' 'plot_Histogram.R' 'plot_KDE.R'
+        'plot_NRt.R' 'plot_RLum.Analysis.R' 'plot_RLum.Data.Curve.R'
         'plot_RLum.Data.Image.R' 'plot_RLum.Data.Spectrum.R'
         'plot_RLum.R' 'plot_RLum.Results.R' 'plot_RadialPlot.R'
         'plot_Risoe.BINfileData.R' 'plot_ViolinPlot.R' 'read_BIN2R.R'
@@ -117,6 +118,6 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'zzz.R'
 RoxygenNote: 6.1.1
 NeedsCompilation: yes
-Packaged: 2019-04-20 13:54:39 UTC; kreutzer
+Packaged: 2019-07-30 17:57:25 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2019-04-21 15:20:14 UTC
+Date/Publication: 2019-07-30 21:40:02 UTC

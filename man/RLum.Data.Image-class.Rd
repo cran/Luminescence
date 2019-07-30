@@ -23,8 +23,7 @@
 \item{object}{\code{\link{get_RLum}}, \code{\link{names_RLum}} (\strong{required}):
 an object of class \linkS4class{RLum.Data.Image}}
 
-\item{class}{\code{\link{set_RLum}}; \link{character}:
-name of the \code{RLum} class to create}
+\item{class}{\code{\link{set_RLum}}; \link{character}: name of the \code{RLum} class to create}
 
 \item{originator}{\code{\link{set_RLum}}; \link{character} (\emph{automatic}):
 contains the name of the calling function (the function that produces this object);
@@ -44,7 +43,8 @@ curve type (e.g. "predefined" or "measured")}
 
 \item{data}{\code{\link{set_RLum}}; \link{matrix}:
 raw curve data. If data is of type \code{RLum.Data.Image} this can be used to
-re-construct the object.}
+re-construct the object, i.e. modified parameters except \code{.uid} and \code{.pid}. The rest
+will be subject to copy and paste unless provided.}
 
 \item{info}{\code{\link{set_RLum}}; \link{list}:
 info elements}
@@ -76,11 +76,11 @@ by the function \link{read_SPE2R}
 \item \code{show}: Show structure of \code{RLum.Data.Image} object
 
 \item \code{set_RLum}: Construction method for RLum.Data.Image object. The slot info is optional
-and predefined as empty list by default..
+and predefined as empty list by default.
 
-\item \code{get_RLum}: Accessor method for RLum.Data.Image object. The argument info.object is
+\item \code{get_RLum}: Accessor method for RLum.Data.Image object. The argument \code{info.object} is
 optional to directly access the info elements. If no info element name is
-provided, the raw image data (RasterBrick) will be returned.
+provided, the raw image data (\code{RasterBrick}) will be returned.
 
 \item \code{names_RLum}: Returns the names info elements coming along with this curve object
 }}
@@ -102,13 +102,13 @@ are measured or predefined}
 The class should only contain data for a set of images. For additional
 elements the slot \code{info} can be used.
 }
-\section{Objects from the Class}{
+\section{Objects from the class}{
 
 Objects can be created by calls of the form \code{set_RLum("RLum.Data.Image", ...)}.
 }
 
 \section{Class version}{
- 0.4.0
+ 0.4.2
 }
 
 \examples{
@@ -123,11 +123,11 @@ set_RLum(class = "RLum.Data.Image")
 \linkS4class{RLum}, \linkS4class{RLum.Data}, \link{plot_RLum}, \link{read_SPE2R}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-} 
+Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
+, RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S. (2019). RLum.Data.Image-class(): Class 'RLum.Data.Image'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2019. RLum.Data.Image-class(): Class 'RLum.Data.Image'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2019. Luminescence: Comprehensive Luminescence Dating Data AnalysisR package version 0.9.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \keyword{classes}

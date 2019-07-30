@@ -8,15 +8,17 @@ class objects}
 apply_EfficiencyCorrection(object, spectral.efficiency)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Spectrum} (\strong{required}):
-S4 object of class \code{RLum.Data.Spectrum}}
+\item{object}{\linkS4class{RLum.Data.Spectrum} or \linkS4class{RLum.Analysis} (\strong{required}):
+S4 object of class \code{RLum.Data.Spectrum},  \code{RLum.Analysis}or a \link{list} of such objects. Other objects in
+the list are skipped.}
 
 \item{spectral.efficiency}{\link{data.frame} (\strong{required}):
 Data set containing wavelengths (x-column) and relative spectral response values
-(y-column) in percentage}
+(y-column) (values between 0 and 1). The provided data will be used to correct all spectra if \code{object} is
+a \link{list}}
 }
 \value{
-Returns same object as input (\linkS4class{RLum.Data.Spectrum})
+Returns same object as provided as input
 }
 \description{
 The function allows spectral efficiency corrections for RLum.Data.Spectrum
@@ -37,7 +39,7 @@ sufficiently correct for spectral efficiency of the entire optical system
 (e.g., spectrometer, camera ...).
 }
 \section{Function version}{
- 0.1.2 (2019-01-15 15:36:39)
+ 0.2.0
 }
 
 \examples{
@@ -49,15 +51,15 @@ sufficiently correct for spectral efficiency of the entire optical system
 
 }
 \seealso{
-\linkS4class{RLum.Data.Spectrum}
+\linkS4class{RLum.Data.Spectrum}, \linkS4class{RLum.Analysis}
 }
 \author{
 Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS-Université Bordeaux Montaigne (France)\cr
 Johannes Friedrich, University of Bayreuth (Germany)
-\cr R Luminescence Package Team} 
+, RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Friedrich, J. (2019). apply_EfficiencyCorrection(): Function to apply spectral efficiency correction to RLum.Data.Spectrum S4 class objects. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., Friedrich, J., 2019. apply_EfficiencyCorrection(): Function to apply spectral efficiency correction to RLum.Data.Spectrum S4 class objects. Function version 0.2.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2019. Luminescence: Comprehensive Luminescence Dating Data AnalysisR package version 0.9.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \keyword{manip}

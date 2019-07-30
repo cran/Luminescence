@@ -9,7 +9,7 @@ calc_Lamothe2003(object, dose_rate.envir, dose_rate.source, g_value,
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Results} \link{data.frame} (\strong{required}): Input data for applying the
-fading correction. Alow are (1) \link{data.frame} with three columns (dose, De, De error), (2)
+fading correction. Alow are (1) \link{data.frame} with three columns (dose, LxTx, LxTx error), (2)
 \linkS4class{RLum.Results} object created by the function \link{analyse_SAR.CWOSL} or \link{analyse_pIRIRSequence}}
 
 \item{dose_rate.envir}{\link{numeric} vector of length 2 (\strong{required}): Environmental dose rate in mGy/a}
@@ -63,7 +63,7 @@ by Lamothe et atl., 2003. The function basically adjusts the Ln/Tn values and fi
 curve using the function \link{plot_GrowthCurve}.
 }
 \section{Function version}{
- 0.1.0 (2018-02-02 18:20:28)
+ 0.1.0
 }
 
 \examples{
@@ -101,7 +101,7 @@ results_corr <- calc_Lamothe2003(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Mercier, N. (2019). calc_Lamothe2003(): Apply fading correction after Lamothe et al., 2003. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., Mercier, N., 2019. calc_Lamothe2003(): Apply fading correction after Lamothe et al., 2003. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2019. Luminescence: Comprehensive Luminescence Dating Data AnalysisR package version 0.9.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \references{
@@ -118,5 +118,5 @@ Towards a prediction of long-term anomalous fadingof feldspar IRSL. Radiation Me
 \author{
 Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France), Norbert Mercier,
 IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
-\cr R Luminescence Package Team}
+, RLum Developer Team}
 \keyword{datagen}

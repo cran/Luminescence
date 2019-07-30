@@ -159,9 +159,10 @@
 #' }
 #'
 #'
-#' @param object [Risoe.BINfileData-class], [RLum.Results-class], [RLum.Analysis-class] [character] or [list] (**required**):
+#' @param object [Risoe.BINfileData-class], [RLum.Results-class], [list] of [RLum.Analysis-class],
+#' [character] or [list] (**required**):
 #' input object used for the Bayesian analysis. If a `character` is provided the function
-#' assumes a file connection and tries to import a BIN-file using the provided path. If a `list` is
+#' assumes a file connection and tries to import a BIN/BINX-file using the provided path. If a `list` is
 #' provided the list can only contain either `Risoe.BINfileData` objects or `character`s
 #' providing a file connection. Mixing of both types is not allowed. If an [RLum.Results-class]
 #' is provided the function directly starts with the Bayesian Analysis (see details)
@@ -236,8 +237,8 @@
 #' number of iterations for the Markov chain Monte Carlo (MCMC) simulations
 #'
 #' @param fit.method [character] (*with default*):
-#' fit method used for fitting the growth curve using the function
-#' [plot_GrowthCurve]. Here supported methods: `EXP`, `EXP+LIN` and `LIN`
+#' equation used for the fitting of the dose-response curve using the function
+#' [plot_GrowthCurve] and then for the Bayesian modelling. Here supported methods: `EXP`, `EXP+LIN` and `LIN`
 #'
 #' @param fit.force_through_origin [logical] (*with default*):
 #' force fitting through origin
@@ -939,7 +940,7 @@ analyse_baSAR <- function(
 
 
      ##limit according to aliquot_range
-     ##TODO Take car of the case that this was provided, otherwise more and more is removed!
+     ##TODO Take care of the case that this was provided, otherwise more and more is removed!
      if (!is.null(aliquot_range)) {
        if (max(aliquot_range) <= nrow(object$input_object)) {
          input_object <- object$input_object[aliquot_range, ]
@@ -1011,7 +1012,11 @@ analyse_baSAR <- function(
     ##In case an RLum.Analysis object is provided we try an ugly conversion only
     if(class(object) == "list" && all(vapply(object, function(x){class(x) == "RLum.Analysis"}, logical(1)))){
      if(verbose)
-       cat("[analyse_baSAR()] RLum.Analysis-object detected .. ")
+       cat("[analyse_baSAR()] List of RLum.Analysis-objects detected .. ")
+
+      ##stop for only one element
+      if(length(object) < 2)
+        stop("[analyse_baSAR()] At least two aliquots are needed for the calculation!", call. = FALSE)
 
       ##set number of objects
       if(class(object) == "list"){

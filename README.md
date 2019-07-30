@@ -8,11 +8,11 @@
 # Luminesence <img width=120px src="man/figures/RL_Logo.svg" align="right" />
 
 The R package ‘Luminescence’ by the R-Luminescence Group provides a
-collection of various R functions for luminescence dating data
-analysis.
+collection of various R functions for luminescence dating data analysis.
 
-[![Rdoc](http://www.rdocumentation.org/badges/version/Luminescence)](http://www.rdocumentation.org/packages/Luminescence)
 [![CRAN](http://www.r-pkg.org/badges/version/Luminescence)](https://cran.r-project.org/package=Luminescence)
+[![Rdoc](http://www.rdocumentation.org/badges/version/Luminescence)](http://www.rdocumentation.org/packages/Luminescence)
+
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/Luminescence)](http://www.r-pkg.org/pkg/Luminescence)
 [![Downloads](http://cranlogs.r-pkg.org/badges/Luminescence)](http://www.r-pkg.org/pkg/Luminescence)
 [![Downloads](http://cranlogs.r-pkg.org/badges/last-week/Luminescence)](http://www.r-pkg.org/pkg/Luminescence)
@@ -21,11 +21,17 @@ analysis.
 ### Test performance
 
 [![Build
-status](https://ci.appveyor.com/api/projects/status/jtgqr9a6jajn02y0/branch/master?svg=true)](https://ci.appveyor.com/project/tzerk/luminescence/branch/dev_0.9.0)
+status](https://ci.appveyor.com/api/projects/status/jtgqr9a6jajn02y0/branch/master?svg=true)](https://ci.appveyor.com/project/tzerk/luminescence/branch/master)
 [![Build
-Status](https://travis-ci.org/R-Lum/Luminescence.svg?branch=dev_0.9.0)](https://travis-ci.org/R-Lum/Luminescence)
+Status](https://travis-ci.org/R-Lum/Luminescence.svg?branch=master)](https://travis-ci.org/R-Lum/Luminescence)
 [![Coverage
-Status](https://img.shields.io/codecov/c/github/R-Lum/Luminescence.svg)](https://codecov.io/github/R-Lum/Luminescence?branch=dev_0.9.0)
+Status](https://img.shields.io/codecov/c/github/R-Lum/Luminescence.svg)](https://codecov.io/github/R-Lum/Luminescence?branch=master)
+
+### CRAN check status
+
+| error | fail | warn | note | ok |
+| ----: | ---: | ---: | ---: | -: |
+|     0 |    0 |    0 |    6 |  6 |
 
 ## Social media and other resources
 

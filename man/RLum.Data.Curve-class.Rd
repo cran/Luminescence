@@ -54,7 +54,8 @@ curve type (e.g., "predefined" or "measured")}
 
 \item{data}{\code{\link{set_RLum}}; \link{matrix} (\strong{required}):
 raw curve data. If \code{data} itself is a \code{RLum.Data.Curve}-object this can be
-used to re-construct the object (s. Details)}
+used to re-construct the object (s. details), i.e. modified parameters except
+\code{.uid}, \code{.pid} and \code{originator}. The rest will be subject to copy and paste unless provided.}
 
 \item{info}{\code{\link{set_RLum}}; \link{list} (\emph{optional}):
 info elements}
@@ -166,7 +167,7 @@ Objects can be created by calls of the form
 }
 
 \section{Class version}{
- 0.5.0
+ 0.5.1
 }
 
 \examples{
@@ -181,11 +182,11 @@ set_RLum(class = "RLum.Data.Curve")
 \linkS4class{RLum}, \linkS4class{RLum.Data}, \link{plot_RLum}, \link{merge_RLum}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
-} 
+Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
+, RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S. (2019). RLum.Data.Curve-class(): Class 'RLum.Data.Curve'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J. (2019). Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.0.109. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2019. RLum.Data.Curve-class(): Class 'RLum.Data.Curve'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2019. Luminescence: Comprehensive Luminescence Dating Data AnalysisR package version 0.9.2. https://CRAN.R-project.org/package=Luminescence
 }
 
 \keyword{classes}

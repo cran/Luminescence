@@ -27,13 +27,13 @@ NULL
 #' The class should only contain data for a set of images. For additional
 #' elements the slot `info` can be used.
 #'
-#' @section Objects from the Class:
+#' @section Objects from the class:
 #' Objects can be created by calls of the form `set_RLum("RLum.Data.Image", ...)`.
 #'
-#' @section Class version: 0.4.0
+#' @section Class version: 0.4.2
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @seealso [RLum-class], [RLum.Data-class], [plot_RLum], [read_SPE2R]
 #'
@@ -68,13 +68,10 @@ setClass(
 )
 
 
-####################################################################################################
-###as()
-####################################################################################################
 
+# as() ----------------------------------------------------------------------------------------
 ##DATA.FRAME
 ##COERCE RLum.Data.Image >> data.frame AND data.frame >> RLum.Data.Image
-
 #' as()
 #'
 #' for `[RLum.Data.Image-class]`
@@ -91,28 +88,23 @@ setClass(
 #' @name as
 setAs("data.frame", "RLum.Data.Image",
       function(from,to){
-
         new(to,
             recordType = "unkown curve type",
             curveType = "NA",
-            data = as.matrix(from),
+            data = raster::brick(raster::raster(as.matrix(from))),
             info = list())
       })
 
 setAs("RLum.Data.Image", "data.frame",
-      function(from){
-
-        data.frame(x = from@data@values[seq(1,length(from@data@values), by = 2)],
-                   y = from@data@values[seq(2,length(from@data@values), by = 2)])
-
-      })
+        function(from){
+          as.data.frame(matrix(from@data@data@values[,1], ncol = from@data@ncols))
+        })
 
 
 ##MATRIX
 ##COERCE RLum.Data.Image >> matrix AND matrix >> RLum.Data.Image
 setAs("matrix", "RLum.Data.Image",
       function(from,to){
-
         new(to,
             recordType = "unkown curve type",
             curveType = "NA",
@@ -122,16 +114,12 @@ setAs("matrix", "RLum.Data.Image",
 
 setAs("RLum.Data.Image", "matrix",
       function(from){
-
-        ##only the first object is convertec
-        as.matrix(from[[1]])
-
+        matrix(from@data@data@values[,1], ncol = from@data@ncols)
       })
 
 
-####################################################################################################
-###show()
-####################################################################################################
+
+# show() --------------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Image
 #' Show structure of `RLum.Data.Image` object
 #'
@@ -163,15 +151,13 @@ setMethod("show",
 )
 
 
-####################################################################################################
-###set_RLum()
-####################################################################################################
+
+# set_RLum() ----------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Image
 #' Construction method for RLum.Data.Image object. The slot info is optional
-#' and predefined as empty list by default..
+#' and predefined as empty list by default.
 #'
-#' @param class [`set_RLum`]; [character]:
-#' name of the `RLum` class to create
+#' @param class [`set_RLum`]; [character]: name of the `RLum` class to create
 #'
 #' @param originator [`set_RLum`]; [character] (*automatic*):
 #' contains the name of the calling function (the function that produces this object);
@@ -191,7 +177,8 @@ setMethod("show",
 #'
 #' @param data [`set_RLum`]; [matrix]:
 #' raw curve data. If data is of type `RLum.Data.Image` this can be used to
-#' re-construct the object.
+#' re-construct the object, i.e. modified parameters except `.uid` and `.pid`. The rest
+#' will be subject to copy and paste unless provided.
 #'
 #' @param info [`set_RLum`]; [list]:
 #' info elements
@@ -207,55 +194,42 @@ setMethod("show",
 setMethod(
   "set_RLum",
   signature = signature("RLum.Data.Image"),
+  definition = function(
+    class,
+    originator,
+    .uid,
+    .pid,
+    recordType = "Image",
+    curveType = NA_character_,
+    data = raster::brick(raster::raster(matrix())),
+    info = list()) {
 
-  definition = function(class,
-                        originator,
-                        .uid,
-                        .pid,
-                        recordType = "Image",
-                        curveType = NA_character_,
-                        data = raster::brick(raster::raster(matrix())),
-                        info = list()) {
     ##The case where an RLum.Data.Image object can be provided
     ##with this RLum.Data.Image objects can be provided to be reconstructed
-
     if (is(data, "RLum.Data.Image")) {
       ##check for missing curveType
-      if (missing(curveType)) {
+      if (missing(curveType))
         curveType <- data@curveType
 
-      }
-
       ##check for missing recordType
-      if (missing(recordType)) {
+      if (missing(recordType))
         recordType <- data@recordType
-
-      }
 
       ##check for missing data ... not possible as data is the object itself
 
       ##check for missing info
-      if (missing(info)) {
+      if (missing(info))
         info <- data@info
 
-      }
-
-      ##check for missing .uid
-      if (missing(.uid)) {
-        info <- data@.uid
-
-      }
-
-      ##check for missing .pid
-      if (missing(.pid)) {
-        info <- data@.pid
-
-      }
+      ##check for modified .uid & .pid
+      ## >> this cannot be changed here, since both would be reset, by
+      ## the arguments passed down from set_RLum() ... the generic function
 
       ##set empty clas form object
       newRLumDataImage <- new("RLum.Data.Image")
 
       ##fill - this is the faster way, filling in new() costs ...
+      newRLumDataImage@originator = data@originator
       newRLumDataImage@recordType = recordType
       newRLumDataImage@curveType = curveType
       newRLumDataImage@data = data@data
@@ -263,10 +237,8 @@ setMethod(
       newRLumDataImage@.uid = data@.uid
       newRLumDataImage@.pid = data@.pid
 
-      return(newRLumDataImage)
-
-    } else{
-      ##set empty clas form object
+    } else {
+      ##set empty class from object
       newRLumDataImage <- new("RLum.Data.Image")
 
       ##fill - this is the faster way, filling in new() costs ...
@@ -278,20 +250,18 @@ setMethod(
       newRLumDataImage@.uid = .uid
       newRLumDataImage@.pid = .pid
 
-      return(newRLumDataImage)
-
     }
-
+    return(newRLumDataImage)
   }
 )
 
-####################################################################################################
-###get_RLum()
-####################################################################################################
+
+
+# get_RLum() ----------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Image
-#' Accessor method for RLum.Data.Image object. The argument info.object is
-#'  optional to directly access the info elements. If no info element name is
-#'  provided, the raw image data (RasterBrick) will be returned.
+#' Accessor method for RLum.Data.Image object. The argument `info.object` is
+#' optional to directly access the info elements. If no info element name is
+#' provided, the raw image data (`RasterBrick`) will be returned.
 #'
 #' @param object [`get_RLum`], [`names_RLum`] (**required**):
 #' an object of class [RLum.Data.Image-class]
@@ -312,47 +282,29 @@ setMethod("get_RLum",
           signature("RLum.Data.Image"),
           definition = function(object, info.object) {
 
-            ##Check if function is of type RLum.Data.Image
-            if(is(object, "RLum.Data.Image") == FALSE){
-
-              stop("[get_RLum] Function valid for 'RLum.Data.Image' objects only!")
-
-            }
-
             ##if missing info.object just show the curve values
+            if(!missing(info.object)){
+              if(class(info.object) != "character")
+                stop("[get_RLum] 'info.object' has to be a character!", call. = FALSE)
 
-            if(missing(info.object) == FALSE){
-
-              if(is(info.object, "character") == FALSE){
-                stop("[get_RLum] 'info.object' has to be a character!")
-              }
-
-              if(info.object %in% names(object@info) == TRUE){
-
+              if(info.object %in% names(object@info)){
                 unlist(object@info[info.object])
 
-              }else{
-
-                ##grep names
-                temp.element.names <- paste(names(object@info), collapse = ", ")
-
-                stop.text <- paste("[get_RLum] Invalid element name. Valid names are:", temp.element.names)
-
-                stop(stop.text)
-
-              }
-
-
-            }else{
-
+              } else {
+                stop(paste0(
+                  "[get_RLum] Invalid element name. Valid names are: ",
+                  paste(names(object@info), collapse = ", ")
+                ),
+                call. = FALSE)
+             }
+            } else {
               object@data
-
             }
           })
 
-####################################################################################################
-###names_RLum()
-####################################################################################################
+
+
+# names_RLum() --------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Image
 #' Returns the names info elements coming along with this curve object
 #'

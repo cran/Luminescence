@@ -28,7 +28,7 @@ NULL
 #' @section Class version: 0.4.15
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
 #'
 #' @seealso [Risoe.BINfileData2RLum.Analysis],
 #' [Risoe.BINfileData-class], [RLum-class]
@@ -69,12 +69,9 @@ setClass("RLum.Analysis",
 )
 
 
-####################################################################################################
 # as() -----------------------------------------------------------------------------------------
-####################################################################################################
 ##LIST
 ##COERCE RLum.Analyse >> list AND list >> RLum.Analysis
-
 #' as() - RLum-object coercion
 #'
 #' for `[RLum.Analysis-class]`
@@ -92,7 +89,6 @@ setClass("RLum.Analysis",
 #' @name as
 setAs("list", "RLum.Analysis",
       function(from,to){
-
         new(to,
             protocol = NA_character_,
             records = from)
@@ -100,18 +96,14 @@ setAs("list", "RLum.Analysis",
 
 setAs("RLum.Analysis", "list",
       function(from){
-
         lapply(1:length(from@records), function(x){
           from@records[[x]]
 
         })
-
       })
 
 
-####################################################################################################
 # show() --------------------------------------------------------------------------------------
-####################################################################################################
 #' @describeIn RLum.Analysis
 #' Show structure of `RLum.Analysis` object
 #'
@@ -219,7 +211,6 @@ setMethod("show",
           }
 )##end show method
 
-
 # set_RLum() ----------------------------------------------------------------------------------
 #' @describeIn RLum.Analysis
 #' Construction method for [RLum.Analysis-class] objects.
@@ -276,7 +267,6 @@ setMethod(
       newRLumAnalysis@info <- if(missing(info)){records@info}else{c(records@info, info)}
       newRLumAnalysis@.uid <- .uid
       newRLumAnalysis@.pid <- if(missing(.pid)){records@.uid}else{.pid}
-
 
     }else{
       #fill slots (this is much faster than the old code!)
@@ -420,32 +410,26 @@ setMethod("get_RLum",
 
             ##if info.object is set, only the info objects are returned
             else if(!is.null(info.object)) {
-
               if(info.object %in% names(object@info)){
                 unlist(object@info[info.object])
 
               }else{
-
                 ##check for entries
                 if(length(object@info) == 0){
-
-                  warning("[get_RLum()] This RLum.Analysis object has no info objects! NULL returned!)")
-                  return(NULL)
+                  warning(
+                    "[get_RLum()] This RLum.Analysis object has no info objects! NULL returned!)",
+                          call. = FALSE)
 
                 }else{
-
-                  ##grep names
-                  temp.element.names <- paste(names(object@info), collapse = ", ")
-
-                  warning.text <- paste("[get_RLum()] Invalid info.object name. Valid names are:", temp.element.names)
-
-                  warning(warning.text, call. = FALSE)
-                  return(NULL)
+                  warning(paste0(
+                    "[get_RLum()] Invalid info.object name. Valid names are: ",
+                    paste(names(object@info), collapse = ", ")
+                  ),
+                  call. = FALSE)
 
                 }
-
+                return(NULL)
               }
-
 
             } else {
 
@@ -488,11 +472,8 @@ setMethod("get_RLum",
                                                      object@records[[x]]@recordType
                                                    })))
 
-              } else{
-                if (!is(recordType, "character")) {
-                  stop("[get_RLum()] 'recordType' has to be of type 'character'!")
-
-                }
+              } else if (class(recordType) != "character"){
+                  stop("[get_RLum()] 'recordType' has to be of type 'character'!", call. = FALSE)
 
               }
 
@@ -504,16 +485,16 @@ setMethod("get_RLum",
                                                   })))
 
               } else if (!is(curveType, "character")) {
-                stop("[get_RLum()] 'curveType' has to be of type 'character'!")
+                stop("[get_RLum()] 'curveType' has to be of type 'character'!", call. = FALSE)
 
               }
 
               ##RLum.type
               if (is.null(RLum.type)) {
-                RLum.type <- c("RLum.Data.Curve", "RLum.Data.Spectrum")
+                RLum.type <- c("RLum.Data.Curve", "RLum.Data.Spectrum", "RLum.Data.Image")
 
               } else if (!is(RLum.type, "character")) {
-                stop("[get_RLum()] 'RLum.type' has to be of type 'character'!")
+                stop("[get_RLum()] 'RLum.type' has to be of type 'character'!", call. = FALSE)
 
               }
 
@@ -522,7 +503,7 @@ setMethod("get_RLum",
                 get.index <- FALSE
 
               } else if (!is(get.index, "logical")) {
-                stop("[get_RLum()] 'get.index' has to be of type 'logical'!")
+                stop("[get_RLum()] 'get.index' has to be of type 'logical'!", call. = FALSE)
 
               }
 
@@ -651,9 +632,8 @@ setMethod("get_RLum",
           })
 
 
-####################################################################################################
-###structure_RLum()
-####################################################################################################
+# structure_RLum() ----------------------------------------------------------------------------
+###
 #' @describeIn RLum.Analysis
 #' Method to show the structure of an [RLum.Analysis-class] object.
 #'
@@ -763,9 +743,7 @@ setMethod("structure_RLum",
           })
 
 
-####################################################################################################
 # length_RLum() -------------------------------------------------------------------------------
-####################################################################################################
 #' @describeIn RLum.Analysis
 #' Returns the length of the object, i.e., number of stored records.
 #'
@@ -784,9 +762,7 @@ setMethod("length_RLum",
 
           })
 
-####################################################################################################
-###names_RLum()
-####################################################################################################
+# names_RLum() --------------------------------------------------------------------------------
 #' @describeIn RLum.Analysis
 #' Returns the names of the [RLum.Data-class] objects objects (same as shown with the show method)
 #'
@@ -807,9 +783,7 @@ setMethod("names_RLum",
           })
 
 
-####################################################################################################
-###smooth_RLum()
-####################################################################################################
+# smooth_RLum() -------------------------------------------------------------------------------
 #' @describeIn RLum.Analysis
 #'
 #' Smoothing of `RLum.Data` objects contained in this `RLum.Analysis` object
@@ -830,7 +804,6 @@ setMethod(
   f = "smooth_RLum",
   signature = "RLum.Analysis",
   function(object, ...) {
-
         object@records <- lapply(object@records, function(x){
           smooth_RLum(x, ...)
 
