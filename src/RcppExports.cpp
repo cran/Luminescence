@@ -32,34 +32,22 @@ BEGIN_RCPP
 END_RCPP
 }
 // create_RLumDataCurve_matrix
-NumericMatrix create_RLumDataCurve_matrix(NumericVector DATA, int VERSION, int NPOINTS, String LTYPE, int LOW, int HIGH, int AN_TEMP, int TOLDELAY, int TOLON, int TOLOFF);
+NumericMatrix create_RLumDataCurve_matrix(NumericVector DATA, double VERSION, int NPOINTS, String LTYPE, double LOW, double HIGH, double AN_TEMP, int TOLDELAY, int TOLON, int TOLOFF);
 RcppExport SEXP _Luminescence_create_RLumDataCurve_matrix(SEXP DATASEXP, SEXP VERSIONSEXP, SEXP NPOINTSSEXP, SEXP LTYPESEXP, SEXP LOWSEXP, SEXP HIGHSEXP, SEXP AN_TEMPSEXP, SEXP TOLDELAYSEXP, SEXP TOLONSEXP, SEXP TOLOFFSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type DATA(DATASEXP);
-    Rcpp::traits::input_parameter< int >::type VERSION(VERSIONSEXP);
+    Rcpp::traits::input_parameter< double >::type VERSION(VERSIONSEXP);
     Rcpp::traits::input_parameter< int >::type NPOINTS(NPOINTSSEXP);
     Rcpp::traits::input_parameter< String >::type LTYPE(LTYPESEXP);
-    Rcpp::traits::input_parameter< int >::type LOW(LOWSEXP);
-    Rcpp::traits::input_parameter< int >::type HIGH(HIGHSEXP);
-    Rcpp::traits::input_parameter< int >::type AN_TEMP(AN_TEMPSEXP);
+    Rcpp::traits::input_parameter< double >::type LOW(LOWSEXP);
+    Rcpp::traits::input_parameter< double >::type HIGH(HIGHSEXP);
+    Rcpp::traits::input_parameter< double >::type AN_TEMP(AN_TEMPSEXP);
     Rcpp::traits::input_parameter< int >::type TOLDELAY(TOLDELAYSEXP);
     Rcpp::traits::input_parameter< int >::type TOLON(TOLONSEXP);
     Rcpp::traits::input_parameter< int >::type TOLOFF(TOLOFFSEXP);
     rcpp_result_gen = Rcpp::wrap(create_RLumDataCurve_matrix(DATA, VERSION, NPOINTS, LTYPE, LOW, HIGH, AN_TEMP, TOLDELAY, TOLON, TOLOFF));
-    return rcpp_result_gen;
-END_RCPP
-}
-// src_find_first_larger_value
-NumericVector src_find_first_larger_value(NumericVector x, NumericVector y);
-RcppExport SEXP _Luminescence_src_find_first_larger_value(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(src_find_first_larger_value(x, y));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -79,7 +67,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Luminescence_create_UID", (DL_FUNC) &_Luminescence_create_UID, 0},
     {"_Luminescence_analyse_IRSARRF_SRS", (DL_FUNC) &_Luminescence_analyse_IRSARRF_SRS, 5},
     {"_Luminescence_create_RLumDataCurve_matrix", (DL_FUNC) &_Luminescence_create_RLumDataCurve_matrix, 10},
-    {"_Luminescence_src_find_first_larger_value", (DL_FUNC) &_Luminescence_src_find_first_larger_value, 2},
     {"_Luminescence_src_get_XSYG_curve_values", (DL_FUNC) &_Luminescence_src_get_XSYG_curve_values, 1},
     {NULL, NULL, 0}
 };

@@ -29,6 +29,8 @@
 #' @param log [logical] (*with default*):
 #' fit the (un-)logged central age model to De data
 #'
+#' @param na.rm [logical] (*with default*): strip `NA` values before the computation proceeds
+#'
 #' @param plot [logical] (*with default*):
 #' plot output
 #'
@@ -45,7 +47,7 @@
 #'
 #' The output should be accessed using the function [get_RLum]
 #'
-#' @section Function version: 1.3.2
+#' @section Function version: 1.4.0
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany) \cr
@@ -96,34 +98,42 @@
 #'
 #' @md
 #' @export
-calc_CentralDose <- function(data, sigmab, log = TRUE, plot = TRUE, ...) {
-
+calc_CentralDose <- function(data, sigmab, log = TRUE, na.rm = FALSE, plot = TRUE, ...) {
   ## ============================================================================##
   ## CONSISTENCY CHECK OF INPUT DATA
   ## ============================================================================##
-
   if (!missing(data)) {
     if (!is(data, "data.frame") & !is(data, "RLum.Results")) {
-      stop("[calc_CentralDose] Error: 'data' object has to be of type\n
-           'data.frame' or 'RLum.Results'!")
+      stop("[calc_CentralDose()] 'data' has to be of type 'data.frame' or 'RLum.Results'!", call. = FALSE)
     } else {
       if (is(data, "RLum.Results")) {
         data <- get_RLum(data, "data")
       }
     }
   }
-  try(colnames(data) <- c("ED", "ED_Error"), silent = TRUE)
-  if (colnames(data[1]) != "ED" || colnames(data[2]) != "ED_Error") {
-    cat(paste("Columns must be named 'ED' and 'ED_Error'"), fill = FALSE)
-    stop(domain = NA)
+
+  ##remove NA values
+  if(na.rm == TRUE && any(is.na(data))){
+    warning("[calc_CentralDose()] ", length(which(is.na(data))), " NA value(s) removed from dataset!", call. = FALSE)
+    data <- na.exclude(data)
   }
+
+  ##make sure we consider onlyt take the first two columns
+  if(ncol(data) < 2 || nrow(data) < 2)
+    stop("[calc_CentralDose()] 'data' should have at least two columns and two rows!", call. = FALSE)
+
+  ##extract only the first two columns and set column names
+  data <- data[,1:2]
+  colnames(data) <- c("ED", "ED_Error")
+
   if (!missing(sigmab)) {
-    if (sigmab < 0 | sigmab > 1 & log) {
-      cat(paste("sigmab needs to be given as a fraction between", "0 and 1 (e.g. 0.2)"),
-          fill = FALSE)
-      stop(domain = NA)
-    }
+    if (sigmab < 0 | sigmab > 1 & log)
+      stop("[calc_CentralDose()] sigmab needs to be given as a fraction between 0 and 1 (e.g., 0.2)!", call. = FALSE)
+
   }
+
+
+
 
   ## ============================================================================##
   ## ... ARGUMENTS
@@ -213,7 +223,7 @@ calc_CentralDose <- function(data, sigmab, log = TRUE, plot = TRUE, ...) {
   sig1 <- sigmax + 9.5 * sesigma
   sig <- try(seq(sig0, sig1, sig1 / 1000), silent = TRUE)
 
-  if (class(sig) != "try-error") {
+  if (!inherits(sig, "try-error")) {
     # TODO: rewrite this loop as a function and maximise with mle2 ll is the actual
     # log likelihood, llik is a vector of all ll
     for (s in sig) {
@@ -223,8 +233,7 @@ calc_CentralDose <- function(data, sigmab, log = TRUE, plot = TRUE, ...) {
       llik <- c(llik, ll)
     }
     llik <- llik[-1] - Lmax
-  } #endif::try-error
-
+  }
 
   ## ============================================================================##
   ## TERMINAL OUTPUT
@@ -261,23 +270,28 @@ calc_CentralDose <- function(data, sigmab, log = TRUE, plot = TRUE, ...) {
     out.sesigma <- NA
   }
 
-  if(!log)
-    sig <- sig / delta
+  if(!log)  sig <- sig / delta
 
 
   summary <- data.frame(de = out.delta, de_err = out.delta * out.sedelta / 100,
                         OD = out.sigma, OD_err = out.sesigma * 100, Lmax = Lmax)
 
-  call <- sys.call()
   args <- list(log = log, sigmab = sigmab)
 
-  newRLumResults.calc_CentralDose <- set_RLum(class = "RLum.Results",
-                                              data = list(summary = summary,
-                                                          data = data,
-                                                          args = args,
-                                                          call = call,
-                                                          profile = data.frame(sig = sig,
-                                                                               llik = llik)))
+  newRLumResults.calc_CentralDose <- set_RLum(
+    class = "RLum.Results",
+    data = list(
+      summary = summary,
+      data = data,
+      args = args,
+      profile = data.frame(
+        sig = if(!inherits(sig, "try-error")) sig else NA,
+        llik = llik)
+    ),
+    info = list(
+      call = sys.call()
+    )
+  )
 
   ## =========## PLOTTING
   if (plot && class(sig) != "try-error")

@@ -116,25 +116,51 @@ plot_RLum.Results<- function(
     
     ## single MAM estimate
     # plot profile log likelhood
-    tryCatch({
-      suppressWarnings(
-        bbmle::plot(object@data$profile, show.points=FALSE, plot.confstr=TRUE, onepage = single, ask = FALSE)
-      )
-    }, error = function(e) {
-      if (single)
-        par(mfrow=c(2, 2))
-      param <- c("gamma", "sigma", "p0", "mu")
-      for (i in param) {
-        if (object@data$summary$par == 3 && i == "mu")
-          break
-        tryCatch({
-          bbmle::plot(object@data$profile, which = i)
-        }, error = function(e)  {
-          message(paste("Unable to plot the Likelihood profile for:", i))
-        })
-      }
-      par(mfrow=c(1,1))
-    })
+    
+    profiles <- object@data$profile 
+    if (object@data$args$log) {
+      profiles@profile$gamma$par.vals[ ,"gamma"] <- exp(profiles@profile$gamma$par.vals[ ,"gamma"])
+      profiles@profile$sigma$par.vals[ ,"sigma"] <- exp(profiles@profile$sigma$par.vals[ ,"sigma"])
+      
+      if (object@data$args$par == 4)
+        profiles@profile$mu$par.vals[ ,"mu"] <- exp(profiles@profile$mu$par.vals[ ,"mu"])
+    }
+    
+    if (single)
+      par(mfrow=c(2, 2))
+    
+    param <- c("gamma", "sigma", "p0", "mu")
+    
+    for (i in param) {
+      if (object@data$summary$par == 3 && i == "mu")
+        break
+      
+      tryCatch({
+        
+        xvals <- as.data.frame(profiles@profile[[i]]$par.vals)[[i]]
+        xlim <- range(xvals[xvals > 0])
+        
+        suppressWarnings(
+          bbmle::plot(profiles, which = i, xlab = "", xaxt = "n", xlim = xlim)
+        )
+        axis(1, mgp = c(3, 0.5, 0))
+        title(xlab = i, line = 1.2)
+        
+        if (i %in% c("gamma", "sigma", "mu") && object@data$args$log && object@data$args$log.output) {
+          axis(1, at = axTicks(1), 
+               labels = format(round(log(axTicks(1)), 2), nsmall = 2), 
+               line = 2.5, mgp = c(3, 0.5, 0))
+          title(xlab = paste0("log(", i, ")"), line = 4)
+        }
+        
+      }, error = function(e)  {
+        message(paste("Unable to plot the Likelihood profile for:", i))
+      })
+    }
+    par(mfrow=c(1,1))
+    
+    
+    # })
     
     ## bootstrap MAM estimates
     if(object@data$args$bootstrap==TRUE) {

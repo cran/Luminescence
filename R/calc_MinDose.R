@@ -13,8 +13,8 @@
 #' `sigma`: \tab spread in ages above the minimum \cr
 #' `p0`: \tab proportion of grains at gamma \cr }
 #'
-#' If `par=3` (default) the 3-parametric minimum age model is applied,
-#' where `gamma=mu`. For `par=4` the 4-parametric model is applied instead.
+#' If `par=3` (default) the 3-parameter minimum age model is applied,
+#' where `gamma=mu`. For `par=4` the 4-parameter model is applied instead.
 #'
 #' **(Un-)logged model**
 #'
@@ -110,7 +110,7 @@
 #' fit the (un-)logged minimum dose model to De data.
 #'
 #' @param par [numeric] (*with default*):
-#' apply the 3- or 4-parametric minimum age model (`par=3` or `par=4`). The MAM-3 is
+#' apply the 3- or 4-parameter minimum age model (`par=3` or `par=4`). The MAM-3 is
 #' used by default.
 #'
 #' @param bootstrap [logical] (*with default*):
@@ -119,10 +119,16 @@
 #' @param init.values [numeric] (*optional*):
 #' a named list with starting values for gamma, sigma, p0 and mu
 #' (e.g. `list(gamma=100, sigma=1.5, p0=0.1, mu=100)`). If no values are provided reasonable values
-#' are tried to be estimated from the data.
+#' are tried to be estimated from the data. **NOTE** that the initial values must always be given
+#' in the absolute units. The the logged model is applied (`log = TRUE`), the provided `init.values`
+#' are automatically log transformed.
 #'
 #' @param level [logical] (*with default*):
 #' the confidence level required (defaults to 0.95).
+#'
+#' @param log.output [logical] (*with default*):
+#' If `TRUE` the console output will also show the logged values of the final parameter estimates
+#' and confidence intervals (only applicable if `log = TRUE`).
 #'
 #' @param plot [logical] (*with default*):
 #' plot output (`TRUE`/`FALSE`)
@@ -231,7 +237,7 @@
 #' data(ExampleData.DeValues, envir = environment())
 #'
 #' # (1) Apply the minimum age model with minimum required parameters.
-#' # By default, this will apply the un-logged 3-parametric MAM.
+#' # By default, this will apply the un-logged 3-parameter MAM.
 #' calc_MinDose(data = ExampleData.DeValues$CA1, sigmab = 0.1)
 #'
 #' \dontrun{
@@ -326,6 +332,7 @@ calc_MinDose <- function(
   bootstrap = FALSE,
   init.values,
   level = 0.95,
+  log.output = FALSE,
   plot = TRUE,
   multicore = FALSE,
   ...
@@ -349,6 +356,12 @@ calc_MinDose <- function(
     message(paste("\n[calc_MinDose] Warning:\nInput data contained NA/NaN values,",
                   "which were removed prior to calculations!"))
     data <- data[complete.cases(data), ]
+  }
+
+  if (!missing(init.values) && length(init.values) != 4) {
+    stop("[calc_MinDose] Error: Please provide initial values for all model parameters. ",
+         "Missing parameter(s): ", paste(setdiff(c("gamma", "sigma", "p0", "mu"), names(init.values)), collapse = ", "),
+         call. = FALSE)
   }
 
   ##============================================================================##
@@ -435,10 +448,10 @@ calc_MinDose <- function(
                   mu = ifelse(log, log(quantile(data[ ,1], probs = 0.25, na.rm = TRUE)),
                               mean(data[ ,1])))
   } else {
-    start <- list(gamma = init.values$gamma,
-                  sigma = init.values$sigma,
+    start <- list(gamma = ifelse(log, log(init.values$gamma), init.values$gamma),
+                  sigma = ifelse(log, log(init.values$sigma), init.values$sigma),
                   p0 = init.values$p0,
-                  mu = init.values$mu)
+                  mu = ifelse(log, log(init.values$mu), init.values$mu))
   }
 
   ##============================================================================##
@@ -721,14 +734,14 @@ calc_MinDose <- function(
                         "ci_lower"=ifelse(log, exp(conf["gamma",1]), conf["gamma",1]),
                         "ci_upper"=ifelse(log, exp(conf["gamma",2]), conf["gamma",2]),
                         par=par,
-                        sig=sig,
+                        sig=ifelse(log, exp(sig), sig),
                         p0=p0end,
                         mu=muend,
                         Lmax=-ests@min,
                         BIC=BIC)
   call <- sys.call()
-  args <- list(log=log, sigmab=sigmab, bootstrap=bootstrap,
-               init.values=start,
+  args <- list(log=log, sigmab=sigmab, par = par, bootstrap=bootstrap,
+               init.values=start, log.output = log.output,
                bs.M=M, bs.N=N, bs.h=h, sigmab.sd=sigmab.sd)
 
   ##============================================================================##
@@ -863,6 +876,17 @@ calc_MinDose <- function(
     ## --------- FIT POLYNOMIALS -------------- ##
     message("\n Fit curves to dose-likelihood pairs...")
     # polynomial fits of increasing degrees
+
+    ## if the input values are too close to zero, we may get
+    ## Inf values >>> we remove them here with a warning
+    if(any(is.infinite(pairs))){
+      inf_count <- length(which(is.infinite(pairs[,2])))/nrow(pairs)
+      pairs <- pairs[!is.infinite(pairs[,2]),]
+      warning(
+      paste0("[calc_MinDose()] Inf values produced by bootstrapping removed for LOcal polynominal regrESSion fitting (loess)!\n The removed values represent  ",round(inf_count * 100,2)," % of the total dataset. This message usually indicates that your values are close to 0."), call. = FALSE)
+
+    }
+
     poly.three <- lm(pairs[ ,2] ~ poly(pairs[ ,1], degree = 3, raw = TRUE))
     poly.four <- lm(pairs[ ,2] ~ poly(pairs[ ,1], degree = 4, raw = TRUE))
     poly.five <- lm(pairs[ ,2] ~ poly(pairs[ ,1], degree = 5, raw = TRUE))
@@ -894,14 +918,46 @@ calc_MinDose <- function(
                        row.names = ""))
 
       cat("\n--- final parameter estimates ---\n")
-      print(round(data.frame(gamma=ifelse(!invert, bbmle::coef(ests)[["gamma"]], (bbmle::coef(ests)[["gamma"]]-x.offset)*-1),
-                             sigma=bbmle::coef(ests)[["sigma"]],
-                             p0=bbmle::coef(ests)[["p0"]],
-                             mu=ifelse(par==4, ifelse(log,log(muend),muend),0),
-                             row.names=""), 2))
+      tmp <- round(data.frame(
+        gamma=ifelse(!invert,
+                     ifelse(log, exp(bbmle::coef(ests)[["gamma"]]), bbmle::coef(ests)[["gamma"]]),
+                     ifelse(log, exp((bbmle::coef(ests)[["gamma"]]-x.offset)*-1),(bbmle::coef(ests)[["gamma"]]-x.offset)*-1)
+        ),
+        sigma=ifelse(log, exp(bbmle::coef(ests)[["sigma"]]), bbmle::coef(ests)[["sigma"]]),
+        p0=bbmle::coef(ests)[["p0"]],
+        mu=ifelse(par==4,
+                  muend,
+                  0),
+        row.names="", check.names = FALSE), 2)
+
+
+      if (log && log.output) {
+        tmp$`log(gamma)` = round(log(tmp$gamma),2)
+        tmp$`log(sigma)` = round(log(tmp$sigma),2)
+        if (par == 4)
+          tmp$`log(mu)` = round(log(tmp$mu),2)
+      }
+
+      print(tmp)
 
       cat("\n------ confidence intervals -----\n")
-      print(round(conf, 2))
+      conf_print <- round(conf, 2)
+      if (log) {
+        logged_rows <- row.names(conf_print) != "p0"
+        conf_print[logged_rows, ] <- exp(conf_print[logged_rows, ])
+        conf_print <- round(conf_print, 2)
+
+        if (log.output) {
+          conf_tmp <- round(conf, 2)
+          conf_tmp[which(rownames(conf_tmp) == "p0"), ] <- "-"
+          conf_print <- cbind(round(conf_print, 2),
+                              setNames(conf_tmp, names(conf_tmp)))
+          conf_print <- rbind(
+            setNames(data.frame("", "", "(logged)", "(logged)", row.names = "", stringsAsFactors = FALSE), names(conf_print)),
+            conf_print)
+        }
+      }
+      print(conf_print)
 
       cat("\n------ De (asymmetric error) -----\n")
       print(round(data.frame(De=pal,
