@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.9.6
-Date: 2019-12-04
+Version: 0.9.7
+Date: 2020-01-04
 Author: Sebastian Kreutzer [aut, trl, cre, dtc]
     (<https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc]
@@ -118,6 +118,6 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'zzz.R'
 RoxygenNote: 7.0.2
 NeedsCompilation: yes
-Packaged: 2019-12-04 16:13:36 UTC; kreutzer
+Packaged: 2020-01-04 20:34:45 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2019-12-04 22:40:02 UTC
+Date/Publication: 2020-01-08 23:02:25 UTC
