@@ -59,7 +59,7 @@
 #'
 #' @param fit.method [character] (*with default*):
 #' select fit method, allowed values: `'port'` and `'LM'`. `'port'` uses the 'port'
-#' routine usint the funtion [nls] `'LM'` utilises the function `nlsLM` from
+#' routine from the function [nls] `'LM'` utilises the function `nlsLM` from
 #' the package `minpack.lm` and with that the Levenberg-Marquardt algorithm.
 #'
 #' @param fit.trace [logical] (*with default*):
@@ -174,7 +174,7 @@
 #' @section Function version: 0.5.2
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 #'
 #' @seealso [fit_LMCurve], [plot],[nls], [RLum.Data.Curve-class],
 #' [RLum.Results-class], [get_RLum], [minpack.lm::nlsLM]

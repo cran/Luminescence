@@ -20,6 +20,7 @@
 #' helpful.
 #'
 #'
+#'
 #' @param object [RLum.Analysis-class] (**required**):
 #' S4 object of class `RLum.Analysis`
 #'
@@ -58,7 +59,7 @@
 #' the `plot` function.
 #'
 #' Supported arguments: `main`, `mtext`, `log`, `lwd`, `lty` `type`, `pch`, `col`,
-#' `norm`, `xlim`,`ylim`, `xlab`, `ylab`...
+#' `norm` (see [plot_RLum.Data.Curve]), `xlim`,`ylim`, `xlab`, `ylab`, ...
 #'
 #' and for `combine = TRUE` also: `sub`, `legend`, `legend.text`, `legend.pos`
 #' (typical plus 'outside'), `legend.col`, `smooth`.
@@ -73,10 +74,10 @@
 #' way you might expect them to work. This function was designed to serve as an overview
 #' plot, if you want to have more control, extract the objects and plot them individually.
 #'
-#' @section Function version: 0.3.11
+#' @section Function version: 0.3.12
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 #'
 #' @seealso [plot], [plot_RLum], [plot_RLum.Data.Curve]
 #'
@@ -127,15 +128,13 @@ plot_RLum.Analysis <- function(
   # Integrity check ----------------------------------------------------------------------------
 
   ##check if object is of class RLum.Analysis (lists are handled via plot_RLum())
-  if (!is(object, "RLum.Analysis")) {
-    stop("[plot_RLum.Analysis()] Input object is not of type 'RLum.Analysis'")
+  if (!is(object, "RLum.Analysis"))
+    stop("[plot_RLum.Analysis()] Input object is not of type 'RLum.Analysis'", call. = FALSE)
 
-  }
 
   # Make selection if wanted  -------------------------------------------------------------------
 
   if(!is.null(subset)){
-
     ##check whether the user set the drop option and remove it, as we cannot work with it
     subset <- subset[!sapply(names(subset), function(x){"drop" %in% x})]
     object <- do.call(get_RLum, c(object = object, subset, drop = FALSE))
@@ -418,6 +417,7 @@ plot_RLum.Analysis <- function(
               lty = plot.settings$lty[[i]],
               xlim = xlim.set,
               ylim = ylim.set,
+              norm = plot.settings$norm,
               pch = plot.settings$pch[[i]],
               cex = plot.settings$cex[[i]],
               smooth = plot.settings$smooth[[i]]
@@ -427,10 +427,9 @@ plot_RLum.Analysis <- function(
 
           arguments[duplicated(names(arguments))] <- NULL
 
-        ##call the fucntion plot_RLum.Data.Curve
+        ##call the function plot_RLum.Data.Curve
         do.call(what = "plot_RLum.Data.Curve", args = arguments)
         rm(arguments)
-
 
         ##add abline
         if(!is.null(abline[[i]])){
@@ -478,7 +477,6 @@ plot_RLum.Analysis <- function(
     ##account for different curve types, combine similar
     temp.object.structure  <- structure_RLum(object)
     temp.recordType <- as.character(unique(temp.object.structure$recordType))
-
 
     ##change graphic settings
     if(!plot.single){
@@ -570,13 +568,29 @@ plot_RLum.Analysis <- function(
 
         }
 
-
         temp.data <- as(object.list[[x]], "data.frame")
 
         ##normalise curves if argument has been set
-        if (plot.settings$norm[[k]]) {
-          temp.data[,2] <- temp.data[,2] / max(temp.data[,2])
+        if(plot.settings$norm[[k]][1] %in% c('max', 'last', 'huot') || plot.settings$norm[[k]][1] == TRUE){
+          if (plot.settings$norm[[k]] == "max" || plot.settings$norm[[k]] == TRUE) {
+             temp.data[[2]] <-  temp.data[[2]] / max(temp.data[[2]])
 
+          } else if (plot.settings$norm[[k]] == "last") {
+            temp.data[[2]] <-  temp.data[[2]] / temp.data[[2]][length(temp.data[[2]])]
+
+
+          } else if (plot.settings$norm[[k]] == "huot") {
+            bg <- median(temp.data[[2]][floor(nrow(temp.data)*0.8):nrow(temp.data)])
+            temp.data[[2]] <-  (temp.data[[2]] - bg) / max(temp.data[[2]] - bg)
+
+          }
+
+          ##check for Inf and NA
+          if(any(is.infinite(temp.data[[2]])) || anyNA(temp.data[[2]])){
+            temp.data[[2]][is.infinite(temp.data[[2]]) | is.na(temp.data[[2]])] <- 0
+            warning("[plot_RLum.Data.Analysis()] Normalisation led to Inf or NaN values. Values replaced by 0.", call. = FALSE)
+
+          }
         }
 
         return(temp.data)
@@ -631,6 +645,7 @@ plot_RLum.Analysis <- function(
         })))
 
       }
+
       if (grepl("y", plot.settings$log[[k]], ignore.case = TRUE))
         ylim[which(ylim == 0)] <- 1
 

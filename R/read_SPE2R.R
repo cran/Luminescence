@@ -1,11 +1,11 @@
-#' Import Princeton Intruments (TM) SPE-file into R
+#' Import Princeton Instruments (TM) SPE-file into R
 #'
 #' Function imports Princeton Instruments (TM) SPE-files into R environment and
 #' provides `RLum` objects as output.
 #'
-#' Function provides an import routine for the Princton Instruments SPE format.
+#' Function provides an import routine for the Princeton Instruments SPE format.
 #' Import functionality is based on the file format description provided by
-#' Princton Instruments and a MatLab script written by Carl Hall (s.
+#' Princeton Instruments and a MatLab script written by Carl Hall (s.
 #' references).
 #'
 #' @param file [character] (**required**):
@@ -58,10 +58,10 @@
 #'
 #' *Currently not all information provided by the SPE format are supported.*
 #'
-#' @section Function version: 0.1.2
+#' @section Function version: 0.1.3
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 #'
 #' @seealso [readBin], [RLum.Data.Spectrum-class], [raster::raster]
 #'
@@ -70,7 +70,7 @@
 #' Format Specification, Version 1.A (for document URL please use an internet search machine)
 #'
 #' Hall, C., 2012: readSPE.m.
-#' [http://www.mathworks.com/matlabcentral/fileexchange/35940-readspe/content/readSPE.m]()
+#' [https://www.mathworks.com/matlabcentral/fileexchange/35940-readspe]()
 #'
 #' @keywords IO
 #'
@@ -188,7 +188,7 @@ read_SPE2R <- function(
   yDimDet <- readBin(con, what="int", 1, size=2, endian="little", signed = TRUE)
 
   #Date
-  Date <- readChar(con, 10, useBytes=TRUE)
+  Date <- suppressWarnings(readChar(con, 10, useBytes=TRUE))
 
   ##jump
   stepping <- readBin(con, what="raw", 4, size=1, endian="little", signed = TRUE)

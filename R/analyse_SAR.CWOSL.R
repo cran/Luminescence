@@ -5,7 +5,7 @@
 #'
 #' The function performs an analysis for a standard SAR protocol measurements
 #' introduced by Murray and Wintle (2000) with CW-OSL curves. For the
-#' calculation of the Lx/Tx value the function [calc_OSLLxTxRatio] is
+#' calculation of the `Lx/Tx` value the function [calc_OSLLxTxRatio] is
 #' used. For **changing the way the Lx/Tx error is calculated** use the argument
 #' `background.count.distribution` and `sigmab`, which will be passed to the function
 #' [calc_OSLLxTxRatio].
@@ -14,12 +14,12 @@
 #'
 #' If the argument `object` is of type [list] containing **only**
 #' [RLum.Analysis-class] objects, the function re-calls itself as often as elements
-#' are in the list. This is usefull if an entire measurement wanted to be analysed without
+#' are in the list. This is useful if an entire measurement wanted to be analysed without
 #' writing separate for-loops. To gain in full control of the parameters (e.g., `dose.points`) for
 #' every aliquot (corresponding to one [RLum.Analysis-class] object in the list), in
 #' this case the arguments can be provided as [list]. This `list` should
 #' be of similar length as the `list` provided with the argument `object`,
-#' otherwise the function will create an own list of the requested lenght.
+#' otherwise the function will create an own list of the requested length.
 #' Function output will be just one single [RLum.Results-class] object.
 #'
 #' Please be careful when using this option. It may allow a fast an efficient data analysis, but
@@ -36,9 +36,9 @@
 #' have to be pre-selected by the user to fit the standards of the SAR
 #' protocol, i.e., Lx,Tx,Lx,Tx and so on.
 #'
-#' Example: Imagine the measurement contains pIRIR50 and pIRIR225 IRSL curves.
-#' Only one curve type can be analysed at the same time: The pIRIR50 curves or
-#' the pIRIR225 curves.
+#' Example: Imagine the measurement contains `pIRIR50` and `pIRIR225` IRSL curves.
+#' Only one curve type can be analysed at the same time: The `pIRIR50` curves or
+#' the `pIRIR225` curves.
 #'
 #' **Supported rejection criteria**
 #'
@@ -62,22 +62,22 @@
 #' @param signal.integral.min [integer] (**required**):
 #' lower bound of the signal integral. Can be a [list] of [integer]s, if `object` is
 #' of type [list]. If the input is vector (e.g., `c(1,2)`) the 2nd value will be interpreted
-#' as the minimum signal integral for the Tx curve.
+#' as the minimum signal integral for the `Tx` curve.
 #'
 #' @param signal.integral.max [integer] (**required**):
 #' upper bound of the signal integral. Can be a [list] of [integer]s, if `object` is
 #' of type [list]. If the input is vector (e.g., `c(1,2)`) the 2nd value will be interpreted
-#' as the maximum signal integral for the Tx curve.
+#' as the maximum signal integral for the `Tx` curve.
 #'
 #' @param background.integral.min [integer] (**required**):
 #' lower bound of the background integral. Can be a [list] of [integer]s, if `object` is
 #' of type [list]. If the input is vector (e.g., `c(1,2)`) the 2nd value will be interpreted
-#' as the minimum background integral for the Tx curve.
+#' as the minimum background integral for the `Tx` curve.
 #'
 #' @param background.integral.max [integer] (**required**):
 #' upper bound of the background integral. Can be a [list] of [integer]s, if `object` is
 #' of type [list]. If the input is vector (e.g., `c(1,2)`) the 2nd value will be interpreted
-#' as the maximum background integral for the Tx curve.
+#' as the maximum background integral for the `Tx` curve.
 #'
 #' @param rejection.criteria [list] (*with default*):
 #' provide a named list and set rejection criteria in **percentage** for further calculation. Can be a [list] in
@@ -87,31 +87,33 @@
 #' `palaeodose.error`, `testdose.error` and `exceed.max.regpoint = TRUE/FALSE`.
 #' Example: `rejection.criteria = list(recycling.ratio = 10)`.
 #' Per default all numerical values are set to 10, `exceed.max.regpoint = TRUE`.
-#' Every criterium can be set to `NA`. In this value are calculated, but not considered, i.e.
+#' Every criterion can be set to `NA`. In this value are calculated, but not considered, i.e.
 #' the RC.Status becomes always `'OK'`
 #'
 #' @param dose.points [numeric] (*optional*):
-#' a numeric vector containg the dose points values Using this argument
+#' a numeric vector containing the dose points values Using this argument
 #' overwrites dose point values in the signal curves. Can be a [list] of
 #' [numeric] vectors, if `object` is of type [list]
 #'
 #' @param mtext.outer [character] (*optional*):
-#' option to provide an outer margin mtext. Can be a [list] of [character]s,
+#' option to provide an outer margin `mtext`. Can be a [list] of [character]s,
 #' if `object` is of type [list]
 #'
-#' @param plot [logical] (*with default*):
-#' enables or disables plot output.
+#' @param plot [logical] (*with default*): enables or disables plot output.
+#'
+#' @param plot_onePage [logical] (*with default*): enables or disables on page plot output
 #'
 #' @param plot.single [logical] (*with default*) or [numeric] (*optional*):
 #' single plot output (`TRUE/FALSE`) to allow for plotting the results in single plot windows.
-#' If a numerice vector is provided the plots can be selected individually, i.e.
+#' If a [numeric] vector is provided the plots can be selected individually, i.e.
 #' `plot.single = c(1,2,3,4)` will plot the TL and Lx, Tx curves but not the legend (5) or the
 #' growth curve (6), (7) and (8) belong to rejection criteria plots. Requires
 #' `plot = TRUE`.
 #'
-#' @param onlyLxTxTable [logical] (with default): If `TRUE` the dose response curve fitting and plotting
-#' is skipped. This allows to get hands on the Lx/Tx table for large datasets without the need for
-#' a curve fitting.
+#'@param onlyLxTxTable [logical] (with default): If `TRUE` the dose response
+#'curve fitting and plotting is skipped.
+#'This allows to get hands on the `Lx/Tx` table for large datasets
+#'without the need for a curve fitting.
 #'
 #' @param ... further arguments that will be passed to the function
 #' [plot_GrowthCurve] or [calc_OSLLxTxRatio]
@@ -125,7 +127,8 @@
 #' returned containing the following elements:
 #'
 #' \item{data}{[data.frame] containing De-values, De-error and further parameters}
-#' \item{LnLxTnTx.values}{[data.frame] of all calculated Lx/Tx values including signal, background counts and the dose points}
+#' \item{LnLxTnTx.values}{[data.frame] of all calculated Lx/Tx values including signal,
+#' background counts and the dose points}
 #' \item{rejection.criteria}{[data.frame] with values that might by used as rejection criteria. NA is produced if no R0 dose point exists.}
 #' \item{Formula}{[formula] formula that have been used for the growth curve fitting }
 #'
@@ -139,10 +142,11 @@
 #'
 #' **The function currently does support only 'OSL', 'IRSL' and 'POSL' data!**
 #'
-#' @section Function version: 0.8.8
+#' @section Function version: 0.8.12
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS-Université Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, Department of Geography & Earth Sciences, Aberystwyth University
+#' (United Kingdom)
 #'
 #'
 #' @seealso [calc_OSLLxTxRatio], [plot_GrowthCurve], [RLum.Analysis-class],
@@ -212,6 +216,7 @@ analyse_SAR.CWOSL<- function(
   dose.points = NULL,
   mtext.outer,
   plot = TRUE,
+  plot_onePage = FALSE,
   plot.single = FALSE,
   onlyLxTxTable = FALSE,
   ...
@@ -297,6 +302,7 @@ if(is.list(object)){
                       plot = plot,
                       rejection.criteria = rejection.criteria[[x]],
                       plot.single = plot.single,
+                      plot_onePage = plot_onePage,
                       onlyLxTxTable = onlyLxTxTable,
                       main = main[[x]],
                       ...)
@@ -331,12 +337,13 @@ if(is.list(object)){
 
     ##MISSING INPUT
     if(missing("object")){
-      stop("[analyse_SAR.CWOSL()] No value set for 'object'!")
+      stop("[analyse_SAR.CWOSL()] No value set for 'object'!",
+           call. = FALSE)
     }
 
     ##INPUT OBJECTS
     if(!is(object, "RLum.Analysis")){
-      stop("[analyse_SAR.CWOSL()] Input object is not of type 'RLum.Analyis'!")
+      stop("[analyse_SAR.CWOSL()] Input object is not of type 'RLum.Analysis'!", call. = FALSE)
     }
 
 
@@ -351,11 +358,11 @@ if(is.list(object)){
     }
 
     if(missing("background.integral.min")){
-     stop("[analyse_SAR.CWOSL()] No value set for 'background.integral.min'!")
+     stop("[analyse_SAR.CWOSL()] No value set for 'background.integral.min'!", call. = FALSE)
     }
 
     if(missing("background.integral.max")){
-      stop("[analyse_SAR.CWOSL()] No value set for 'background.integral.max'!")
+      stop("[analyse_SAR.CWOSL()] No value set for 'background.integral.max'!", call. = FALSE)
     }
 
 
@@ -631,47 +638,13 @@ if(is.list(object)){
     TL.Curves.ID <-
       suppressWarnings(get_RLum(object, recordType = "TL$", get.index = TRUE))
 
-    ##separate TL curves
-    TL.Curves.ID.Lx <-
-      lapply(1:length(OSL.Curves.ID.Lx), function(x) {
-        TL.Curves.ID[which(TL.Curves.ID == (OSL.Curves.ID.Lx[x] - 1))]
-      })
+    ##separate TL curves which is always coming before the OSL curve
+    ##Note: we do not check anymore whether the sequence makes sense.
+    TL.Curves.ID.Lx <- TL.Curves.ID[TL.Curves.ID%in%(OSL.Curves.ID.Lx - 1)]
+    TL.Curves.ID.Tx <- TL.Curves.ID[TL.Curves.ID%in%(OSL.Curves.ID.Tx - 1)]
 
 
-    TL.Curves.ID.Tx <-
-      lapply(1:length(OSL.Curves.ID.Tx), function(x) {
-        TL.Curves.ID[which(TL.Curves.ID == (OSL.Curves.ID.Tx[x] - 1))]
-      })
-
-
-    # COMPONENT FITTING -------------------------------------------------------
-
-
-    # for(x in seq(1,length(OSL.Curves.ID),by=2)){
-    #
-    #
-    #   temp.fit.output <- fit_CWCurve(object@records[[OSL.Curves.ID[x]]],
-    #                 n.components.max=3,
-    #                 output.terminal = FALSE,
-    #                 output.terminalAdvanced = FALSE,
-    #                 plot = FALSE
-    #
-    #               )
-    #   if(exists("fit.output") == FALSE){
-    #
-    #     fit.output <- get_RLum(temp.fit.output)
-    #
-    #   }else{
-    #
-    #     fit.output <- rbind(fit.output, get_RLum(temp.fit.output))
-    #
-    #   }
-    #
-    # }
-
-    ##TODO
-
-    # Calculate LnLxTnTx values  --------------------------------------------------
+# Calculate LnLxTnTx values  --------------------------------------------------
 
     ##calculate LxTx values using external function
     LnLxTnTx <- lapply(seq(1,length(OSL.Curves.ID),by = 2), function(x){
@@ -866,20 +839,9 @@ if(is.list(object)){
       ))
 
     ##RecyclingRatio
-    if (!is.na(RecyclingRatio)[1] & !is.na(rejection.criteria$recycling.ratio)) {
-      temp.status.RecyclingRatio <-
-        sapply(1:length(RecyclingRatio), function(x) {
-          if (abs(1 - RecyclingRatio[x]) > (rejection.criteria$recycling.ratio / 100)) {
-            "FAILED"
-          }else{
-            "OK"
-          }
-        })
-
-    }else{
-      temp.status.RecyclingRatio <- rep("OK", length(RecyclingRatio))
-
-    }
+    temp.status.RecyclingRatio <- rep("OK", length(RecyclingRatio))
+    if (!any(is.na(RecyclingRatio)) & !is.na(rejection.criteria$recycling.ratio))
+      temp.status.RecyclingRatio[abs(1 - RecyclingRatio) > (rejection.criteria$recycling.ratio / 100)] <- "FAILED"
 
     ##Recuperation
     if (!is.na(Recuperation)[1] &
@@ -947,23 +909,54 @@ if(is.list(object)){
     ##============================================================================##
     ##PLOTTING
     ##============================================================================##
-
-    if (plot == TRUE) {
-      # Plotting - Config -------------------------------------------------------
+    if (plot) {
+      ##make sure the par settings are good after the functions stops
+      ##Why this is so complicated? Good question, if par() is called in the
+      ##single mode, it starts a new plot and then subsequent functions like
+      ##analyse_pIRIRSequence() produce an odd plot output.
+      par.default <- par()[c("oma","mar","cex", "mfrow", "mfcol")]
+      on_exit <- function(x = par.default){
+        par(
+          oma = x$oma,
+          mar = x$mar,
+          cex = x$cex,
+          mfrow = x$mfrow,
+          mfcol = x$mfcol
+        )
+      }
 
       ##colours and double for plotting
       col <- get("col", pos = .LuminescenceEnv)
 
-      if (plot.single[1] == FALSE) {
-        ## read par settings
-        par.default <- par(no.readonly = TRUE)
+      # plot everyting on one page ... doing it here is much cleaner than
+      # Plotting - one Page config -------------------------------------------------------
+      if(plot_onePage){
+      on.exit(on_exit())
 
+      plot.single <- TRUE
+      layout(matrix(
+        c(1, 1, 3, 3, 6, 6, 7,
+          1, 1, 3, 3, 6, 6, 8,
+          2, 2, 4, 4, 9, 9, 10,
+          2, 2, 4, 4, 9, 9, 10,
+          5, 5, 5, 5, 5, 5, 5), 5, 7, byrow = TRUE
+      ))
+      par(oma = c(0, 0, 0, 0),
+          mar = c(4, 4, 3, 1),
+          cex = cex * 0.6)
+
+      }
+
+
+      # Plotting - old way config -------------------------------------------------------
+      if (plot.single[1] == FALSE) {
+        on.exit(on_exit())
         layout(matrix(
-          c(1,1,3,3,
-            1,1,3,3,
-            2,2,4,4,
-            2,2,4,4,
-            5,5,5,5),5,4,byrow = TRUE
+          c(1, 1, 3, 3,
+            1, 1, 3, 3,
+            2, 2, 4, 4,
+            2, 2, 4, 4,
+            5, 5, 5, 5), 5, 4, byrow = TRUE
         ))
 
         par(
@@ -1337,13 +1330,8 @@ if(is.list(object)){
 
       }#plot.single.sel
 
-      if (exists("par.default")) {
-        par(par.default)
 
-      }
-
-
-    }##end plot == TRUE
+    }##end plot
 
 
     # Plotting  GC  ----------------------------------------
@@ -1368,9 +1356,16 @@ if(is.list(object)){
 
     ##Fit and plot growth curve
     if(!onlyLxTxTable){
-        temp.GC <- plot_GrowthCurve(temp.sample,
-                                    output.plot = plot,
-                                    ...)
+      temp.GC <- do.call(plot_GrowthCurve, args = modifyList(
+          list(
+            sample = temp.sample,
+            output.plot = plot,
+            output.plotExtended.single = plot_onePage,
+            cex.global = if(plot_onePage) .6 else 1
+            ),
+          list(...)
+        ))
+
 
         ##if null
         if(is.null(temp.GC)){
@@ -1759,13 +1754,6 @@ if(is.list(object)){
     }
 
 
-    ##It is doubled in this function, but the par settings need some more careful considerations ...
-    if (exists("par.default")) {
-      par(par.default)
-      rm(par.default)
-    }
-
-
     # Return --------------------------------------------------------------------------------------
     invisible(temp.results.final)
 
@@ -1779,5 +1767,3 @@ if(is.list(object)){
   }
 
 }
-
-

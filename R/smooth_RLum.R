@@ -12,7 +12,7 @@
 #' @param object [RLum-class] (**required**):
 #' S4 object of class `RLum`
 #'
-#' @param ... further arguments passed to the specifc class method
+#' @param ... further arguments passed to the specific class method
 #'
 #' @return
 #' An object of the same type as the input object is provided
@@ -20,7 +20,7 @@
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 #'
 #' @note
 #' Currenlty only `RLum` objects of class `RLum.Data.Curve` and `RLum.Analysis`

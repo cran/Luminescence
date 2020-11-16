@@ -76,7 +76,7 @@ The original function call
 Terminal output is only shown of the argument \code{verbose = TRUE}.
 
 \emph{(1) Start parameter and component adapation}\cr
-Trave of the parameter adaption process
+Trave of the parameter adaptation process
 
 \emph{(2) Fitting results (sorted by ascending tau)}\cr
 The fitting results sorted by ascending tau value. Please note
@@ -87,9 +87,9 @@ that if you access the \code{nls} fitting object, the values are not sorted.
 \item The photon count sum
 \item Durbin-Watson residual statistic to asses whether the residuals are correlated, ideally
 the residuals should be not correlated at all. Rough measures are: \cr
-D = 0: the residuls are systematically correlated \cr
+D = 0: the residuals are systematically correlated \cr
 D = 2: the residuals are randomly distributed \cr
-D = 4: the residuals are systematically anticorrlated\cr
+D = 4: the residuals are systematically anticorrelated\cr
 }
 
 You should be suspicious if D differs largely from 2.
@@ -135,7 +135,7 @@ with \eqn{w = 1} for unweighted regression analysis (\code{method_control = list
 
 \tabular{lll}{
 \strong{Parameter} \tab \strong{Type} \tab \strong{Description}\cr
-\code{p} \tab \link{numeric} \tab controls the probability for the F statistic reference values. For a significance level of 5 \% a value of 0.95 (the default) should be added, for 1 \%, a value of 0.99 is sufficient: 1 > p > 0 (cf. \link[stats:FDist]{stats::FDist})\cr
+\code{p} \tab \link{numeric} \tab controls the probability for the F statistic reference values. For a significance level of 5 \% a value of 0.95 (the default) should be added, for 1 \%, a value of 0.99 is sufficient: 1 > p > 0 (cf. \link[stats:Fdist]{stats::FDist})\cr
 \code{seed} \tab \link{numeric} \tab set the seed for the random number generator, provide a value here to get reproducible results \cr
 \code{DEoptim.trace} \tab \link{logical} \tab enables/disables the tracing of the differential evolution (cf. \link[DEoptim:DEoptim.control]{DEoptim::DEoptim.control}) \cr
 \code{DEoptim.itermax} \tab \link{logical} \tab controls the number of the allowed generations (cf. \link[DEoptim:DEoptim.control]{DEoptim::DEoptim.control}) \cr
@@ -169,7 +169,7 @@ object = ExampleData.TR_OSL)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Schmidt, C., 2020. fit_OSLLifeTimes(): Fitting and Deconvolution of OSL Lifetime Components. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2020. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.7. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., Schmidt, C., 2020. fit_OSLLifeTimes(): Fitting and Deconvolution of OSL Lifetime Components. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Riedesel, S., Autzen, M., 2020. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.8. https://r-luminescence.org
 }
 
 \references{
@@ -191,6 +191,6 @@ Journal of Global Optimization 11, 341–359.
 \link[minpack.lm:nls.lm]{minpack.lm::nls.lm}, \link[DEoptim:DEoptim]{DEoptim::DEoptim}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS-Université Bordeaux Montaigne (France),
+Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University,
 Christoph Schmidt, University of Bayreuth (Germany)
 , RLum Developer Team}

@@ -19,6 +19,8 @@
 #'
 #' @details **Full list of authors and contributors** (alphabetic order)
 #'
+#' *In the case authors retired the last affiliation is mentioned.*
+#'
 #' \tabular{ll}{
 #' Martin Autzen \tab *DTU NUTECH Center for Nuclear Technologies* \cr
 #' Christoph Burow \tab *University of Cologne, Germany** \cr
@@ -26,17 +28,17 @@
 #' Michael Dietze \tab *GFZ Helmholtz Centre Potsdam, Germany* \cr
 #' Julie Durcan \tab *University of Oxford, United Kingdom* \cr
 #' Pierre Guibert \tab *IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne, France* \cr
-#' Manfred Fischer\tab *University of Bayreuth, Germany* \cr
+#' Manfred Fischer\tab *Chair of Geomorphology, University of Bayreuth, Germany* \cr
 #' Margret C. Fuchs \tab *Helmholtz-Zentrum Dresden-Rossendorf, Helmholtz-Institute Freiberg for Resource Technology, Freiberg, Germany* \cr
 #' Johannes Friedrich \tab *Chair of Geomorphology, University of Bayreuth, Germany* \cr
 #' Guillaume Guérin \tab *IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne, France* \cr
 #' Georgina E. King \tab *University of Lausanne, Switzerland* \cr
-#' Sebastian Kreutzer \tab *Department of Geography & Earth Sciences, Aberystwyth University, United Kingdom * \cr
+#' Sebastian Kreutzer \tab *Department of Geography & Earth Sciences, Aberystwyth University, United Kingdom* \cr
 #' Norbert Mercier \tab *IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne, France* \cr
-#' Svenja Riedesel \tab *Aberystwyth University, United Kingdom* \cr
-#' Christoph Schmidt \tab *Chair of Geomorophology, University of Bayreuth, Germany* \cr
+#' Svenja Riedesel \tab *Department of Geograpy & Earth Sciences ,Aberystwyth University, United Kingdom* \cr
+#' Christoph Schmidt \tab *Institute of Earth Surface Dynamics,University of Lausanne, Switzerland* \cr
 #' Rachel K. Smedley \tab *Liverpool University, United Kingdom* \cr
-#' Anne Philippe \tab  *Universite de Nantes and ANJA INRIA, Rennes, France* \cr
+#' Anne Philippe \tab  *Université de Nantes and ANJA INRIA, Rennes, France* \cr
 #' Antoine Zink \tab *C2RMF, Palais du Louvre, Paris, France*
 #' }
 #'
@@ -58,7 +60,7 @@
 #'
 #' **Project website**
 #'
-#' - [http://www.r-luminescence.org]()
+#' - [https://www.r-luminescence.org]()
 #'
 #' **Project source code repository**
 #'
@@ -68,11 +70,12 @@
 #'
 #' - [https://cran.r-project.org/package=RLumShiny]()
 #' - [https://cran.r-project.org/package=RLumModel]()
+#' - [https://cran.r-project.org/package=RLumCarlo]()
 #'
 #' **Package maintainer**
 #'
-#' Sebastian Kreutzer, Department of of Geography & Earth Sciences, Aberystwyth University, United Kingdom,\cr
-#' \email{sebastian.kreutzer@@u-bordeaux-montaigne.fr}
+#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom),\cr
+#' \email{sebastian.kreutzer@@aber.ac.uk}
 #'
 #' **Funding**
 #'
@@ -83,6 +86,10 @@
 #'
 #' Between 2014--2019, the work of Sebastian Kreutzer as maintainer of the package was supported
 #' by LabEx LaScArBxSK (ANR - n. ANR-10-LABX-52).
+#'
+#' Between 2020--2021, the work of Sebastian Kreutzer as maintainer of the package has received funding
+#' from the European Union’s Horizon 2020 research and innovation programme under
+#' the Marie Skłodowska-Curie grant agreement No 844457 (CREDit).
 #'
 #' @references
 #' Dietze, M., Kreutzer, S., Fuchs, M.C., Burow, C., Fischer, M.,
@@ -144,6 +151,9 @@ NULL
 #' `AdamiecAitken1998`: \tab
 #' Conversion factors from Tables 5 and 6 \cr
 #'
+#' `Cresswelletal2018`: \tab
+#' Conversion factors from Tables 5 and 6 \cr
+#'
 #' `Guerinetal2011`: \tab
 #' Conversion factors from Tables 1, 2 and 3 \cr
 #'
@@ -151,19 +161,24 @@ NULL
 #' Conversion factors from Tables 1, 2 and 3 \cr
 #' }
 #'
-#'
-#' @section Version: 0.1
+#' @section Version: 0.2.0
 #'
 #' @references
-#' Guerin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
-#' factors: update. Ancient TL, 29, 5-8.
 #'
 #' Adamiec, G., Aitken, M.J., 1998. Dose-rate conversion factors: update.
 #' Ancient TL 16, 37-46.
 #'
+#' Cresswell., A.J., Carter, J., Sanderson, D.C.W., 2018.
+#' Dose rate conversion parameters: Assessment of nuclear data.
+#' Radiation Measurements 120, 195-201.
+#'
+#' Guerin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
+#' factors: update. Ancient TL, 29, 5-8.
+#'
 #' Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
 #' A re-evaluation of radiation dose-rate conversion factors. Mediterranean
 #' Archaeology and Archaeometry 13, 1-15.
+#'
 #'
 #' @source
 #' All gamma conversion factors were carefully read from the tables given in the
@@ -174,9 +189,37 @@ NULL
 #' @examples
 #'
 #' ## Load data
-#' data("BaseDataSet.ConversionFactors")
+#' data("BaseDataSet.ConversionFactors", envir = environment())
 #'
 #' @name BaseDataSet.ConversionFactors
+#' @md
+NULL
+
+#' @title Base dataset for grain size attenuation data by Guérin et al. (2012)
+#'
+#' @description Grain size correction data for beta-dose rates
+#' published by Guérin et al. (2012).
+#'
+#'#' @format
+#'
+#' A [`data.frame`] seven columns and sixteen rows. Column headers
+#' are `GrainSize`, `Q_K`, `FS_K`, `Q_Th`, `FS_Th`, `Q_U`, `FS_U`.
+#' Grain sizes are quoted in µm (e.g., 20, 40, 60 etc.)
+#'
+#' @section Version: 0.1.0
+#'
+#' @source Guérin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012.
+#' On the use of the infinite matrix assumption and associated concepts:
+#' A critical review. Radiation Measurements, 47, 778-785.
+#'
+#' @keywords datasets
+#'
+#' @examples
+#'
+#' ## load data
+#' data("BaseDataSet.GrainSizeAttenuation", envir = environment())
+#'
+#' @name BaseDataSet.GrainSizeAttenuation
 #' @md
 NULL
 
@@ -211,7 +254,7 @@ NULL
 #' @examples
 #'
 #' ## Load data
-#' data("BaseDataSet.FractionalGammaDose")
+#' data("BaseDataSet.FractionalGammaDose", envir = environment())
 #'
 #' @name BaseDataSet.FractionalGammaDose
 #' @md
@@ -236,9 +279,32 @@ NULL
 #' @examples
 #'
 #' ## Load data
-#' data("ExampleData.ScaleGammaDose")
+#' data("ExampleData.ScaleGammaDose", envir = environment())
 #'
 #' @name ExampleData.ScaleGammaDose
+#' @md
+NULL
+
+#' Example data for calc_CobbleDoseRate()
+#'
+#' An example data set for the function [calc_CobbleDoseRate] containing layer
+#' specific information for the cobble to be used in the function.
+#'
+#' @format
+#'
+#' A [`data.frame`]. Please see [calc_CobbleDoseRate] for detailed information
+#' on the structure of the [data.frame].
+#'
+#' @section Version: 0.1.0
+#'
+#' @keywords datasets
+#'
+#' @examples
+#'
+#' ## Load data
+#' data("ExampleData.CobbleData", envir = environment())
+#'
+#' @name ExampleData.CobbleData
 #' @md
 NULL
 
@@ -608,7 +674,6 @@ NULL
 #' @aliases Lx.data Tx.data
 #' @md
 NULL
-
 
 #' Example data as [RLum.Analysis-class] objects
 #'
@@ -1252,7 +1317,7 @@ NULL
 #' **Type:** Test data for exponential fits \cr
 #' **Reference:** Berger, G.W., Huntley, D.J., 1989. Test data for exponential fits. Ancient TL 7, 43-46.
 #'
-#' *>>XYSG_file.xysg*
+#' *>>XSYG_file.xsyg*
 #'
 #' **Type:** XSYG-file stump \cr
 #' **Info: ** XSYG-file with some basic curves to test functions \cr

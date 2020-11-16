@@ -38,13 +38,14 @@
 #'
 #' \tabular{ll}{
 #' **Argument** \tab **Description** \cr
-#' `short_table` \tab If `TRUE` only show the first and last 5 rows of lang tables. \cr
+#' `short_table` \tab If `TRUE` only show the first and last 5 rows of long tables. \cr
 #' `theme` \tab Specifies the Bootstrap
-#' theme to use for the report. Valid themes include "default", "cerulean", "journal", "flatly",
-#' "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", and "yeti". \cr
-#' `highlight` \tab Specifies the syntax highlighting
-#'  style. Supported styles include "default", "tango", "pygments", "kate", "monochrome",
-#'  "espresso", "zenburn", "haddock", and "textmate". \cr
+#' theme to use for the report. Valid themes include `"default"`, `"cerulean"`, `"journal"`, `"flatly"`,
+#' `"readable"`, `"spacelab"`, `"united"`, `"cosmo"`, `"lumen"`, `"paper"`, `"sandstone"`,
+#' `"simplex"`, and `"yeti"`. \cr
+#' `highlight` \tab Specifies the syntax highlighting style.
+#'  Supported styles include `"default"`, `"tango"`, `"pygments"`, `"kate"`, `"monochrome"`,
+#'  `"espresso"`, `"zenburn"`, `"haddock"`, and `"textmate"`. \cr
 #' `css` \tab `TRUE` or `FALSE` to enable/disable custom CSS styling \cr
 #' }
 #'
@@ -52,9 +53,9 @@
 #'
 #' \tabular{ll}{
 #' **Argument** \tab **Description** \cr
-#' `font_family` \tab Define the font family of the HTML document (default: arial) \cr
+#' `font_family` \tab Define the font family of the HTML document (default: `"arial"`) \cr
 #' `headings_size` \tab Size of the `<h1>` to `<h6>` tags used to define HTML headings (default: 166%). \cr
-#' `content_color` \tab Color of the object's content (default: #a72925). \cr
+#' `content_color` \tab Colour of the object's content (default: #a72925). \cr
 #' }
 #'
 #' Note that these arguments must all be of class [character] and follow standard CSS syntax.
@@ -91,7 +92,7 @@
 #' Path to a CSS file to change the default styling of the HTML document.
 #'
 #' @param quiet [logical] (*with default*):
-#' `TRUE` to supress printing of the pandoc command line.
+#' `TRUE` to suppress printing of the pandoc command line.
 #'
 #' @param clean [logical] (*with default*):
 #' `TRUE` to clean intermediate files created during rendering.
@@ -99,11 +100,11 @@
 #' @param ... further arguments passed to or from other methods and to control
 #' the document's structure (see details).
 #'
-#' @section Function version: 0.1.1
+#' @section Function version: 0.1.3
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany),
-#' Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France) \cr
+#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom) \cr
 #'
 #' @note
 #' This function requires the R packages 'rmarkdown', 'pander' and 'rstudioapi'.
@@ -274,11 +275,15 @@ report_RLum <- function(
   # save RDS file
   saveRDS(object, file.rds)
 
+  # get object
+  elements <- .struct_RLum(object, root = deparse(substitute(object)))
+
   ## ------------------------------------------------------------------------ ##
   ## WRITE CONTENT ----
 
   # HEADER ----
   writeLines("---", tmp)
+  writeLines("title: RLum.Report", tmp)
   writeLines("output:", tmp)
   writeLines("  html_document:", tmp)
   writeLines("    mathjax: null", tmp)
@@ -298,7 +303,8 @@ report_RLum <- function(
     writeLines(paste0(
       "<style>",
       paste0("h1, h2, h3, h4, h5, h6 { font-size:", css$headings_size," } \n"),
-      paste0("#root { color: ", css$content_color," } \n"),
+      paste0("#root", seq(1,nrow(elements)), " { color: ",
+             css$content_color," } \n"),
       paste0("BODY { font-family:", css$font_family, " } \n"),
       "</style>"
     ),
@@ -350,8 +356,6 @@ report_RLum <- function(
   }#EndOf::Header
 
   # OBJECT ----
-  elements <- .struct_RLum(object, root = deparse(substitute(object)))
-
   if (structure$main) {
     for (i in 1:nrow(elements)) {
 
@@ -376,7 +380,7 @@ report_RLum <- function(
         hlevel <- paste(rep("#", elements$depth[i]), collapse = "")
 
       # write header; number of dots represents depth in the object. because there
-      # may be duplicate header names, for each further occurence of a name
+      # may be duplicate header names, for each further occurrence of a name
       # Zero-width non-joiner entities are added to the name (non visible)
       writeLines(paste0(hlevel, " ",
                         "<span style='color:#74a9d8'>",
@@ -385,7 +389,8 @@ report_RLum <- function(
                         "</span>",
                         paste(rep("&zwnj;", elements$bud.freq[i]), collapse = ""),
                         short.name[length(short.name)],
-                        ifelse(elements$endpoint[i], "", "{#root}"),
+                        ifelse(elements$endpoint[i], "", paste0("{#root",i,"}")),
+                        ##ifelse(elements$endpoint[i], "", "{#root}"),
                         "\n\n"),
                  tmp)
 

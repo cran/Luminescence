@@ -14,6 +14,7 @@ collection of various R functions for luminescence dating data analysis.
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![CRAN](https://www.r-pkg.org/badges/version/Luminescence)](https://cran.r-project.org/package=Luminescence)
+[![DOI](https://zenodo.org/badge/23153315.svg)](https://zenodo.org/badge/latestdoi/23153315)
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/Luminescence)](https://www.r-pkg.org/pkg/Luminescence)
 [![Downloads](https://cranlogs.r-pkg.org/badges/Luminescence)](https://www.r-pkg.org/pkg/Luminescence)
 [![Downloads](https://cranlogs.r-pkg.org/badges/last-week/Luminescence)](https://www.r-pkg.org/pkg/Luminescence)
@@ -27,36 +28,32 @@ Status](https://img.shields.io/codecov/c/github/R-Lum/Luminescence.svg)](https:/
 
 ### CRAN check status
 
-| error | fail | warn | note | ok |
-| ----: | ---: | ---: | ---: | -: |
-|     0 |    0 |    0 |    8 |  5 |
+| error | fail | warn | note |  ok |
+|------:|-----:|-----:|-----:|----:|
+|     0 |    0 |    0 |    7 |   5 |
 
 ## Social media and other resources
 
 Follow us on
-[![](http://i.imgur.com/wWzX9uB.png)](https://www.twitter.com/RLuminescence)
-or visit our [R-Luminescence homepage](http://www.r-luminescence.org).
+[![](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/RLuminescence)
+or visit our [R-Luminescence homepage](https://r-luminescence.org).
 
 ## Installation
 
 #### i. Requirements
 
-**Windows (32/64bit)** - ‘Rtools’ (provided by CRAN)
-
-<https://cran.r-project.org/bin/windows/Rtools/>
-
-**Mac OS X** - ‘Xcode’ (provided by Apple)
-
-<https://developer.apple.com/xcode/downloads/>
-
-For **Linux** users *gcc* often comes pre-installed in most
-distributions. Should *gcc* be not available, however, we kindly refer
-to the exhaustive collection of installation guides depending on the
-linux distribution.
+-   *Windows (32/64bit)*:
+    [Rtools](https://cran.r-project.org/bin/windows/Rtools/) (provided
+    by CRAN)
+-   *macOS*: [Xcode](https://developer.apple.com/xcode/downloads/)
+    (provided by Apple)
+-   *Linux*: [gcc](https://gcc.gnu.org) often comes pre-installed in
+    most distributions.
 
 #### ii. Install the package
 
-Install any development versions using our *RStudio* add-in
+Install any development versions using our
+[RStudio](https://rstudio.com) add-in
 
 ![](man/figures/README-Screenshot_AddIn.png)
 
@@ -86,15 +83,15 @@ as well as a user-friendly design. Try
 <https://github.com/R-Lum/Luminescence/issues> or write us an
 [e-mail](mailto:developers@r-luminescence.org) if anything crosses your
 mind or if you want your new self-written function to be to implemented.
-You are kindly invited to bring forward the package with us\!
+You are kindly invited to bring forward the package with us!
 
 ## Note
 
-**The package comes without any guarantee\!**
+**The package comes without any guarantee!**
 
 Please further note that this version is a development version and may
 change day by day. For stable branches please visit the package on [CRAN
-‘Luminescence’](https://cran.r-project.org/package=Luminescence).
+‘Luminescence’](https://CRAN.R-project.org/package=Luminescence).
 
 ## License
 
@@ -112,11 +109,12 @@ more details.
 
 ## Related projects
 
-  - [RLumModel](https://github.com/R-Lum/RLumModel)
-  - [RLumShiny](https://github.com/R-Lum/RLumShiny)
-  - [BayLum](https://github.com/R-Lum/BayLum)
-  - [RLumDocker](https://github.com/R-Lum/RLumDocker)
-  - [RCarb](https://github.com/R-Lum/RCarb)
+-   [RLumModel](https://github.com/R-Lum/RLumModel)
+-   [RLumShiny](https://github.com/R-Lum/RLumShiny)
+-   [RLumDocker](https://github.com/R-Lum/RLumDocker)
+-   [BayLum](https://github.com/crp2a/BayLum)
+-   [RCarb](https://github.com/R-Lum/RCarb)
+-   [RLumCarlo](https://github.com/R-Lum/RLumCarlo)
 
 ## R package dependencies
 

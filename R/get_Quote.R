@@ -4,19 +4,19 @@
 #' growing library. If called without any parameters, a random quote is
 #' returned.
 #'
-#' @param ID [character] (*optional*): qoute ID to be returned.
+#' @param ID [character] (*optional*): quote ID to be returned.
 #'
 #' @param separated [logical] (*with default*): return result in separated form.
 #'
 #' @return Returns a character with quote and respective (false) author.
 #'
-#' @section Function version: 0.1.4
+#' @section Function version: 0.1.5
 #'
-#' @author Michael Dietze, GFZ Potsdam (Germany), Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France), Dirk Mittelstraß, TU Dresden (Germany)
+#' @author Michael Dietze, GFZ Potsdam (Germany), Sebastian Kreutzer, Geography & Earth Science, Aberystwyth University (United Kingdom), Dirk Mittelstraß, TU Dresden (Germany)
 #'
 #' @examples
 #'
-#' ## ask for an arbitrary qoute
+#' ## ask for an arbitrary quote
 #' get_Quote()
 #'
 #' @md
@@ -60,7 +60,6 @@ get_Quote <- function(
     c("An aliquot disc", "The answer [...] is: 48"),
     c("Push Pin", "Made of used sample carriers"),
     c("A motivated R-Team member", "We are doing this not just for statistical reasons, there is real science behind it!"),
-    c("An enthusiastic cabaret artist", "Political elections are like brushing teeth: if you don't do it, things become brown."),
     c("An unbiased reviewer", "The data is too poor to be published in QG, try a higher ranked journal."),
     c("R Team member, asked about statistical details", "No idea, I'm just here for the visualisation."),
     c("An arbitrary unexperienced RLum-user", "Little by little, the bird builds its nest."),

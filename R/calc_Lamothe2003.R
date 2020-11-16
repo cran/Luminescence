@@ -1,25 +1,28 @@
 #' Apply fading correction after Lamothe et al., 2003
 #'
 #' This function applies the fading correction for the prediction of long-term fading as suggested
-#' by Lamothe et atl., 2003. The function basically adjusts the Ln/Tn values and fit a new dose-response
+#' by Lamothe et al., 2003. The function basically adjusts the Ln/Tn values and fit a new dose-response
 #' curve using the function [plot_GrowthCurve].
 #'
 #'
 #' @param object [RLum.Results-class] [data.frame] (**required**): Input data for applying the
-#' fading correction. Alow are (1) [data.frame] with three columns (dose, LxTx, LxTx error), (2)
+#' fading correction. Allow are (1) [data.frame] with three columns (dose, LxTx, LxTx error), (2)
 #' [RLum.Results-class] object created by the function [analyse_SAR.CWOSL] or [analyse_pIRIRSequence]
 #'
 #' @param dose_rate.envir [numeric] vector of length 2 (**required**): Environmental dose rate in mGy/a
 #'
-#' @param dose_rate.source [numeric] vector of length 2 (**required**): Irradiation source dose rate in Gy/s
+#' @param dose_rate.source [numeric] vector of length 2 (**required**): Irradiation source dose rate in Gy/s,
+#' which is, according to Lamothe et al. (2003) De/t*.
 #'
 #' @param g_value [numeric] vector of length 2 (**required**): g_value in \%/decade *recalculated at the moment*
 #' the equivalent dose was calculated, i.e. tc is either similar for the g-value measurement **and** the De measurement or
 #' needs be to recalculated (cf. [calc_FadingCorr]). Inserting a normalised g-value, e.g., normalised to 2-days , will
 #' lead to wrong results
 #'
-#' @param tc [numeric] (optional): time in seconds between irradiation and the prompt measurement used in the De estimation (cf. Huntley & Lamothe 2001).
-#' If set to `NULL` it is assumed that tc is similar for the equivalent dose estimation and the g-value estimation
+#' @param tc [numeric] (optional): time in seconds between irradiation and
+#' the prompt measurement used in the De estimation (cf. Huntley & Lamothe 2001).
+#' If set to `NULL` it is assumed that tc is similar for the equivalent dose
+#' estimation and the g-value estimation
 #'
 #' @param tc.g_value [numeric] (with default): the time in seconds between irradiation and the prompt measurement used for estimating the g-value.
 #' If the g-value was normalised to, e.g., 2 days, this time in seconds (i.e., 172800) should be given here along with the time used for the
@@ -59,12 +62,12 @@
 #' and correction for it in optical dating. Canadian Journal of Earth Sciences 38, 1093-1106.
 #'
 #' Lamothe, M., Auclair, M., Hamzaoui, C., Huot, S., 2003.
-#' Towards a prediction of long-term anomalous fadingof feldspar IRSL. Radiation Measurements 37,
+#' Towards a prediction of long-term anomalous fading of feldspar IRSL. Radiation Measurements 37,
 #' 493-498.
 #'
 #' @section Function version: 0.1.0
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France), Norbert Mercier,
+#' @author Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom), Norbert Mercier,
 #' IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 #'
 #' @keywords datagen
@@ -186,7 +189,7 @@ calc_Lamothe2003 <- function(
     if(object@originator == "analyse_SAR.CWOSL" || object@originator == "analyse_pIRIRSequence"){
       ##now we do crazy stuff, we make a self-call here since this file can contain a lot of information
 
-        ##get number of datasets; we have to search for the word natural, everthing else is not safe enough
+        ##get number of datasets; we have to search for the word natural, everything else is not safe enough
         full_table <- object@data$LnLxTnTx.table
         set_start <- which(grepl(full_table$Name, pattern = "Natural", fixed = TRUE))
         set_end <- c(set_start[-1] - 1, nrow(full_table))
@@ -230,7 +233,7 @@ calc_Lamothe2003 <- function(
   # Apply correction----------------------------------------------------------------------------
 
   ##recalculate the g-value to the given tc ...
-  ##re-calulation thanks to the help by Sebastien Huot, e-mail: 2016-07-19
+  ##re-calculation thanks to the help by Sébastien Huot, e-mail: 2016-07-19
   if(!is.null(tc)){
     k0 <- g_value / 100 / log(10)
     k1 <- k0 / (1 - k0 * log(tc[1]/tc.g_value[1]))
@@ -241,18 +244,30 @@ calc_Lamothe2003 <- function(
   # transform irradiation times to dose values
   data[[1]] <- data[[1]] * dose_rate.source[1]
 
-  # fading correction
-  rr <-  31.5576 * 10^9 * dose_rate.source[1] / (exp(1) * dose_rate.envir[1])
-  s_rr <-  (sqrt ((100*dose_rate.source[2]/dose_rate.source[1])^2 + (100*dose_rate.envir[2]/dose_rate.envir[1])^2))  * rr / 100
-  Fading_C <-  1 - (g_value[1])/100 * log10(rr)
-  sFading_C <-  sqrt ((log10(rr) )^2 * ((g_value[2])/100)^2 + (g_value[1]/(100*rr))^2 * (s_rr)^2 )
+  ## fading correction (including dose rate conversion from Gy/s to Gy/ka)
+  ## and error calculation
+  ## the formula in Lamothe et al. (2003) reads:
+  ## I_faded = I_unfaded*(1-g*log((1/e)*DR_lab/DR_soil)))
+  rr <-  31.5576e+09 * dose_rate.source[1] / (exp(1) * dose_rate.envir[1])
+  s_rr <- sqrt((dose_rate.source[2]/dose_rate.source[1])^2 + (dose_rate.envir[2]/dose_rate.envir[1])^2) * rr
+  Fading_C <- 1 - g_value[1] / 100 * log10(rr)
+  sFading_C <- sqrt((log10(rr) * g_value[2]/100)^2 + (g_value[1]/(100 * rr) * s_rr)^2)
 
-  #apply to input data
+  # store original Lx/Tx in new object
   LnTn_BEFORE <- data[[2]][1]
   LnTn_BEFORE.ERROR <- data[[3]][1]
-  data[[2]][1] <-  data[[2]][1] / Fading_C
-  data[[3]][1] <-  (sqrt( (100*data[[3]][1]/data[[2]][1])^2  + ((1/Fading_C - 1)*100*sFading_C/Fading_C)^2 )) * data[[2]][1] / 100
 
+  # apply to input data
+  data[[2]][1] <-  data[[2]][1] / Fading_C
+  data[[3]][1] <-  sqrt((data[[3]][1]/data[[2]][1])^2 +
+                            ((1/Fading_C - 1) * sFading_C/Fading_C)^2) * data[[2]][1]
+
+  ##TODO discuss with Norbert
+  # data[[3]][1] <-  sqrt((data[[3]][1]/data[[2]][1])^2 +
+  #                         (sFading_C/Fading_C)^2) * data[[2]][1]
+  #
+  # print(LnTn_BEFORE.ERROR/LnTn_BEFORE)
+  # print(data[[3]][1]/ data[[2]][1] )
 
   # Fitting ---------------------------------------------------------------------------------
   ##set arguments
@@ -276,8 +291,7 @@ calc_Lamothe2003 <- function(
 
   # Age calculation -----------------------------------------------------------------------------
   Age <-  get_RLum(fit_results)[["De"]] / dose_rate.envir[1]
-  s_Age <-  sqrt (  (100*get_RLum(fit_results)[["De.Error"]]/get_RLum(fit_results)[["De"]])^2 + (100*dose_rate.envir[2]/dose_rate.envir[1])^2   ) *Age/100
-
+  s_Age <-  sqrt((100*get_RLum(fit_results)[["De.Error"]]/get_RLum(fit_results)[["De"]])^2 + (100*dose_rate.envir[2]/dose_rate.envir[1])^2) *Age/100
 
 
   # Terminal output -----------------------------------------------------------------------------
@@ -314,7 +328,6 @@ calc_Lamothe2003 <- function(
           LnTn_BEFORE.ERROR = LnTn_BEFORE.ERROR,
           LnTn_AFTER = data[[2]][1],
           LnTn_AFTER.ERROR = data[[3]][1],
-          DE = get_RLum(fit_results)[["De"]],
           DE = get_RLum(fit_results)[["De"]],
           DE.ERROR = get_RLum(fit_results)[["De.Error"]],
           AGE = Age,

@@ -1,7 +1,7 @@
 #' Create a DRAC input data template (v1.2)
 #'
 #' This function returns a DRAC input template (v1.2) to be used in conjunction
-#' with the use_DRAC() function
+#' with the [use_DRAC] function
 #'
 #' @param nrow [integer] (*with default*):
 #' specifies the number of rows of the template (i.e., the number of data
@@ -32,7 +32,7 @@
 #' @return A list.
 #'
 #' @author
-#' Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+#' Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 #'
 #' @references
 #' Durcan, J.A., King, G.E., Duller, G.A.T., 2015. DRAC: Dose Rate and Age Calculator for trapped charge dating.

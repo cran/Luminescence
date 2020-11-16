@@ -16,15 +16,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// src_EED_Calc_Overall_StatUncertainty
+NumericMatrix src_EED_Calc_Overall_StatUncertainty(NumericMatrix M_Simul, int Ndata, int Nsimul, int MinNbSimExp);
+RcppExport SEXP _Luminescence_src_EED_Calc_Overall_StatUncertainty(SEXP M_SimulSEXP, SEXP NdataSEXP, SEXP NsimulSEXP, SEXP MinNbSimExpSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type M_Simul(M_SimulSEXP);
+    Rcpp::traits::input_parameter< int >::type Ndata(NdataSEXP);
+    Rcpp::traits::input_parameter< int >::type Nsimul(NsimulSEXP);
+    Rcpp::traits::input_parameter< int >::type MinNbSimExp(MinNbSimExpSEXP);
+    rcpp_result_gen = Rcpp::wrap(src_EED_Calc_Overall_StatUncertainty(M_Simul, Ndata, Nsimul, MinNbSimExp));
+    return rcpp_result_gen;
+END_RCPP
+}
 // analyse_IRSARRF_SRS
-RcppExport SEXP analyse_IRSARRF_SRS(NumericVector values_regenerated_limited, NumericVector values_natural_limited, NumericVector vslide_range, int n_MC, bool trace);
+RcppExport SEXP analyse_IRSARRF_SRS(arma::vec values_regenerated_limited, arma::vec values_natural_limited, arma::vec vslide_range, int n_MC, bool trace);
 RcppExport SEXP _Luminescence_analyse_IRSARRF_SRS(SEXP values_regenerated_limitedSEXP, SEXP values_natural_limitedSEXP, SEXP vslide_rangeSEXP, SEXP n_MCSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type values_regenerated_limited(values_regenerated_limitedSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type values_natural_limited(values_natural_limitedSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vslide_range(vslide_rangeSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type values_regenerated_limited(values_regenerated_limitedSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type values_natural_limited(values_natural_limitedSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type vslide_range(vslide_rangeSEXP);
     Rcpp::traits::input_parameter< int >::type n_MC(n_MCSEXP);
     Rcpp::traits::input_parameter< bool >::type trace(traceSEXP);
     rcpp_result_gen = Rcpp::wrap(analyse_IRSARRF_SRS(values_regenerated_limited, values_natural_limited, vslide_range, n_MC, trace));
@@ -65,6 +79,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_Luminescence_create_UID", (DL_FUNC) &_Luminescence_create_UID, 0},
+    {"_Luminescence_src_EED_Calc_Overall_StatUncertainty", (DL_FUNC) &_Luminescence_src_EED_Calc_Overall_StatUncertainty, 4},
     {"_Luminescence_analyse_IRSARRF_SRS", (DL_FUNC) &_Luminescence_analyse_IRSARRF_SRS, 5},
     {"_Luminescence_create_RLumDataCurve_matrix", (DL_FUNC) &_Luminescence_create_RLumDataCurve_matrix, 10},
     {"_Luminescence_src_get_XSYG_curve_values", (DL_FUNC) &_Luminescence_src_get_XSYG_curve_values, 1},

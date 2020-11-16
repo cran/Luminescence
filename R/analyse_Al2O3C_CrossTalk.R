@@ -19,7 +19,7 @@
 #' function [get_RLum]. To deactivate the automatic selection set the argument to `NULL`
 #'
 #' @param irradiation_time_correction [numeric] or [RLum.Results-class] (*optional*):
-#' information on the used irradiation time correction obained by another experiements.
+#' information on the used irradiation time correction obtained by another experiments.
 #'
 #' @param method_control [list] (*optional*):
 #' optional parameters to control the calculation.
@@ -63,7 +63,7 @@
 #'
 #' @section Function version: 0.1.2
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+#' @author Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 #'
 #' @seealso [analyse_Al2O3C_ITC]
 #'

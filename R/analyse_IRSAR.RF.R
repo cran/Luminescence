@@ -1,9 +1,9 @@
-#' Analyse IRSAR RF measurements
+#' @title Analyse IRSAR RF measurements
 #'
-#' Function to analyse IRSAR RF measurements on K-feldspar samples, performed
+#' @description Function to analyse IRSAR RF measurements on K-feldspar samples, performed
 #' using the protocol according to Erfurt et al. (2003) and beyond.
 #'
-#' The function performs an IRSAR analysis described for K-feldspar samples by
+#' @details The function performs an IRSAR analysis described for K-feldspar samples by
 #' Erfurt et al. (2003) assuming a negligible sensitivity change of the RF
 #' signal.
 #'
@@ -24,7 +24,7 @@
 #' **`method = "FIT"`**
 #'
 #' The principle is described above and follows the original suggestions by
-#' Erfurt et al., 2003. For the fitting the mean count value of the RF_nat curve is used.
+#' Erfurt et al., 2003. For the fitting the mean count value of the `RF_nat` curve is used.
 #'
 #' Function used for the fitting (according to Erfurt et al. (2003)):
 #'
@@ -59,7 +59,7 @@
 #' **`method.control`**
 #'
 #' To keep the generic argument list as clear as possible, arguments to control the methods
-#' for De estimation are all preset with meaningful default parameters and can be
+#' for De estimation are all pre set with meaningful default parameters and can be
 #' handled using the argument `method.control` only, e.g.,
 #' `method.control = list(trace = TRUE)`. Supported arguments are:
 #'
@@ -97,7 +97,7 @@
 #' For **`method = "FIT"`** the asymmetric error range is obtained by using the 2.5 % (lower) and
 #' the 97.5 % (upper) quantiles of the \eqn{RF_{nat}} curve for calculating the \eqn{D_{e}} error range.
 #'
-#' For **`method = "SLIDE"`** the error is obtained by bootstrapping the residuals of the slided
+#' For **`method = "SLIDE"`** the error is obtained by bootstrapping the residuals of the slid
 #' curve to construct new natural curves for a Monte Carlo simulation. The error is returned in two
 #' ways: (a) the standard deviation of the herewith obtained \eqn{D_{e}} from the MC runs and (b) the confidence
 #' interval using the  2.5 % (lower) and the 97.5 % (upper) quantiles. The results of the MC runs
@@ -107,11 +107,12 @@
 #'
 #' The argument `test_parameters` allows to pass some thresholds for several test parameters,
 #' which will be evaluated during the function run. If a threshold is set and it will be exceeded the
-#' test parameter status will be set to "FAILED". Intentionally this parameter is not termed
-#' 'rejection criteria' as not all test parameters are evaluated for both methods and some parameters
+#' test parameter status will be set to `"FAILED"`. Intentionally this parameter is not termed
+#' `'rejection criteria'` as not all test parameters are evaluated for both methods and some parameters
 #' are calculated by not evaluated by default. Common for all parameters are the allowed argument options
 #' `NA` and `NULL`. If the parameter is set to `NA` the value is calculated but the
-#' result will not be evaluated, means it has no effect on the status ("OK" or "FAILED") of the parameter.
+#' result will not be evaluated, means it has no effect on the status (`"OK"` or `"FAILED"`)
+#' of the parameter.
 #' Setting the parameter to `NULL` disables the parameter entirely and the parameter will be
 #' also removed from the function output. This might be useful in cases where a particular parameter
 #' asks for long computation times. Currently supported parameters are:
@@ -126,8 +127,8 @@
 #' Calculated as absolute difference from 1 of the ratio of the integral of the normalised RF-curves,
 #' This value indicates intersection of the RF-curves and should be close to 0 if the curves
 #' have a similar shape. For this calculation first the corresponding time-count pair value on the RF_reg
-#' curve is obtained using the maximum count value of the RF_nat curve and only this segment (fitting to
-#' the RF_nat curve) on the RF_reg curve is taken for further calculating this ratio. If nothing is
+#' curve is obtained using the maximum count value of the `RF_nat` curve and only this segment (fitting to
+#' the `RF_nat` curve) on the RF_reg curve is taken for further calculating this ratio. If nothing is
 #' found at all, `Inf` is returned.
 #'
 #' `residuals_slope` [numeric] (default: `NA`; only for `method = "SLIDE"`):
@@ -160,7 +161,7 @@
 #'
 #' @param object [RLum.Analysis-class] or a [list] of [RLum.Analysis-class]-objects (**required**):
 #' input object containing data for protocol analysis. The function expects to
-#' find at least two curves in the [RLum.Analysis-class] object: (1) RF_nat, (2) RF_reg.
+#' find at least two curves in the [RLum.Analysis-class] object: (1) `RF_nat`, (2) `RF_reg`.
 #' If a `list` is provided as input all other parameters can be provided as
 #' `list` as well to gain full control.
 #'
@@ -185,8 +186,8 @@
 #'
 #' @param method.control [list] (*optional*):
 #' parameters to control the method, that can be passed to the chosen method.
-#' These are for (1) `method = "FIT"`: 'trace', 'maxiter', 'warnOnly', 'minFactor' and for
-#' (2) `method = "SLIDE"`: 'correct_onset', 'show_density',  'show_fit', 'trace'.
+#' These are for (1) `method = "FIT"`: `'trace'`, `'maxiter'`, `'warnOnly'`, `'minFactor'` and for
+#' (2) `method = "SLIDE"`: `'correct_onset'`, `'show_density'`,  `'show_fit'`, `'trace'`.
 #' See details.
 #'
 #' @param test_parameters [list] (*with default*):
@@ -301,16 +302,16 @@
 #' `[ PLOT OUTPUT ]`\cr
 #' ------------------------\cr
 #'
-#' The slided IR-RF curves with the finally obtained De
+#' The slid IR-RF curves with the finally obtained De
 #'
 #' @note
 #' This function assumes that there is no sensitivity change during the
 #' measurements (natural vs. regenerated signal), which is in contrast to the
 #' findings by Buylaert et al. (2012).
 #'
-#' @section Function version: 0.7.5
+#' @section Function version: 0.7.8
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+#' @author Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 #'
 #' @seealso [RLum.Analysis-class], [RLum.Results-class], [get_RLum],
 #' [nls], [minpack.lm::nlsLM], `parallel::mclapply`
@@ -458,7 +459,11 @@ analyse_IRSAR.RF<- function(
       }
 
     }else{
-      temp_main <- as.list(paste0("ALQ #",1:length(object)))
+      if(object[[1]]@originator == "read_RF2R"){
+        temp_main <- lapply(object, function(x) x@info$ROI)
+      } else {
+        temp_main <- as.list(paste0("ALQ #",1:length(object)))
+      }
 
     }
 
@@ -1045,7 +1050,7 @@ analyse_IRSAR.RF<- function(
         }
 
         ##construct list of vector ranges we want to check for, this should avoid that we
-        ##got trapped in a local minium
+        ##got trapped in a local minimum
         median_vslide_range.index <- median(1:length(vslide_range))
         vslide_range.list <- lapply(seq(1, median_vslide_range.index, length.out = 10), function(x){
            c(median_vslide_range.index - as.integer(x), median_vslide_range.index + as.integer(x))
@@ -1072,7 +1077,7 @@ analyse_IRSAR.RF<- function(
         temp_hslide_indices <- vapply(temp_minium_list, function(x){
           x$sliding_vector_min_index}, FUN.VALUE = numeric(length = 1))
 
-        ##get also the vertical slide indicies
+        ##get also the vertical slide indices
         temp_vslide_indicies <- vapply(temp_minium_list, function(x){
           x$vslide_index}, FUN.VALUE = numeric(length = 1))
 
@@ -1117,7 +1122,7 @@ analyse_IRSAR.RF<- function(
 
       #(2) get minimum value (index and time value)
       index_min <- which.min(temp.sum.residuals$sliding_vector)
-      t_n.id <- index_min
+      if(length(index_min) == 0) t_n.id <- 1 else t_n.id <- index_min
 
       if (is.null(vslide_range)) {
         I_n <- 0
@@ -1311,14 +1316,12 @@ analyse_IRSAR.RF<- function(
         if(txtProgressBar){
           ##progress bar
           cat("\n\t Run Monte Carlo loops for error estimation\n")
-          pb<-txtProgressBar(min=0, max=n.MC, initial=0, char="=", style=3)
+          pb <- txtProgressBar(min = 0, max = n.MC, initial = 0, char = "=", style = 3)
         }
 
         De.MC <- sapply(1:n.MC, function(i) {
-
           # update progress bar
-          if (txtProgressBar)
-            setTxtProgressBar(pb, i)
+          if (txtProgressBar) setTxtProgressBar(pb, i)
 
           sliding(
             RF_nat = RF_nat,
@@ -1327,6 +1330,9 @@ analyse_IRSAR.RF<- function(
             numerical.only = TRUE
           )[[2]]
         })
+
+        ## close progress bar
+        if (txtProgressBar) close(pb)
 
       ## MULTICORE -----
       } else {
@@ -1366,7 +1372,8 @@ analyse_IRSAR.RF<- function(
 
   }else{
 
-    warning("[analyse_IRSAR.RF()] Analysis skipped: Unknown method or threshold of test parameter exceeded.", call. = FALSE)
+    warning("[analyse_IRSAR.RF()] Analysis skipped: Unknown method or threshold of test parameter exceeded.",
+            call. = FALSE)
 
   }
 
@@ -1583,9 +1590,7 @@ analyse_IRSAR.RF<- function(
   ##===============================================================================================#
   # Plotting ------------------------------------------------------------------------------------
   ##===============================================================================================#
-
-  if(plot){
-
+  if (plot) {
 
     ##get internal colour definition
     col <- get("col", pos = .LuminescenceEnv)
@@ -1607,9 +1612,7 @@ analyse_IRSAR.RF<- function(
 
       }
     }else{
-
       if(plot.settings[["cex"]] != 1){
-
         def.par <- par()[["cex"]]
         on.exit(par(def.par))
 
@@ -1803,8 +1806,8 @@ analyse_IRSAR.RF<- function(
                               De.upper > max(RF_reg.x))){
 
         try(mtext(side=3, substitute(D[e] == De,
-                                     list(De=paste(
-                                       De," (",De.lower," ", De.upper,")", sep=""))),
+                                     list(De=paste0(
+                                       De," (", De.lower," ", De.upper,")"))),
                   line=0, cex=0.8 * par()[["cex"]], col="red"), silent=TRUE)
 
         De.status <- "VALUE OUT OF BOUNDS"
@@ -1818,8 +1821,7 @@ analyse_IRSAR.RF<- function(
             side = 3,
             substitute(D[e] == De,
                        list(
-                         De = paste(De," [",De.lower," ; ", De.upper,"]", sep =
-                                      "")
+                         De = paste0(De," [",De.lower," ; ", De.upper,"]")
                        )),
             line = 0,
             cex = 0.7 * par()[["cex"]]

@@ -31,7 +31,7 @@ provided by the \link{raster} package.
 \details{
 \strong{Details on the plot functions}
 
-Image is visualised as 2D plot usinng generic plot types provided by other
+Image is visualised as 2D plot using generic plot types provided by other
 packages.
 
 Supported plot types:
@@ -68,7 +68,7 @@ plot is produced. Arguments that are passed through the function call:\cr
 \code{col}
 }
 \note{
-This function has been created to faciliate the plotting of image data
+This function has been created to facilitate the plotting of image data
 imported by the function \link{read_SPE2R}. However, so far the
 function is not optimized to handle image data > ca. 200 MByte and thus
 plotting of such data is extremely slow.
@@ -90,11 +90,11 @@ plot_RLum.Data.Image(ExampleData.RLum.Data.Image)
 \linkS4class{RLum.Data.Image}, \link{plot}, \link{plot_RLum}, \link[raster:raster]{raster::raster}
 }
 \author{
-Sebastian Kreutzer, IRAMAT-CRP2A, Universite Bordeaux Montaigne (France)
+Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2020. plot_RLum.Data.Image(): Plot function for an RLum.Data.Image S4 class object. Function version 0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., 2020. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.7. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2020. plot_RLum.Data.Image(): Plot function for an RLum.Data.Image S4 class object. Function version 0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Riedesel, S., Autzen, M., 2020. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.8. https://r-luminescence.org
 }
 
 \keyword{aplot}

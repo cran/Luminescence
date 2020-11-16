@@ -8,7 +8,7 @@
 #'
 #' The function compares the expected values (\eqn{E(X)}) and the variance
 #' (\eqn{Var(X)}) of the count values for each curve. Assuming that the
-#' background roughly follows a poisson distribution the absolute difference
+#' background roughly follows a Poisson distribution the absolute difference
 #' of both values should be zero or at least around zero as
 #'
 #' \deqn{E(x) = Var(x) = \lambda}
@@ -17,7 +17,7 @@
 #'
 #' \deqn{abs(E(x) - Var(x)) >= \Theta}
 #'
-#' With \eqn{\Theta} an arbitray, user defined, threshold. Values above the
+#' With \eqn{\Theta} an arbitrary, user defined, threshold. Values above the
 #' threshold indicating curves comprising a signal.
 #'
 #' Note: the absolute difference of \eqn{E(X)} and \eqn{Var(x)} instead of the
@@ -32,8 +32,8 @@
 #' the `var` of the count values (see details)
 #'
 #' @param cleanup [logical] (*with default*):
-#' if set to `TRUE` curves indentified as zero light level curves are
-#' automatically removed. Ouput is an object as same type as the input, i.e.
+#' if set to `TRUE` curves identified as zero light level curves are
+#' automatically removed. Output is an object as same type as the input, i.e.
 #' either [Risoe.BINfileData-class] or [RLum.Analysis-class]
 #'
 #' @param cleanup_level [character] (*with default*):
@@ -96,7 +96,7 @@
 #'
 #'
 #' @author
-#' Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, CNRS - Université Bordeaux Montaigne (France)
+#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyh University (United Kingdom)
 #'
 #'
 #' @seealso [Risoe.BINfileData-class], [RLum.Analysis-class], [write_R2BIN],
@@ -159,7 +159,8 @@ verify_SingleGrainData <- function(
         threshold = threshold,
         cleanup = cleanup,
         cleanup_level = cleanup_level,
-        verbose = verbose
+        verbose = verbose,
+        plot = plot
       )
     })
 
@@ -210,7 +211,6 @@ verify_SingleGrainData <- function(
 
 
         if(cleanup_level == "aliquot"){
-
           selection_id <- sort(unlist(lapply(1:nrow(unique_pairs), function(x) {
             which(
               .subset2(selection, 1) == .subset2(unique_pairs, 1)[x] &

@@ -25,7 +25,7 @@ NULL
 #' **Internal METADATA - object structure**
 #'
 #' This structure is compatible with BIN/BINX-files version 03-08, however, it does not follow (in its
-#' sequential arrangment) the manual provided by the manufacturer,
+#' sequential arrangement) the manual provided by the manufacturer,
 #' but an own structure accounting for the different versions.
 #'
 #' \tabular{rllll}{
@@ -123,55 +123,58 @@ NULL
 #' **LTYPE** values
 #'
 #' \tabular{rll}{
-#' `[,0]` \tab TL \tab: Thermoluminescence \cr
-#' `[,1]` \tab OSL \tab: Optically stimulated luminescence \cr
-#' `[,2]` \tab IRSL \tab: Infrared stimulated luminescence \cr
-#' `[,3]` \tab M-IR \tab: Infrared monochromator scan\cr
-#' `[,4]` \tab M-VIS \tab: Visible monochromator scan\cr
-#' `[,5]` \tab TOL \tab: Thermo-optical luminescence \cr
-#' `[,6]` \tab TRPOSL \tab: Time Resolved Pulsed OSL\cr
-#' `[,7]` \tab RIR \tab: Ramped IRSL\cr
-#' `[,8]` \tab RBR \tab: Ramped (Blue) LEDs\cr
-#' `[,9]` \tab USER \tab: User defined\cr
-#' `[,10]` \tab POSL \tab: Pulsed OSL \cr
-#' `[,11]` \tab SGOSL \tab: Single Grain OSL\cr
-#' `[,12]` \tab RL \tab: Radio Luminescence \cr
-#' `[,13]` \tab XRF \tab: X-ray Fluorescence
+#'  VALUE \tab TYPE \tab DESCRIPTION \cr
+#' `[0]` \tab TL \tab: Thermoluminescence \cr
+#' `[1]` \tab OSL \tab: Optically stimulated luminescence \cr
+#' `[2]` \tab IRSL \tab: Infrared stimulated luminescence \cr
+#' `[3]` \tab M-IR \tab: Infrared monochromator scan\cr
+#' `[4]` \tab M-VIS \tab: Visible monochromator scan\cr
+#' `[5]` \tab TOL \tab: Thermo-optical luminescence \cr
+#' `[6]` \tab TRPOSL \tab: Time Resolved Pulsed OSL\cr
+#' `[7]` \tab RIR \tab: Ramped IRSL\cr
+#' `[8]` \tab RBR \tab: Ramped (Blue) LEDs\cr
+#' `[9]` \tab USER \tab: User defined\cr
+#' `[10]` \tab POSL \tab: Pulsed OSL \cr
+#' `[11]` \tab SGOSL \tab: Single Grain OSL\cr
+#' `[12]` \tab RL \tab: Radio Luminescence \cr
+#' `[13]` \tab XRF \tab: X-ray Fluorescence
 #' }
 #'
 #' **DTYPE** values
 #'
-#' \tabular{rll}{
-#' `[,0]` \tab 0 \tab Natural \cr
-#' `[,1]` \tab 1 \tab N+dose \cr
-#' `[,2]` \tab 2 \tab Bleach \cr
-#' `[,3]` \tab 3 \tab Bleach+dose \cr
-#' `[,4]` \tab 4 \tab Natural (Bleach) \cr
-#' `[,5]` \tab 5 \tab N+dose (Bleach) \cr
-#' `[,6]` \tab 6 \tab Dose \cr
-#' `[,7]` \tab 7 \tab Background
+#' \tabular{rl}{
+#' VALUE \tab DESCRIPTION \cr
+#' `[0]` \tab Natural \cr
+#' `[1]` \tab N+dose \cr
+#' `[2]` \tab Bleach \cr
+#' `[3]` \tab Bleach+dose \cr
+#' `[4]` \tab Natural (Bleach) \cr
+#' `[5]` \tab N+dose (Bleach) \cr
+#' `[6]` \tab Dose \cr
+#' `[7]` \tab Background
 #' }
 #'
 #' **LIGHTSOURCE** values
 #'
-#' \tabular{rll}{
-#' `[,0]` \tab 0 \tab None \cr
-#' `[,1]` \tab 1 \tab Lamp \cr
-#' `[,2]` \tab 2 \tab IR diodes/IR Laser \cr
-#' `[,3]` \tab 3 \tab Calibration LED \cr
-#' `[,4]` \tab 4 \tab Blue Diodes \cr
-#' `[,5]` \tab 5 \tab White lite \cr
-#' `[,6]` \tab 6 \tab Green laser (single grain) \cr
-#' `[,7]` \tab 7 \tab IR laser (single grain) }
+#' \tabular{rl}{
+#'  VALUE \tab DESCRIPTION \cr
+#' `[0]` \tab None \cr
+#' `[1]` \tab Lamp \cr
+#' `[2]` \tab IR diodes/IR Laser \cr
+#' `[3]` \tab Calibration LED \cr
+#' `[4]` \tab Blue Diodes \cr
+#' `[5]` \tab White light \cr
+#' `[6]` \tab Green laser (single grain) \cr
+#' `[7]` \tab IR laser (single grain) }
 #'
-#' (information on the BIN/BINX file format are kindly provided by Risoe, DTU Nutech)
+#' (information on the BIN/BINX file format are kindly provided by Risø, DTU Nutech)
 #'
 #' @section Objects from the Class: Objects can be created by calls of the form
 #' `new("Risoe.BINfileData", ...)`.
 #'
 #' @section Function version: 0.4.0
 #'
-#' @author Sebastian Kreutzer, IRAMAT-CRP2A, UMR 5060, Université Bordeaux Montaigne (France)\cr
+#' @author Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)\cr
 #' based on information provided by Torben Lapp and Karsten Bracht Nielsen (Risø DTU, Denmark)
 #'
 #' @seealso [plot_Risoe.BINfileData], [read_BIN2R], [write_R2BIN],
@@ -182,7 +185,7 @@ NULL
 #'
 #' The Sequence Editor User Manual - Feburar 2016
 #'
-#' [http://www.nutech.dtu.dk/]()
+#' [https://www.nutech.dtu.dk/]()
 #'
 #' @keywords classes
 #'
