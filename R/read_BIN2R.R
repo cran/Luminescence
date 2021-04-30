@@ -7,10 +7,10 @@
 #' published in the Appendices of the Analyst manual p. 42.
 #'
 #' For the general BIN/BINX-file structure, the reader is referred to the
-#' Risø website: [https://www.nutech.dtu.dk/]()
+#' Risø website: [https://www.dtu.dk]()
 #'
 #' @param file [character] or [list] (**required**): path and file name of the
-#' BIN/BINX file (urls are supported). If input is a `list` it should comprise
+#' BIN/BINX file (URLs are supported). If input is a `list` it should comprise
 #' only `character`s representing each valid path and BIN/BINX-file names.
 #' Alternatively the input character can be just a directory (path), in this case the
 #' the function tries to detect and import all BIN/BINX files found in the directory.
@@ -107,7 +107,7 @@
 #'
 #' @references
 #' DTU Nutech, 2016. The Sequence Editor, Users Manual, February, 2016.
-#' [https://www.nutech.dtu.dk/english/products-and-services/radiation-instruments/tl_osl_reader/manuals]()
+#' [https://www.fysik.dtu.dk/english/research/radphys/research/radiation-instruments/tl_osl_reader/manuals]()
 #'
 #'
 #' @keywords IO
@@ -708,7 +708,7 @@ read_BIN2R <- function(
     # BINX FORMAT SUPPORT -----------------------------------------------------
     if(temp.VERSION == 05 | temp.VERSION == 06 | temp.VERSION == 07 | temp.VERSION == 08){
 
-      ##(1) Header size and strucutre
+      ##(1) Header size and structure
       ##LENGTH, PREVIOUS, NPOINTS, LTYPE
       temp <- readBin(con, what="int", 3, size=4, endian="little")
 
@@ -1057,17 +1057,20 @@ read_BIN2R <- function(
 
 
       ##POSITION
-      temp.POSITION<-readBin(con, what="int", 1, size=1, endian="little")
+      temp.POSITION <- readBin(
+        con, what="int", 1, size=1, endian="little", signed = FALSE)
 
       ##RUN
-      temp.RUN<-readBin(con, what="int", 1, size=1, endian="little")
+      temp.RUN <- readBin(
+        con, what="int", 1, size=1, endian="little", signed = FALSE)
 
       ##TIME
-      TIME_SIZE<-readBin(con, what="int", 1, size=1, endian="little")
+      TIME_SIZE <- readBin(
+        con, what="int", 1, size=1, endian="little")
 
 
       ##time size corrections for wrong time formats; set n to 6 for all values
-      ##accoording the handbook of Geoff Duller, 2007
+      ##according to the handbook of Geoff Duller, 2007
       TIME_SIZE<-6
       temp.TIME<-readChar(con, TIME_SIZE, useBytes=TRUE)
 
