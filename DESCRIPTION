@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.9.11
-Date: 2021-04-29
+Version: 0.9.13
+Date: 2021-06-03
 Author: Sebastian Kreutzer [aut, trl, cre, dtc]
     (<https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc]
@@ -18,7 +18,7 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc]
   Antoine Zink [ctb] (<https://orcid.org/0000-0001-7146-1101>),
   Julie Durcan [ctb] (<https://orcid.org/0000-0001-8724-8022>),
   Georgina E. King [ctb, dtc] (<https://orcid.org/0000-0003-1059-8192>),
-  Anne Philippe [ctb],
+  Anne Philippe [aut] (<https://orcid.org/0000-0002-5331-5087>),
   Guillaume Guerin [ctb] (<https://orcid.org/0000-0001-6298-5579>),
   Svenja Riedesel [aut] (<https://orcid.org/0000-0003-2936-8776>),
   Martin Autzen [aut] (<https://orcid.org/0000-0001-6249-426X>),
@@ -37,10 +37,10 @@ Authors@R: c(
     person("Norbert", "Mercier", role = c("aut"), comment = c(ORCID = "0000-0002-6375-9108")),
     person("Rachel K.", "Smedley", role = c("ctb"), comment = c(ORCID = "0000-0001-7773-5193")),
     person("Claire", "Christophe", role = c("ctb")),
-    person("Antoine", "Zink", rol = c("ctb"), comment = c(ORCID = "0000-0001-7146-1101")),
+    person("Antoine", "Zink", role = c("ctb"), comment = c(ORCID = "0000-0001-7146-1101")),
     person("Julie", "Durcan", role = c("ctb"), comment = c(ORCID = "0000-0001-8724-8022")),
     person("Georgina E.", "King", role = c("ctb", "dtc"), comment = c(ORCID = "0000-0003-1059-8192")),
-    person("Anne", "Philippe", role = c("ctb")),
+    person("Anne", "Philippe", role = c("aut"), comment = c(ORCID = "0000-0002-5331-5087")),
     person("Guillaume", "Guerin", role = c("ctb"), comment = c(ORCID = "0000-0001-6298-5579")),
     person("Svenja", "Riedesel", role = c("aut"), comment = c(ORCID = "0000-0003-2936-8776")),
     person("Martin", "Autzen", role = c("aut"), comment = c(ORCID = "0000-0001-6249-426X")),
@@ -65,8 +65,8 @@ Imports: bbmle (>= 1.0.23), data.table (>= 1.13.2), DEoptim (>= 2.2-5),
         3.99), zoo (>= 1.8)
 Suggests: spelling (>= 2.2), RLumShiny (>= 0.2.2), plotly (>= 4.9.2),
         rmarkdown (>= 2.5), rstudioapi (>= 0.13), rjags (>= 4-10), coda
-        (>= 0.19-4), pander (>= 0.6.3), testthat (>= 3.0.0), devtools
-        (>= 2.3.2), R.rsp (>= 0.44.0)
+        (>= 0.19-4), pander (>= 0.6.3), testthat (>= 3.0.0), tiff (>=
+        0.1), devtools (>= 2.3.2), R.rsp (>= 0.44.0)
 VignetteBuilder: R.rsp
 URL: https://CRAN.R-project.org/package=Luminescence
 Encoding: UTF-8
@@ -119,13 +119,13 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'plot_RLum.R' 'plot_RLum.Results.R' 'plot_ROI.R'
         'plot_RadialPlot.R' 'plot_Risoe.BINfileData.R'
         'plot_ViolinPlot.R' 'read_BIN2R.R' 'read_Daybreak2R.R'
-        'read_PSL2R.R' 'read_RF2R.R' 'read_SPE2R.R' 'read_XSYG2R.R'
-        'report_RLum.R' 'scale_GammaDose.R' 'template_DRAC.R'
-        'tune_Data.R' 'use_DRAC.R' 'utils_DRAC.R'
+        'read_PSL2R.R' 'read_RF2R.R' 'read_SPE2R.R' 'read_TIFF2R.R'
+        'read_XSYG2R.R' 'report_RLum.R' 'scale_GammaDose.R'
+        'template_DRAC.R' 'tune_Data.R' 'use_DRAC.R' 'utils_DRAC.R'
         'verify_SingleGrainData.R' 'write_R2BIN.R' 'write_RLum2CSV.R'
         'zzz.R'
 RoxygenNote: 7.1.1
 NeedsCompilation: yes
-Packaged: 2021-04-29 10:21:30 UTC; kreutzer
+Packaged: 2021-06-03 16:06:47 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2021-04-30 04:10:08 UTC
+Date/Publication: 2021-06-03 16:40:02 UTC
