@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 0.9.15
-Date: 2021-08-24
+Version: 0.9.16
+Date: 2021-11-25
 Author: Sebastian Kreutzer [aut, trl, cre, dtc]
     (<https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc]
@@ -25,6 +25,7 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc]
   Pierre Guibert [ctb] (<https://orcid.org/0000-0001-8969-8684>),
   Dirk Mittelstrass [aut] (<https://orcid.org/0000-0002-9567-8791>),
   Harrison J. Gray [aut] (<https://orcid.org/0000-0002-4555-7473>),
+  Jean-Michel Galharret [aut] (<https://orcid.org/0000-0003-2219-8727>),
   Markus Fuchs [ths]
 Authors@R: c(
     person("Sebastian", "Kreutzer", role = c("aut", "trl", "cre", "dtc"), email = "sebastian.kreutzer@aber.ac.uk", comment = c(ORCID = "0000-0002-0734-2199")),
@@ -47,6 +48,7 @@ Authors@R: c(
     person("Pierre", "Guibert", role = c("ctb"), comment = c(ORCID = "0000-0001-8969-8684")),
     person("Dirk", "Mittelstrass", role = c("aut"), comment = c(ORCID = "0000-0002-9567-8791")),
     person("Harrison J.", "Gray", role = c("aut"), comment = c(ORCID = "0000-0002-4555-7473")),
+    person("Jean-Michel", "Galharret", role = c("aut"), comment = c(ORCID = "0000-0003-2219-8727")),
     person("Markus", "Fuchs", role = c("ths")))
 Maintainer: Sebastian Kreutzer <sebastian.kreutzer@aber.ac.uk>
 Description: A collection of various R functions for the purpose of Luminescence
@@ -60,9 +62,9 @@ Depends: R (>= 4.0), utils
 LinkingTo: Rcpp (>= 1.0.7), RcppArmadillo (>= 0.10.6.0.0)
 Imports: bbmle (>= 1.0.24), data.table (>= 1.14.0), DEoptim (>= 2.2-6),
         httr (>= 1.4.2), lamW (>= 2.1.0), matrixStats (>= 0.60.0),
-        methods, minpack.lm (>= 1.2-1), plotrix (>= 3.8-1), raster (>=
-        3.4-10), readxl (>= 1.3.1), shape (>= 1.4.6), parallel, XML (>=
-        3.99), zoo (>= 1.8)
+        methods, minpack.lm (>= 1.2-1), mclust (>= 5.4.7), plotrix (>=
+        3.8-1), raster (>= 3.4-10), readxl (>= 1.3.1), shape (>=
+        1.4.6), parallel, XML (>= 3.99), zoo (>= 1.8)
 Suggests: spelling (>= 2.2), RLumShiny (>= 0.2.2), plotly (>= 4.9.3),
         rmarkdown (>= 2.10), rstudioapi (>= 0.13), rjags (>= 4-10),
         coda (>= 0.19-4), pander (>= 0.6.3), testthat (>= 3.0.2), tiff
@@ -98,34 +100,35 @@ Collate: 'Analyse_SAR.OSLdata.R' 'CW2pHMi.R' 'CW2pLM.R' 'CW2pLMi.R'
         'calc_OSLLxTxRatio.R' 'calc_SourceDoseRate.R'
         'calc_Statistics.R' 'calc_TLLxTxRatio.R'
         'calc_ThermalLifetime.R' 'calc_WodaFuchs2008.R' 'calc_gSGC.R'
-        'calc_gSGC_feldspar.R' 'convert_Activity2Concentration.R'
-        'convert_BIN2CSV.R' 'convert_Concentration2DoseRate.R'
-        'convert_Daybreak2CSV.R' 'convert_PSL2CSV.R'
-        'convert_RLum2Risoe.BINfileData.R' 'convert_SG2MG.R'
-        'convert_Wavelength2Energy.R' 'convert_XSYG2CSV.R'
-        'extract_IrradiationTimes.R' 'fit_CWCurve.R'
-        'fit_EmissionSpectra.R' 'fit_LMCurve.R' 'fit_OSLLifeTimes.R'
-        'fit_SurfaceExposure.R' 'fit_ThermalQuenching.R' 'get_Layout.R'
-        'get_Quote.R' 'get_rightAnswer.R' 'github.R'
-        'install_DevelopmentVersion.R' 'internal_as.latex.table.R'
-        'internals_RLum.R' 'merge_RLum.Analysis.R'
-        'merge_RLum.Data.Curve.R' 'merge_RLum.R' 'merge_RLum.Results.R'
+        'calc_gSGC_feldspar.R' 'combine_De_Dr.R'
+        'convert_Activity2Concentration.R' 'convert_BIN2CSV.R'
+        'convert_Concentration2DoseRate.R' 'convert_Daybreak2CSV.R'
+        'convert_PSL2CSV.R' 'convert_RLum2Risoe.BINfileData.R'
+        'convert_SG2MG.R' 'convert_Wavelength2Energy.R'
+        'convert_XSYG2CSV.R' 'extract_IrradiationTimes.R'
+        'fit_CWCurve.R' 'fit_EmissionSpectra.R' 'fit_LMCurve.R'
+        'fit_OSLLifeTimes.R' 'fit_SurfaceExposure.R'
+        'fit_ThermalQuenching.R' 'get_Layout.R' 'get_Quote.R'
+        'get_rightAnswer.R' 'github.R' 'install_DevelopmentVersion.R'
+        'internal_as.latex.table.R' 'internals_RLum.R'
+        'merge_RLum.Analysis.R' 'merge_RLum.Data.Curve.R'
+        'merge_RLum.R' 'merge_RLum.Results.R'
         'merge_Risoe.BINfileData.R' 'methods_DRAC.R' 'methods_RLum.R'
         'plot_AbanicoPlot.R' 'plot_DRCSummary.R' 'plot_DRTResults.R'
         'plot_DetPlot.R' 'plot_FilterCombinations.R'
         'plot_GrowthCurve.R' 'plot_Histogram.R' 'plot_KDE.R'
-        'plot_NRt.R' 'plot_RLum.Analysis.R' 'plot_RLum.Data.Curve.R'
-        'plot_RLum.Data.Image.R' 'plot_RLum.Data.Spectrum.R'
-        'plot_RLum.R' 'plot_RLum.Results.R' 'plot_ROI.R'
-        'plot_RadialPlot.R' 'plot_Risoe.BINfileData.R'
+        'plot_NRt.R' 'plot_OSLAgeSummary.R' 'plot_RLum.Analysis.R'
+        'plot_RLum.Data.Curve.R' 'plot_RLum.Data.Image.R'
+        'plot_RLum.Data.Spectrum.R' 'plot_RLum.R' 'plot_RLum.Results.R'
+        'plot_ROI.R' 'plot_RadialPlot.R' 'plot_Risoe.BINfileData.R'
         'plot_ViolinPlot.R' 'read_BIN2R.R' 'read_Daybreak2R.R'
         'read_PSL2R.R' 'read_RF2R.R' 'read_SPE2R.R' 'read_TIFF2R.R'
         'read_XSYG2R.R' 'report_RLum.R' 'scale_GammaDose.R'
         'template_DRAC.R' 'tune_Data.R' 'use_DRAC.R' 'utils_DRAC.R'
         'verify_SingleGrainData.R' 'write_R2BIN.R' 'write_RLum2CSV.R'
         'zzz.R'
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 NeedsCompilation: yes
-Packaged: 2021-08-24 14:08:10 UTC; kreutzer
+Packaged: 2021-11-25 12:08:47 UTC; kreutzer
 Repository: CRAN
-Date/Publication: 2021-09-02 21:10:47 UTC
+Date/Publication: 2021-11-26 16:11:17 UTC
