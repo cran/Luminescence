@@ -114,9 +114,9 @@
 #+ .smoothing()      +
 #+++++++++++++++++++++
 
-#' Allows smmoothing of data based on the function zoo::rollmean
+#' Allows smoothing of data based on the function zoo::rollmean
 #'
-#' The function just allows a direct and meaningfull access to the functionality of the zoo::rollmean()
+#' The function just allows a direct and meaningful access to the functionality of the zoo::rollmean()
 #' function. Arguments of the function are only partly valid.
 #'
 #' @param x [numeric] (**required**):
@@ -446,7 +446,7 @@ fancy_scientific <- function(l) {
 #++++++++++++++++++++++++++++++
 #+ .matrix_binning            +
 #++++++++++++++++++++++++++++++
-#' @title Efficient binning of matricies
+#' @title Efficient binning of matrices
 #'
 #' @description This function allows efficient binning of matrices including
 #' row and column name handling. Internally, the function uses [rowsum],
@@ -550,7 +550,7 @@ fancy_scientific <- function(l) {
 #' @title Expand function parameters of self-call
 #'
 #' @description For the self-call, the function parameters need to
-#' be expended, this was done, so far in a non-consistent way and
+#' be expanded, this was done, so far in a non-consistent way and
 #' repeated in every function using the self-call. This functions
 #' does it once and for all similar in all functions.
 #'
@@ -785,3 +785,137 @@ fancy_scientific <- function(l) {
 
 }
 
+#'@title Extract named element from nested list
+#'
+#'@description The function extracts a named element from a nested list. It assumes
+#'that the name is unique in the nested list
+#'
+#'@param l [list] (**required**): input list for which we search the elements
+#'
+#'@param element [character] (**required**): name of the element we are looking for
+#'
+#'@returns Returns a flat [list] with only the elements with a particular name
+#'
+#'@author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany);
+#'inspired by a ChatGPT request (2024-07-01)
+#'
+#'@md
+#'@noRd
+.get_named_list_element <- function(l, element) {
+  ## set helper function to iterate over list
+  f_iterate <- function(x, env) {
+    if (inherits(x, "list")) {
+      ## if name is in element, return element and update out
+      if (element %in% names(x)) {
+        tmp <- c(out, list(x[names(x) %in% element]))
+        assign(x = "out", value = tmp, envir = env)
+      }
+
+      ## call the helper function with lapply
+      lapply(x, f_iterate, env = env)
+    }
+  }
+
+  ## set output list and get current environment
+  out <- list()
+  env <- environment()
+
+  ## call recursive function
+  f_iterate(l, env)
+
+  ## unlist output (and keep NA)
+  out <- unlist(out, recursive = FALSE)
+
+  ## return
+  return(out)
+
+}
+
+#'@title Throws a Custom Tailored Error Message
+#'
+#'@param ... the error message to throw
+#'@param nframe [numeric] (*with default*): the frame where the function
+#'       name to return in the error message should be searched: the
+#'       default value of 1 is generally fine, unless [throw_error] is
+#'       called from an internal function (whose name is not of interest
+#'       to the user), in which case a value of 2 should be used.
+#'
+#'@md
+#'@noRd
+.throw_error <- function(..., nframe = 1) {
+  ## get name of calling function
+  f_calling <- paste0("[", deparse(sys.call(-nframe)[1]), "] ")
+
+  ## stop
+  stop(paste0(f_calling, ...), call. = FALSE)
+
+}
+
+#'@title Throws a Custom Tailored Warning Message
+#'
+#'@param ... the warning message to throw
+#'@param nframe [numeric] (*with default*): the frame where the function
+#'       name to return in the warning message should be searched: the
+#'       default value of 1 is generally fine, unless [throw_warning] is
+#'       called from an internal function (whose name is not of interest
+#'       to the user), in which case a value of 2 should be used
+#'
+#'@md
+#'@noRd
+.throw_warning <- function(..., nframe = 1) {
+  ## get name of calling function
+  f_calling <- paste0("[", deparse(sys.call(-nframe)[1]), "] ")
+
+  ## stop
+  warning(paste0(f_calling, ...), call. = FALSE)
+
+}
+
+#' @title Silence Output and Warnings during Tests
+#'
+#' @description
+#' This is helpful so that during tests the terminal is not filled up by
+#' the output from the function tested, which is often left intentionally
+#' verbose to facilitate the coverage analysis.
+#'
+#' This was originally defined in `tests/testthat/setup.R`, but unfortunately
+#' that file is not sourced by `covr::file_coverage()` (as opposed to what
+#' happens with `testthat::test_file()` and `covr::package_coverage()`),
+#' which makes it harder to work iteratively with it.
+#'
+#' @param expr [expression] an R expression (often a function, but can be
+#'        any amount of code) the output of which needs to be silenced
+#'
+#' @examples
+#' SW({
+#'   template_DRAC(preset = "DRAC-example_quartz")
+#' })
+#'
+#' @md
+#' @noRd
+SW <- function(expr) capture.output(suppressMessages(suppressWarnings(expr)))
+
+#' @title Validate Scalar Variables Expected to be Positive
+#'
+#' @param val [numeric] (**required**): value to validate
+#' @param int [logical] (*with default*): whether the value has to be an
+#'        integer (`FALSE` by default)
+#' @param null.ok [logical] (*with default*): whether a `NULL` value should be
+#'        considered valid (`FALSE` by default)
+#' @param name [character] (*with default*): Variable name to report in case of error; if not specified
+#'        it's inferred from the name of the name of the variable tested
+#'
+#' @md
+#' @noRd
+.validate_positive_scalar <- function(val, int = FALSE, null.ok = FALSE,
+                                      name = NULL) {
+  if (is.null(val) && null.ok)
+    return()
+  if (!is.numeric(val) || length(val) != 1 || is.na(val) || val <= 0 ||
+      (int && val != as.integer(val))) {
+    if (is.null(name))
+      name <- all.vars(match.call())[1]
+    .throw_error("'", name, "' must be a positive ", if (int) "integer ",
+                 "scalar", nframe = 2)
+  }
+}

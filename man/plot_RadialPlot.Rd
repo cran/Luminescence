@@ -30,7 +30,9 @@ plot_RadialPlot(
 }
 \arguments{
 \item{data}{\link{data.frame} or \linkS4class{RLum.Results} object (\strong{required}):
-for \code{data.frame} two columns: De (\code{data[,1]}) and De error (\code{data[,2]}).
+for \code{data.frame}: either two columns: De (\code{data[,1]}) and De error
+(\code{data[,2]}), or one: De (\code{values[,1]}). If a single-column data frame
+is provided, De error is assumed to be 10^-9 for all measurements.
 To plot several data sets in one plot, the data sets must be provided as
 \code{list}, e.g. \code{list(data.1, data.2)}.}
 
@@ -194,6 +196,7 @@ plot1$zlim
 plot_RadialPlot(
   data = ExampleData.DeValues,
   log.z = FALSE,
+  xlim = c(0, 5),
   zlim = c(100, 200))
 
 ## now the two plots with serious but seasonally changing fun
@@ -273,7 +276,7 @@ plot_RadialPlot(
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2024. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Dietze, M., Kreutzer, S., 2024. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

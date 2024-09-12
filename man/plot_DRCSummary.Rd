@@ -17,7 +17,7 @@ plot_DRCSummary(
 \arguments{
 \item{object}{\linkS4class{RLum.Results} object (\strong{required}): input object created by the function \link{analyse_SAR.CWOSL}. The input object can be provided as \link{list}.}
 
-\item{source_dose_rate}{\link{numeric} (\emph{optional}): allows to modify the axis and show values in Gy, instead seconds. Only a single numerical values is allowed.}
+\item{source_dose_rate}{\link{numeric} (\emph{optional}): allows to modify the axis and show values in Gy, instead seconds. Only a single numerical value is allowed.}
 
 \item{sel_curves}{\link{numeric} (optional): id of the curves to be plotting in its occurring order. A sequence can
 be provided for selecting, e.g., only every 2nd curve from the input object}
@@ -96,6 +96,6 @@ Christoph Burow, University of Cologne (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2024. plot_DRCSummary(): Create a Dose-Response Curve Summary Plot. Function version 0.2.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., Burow, C., 2024. plot_DRCSummary(): Create a Dose-Response Curve Summary Plot. Function version 0.2.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 

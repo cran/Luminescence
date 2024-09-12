@@ -118,7 +118,7 @@ use_DRAC <- function(
 ){
   ## TODO:
   ## (1) Keep the data set as unmodified as possible. Check structure and order of parameters
-  ## for meaningful cominbination.
+  ## for meaningful combination.
   ##
   ## (2)
   ## Leave it to the user where the calculations made in our package should be used
@@ -159,13 +159,12 @@ use_DRAC <- function(
 
   } else if (inherits(file, "DRAC.data.frame")) {
     input.raw <- file
-
   } else {
-    stop("The provided data object is not a valid DRAC template.", call. = FALSE)
+    .throw_error("The provided data object is not a valid DRAC template.")
   }
 
   if (nrow(input.raw) > 5000)
-    stop("[use_DRAC()] The limit of allowed datasets is 5000!", call. = FALSE)
+    .throw_error("The limit of allowed datasets is 5000!")
 
   # Settings ------------------------------------------------------------------------------------
   settings <- list(
@@ -267,16 +266,17 @@ use_DRAC <- function(
     error_end <- regexec('textarea name=', DRAC.content)[[1]]
     error_msg <- substr(DRAC.content, error_start, error_end)
 
+    # nocov start
     on.exit({
       reply <- readline("Do you want to see the DRAC error message (Y/N)?")
       if (reply == "Y" || reply == "y" || reply == 1)
         cat(error_msg)
     })
+    # nocov end
 
-    stop(paste("\n\t We got a response from the server, but it\n",
-               "\t did not contain DRAC output. Please check\n",
-               "\t your data and verify its validity.\n"),
-         call. = FALSE)
+    .throw_error("\n\t We got a response from the server, but it\n",
+                 "\t did not contain DRAC output. Please check\n",
+                 "\t your data and verify its validity.\n")
   } else {
     if (settings$verbose) message("\t Finalising the results...")
   }
@@ -319,7 +319,7 @@ use_DRAC <- function(
   DRAC.content.input <- DRAC.content[ ,grep("TI:", names(DRAC.content))]
   DRAC.content.output <- DRAC.content[ ,grep("TO:", names(DRAC.content))]
 
-  ## The DRAC ouput also contains a hightlight table, which results in
+  ## The DRAC ouput also contains a highlight table, which results in
   ## duplicate columns. When creating the data.frame duplicate columns
   ## are automatically appended '.1' in their names, so we can identify
   ## and remove them easily

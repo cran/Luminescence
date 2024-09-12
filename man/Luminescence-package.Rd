@@ -108,13 +108,13 @@ https://doi.org/10.1016/j.radmeas.2018.07.013
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://CRAN.R-project.org/package=Luminescence}
+  \item \url{https://r-lum.github.io/Luminescence/}
   \item Report bugs at \url{https://github.com/R-Lum/Luminescence/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Sebastian Kreutzer \email{sebastian.kreutzer@uni-heidelberg.de} (\href{https://orcid.org/0000-0002-0734-2199}{ORCID}) [translator, data contributor]
+\strong{Maintainer}: Sebastian Kreutzer \email{maintainer_luminescence@r-luminescence.org} (\href{https://orcid.org/0000-0002-0734-2199}{ORCID}) [translator, data contributor]
 
 Authors:
 \itemize{
@@ -131,6 +131,7 @@ Authors:
   \item Dirk Mittelstrass (\href{https://orcid.org/0000-0002-9567-8791}{ORCID})
   \item Harrison J. Gray (\href{https://orcid.org/0000-0002-4555-7473}{ORCID})
   \item Jean-Michel Galharret (\href{https://orcid.org/0000-0003-2219-8727}{ORCID})
+  \item Marco Colombo (\href{https://orcid.org/0000-0001-6672-0623}{ORCID})
 }
 
 Other contributors:

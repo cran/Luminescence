@@ -24,7 +24,6 @@ temp2 <- calc_ThermalLifetime(
 
 test_that("check class and length of output example 1", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   expect_s4_class(temp, "RLum.Results")
   expect_equal(length(temp), 2)
@@ -33,7 +32,6 @@ test_that("check class and length of output example 1", {
 #
 test_that("check values from output example 1", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   expect_type(temp$lifetimes, "double")
   expect_equal(dim(temp$lifetimes), c(1, 2, 11))
@@ -67,11 +65,11 @@ test_that("check class and length of output example 2", {
 
 test_that("check values from output example 2", {
   testthat::skip_on_cran()
-  testthat::expect_is(temp2$lifetimes, class = c("numeric", "vector"))
+
+  testthat::expect_type(temp2$lifetimes, "double")
+  testthat::expect_equal(class(temp2$lifetimes), "numeric")
   testthat::expect_equal(length(temp2$lifetimes), 1000)
   testthat::expect_equal(dim(temp2$profiling_matrix), c(1000, 4))
-
-
 })
 
 
@@ -79,28 +77,34 @@ test_that("check arguments", {
   testthat::skip_on_cran()
 
   ##missing E and/or s
-  expect_error(calc_ThermalLifetime())
+  expect_error(calc_ThermalLifetime(),
+               "'E' or 's' or both are missing, but required")
 
   ##profiling settings
+  SW({
   expect_warning(
-    calc_ThermalLifetime(E = 1.4, s = 1e05, profiling_config = list(n = 10)))
+    calc_ThermalLifetime(E = 1.4, s = 1e05, profiling_config = list(n = 10)),
+    "Minimum MC runs are 1000, parameter 'n' in profiling_config reset to 1000")
+  })
   expect_error(calc_ThermalLifetime(
     E = 1.4,
     s = 1e05,
     profiling = TRUE,
     profiling_config = list(E.distribution = "test")
-  ))
+  ), "Unknown distribution setting for E profiling")
   expect_error(suppressWarnings(calc_ThermalLifetime(
     E = 1.4,
     s = 1e05,
     profiling = TRUE,
     profiling_config = list(s.distribution = "test"))
-  ))
+  ), "Unknown distribution setting for s profiling")
 
   ##output
-  expect_warning(calc_ThermalLifetime(E = 1.4, s = 1e05, output_unit = "test"))
+  SW({
+  expect_warning(calc_ThermalLifetime(E = 1.4, s = 1e05, output_unit = "test"),
+                 "'output_unit' unknown, reset to 's'")
+  })
   expect_output(calc_ThermalLifetime(E = 1.4, s = 1e05, verbose = TRUE))
   expect_output(calc_ThermalLifetime(E = c(1.4, 0.001), s = c(1e05,1e03), plot = TRUE, profiling = TRUE))
 
 })
-

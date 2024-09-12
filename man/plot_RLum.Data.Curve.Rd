@@ -38,12 +38,12 @@ The function provides a standardised plot output for curve data of an
 \code{RLum.Data.Curve} S4-class object.
 }
 \details{
-Only single curve data can be plotted with this function.Arguments
+Only single curve data can be plotted with this function. Arguments
 according to \link{plot}.
 
 \strong{Curve normalisation}
 
-The argument \code{norm} normalises all count values, to date the following
+The argument \code{norm} normalises all count values. To date the following
 options are supported:
 
 \code{norm = TRUE} or \code{norm = "max"}: Curve values are normalised to the highest
@@ -58,7 +58,7 @@ via GitHub:
 y = (observed - median(background)) / (max(observed) - median(background))
 }
 
-The background of the curve is defined as the last 20 \% of the count values
+The background of the curve is defined as the last 20\% of the count values
 of a curve.
 }
 \note{
@@ -91,7 +91,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2024. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

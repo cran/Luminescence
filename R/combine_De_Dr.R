@@ -1,7 +1,7 @@
 #'@title Estimate Individual Age using Bayesian Inference
 #'
 #'@description A Bayesian robust estimation of central age from equivalent dose
-#' measurements under the assumption that the dose rate is modelled by
+#' measurements under the assumption that the dose rate is modelled by a
 #' finite Gaussian mixture model.
 #'
 #'@param theta [numeric] (**required**): the weight vector of the Gaussian mixture
@@ -460,7 +460,7 @@
 #'Norbert Mercier, IRAMAT-CRP2A, Université Bordeaux Montaigne (France),
 #'Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
-#'@seealso [plot_OSLAgeSummary], [rjags::rjags], [mclust-package]
+#'@seealso [plot_OSLAgeSummary], [rjags::rjags], [mclust::mclust-package]
 #'
 #'@section Function version: 0.1.0
 #'
@@ -513,10 +513,12 @@ if (!all(t_pkg <- c(
   requireNamespace("rjags", quietly = TRUE),
   requireNamespace("coda", quietly = TRUE),
   requireNamespace("mclust", quietly = TRUE)))) {
+  # nocov start
   t_names <- c('rjags', 'coda', 'mclust')
     stop(paste0("[combine_De_Dr()] To use this function you have to first
          install the package(s) ", paste(t_names[!t_pkg], collapse = ",")),
          call. = FALSE)
+  # nocov end
 }
 
 # Integrity checks --------------------------------------------------------

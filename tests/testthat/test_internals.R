@@ -1,6 +1,5 @@
 test_that("Test internals", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   # .expand_parameters() ------------------------------------------------------
   ##create empty function ... reminder
@@ -35,6 +34,13 @@ test_that("Test internals", {
 
   # .smoothing ----------------------------------------------------------------------------------
   expect_silent(Luminescence:::.smoothing(runif(100), k = 5, method = "median"))
+  suppressWarnings( # suppress second warning: number of items to replace
+                    #   is not a multiple of replacement length
+  expect_warning(.smoothing(runif(100), k = 4, method = "median"),
+                 "'k' must be odd")
+  )
+  expect_silent(.smoothing(runif(200), method = "median"))
+  expect_silent(.smoothing(runif(100), k = 4, method = "mean"))
   expect_error(Luminescence:::.smoothing(runif(100), method = "test"))
 
   # fancy_scientific ()--------------------------------------------------------------------------
@@ -45,12 +51,21 @@ test_that("Test internals", {
   y <- c(0.1, 0.001, 0.0001)
   plot(1:length(y), y, yaxt = "n", log = "y")
   expect_silent(Luminescence:::.add_fancy_log_axis(side = 2, las = 1))
+  expect_null(.add_fancy_log_axis(side = 1, las = 1))
 
   # .create_StatisticalSummaryText() ------------------------------------------------------------
+  stats <- calc_Statistics(data.frame(1:10,1:10))
   expect_silent(Luminescence:::.create_StatisticalSummaryText())
-  expect_type(
-    Luminescence:::.create_StatisticalSummaryText(
-      calc_Statistics(data.frame(1:10,1:10)), keywords = "mean"), "character")
+  expect_equal(.create_StatisticalSummaryText(stats,
+                                              keywords = "mean"),
+               "mean = 5.5")
+  expect_equal(.create_StatisticalSummaryText(stats,
+                                              keywords = "unweighted$mean"),
+               "mean = 5.5")
+  expect_equal(.create_StatisticalSummaryText(stats,
+                                              keywords = "weighted$mean"),
+               "weighted$mean = 1.89")
+
 
   # .unlist_RLum() ------------------------------------------------------------------------------
   expect_length(Luminescence:::.unlist_RLum(list(a = list(b = list(c = list(d = 1, e = 2))))), 2)
@@ -90,16 +105,93 @@ test_that("Test internals", {
     ##clean-up
     rm(m)
 
-   # .download_file ---------------------------------------------------------------------------
-   ## returns just NULL (no URL detected)
-   expect_null(.download_file(url = "_url"))
+  # .download_file() --------------------------------------------------------
 
-   ## attempts download
-   expect_message(.download_file(url = "https://raw.githubusercontent.com/R-Lum/rxylib/master/inst/extg"))
+  ## returns just NULL (no URL detected)
+  expect_null(.download_file(url = "_url"))
 
-    ## attempts download silently
-   expect_null(suppressMessages(
-    .download_file(url = "https://raw.githubusercontent.com/R-Lum/rxylib/master/inst/extg")))
+  ## attempts download but fails
+  url.404 <- "https://raw.githubusercontent.com/R-Lum/rxylib/master/inst/extg"
+  expect_message(
+      expect_message(
+          expect_message(expect_null(.download_file(url = url.404)),
+                         "URL detected:"),
+          "Attempting download ..."),
+      "FAILED")
+
+  ## attempts download and succeeds
+  url.ok <- "https://raw.githubusercontent.com/R-Lum/rxylib/master/codecov.yml"
+  suppressMessages( # silence other messages already tested above
+      expect_message(expect_type(.download_file(url = url.ok),
+                                 "character"),
+                     "OK")
+  )
+
+  # .get_named_list_element  ------------------------------------------------
+  ## create random named list element
+  l <- list(
+    a = list(x = 1:10),
+    b = list(x = 1:10)
+
+  )
+  t <- expect_type(.get_named_list_element(l, element = "x"), type = "list")
+  expect_equal(sum(unlist(t)), expected = 110)
+
+  ## .throw_error() ---------------------------------------------------------
+  fun.int <- function() .throw_error("Error message")
+  fun.ext <- function() fun.int()
+  expect_error(fun.int(),
+               "[fun.int()] Error message", fixed = TRUE)
+  expect_error(fun.ext(),
+               "[fun.int()] Error message", fixed = TRUE)
+
+  fun.int <- function() .throw_error("Error message", nframe = 2)
+  fun.ext <- function() fun.int()
+  expect_error(fun.ext(),
+               "[fun.ext()] Error message", fixed = TRUE)
+
+  ## .throw_warning() -------------------------------------------------------
+  fun.int <- function() .throw_warning("Warning message")
+  fun.ext <- function() fun.int()
+  expect_warning(fun.int(),
+                 "[fun.int()] Warning message", fixed = TRUE)
+  expect_warning(fun.ext(),
+                 "[fun.int()] Warning message", fixed = TRUE)
+
+  fun.int <- function() .throw_warning("Warning message", nframe = 2)
+  fun.ext <- function() fun.int()
+  expect_warning(fun.ext(),
+                 "[fun.ext()] Warning message", fixed = TRUE)
+
+  ## SW() ------------------------------------------------------------------
+  expect_silent(SW(cat("silenced message")))
+  expect_silent(SW(message("silenced message")))
+  expect_silent(SW(warning("silenced message")))
+  expect_silent(SW(.throw_warning("silenced message")))
+  expect_error(SW(stop("error message")),
+               "error message")
+  expect_error(SW(.throw_error("error message")),
+               "error message")
+
+  ## .validate_positive_scalar() --------------------------------------------
+  expect_silent(.validate_positive_scalar(1.3))
+  expect_silent(.validate_positive_scalar(2, int = TRUE))
+  expect_silent(.validate_positive_scalar(NULL, int = TRUE, null.ok = TRUE))
+
+  expect_error(.validate_positive_scalar(test <- "a"),
+               "'test' must be a positive scalar")
+  expect_error(.validate_positive_scalar(test <- NULL),
+               "'test' must be a positive scalar")
+  expect_error(.validate_positive_scalar(iris),
+               "'iris' must be a positive scalar")
+  expect_error(.validate_positive_scalar(1:2, name = "var"),
+               "'var' must be a positive scalar")
+  expect_error(.validate_positive_scalar(0, name = "var"),
+               "'var' must be a positive scalar")
+  expect_error(.validate_positive_scalar(-1, name = "var"),
+               "'var' must be a positive scalar")
+  expect_error(.validate_positive_scalar(1.5, int = TRUE, name = "var"),
+               "'var' must be a positive integer")
 
   ## C++ code ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   ##
@@ -119,5 +211,4 @@ test_that("Test internals", {
       TOLOFF = 0
     )
   )
-
 })

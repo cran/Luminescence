@@ -209,7 +209,7 @@ by the function, i.e. in theory it is enough to provide a BIN/BINX-file with the
 data. For the Bayesian analysis for each aliquot the following information are needed from the SAR analysis.
 \code{LxTx}, the \code{LxTx} error and the dose values for all regeneration points.
 
-\strong{How the systematic error contribution is calculated?}
+\strong{How is the systematic error contribution calculated?}
 
 Standard errors (so far) provided with the source dose rate are considered as systematic uncertainties
 and added to final central dose by:
@@ -265,7 +265,7 @@ by \link{verify_SingleGrainData} might be not totally sufficient.
 
 If an \linkS4class{RLum.Results} object is provided as input and(!) this object was
 previously created by the function \code{analyse_baSAR()} itself, the pre-processing part
-is skipped and the function starts directly the Bayesian analysis. This option is very powerful
+is skipped and the function starts directly with the Bayesian analysis. This option is very powerful
 as it allows to change parameters for the Bayesian analysis without the need to repeat
 the data pre-processing. If furthermore the argument \code{aliquot_range} is set, aliquots
 can be manually excluded based on previous runs.
@@ -413,7 +413,7 @@ list(
 } 
 
 \section{How to cite}{
-Mercier, N., Kreutzer, S., 2024. analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.33. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Mercier, N., Kreutzer, S., 2024. analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.33. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

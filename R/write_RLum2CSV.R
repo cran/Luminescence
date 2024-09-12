@@ -142,7 +142,7 @@ write_RLum2CSV <- function(
 
     ##non NULL conditon
     if(export == TRUE && !dir.exists(path)){
-      stop("[write_RLum2CSV()] Diretory provided via the argument 'path' does not exist!", call. = FALSE)
+      stop("[write_RLum2CSV()] Directory provided via the argument 'path' does not exist!", call. = FALSE)
 
     }
 
@@ -210,11 +210,12 @@ write_RLum2CSV <- function(
       ##adjust the names
       names(object_list) <- paste0(1:length(object_list),"_",names(object_list))
 
-
     } else {
-      try(stop("[write_RLum2CSV()] One particular RLum-object is not yet supported! NULL returned!", call. = FALSE))
+      # nocov start
+      message("[write_RLum2CSV()] Error: One particular RLum-object ",
+              "is not yet supported, NULL returned")
       return(NULL)
-
+      # nocov end
     }
 
   } else if (inherits(object, "data.frame")) {

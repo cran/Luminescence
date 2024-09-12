@@ -19,8 +19,8 @@ Function allows merging of RLum.Analysis objects and adding of allowed
 objects to an RLum.Analysis.
 }
 \details{
-This function simply allowing to merge \linkS4class{RLum.Analysis}
-objects.  Additionally other \linkS4class{RLum} objects can be added
+This function simply allows to merge \linkS4class{RLum.Analysis}
+objects. Moreover, other \linkS4class{RLum} objects can be added
 to an existing \linkS4class{RLum.Analysis} object. Supported objects
 to be added are: \linkS4class{RLum.Data.Curve},
 \linkS4class{RLum.Data.Spectrum} and
@@ -60,7 +60,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. merge_RLum.Analysis(): Merge function for RLum.Analysis S4 class objects. Function version 0.2.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2024. merge_RLum.Analysis(): Merge function for RLum.Analysis S4 class objects. Function version 0.2.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{internal}

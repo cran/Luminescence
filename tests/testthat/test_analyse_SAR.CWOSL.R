@@ -20,7 +20,6 @@ object_NO_TL <- get_RLum(object, record.id = -seq(1,30,2), drop = FALSE)
 
 test_that("tests class elements", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   expect_s4_class(results, "RLum.Results")
   expect_equal(length(results), 4)
@@ -32,22 +31,12 @@ test_that("tests class elements", {
 
 test_that("regression tests De values", {
   testthat::skip_on_cran()
-  local_edition(3)
 
-  ##fix for different R versions
-  if(R.version$major == "3" && as.numeric(R.version$minor) < 6){
-    expect_equal(object = round(sum(results$data[1:2]), digits = 0), 1716)
-
-  }else{
-    expect_equal(object = round(sum(results$data[1:2]), digits = 0), 1716)
-
-  }
-
+  expect_equal(object = round(sum(results$data[1:2]), digits = 0), 1716)
 })
 
 test_that("regression test LxTx table", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   expect_equal(object = round(sum(results$LnLxTnTx.table$LxTx), digits = 5),  20.92051)
   expect_equal(object = round(sum(results$LnLxTnTx.table$LxTx.Error), digits = 2), 0.34)
@@ -60,22 +49,13 @@ test_that("regression test LxTx table", {
 
 test_that("regression test - check rejection criteria", {
   testthat::skip_on_cran()
-  local_edition(3)
 
-  ##fix for different R versions
-  if(R.version$major == "3" && as.numeric(R.version$minor) < 6){
-    expect_equal(object = round(sum(results$rejection.criteria$Value), digits = 0),  1669)
-
-  }else{
-    expect_equal(object = round(sum(results$rejection.criteria$Value), digits = 0),  1669)
-
-  }
-
+  expect_equal(round(sum(results$rejection.criteria$Value), digits = 0),
+               1669)
 })
 
 test_that("simple run", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##verbose and plot off
   t <- expect_s4_class(
@@ -150,6 +130,7 @@ test_that("simple run", {
 
   ##verbose and plot on
   ##full dataset
+  SW({
   expect_s4_class(
     analyse_SAR.CWOSL(
       object = object[[1]],
@@ -250,6 +231,7 @@ test_that("simple run", {
     ),
     class = "RLum.Results"
   )
+  })
 
   ## check if a different point was selected
   expect_equal(round(t$rejection.criteria$Value[2],2), expected = 0.01)
@@ -278,16 +260,19 @@ test_that("simple run", {
    # Trigger stops -----------------------------------------------------------
    ##trigger stops for parameters
    ##object
-   expect_error(analyse_SAR.CWOSL(
-      object = "fail",
-      background.integral.min = 900,
-      fit.method = "LIN",
-      plot = FALSE,
-      verbose = FALSE
-    ), regexp = "Input object is not of type 'RLum.Analysis'!")
+  expect_error(analyse_SAR.CWOSL("fail"),
+               "Input object is not of type 'RLum.Analysis'")
 
-    ##check stop for OSL.components ... failing
-    expect_null(analyse_SAR.CWOSL(
+  expect_error(analyse_SAR.CWOSL(object[[1]],
+                                 signal.integral.min = 1.2,
+                                 signal.integral.max = 3.5,
+                                 background.integral.min = 900,
+                                 background.integral.max = 1000),
+               "'signal.integral' or 'background.integral' is not of type integer")
+
+  ## check stop for OSL.components ... failing
+  SW({
+  expect_null(analyse_SAR.CWOSL(
        object = object[[1]],
        signal.integral.min = 1,
        signal.integral.max = 2,
@@ -299,6 +284,7 @@ test_that("simple run", {
        plot = FALSE,
        verbose = FALSE
      ))
+  })
 
    expect_error(analyse_SAR.CWOSL(
      object = object[[1]],
@@ -310,11 +296,12 @@ test_that("simple run", {
      fit.method = "LIN",
      plot = FALSE,
      verbose = FALSE
-   ), regexp = "length 'dose.points' differs from number of curves")
+   ), regexp = "Length of 'dose.points' differs from number of curves")
 
 
+  expect_message(
    expect_null(analyse_SAR.CWOSL(
-     object = set_RLum("RLum.Analysis", records = list(set_RLum("RLum.Data.Curve", recordType = "false"))),
+     object = set_RLum("RLum.Analysis",records = list(set_RLum("RLum.Data.Curve", recordType = "false"))),
      signal.integral.min = 1,
      signal.integral.max = 2,
      background.integral.min = 800,
@@ -322,7 +309,8 @@ test_that("simple run", {
      fit.method = "LIN",
      plot = FALSE,
      verbose = FALSE
-   ))
+   )),
+   "No record of type 'OSL', 'IRSL', 'POSL' detected")
 
    ##check background integral
    expect_warning(analyse_SAR.CWOSL(
@@ -335,6 +323,63 @@ test_that("simple run", {
      plot = FALSE,
      verbose = FALSE
    ), regexp = "Background integral out of bounds")
+
+  expect_warning(analyse_SAR.CWOSL(
+      object = object[[1]],
+      signal.integral.min = 1,
+      signal.integral.max = 1,
+      background.integral.min = 800,
+      background.integral.max = 1000,
+      fit.method = "LIN",
+      plot = FALSE,
+      verbose = FALSE
+  ), "Integral signal limits cannot be equal")
+
+  expect_warning(analyse_SAR.CWOSL(
+      object = object[[1]],
+      signal.integral.min = 1,
+      signal.integral.max = 2,
+      background.integral.min = c(600, 800),
+      background.integral.max = c(900, 1000),
+      fit.method = "LIN",
+      plot = FALSE,
+      verbose = FALSE
+  ), "Background integral for Tx curves set, but not for the signal integral")
+
+  expect_warning(expect_message(
+      analyse_SAR.CWOSL(
+          object = object[[1]],
+          signal.integral.min = c(1, 1500),
+          signal.integral.max = c(2, 2000),
+          background.integral.min = 800,
+          background.integral.max = 1000,
+          fit.method = "LIN",
+          plot = FALSE,
+          verbose = FALSE
+      ), "Something went wrong while generating the LxTx table"),
+  "Signal integral for Tx curves set, but not for the background integral")
+
+  ## this generates multiple warnings
+  warnings <- capture_warnings(analyse_SAR.CWOSL(
+      object = object[[1]],
+      signal.integral.min = c(1, 70),
+      signal.integral.max = c(2, 80),
+      background.integral.min = 800,
+      background.integral.max = 1200,
+      fit.method = "LIN",
+      plot = FALSE,
+      verbose = FALSE))
+  expect_match(warnings, all = FALSE,
+               "Background integral for Tx out of bounds")
+
+  ## plot.single
+  expect_error(analyse_SAR.CWOSL(object[[1]],
+                                 signal.integral.min = 1,
+                                 signal.integral.max = 2,
+                                 background.integral.min = 900,
+                                 background.integral.max = 1000,
+                                 plot.single = list()),
+               "Invalid data type for 'plot.single'")
 
    ## check different curve numbers by shorten one OSL curve
    object_short <- object
@@ -371,7 +416,6 @@ test_that("simple run", {
 
 test_that("advance tests run", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##this tests basically checks the parameter expansion and make
   ##sure everything is evaluated properly
@@ -457,12 +501,10 @@ test_that("advance tests run", {
       rejection.criteria = list(list(recycling.ratio = 0)),
       fit.method = "LIN",
       unknown_argument = "hallo",
+      main = "Title",
       plot = TRUE,
       verbose = FALSE
     ),
     class = "RLum.Results"
   )
-
 })
-
-

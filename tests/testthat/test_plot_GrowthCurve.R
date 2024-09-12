@@ -1,6 +1,5 @@
 test_that("plot_GrowthCurve", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ## load data
   data(ExampleData.LxTxData, envir = environment())
@@ -18,12 +17,19 @@ test_that("plot_GrowthCurve", {
   ## shorten dataframe
   expect_error(
     object = plot_GrowthCurve(LxTxData[1:2,]),
-    regexp = "\\[plot\\_GrowthCurve\\(\\)\\] At least two regeneration points are required!")
+    regexp = "\\[plot\\_GrowthCurve\\(\\)\\] At least three regeneration points are required!")
 
   ## wrong argument for mode
   expect_error(
     object = plot_GrowthCurve(LxTxData, mode = "fail"),
     regexp = "\\[plot\\_GrowthCurve\\(\\)\\] Unknown input for argument 'mode'")
+
+  ## wrong combination of fit.method and mode
+  expect_error(
+    plot_GrowthCurve(LxTxData, fit.method = "EXP+EXP",
+                     mode = "extrapolation"),
+    "mode 'extrapolation' for fitting method 'EXP+EXP' currently not supported",
+    fixed = TRUE)
 
 # Weird LxTx values --------------------------------------------------------
 
@@ -35,49 +41,63 @@ test_that("plot_GrowthCurve", {
     class = "data.frame", row.names = c(NA, -9L))
 
   ##fit
-  expect_warning(Luminescence:::.warningCatcher(
+  SW({
+  expect_warning(
     plot_GrowthCurve(
       sample = LxTx[,c("Dose", "LxTx", "LxTx.Error")],
-      output.plot = FALSE)))
+      output.plot = TRUE),
+    "Inf values found, replaced by NA")
+  })
 
   ##all points have the same dose ... error but NULL
   data(ExampleData.LxTxData, envir = environment())
   tmp_LxTx <- LxTxData
   tmp_LxTx$Dose <- 10
 
-  expect_null(
-    object = plot_GrowthCurve(tmp_LxTx))
+  expect_message(expect_null(
+      object = plot_GrowthCurve(tmp_LxTx)),
+      "Error: All points have the same dose, NULL returned")
 
   ## check input objects ... matrix
+  SW({
   expect_s4_class(
     object = plot_GrowthCurve(as.matrix(LxTxData), output.plot = FALSE),
     class = "RLum.Results")
+  })
 
   ## check input objects ... list
   expect_s4_class(
-    object = plot_GrowthCurve(as.list(LxTxData), output.plot = FALSE),
+    object = plot_GrowthCurve(as.list(LxTxData), output.plot = FALSE,
+                              verbose = FALSE),
     class = "RLum.Results")
 
   ## test case for only two columns
   expect_s4_class(
-    object = suppressWarnings(plot_GrowthCurve(LxTxData[,1:2], output.plot = FALSE)),
+    suppressWarnings(plot_GrowthCurve(LxTxData[,1:2], output.plot = FALSE,
+                                      verbose = FALSE)),
     class = "RLum.Results")
 
   ## test case with all NA
   tmp_LxTx <- LxTxData
   tmp_LxTx$LxTx <- NA
-  expect_null(
-    object = suppressWarnings(plot_GrowthCurve(tmp_LxTx, output.plot = FALSE)))
+  expect_message(expect_null(
+      suppressWarnings(plot_GrowthCurve(tmp_LxTx, output.plot = FALSE))),
+      "Error: After NA removal, nothing is left from the data set")
 
-  ## test defunct
-  expect_error(
-    object = plot_GrowthCurve(LxTxData[,1:2], output.plot = FALSE, na.rm = FALSE))
+  ## test case without TnTx column
+  tmp_LxTx <- LxTxData
+  tmp_LxTx$TnTx <- NULL
+  SW({
+  expect_s4_class(
+    plot_GrowthCurve(tmp_LxTx, output.plot = TRUE, verbose = FALSE),
+    "RLum.Results")
+  })
 
   ## do not include reg point
   expect_s4_class(
     object = plot_GrowthCurve(
       sample = LxTxData,
-      output.plot = FALSE,
+      output.plot = FALSE, verbose = FALSE,
       fit.includingRepeatedRegPoints = FALSE),
     class = "RLum.Results")
 
@@ -103,6 +123,7 @@ test_that("plot_GrowthCurve", {
   t <- expect_s4_class(
     object = plot_GrowthCurve(
       sample = df_odd,
+      verbose = FALSE,
       output.plot = FALSE),
     class = "RLum.Results")
 
@@ -111,6 +132,7 @@ test_that("plot_GrowthCurve", {
 # Check output for regression ---------------------------------------------
   set.seed(1)
   data(ExampleData.LxTxData, envir = environment())
+  SW({
   temp_EXP <-
     plot_GrowthCurve(
       LxTxData,
@@ -141,6 +163,8 @@ test_that("plot_GrowthCurve", {
     plot_GrowthCurve(
       LxTxData,
       fit.method = "EXP+LIN",
+      fit.bounds = FALSE,
+      fit.force_through_origin = TRUE,
       output.plot = FALSE,
       verbose = FALSE,
       NumberIterations.MC = 10
@@ -150,7 +174,7 @@ test_that("plot_GrowthCurve", {
       LxTxData,
       fit.method = "EXP+EXP",
       output.plot = FALSE,
-      verbose = FALSE,
+      verbose = TRUE,
       NumberIterations.MC = 10
     )
   temp_QDR <-
@@ -158,7 +182,7 @@ test_that("plot_GrowthCurve", {
       LxTxData,
       fit.method = "QDR",
       output.plot = FALSE,
-      verbose = FALSE,
+      verbose = TRUE,
       NumberIterations.MC = 10
     )
   temp_QDR <-
@@ -168,7 +192,7 @@ test_that("plot_GrowthCurve", {
       output.plot = FALSE,
       mode = "extrapolation",
       fit.force_through_origin = TRUE,
-      verbose = FALSE,
+      verbose = TRUE,
       NumberIterations.MC = 10
     )
   temp_GOK <-
@@ -187,6 +211,7 @@ test_that("plot_GrowthCurve", {
       verbose = FALSE,
       NumberIterations.MC = 10
     )
+  })
 
   expect_s4_class(temp_EXP, class = "RLum.Results")
     expect_s3_class(temp_EXP$Fit, class = "nls")
@@ -209,11 +234,15 @@ test_that("plot_GrowthCurve", {
   expect_s4_class(temp_LambertW, class = "RLum.Results")
     expect_s3_class(temp_LambertW$Fit, class = "nls")
 
+  ## check n_N calculation
+  expect_equal(round(temp_EXP$De$n_N, 1), 0.5)
+  expect_equal(round(temp_LambertW$De$n_N, 1), 0.6)
 
 # Check more output -------------------------------------------------------
   data(ExampleData.LxTxData, envir = environment())
 
   set.seed(1)
+  SW({
   temp_EXP <-
     plot_GrowthCurve(
       LxTxData,
@@ -280,63 +309,19 @@ temp_LambertW <-
     verbose = FALSE,
     NumberIterations.MC = 10
   )
+  })
 
    expect_equal(round(temp_EXP$De[[1]], digits = 2), 1737.88)
-
-   ##fix for different R versions
-   if(R.version$major == "3" && as.numeric(R.version$minor) < 6){
-    expect_equal(round(sum(temp_EXP$De.MC, na.rm = TRUE), digits = 0), 17441)
-
-   }else{
-     expect_equal(round(sum(temp_EXP$De.MC, na.rm = TRUE), digits = 0), 17562)
-
-   }
-
+   expect_equal(round(sum(temp_EXP$De.MC, na.rm = TRUE), digits = 0), 17562)
    expect_equal(round(temp_LIN$De[[1]], digits = 2), 1811.33)
-
-   ##fix for different R versions
-   if(R.version$major == "3" && as.numeric(R.version$minor) < 6){
-     expect_equal(round(sum(temp_LIN$De.MC, na.rm = TRUE), digits = 0),18238)
-
-   }else{
-     expect_equal(round(sum(temp_LIN$De.MC, na.rm = TRUE), digits = 0),18398)
-
-   }
-
+   expect_equal(round(sum(temp_LIN$De.MC, na.rm = TRUE), digits = 0),18398)
    expect_equal(round(temp_EXPLIN$De[[1]], digits = 2), 1791.53)
-
-   ##fix for different R versions
-   if(R.version$major == "3" && as.numeric(R.version$minor) < 6){
-    expect_equal(round(sum(temp_EXPLIN$De.MC, na.rm = TRUE), digits = 0),17474)
-
-   }else{
-     expect_equal(round(sum(temp_EXPLIN$De.MC, na.rm = TRUE), digits = 0),18045)
-
-   }
-
+   expect_equal(round(sum(temp_EXPLIN$De.MC, na.rm = TRUE), digits = 0),18045)
    expect_equal(round(temp_EXPEXP$De[[1]], digits = 2), 1787.15)
-
-   ##fix for different R versions
-   if(R.version$major == "3" && as.numeric(R.version$minor) < 6){
-    expect_equal(round(sum(temp_EXPEXP$De.MC, na.rm = TRUE), digits = 0), 7316)
-
-   }else{
-     expect_equal(round(sum(temp_EXPEXP$De.MC, na.rm = TRUE), digits = 0), 7303,
-                  tolerance = 10)
-
-   }
-
+   expect_equal(round(sum(temp_EXPEXP$De.MC, na.rm = TRUE), digits = 0), 7303,
+                tolerance = 10)
    expect_equal(round(temp_QDR$De[[1]], digits = 2), 1666.2)
-
-   ##fix for different R versions
-   if (R.version$major == "3" && as.numeric(R.version$minor) < 6){
-    expect_equal(round(sum(temp_QDR$De.MC, na.rm = TRUE), digits = 0), 14937)
-
-   }else{
-    expect_equal(round(sum(temp_QDR$De.MC, na.rm = TRUE), digits = 0), 16476)
-
-   }
-
+   expect_equal(round(sum(temp_QDR$De.MC, na.rm = TRUE), digits = 0), 16476)
    expect_equal(round(temp_GOK$De[[1]], digits = 0), 1786)
    ##fix for different R versions
    if (R.version$major > "3"){
@@ -354,14 +339,18 @@ temp_LambertW <-
    expect_equal(round(temp_LambertW$De[[1]], digits = 2),  1784.78)
    expect_equal(round(sum(temp_LambertW$De.MC, na.rm = TRUE), digits = 0), 17422)
 
+
 # Check extrapolation -----------------------------------------------------
   ## load data
   data(ExampleData.LxTxData, envir = environment())
 
   set.seed(1)
   LxTxData[1,2:3] <- c(0.5, 0.001)
+  SW({
   LIN <- expect_s4_class(
-    plot_GrowthCurve(LxTxData,mode = "extrapolation", fit.method = "LIN"),
+    plot_GrowthCurve(LxTxData,mode = "extrapolation", fit.method = "LIN",
+                     main = "Title", xlab = "x-axis", ylab = "y-axis",
+                     xlim = c(0, 10), ylim = c(0, 10), fun = TRUE),
     "RLum.Results")
   EXP <- expect_s4_class(
     plot_GrowthCurve(LxTxData,mode = "extrapolation", fit.method = "EXP"),
@@ -373,11 +362,12 @@ temp_LambertW <-
     "RLum.Results")
 
   GOK <- expect_s4_class(
-    plot_GrowthCurve(LxTxData,mode = "extrapolation", fit.method = "GOK"),
+    plot_GrowthCurve(LxTxData,mode = "interpolation", fit.method = "GOK"),
     "RLum.Results")
 
   LambertW <- expect_s4_class(
     plot_GrowthCurve(LxTxData,mode = "extrapolation", fit.method = "LambertW"), "RLum.Results")
+  })
 
   expect_equal(round(LIN$De$De,0), 165)
   expect_equal(round(EXP$De$De,0),  110)
@@ -517,5 +507,20 @@ temp_LambertW <-
     verbose = FALSE),
     regexp = "\\[plot\\_GrowthCurve\\(\\)\\] Standard root estimation using stats\\:\\:uniroot\\(\\).+")
 
+  ## only two valid points provided: this generates two warnings, hence
+  ## we cannot use expect_warning(), which can only capture one at a time
+  SW({
+  warnings <- capture_warnings(expect_message(plot_GrowthCurve(
+    data.frame(
+        dose = c(0, 1388.88888888889, NA),
+        LxTx = c(1.54252220145258, 4.43951568403849, NA),
+        LxTx_X = c(0.130074482379272, 2.59694106608, NA)),
+    output.plot = FALSE,
+    verbose = TRUE),
+    "fit.method set to 'LIN'"))
+  })
+  expect_match(warnings, "1 NA values removed",
+               all = FALSE, fixed = TRUE)
+  expect_match(warnings, "Fitting using an exponential term requires",
+               all = FALSE, fixed = TRUE)
 })
-

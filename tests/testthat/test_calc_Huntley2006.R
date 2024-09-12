@@ -20,9 +20,61 @@ huntley <- calc_Huntley2006(
   verbose = FALSE
 )
 
+test_that("input validation", {
+  testthat::skip_on_cran()
+
+  rhop.test <- rhop
+  rhop.test@originator <- "unexpected"
+
+  expect_error(calc_Huntley2006(),
+               "\"data\" is missing, with no default")
+  expect_error(calc_Huntley2006("test"),
+               "'data' must be a data frame")
+
+  expect_error(calc_Huntley2006(data, fit.method = "test"),
+               "Invalid fit option 'test'")
+  expect_error(calc_Huntley2006(data, fit.method = "GOK", lower.bounds = 0),
+               "Argument 'lower.bounds' must be of length 4")
+
+  expect_error(calc_Huntley2006(data, LnTn = list()),
+               "'LnTn' must be a data frame with 2 columns")
+  expect_error(calc_Huntley2006(data, LnTn = data),
+               "'LnTn' must be a data frame with 2 columns")
+  expect_error(calc_Huntley2006(cbind(data, data), LnTn = data[, 1:2]),
+               "When 'LnTn' is specified, the 'data' data frame must have")
+  expect_error(calc_Huntley2006(cbind(data, data[, 1])),
+               "The number of columns in 'data' must be a multiple of 3")
+
+  expect_error(calc_Huntley2006(data, rhop = 1),
+               "'rhop' must be a vector of length 2")
+  expect_error(calc_Huntley2006(data, rhop = "test"),
+               "'rhop' must be a numeric vector or an RLum.Results object")
+  expect_error(calc_Huntley2006(data, rhop = rhop.test),
+               "'rhop' accepts RLum.Results objects only if produced by")
+  expect_error(calc_Huntley2006(data, rhop = c(-1, 4.9e-7)),
+               "'rhop' must be a positive number")
+
+  expect_error(calc_Huntley2006(data, rhop = rhop),
+               "\"ddot\" is missing, with no default")
+  expect_error(calc_Huntley2006(data, rhop = rhop, ddot = ddot),
+               "\"readerDdot\" is missing, with no default")
+  expect_error(calc_Huntley2006(data, rhop = rhop,
+                                ddot = "test", readerDdot = readerDdot),
+               "'ddot' and 'readerDdot' must be numeric vectors")
+  expect_error(calc_Huntley2006(data, rhop = rhop,
+                                ddot = ddot, readerDdot = "test"),
+               "'ddot' and 'readerDdot' must be numeric vectors")
+
+  SW({
+  expect_warning(calc_Huntley2006(data[, 1:2], rhop = rhop, n.MC = 2,
+                                  ddot = ddot, readerDdot = readerDdot,
+                                  fit.method = "GOK"),
+                 "'data' only had two columns")
+  })
+})
+
 test_that("check class and length of output", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##rhop
   expect_s4_class(rhop, class = "RLum.Results")
@@ -49,24 +101,15 @@ test_that("check values from analyse_FadingMeasurement()", {
 test_that("check values from calc_Huntley2008()", {
   testthat::skip_on_cran()
 
-  ##fix for different R versions
-  if(R.version$major == "3" && as.numeric(R.version$minor) < 6){
-    expect_equal(round(huntley$results$Sim_Age, 1), 41.3)
-    expect_equal(round(huntley$results$Sim_Age_2D0, 0), 164)
-    expect_equal(round(sum(huntley$Ln),4), 0.1585)
-
-  }else{
-    expect_equal(round(huntley$results$Sim_Age, 1), 34)
-    expect_equal(round(huntley$results$Sim_Age_2D0, 0), 175)
-    expect_equal(round(sum(huntley$Ln),2), 0.16)
-
-  }
-
+  expect_equal(round(huntley$results$Sim_Age, 1), 34)
+  expect_equal(round(huntley$results$Sim_Age_2D0, 0), 175)
+  expect_equal(round(sum(huntley$Ln),2), 0.16)
 
   expect_equal(round(sum(huntley$data),0), 191530)
   expect_equal(round(sum(residuals(huntley$fits$simulated)),1),  0.8)
   expect_equal(round(sum(residuals(huntley$fits$measured)),4),  0.1894)
   expect_equal(round(sum(residuals(huntley$fits$unfaded)),2),  0)
+})
 
 ## COMPARE calc_Kars2008 (deprecated) vs. re-named calc_Huntley2006
 test_that("compare deprecated calc_Kars2008 and calc_Huntley2006", {
@@ -200,6 +243,7 @@ test_that("Further tests calc_Huntley2006", {
   class = "data.frame", row.names = c(NA, -7L))
 
   set.seed(1)
+  SW({
   expect_warning(calc_Huntley2006(
     data = df,
     LnTn = NULL,
@@ -212,9 +256,5 @@ test_that("Further tests calc_Huntley2006", {
     plot = FALSE,
     n.MC = 100),
     regexp = "\\[calc\\_Huntley2006\\(\\)\\] Ln\\/Tn is smaller than the minimum computed LxTx value.")
-
-
- })
-
+  })
 })
-

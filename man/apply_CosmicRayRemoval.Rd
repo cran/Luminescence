@@ -19,7 +19,7 @@ apply_CosmicRayRemoval(
 \item{object}{\linkS4class{RLum.Data.Spectrum} or \linkS4class{RLum.Analysis} (\strong{required}): input
 object to be treated. This can be also provided as \link{list}. If an \linkS4class{RLum.Analysis} object
 is provided, only the \linkS4class{RLum.Data.Spectrum} objects are treated. Please note: this mixing of
-objects do not work for a list of \code{RLum.Data} objects.}
+objects does not work for a list of \code{RLum.Data} objects.}
 
 \item{method}{\link{character} (\emph{with default}):
 Defines method that is applied for cosmic ray removal. Allowed methods are
@@ -107,7 +107,7 @@ dataset (see example).
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. apply_CosmicRayRemoval(): Function to remove cosmic rays from an RLum.Data.Spectrum S4 class object. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2024. apply_CosmicRayRemoval(): Function to remove cosmic rays from an RLum.Data.Spectrum S4 class object. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

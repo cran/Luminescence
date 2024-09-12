@@ -1,6 +1,5 @@
 test_that("full example test", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   data(ExampleData.BINfileData, envir = environment())
   output <- Analyse_SAR.OSLdata(input.data = CWOSL.SAR.Data,
@@ -8,7 +7,6 @@ test_that("full example test", {
                                 background.integral = c(900:1000),
                                 position = c(1:1),
                                 output.plot = FALSE)
-
 
   ##checks
   expect_type(output, "list")
@@ -27,6 +25,7 @@ test_that("full example test", {
                regexp = "No 'OSL' curves found")
 
   ## should work
+  SW({
   expect_type(Analyse_SAR.OSLdata(input.data = CWOSL.SAR.Data, signal.integral = 1:3,
                                   background.integral = 200:250, position = 1,
                                   background.count.distribution = "non-poisson",
@@ -35,5 +34,5 @@ test_that("full example test", {
   expect_type(
     Analyse_SAR.OSLdata(tmp, 1:3, 200:250, output.plot = TRUE, output.plot.single = TRUE),
     "list")
-
+  })
 })

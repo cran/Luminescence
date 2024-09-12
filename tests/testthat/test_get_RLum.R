@@ -11,7 +11,6 @@ temp_RLumResults <- set_RLum(class = "RLum.Results")
 
 test_that("check class and length of output", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   expect_s3_class(get_RLum(temp), class = "data.frame")
   expect_type(get_RLum(temp, data.object = "args"), "list")
@@ -22,20 +21,25 @@ test_that("check class and length of output", {
   expect_type(get_RLum(temp_RLumDataSpectrum), "logical")
   expect_null(suppressWarnings(get_RLum(temp_RLumAnalysis)))
   expect_null(get_RLum(temp_RLumResults))
-
 })
 
 test_that("check get_RLum on a list and NULL", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   object <- set_RLum(class = "RLum.Analysis", records = rep(set_RLum(class = "RLum.Data.Curve"), 10))
-  expect_warning(get_RLum(object, recordType = "test"))
-
+  expect_warning(get_RLum(object, recordType = "test"),
+                 "This request produced an empty list of records")
   expect_null(get_RLum(NULL), "NULL")
+
+  expect_warning(res <- get_RLum(list(temp, "test")),
+                 "object #2 in the list was not of type 'RLum'")
+  expect_length(res, 2)
+  res <- get_RLum(list(temp, temp_RLumAnalysis), null.rm = TRUE)
+  expect_length(res, 1)
 
   ##check class argument
   a <- list(set_RLum("RLum.Results"), set_RLum("RLum.Analysis", records = list(set_RLum("RLum.Data.Curve"))))
   expect_type(get_RLum(a, class = "test", drop = FALSE), "list")
   expect_type(get_RLum(a, class = "RLum.Results", drop = FALSE), "list")
+  expect_type(get_RLum(list(temp_RLumResults, temp_RLumAnalysis)), "list")
 })

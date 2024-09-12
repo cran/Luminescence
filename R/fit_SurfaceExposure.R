@@ -237,7 +237,7 @@ fit_SurfaceExposure <- function(
 
   ## Data type validation
   if (inherits(data, "RLum.Results"))
-    object <- get_RLum(data, "data")
+    data <- get_RLum(data, "data")
 
   if (inherits(data, "matrix"))
     data <- as.data.frame(data)
@@ -255,7 +255,7 @@ fit_SurfaceExposure <- function(
     # TODO: Support weighted fitting for global fit
     if (weights) {
       if (settings$verbose)
-        warning("Argument 'weights' is not supported when multiple data sets are provided for global fitting.", call. = FALSE)
+        warning("[fit_SurfaceExposure()] Argument 'weights' is not supported when multiple data sets are provided for global fitting.", call. = FALSE)
       weights <- FALSE
     }
 
@@ -289,7 +289,14 @@ fit_SurfaceExposure <- function(
   else
     wi <- rep(1, times = nrow(data))
 
-  # extract errors into seperate variable
+  ## remove rows with NA
+  if (any(is.na(data))) {
+    data <- data[complete.cases(data), ]
+    if (settings$verbose)
+      warning("[fit_SurfaceExposure()] NA values in 'data' were removed.", call. = FALSE)
+  }
+
+  ## extract errors into separate variable
   if (ncol(data) >= 3 && !global_fit)
     error <- data[ ,3]
   else
@@ -298,13 +305,6 @@ fit_SurfaceExposure <- function(
   ## Take only the first to columns (depth, signal)
   if (ncol(data) > 2 && !global_fit)
     data <- data[ ,1:2]
-
-  ## remove rows with NA
-  if (any(is.na(data))) {
-    data <- data[complete.cases(data), ]
-    if (settings$verbose)
-      warning("NA values in 'data' were removed.", call. = FALSE)
-  }
 
   ## Data preprocessing ----
 
@@ -376,7 +376,8 @@ fit_SurfaceExposure <- function(
     coef <- as.data.frame(coef(summary(fit)))
   } else {
     if (settings$verbose)
-      message("[fit_SurfaceExposure()] \n- Unable to fit the data. Original error from minpack::nlsLM():\n\n", fit$message)
+      message("[fit_SurfaceExposure()] Unable to fit the data. ",
+              "Original error from minpack.lm::nlsLM(): ", fit$message)
 
     # Fill with NA values
     coef <- data.frame(
@@ -445,7 +446,9 @@ fit_SurfaceExposure <- function(
 
     if (grepl("y", plot_settings$log)) {
       plot_settings$ylim[1] <- 0.01
-      plot_settings$x <- data[which(data[ ,2] > 0),]
+      pos.idx <- which(data[, 2] > 0)
+      error <- error[pos.idx]
+      plot_settings$x <- data[pos.idx, ]
     }
 
     ## create main plot

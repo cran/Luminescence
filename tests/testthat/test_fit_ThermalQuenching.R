@@ -11,7 +11,6 @@ data_NA[1,] <- NA
 
 test_that("standard check", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##trigger errors
   expect_error(fit_ThermalQuenching(data = "test"))
@@ -22,6 +21,7 @@ test_that("standard check", {
     n.MC = NULL), regexp = "'data' is empty or has less than three columns!")
 
   ##simple run with warning
+  SW({
   expect_warning(fit_ThermalQuenching(
     data = cbind(data,data),
     n.MC = NULL), regexp = "data' has more than 3 columns, taking only the first three!")
@@ -35,13 +35,16 @@ test_that("standard check", {
   expect_s4_class(fit_ThermalQuenching(
     data = data,
     n.MC = NULL), class = "RLum.Results")
+  })
 
   ##simple run with fitting error
-  expect_null(fit_ThermalQuenching(
+  expect_message(expect_null(fit_ThermalQuenching(
     data = data.frame(T = 1:10, V = 1:10, V_X = 1:10),
-    n.MC = NULL))
+    n.MC = NULL)),
+    "Error: Fitting failed, NULL returned")
 
   # ##switch off weights
+  SW({
   expect_s4_class(fit_ThermalQuenching(
     data = data,
     method_control = list(weights = NULL),
@@ -58,7 +61,5 @@ test_that("standard check", {
     verbose = FALSE,
     plot = TRUE,
     n.MC = 10), class = "RLum.Results")
-
-
+  })
 })
-

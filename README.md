@@ -13,15 +13,19 @@ collection of various R functions for luminescence dating data analysis.
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![DOI](https://zenodo.org/badge/23153315.svg)](https://zenodo.org/badge/latestdoi/23153315)
-[![CRAN](https://www.r-pkg.org/badges/version/Luminescence)](https://cran.r-project.org/package=Luminescence)
+[![CRAN](https://www.r-pkg.org/badges/version/Luminescence)](https://CRAN.R-project.org/package=Luminescence)
+[![CRAN
+DOI](https://img.shields.io/badge/DOI-10.32614/CRAN.package.Luminescence-1f57b6?style=flat&link=https://doi.org/10.32614/CRAN.package.Luminescence)](https://doi.org/10.32614/CRAN.package.Luminescence)
+[![ZENODO
+DOI](https://zenodo.org/badge/23153315.svg)](https://zenodo.org/badge/latestdoi/23153315)
 
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/Luminescence)](https://www.r-pkg.org/pkg/Luminescence)
 [![Downloads](https://cranlogs.r-pkg.org/badges/Luminescence)](https://www.r-pkg.org/pkg/Luminescence)
 [![Downloads](https://cranlogs.r-pkg.org/badges/last-week/Luminescence)](https://www.r-pkg.org/pkg/Luminescence)
 [![Downloads](https://cranlogs.r-pkg.org/badges/last-day/Luminescence)](https://www.r-pkg.org/pkg/Luminescence)
 
-[![R-CMD-check](https://github.com/R-Lum/Luminescence/workflows/GitHub%20Actions%20CI/badge.svg)](https://github.com/R-Lum/Luminescence/actions)
+[![R-CMD-check](https://github.com/R-Lum/Luminescence/actions/workflows/R-CMD-check.yml/badge.svg)](https://github.com/R-Lum/Luminescence/actions)
+
 [![Coverage
 Status](https://img.shields.io/codecov/c/github/R-Lum/Luminescence.svg)](https://app.codecov.io/github/R-Lum/Luminescence?branch=master)
 
@@ -112,8 +116,7 @@ more details.
   id: 250974974](https://gepris.dfg.de/gepris/projekt/250974974))
 
 - 05/2014-12/2019: The work of Sebastian Kreutzer as maintainer of the
-  package was supported by [LabEx LaScArBx (ANR -
-  n. ANR-10-LABX-52)](https://lascarbx.labex.u-bordeaux.fr/en/).
+  package was supported by LabEx LaScArBx (ANR - n. ANR-10-LABX-52).
 
 - 01/2020-04/2022: Sebastian Kreutzer as maintainer of the package has
   received funding from the European Union’s Horizon 2020 research and
@@ -124,6 +127,14 @@ more details.
 - since 03/2023: Sebastian Kreutzer as maintainer of the package
   receives funding from the DFG Heisenberg programme [No
   505822867](https://gepris.dfg.de/gepris/projekt/505822867).
+
+- since 08/2024 the future and sustainable development of
+  `'Luminescence'` towards better reproducibility and usability is
+  supported through the DFG programme “REPLAY: REProducible Luminescence
+  Data AnalYses” [No
+  528704761](https://gepris.dfg.de/gepris/projekt/528704761?language=en)
+  led by Dr Sebastian Kreutzer (PI at Heidelberg University, DE) and Dr
+  Thomas Kolb (PI at Justus-Liebig-University Giessen, DE).
 
 - All other authors gratefully received additional funding from various
   public funding bodies.

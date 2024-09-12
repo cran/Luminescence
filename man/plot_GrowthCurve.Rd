@@ -6,7 +6,6 @@
 \usage{
 plot_GrowthCurve(
   sample,
-  na.rm = TRUE,
   mode = "interpolation",
   fit.method = "EXP",
   fit.force_through_origin = FALSE,
@@ -31,8 +30,6 @@ data frame with three columns for \code{x = Dose},\code{y = LxTx},\code{z = LxTx
 The column for the test dose response is optional, but requires \code{'TnTx'} as
 column name if used. For exponential fits at least three dose points
 (including the natural) should be provided.}
-
-\item{na.rm}{\link{logical} (\emph{with default}): excludes \code{NA} values from the data set prior to any further operations. This argument is defunct and will be removed in a future version!}
 
 \item{mode}{\link{character} (\emph{with default}):
 selects calculation mode of the function.
@@ -225,7 +222,7 @@ To avoid plotting the subtitle information, provide an empty user \code{mtext}
 \code{mtext = ""}. To plot any other subtitle text, use \code{mtext}.
 }
 \section{Function version}{
- 1.11.12
+ 1.11.13
 }
 
 \examples{
@@ -252,7 +249,7 @@ plot_GrowthCurve(LxTxData)
 plot_GrowthCurve(LxTxData, output.plotExtended.single = TRUE)
 ##dev.off()
 
-##(4) plot resulting function for given intervall x
+##(4) plot resulting function for given interval x
 x <- seq(1,10000, by = 100)
 plot(
  x = x,
@@ -316,7 +313,7 @@ print(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., 2024. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.11.12. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., Dietze, M., 2024. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.11.13. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

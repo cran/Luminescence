@@ -10,7 +10,6 @@ temp <- calc_FadingCorr(
 
 test_that("check class and length of output", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##trigger some errors
   expect_error(calc_FadingCorr(age.faded = "test", g_value = "test"),
@@ -31,6 +30,7 @@ test_that("check class and length of output", {
   expect_equal(length(temp), 2)
 
   ##check the verbose mode
+  SW({
   expect_s4_class(calc_FadingCorr(
     age.faded = c(0.1,0),
     g_value = c(5.0, 1.0),
@@ -38,11 +38,34 @@ test_that("check class and length of output", {
     tc.g_value = 172800,
     n.MC = 1, verbose = TRUE), class = "RLum.Results")
 
+  ## g_value provided as RLum.Results object
+  data("ExampleData.Fading", envir = environment())
+  fading <- analyse_FadingMeasurement(ExampleData.Fading$fading.data$IR50,
+                                      plot = FALSE)
+  expect_s4_class(calc_FadingCorr(age.faded = c(0.1,0),
+                                  g_value = fading, tc = 2592000),
+                  "RLum.Results")
+  })
+
+  fading@originator <- "unexpected"
+  expect_message(
+      expect_null(calc_FadingCorr(age.faded = c(0.1,0),
+                               g_value = fading, tc = 2592000)),
+               "Unknown originator for the provided RLum.Results object")
+
+  ## auto, seed (Note: this is slow!)
+  SW({
+  calc_FadingCorr(
+    age.faded = c(0.1,0),
+    g_value = c(5.0, 1.0),
+    tc = 2592000,
+    seed = 1,
+    n.MC = "auto")
+  })
 })
 
 test_that("check values from output example 1", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   results <- get_RLum(temp)
 

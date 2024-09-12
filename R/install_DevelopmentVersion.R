@@ -37,7 +37,7 @@
 #' @md
 #' @export
 install_DevelopmentVersion <- function(force_install = FALSE) {
-
+  # nocov start
   message("\n[install_DevelopmentVersion]\n")
 
   # check which branches are currently available
@@ -74,7 +74,7 @@ install_DevelopmentVersion <- function(force_install = FALSE) {
 
     message("Please copy and run the following code in your R command-line:\n")
     if (!requireNamespace("devtools", quietly = TRUE))
-      message("install.packages('devtools')")
+      message("install.packages('devtools')") # nocov
 
     message(branches$INSTALL[as.numeric(index)], "\n")
 
@@ -111,7 +111,6 @@ install_DevelopmentVersion <- function(force_install = FALSE) {
 
     # install the development version
     devtools::install_github(paste0("r-lum/luminescence@", branch))
-
   }
-
+  # nocov end
 }

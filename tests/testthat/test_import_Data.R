@@ -1,11 +1,12 @@
 test_that("Test general import", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ## BINX
+  SW({
   expect_type(
     object = import_Data(system.file("extdata/BINfile_V8.binx", package = "Luminescence")),
     type = "list")
+  })
 
   ## XSYG
   expect_type(
@@ -36,5 +37,10 @@ test_that("Test general import", {
   expect_s4_class(
     object = import_Data(system.file("extdata/TIFFfile.tif", package = "Luminescence")),
     class = "RLum.Data.Image")
+
+  ## OSL
+  expect_s4_class(
+    object = import_Data(system.file("extdata/HeliosOSL_Example.osl", package = "Luminescence")),
+    class = "RLum.Analysis")
 
 })

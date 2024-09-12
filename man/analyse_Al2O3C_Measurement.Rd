@@ -39,7 +39,7 @@ based on the TL curves. Taken is the ratio of the peak sums of each curves +/- 5
 
 \item{irradiation_time_correction}{\link{numeric} or \linkS4class{RLum.Results} (\emph{optional}):
 information on the used irradiation time correction obtained by another experiments.
-I a \code{numeric} is provided it has to be of length two: mean, standard error}
+If a \code{numeric} is provided it has to be of length two: mean, standard error}
 
 \item{cross_talk_correction}{\link{numeric} or \linkS4class{RLum.Results} (\emph{optional}):
 information on the used irradiation time correction obtained by another experiments.
@@ -47,7 +47,7 @@ If a \code{numeric} vector is provided it has to be of length three:
 mean, 2.5 \% quantile, 97.5 \% quantile.}
 
 \item{travel_dosimeter}{\link{numeric} (\emph{optional}): specify the position of the travel dosimeter
-(so far measured a the same time). The dose of travel dosimeter will be subtracted from all
+(so far measured at the same time). The dose of travel dosimeter will be subtracted from all
 other values.}
 
 \item{test_parameters}{\link{list} (\emph{with default}):
@@ -146,7 +146,7 @@ analyse_Al2O3C_Measurement(data_CrossTalk)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_Al2O3C_Measurement(): Al2O3:C Passive Dosimeter Measurement Analysis. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2024. analyse_Al2O3C_Measurement(): Al2O3:C Passive Dosimeter Measurement Analysis. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -21,8 +21,8 @@
 #'
 #' @param smooth [character] (*optional*):
 #' apply data smoothing. Use `"rmean"` to calculate the rolling where `k`
-#' determines the width of the rolling window (see [rollmean]). `"spline"`
-#' applies a smoothing spline to each curve (see [smooth.spline])
+#' determines the width of the rolling window (see [zoo::rollmean]). `"spline"`
+#' applies a smoothing spline to each curve (see [stats::smooth.spline])
 #'
 #' @param k [integer] (*with default*):
 #' integer width of the rolling window.
@@ -127,13 +127,15 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
   ## DATA INPUT EVALUATION -----
   if (inherits(data, "list")) {
     if (length(data) < 2)
-      stop(paste("The provided list only contains curve data of the natural signal"), call. = FALSE)
+      .throw_error("The provided list only contains curve data ",
+                   "of the natural signal")
     if (all(sapply(data, class) == "RLum.Data.Curve"))
       curves <- lapply(data, get_RLum)
   }
   else if (inherits(data, "data.frame") || inherits(data, "matrix")) {
     if (ncol(data) < 3)
-      stop(paste("The provided", class(data), "only contains curve data of the natural signal"), call. = FALSE)
+      .throw_error("The provided ", class(data)[1],
+                   " only contains curve data of the natural signal")
     if (is.matrix(data))
       data <- as.data.frame(data)
     curves <- apply(data[2:ncol(data)], MARGIN = 2, function(curve) {
@@ -142,11 +144,16 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
   }
   else if (inherits(data, "RLum.Analysis")) {
     RLum.objects <- get_RLum(data)
-    if (!any(sapply(RLum.objects, class) == "RLum.Data.Curve"))
-      stop(paste("The provided RLum.Analysis object must exclusively contain RLum.Data.Curve objects."), call. = FALSE)
+    if (any(sapply(RLum.objects, class) != "RLum.Data.Curve"))
+      .throw_error("The provided 'RLum.Analysis' object ",
+                   "must exclusively contain 'RLum.Data.Curve' objects")
     curves <- lapply(RLum.objects, get_RLum)
     if (length(curves) < 2)
-      stop(paste("The provided RLum.Analysis object only contains curve data of the natural signal"), call. = FALSE)
+      .throw_error("The provided 'RLum.Analysis' object ",
+                   "only contains curve data of the natural signal")
+  } else {
+    .throw_error("'data' is expected to be a list, matrix, data.frame or ",
+                 "'RLum.Analysis' object")
   }
 
   ## BASIC SETTINGS ------
@@ -154,6 +161,10 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
   regCurves <- curves[2:length(curves)]
   time <- curves[[1]][ ,1]
 
+  if (any(sapply(regCurves, nrow) != nrow(natural))) {
+    .throw_error("The time values for the natural signal don't match ",
+                 "those for the regenerated signal")
+  }
 
   ## DATA TRANSFORMATION -----
 

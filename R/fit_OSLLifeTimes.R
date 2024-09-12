@@ -44,7 +44,8 @@
 #'
 #' @param object [RLum.Data.Curve-class], [RLum.Analysis-class], [data.frame] or [matrix] **(required)**:
 #' Input object containing the data to be analysed. All objects can be provided also as list for an automated
-#' processing. Please note: `NA` values are automatically removed and the dataset should comprise at least 5 data points.
+#' processing. Please note: `NA` values are automatically removed and the dataset should comprise at least 5 data points (possibly more if `n.components` is
+#' set to a value greater than 1)
 #'
 #' @param tp [numeric] (*with default*): option to account for the stimulation pulse width. For off-time measurements
 #' the default value is 0. `tp` has the same unit as the measurement data, e.g., µs. Please set this parameter
@@ -203,6 +204,7 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
   ##pretreat some of the ... settings to avoid
   ## expand all arguments
+  arg_list <- NULL
   if(!is.null(arg_names)){
     arg_list <- lapply(arg_names , function(x){
       unlist(rep(list(...)[[x]], length.out = length(object)))
@@ -218,9 +220,6 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
       args
 
     })
-  } else{
-    arg_list <- NULL
-
   }
 
   ##run function
@@ -245,9 +244,7 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
      }else{
        return(temp)
-
      }
-
   })
 
   ##combine results and return
@@ -264,8 +261,8 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 # Input integrity tests ------------------------------------------------------------------
   if(inherits(object, "RLum.Data.Curve")){
    if(!grepl(pattern = "POSL", x = object@recordType, fixed = TRUE))
-     stop(paste0("[fit_OSLLifeTime()] recordType ",object@recordType, " not supported for input object!"),
-          call. = FALSE)
+     .throw_error("recordType ", object@recordType,
+                  " not supported for input object")
 
     df <- as.data.frame(object@data)
 
@@ -276,8 +273,8 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
     df <- as.data.frame(object[,1:2])
 
   }else{
-    try(stop(paste0("[fit_OSLLifeTime()] Class '",class(object), "' not supported as input, NULL returned!"),
-             call. = FALSE))
+    message("[fit_OSLLifeTime()] Error: Class '", class(object),
+            "' not supported as input, NULL returned!")
     return(NULL)
 
   }
@@ -285,25 +282,17 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
   ##remove NA values, whatever it is worth for
   if(any(is.na(df))){
     df <- na.exclude(df)
-    warning("[fit_OSLLifeTimes()] NA values detected and removed from dataset.",call. = TRUE)
-
+    .throw_warning("NA values detected and removed from dataset")
   }
 
   ##rename columns for data.frame
   colnames(df) <- c("x","y")
 
-  ##make sure that we have a minimum of data points available
-  if(nrow(df) < 5){
-    try(stop("[fit_OSLLifeTimes()] Your input dataset has less than 5 data points. NULL returned!", call. = FALSE))
-    return(NULL)
-
-  }
-
   #check for 0 data in dataset ... we opt for hard stop
   if(any(df[[2]] == 0)){
-    warning("[fit_OSLLifeTimes()] Your dataset contains 0. A value of 0.1 has been added to your count values!",call. = TRUE)
+    .throw_warning("The dataset contains 0, a value of 0.1 ",
+                   "has been added to your count values")
     df[[2]] <- df[[2]] + 0.1
-
   }
 
   ##save original data for later
@@ -311,29 +300,49 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
   ##signal_range
   if(!is.null(signal_range)){
-    if(!inherits(signal_range, "numeric"))
-      stop("[fit_OSLLifeTimes()] Argument 'signal_range' must by of type numeric!", call. = FALSE)
+    if (!is.numeric(signal_range))
+      .throw_error("'signal_range' must be of type numeric")
 
     ##check lengths
     if(length(signal_range) == 1)
       signal_range <- c(signal_range, nrow(df))
 
     if(length(signal_range) > 2)
-      warning("[fit_OSLLifeTimes()] 'signal_range' has more than two elements, take only the first two!", call. = FALSE)
+      .throw_warning("'signal_range' has more than 2 elements, ",
+                     "only the first 2 will be used")
 
     if(signal_range[2] > nrow(df)){
-      warning("[fit_OSLLifeTimes()] 'signal_range' > number of channels, reset to maximum!", call. = FALSE)
+      .throw_warning("'signal_range' > number of channels, reset to maximum")
       signal_range[2] <- nrow(df)
     }
 
     if(signal_range[1] > signal_range[2]){
-      warning("[fit_OSLLifeTimes()] 'signal_range' first element > last element, reset to default", call. = FALSE)
+      .throw_warning("'signal_range' first element > last element, reset to default")
       signal_range <- c(1, nrow(df))
     }
 
     ##set range
     df <- df[signal_range[1]:signal_range[2],]
 
+  }
+
+  ## number of components requested
+  .validate_positive_scalar(n.components, int = TRUE, null.ok = TRUE)
+  if (is.null(n.components)){
+    m <- 1
+  } else{
+    m <- n.components
+  }
+
+  ## ensure that we have a minimum of data points available: the minimum
+  ## is computed so that the degrees of freedom for the F distribution is
+  ## positive (see `qf()` in the `while` loop further down at (B))
+  min.num.signals <- 2 * m + 2 + 1
+  if (nrow(df) < min.num.signals) {
+    message("[fit_OSLLifeTimes()] Error: For ", m, " components ",
+            "the dataset must have at least ", min.num.signals,
+            " signal points, NULL returned")
+    return(NULL)
   }
 
 
@@ -361,7 +370,7 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
   ##
   ##(1) >> set fitting function for minpack.lm
   x <- 0 #cheat R check routine
-  fit_forumla <- function(n.components, tp){
+  fit_formula <- function(n.components, tp) {
     A <- paste0("A.",1:n.components)
     tau <- paste0("tau.",1:n.components)
     as.formula(paste0("y ~ ", paste(A," * exp(- x/(",tau," + ", tp, "))", collapse = " + ")))
@@ -401,18 +410,11 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
   }
   ##
   ##
-  ##(3) initialse objects
+  ##(3) initialise objects
   chi_squared <- c(NA, NA)
   F <- c(Inf, Inf)
   start <- NULL
 
-  if(is.null(n.components)){
-    m <- 1
-
-  }else{
-    m <- n.components
-
-  }
   ##
   ##
   ##(4) set seed
@@ -505,7 +507,6 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
         start_parameters <- start$optim$bestmem
         break()
-
       }
 
       ##update objects
@@ -519,7 +520,7 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
     ##
     ##reduce m by 2, why 2?
     ##  - the last component violated the F statistic, so was obviously not the best call
-    ##  - the loop adds everytime another component
+    ##  - the loop adds every time another component
     if(is.null(n.components)){
       ##this covers the extrem case that the process stops after the first run
       if(m == 2){
@@ -552,7 +553,7 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
     ##run fitting using the Levenberg-Marquardt algorithm
     fit <- try(minpack.lm::nlsLM(
-      formula = fit_forumla(n.components = m, tp = tp),
+      formula = fit_formula(n.components = m, tp = tp),
       data = df,
       start = c(A, tau),
       upper = if(method_control_setting$nlsLM.upper){
@@ -577,6 +578,10 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
 # Post-processing -----------------------------------------------------------------------------
 
+  A <- NA
+  tau <- NA
+  summary_matrix <- NA
+  D <- NA
   if (!inherits(fit, 'try-error')) {
     ##extract coefficients
     A <- coef(fit)[1:(m)]
@@ -593,7 +598,8 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
     ##return warning if one parameter is negative, this can happen if the user let the boundaries
     ##free float
     if(any(summary_matrix[,1]<0))
-      warning("[fit_OSLLifeTimes()] At least one parameter is negative. Please carefully check your results!", call. = FALSE)
+      .throw_warning("At least one parameter is negative, ",
+                     "please check carefully your results")
 
     ##order matrix by tau, but keep the rownames
     temp_rownames <- rownames(summary_matrix)
@@ -605,15 +611,8 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
     R <- residuals(fit)
     D <- round(sum((R - c(0,R[-length(R)]))^2) / sum(R^2),2)
     rm(R)
-
-
-  }else{
+  } else {
     m <- 1
-    A <- NA
-    tau <- NA
-    summary_matrix <- NA
-    D <- NA
-
   }
 
 # Terminal output -----------------------------------------------------------------------------
@@ -626,8 +625,8 @@ if(verbose){
     cat("-------------------------------------------------------------------------\n")
 
   }else{
-    try(stop("[fit_OSLLifeTimes()] The fitting was not sucessful, consider to try again!", call. = FALSE))
-
+    message("[fit_OSLLifeTimes()] Error: The fitting was not successful, ",
+            "consider trying again")
   }
 
   cat("\n(3) Further information\n")
@@ -635,12 +634,9 @@ if(verbose){
   cat("Photon count sum: ", sum(df[[2]]),"\n")
   cat("Durbin-Watson residual statistic: ", D,"")
 
+  string <- NA
   if(!is.na(D)){
     string <- c("\u005b",rep(" ",(D * 10)/4),"\u003c\u003e",rep(" ",10 - (D * 10)/4),"\u005d\n")
-
-  }else{
-    string <- NA
-
   }
   cat(paste(string, collapse = ""))
   cat("\n")
@@ -672,19 +668,18 @@ if(plot) {
     if(grepl(pattern = "x", plot_settings$log, fixed = TRUE)){
       if(plot_settings$xlim[1] == 0){
         plot_settings$xlim[1] <- if(min(df_raw[[1]]) == 0) 1e-04 else min(df_raw[[1]])
-        warning(paste0("[fit_OSLLifeTime()] log-scale requires x-values > 0, set min xlim to ",
-                       round(plot_settings$xlim[1],4), "!"), immediate. = TRUE, call. = FALSE)
+        .throw_warning("log-scale requires x-values > 0, set min xlim to ",
+                       round(plot_settings$xlim[1], 4))
       }
     }
 
     if(grepl(pattern = "y", plot_settings$log, fixed = TRUE)){
       if(plot_settings$ylim[1] == 0){
         plot_settings$ylim[1] <- if(min(df_raw[[2]]) == 0) 1e-04 else min(df_raw[[2]])
-        warning(paste0("[fit_OSLLifeTime()] log-scale requires y-values > 0, set min ylim to ",
-                       round(plot_settings$ylim[1],4), "!"), immediate. = TRUE, call. = FALSE)
+        .throw_warning("log-scale requires y-values > 0, set min ylim to ",
+                       round(plot_settings$ylim[1], 4))
       }
     }
-
 
   ##plot if the fitting was a success
   if (!inherits(fit, 'try-error')) {
@@ -780,7 +775,6 @@ if(plot) {
         ylim = plot_settings$ylim,
         log = plot_settings$log
       )
-
   }
 
 }#if plot
@@ -802,5 +796,4 @@ if(plot) {
       )
     )
   )
-
 }

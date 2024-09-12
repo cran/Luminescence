@@ -50,7 +50,7 @@ calculation (e.g. 2nd or 3rd value).
 \strong{Basic steps of the approach}
 \enumerate{
 \item Estimate natural relative variation of the sample using a dose recovery test
-\item Sort the input values ascendantly
+\item Sort the input values in ascending order
 \item Calculate a running mean, starting with the lowermost two values and add values iteratively.
 \item Stop if the calculated \code{c[v]} exceeds the specified \code{cvThreshold}
 }
@@ -73,7 +73,7 @@ temp<- calc_FuchsLang2001(ExampleData.DeValues$BT998, cvThreshold = 5)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2024. calc_FuchsLang2001(): Apply the model after Fuchs & Lang (2001) to a given De distribution.. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., Burow, C., 2024. calc_FuchsLang2001(): Apply the model after Fuchs & Lang (2001) to a given De distribution.. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

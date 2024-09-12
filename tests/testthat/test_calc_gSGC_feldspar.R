@@ -1,6 +1,5 @@
 test_that("test errors", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##crash function
   ##no data.frame
@@ -27,6 +26,16 @@ test_that("test errors", {
     "\\[calc_gSGC_feldspar\\(\\)\\] 'gSGC.type' needs to be one of the accepted values"
   )
 
+  ## incorrect number of columns
+  expect_error(
+    calc_gSGC_feldspar(
+      data = data.frame(a  = 1, b = 1, c = 1, d = 1),
+      gSGC.type = "50LxTx",
+      plot = FALSE
+    ),
+    "Structure of 'data' does not fit the expectations"
+  )
+
  ##finally run with plot output
  #test on a generated random sample
  set.seed(1234)
@@ -44,8 +53,9 @@ test_that("test errors", {
     plot = TRUE),
     "RLum.Results")
 
-  ##test own curve parameters
-  results <- expect_s4_class(calc_gSGC_feldspar(
+  ## test own curve parameters
+  SW({
+  expect_message(results <- calc_gSGC_feldspar(
     data = data,
     gSGC.parameters = data.frame(
       y1 = 0.6,
@@ -57,10 +67,11 @@ test_that("test errors", {
       y0 = 0.001,
       y0_err = 0.0001
     )),
-    "RLum.Results")
+    "No solution found for dataset")
+  })
 
   ##regression tests
+  expect_s4_class(results, "RLum.Results")
   expect_true(all(is.na(unlist(results$m.MC))))
 
 })
-

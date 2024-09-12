@@ -109,7 +109,8 @@
 #' `plot.single = c(3,4)` draws only the last two plots
 #'
 #' @param ... (*optional*) further arguments that can be passed to internally used functions. Supported arguments:
-#' `xlab`, `log`, `mtext` and `xlim` for the two first curve plots, and `ylim` for the fading
+#' `xlab`, `log`, `mtext`, `plot.trend` (enable/disable trend blue line), and `xlim` for the
+#' two first curve plots, and `ylim` for the fading
 #' curve plot. For further plot customization please use the numerical output of the functions for
 #' own plots.
 #'
@@ -134,7 +135,7 @@
 #' `call` \tab `call` \tab the original function call\cr
 #' }
 #'
-#' @section Function version: 0.1.21
+#' @section Function version: 0.1.22
 #'
 #' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
 #' Christoph Burow, University of Cologne (Germany)
@@ -209,11 +210,8 @@ analyse_FadingMeasurement <- function(
 
       ##check whether this is empty now
       if(length(object) == 0)
-      stop(
-        "[analyse_FadingMeasurement()] 'object' expects an 'RLum.Analysis' object or a
-        'list' of such objects!", call. = FALSE
-      )
-
+        .throw_error("'object' must be an 'RLum.Analysis' object ",
+                     "or a 'list' of such objects")
     }
 
   } else if (inherits(object, "RLum.Analysis")) {
@@ -221,7 +219,8 @@ analyse_FadingMeasurement <- function(
 
   } else if(inherits(object,"data.frame")){
     if (ncol(object) %% 3 != 0) {
-      stop("[analyse_FadingMeasurement()] 'object': if you provide a data.frame as input, the number of columns must be a multiple of 3.")
+      .throw_error("'object': if you provide a data.frame as input, ",
+                   "the number of columns must be a multiple of 3.")
     } else {
       object <- do.call(rbind,
                         lapply(seq(1, ncol(object), 3), function(col) {
@@ -239,19 +238,17 @@ analyse_FadingMeasurement <- function(
 
 
   }else{
-    stop(
-      "[analyse_FadingMeasurement()] 'object' needs to be of type 'RLum.Analysis' or a 'list' of such objects!",
-      call. = FALSE
-    )
-
+    .throw_error("'object' must be an 'RLum.Analysis' object ",
+                 "or a 'list' of such objects")
   }
 
 
   # Prepare data --------------------------------------------------------------------------------
   if(!is.null(object)){
-    ##support read_XSYG2R()
-    if(length(unique(unlist(lapply(object, slot, name = "originator")))) == 1 &&
-       unique(unlist(lapply(object, slot, name = "originator"))) == "read_XSYG2R"){
+    originators <- unique(unlist(lapply(object, slot, name = "originator")))
+
+    ## support read_XSYG2R()
+    if (length(originators) == 1 && originators == "read_XSYG2R") {
 
       ## extract irradiation times
       irradiation_times <- extract_IrradiationTimes(object)
@@ -268,7 +265,6 @@ analyse_FadingMeasurement <- function(
           x@data$irr.times[["IRR_TIME"]][!grepl(pattern = "irradiation",
                                            x = x@data$irr.times[["STEP"]],
                                            fixed = TRUE)]
-
       }))
 
 
@@ -276,8 +272,8 @@ analyse_FadingMeasurement <- function(
       object_clean <- unlist(get_RLum(object, curveType = "measured"))
 
       ##support read_BIN2R()
-    }else if (length(unique(unlist(lapply(object, slot, name = "originator")))) == 1 &&
-              unique(unlist(lapply(object, slot, name = "originator"))) %in% c("read_BIN2R","Risoe.BINfileData2RLum.Analysis")){
+    } else if (length(originators) == 1 &&
+               originators %in% c("read_BIN2R", "Risoe.BINfileData2RLum.Analysis")) {
 
       ##assign object, unlist and drop it
       object_clean <- unlist(get_RLum(object))
@@ -312,10 +308,7 @@ analyse_FadingMeasurement <- function(
         }
 
         ##return warning
-        warning(
-          paste0("[analyse_FadingMeasurement()] ",
-                 rm_records, " records 'time since irradiation' value removed from the dataset!"),
-                call. = FALSE)
+        .throw_warning(rm_records, " records 'time since irradiation' value removed from the dataset")
         rm(rm_records)
 
       }
@@ -328,9 +321,8 @@ analyse_FadingMeasurement <- function(
 
       ##not support
     }else{
-      try(stop("[analyse_FadingMeasurement()] Unknown or unsupported originator!", call. = FALSE))
+      message("[analyse_FadingMeasurement()] Error: Unknown or unsupported originator")
       return(NULL)
-
     }
 
     ##correct irradiation time for t_star
@@ -362,8 +354,7 @@ analyse_FadingMeasurement <- function(
         t_star <- t1
 
       }else{
-        stop("[analyse_FadingMeasurement()] Invalid input for t_star.", call. = FALSE)
-
+        .throw_error("Invalid input for t_star.")
       }
     }
 
@@ -386,13 +377,20 @@ analyse_FadingMeasurement <- function(
       Tx_data <- NULL
 
     }else{
-      try(stop("[analyse_FadingMeasurement()] I have no idea what your structure means!", call. = FALSE))
+      message("[analyse_FadingMeasurement()] Error: I have no idea what your structure means")
       return(NULL)
-
     }
 
     ##calculate Lx/Tx table
+    len.Tx <- length(Tx_data)
     LxTx_table <- merge_RLum(.warningCatcher(lapply(1:length(Lx_data), function(x) {
+      ## we operate only up to the shortest common length to avoid indexing
+      ## into Tx_data with an invalid index
+      if (len.Tx > 0 && x > len.Tx) {
+        .throw_warning("Lx and Tx have different sizes: skipped sample ", x,
+                       ", NULL returned")
+        return(NULL)
+      }
       calc_OSLLxTxRatio(
         Lx.data = Lx_data[[x]],
         Tx.data = Tx_data[[x]],
@@ -414,7 +412,6 @@ analyse_FadingMeasurement <- function(
           list(...)$background.count.distribution
         }
       )
-
     })))$LxTx.table
 
   }
@@ -468,7 +465,7 @@ analyse_FadingMeasurement <- function(
 
 
   # Fitting -------------------------------------------------------------------------------------
-  ##prevent that n.MC can became smaller than 2
+  ## prevent that n.MC can become smaller than 2
   n.MC <- max(c(n.MC[1],2))
 
   ##we need to fit the data to get the g_value
@@ -560,12 +557,9 @@ analyse_FadingMeasurement <- function(
 
   ##calculate final g_value
   ##the 2nd term corrects for the (potential) offset from one
-  if(inherits(fit, "try-error")){
-    g_value_fit <- NA
-
-  }else{
+  g_value_fit <- NA
+  if (!inherits(fit, "try-error")) {
     g_value_fit <- -fit$coefficient[2] * 1 / fit$coefficient[1] * 100
-
   }
 
   ##construct output data.frame
@@ -594,23 +588,23 @@ analyse_FadingMeasurement <- function(
                                xout = 0.5), silent = TRUE)
 
   if(inherits(T_0.5.interpolated, 'try-error')){
-    T_0.5.predict <- NULL
-    T_0.5.interpolated <- NULL
-
+    T_0.5 <- data.frame(
+        T_0.5_INTERPOLATED = NA,
+        T_0.5_PREDICTED = NA,
+        T_0.5_PREDICTED.LOWER = NA,
+        T_0.5_PREDICTED.UPPER = NA
+    )
   }else{
     T_0.5.predict <- stats::predict.lm(fit_predict,newdata = data.frame(x = 0.5),
                                        interval = "predict")
-
+    T_0.5 <- data.frame(
+        T_0.5_INTERPOLATED = T_0.5.interpolated$y,
+        T_0.5_PREDICTED = (10 ^ T_0.5.predict[, 1]) * tc,
+        T_0.5_PREDICTED.LOWER = (10 ^ T_0.5.predict[, 2]) * tc,
+        T_0.5_PREDICTED.UPPER = (10 ^ T_0.5.predict[, 2]) * tc
+    )
   }
 
-
-  T_0.5 <- data.frame(
-    T_0.5_INTERPOLATED = T_0.5.interpolated$y,
-    T_0.5_PREDICTED =  (10^T_0.5.predict[,1])*tc,
-    T_0.5_PREDICTED.LOWER =  (10^T_0.5.predict[,2])*tc,
-    T_0.5_PREDICTED.UPPER =  (10^T_0.5.predict[,2])*tc
-
-  )
 
   # Plotting ------------------------------------------------------------------------------------
   if(plot) {
@@ -630,7 +624,8 @@ analyse_FadingMeasurement <- function(
       ylim = NULL,
       xlim = NULL,
       log = "",
-      mtext = ""
+      mtext = "",
+      plot.trend = TRUE
 
     )
 
@@ -694,7 +689,7 @@ analyse_FadingMeasurement <- function(
             xlab = plot_settings$xlab,
             log = plot_settings$log,
             legend.pos = "outside",
-            main = expression(paste(T[x], " - curves")),
+            main = bquote(expression(paste(T[x], " - curves"))),
             mtext = plot_settings$mtext
           )
 
@@ -722,10 +717,7 @@ analyse_FadingMeasurement <- function(
               lty = 2,
               col = "red"
             )
-
           }
-
-
         }
 
       } else{
@@ -928,14 +920,17 @@ analyse_FadingMeasurement <- function(
         )
 
         ##add power law curve
-        curve(
-          x ^ 3 * fit_power$coefficient[2] + x ^ 2 * fit_power$coefficient[3] + x * fit_power$coefficient[4] + fit_power$coefficient[1],
-          add = TRUE,
-          col = "blue",
-          lty = 2
-        )
+        if(plot_settings$plot.trend) {
+          curve(
+            x ^ 3 * fit_power$coefficient[2] + x ^ 2 * fit_power$coefficient[3] + x
+            * fit_power$coefficient[4] + fit_power$coefficient[1],
+            add = TRUE,
+            col = "blue",
+            lty = 2
+          )
+        }
 
-        ##addpoints
+        ##add points
         points(x = LxTx_table[["TIMESINCEIRR_NORM.LOG"]],
                y = LxTx_table[["LxTx_NORM"]],
                pch = 21,
@@ -954,9 +949,9 @@ analyse_FadingMeasurement <- function(
         ##add legend
         legend(
           "bottom",
-          legend = c("fit", "fit MC", "trend"),
-          col = c("red", "grey", "blue"),
-          lty = c(1, 1, 2),
+          legend = c("fit", "fit MC", if(plot_settings$plot.trend) "trend" else NULL),
+          col = c("red", "grey", if(plot_settings$plot.trend) "blue" else NULL),
+          lty = c(1, 1, if(plot_settings$plot.trend) 2 else NULL),
           bty = "n",
           horiz = TRUE
         )

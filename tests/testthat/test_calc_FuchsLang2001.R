@@ -1,6 +1,5 @@
 test_that("check class and length of output", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##load example data
   data(ExampleData.DeValues, envir = environment())
@@ -30,7 +29,15 @@ test_that("check class and length of output", {
   expect_equal(get_RLum(temp)$de_weighted_err, 20.58)
   expect_equal(get_RLum(temp)$n.usedDeValues, 22)
 
+  ## using an RLum.Results object as input
+  SW({
+  expect_s4_class(calc_FuchsLang2001(data = temp, startDeValue = 24,
+                                     plot = FALSE),
+                  "RLum.Results")
+  })
+
   ##the check output
+  SW({
   output <- expect_s4_class(
     calc_FuchsLang2001(
       data = ExampleData.DeValues$BT998,
@@ -39,6 +46,5 @@ test_that("check class and length of output", {
       verbose = TRUE
 
     ), "RLum.Results")
-
+  })
 })
-

@@ -131,23 +131,17 @@ plot_Histogram <- function(
 
   # Integrity tests ---------------------------------------------------------
   ## check/adjust input data structure
-  if(is(data, "RLum.Results") == FALSE &
-     is(data, "data.frame") == FALSE) {
-
-    stop(paste("[plot_Histogram()] Input data format is neither",
-               "'data.frame' nor 'RLum.Results'"))
-  } else {
-
-    if(is(data, "RLum.Results")) {
-      data <- get_RLum(data)[,1:2]
-    }
+  if (!is(data, "RLum.Results") && !is.data.frame(data)) {
+    .throw_error("Input data format is neither 'data.frame' nor 'RLum.Results'")
+  }
+  if (is(data, "RLum.Results")) {
+    data <- get_RLum(data)[,1:2]
   }
 
   ## handle error-free data sets
   if(length(data) < 2) {
     data <- cbind(data, rep(NA, length(data)))
   }
-
 
   ## Set general parameters ---------------------------------------------------
   ## Check/set default parameters
@@ -188,7 +182,7 @@ plot_Histogram <- function(
 
   ## define fun
   if("fun" %in% names(extraArgs)) {
-    fun <- extraArgs$fun
+    fun <- extraArgs$fun # nocov
   } else {
     fun <- FALSE
   }
@@ -244,6 +238,9 @@ plot_Histogram <- function(
 
   if("ylim" %in% names(extraArgs)) {
     ylim.plot <- extraArgs$ylim
+    if (length(ylim.plot) < 4) {
+      .throw_error("'ylim' must be a vector of length 4")
+    }
   } else {
     H.lim <- hist(data[,1],
                   breaks = breaks.plot,
@@ -348,6 +345,8 @@ plot_Histogram <- function(
     De.stats[i,18] <- statistics$weighted$se.rel
 
     ##kdemax - here a little doubled as it appears below again
+    De.denisty <- NA
+    De.stats[i,6] <- NA
     if(nrow(data) >= 2){
       De.density <-density(x = data[,1],
                            kernel = "gaussian",
@@ -355,13 +354,7 @@ plot_Histogram <- function(
                            to = xlim.plot[2])
 
       De.stats[i,6] <- De.density$x[which.max(De.density$y)]
-
-    }else{
-      De.denisty <- NA
-      De.stats[i,6] <- NA
-
     }
-
   }
 
   label.text = list(NA)
@@ -625,7 +618,7 @@ plot_Histogram <- function(
   } else if(summary.pos[1] == "topright") {
     summary.pos <- c(xlim.plot[2], ylim.plot[2])
     summary.adj <- c(1, 1)
-  }  else if(summary.pos[1] == "left") {
+  } else if(summary.pos[1] == "left") {
     summary.pos <- c(xlim.plot[1], mean(ylim.plot[1:2]))
     summary.adj <- c(0, 0.5)
   } else if(summary.pos[1] == "center") {
@@ -705,16 +698,17 @@ plot_Histogram <- function(
         cex = 0.8 * cex.global)
 
   ## FUN by R Luminescence Team
-  if(fun & !interactive)
-    sTeve()
+  if (fun && !interactive) sTeve() # nocov
 
   ## Optionally: Interactive Plot ----------------------------------------------
   if (interactive) {
 
     if (!requireNamespace("plotly", quietly = TRUE))
+      # nocov start
       stop("The interactive histogram requires the 'plotly' package. To install",
            " this package run 'install.packages('plotly')' in your R console.",
            call. = FALSE)
+      # nocov end
 
     ## tidy data ----
     data <- as.data.frame(data)
@@ -723,15 +717,14 @@ plot_Histogram <- function(
     if (length(grep("paste", as.character(xlab.plot))) > 0)
       xlab.plot <- "Equivalent dose [Gy]"
 
-
     ## create plots ----
 
     # histogram
-    hist <- plotly::plot_ly(data = data, x = x,
+    hist <- plotly::plot_ly(data = data, x = ~x,
                             type = "histogram",
                             showlegend = FALSE,
                             name = "Bin", opacity = 0.75,
-                            marker = list(color = "428BCA",
+                            marker = list(color = "#428BCA",
                                           line = list(width = 1.0,
                                                       color = "white")),
                             histnorm = ifelse(normal_curve, "probability density", ""),
@@ -744,12 +737,12 @@ plot_Histogram <- function(
       density.curve <- density(data$x)
       normal.curve <- data.frame(x = density.curve$x, y = density.curve$y)
 
-      hist <- plotly::add_trace(hist, data = normal.curve, x = x, y = y,
+      hist <- plotly::add_trace(hist, data = normal.curve, x = ~x, y = ~y,
+                                inherit = FALSE,
                                 type = "scatter", mode = "lines",
-                                marker = list(color = "red"),
+                                line = list(color = "red"),
                                 name = "Normal curve",
                                 yaxis = "y")
-
     }
 
     # scatter plot of individual errors
@@ -761,14 +754,15 @@ plot_Histogram <- function(
       se.text <- paste0("Measured value:</br>",
                         data$x, " &plusmn; ", data$y,"</br>")
 
-      hist <- plotly::add_trace(hist, data = data, x = x, y = y,
+      hist <- plotly::add_trace(hist, data = data, x = ~x, y = ~y,
+                                inherit = FALSE,
                                 type = "scatter", mode = "markers",
                                 name = "Error", hoverinfo = "text",
                                 text = se.text,
                                 marker = list(color = "black"),
                                 yaxis = "y2")
 
-      hist <- plotly::layout(yaxis2 = yaxis2)
+      hist <- plotly::layout(hist, yaxis2 = yaxis2)
     }
 
     # set layout ----
@@ -787,5 +781,4 @@ plot_Histogram <- function(
     print(hist)
     return(hist)
   }
-
 }

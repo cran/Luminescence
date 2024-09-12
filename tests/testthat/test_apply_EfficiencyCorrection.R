@@ -1,6 +1,5 @@
 test_that("check function", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   ##load data
   data(ExampleData.XSYG, envir = environment())
@@ -37,10 +36,14 @@ test_that("check function", {
     apply_EfficiencyCorrection(set_RLum("RLum.Analysis",
                                         records = list(TL.Spectrum)), spectral.efficiency = eff_data),
     "RLum.Analysis")
+  expect_warning(
+      apply_EfficiencyCorrection(set_RLum("RLum.Analysis",
+                                          records = list(TL.Spectrum, "test")),
+                                 spectral.efficiency = eff_data),
+      regexp = "Skipping character object in input list.")
 
   ##run test with everything combined
   input <- list(a = "test", TL.Spectrum,set_RLum("RLum.Analysis", records = list(TL.Spectrum)))
   expect_warning(apply_EfficiencyCorrection(input, eff_data), "Skipping character object in input list")
 
 })
-

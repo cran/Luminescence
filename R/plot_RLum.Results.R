@@ -65,7 +65,7 @@ plot_RLum.Results<- function(
 
   ##check if object is of class RLum.Data.Curve
   if(!is(object,"RLum.Results")){
-    stop("[plot_RLum.Results()] Input object is not of type 'RLum.Results'")
+    .throw_error("Input object is not of type 'RLum.Results'")
   }
 
   ##============================================================================##
@@ -162,7 +162,8 @@ plot_RLum.Results<- function(
         }
 
       }, error = function(e)  {
-        message(paste("Unable to plot the Likelihood profile for:", i, "(Likelihood probably infinite)"))
+        message("Unable to plot the likelihood profile for: ", i,
+                " (likelihood probably infinite)")
       })
     }
     par(mfrow=c(1,1))
@@ -362,7 +363,7 @@ plot_RLum.Results<- function(
       polygon(x, y, col = "grey80", border = NA)
 
       if (all(x > max(xlim)) || all(x < min(xlim)))
-        warning("Bootstrap estimates out of x-axis range.", call. = FALSE)
+        .throw_warning("Bootstrap estimates out of x-axis range")
 
 
       ### ----- PLOT MAM SINGLE ESTIMATE
@@ -373,7 +374,7 @@ plot_RLum.Results<- function(
 
 
       if (any(is.na(c(mean, sd)))) {
-        warning("Unable to plot the MAM single estimate (NA value).", call. = FALSE)
+        .throw_warning("Unable to plot the MAM single estimate (NA value)")
 
       } else {
 
@@ -687,15 +688,15 @@ plot_RLum.Results<- function(
         sapply.storage<- list()
 
         ## NORMAL DISTR. OF EACH COMPONENT
-        options(warn=-1) #suppress warnings for NA values
 
         # LOOP - iterate over number of components
         for(j in 1:max(n.components)) {
           # draw random values of the ND to check for NA values
+          suppressWarnings(
           comp.nd.n<- sort(rnorm(n = length(object@data$data[,1]),
                                  mean = comp.n[pos.n[j],i],
                                  sd = comp.n[pos.n[j]+1,i]))
-
+          )
           # proceed if no NA values occurred
           if(length(comp.nd.n)!=0) {
 
@@ -731,10 +732,11 @@ plot_RLum.Results<- function(
               for(b in 1:max(n.components)){
 
                 # draw random values of the ND to check for NA values
+                suppressWarnings(
                 comp.nd.n<- sort(rnorm(n = length(object@data$data[,1]),
                                        mean = comp.n[pos.n[b],i],
                                        sd = comp.n[pos.n[b]+1,i]))
-
+                )
                 # proceed if no NA values occurred
                 if(length(comp.nd.n)!=0) {
 
@@ -790,9 +792,6 @@ plot_RLum.Results<- function(
 
           }
         }##EndOf::Component loop
-
-        #turn warnings on again
-        options(warn=0)
 
         # Add sum of Gaussian curve
         par(new = TRUE)
@@ -893,7 +892,6 @@ plot_RLum.Results<- function(
         # add subtitle
         mtext("Proportion of components",
               side = 3, font = 2, line = 0, adj = 0, cex = 0.8)
-
       }
       ##--------------------------------------------------------------------------
       ## PLOT 3: BIC & LLIK
@@ -1039,9 +1037,7 @@ plot_RLum.Results<- function(
     ##reduce the size for plotting, more than 100 points makes no sense
     if(nrow(df)>100) {
       df <- df[seq(1,nrow(df), length = 100),]
-
     }
-
 
     ##plot settings
     plot.settings <- list(
@@ -1099,7 +1095,6 @@ plot_RLum.Results<- function(
 
     if(!is.null(plot.settings$grid)){
       grid(eval(plot.settings$grid))
-
     }
 
   }#EndOf::Case 6 - calc_SourceDoseRate()

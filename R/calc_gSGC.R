@@ -10,7 +10,7 @@
 #'
 #' @param data [data.frame] (**required**):
 #' input data of providing the following columns: `LnTn`, `LnTn.error`, `Lr1Tr1`, `Lr1Tr1.error`, `Dr1`
-#' **Note:** column names are not required. The function expect the input data in the given order
+#' **Note:** column names are not required. The function expects the input data in the given order
 #'
 #' @param gSGC.type [character] (*with default*):
 #' define the function parameters that
@@ -88,11 +88,12 @@ calc_gSGC<- function(
 ##CHECK INPUT DATA
 ##============================================================================##
 
-  if(!is(data, "data.frame")) stop("[calc_gSGC()] 'data' needs to be of type data.frame.", call. = FALSE)
-  if(!is(gSGC.type, "character")) stop("[calc_gSGC()] 'gSGC.type' needs to be of type character.", call. = FALSE)
-
-  ##check length of input data
-  if(ncol(data) != 5) stop("[calc_gSGC()] Structure of 'data' does not fit the expectations.", call. = FALSE)
+  if (!is.data.frame(data))
+    .throw_error("'data' must be a data.frame")
+  if (ncol(data) != 5)
+    .throw_error("'data' is expected to have 5 columns")
+  if (!is.character(gSGC.type))
+    .throw_error("'gSGC.type' must be of type 'character'")
 
   ##rename columns for consistency reasons
   colnames(data) <- c('LnTn', 'LnTn.error', 'Lr1Tr1', 'Lr1Tr1.error', 'Dr1')
@@ -146,10 +147,8 @@ calc_gSGC<- function(
         range <- c(0.1,250)
 
       }else{
-        stop("[calc_gSGC()] Unknown input for 'gSGC.type'", call. = FALSE)
-
+        .throw_error("Unknown 'gSGC.type'")
       }
-
     }
 
     ##Define size of output objects
@@ -249,7 +248,7 @@ for(i in 1:nrow(data)){
       De.error <- sd(temp.MC.matrix[,7])
 
   }else{
-    warning("No solution was found!", call. = FALSE)
+    .throw_warning("No solution was found")
     De <- NA
     Eta <- NA
     De.error <- NA
@@ -263,8 +262,6 @@ for(i in 1:nrow(data)){
       mean = c(LnTn, Lr1Tr1, A, D0, c, Y0),
       sd = c(LnTn.error, Lr1Tr1.error, A.error, D0.error, c.error, Y0.error)
     ), ncol = 6, byrow = TRUE)
-
-
   }
 
 
@@ -305,14 +302,12 @@ for(i in 1:nrow(data)){
 
     if(!is.null(plot.settings$grid)){
       graphics::grid(eval(plot.settings$grid))
-
     }
 
     if(!inherits(temp, "try-error")){
 
       if(temp$root < 450 & temp$root > 0){
         points(temp$root,Eta*LnTn, col = plot.settings$col, pch = plot.settings$pch)
-
         segments(De - De.error,Eta * LnTn,
                  De + De.error,Eta * LnTn)
 
@@ -337,7 +332,6 @@ for(i in 1:nrow(data)){
             arr.type = "triangle",
             col = "red"
           )
-
         }else{
 
             shape::Arrows(
@@ -348,22 +342,14 @@ for(i in 1:nrow(data)){
               arr.type = "triangle",
               col = "red"
             )
-
-
         }
 
         mtext(side = 1, text = "Out of bounds!", col = "red")
-
-
       }
-
 
     }else{
       mtext(side = 1, text = "No solution found!", col = "red")
-
     }
-
-
   }
 
 
@@ -380,7 +366,6 @@ for(i in 1:nrow(data)){
       cat(paste0(" ------------------------------ \n"))
       cat(paste0(" De:\t\t",round(De,digits = 2)," \u00B1 ",round(De.error,digits = 2),"\n"))
       cat(paste0(" ------------------------------ \n"))
-
     }
 
 
@@ -402,24 +387,21 @@ for(i in 1:nrow(data)){
 
     ##matrix - to prevent memory overload limit output
     if(n.MC * nrow(data) > 1e6){
+      # nocov start
       if(i == 1){
         output.De.MC[[i]] <- temp.MC.matrix
-
       }else{
         output.De.MC[[i]] <- NA
-
       }
 
-      warning("Only the first MC matrix is returned to prevent memory overload!", call. = FALSE)
-
+      .throw_warning("Only the first MC matrix is returned to prevent ",
+                     "memory overload")
+      # nocov end
     }else{
       output.De.MC[[i]] <- temp.MC.matrix
-
     }
 
-
     output.uniroot[[i]] <- temp
-
 
 }##end for loop
 

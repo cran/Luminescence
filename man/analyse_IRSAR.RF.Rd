@@ -64,7 +64,7 @@ error estimation (\code{method = "SLIDE"}). This value can be set to \code{NULL}
 MC runs. Note: Large values will significantly increase the computation time}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables \code{TRUE} or disables \code{FALSE} the progression bar during MC runs}
+enables \code{TRUE} or disables \code{FALSE} the progress bar during MC runs}
 
 \item{plot}{\link{logical} (\emph{with default}):
 plot output (\code{TRUE} or \code{FALSE})}
@@ -228,7 +228,7 @@ changed with \code{method.control}.
 \strong{\code{method.control}}
 
 To keep the generic argument list as clear as possible, arguments to control the methods
-for De estimation are all pre set with meaningful default parameters and can be
+for De estimation are all preset with meaningful default parameters and can be
 handled using the argument \code{method.control} only, e.g.,
 \code{method.control = list(trace = TRUE)}. Supported arguments are:
 
@@ -362,7 +362,7 @@ results <- analyse_IRSAR.RF(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_IRSAR.RF(): Analyse IRSAR RF measurements. Function version 0.7.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2024. analyse_IRSAR.RF(): Analyse IRSAR RF measurements. Function version 0.7.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -26,7 +26,7 @@ path and file name of an existing BINX-file. If a file name is provided the
 file will be updated with the information from the XSYG file in the same
 folder as the original BINX-file.
 
-\strong{Note:} The XSYG and the BINX-file have to be originate from the
+\strong{Note:} The XSYG and the BINX-file must originate from the
 same measurement!}
 
 \item{recordType}{\link{character} (\emph{with default}):
@@ -45,7 +45,7 @@ this option is parsed only if a BIN/BINX file is produced and it will reset all 
 values to a max. value of 48, cf.\link{write_R2BIN}}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables \code{TRUE} or disables \code{FALSE} the progression bars during import and export}
+enables \code{TRUE} or disables \code{FALSE} the progress bars during import and export}
 }
 \value{
 An \linkS4class{RLum.Results} object is returned with the
@@ -76,9 +76,9 @@ and used for further analysis or/and to stored in a new BINX-file, which can
 be further used by other software, e.g., Analyst (Geoff Duller).
 
 Typical application example: g-value estimation from fading measurements
-using the Analyst or any other self written script.
+using the Analyst or any other self-written script.
 
-Beside the some simple data transformation steps the function applies the
+Beside some simple data transformation steps, the function applies
 functions \link{read_XSYG2R}, \link{read_BIN2R}, \link{write_R2BIN} for data import and export.
 }
 \note{
@@ -99,7 +99,7 @@ The way the value 'Time Since Irradiation' is defined differs. In the BINX-file 
 Time'. The table output returns only the real 'Time Since Irradiation', i.e. time between the
 end of the irradiation and the next step.
 
-\strong{Negative values for \code{TIMESINCELAS.STEP}?}
+\strong{Negative values for \code{TIMESINCELAST.STEP}?}
 
 Yes, this is possible and no bug, as in the XSYG-file multiple curves are stored for one step.
 Example: TL step may comprise three curves:
@@ -138,7 +138,7 @@ towards a correct time order.
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. extract_IrradiationTimes(): Extract Irradiation Times from an XSYG-file. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Kreutzer, S., 2024. extract_IrradiationTimes(): Extract Irradiation Times from an XSYG-file. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

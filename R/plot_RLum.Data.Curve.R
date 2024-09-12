@@ -3,12 +3,12 @@
 #' @description The function provides a standardised plot output for curve data of an
 #' `RLum.Data.Curve` S4-class object.
 #'
-#' @details Only single curve data can be plotted with this function.Arguments
+#' @details Only single curve data can be plotted with this function. Arguments
 #' according to [plot].
 #'
 #' **Curve normalisation**
 #'
-#' The argument `norm` normalises all count values, to date the following
+#' The argument `norm` normalises all count values. To date the following
 #' options are supported:
 #'
 #' `norm = TRUE` or `norm = "max"`: Curve values are normalised to the highest
@@ -23,7 +23,7 @@
 #' y = (observed - median(background)) / (max(observed) - median(background))
 #' }
 #'
-#' The background of the curve is defined as the last 20 % of the count values
+#' The background of the curve is defined as the last 20% of the count values
 #' of a curve.
 #'
 #' @param object [RLum.Data.Curve-class] (**required**):
@@ -228,4 +228,3 @@ plot_RLum.Data.Curve<- function(
     ##plot additional mtext
     mtext(plot_settings$mtext, side = 3, cex = plot_settings$cex * 0.8)
 }
-

@@ -1,6 +1,5 @@
 test_that("test convert functions", {
   testthat::skip_on_cran()
-  local_edition(3)
 
   # Set up test scenario ------------------------------------------------------------------------
   #create artifical dataset according to Mooney et al. (2013)
@@ -34,10 +33,17 @@ test_that("test convert functions", {
 
   ##test order argument
   expect_type(convert_Wavelength2Energy(data, order = TRUE), "double")
+  res <- convert_Wavelength2Energy(object, order = TRUE)
+  expect_equal(order(rownames(res@data)),
+               1:nrow(res@data))
 
   ##test special treatment of RLum.Data.Spectrum objects
   object@info[["curveDescripter"]] <- "energy"
   expect_message(convert_Wavelength2Energy(object), regexp = "Your object has already an energy scale, nothing done!")
+  object@info[["curveDescripter"]] <- "wavelength"
+  res <- convert_Wavelength2Energy(object)
+  expect_equal(res@info[["curveDescripter"]],
+               "energy [eV]")
 
   ##Code below just a cross check if wanted
   ##matrix

@@ -205,13 +205,9 @@ fit_EmissionSpectra <- function(
 
       }else{
         if(max(frame) > ncol(o@data)|| min(frame) < 1){
-          stop(
-            paste0(
-              "[fit_EmissionSpectra()] 'frame' invalid. Allowed range min: 1 and max: ",ncol(o@data)),
-            call. = FALSE)
-
+          .throw_error("'frame' invalid. Allowed range min: 1 and max: ",
+                       ncol(o@data), nframe = 3) # we are inside an lapply closure
         }
-
       }
 
       ##get frame
@@ -241,13 +237,9 @@ fit_EmissionSpectra <- function(
 
     }else{
       if(max(frame) > (ncol(object)-1) || min(frame) < 1){
-        stop(
-          paste0(
-            "[fit_EmissionSpectra()] 'frame' invalid. Allowed range min: 1 and max: ", ncol(object)-1),"!",
-          call. = FALSE)
-
+        .throw_error("'frame' invalid. Allowed range min: 1 and max: ",
+                     ncol(object) - 1, nframe = 3) # we are inside an lapply closure
       }
-
     }
 
     temp <- lapply(frame +1 , function(x) cbind(object[,1],object[,x]))
@@ -281,6 +273,7 @@ fit_EmissionSpectra <- function(
           start_parameters = start_parameters,
           n_components = n_components,
           sub_negative = sub_negative,
+          input_scale = input_scale,
           method_control = method_control,
           frame = frame,
           mtext = mtext[[o]]),
@@ -300,7 +293,7 @@ fit_EmissionSpectra <- function(
   # Start main core -----------------------------------------------------------------------------
   ##backstop, from here we allow only a matrix
   if(!inherits(object, "matrix"))
-    stop("[fit_EmissionSpectra()] Input not supported, please read the manual!",call. = FALSE)
+    .throw_error("Objects of type '", is(object)[1], "' are not supported")
 
   ##extract matrix for everything below
   m <- object[,1:2]
@@ -349,7 +342,7 @@ fit_EmissionSpectra <- function(
 
   ##set fit function
   x <- 0 #cheat R check routine
-  fit_forumla <- function(n.components){
+  fit_formula <- function(n.components) {
     sigma <- paste0("sigma.",1:n.components)
     mu <- paste0("mu.",1:n.components)
     C <- paste0("C.",1:n.components)
@@ -375,6 +368,11 @@ fit_EmissionSpectra <- function(
   if(method_control$norm[1])
     df[["y"]] <- df[["y"]]/max(m[,2]) ##normalise values, it is just easier
 
+  ## check graining parameter
+  if (method_control$graining >= nrow(m))
+    .throw_error("method_control$graining cannot exceed the ",
+                 "available channels (", nrow(m) ,")", nframe = 5)
+
   ##initialise objects
   success_counter <- 0
   run <- 0
@@ -386,12 +384,6 @@ fit_EmissionSpectra <- function(
   ##run iterations
   while(success_counter < 1000 && run < method_control$max.runs){
     ##try to find start parameters
-    ##check graining parameter
-    if(method_control$graining >= nrow(m))
-      stop(paste0(
-        "[fit_EmissionSpectra()] method_control$graining cannot be larger than available channels (",
-        nrow(m) ,")!"),
-           call. = FALSE)
 
     ##identify peaks
     id_peaks <- .peaks(m[,2], sample(method_control$graining[1]:(nrow(m) - 1), 1))
@@ -422,7 +414,7 @@ fit_EmissionSpectra <- function(
 
     ##run fitting using the Levenberg-Marquardt algorithm
     fit_try <- try(minpack.lm::nlsLM(
-      formula = fit_forumla(n.components = length(mu)),
+      formula = fit_formula(n.components = length(mu)),
       data = df,
       start = c(sigma, mu, C),
       trace = method_control$trace,
@@ -451,12 +443,9 @@ fit_EmissionSpectra <- function(
 
 
   ## handle the output
-  if(length(fit) == 0){
-    if (verbose) cat("\r>> Searching components ... \t\t\t[FAILED]")
-
-  }else{
-    if (verbose) cat("\r>> Searching components ... \t\t\t[OK]")
-
+  if (verbose) {
+    cat("\r>> Searching components ... \t\t\t",
+        if (length(fit) > 0) "[OK]" else "[FAILED]")
   }
 
   ##Extract best fit values
@@ -481,6 +470,7 @@ fit_EmissionSpectra <- function(
 
   # Extract values ------------------------------------------------------------------------------
   ##extract components
+  m_coef <- NA
   if(!is.na(fit[1]) && is(fit, "nls")){
     ##extract values we need only
     m_coef <- summary(fit)$coefficients
@@ -503,10 +493,6 @@ fit_EmissionSpectra <- function(
     mu <- m_coef[,"mu"]
     sigma <- m_coef[,"sigma"]
     C <- m_coef[,"C"]
-
-  }else{
-    m_coef <- NA
-
   }
 
   # Terminal output -----------------------------------------------------------------------------
@@ -697,4 +683,3 @@ fit_EmissionSpectra <- function(
   return(results)
 
 }
-

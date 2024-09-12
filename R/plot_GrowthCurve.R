@@ -98,8 +98,6 @@
 #' column name if used. For exponential fits at least three dose points
 #' (including the natural) should be provided.
 #'
-#' @param na.rm [logical] (*with default*): excludes `NA` values from the data set prior to any further operations. This argument is defunct and will be removed in a future version!
-#'
 #' @param mode [character] (*with default*):
 #' selects calculation mode of the function.
 #' - `"interpolation"` (default) calculates the De by interpolation,
@@ -195,7 +193,7 @@
 #' `..$call` : \tab `call` \tab The original function call\cr
 #' }
 #'
-#' @section Function version: 1.11.12
+#' @section Function version: 1.11.13
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
@@ -239,7 +237,7 @@
 #' plot_GrowthCurve(LxTxData, output.plotExtended.single = TRUE)
 #' ##dev.off()
 #'
-#' ##(4) plot resulting function for given intervall x
+#' ##(4) plot resulting function for given interval x
 #' x <- seq(1,10000, by = 100)
 #' plot(
 #'  x = x,
@@ -304,7 +302,6 @@
 #' @export
 plot_GrowthCurve <- function(
   sample,
-  na.rm = TRUE,
   mode = "interpolation",
   fit.method = "EXP",
   fit.force_through_origin = FALSE,
@@ -345,8 +342,8 @@ plot_GrowthCurve <- function(
   }
 
   ##2. check if sample contains a least three rows
-  if(length(sample[[1]]) < 3 & fit.method != "LIN")
-    stop("\n [plot_GrowthCurve()] At least two regeneration points are required!", call. = FALSE)
+  if(length(sample[[1]]) < 3 && fit.method != "LIN")
+    stop("\n [plot_GrowthCurve()] At least three regeneration points are required!", call. = FALSE)
 
   ##2.1 check column numbers; we assume that in this particular case no error value
   ##was provided, e.g., set all errors to 0
@@ -358,38 +355,29 @@ plot_GrowthCurve <- function(
       #https://stackoverflow.com/questions/12188509/cleaning-inf-values-from-an-r-dataframe
       #This is slow, but it does not break with previous code
       sample <- do.call(data.frame, lapply(sample, function(x) replace(x, is.infinite(x),NA)))
-      warning("[plot_GrowthCurve()] Inf values found, replaced by NA!", call. = FALSE)
+      .throw_warning("Inf values found, replaced by NA")
   }
 
   ##2.3 check whether the dose value is equal all the time
   if(sum(abs(diff(sample[[1]])), na.rm = TRUE) == 0){
-    try(stop("[plot_GrowthCurve()] All points have the same dose. NULL returned!", call. = FALSE))
+    message("[plot_GrowthCurve()] Error: All points have the same dose, ",
+            "NULL returned")
     return(NULL)
-
   }
 
-  ## optionally, count and exclude NA values and print result
-  if(na.rm[1]) {
-    ## write warning
-    if(sum(!complete.cases(sample)) > 0)
-      warning(paste("[plot_GrowthCurve()]",
-                    sum(!complete.cases(sample)),
-                    "NA value(s) excluded."),
-              call. = FALSE)
+  ## count and exclude NA values and print result
+  if (sum(!complete.cases(sample)) > 0)
+    .throw_warning(sum(!complete.cases(sample)),
+                   " NA values removed")
 
-    ## exclude NA
-    sample <- na.exclude(sample)
+  ## exclude NA
+  sample <- na.exclude(sample)
 
-    ##Check if anything is left after removal
-    if(nrow(sample) == 0){
-     try(stop("[plot_GrowthCurve()] Sorry, after NA removal nothing is left from the data set! NULL returned!", call. = FALSE))
-      return(NULL)
-    }
-
-  }else{
-    stop("[plot_GrowthCurve()] Sorry, the argument 'na.rm' is defunct and will be removed in future!",
-         call. = FALSE)
-
+  ## Check if anything is left after removal
+  if (nrow(sample) == 0) {
+    message("[plot_GrowthCurve()] Error: After NA removal, nothing is left ",
+            "from the data set, NULL returned")
+    return(NULL)
   }
 
   ##3. verbose mode
@@ -560,9 +548,8 @@ plot_GrowthCurve <- function(
   ##    (suppress the warning in case one parameter is negative)
   fit.lm <- try(lm(suppressWarnings(log(data$y))~data$x))
 
-  if(inherits(fit.lm, "try-error"))
-    b <- 1
-  else
+  b <- 1
+  if (!inherits(fit.lm, "try-error"))
     b <- as.numeric(1/fit.lm$coefficients[2])
 
   ##c - get start parameters from a linear fit - offset on x-axis
@@ -587,16 +574,12 @@ plot_GrowthCurve <- function(
 
     if (!is.na(b)) {
       b.MC <- suppressWarnings(rnorm(50, mean = b, sd = b / 100))
-
-    } else{
-      b <- NA
-
     }
 
     c.MC <- suppressWarnings(rnorm(50, mean = c, sd = c / 100))
     g.MC <- suppressWarnings(rnorm(50, mean = g, sd = g / 1))
 
-    ##set start vector (to avoid errors witin the loop)
+    ##set start vector (to avoid errors within the loop)
     a.start <- NA
     b.start <- NA
     c.start <- NA
@@ -629,6 +612,7 @@ plot_GrowthCurve <- function(
     }
 
     ##solve and get De
+    De <- NA
     if (mode == "interpolation") {
       De.uniroot <- try(uniroot(De.fs,
                                 y = sample[1, 2],
@@ -648,8 +632,6 @@ plot_GrowthCurve <- function(
       } else{
         if (verbose)
           writeLines("[plot_GrowthCurve()] no solution found for QDR fit")
-        De <- NA
-
       }
     }else if (mode == "extrapolation"){
       De.uniroot <- try(uniroot(De.fs,
@@ -670,11 +652,7 @@ plot_GrowthCurve <- function(
       } else{
         if (verbose)
           writeLines("[plot_GrowthCurve()] no solution found for QDR fit")
-        De <- NA
-
       }
-    }else{
-      De <- NA
     }
 
     ##set progressbar
@@ -710,6 +688,7 @@ plot_GrowthCurve <- function(
 
       }
 
+      De.MC <- NA
       if (mode == "interpolation") {
         ##solve and get De
         De.uniroot.MC <- try(uniroot(
@@ -722,10 +701,6 @@ plot_GrowthCurve <- function(
 
         if (!inherits(De.uniroot.MC, "try-error")) {
           De.MC <- De.uniroot.MC$root
-
-        } else{
-          De.MC <- NA
-
         }
 
       }else if (mode == "extrapolation"){
@@ -740,16 +715,7 @@ plot_GrowthCurve <- function(
 
         if (!inherits(De.uniroot.MC, "try-error")) {
           De.MC <- De.uniroot.MC$root
-
-        } else{
-          De.MC <- NA
-
         }
-
-
-      }else{
-        De.MC <- NA
-
       }
 
       ##update progress bar
@@ -767,9 +733,9 @@ plot_GrowthCurve <- function(
   #EXP ---------------
   if (fit.method=="EXP" | fit.method=="EXP OR LIN" | fit.method=="LIN"){
     if((is.na(a) | is.na(b) | is.na(c)) && fit.method != "LIN"){
-      try(stop("[plot_GrowthCurve()] Fit could not be applied for this data set. NULL returned!", call. = FALSE))
+      message("[plot_GrowthCurve()] Error: Fit could not be applied ",
+              "for this data set, NULL returned")
       return(NULL)
-
     }
 
     if(fit.method != "LIN"){
@@ -857,6 +823,7 @@ plot_GrowthCurve <- function(
         c <- as.vector((parameters["c"]))
 
         #calculate De
+        De <- NA
         if(mode == "interpolation"){
           De <- suppressWarnings(-c-b*log(1-sample[1,2]/a))
 
@@ -867,10 +834,6 @@ plot_GrowthCurve <- function(
 
         }else if (mode == "extrapolation"){
           De <- suppressWarnings(-c-b*log(1-0/a))
-
-        }else{
-          De <- NA
-
         }
 
         #print D01 value
@@ -951,7 +914,6 @@ plot_GrowthCurve <- function(
               x.natural[i] <- NA
 
             }
-
           }
 
         }#end for loop
@@ -980,13 +942,10 @@ plot_GrowthCurve <- function(
         fit.lm<-lm(data$y ~ 0 + data$x, weights = fit.weights)
 
         #calculate De
+        De <- 0
         if(mode == "interpolation"){
           De <- sample[1,2]/fit.lm$coefficients[1]
-
-        }else{
-          De <- 0
         }
-
 
       }else{
         fit.lm<-lm(data$y ~ data$x, weights = fit.weights)
@@ -1167,6 +1126,7 @@ plot_GrowthCurve <- function(
 
       #problem: analytically it is not easy to calculate x,
       #use uniroot to solve that problem ... readjust function first
+      De <- NA
       if (mode == "interpolation") {
         f.unirootEXPLIN <-
           function(a, b, c, g, x, LnTn) {
@@ -1189,8 +1149,6 @@ plot_GrowthCurve <- function(
 
         if (!inherits(temp.De, "try-error")) {
           De <- temp.De$root
-        } else{
-          De <- NA
         }
       }else if(mode == "extrapolation"){
           f.unirootEXPLIN <-
@@ -1212,18 +1170,10 @@ plot_GrowthCurve <- function(
           ),
           silent = TRUE)
 
-
           if (!inherits(temp.De, "try-error")) {
             De <- temp.De$root
-          } else{
-            De <- NA
           }
-
-      }else{
-        De <- NA
-
       }
-
 
       if (verbose) {
         if (mode != "alternate") {
@@ -1436,6 +1386,7 @@ plot_GrowthCurve <- function(
       D02 <- round(b2,digits = 2)
 
       #problem: analytically it is not easy to calculate x, use uniroot
+      De <- NA
       if (mode == "interpolation") {
         f.unirootEXPEXP <-
           function(a1, a2, b1, b2, x, LnTn) {
@@ -1458,20 +1409,14 @@ plot_GrowthCurve <- function(
 
         if (!inherits(temp.De, "try-error")) {
           De <- temp.De$root
-        } else{
-          De <- NA
         }
 
         ##remove object
         rm(temp.De)
 
       }else if (mode == "extrapolation"){
-        stop("[plot_GrowthCurve()] mode 'extrapolation' for this fitting method currently not supported!",
-             call. = FALSE)
-
-      } else{
-        De <- NA
-
+        .throw_error("mode 'extrapolation' for fitting method 'EXP+EXP' ",
+                     "currently not supported")
       }
 
       #print D0 and De value values
@@ -1955,7 +1900,7 @@ plot_GrowthCurve <- function(
       }
     }
 
-    fun   <- if("fun" %in% names(extraArgs)) {extraArgs$fun} else {FALSE}
+    fun <- if ("fun" %in% names(extraArgs)) extraArgs$fun else FALSE # nocov
 
     ##set plot check
     plot_check <- NULL
@@ -2259,9 +2204,7 @@ plot_GrowthCurve <- function(
         }
 
         ## FUN by R Luminescence Team
-        if (fun == TRUE) {
-          sTeve()
-        }
+        if (fun == TRUE) sTeve() # nocov
 
       }#endif::output.plotExtended
 
@@ -2269,10 +2212,10 @@ plot_GrowthCurve <- function(
 
     ##reset graphic device if the plotting failed!
     if(is(plot_check, "try-error")){
-      try(stop("[plot_GrowthCurve()] Figure margins too large, nothing plotted, but results returned!", call. = FALSE),)
+      message("[plot_GrowthCurve()] Error: Figure margins too large, ",
+              "nothing plotted, but results returned!")
       dev.off()
     }
-
   }
 
 # Output ------------------------------------------------------------------
@@ -2285,6 +2228,26 @@ plot_GrowthCurve <- function(
 
   }
 
+  ## calculate the n/N value (the relative saturation level)
+  ## the absolute intensity is the integral of curve
+      ## define the function
+      f_int <- function(x) eval(fit_formula)
+
+      ## run integrations (they may fail; so we have to check)
+      N <- try({
+        suppressWarnings(
+          stats::integrate(f_int, lower = 0, upper = max(xy$x, na.rm = TRUE))$value)
+      }, silent = TRUE)
+      n <- try({
+        suppressWarnings(
+          stats::integrate(f_int, lower = 0, upper = max(De, na.rm = TRUE))$value)
+      }, silent = TRUE)
+
+      if(inherits(N, "try-error") || inherits(n, "try-error"))
+        n_N <- NA
+      else
+        n_N <- n/N
+
   output <- try(data.frame(
     De = abs(De),
     De.Error = De.Error,
@@ -2293,6 +2256,7 @@ plot_GrowthCurve <- function(
     D02 = D02,
     D02.ERROR = D02.ERROR,
     Dc = Dc,
+    n_N = n_N,
     De.MC = De.MonteCarlo,
     Fit = fit.method,
     HPDI68_L = HPDI[1,1],

@@ -120,7 +120,7 @@ received by the sample in the target layer.
 }
 \description{
 This function calculates the gamma dose deposited in a luminescence sample
-taking into account layer-to-layer variations in sediment radioactivity .
+taking into account layer-to-layer variations in sediment radioactivity.
 The function scales user inputs of uranium, thorium and potassium based on
 input parameters for sediment density, water content and given layer
 thicknesses and distances to the sample.
@@ -146,7 +146,7 @@ value must be provided, which is the distance (in cm) measured from \strong{bott
 of the layer of interest. If the whole layer was sampled insert \code{0}. If the
 sample was taken from \emph{within} the layer, insert a numerical value \verb{>0},
 which describes the distance from the middle of the sample to the bottom of
-the layer in cm. Columns 4 to 9 should  contain radionuclide concentrations
+the layer in cm. Columns 4 to 9 should contain radionuclide concentrations
 and their standard errors for
 potassium (in \%), thorium (in ppm) and uranium (in ppm). Columns 10 and 11
 give information on the water content and its uncertainty (standard error)
@@ -236,7 +236,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., Burow, C., 2024. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Riedesel, S., Autzen, M., Burow, C., 2024. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{

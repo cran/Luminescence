@@ -23,8 +23,8 @@ logarithmic axes (\code{c("x", "y", "xy")}).}
 
 \item{smooth}{\link{character} (\emph{optional}):
 apply data smoothing. Use \code{"rmean"} to calculate the rolling where \code{k}
-determines the width of the rolling window (see \link{rollmean}). \code{"spline"}
-applies a smoothing spline to each curve (see \link{smooth.spline})}
+determines the width of the rolling window (see \link[zoo:rollmean]{zoo::rollmean}). \code{"spline"}
+applies a smoothing spline to each curve (see \link[stats:smooth.spline]{stats::smooth.spline})}
 
 \item{k}{\link{integer} (\emph{with default}):
 integer width of the rolling window.}
@@ -131,7 +131,7 @@ par(mfrow = c(1, 1))
 } 
 
 \section{How to cite}{
-Burow, C., 2024. plot_NRt(): Visualise natural/regenerated signal ratios. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.24. https://CRAN.R-project.org/package=Luminescence
+Burow, C., 2024. plot_NRt(): Visualise natural/regenerated signal ratios. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
 }
 
 \references{
