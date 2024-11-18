@@ -270,6 +270,8 @@ analyse_SAR.CWOSL<- function(
   onlyLxTxTable = FALSE,
   ...
 ) {
+  .set_function_name("analyse_SAR.CWOSL")
+  on.exit(.unset_function_name(), add = TRUE)
 
 # SELF CALL -----------------------------------------------------------------------------------
 if(is.list(object)){
@@ -291,7 +293,7 @@ if(is.list(object)){
 
   }
 
-  results <- merge_RLum(lapply(1:length(object), function(x){
+  results <- .warningCatcher(merge_RLum(lapply(seq_along(object), function(x){
     analyse_SAR.CWOSL(
       object = object[[x]],
       signal.integral.min = parm$signal.integral.min[[x]],
@@ -309,10 +311,10 @@ if(is.list(object)){
       onlyLxTxTable = parm$onlyLxTxTable[[x]],
       main = main[[x]],
       ...)
-  }))
+  })))
 
   ## add aliquot number
-  results@data$data$ALQ <- seq_along(object)
+  results@data$data$ALQ <- seq_along(object)[1:nrow(results@data$data)]
 
   ##return
   ##DO NOT use invisible here, this will prevent the function from stopping
@@ -867,7 +869,7 @@ error.list <- list()
       # plot everyting on one page ... doing it here is much cleaner than
       # Plotting - one Page config -------------------------------------------------------
       if(plot_onePage){
-      on.exit(on_exit())
+      on.exit(on_exit(), add = TRUE)
 
       plot.single <- TRUE
       layout(matrix(
@@ -890,7 +892,7 @@ error.list <- list()
       }
 
       if (plot.single[1] == FALSE) {
-        on.exit(on_exit())
+        on.exit(on_exit(), add = TRUE)
         layout(matrix(
           c(1, 1, 3, 3,
             1, 1, 3, 3,
@@ -1255,6 +1257,7 @@ error.list <- list()
         D02 = NA,
         D02.ERROR = NA,
         Dc = NA,
+        n_N = NA,
         De.MC = NA,
         Fit = NA,
         HPDI68_L = NA,

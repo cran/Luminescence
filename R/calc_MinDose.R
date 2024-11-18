@@ -337,7 +337,9 @@ calc_MinDose <- function(
   plot = TRUE,
   multicore = FALSE,
   ...
-){
+) {
+  .set_function_name("calc_MinDose")
+  on.exit(.unset_function_name(), add = TRUE)
 
   ## ============================================================================##
   ## CONSISTENCY CHECK OF INPUT DATA
@@ -661,7 +663,7 @@ calc_MinDose <- function(
       bbmle::profile(ests,
                      which = which,
                      std.err = as.vector(coef_err),
-                     try_harder = TRUE,
+                     # try_harder = TRUE,
                      quietly = TRUE,
                      maxsteps = maxsteps,
                      tol.newmin = Inf,

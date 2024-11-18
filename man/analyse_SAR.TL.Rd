@@ -41,7 +41,7 @@ best matching channel is selected.}
 specifies the general sequence structure. Three steps are allowed
 (\code{"PREHEAT"}, \code{"SIGNAL"}, \code{"BACKGROUND"}), in addition a
 parameter \code{"EXCLUDE"}. This allows excluding TL curves which are not
-relevant for the protocol analysis.  (\strong{Note:} None TL are removed by default)}
+relevant for the protocol analysis.  (\strong{Note:} No TL are removed by default)}
 
 \item{rejection.criteria}{\link{list} (\emph{with default}):
 list containing rejection criteria in percentage for the calculation.}
@@ -79,7 +79,7 @@ used.
 
 \strong{Provided rejection criteria}
 
-\verb{[recyling.ratio]}: calculated for every repeated regeneration dose point.
+\verb{[recycling.ratio]}: calculated for every repeated regeneration dose point.
 
 \verb{[recuperation.rate]}: recuperation rate calculated by
 comparing the \code{Lx/Tx} values of the zero regeneration point with the \code{Ln/Tn}
@@ -115,7 +115,7 @@ analyse_SAR.TL(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.25. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2024. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
 }
 
 \references{

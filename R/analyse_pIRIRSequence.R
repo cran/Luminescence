@@ -178,26 +178,25 @@ analyse_pIRIRSequence <- function(
   plot = TRUE,
   plot.single = FALSE,
   ...
-){
+) {
+  .set_function_name("analyse_pIRIRSequence")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  if (missing("object")) {
-    stop("[analyse_pIRIRSequence()] No value set for 'object'!")
-  }
+  if (missing("object"))
+    .throw_error("No value set for 'object'")
 
 # SELF CALL -----------------------------------------------------------------------------------
  if(is.list(object)){
-
     ##make live easy
     if(missing("signal.integral.min")){
       signal.integral.min <- 1
-      warning("[analyse_pIRIRSequence()] 'signal.integral.min' missing, set to 1", call. = FALSE)
+      .throw_warning("'signal.integral.min' missing, set to 1")
     }
 
     if(missing("signal.integral.max")){
       signal.integral.max <- 2
-      warning("[analyse_pIRIRSequence()] 'signal.integral.max' missing, set to 2", call. = FALSE)
+      .throw_warning("'signal.integral.max' missing, set to 2")
     }
-
 
     ##now we have to extend everything to allow list of arguments ... this is just consequent
     signal.integral.min <- rep(list(signal.integral.min), length = length(object))
@@ -229,12 +228,10 @@ analyse_pIRIRSequence <- function(
         main_list <- as.list(main_list)
 
       }
-
     }
 
     ##run analysis
-    temp <- lapply(1:length(object), function(x){
-
+    temp <- .warningCatcher(lapply(1:length(object), function(x) {
       analyse_pIRIRSequence(object[[x]],
                         signal.integral.min = signal.integral.min[[x]],
                         signal.integral.max = signal.integral.max[[x]],
@@ -246,8 +243,7 @@ analyse_pIRIRSequence <- function(
                         plot.single = plot.single,
                         main = ifelse("main"%in% names(list(...)), main_list[[x]], paste0("ALQ #",x)),
                         ...)
-
-    })
+    }))
 
     ##combine everything to one RLum.Results object as this as what was written ... only
     ##one object
@@ -256,25 +252,18 @@ analyse_pIRIRSequence <- function(
     results <- merge_RLum(temp)
 
     ##DO NOT use invisible here, this will stop the function from stopping
-    if(length(results) == 0){
+    if(length(results) == 0)
       return(NULL)
-
-    }else{
+    else
       return(results)
-
-    }
 
   }
 
-
 # General Integrity Checks ---------------------------------------------------
-
   ##GENERAL
-
     ##INPUT OBJECTS
     if(is(object, "RLum.Analysis")==FALSE){
-      stop("[analyse_pIRIRSequence()] Input object is not of type 'RLum.Analyis'!",
-           call. = FALSE)
+      .throw_error("Input object is not of type 'RLum.Analysis'")
     }
 
     ##CHECK ALLOWED VALUES IN SEQUENCE STRUCTURE
@@ -286,13 +275,21 @@ analyse_pIRIRSequence <- function(
       collapse = ", ")
 
     if(temp.collect.invalid.terms != ""){
-      stop("[analyse_pIRIRSequence()] ",
-        temp.collect.invalid.terms, " not allowed in 'sequence.structure'!")
+      .throw_error("'", temp.collect.invalid.terms,
+                   "' not allowed in 'sequence.structure'")
     }
 
+  ## CHECK FOR PLOT ...we safe users the pain by checking whether plot device has the
+  ## required size.
+    if (plot[1] && !plot.single && all(grDevices::dev.size("in") < 18)) {
+      plot <- FALSE
+      .throw_warning("Argument 'plot' reset to 'FALSE'. The smallest plot ",
+                     "size required is 18 x 18 in.\n",
+                     "Consider plotting via `pdf(..., height = 18, width = 18)` ",
+                     "or setting `plot.single = TRUE`")
+    }
 
 # Deal with extra arguments -------------------------------------------------------------------
-
   ## default values
   mtext.outer <- "MEASUREMENT INFO"
   main <- ""
@@ -308,7 +305,6 @@ analyse_pIRIRSequence <- function(
 
 
 # Protocol Integrity Checks --------------------------------------------------
-
   ##(1) Check structure and remove curves that fit not the recordType criteria
 
   ##get sequence structure
@@ -328,14 +324,9 @@ analyse_pIRIRSequence <- function(
         drop = FALSE
       )
 
-  ##compile warning message
-  temp.sequence.rm.warning <- paste(
-    temp.sequence.structure[temp.sequence.rm.id, "recordType"], collapse = ", ")
-
-  temp.sequence.rm.warning <- paste(
-    "Record types are unrecognised and have been removed:", temp.sequence.rm.warning)
-
-  warning(temp.sequence.rm.warning, call. = FALSE)
+  .throw_warning("The following unrecognised record types have been removed: ",
+                 paste(temp.sequence.structure[temp.sequence.rm.id,
+                                               "recordType"], collapse = ", "))
   }
 
   ##(2) Apply user sequence structure
@@ -345,8 +336,8 @@ analyse_pIRIRSequence <- function(
 
     ##try to account for a very common mistake
     if(any(grepl(sequence.structure, pattern = "TL", fixed = TRUE)) && !any(grepl(temp.sequence.structure[["recordType"]], pattern = "TL", fixed = TRUE))){
-      warning("[analyse_pIRIRSequence()] Your sequence does not contain 'TL' curves, trying to adapt 'sequence.structure' for you ...",
-              call. = FALSE, immediate. = TRUE)
+      .throw_warning("Your sequence does not contain 'TL' curves, trying ",
+                     "to adapt 'sequence.structure' for you ...")
       sequence.structure <- sequence.structure[!grepl(sequence.structure, pattern = "TL", fixed = TRUE)]
     }
 
@@ -358,9 +349,9 @@ analyse_pIRIRSequence <- function(
       sequence.structure, nrow(temp.sequence.structure)/2/length(sequence.structure))
 
   }else{
-    try(stop("[analyse_pIRIRSequence()] Number of records is not a multiple of the defined sequence structure! NULL returned!", call. = FALSE))
+    message("[analyse_pIRIRSequence()] Error: The number of records is not a ",
+            "multiple of the defined sequence structure, NULL returned")
     return(NULL)
-
   }
 
   ##remove values that have been excluded
@@ -383,8 +374,8 @@ analyse_pIRIRSequence <- function(
       sequence.structure, nrow(temp.sequence.structure)/2/length(temp.sequence.structure))
 
     ##print warning message
-    warning("[analyse_pIRIRSequence()] ", length(temp.sequence.rm.id), " records have been removed due to EXCLUDE!", call. = FALSE)
-
+    .throw_warning(length(temp.sequence.rm.id),
+                   " records have been removed due to EXCLUDE")
   }
 
 ##============================================================================##
@@ -546,7 +537,6 @@ analyse_pIRIRSequence <- function(
 
    }else{
       temp.plot.single  <- c(2,4,6)
-
    }
 
     ##start analysis
@@ -604,26 +594,19 @@ analyse_pIRIRSequence <- function(
         )
       )
 
-
       ##merge results
       if (exists("temp.results.final")) {
         temp.results.final <- merge_RLum(list(temp.results.final, temp.results))
 
       } else{
         temp.results.final <- temp.results
-
       }
-
-
   }
 
-
 ##============================================================================##
-# Plotting additionals--------------------------------------------------------
+# Plotting additional --------------------------------------------------------
 ##============================================================================##
-
 if(plot){
-
   ##extract LnLnxTnTx.table
   LnLxTnTx.table <- get_RLum(temp.results.final, "LnLxTnTx.table")
 
@@ -633,7 +616,6 @@ if(plot){
 
     if(any(is.infinite(LnLxTnTx.table[["LxTx.Error"]])))
       LnLxTnTx.table[["LxTx.Error"]][is.infinite(LnLxTnTx.table[["LxTx.Error"]])] <- NA
-
 
   ##plot growth curves
   plot(NA, NA,
@@ -650,12 +632,10 @@ if(plot){
        ylab = expression(L[x]/T[x]),
        main = "Summarised Dose Response Curves")
 
-
     ##set x for expression evaluation
-    x <- seq(0,max(LnLxTnTx.table$Dose)*1.05,length = 100)
+    x <- seq(0,max(LnLxTnTx.table$Dose)*1.05, length.out = 100)
 
     for(j in 1:length(pIRIR.curve.names)){
-
      ##dose points
      temp.curve.points <-  LnLxTnTx.table[,c("Dose", "LxTx", "LxTx.Error", "Signal")]
 
@@ -693,7 +673,6 @@ if(plot){
 
     rm(x)
 
-
     ##plot legend
     legend("bottomright", legend = pIRIR.curve.names,
            lty = 1, col = c(1:length(pIRIR.curve.names)),
@@ -724,7 +703,7 @@ if(plot){
     plot(NA, NA,
        xlim = c(0,nrow(LnLxTnTx.table)/
                      n.loops),
-       ylim = range(temp.curve.TnTx.matrix),
+       ylim = if(any(is.na(range(temp.curve.TnTx.matrix)))) c(0,1) else range(temp.curve.TnTx.matrix),
        xlab = "# Cycle",
        ylab = expression(T[x]/T[n]),
        main = "Sensitivity change")
@@ -733,7 +712,6 @@ if(plot){
     abline(h = 1:nrow(temp.curve.TnTx.matrix), col = "gray")
 
     for(j in 1:length(pIRIR.curve.names)){
-
      lines(1:nrow(temp.curve.TnTx.matrix),
            temp.curve.TnTx.matrix[,j],
            type = "b",
@@ -747,7 +725,6 @@ if(plot){
          bty = "n",
          pch = c(1:length(pIRIR.curve.names))
          )
-
 
    ##Rejection criteria
    temp.rejection.criteria <- get_RLum(temp.results.final,
@@ -781,7 +758,6 @@ if(plot){
           y = c(21,29,29,21), col = "gray", border = NA)
     polygon(x = c(-0.3,-0.3,0.3,0.3) , y = c(21,29,29,21))
 
-
    ##consider possibility of multiple pIRIR signals and multiple recycling ratios
    col.id  <- 1
 
@@ -790,7 +766,6 @@ if(plot){
 
    for(i in seq(1,nrow(temp.rc.recuperation.rate),
                   length(unique(temp.rc.recuperation.rate[,"Criteria"])))){
-
 
         for(j in 0:length(unique(temp.rc.recuperation.rate[,"Criteria"]))){
          points(temp.rc.reycling.ratio[i+j, "Value"]-1,
@@ -804,8 +779,6 @@ if(plot){
    }#endif
 
     rm(col.id)
-
-
 
    ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++##
    ##polygon for recuperation rate
@@ -828,7 +801,6 @@ if(plot){
            y = 15,
            pch = i,
            col = i)
-
   }
   }#endif
 
@@ -843,14 +815,12 @@ if(plot){
    polygon(x = c(-0.3,-0.3,0.3,0.3) , y = c(1,9,9,1))
    polygon(x = c(-0.3,-0.3,0,0) , y = c(1,9,9,1), border = NA, density = 10, angle = 45)
 
-
    for(i in 1:nrow(temp.rc.palaedose.error)){
-
-     points(temp.rc.palaedose.error[i, "Value"],
-            y = 5,
-            pch = i,
-            col = i)
-
+     if(length(temp.rc.palaedose.error[i, "Value"]) > 0 && !is.na(temp.rc.palaedose.error[i, "Value"]))
+       points(temp.rc.palaedose.error[i, "Value"],
+              y = 5,
+              pch = i,
+              col = i)
    }
 
    ##add 0 value
@@ -875,6 +845,4 @@ if(plot){
 ##============================================================================##
 
   return(temp.results.final)
-
-
 }
