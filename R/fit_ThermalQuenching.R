@@ -36,8 +36,8 @@
 #' **ARGUMENT** \tab **TYPE** \tab **DESCRIPTION**\cr
 #' `upper` \tab named [vector] \tab sets upper fitting boundaries, if provided boundaries for all arguments
 #' are required, e.g., `c(A = 0, C = 0, W = 0, c = 0)` \cr
-#' `lower` \tab names [vector] \tab sets lower fitting boundaries (see `upper` for details) \cr
-#' `trace`   \tab [logical] \tab enables/disables progression trace for [minpack.lm::nlsLM]\cr
+#' `lower` \tab names [vector] \tab set lower fitting boundaries (see `upper` for details) \cr
+#' `trace`   \tab [logical] \tab enable/disable progression trace for [minpack.lm::nlsLM]\cr
 #'  `weights` \tab [numeric] \tab option to provide own weights for the fitting, the length of this
 #'  vector needs to be equal to the number for rows of the input `data.frame`. If set to `NULL` no weights
 #'  are applied. The weights are defined by the third column of the input `data.frame`.
@@ -46,18 +46,20 @@
 #' @param data [data.frame] (**required**): input data with three columns, the first column contains
 #' temperature values in deg. C, columns 2 and 3 the dependent values with its error
 #'
-#' @param start_param [list] (optional): option to provide own start parameters for the fitting, see
-#' details
+#' @param start_param [list] (*optional*): option to provide the start
+#' parameters for the fitting, see details
 #'
-#' @param method_control [list] (optional): further options to fine tune the fitting, see details for
+#' @param method_control [list] (*optional*): further options to fine tune
+#' the fitting, see details for
 #' further information
 #'
 #' @param n.MC [numeric] (*with default*): number of Monte Carlo runs for the error estimation. If `n.MC` is
 #' `NULL` or `<=1`, the error estimation is skipped
 #'
-#' @param verbose [logical] (*with default*): enables/disables terminal output
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
 #'
-#' @param plot [logical] (*with default*): enables/disables plot output
+#' @param plot [logical] (*with default*): enable/disable the plot output.
 #'
 #' @param ... further arguments that can be passed to control the plotting, support are `main`, `pch`,
 #' `col_fit`, `col_points`, `lty`, `lwd`, `xlab`, `ylab`, `xlim`, `ylim`, `xaxt`
@@ -132,8 +134,9 @@ fit_ThermalQuenching <- function(
   verbose = TRUE,
   plot = TRUE,
   ...
-){
-
+) {
+  .set_function_name("fit_ThermalQuenching")
+  on.exit(.unset_function_name(), add = TRUE)
 
   # Self-call -----------------------------------------------------------------------------------
   if(inherits(data, "list")){
@@ -143,7 +146,6 @@ fit_ThermalQuenching <- function(
     args[[1]] <- NULL
     args$data <- NULL
 
-
     ##run function
     results_list <- lapply(data, function(x){
        do.call(fit_ThermalQuenching, c(list(data = x),args))
@@ -151,30 +153,26 @@ fit_ThermalQuenching <- function(
 
     ##combine and return
     return(merge_RLum(results_list))
-
   }
 
 
-  # Integrity checks ----------------------------------------------------------------------------
-  if(!inherits(data, 'data.frame')){
-    stop("[fit_ThermalQuenching()] 'data' must by of type 'data.frame' or list of 'data.frames'!", call. = FALSE)
+  ## Integrity tests --------------------------------------------------------
 
-  }else{
-    if(nrow(data) < 1 || ncol(data) < 3)
-      stop("[fit_ThermalQuenching()] 'data' is empty or has less than three columns!", call. = FALSE)
+  .validate_class(data, "data.frame",
+                  extra = "a 'list' of such objects")
 
-    if(ncol(data) > 3)
-      warning("[fit_ThermalQuenching()] 'data' has more than 3 columns, taking only the first three!", call. = FALSE)
+  if(nrow(data) < 1 || ncol(data) < 3)
+    .throw_error("'data' is empty or has fewer than three columns")
 
-    if(any(is.na(data)))
-      warning("[fit_ThermalQuenching()] NA values in 'data' automatically removed!", call. = FALSE)
-
-
-    ##this we do anyway, you never know
-    data <- na.exclude(data[,1:3])
+  if (ncol(data) > 3) {
+    .throw_warning("'data' has more than 3 columns, taking only the first three")
+    data <- data[, 1:3]
   }
 
-
+  if (anyNA(data)) {
+    .throw_warning("NA values in 'data' automatically removed")
+    data <- na.exclude(data)
+  }
 
   # Prepare data --------------------------------------------------------------------------------
   ##set formula for quenching accordingt to Wintle 1973
@@ -266,12 +264,12 @@ fit_ThermalQuenching <- function(
     })
 
   }else{
-    message("[fit_ThermalQuenching()] Error: Fitting failed, NULL returned!")
+    .throw_message("Fitting failed, NULL returned")
     return(NULL)
   }
 
   ## remove NULL (the fit was not successful)
-  fit_MC <- fit_MC[!sapply(X = fit_MC, is.null)]
+  fit_MC <- .rm_NULL_elements(fit_MC)
   n.MC <- length(fit_MC)
 
 # Extract values ------------------------------------------------------------------------------
@@ -301,7 +299,6 @@ if(verbose){
     cat(" W = ", W, " \u00b1 ",W_MC_X, " eV\n")
     cat(" c = ", c, " \u00b1 ",c_MC_X, "\n")
     cat(" --------------------------------\n")
-
 }
 
 # Potting -------------------------------------------------------------------------------------
@@ -342,7 +339,6 @@ if(verbose){
     if(!is.null(plot_settings$xaxt) && plot_settings$xaxt == "n"){
       at <- pretty(round(axTicks(side = 1) - 273.15))
       axis(side = 1, at = at + 273.15, labels = at)
-
     }
 
     ##reset n.MC
@@ -355,7 +351,6 @@ if(verbose){
         c <- fit_coef_MC_full[4,i]
         x <- 0
         curve((A / (1 + C * (exp(-W / (k * x))))) + c, col = rgb(0,0,0,.1), add = TRUE)
-
       }
     }
 
@@ -369,7 +364,6 @@ if(verbose){
              y1 = data[[2]] - data[[3]],
              col = plot_settings$col_points
              )
-
 
     ##add central fit
       A <- fit_coef[["A"]]
@@ -389,7 +383,6 @@ if(verbose){
 
     ##add mtext
     mtext(side = 3, text = plot_settings$mtext)
-
   }
 
 
@@ -414,11 +407,8 @@ if(verbose){
     ),
     info = list(
       call = sys.call()
-
     )
   )
 
   return(output)
-
-
 }

@@ -1,19 +1,33 @@
-test_that("check function", {
+## load data
+data(ExampleData.XSYG, envir = environment())
+
+test_that("input validation", {
   testthat::skip_on_cran()
 
-  ##load data
-  data(ExampleData.XSYG, envir = environment())
-
-  ##crash the function
-  expect_error(
-    apply_CosmicRayRemoval("error"),
-    regexp = "An object of class 'character' is not supported as input; please read the manual!")
+  expect_error(apply_CosmicRayRemoval("error"),
+               "'object' should be of class 'RLum.Data.Spectrum'")
   expect_error(apply_CosmicRayRemoval(TL.Spectrum, method = "error"),
-               "Unknown method for cosmic ray removal")
+               "'method' should be one of 'smooth', 'smooth.spline', 'smooth_RLum' or 'Pych'",
+               fixed = TRUE)
+
+  expect_error(apply_CosmicRayRemoval(set_RLum("RLum.Data.Spectrum"),
+                                      "'object' contains no data"))
+})
+
+test_that("check function", {
+  testthat::skip_on_cran()
 
   ##run basic tests
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "Pych"))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth"))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum"))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 1, k = 0))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 1, k = 4))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 1, k = 10000))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 2, k = 0))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 2, k = 4))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 2, k = 10000))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", k = 10))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth", MARGIN = 1))
   expect_output(apply_CosmicRayRemoval(TL.Spectrum, method = "Pych", MARGIN = 2, verbose = TRUE, plot = TRUE))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "Pych",

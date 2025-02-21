@@ -20,12 +20,12 @@ S4 object of class \code{RLum.Data.Curve}}
 use local graphical parameters for plotting, e.g. the plot is shown in one
 column and one row. If \code{par.local = FALSE}, global parameters are inherited.}
 
-\item{norm}{\link{logical} \link{character} (\emph{with default}): allows curve normalisation to the
-highest count value ('default'). Alternatively, the function offers the
-modes \code{"max"}, \code{"min"} and \code{"huot"} for a background corrected normalisation, see details.}
+\item{norm}{\link{logical} \link{character} (\emph{with default}): whether curve
+normalisation should occur (\code{FALSE} by default). Alternatively, the function
+offers modes \code{"max"} (used with \code{TRUE}), \code{"last"} and \code{"huot"}, see details.}
 
 \item{smooth}{\link{logical} (\emph{with default}):
-provides an automatic curve smoothing based on \link[zoo:rollmean]{zoo::rollmean}}
+provides automatic curve smoothing based on the internal function \code{.smoothing}}
 
 \item{...}{further arguments and graphical parameters that will be passed
 to the \code{plot} function}
@@ -49,7 +49,7 @@ options are supported:
 \code{norm = TRUE} or \code{norm = "max"}: Curve values are normalised to the highest
 count value in the curve
 
-\code{norm = "last"}: Curves values are normalised to the last count value
+\code{norm = "last"}: Curve values are normalised to the last count value
 (this can be useful in particular for radiofluorescence curves)
 
 \code{norm = "huot"}: Curve values are normalised as suggested by Sébastien Huot
@@ -91,7 +91,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

@@ -1,22 +1,22 @@
 #' @title Calculate Lx/Tx ratio for decomposed CW-OSL signal components
 #'
 #' @description Calculate `Lx/Tx` ratios from a given set of decomposed
-#' CW-OSL curves decomposed by `[OSLdecomposition::RLum.OSL_decomposition]`
+#' CW-OSL curves decomposed by `OSLdecomposition::RLum.OSL_decomposition`.
 #'
 #' @param OSL.component [integer] or [character] (*optional*):
 #' a single index or a name describing which OSL signal component shall be evaluated.
 #' This argument can either be the name of the OSL component assigned by
-#' `[OSLdecomposition::RLum.OSL_global_fitting]` or the index of component.
+#' `OSLdecomposition::RLum.OSL_global_fitting` or the index of component.
 #' Then `'1'` selects the fastest decaying component, `'2'` the
 #' second fastest and so on. If not defined, the fastest decaying component is selected.
 #'
 #' @param Lx.data [data.frame] (**required**): Component table created by
-#' `[OSLdecomposition::RLum.OSL_decomposition]` and per default located
+#' `OSLdecomposition::RLum.OSL_decomposition` and per default located
 #' at `object@records[[...]]@info$COMPONENTS`.The value of `$n[OSL.component]`
 #' is set as `LnLx`. The value of `$n.error[OSL.component]` is set as `LnLx.error`
 #'
 #' @param Tx.data [data.frame] (*optional*): Component table created by
-#' `[OSLdecomposition::RLum.OSL_decomposition]` and per default located at
+#' `OSLdecomposition::RLum.OSL_decomposition` and per default located at
 #' `object@records[[...]]@info$COMPONENTS`. The value of `$n[OSL.component]`
 #' is set as `TnTx`. The value of `$n.error[OSL.component]` is set as `TnTx.error`
 #'
@@ -48,7 +48,7 @@
 #'
 #' @author Dirk Mittelstrass
 #'
-#' @seealso [RLum.Data.Curve-class], [plot_GrowthCurve], [analyse_SAR.CWOSL]
+#' @seealso [RLum.Data.Curve-class], [fit_DoseResponseCurve], [analyse_SAR.CWOSL]
 #'
 #' @references Mittelstrass D., Schmidt C., Beyer J., Straessner A., 2019.
 #' Automated identification and separation of quartz CW-OSL signal components with R.
@@ -78,11 +78,15 @@ calc_OSLLxTxDecomposed <- function(
 
   ##--------------------------------------------------------------------------##
   ## (1) - integrity checks
-  if (!(is.data.frame(Lx.data) && (nrow(Lx.data) >= 1)))
+  .validate_class(Lx.data, "data.frame")
+  if (nrow(Lx.data) < 1)
     .throw_error("No valid component data.frame for Lx value")
 
-  if (!(is.null(Tx.data)) && !(is.data.frame(Tx.data) && (nrow(Tx.data) >= 1)))
-    .throw_error("No valid component data.frame for Tx value")
+  if (!is.null(Tx.data)) {
+    .validate_class(Tx.data, "data.frame")
+    if (nrow(Tx.data) < 1)
+      .throw_error("No valid component data.frame for Tx value")
+  }
 
   # define the component
   component_index <- NA
@@ -90,10 +94,7 @@ calc_OSLLxTxDecomposed <- function(
   #select only the first element; we do this silently because it is clearly
   #written in the documentation
   OSL.component <- OSL.component[1]
-
-  if (!(is.numeric(OSL.component) || is.character(OSL.component)) ||
-      is.na(OSL.component))
-    .throw_error("Invalid data type for OSL component")
+  .validate_class(OSL.component, c("integer", "numeric", "character"))
 
   # get component index from component name
   if (is.character(OSL.component)) {
@@ -102,7 +103,7 @@ calc_OSLLxTxDecomposed <- function(
 
     } else {
       .throw_error("Invalid OSL component name, valid names are: ",
-                  paste(Lx.data$name, collapse = ", "))
+                   .collapse(Lx.data$name))
     }
   }
 
@@ -143,41 +144,15 @@ calc_OSLLxTxDecomposed <- function(
     TnTx.Error
   )
 
-  # THE FOLLOWING CODE IS MOSTLY IDENTICAL WITH (4) IN calc_OSLLxTxRatio()
-
   ##--------------------------------------------------------------------------##
   ##(4) Calculate LxTx error according Galbraith (2014)
 
   ## transform results to a data.frame
   LnLxTnTx <- as.data.frame(LnLxTnTx)
-
-  #add col names
   colnames(LnLxTnTx)<-c("Net_LnLx", "Net_LnLx.Error",
                         "Net_TnTx", "Net_TnTx.Error")
 
-  ##calculate Ln/Tx
-  LxTx <- LnLxTnTx$Net_LnLx/LnLxTnTx$Net_TnTx
-
-  ##set NaN
-  if(is.nan(LxTx)) LxTx <- 0
-
-  ##calculate Ln/Tx error
-  LxTx.relError <- sqrt((LnLx.Error / LnLx)^2 + (TnTx.Error / TnTx)^2)
-  LxTx.Error <- abs(LxTx * LxTx.relError)
-
-  ##set NaN
-  if(is.nan(LxTx.Error)) LxTx.Error <- 0
-
-  ##add an extra component of error
-  LxTx.Error <- sqrt(LxTx.Error^2 + (sig0 * LxTx)^2)
-
-  ##return combined values
-  temp <- cbind(LnLxTnTx, LxTx, LxTx.Error)
-
-  ##apply digits if wanted
-  if(!is.null(digits)){
-    temp[1,] <- round(temp[1,], digits = digits)
-  }
+  temp <- .calculate_LxTx_error(LnLxTnTx, sig0, digits)
 
   # ToDo: Add decomposition algorithm parameters here
   # calc.parameters <- list(...)

@@ -18,18 +18,20 @@ fit_ThermalQuenching(
 \item{data}{\link{data.frame} (\strong{required}): input data with three columns, the first column contains
 temperature values in deg. C, columns 2 and 3 the dependent values with its error}
 
-\item{start_param}{\link{list} (optional): option to provide own start parameters for the fitting, see
-details}
+\item{start_param}{\link{list} (\emph{optional}): option to provide the start
+parameters for the fitting, see details}
 
-\item{method_control}{\link{list} (optional): further options to fine tune the fitting, see details for
+\item{method_control}{\link{list} (\emph{optional}): further options to fine tune
+the fitting, see details for
 further information}
 
 \item{n.MC}{\link{numeric} (\emph{with default}): number of Monte Carlo runs for the error estimation. If \code{n.MC} is
 \code{NULL} or \verb{<=1}, the error estimation is skipped}
 
-\item{verbose}{\link{logical} (\emph{with default}): enables/disables terminal output}
+\item{verbose}{\link{logical} (\emph{with default}): enable/disable output to the
+terminal.}
 
-\item{plot}{\link{logical} (\emph{with default}): enables/disables plot output}
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.}
 
 \item{...}{further arguments that can be passed to control the plotting, support are \code{main}, \code{pch},
 \code{col_fit}, \code{col_points}, \code{lty}, \code{lwd}, \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{xaxt}}
@@ -104,8 +106,8 @@ wrong.
 \strong{ARGUMENT} \tab \strong{TYPE} \tab \strong{DESCRIPTION}\cr
 \code{upper} \tab named \link{vector} \tab sets upper fitting boundaries, if provided boundaries for all arguments
 are required, e.g., \code{c(A = 0, C = 0, W = 0, c = 0)} \cr
-\code{lower} \tab names \link{vector} \tab sets lower fitting boundaries (see \code{upper} for details) \cr
-\code{trace}   \tab \link{logical} \tab enables/disables progression trace for \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}\cr
+\code{lower} \tab names \link{vector} \tab set lower fitting boundaries (see \code{upper} for details) \cr
+\code{trace}   \tab \link{logical} \tab enable/disable progression trace for \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}\cr
 \code{weights} \tab \link{numeric} \tab option to provide own weights for the fitting, the length of this
 vector needs to be equal to the number for rows of the input \code{data.frame}. If set to \code{NULL} no weights
 are applied. The weights are defined by the third column of the input \code{data.frame}.
@@ -131,7 +133,7 @@ fit_ThermalQuenching(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. fit_ThermalQuenching(): Fitting Thermal Quenching Data. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. fit_ThermalQuenching(): Fitting Thermal Quenching Data. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

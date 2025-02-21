@@ -109,8 +109,8 @@ The input data is not restricted to a special type.
 
 ## load data
 data(ExampleData.DeValues, envir = environment())
-ExampleData.DeValues <-
-  Second2Gray(ExampleData.DeValues$BT998, dose.rate = c(0.0438,0.0019))
+ExampleData.DeValues <- convert_Second2Gray(ExampleData.DeValues$BT998,
+                                            dose.rate = c(0.0438,0.0019))
 
 ## plot histogram the easiest way
 plot_Histogram(ExampleData.DeValues)
@@ -142,6 +142,6 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2024. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2025. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 

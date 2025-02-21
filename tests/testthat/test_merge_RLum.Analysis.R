@@ -7,15 +7,17 @@ test_that("input validation", {
   r1 <- as(object = list(1:10), Class = "RLum.Results")
 
   expect_error(merge_RLum.Analysis(),
-               "is missing, with no default")
+               "'objects' should be of class 'list'")
   expect_error(merge_RLum.Analysis(o1),
-               "At least one input object in the list has to be of class")
+               "'objects' should be of class 'list'")
+  expect_error(merge_RLum.Analysis(list()),
+               "'objects' cannot be an empty list")
   expect_error(merge_RLum.Analysis(list(c1)),
                "At least one input object in the list has to be of class")
   expect_error(merge_RLum.Analysis(list(o1, "test")),
-               "At least element #2 is not of class 'RLum' or a derivative")
+               "All elements of 'object' should be of class 'RLum'")
   expect_error(merge_RLum.Analysis(list(o1, r1)),
-               "Object of class 'RLum.Results' not supported")
+               "'objects' should be of class 'RLum.Analysis' or 'RLum.Data'")
 
   expect_s4_class(merge_RLum.Analysis(list(o1)),
                   "RLum.Analysis")

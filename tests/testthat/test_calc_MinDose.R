@@ -1,3 +1,4 @@
+## load data
 data(ExampleData.DeValues, envir = environment())
 temp <- calc_MinDose(data = ExampleData.DeValues$CA1,
                      sigmab = 0.1,
@@ -8,9 +9,11 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(calc_MinDose(),
-               "is missing, with no default")
+               "'data' should be of class 'data.frame' or 'RLum.Results'")
   expect_error(calc_MinDose("test"),
-               "'data' object must be of type 'data.frame' or 'RLum.Results'")
+               "'data' should be of class 'data.frame' or 'RLum.Results'")
+  expect_error(calc_MinDose(data.frame()),
+               "'data' cannot be an empty data.frame")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1),
                "is missing, with no default")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, init.values = 1:4),
@@ -22,7 +25,7 @@ test_that("input validation", {
                             init.values = list(p0 = 0, p1 = 1, p2 = 2, mu = 3)),
                "Missing parameters: gamma, sigma")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, par = "error"),
-               "'par' must be a positive integer scalar")
+               "'par' should be a positive integer scalar")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, par = 2),
                "'par' can only be set to 3 or 4")
 })
@@ -70,6 +73,14 @@ test_that("check class and length of output", {
   SW({
   expect_error(calc_MinDose(data.nofit, sigmab = 0.9, par=4),
                "Couldn't find a converging fit for the profile log-likelihood")
+  })
+
+  ## more coverage
+  SW({
+  expect_warning(calc_MinDose(ExampleData.DeValues$CA1 / 100, sigmab = 0.1,
+                              par = 4, gamma.lower = 2, log.output = TRUE,
+                              bootstrap = TRUE, bs.M = 10, bs.N = 5, bs.h=100),
+                 "Gamma is larger than mu, consider running the model with new")
   })
 })
 

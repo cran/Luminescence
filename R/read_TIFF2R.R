@@ -5,6 +5,9 @@
 #'
 #'@param file [character] (**required**): file name
 #'
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
+#'
 #'@param ... not in use, for compatibility reasons only
 #'
 #'@return [RLum.Data.Image-class] object
@@ -29,22 +32,30 @@
 #'@export
 read_TIFF2R <- function(
   file,
+  verbose = TRUE,
   ...
-){
-# Integrity ---------------------------------------------------------------
-  ## most of the users don't need this import, no need to bother them
-  ## with required libraries
-  if (!requireNamespace("tiff", quietly = TRUE))
-    # nocov start
-    stop("Importing TIFF files requires the package tiff.\n",
-         "To install this package run 'install.packages('tiff')' in your R console.",
-         call. = FALSE)
-    # nocov end
+) {
+  .set_function_name("read_TIFF2R")
+  on.exit(.unset_function_name(), add = TRUE)
+
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(file, "character")
+  .validate_not_empty(file)
+  .require_suggested_package("tiff", "Importing TIFF files")
 
   if(!file.exists(file))
-    stop("[read_TIFF2R()] File does not exist or is not readable!", call. = FALSE)
+    .throw_error("File does not exist or is not readable")
 
-# Import ------------------------------------------------------------------
+  ## Import -----------------------------------------------------------------
+
+  if (verbose) {
+    cat("\n[read_TIFF2R()] Importing ...")
+    cat("\n path: ", dirname(file))
+    cat("\n file: ", .shorten_filename(basename(file)))
+    cat("\n")
+  }
+
   ## import
   temp <- tiff::readTIFF(file, all = TRUE, as.is = TRUE)
 
@@ -53,5 +64,4 @@ read_TIFF2R <- function(
 
 # Return ------------------------------------------------------------------
   set_RLum(class = "RLum.Data.Image", data = temp@data)
-
 }

@@ -22,7 +22,7 @@
 #' (as function of median error).
 #'
 #' @param plot [logical] (*with default*):
-#' enable plot output.
+#' enable/disable the plot output.
 #'
 #' @param ... Further plot arguments passed to the function.
 #'
@@ -63,22 +63,18 @@ calc_WodaFuchs2008 <- function(
   # - add statistics to the plot
   # - check whether this makes sense at all ...
 
-  ## check data and parameter consistency -------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
-    if(is(data, "RLum.Results") == FALSE &
-         is(data, "data.frame") == FALSE &
-         is.numeric(data) == FALSE) {
+  if (!.validate_class(data, c("data.frame", "RLum.Results", "numeric"),
+                       throw.error = FALSE)) {
+    return(NULL)
+  }
+  .validate_not_empty(data)
 
-      .throw_warning("Input data must be one of 'data.frame', 'RLum.Results' ",
-                     "or 'numeric', NULL returned")
-      return(NULL)
-
-    } else {
-
-      if(is(data, "RLum.Results") == TRUE) {
+  if (inherits(data, "RLum.Results")) {
         data <- tryCatch(get_RLum(data, "data"),
                          error = function(e) get_RLum(data))
-      }
+  }
 
       ## if data is a numeric vector or a single-column data frame,
       ## append a second column of NAs
@@ -90,7 +86,6 @@ calc_WodaFuchs2008 <- function(
       if (nrow(data) < 2) {
         .throw_error("Insufficient number of data points")
       }
-    }
 
   ## read additional arguments
 
@@ -106,7 +101,7 @@ calc_WodaFuchs2008 <- function(
 
   ## estimate bin width based on Woda and Fuchs (2008)
   if (all(is.na(data[, 2]))) {
-    message("[calc_WodFuchs2008()] No errors provided. Bin width set ",
+    message("[calc_WodaFuchs2008()] No errors provided, bin width set ",
             "by 10 percent of input data")
     bin_width <- median(data[,1] / 10,
                         na.rm = TRUE)

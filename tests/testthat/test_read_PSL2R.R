@@ -4,23 +4,32 @@ test_that("Test functionality", {
   testthat::skip_on_cran()
 
   ## default values
+  SW({
   expect_s4_class(read_PSL2R(
     file = psl.file
   ), "RLum.Analysis")
+  })
 
   ## custom values (all inverted), multiple files given to test merge=TRUE
   expect_s4_class(read_PSL2R(
     file = c(psl.file, psl.file),
-    drop_bg = TRUE, as_decay_curve = FALSE, smooth = TRUE, merge = TRUE
+    drop_bg = TRUE, as_decay_curve = FALSE, smooth = TRUE, merge = TRUE,
+    verbose = FALSE
   ), "RLum.Analysis")
 })
 
-test_that("Input validation", {
+test_that("input validation", {
   testthat::skip_on_cran()
+
+  expect_error(read_PSL2R(data.frame()),
+               "'file' should be of class 'character'")
+  expect_error(read_PSL2R(character(0)),
+               "'file' cannot be an empty character")
 
   ## directory given (assumes that we have a .psl file under inst/extdata)
   expect_message(
-    read_PSL2R(file = system.file("extdata", package = "Luminescence")),
+    read_PSL2R(file = system.file("extdata", package = "Luminescence"),
+               verbose = FALSE),
     "The following files were found and imported"
   )
 

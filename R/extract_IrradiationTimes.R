@@ -49,7 +49,7 @@
 #' values to a max. value of 48, cf.[write_R2BIN]
 #'
 #' @param txtProgressBar [logical] (*with default*):
-#' enables `TRUE` or disables `FALSE` the progress bars during import and export
+#' enable/disable the progress bar during import and export.
 #'
 #' @note The function can be also used to extract irradiation times from [RLum.Analysis-class] objects
 #' previously imported via [read_BIN2R] (`fastForward = TRUE`) or in combination with [Risoe.BINfileData2RLum.Analysis].
@@ -100,7 +100,7 @@
 #' ([read_XSYG2R]) do not change the order of entries for one step
 #' towards a correct time order.
 #'
-#' @section Function version: 0.3.3
+#' @section Function version: 0.3.4
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -125,7 +125,7 @@
 #' #     output <- extract_IrradiationTimes(file.XSYG = file.XSYG, file.BINX = file.BINX)
 #' #     get_RLum(output)
 #' #
-#' ## export results additionally to a CSV.file in the same directory as the XSYG-file
+#' ## export results additionally to a CSV-file in the same directory as the XSYG-file
 #' #       write.table(x = get_RLum(output),
 #' #                   file = paste0(file.BINX,"_extract_IrradiationTimes.csv"),
 #' #                   sep = ";",
@@ -150,19 +150,11 @@ extract_IrradiationTimes <- function(
       .throw_warning("argument 'file.BINX' is not supported in self-call mode.")
     }
 
-    ##extend arguments
-      ##extent recordType
-      if(is(recordType, "list")){
-        recordType <-
-          rep(recordType, length = length(object))
+    ## expand input arguments
+    recordType <- .listify(recordType, length(object))
 
-      }else{
-        recordType <-
-          rep(list(recordType), length = length(object))
-      }
-
-      ##run function
-      results <- lapply(1:length(object), function(x) {
+    ## run function
+    results <- lapply(seq_along(object), function(x) {
         extract_IrradiationTimes(
           object = object[[x]],
           recordType = recordType[[x]],
@@ -179,12 +171,13 @@ extract_IrradiationTimes <- function(
       }
   }
 
-# Integrity tests -----------------------------------------------------------------------------
-  ##check whether an character or an RLum.Analysis object is provided
-  if(is(object)[1] != "character" & is(object)[1] != "RLum.Analysis"){
-    .throw_error("Input object is neither of type 'character' nor ",
-                 "of type 'RLum.Analysis'.")
-  } else if(is(object)[1] == "character"){
+  ## Integrity tests --------------------------------------------------------
+
+  .validate_class(object, c("character", "RLum.Analysis"),
+                  extra = "a 'list' of such objects")
+  .validate_not_empty(object)
+
+  if (is.character(object[1])) {
 
     ##set object to file.XSYG
     file.XSYG <- object
@@ -270,13 +263,16 @@ extract_IrradiationTimes <- function(
     ##a little bit reformatting.
     START <- strptime(temp.START, format = "%y%m%d%H%M%S", tz = "GMT")
       ## make another try in case it does not make sense
-      if(any(is.na(START)))
+      if (anyNA(START))
         START <- strptime(temp.START, format = "%y%m%d%H:%M:%S", tz = "GMT")
 
   } else {
     temp.START <- vapply(temp.sequence, function(x) {
-      get_RLum(x, info.object = c("startDate"))
+      tmp <- suppressWarnings(get_RLum(x, info.object = c("startDate")))
+      if(is.null(tmp))
+        tmp <- as.character(Sys.Date())
 
+      tmp
     }, character(1))
 
     ##a little bit reformatting.
@@ -347,7 +343,6 @@ extract_IrradiationTimes <- function(
 
       }else{
         return(difftime(temp.results[x,"START"],time.irr.end, units = "secs"))
-
       }
     }
 
@@ -370,7 +365,7 @@ extract_IrradiationTimes <- function(
   # Write BINX-file if wanted -------------------------------------------------------------------
   if(!missing(file.BINX)){
     ##(1) remove all irradiation steps as there is no record in the BINX file and update information
-    results.BINX <- results[-which(results[,"STEP"] == "irradiation (NA)"),]
+    results.BINX <- results[results[, "STEP"] != "irradiation (NA)", ]
 
     ## (2) compare entries in the BINX-file with the entries in the table
     ## to make sure that both have the same length
@@ -388,6 +383,7 @@ extract_IrradiationTimes <- function(
       try <- write_R2BIN(temp.BINX, version = "06",
                          file = paste0(file.BINX,"_extract_IrradiationTimes.BINX"),
                          compatibility.mode = compatibility.mode,
+                         verbose = txtProgressBar,
                          txtProgressBar = txtProgressBar)
 
       ##set message on the format definition
@@ -395,8 +391,8 @@ extract_IrradiationTimes <- function(
         message("[extract_IrradiationTimes()] 'Time Since Irradiation' was redefined in the exported BINX-file to: 'Time Since Irradiation' plus the 'Irradiation Time' to be compatible with the Analyst.")
       }
     } else {
-      message("[extract_IrradiationTimes()] XSYG-file and BINX-file ",
-              "do not contain similar entries, BINX-file update skipped")
+      .throw_message("XSYG-file and BINX-file do not contain similar entries, ",
+                     "BINX-file update skipped")
     }
   }
 

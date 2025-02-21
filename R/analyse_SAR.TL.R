@@ -31,9 +31,9 @@
 #' (e.g. `signal.integral.max = 200`)
 #'
 #' @param integral_input [character] (*with default*):
-#' defines the input for the the arguments `signal.integral.min` and
+#' defines the input for the arguments `signal.integral.min` and
 #' `signal.integral.max`. These limits can be either provided `'channel'`
-#' number (the default) or `'temperature'`. If `'temperature'` is chosen the
+#' number (the default) or `'temperature'`. If `'temperature'` is chosen, the
 #' best matching channel is selected.
 #'
 #' @param sequence.structure [vector] [character] (*with default*):
@@ -54,7 +54,7 @@
 #' are to be logarithmic. See
 #' [plot.default]).
 #'
-#' @param ... further arguments that will be passed to the function [plot_GrowthCurve]
+#' @param ... further arguments that will be passed to the function [fit_DoseResponseCurve]
 #'
 #' @return
 #' A plot (*optional*) and an [RLum.Results-class] object is
@@ -64,7 +64,7 @@
 #' \item{LnLxTnTx.values}{[data.frame] of all calculated `Lx/Tx` values including signal, background counts and the dose points.}
 #' \item{rejection.criteria}{[data.frame] with values that might by used as rejection criteria. NA is produced if no R0 dose point exists.}
 #'
-#' **note:** the output should be accessed using the function [get_RLum]
+#' The output should be accessed using the function [get_RLum].
 #'
 #' @note
 #' **THIS IS A BETA VERSION**
@@ -77,7 +77,7 @@
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
-#' @seealso [calc_TLLxTxRatio], [plot_GrowthCurve], [RLum.Analysis-class],
+#' @seealso [calc_TLLxTxRatio], [fit_DoseResponseCurve], [RLum.Analysis-class],
 #' [RLum.Results-class], [get_RLum]
 #'
 #' @references
@@ -123,15 +123,11 @@ analyse_SAR.TL <- function(
   .set_function_name("analyse_SAR.TL")
   on.exit(.unset_function_name(), add = TRUE)
 
-  if (missing("object")) {
-    stop("[analyse_SAR.TL()] No value set for 'object'!", call. = FALSE)
-  }
-
   # Self-call -----------------------------------------------------------------------------------
   if(inherits(object, "list")){
-   if(!all(sapply(object, class) == "RLum.Analysis"))
-     stop("[analyse_SAR.TL()] All elements in the input list must be of class 'RLum.Analysis'!",
-          call. = FALSE)
+    lapply(object,
+           function(x) .validate_class(x, "RLum.Analysis",
+                                       name = "All elements of 'object'"))
 
     ##run sequence
     results <- lapply(object, function(o){
@@ -154,20 +150,13 @@ analyse_SAR.TL <- function(
 
     ##return
     return(results)
-
   }
 
   # CONFIG  -----------------------------------------------------------------
 
-  ##set allowed curve types
-  type.curves <- c("TL")
+  ## Integrity checks -------------------------------------------------------
 
-  ##=============================================================================#
-  # General Integrity Checks ---------------------------------------------------
-
-  if (!is(object, "RLum.Analysis")) {
-    .throw_error("Input object is not of type 'RLum.Analyis'")
-  }
+  .validate_class(object, "RLum.Analysis")
   if (missing("signal.integral.min")) {
     .throw_error("No value set for 'signal.integral.min'")
   }
@@ -175,11 +164,16 @@ analyse_SAR.TL <- function(
     .throw_error("No value set for 'signal.integral.max'")
   }
 
+  integral_input <- .validate_args(integral_input, c("channel", "temperature"))
 
   # Protocol Integrity Checks --------------------------------------------------
 
+  ##set allowed curve types
+  type.curves <- c("TL")
+
   ##Remove non TL-curves from object by selecting TL curves
-  object@records <- get_RLum(object, recordType = type.curves)
+  object@records <- get_RLum(object, recordType = type.curves,
+                             recursive = FALSE)
 
   ##ANALYSE SEQUENCE OBJECT STRUCTURE
 
@@ -424,10 +418,9 @@ analyse_SAR.TL <- function(
   ##catch log-scale problem
   if(log != ""){
     if(min(LnLx_matrix) <= 0 || min(TnTx_matrix) <= 0){
-      warning("[analyse_SAR.TL()] log-scale needs positive values; log-scale disabled!", call. = FALSE)
+      .throw_warning("Non-positive values detected, log-scale disabled")
     log <- ""
     }
-
   }
 
   #open plot area LnLx
@@ -625,12 +618,12 @@ analyse_SAR.TL <- function(
   temp.sample[is.na(temp.sample$LxTx.Error),"LxTx.Error"] <- 0
 
   ##run curve fitting
-  temp.GC <- try(plot_GrowthCurve(
-    sample = temp.sample,
+  temp.GC <- try(fit_DoseResponseCurve(
+    object = temp.sample,
     ...
   ))
 
-  ## plot_GrowthCurve() can fail in two ways:
+  ## fit_DoseResponseCurve() can fail in two ways:
   ## 1. either with a hard error, in which case there's nothing much we
   ##    can do and stop early by returning NULL
   if(inherits(temp.GC, "try-error")){

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_LMCurve.R
 \name{fit_LMCurve}
 \alias{fit_LMCurve}
-\title{Nonlinear Least Squares Fit for LM-OSL curves}
+\title{Non-linear Least Squares Fit for LM-OSL curves}
 \usage{
 fit_LMCurve(
   values,
@@ -22,6 +22,7 @@ fit_LMCurve(
   verbose = TRUE,
   plot = TRUE,
   plot.BG = FALSE,
+  method_control = list(),
   ...
 )
 }
@@ -42,7 +43,7 @@ an automatic start value estimation is attempted (see details).}
 
 \item{input.dataType}{\link{character} (\emph{with default}):
 alter the plot output depending on the input data: \code{"LM"} or \code{"pLM"} (pseudo-LM).
-See: \link{CW2pLM}}
+See: \link{convert_CW2pLM}}
 
 \item{fit.method}{\link{character} (\emph{with default}):
 select fit method, allowed values: \code{'port'} and \code{'LM'}. \code{'port'} uses the 'port'
@@ -56,7 +57,7 @@ sample code used for the plot and the optional output table (mtext).}
 additional identifier used as column header for the table output.}
 
 \item{LED.power}{\link{numeric} (\emph{with default}):
-LED power (max.) used for intensity ramping in mW/cm^2.
+LED power (max.) used for intensity ramping in mW/cm².
 \strong{Note:} This value is used for the calculation of the absolute
 photoionisation cross section.}
 
@@ -81,14 +82,19 @@ specifies method for background subtraction (\code{polynomial}, \code{linear}, \
 see Details). \strong{Note:} requires input for \code{values.bg}.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-terminal output with fitting results.}
+enable/disable output to the terminal.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-returns a plot of the fitted curves.}
+enable/disable the plot output.}
 
 \item{plot.BG}{\link{logical} (\emph{with default}):
 returns a plot of the background values with the fit used for the
 background subtraction.}
+
+\item{method_control}{\link{list} (\emph{optional}): options to control the output
+produced. Currently only the 'export.comp.contrib.matrix' (logical) option
+is supported, to enable/disable export of the component contribution
+matrix.}
 
 \item{...}{Further arguments that may be passed to the plot output, e.g.
 \code{xlab}, \code{xlab}, \code{main}, \code{log}.}
@@ -103,6 +109,7 @@ Various types of plots are returned. For details see above. Furthermore an
 \code{.. $fit} : nls (\link{nls} object)\cr
 \code{.. $component_matrix} : \link{matrix} with numerical xy-values of the single fitted components with the resolution of the input data
 \code{.. $component.contribution.matrix} : \link{list} component distribution matrix
+(produced only if \code{method_control$export.comp.contrib.matrix = TRUE})
 
 \strong{\verb{info:}}
 
@@ -117,7 +124,7 @@ the relative component contribution for each time interval including the row
 sum for this values.
 }
 \description{
-The function determines weighted nonlinear least-squares estimates of the
+The function determines weighted non-linear least-squares estimates of the
 component parameters of an LM-OSL curve (Bulur 1996) for a given number of
 components and returns various component parameters. The fitting procedure
 uses the function \link{nls} with the \code{port} algorithm.
@@ -186,7 +193,7 @@ process may be time consuming.
 
 \strong{Goodness of fit}
 
-The goodness of the fit is given by a pseudo-R^2 value (pseudo coefficient of
+The goodness of the fit is given by a pseudo-R² value (pseudo coefficient of
 determination). According to Lave (1970), the value is calculated as:
 
 \deqn{pseudoR^2 = 1 - RSS/TSS}
@@ -205,8 +212,8 @@ can be estimated by using internal R functions like \link{summary}. See the
 \emph{For more details on the nonlinear regression in R, see Ritz & Streibig (2008).}
 }
 \note{
-The pseudo-R^2 may not be the best parameter to describe the goodness
-of the fit. The trade off between the \code{n.components} and the pseudo-R^2
+The pseudo-R² may not be the best parameter to describe the goodness
+of the fit. The trade off between the \code{n.components} and the pseudo-R²
 value currently remains unconsidered.
 
 The function \strong{does not} ensure that the fitting procedure has reached a
@@ -214,7 +221,7 @@ global minimum rather than a local minimum! In any case of doubt, the use of
 manual start values is highly recommended.
 }
 \section{Function version}{
- 0.3.4
+ 0.3.5
 }
 
 \examples{
@@ -243,7 +250,7 @@ fit_LMCurve(values = values.curve,
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. fit_LMCurve(): Nonlinear Least Squares Fit for LM-OSL curves. Function version 0.3.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. fit_LMCurve(): Non-linear Least Squares Fit for LM-OSL curves. Function version 0.3.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

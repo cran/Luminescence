@@ -10,7 +10,7 @@
 #'
 #' The intensity of the spectrum is re-calculated using the following approach to recalculate
 #' wavelength and corresponding intensity values
-#' (e.g., Appendix 4 in Blasse and Grabmeier, 1994; Mooney and Kambhampati, 2013):
+#' (e.g., Appendix 4 in Blasse and Grabmaier, 1994; Mooney and Kambhampati, 2013):
 #'
 #' \deqn{\phi_{E} = \phi_{\lambda} * \lambda^2 / (hc)}
 #'
@@ -30,9 +30,10 @@
 #'
 #' @param digits [integer] (*with default*): set the number of digits on the returned energy axis
 #'
-#' @param order [logical] (*with default*): enables/disables sorting of the values in ascending energy
-#' order. After the conversion the longest wavelength has the lowest energy value and the shortest
-#' wavelength the highest. While this is correct, some R functions expect increasing x-values.
+#' @param order [logical] (*with default*): enable/disable sorting of the
+#' values in ascending energy order. After the conversion, the longest
+#' wavelength has the lowest energy value and the shortest wavelength the
+#' highest. While this is correct, some R functions expect increasing x-values.
 #'
 #' @return The same object class as provided as input is returned.
 #'
@@ -126,13 +127,13 @@ convert_Wavelength2Energy <- function(
   object,
   digits = 3L,
   order = FALSE
-  ){
-
+) {
+  .set_function_name("convert_Wavelength2Energy")
+  on.exit(.unset_function_name(), add = TRUE)
 
   # Self-call -----------------------------------------------------------------------------------
   if(inherits(object, "list")){
     return(lapply(object, convert_Wavelength2Energy))
-
   }
 
   # Conversion function -------------------------------------------------------------------------
@@ -151,12 +152,20 @@ convert_Wavelength2Energy <- function(
 
       ##return results
       return(m)
-
   }
 
+  ## Integrity checks -------------------------------------------------------
 
-  # Treat input data ----------------------------------------------------------------------------
+  .validate_class(object, c("RLum.Data.Spectrum", "data.frame", "matrix"),
+                  extra = "a 'list' of such objects")
+  .validate_not_empty(object)
+
   if(inherits(object, "RLum.Data.Spectrum")){
+
+    if (length(object@data) < 2) {
+      .throw_error("'object' contains no data")
+    }
+
      ##check whether the object might have this scale already
     ##this only works on RLum.Data.Spectrum objects and is sugar for using RLum-objects
     if(any("curveDescripter" %in% names(object@info))){
@@ -164,9 +173,7 @@ convert_Wavelength2Energy <- function(
          message("[convert_Wavelength2Energy()] Your object has already an energy scale, nothing done!")
          return(object)
      }
-
     }
-
 
     ##convert data
     object@data <- .conv_intensity(object@data)
@@ -176,7 +183,6 @@ convert_Wavelength2Energy <- function(
       object@data <- object@data[order(as.numeric(rownames(object@data))), ,
                                  drop = FALSE]
       rownames(object@data) <- sort(as.numeric(rownames(object@data)))
-
     }
 
     ##correct $curveDescripter (we do not attach the table, otherwise the object gets too big)
@@ -190,6 +196,11 @@ convert_Wavelength2Energy <- function(
     return(object)
 
   }else if(inherits(object, "matrix") || inherits(object, "data.frame")){
+
+    if (ncol(object) < 2) {
+      .throw_error("'object' should have at least two columns")
+    }
+
     temp <- as.matrix(object[,2:ncol(object)])
 
     ##set rownames
@@ -211,16 +222,5 @@ convert_Wavelength2Energy <- function(
       return(as.data.frame(temp))
 
     return(temp)
-  }else{
-    stop(
-      paste0(
-        "[convert_Wavelength2Energy()] Class '",
-        class(object)[1],
-        "' not supported as input!"
-      ),
-      call. = FALSE
-    )
-
   }
-
 }

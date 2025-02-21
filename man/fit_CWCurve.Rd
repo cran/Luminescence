@@ -15,9 +15,10 @@ fit_CWCurve(
   LED.wavelength = 470,
   cex.global = 0.6,
   sample_code = "Default",
-  output.terminal = TRUE,
+  verbose = TRUE,
   output.terminalAdvanced = TRUE,
   plot = TRUE,
+  method_control = list(),
   ...
 )
 }
@@ -29,7 +30,7 @@ x, y data of measured values (time and counts). See examples.}
 maximum number of components that are to be used for fitting.
 The upper limit is 7.}
 
-\item{fit.failure_threshold}{\link{vector} (\emph{with default}):
+\item{fit.failure_threshold}{\link{integer} (\emph{with default}):
 limits the failed fitting attempts.}
 
 \item{fit.method}{\link{character} (\emph{with default}):
@@ -44,7 +45,7 @@ traces the fitting process on the terminal.}
 calculate 1-sigma error range of components using \link[stats:confint]{stats::confint}}
 
 \item{LED.power}{\link{numeric} (\emph{with default}):
-LED power (max.) used for intensity ramping in mW/cm^2.
+LED power (max.) used for intensity ramping in mW/cm².
 \strong{Note:} The value is used for the calculation of the absolute
 photoionisation cross section.}
 
@@ -59,15 +60,19 @@ global scaling factor.}
 \item{sample_code}{\link{character} (\emph{optional}):
 sample code used for the plot and the optional output table (\code{mtext}).}
 
-\item{output.terminal}{\link{logical} (\emph{with default}):
-terminal output with fitting results.}
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 
 \item{output.terminalAdvanced}{\link{logical} (\emph{with default}):
-enhanced terminal output. Requires \code{output.terminal = TRUE}.
-If \code{output.terminal = FALSE} no advanced output is possible.}
+enhanced terminal output. Only valid if \code{verbose = TRUE}.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-returns a plot of the fitted curves.}
+enable/disable the plot output.}
+
+\item{method_control}{\link{list} (\emph{optional}): options to control the output
+produced. Currently only the 'export.comp.contrib.matrix' (logical) option
+is supported, to enable/disable export of the component contribution
+matrix.}
 
 \item{...}{further arguments and graphical parameters passed to \link{plot}.}
 }
@@ -76,7 +81,7 @@ returns a plot of the fitted curves.}
 
 the fitted CW-OSL curves are returned as plot.
 
-\strong{RLum.Results}
+\strong{RLum.Results object}
 
 Beside the plot and table output options, an \linkS4class{RLum.Results} object is
 returned.
@@ -92,31 +97,10 @@ a \link{data.frame} containing the summarised parameters including the error
 \code{component.contribution.matrix}:
 \link{matrix} containing the values for the component to sum contribution plot
 (\verb{$component.contribution.matrix}).
+Produced only if \code{method_control$export.comp.contrib.matrix = TRUE}).
 
 Matrix structure:\cr
 Column 1 and 2: time and \code{rev(time)} values \cr
-Additional columns are used for the components, two for each component,
-containing I0 and n0. The last columns \code{cont.} provide information on
-the relative component contribution for each time interval including the row
-sum for this values.
-
-\strong{object}
-
-beside the plot and table output options, an \linkS4class{RLum.Results} object
-is returned.
-
-\code{fit}:
-an \code{nls} object (\verb{$fit}) for which generic R functions
-are provided, e.g. \link{summary}, \link{confint}, \link{profile}. For more
-details, see \link{nls}.
-
-\code{output.table}:
-a \link{data.frame} containing the summarised parameters including the error\cr
-\code{component.contribution.matrix}: \link{matrix} containing the values
-for the component to sum contribution plot (\verb{$component.contribution.matrix}).\cr
-
-Matrix structure:\cr
-Column 1 and 2: time and \code{rev(time)} values\cr
 Additional columns are used for the components, two for each component,
 containing I0 and n0. The last columns \code{cont.} provide information on
 the relative component contribution for each time interval including the row
@@ -127,8 +111,7 @@ The function determines the weighted least-squares estimates of the
 component parameters of a CW-OSL signal for a given maximum number of
 components and returns various component parameters. The fitting procedure
 uses the \link{nls} function with the \code{port} algorithm.
-}
-\details{
+
 \strong{Fitting function}
 
 The function for the CW-OSL fitting has the general form:
@@ -150,7 +133,7 @@ provide start parameters.
 
 \strong{Goodness of fit}
 
-The goodness of the fit is given as pseudoR^2 value (pseudo coefficient of
+The goodness of the fit is given as pseudoR² value (pseudo coefficient of
 determination). According to Lave (1970), the value is calculated as:
 
 \deqn{pseudoR^2 = 1 - RSS/TSS}
@@ -173,15 +156,15 @@ for more information.
 \strong{Beta version - This function has not been properly tested yet and}
 \strong{should therefore not be used for publication purposes!}
 
-The pseudo-R^2 may not be the best parameter to describe the goodness of the
-fit. The trade off between the \code{n.components} and the pseudo-R^2 value
+The pseudo-R² may not be the best parameter to describe the goodness of the
+fit. The trade off between the \code{n.components} and the pseudo-R² value
 is currently not considered.
 
 The function \strong{does not} ensure that the fitting procedure has reached a
 global minimum rather than a local minimum!
 }
 \section{Function version}{
- 0.5.3
+ 0.5.4
 }
 
 \examples{
@@ -198,7 +181,7 @@ fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. fit_CWCurve(): Nonlinear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. fit_CWCurve(): Nonlinear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

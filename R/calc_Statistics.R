@@ -1,9 +1,9 @@
-#' Function to calculate statistic measures
+#' @title Function to calculate statistic measures
 #'
-#' This function calculates a number of descriptive statistics for estimates
+#' @description This function calculates a number of descriptive statistics for estimates
 #' with a given standard error (SE), most fundamentally using error-weighted approaches.
 #'
-#' The option to use Monte Carlo Methods (`n.MCM`) allows calculating
+#' @details The option to use Monte Carlo Methods (`n.MCM`) allows calculating
 #' all descriptive statistics based on random values. The distribution of these
 #' random values is based on the Normal distribution with `De` values as
 #' means and `De_error` values as one standard deviation. Increasing the
@@ -13,24 +13,22 @@
 #' values. See Dietze et al. (2016, Quaternary Geochronology) and the function
 #' [plot_AbanicoPlot] for details.
 #'
-#' @param data [data.frame] or [RLum.Results-class] object (**required**): 
-#' for [data.frame] two columns: De (`data[,1]`) and De error (`data[,2]`). 
-#' To plot several data sets in one plot the data sets must be provided 
-#' as `list`, e.g. `list(data.1, data.2)`.
+#' @param data [data.frame] or [RLum.Results-class] object (**required**):
+#' for [data.frame] two columns: De (`data[, 1]`) and De error (`data[, 2]`).
 #'
-#' @param weight.calc [character]: 
-#' type of weight calculation. One out of `"reciprocal"` (weight is 1/error), 
+#' @param weight.calc [character] (*with default*):
+#' type of weight calculation. One out of `"reciprocal"` (weight is 1/error),
 #' `"square"` (weight is 1/error^2). Default is `"square"`.
 #'
-#' @param digits [integer] (*with default*): 
-#' round numbers to the specified digits. 
-#' If digits is set to `NULL` nothing is rounded.
+#' @param digits [integer] (*with default*):
+#' number of decimal places to be used when rounding numbers. If set to `NULL`
+#' (default), no rounding occurs.
 #'
-#' @param n.MCM [numeric] (*with default*): 
-#' number of samples drawn for Monte Carlo-based statistics. 
+#' @param n.MCM [numeric] (*with default*):
+#' number of samples drawn for Monte Carlo-based statistics.
 #' `NULL` (the default) disables MC runs.
 #'
-#' @param na.rm [logical] (*with default*): 
+#' @param na.rm [logical] (*with default*):
 #' indicating whether `NA` values should be stripped before the computation proceeds.
 #'
 #' @return Returns a list with weighted and unweighted statistic measures.
@@ -70,16 +68,15 @@ calc_Statistics <- function(
   n.MCM = NULL,
   na.rm = TRUE
 ) {
+  .set_function_name("calc_Statistics")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  ## Check input data
-  if(is(data, "RLum.Results") == FALSE &
-       is(data, "data.frame") == FALSE) {
-    stop("[calc_Statistics()] Input data is neither of type 'data.frame' nor 'RLum.Results'", call. = FALSE)
+  ## Integrity checks -------------------------------------------------------
 
-  } else {
-    if(is(data, "RLum.Results")) {
-      data <- get_RLum(data, "data")[,1:2]
-    }
+  .validate_class(data, c("RLum.Results", "data.frame"))
+  .validate_not_empty(data)
+  if (inherits(data, "RLum.Results")) {
+    data <- get_RLum(data, "data")[, 1:2]
   }
 
   ##strip na values
@@ -96,19 +93,21 @@ calc_Statistics <- function(
   data[is.na(data[,2]),2] <- 0
 
   if(sum(data[,2]) == 0) {
-    warning("[calc_Statistics()] All errors are NA or zero! Automatically set to 10^-9!", call. = FALSE)
+    .throw_warning("All errors are NA or zero, automatically set to 10^-9")
     data[,2] <- rep(x = 10^-9, length(data[,2]))
   }
 
+  weight.calc <- .validate_args(weight.calc, c("square", "reciprocal"))
   if(weight.calc == "reciprocal") {
     S.weights <- 1 / data[,2]
   } else if(weight.calc == "square") {
     S.weights <- 1 / data[,2]^2
-  } else {
-    stop ("[calc_Statistics()] Weight calculation type not supported!", call. = FALSE)
   }
 
   S.weights <- S.weights / sum(S.weights)
+
+  .validate_positive_scalar(digits, int = TRUE, null.ok = TRUE)
+  .validate_positive_scalar(n.MCM, int = TRUE, null.ok = TRUE)
 
   ## create MCM data
   if (is.null(n.MCM)) {
@@ -132,9 +131,9 @@ calc_Statistics <- function(
   S.mean <- mean(x = data[,1],
                  na.rm = na.rm)
 
-  S.wg.mean <- weighted.mean(x = data[,1],
-                             w = S.weights,
-                             n.rm = na.rm)
+  S.wg.mean <- stats::weighted.mean(x = data[,1],
+                                    w = S.weights,
+                                    n.rm = na.rm)
 
   S.m.mean <- mean(x = data.MCM,
                    na.rm = na.rm)

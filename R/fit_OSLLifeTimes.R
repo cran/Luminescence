@@ -33,16 +33,16 @@
 #' **Parameter** \tab **Type** \tab **Description**\cr
 #' `p` \tab [numeric] \tab controls the probability for the F statistic reference values. For a significance level of 5 % a value of 0.95 (the default) should be added, for 1 %, a value of 0.99 is sufficient: 1 > p > 0 (cf. [stats::FDist])\cr
 #' `seed` \tab [numeric] \tab set the seed for the random number generator, provide a value here to get reproducible results \cr
-#' `DEoptim.trace` \tab [logical] \tab enables/disables the tracing of the differential evolution (cf. [DEoptim::DEoptim.control]) \cr
-#' `DEoptim.itermax` \tab [logical] \tab controls the number of the allowed generations (cf. [DEoptim::DEoptim.control]) \cr
-#' `weights` \tab [logical] \tab enables/disables the weighting for the start parameter estimation and fitting (see equations above).
+#' `DEoptim.trace` \tab [logical] \tab enable/disable the tracing of the differential evolution (cf. [DEoptim::DEoptim.control]) \cr
+#' `DEoptim.itermax` \tab [logical] \tab control the number of the allowed generations (cf. [DEoptim::DEoptim.control]) \cr
+#' `weights` \tab [logical] \tab enable/disable the weighting for the start parameter estimation and fitting (see equations above).
 #' The default values is `TRUE` \cr
-#' `nlsLM.trace` \tab [logical] \tab enables/disables trace mode for the nls fitting ([minpack.lm::nlsLM]), can be used to identify convergence problems, default is `FALSE` \cr
-#' `nlsLM.upper` \tab [logical] \tab enables/disables upper parameter boundary, default is `TRUE` \cr
-#' `nlsLM.lower` \tab [logical] \tab enables/disables lower parameter boundary, default is `TRUE`
+#' `nlsLM.trace` \tab [logical] \tab enable/disable trace mode for the nls fitting ([minpack.lm::nlsLM]), can be used to identify convergence problems, default is `FALSE` \cr
+#' `nlsLM.upper` \tab [logical] \tab enable/disable upper parameter boundary, default is `TRUE` \cr
+#' `nlsLM.lower` \tab [logical] \tab enable/disable lower parameter boundary, default is `TRUE`
 #' }
 #'
-#' @param object [RLum.Data.Curve-class], [RLum.Analysis-class], [data.frame] or [matrix] **(required)**:
+#' @param object [RLum.Data.Curve-class], [RLum.Analysis-class], [data.frame] or [matrix] (**required**):
 #' Input object containing the data to be analysed. All objects can be provided also as list for an automated
 #' processing. Please note: `NA` values are automatically removed and the dataset should comprise at least 5 data points (possibly more if `n.components` is
 #' set to a value greater than 1)
@@ -62,13 +62,15 @@
 #' @param method_control [list] (*optional*): Named to allow a more fine control of the fitting process. See details
 #' for allowed options.
 #'
-#' @param plot [logical] (*with default*): Enable/disable plot output
+#' @param plot [logical] (*with default*): Enable/disable the plot output.
 #'
-#' @param plot_simple [logical] (*with default*): Enable/disable reduced plot output. If `TRUE`, no
+#' @param plot_simple [logical] (*with default*): Enable/disable the reduced
+#' plot output. If `TRUE`, no
 #' residual plot is shown, however, plot output can be combined using the standard R layout options,
 #' such as `par(mfrow = c(2,2))`.
 #'
-#' @param verbose [logical] (*with default*): Enable/disable terminal feedback
+#' @param verbose [logical] (*with default*): Enable/disable output to the
+#' terminal.
 #'
 #' @param ... parameters passed to [plot.default] to control the plot output, supported are:
 #' `main`, `xlab`, `ylab`, `log`, `xlim`, `ylim`, `col`, `lty`, `legend.pos`, `legend.text`. If the input
@@ -112,7 +114,7 @@
 #'
 #' *(3) Further information*\cr
 #' - The photon count sum
-#' - Durbin-Watson residual statistic to asses whether the residuals are correlated, ideally
+#' - Durbin-Watson residual statistic to assess whether the residuals are correlated, ideally
 #' the residuals should be not correlated at all. Rough measures are: \cr
 #' D = 0: the residuals are systematically correlated \cr
 #' D = 2: the residuals are randomly distributed \cr
@@ -184,21 +186,22 @@ fit_OSLLifeTimes <- function(
 
 # Self-call -----------------------------------------------------------------------------------
 if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
+
+  .validate_not_empty(object)
+
   ##allow RLum.Analysis objects
   if(all(vapply(object, function(x){
     inherits(x, "RLum.Analysis")}, logical(1)))){
     object <- lapply(object, function(x){x@records})
     object <- .unlist_RLum(object)
-
   }
 
-  ##expand parameters
-  ##n.components
-  if(!is.null(n.components))
-    n.components <- as.list(rep(n.components, length(object)))
+  ## expand input arguments
+  rep.length <- length(object)
 
-  ##tp
-  tp <- as.list(rep(tp, length(object)))
+  if (!is.null(n.components))
+    n.components <- .listify(n.components, rep.length)
+  tp <- .listify(tp, rep.length)
 
   ## names of extra arguments
   arg_names <- names(list(...))
@@ -219,13 +222,12 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
       })
       names(args) <- arg_names
       args
-
     })
   }
 
   ##run function
   temp_results <- lapply(1:length(object), function(x){
-      temp <- try(do.call(what = fit_OSLLifeTimes,
+    temp <- try(do.call(what = fit_OSLLifeTimes,
         c(list(
          object = object[[x]],
          tp = tp[[x]],
@@ -238,11 +240,10 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
          ),
          arg_list[[x]])
 
-     ), silent = FALSE)
+     ), outFile = stdout()) # redirect error messages so they can be silenced
 
      if(inherits(temp, "try-error")){
        return(NULL)
-
      }else{
        return(temp)
      }
@@ -256,32 +257,36 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
   ##return
   return(results)
-
 }
 
-# Input integrity tests ------------------------------------------------------------------
-  if(inherits(object, "RLum.Data.Curve")){
-   if(!grepl(pattern = "POSL", x = object@recordType, fixed = TRUE))
-     .throw_error("recordType ", object@recordType,
-                  " not supported for input object")
+  ## Integrity checks -------------------------------------------------------
 
-    df <- as.data.frame(object@data)
-
-  }else if(inherits(object, "data.frame")){
-    df <- object[,1:2]
-
-  } else if(inherits(object, "matrix")){
-    df <- as.data.frame(object[,1:2])
-
-  }else{
-    message("[fit_OSLLifeTime()] Error: Class '", class(object),
-            "' not supported as input, NULL returned!")
+  is.valid <- .validate_class(object,
+                              c("RLum.Data.Curve", "data.frame", "matrix"),
+                              extra = "a 'list' of such objects",
+                              throw.error = FALSE)
+  if (!is.valid)
     return(NULL)
 
+  .validate_not_empty(object)
+  if(inherits(object, "RLum.Data.Curve")){
+   if(!grepl(pattern = "POSL", x = object@recordType, fixed = TRUE))
+     .throw_error("recordType '", object@recordType,
+                  "' not supported for input object")
+
+    object <- as.data.frame(object@data)
+
+  } else if(inherits(object, "matrix")){
+    object <- as.data.frame(object)
   }
 
+  if (ncol(object) < 2) {
+    .throw_error("'object' should have at least two columns")
+  }
+  df <- object[, 1:2]
+
   ##remove NA values, whatever it is worth for
-  if(any(is.na(df))){
+  if (anyNA(df)) {
     df <- na.exclude(df)
     .throw_warning("NA values detected and removed from dataset")
   }
@@ -301,8 +306,7 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
   ##signal_range
   if(!is.null(signal_range)){
-    if (!is.numeric(signal_range))
-      .throw_error("'signal_range' must be of type numeric")
+    .validate_class(signal_range, "numeric")
 
     ##check lengths
     if(length(signal_range) == 1)
@@ -324,14 +328,12 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
     ##set range
     df <- df[signal_range[1]:signal_range[2],]
-
   }
 
   ## number of components requested
   .validate_positive_scalar(n.components, int = TRUE, null.ok = TRUE)
-  if (is.null(n.components)){
-    m <- 1
-  } else{
+  m <- 1
+  if (!is.null(n.components)){
     m <- n.components
   }
 
@@ -340,9 +342,8 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
   ## positive (see `qf()` in the `while` loop further down at (B))
   min.num.signals <- 2 * m + 2 + 1
   if (nrow(df) < min.num.signals) {
-    message("[fit_OSLLifeTimes()] Error: For ", m, " components ",
-            "the dataset must have at least ", min.num.signals,
-            " signal points, NULL returned")
+    .throw_message("For ", m, " components the dataset must have at least ",
+                   min.num.signals, " signal points, NULL returned")
     return(NULL)
   }
 
@@ -359,7 +360,6 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
     nlsLM.trace = FALSE,
     nlsLM.upper = TRUE,
     nlsLM.lower = TRUE
-
   )
 
   ##udpate list if the user did something
@@ -374,8 +374,8 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
   fit_formula <- function(n.components, tp) {
     A <- paste0("A.",1:n.components)
     tau <- paste0("tau.",1:n.components)
-    as.formula(paste0("y ~ ", paste(A," * exp(- x/(",tau," + ", tp, "))", collapse = " + ")))
-
+    stats::as.formula(paste0("y ~ ", paste(A," * exp(- x/(",tau," + ", tp, "))",
+                             collapse = " + ")))
   }
   ##
   ##
@@ -394,12 +394,9 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
     term <- paste(term, collapse = " + ")
 
     ##set weight (should be given as character)
+    w <- "1"
     if(method_control_setting$weights){
       w <- "c^2/n"
-
-    }else{
-      w <- "1"
-
     }
 
     ##combine
@@ -407,7 +404,6 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
 
     ##parse ... if we do it here, we boost the speed of the evaluation
     parse(text = eval(term))
-
   }
   ##
   ##
@@ -429,11 +425,10 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
       cat("\n[fit_OSLLifeTime()]\n")
       cat("\n(1) Start parameter and component adapation")
       cat("\n---------------------(start adaption)------------------------------------")
-
     }
 
-    while(!is.na(suppressWarnings(qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2))) && (
-          F[2] > qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2) & F[1] >= F[2])){
+    while(!is.na(suppressWarnings(stats::qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2))) && (
+          F[2] > stats::qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2) & F[1] >= F[2])){
 
       ##set F
       F[1] <- F[2]
@@ -480,23 +475,20 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
       if(!is.na(chi_squared[1])){
         F[2] <- (abs(diff(chi_squared))/2) /
           (chi_squared[2]/(nrow(df) - 2 * m  - 2))
-
       }
 
       ##terminal feedback
       if(verbose){
         cat("\n>> + adaption for",m, "comp.", ": ", round(F[2],2), "(calc.) <> ",
-            round(qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2), 2), "(ref.)")
+            round(stats::qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2), 2), "(ref.)")
 
-        if(F[2] > qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2) & F[1] >= F[2]){
+        if(F[2] > stats::qf(method_control_setting$p, df1 = 2, df2 = length(df[[2]]) - 2 * m - 2) & F[1] >= F[2]){
           cat(" >> [add comp.]")
 
         }else{
           cat(" >> [stop]\n")
           cat("---------------------(end adaption)--------------------------------------\n\n")
-
         }
-
       }
 
       ##break here if n.components was set others than NULL, in such case we force the number
@@ -513,7 +505,6 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
       ##update objects
       chi_squared[1] <- chi_squared[2]
       m <- m + 1
-
     }
 
     ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -523,15 +514,11 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
     ##  - the last component violated the F statistic, so was obviously not the best call
     ##  - the loop adds every time another component
     if(is.null(n.components)){
-      ##this covers the extrem case that the process stops after the first run
+      ## this covers the extreme case that the process stops after the first run
       if(m == 2){
-        m <- 1
         start_parameters <- start$optim$bestmem
-
-      }else{
-        m <- m - 2
-
       }
+      m <- max(m - 2, 1)
     }
 
     A <- start_parameters[seq(1,length(start_parameters), by = 2)]
@@ -549,7 +536,6 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
       cat("\n>> Applied component matrix\n")
       print(start_matrix)
       cat("\n\n")
-
     }
 
     ##run fitting using the Levenberg-Marquardt algorithm
@@ -575,7 +561,7 @@ if(inherits(object, "list") || inherits(object, "RLum.Analysis")){
       },
       trace = method_control_setting$nlsLM.trace,
       control = minpack.lm::nls.lm.control(maxiter = 500)
-    ), silent = FALSE)
+    ), outFile = stdout()) # redirect error messages so they can be silenced
 
 # Post-processing -----------------------------------------------------------------------------
 
@@ -626,8 +612,7 @@ if(verbose){
     cat("-------------------------------------------------------------------------\n")
 
   }else{
-    message("[fit_OSLLifeTimes()] Error: The fitting was not successful, ",
-            "consider trying again")
+    .throw_message("The fitting was not successful, consider trying again")
   }
 
   cat("\n(3) Further information\n")
@@ -641,7 +626,6 @@ if(verbose){
   }
   cat(paste(string, collapse = ""))
   cat("\n")
-
 }
 
 # Plotting ------------------------------------------------------------------------------------
@@ -659,16 +643,17 @@ if(plot) {
     lty = rep(1, (m + 1)),
     legend.pos = "topright",
     legend.text = c("sum", paste0("comp. ", 1:m))
-
   )
 
     ##modify settings on request
     plot_settings <- modifyList(x = plot_settings, val = list(...))
 
     ##catch log scale
+    if (is.list(plot_settings$log))
+      plot_settings$log <- unlist(plot_settings$log)
     if(grepl(pattern = "x", plot_settings$log, fixed = TRUE)){
       if(plot_settings$xlim[1] == 0){
-        plot_settings$xlim[1] <- if(min(df_raw[[1]]) == 0) 1e-04 else min(df_raw[[1]])
+        plot_settings$xlim[1] <- max(min(df_raw[[1]]), 1e-4)
         .throw_warning("log-scale requires x-values > 0, set min xlim to ",
                        round(plot_settings$xlim[1], 4))
       }
@@ -676,7 +661,7 @@ if(plot) {
 
     if(grepl(pattern = "y", plot_settings$log, fixed = TRUE)){
       if(plot_settings$ylim[1] == 0){
-        plot_settings$ylim[1] <- if(min(df_raw[[2]]) == 0) 1e-04 else min(df_raw[[2]])
+        plot_settings$ylim[1] <- max(min(df_raw[[2]]), 1e-04)
         .throw_warning("log-scale requires y-values > 0, set min ylim to ",
                        round(plot_settings$ylim[1], 4))
       }
@@ -687,13 +672,13 @@ if(plot) {
 
     if(!plot_simple){
       ##make sure that the screen closes if something is wrong
-      on.exit(close.screen(all.screens = TRUE), add = TRUE)
+      on.exit(graphics::close.screen(all.screens = TRUE), add = TRUE)
 
-      split.screen(rbind(
+      graphics::split.screen(rbind(
         c(0.1,1,0.32, 0.98),
         c(0.1,1,0.1, 0.32)))
 
-      screen(1)
+      graphics::screen(1)
       par(mar = c(0, 4, 3, 4))
     }
 
@@ -717,7 +702,7 @@ if(plot) {
     ##+ add some curve
     lines(
       df$x,
-      fitted(fit),
+      stats::fitted(fit),
       col = plot_settings$col[1],
       lwd = 1.3,
       lty = plot_settings$lty[1]
@@ -737,7 +722,6 @@ if(plot) {
         col = plot_settings$col[i + 1],
         lty = plot_settings$lty[i + 1]
       )
-
     }
 
     ##+ add legend
@@ -751,7 +735,7 @@ if(plot) {
 
 
     if(!plot_simple){
-      screen(2)
+      graphics::screen(2)
       par(mar = c(4, 4, 0, 4))
       plot(
         x = df[[1]],

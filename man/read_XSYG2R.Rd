@@ -7,6 +7,7 @@
 read_XSYG2R(
   file,
   recalculate.TL.curves = TRUE,
+  n_records = NULL,
   fastForward = FALSE,
   import = TRUE,
   pattern = ".xsyg",
@@ -18,14 +19,18 @@ read_XSYG2R(
 \item{file}{\link{character} or \link{list} (\strong{required}):
 path and file name of the XSYG file. If input is a \code{list} it should comprise
 only \code{character}s representing each valid path and XSYG-file names.
-Alternatively the input character can be just a directory (path), in this case the
-the function tries to detect and import all XSYG-files found in the directory.}
+Alternatively, the input character can be just a directory (path), in which
+case the function tries to detect and import all XSYG-files found in the
+directory.}
 
 \item{recalculate.TL.curves}{\link{logical} (\emph{with default}):
 if set to \code{TRUE}, TL curves are returned as temperature against count values
 (see details for more information) Note: The option overwrites the time vs.
 count TL curve. Select \code{FALSE} to import the raw data delivered by the
 lexsyg. Works for TL curves and spectra.}
+
+\item{n_records}{\link{numeric} (\emph{with default}): set the number of records to be imported; by default
+the function attempts to import all records}
 
 \item{fastForward}{\link{logical} (\emph{with default}):
 if \code{TRUE} for a more efficient data processing only a list of \linkS4class{RLum.Analysis}
@@ -38,11 +43,11 @@ if set to \code{FALSE}, only the XSYG file structure is shown.}
 optional regular expression if \code{file} is a link to a folder, to select just
 specific XSYG-files}
 
-\item{verbose}{\link{logical} (\emph{with default}): enable or disable verbose mode. If verbose is \code{FALSE}
-the \code{txtProgressBar} is also switched off}
+\item{verbose}{\link{logical} (\emph{with default}): enable/disable output to the
+terminal. If verbose is \code{FALSE} the \code{txtProgressBar} is also switched off}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables \code{TRUE} or disables \code{FALSE} the progress bar during import}
+enable/disable the progress bar during import. Ignored if \code{verbose = FALSE}.}
 }
 \value{
 \strong{Using the option \code{import = FALSE}}
@@ -144,7 +149,7 @@ be done using the functions provided with the package \code{'XML'}.
 Corresponding values in the XSXG file are skipped.
 }
 \section{Function version}{
- 0.6.12
+ 0.6.14
 }
 
 \examples{
@@ -176,7 +181,7 @@ structure_RLum(OSL.SARMeasurement$Sequence.Object)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. read_XSYG2R(): Import XSYG files to R. Function version 0.6.12. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. read_XSYG2R(): Import XSYG files to R. Function version 0.6.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

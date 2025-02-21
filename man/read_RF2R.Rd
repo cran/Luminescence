@@ -4,11 +4,14 @@
 \alias{read_RF2R}
 \title{Import RF-files to R}
 \usage{
-read_RF2R(file, ...)
+read_RF2R(file, verbose = TRUE, ...)
 }
 \arguments{
 \item{file}{\link{character} (\strong{required}): path and file name of the RF file. Alternatively a list of file
 names can be provided.}
+
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 
 \item{...}{not used, only for compatible reasons}
 }
@@ -21,9 +24,10 @@ Import files produced by the IR-RF 'ImageJ' macro (\code{SR-RF.ijm}; Mittelstra�
 objects
 }
 \details{
-The results of spatially resolved IR-RF data are summarised in so-called RF-files ((Mittelstraß and Kreutzer, 2021).
+The results of spatially resolved IR-RF data are summarised in
+so-called RF-files (Mittelstraß and Kreutzer, 2021).
 This functions provides an easy import to process the data seamlessly with the R package 'Luminescence'.
-The output of the function can be passed to the function \link{analyse_IRSAR.RF}
+The output of the function can be passed to function \link{analyse_IRSAR.RF}.
 }
 \section{Function version}{
  0.1.1
@@ -38,7 +42,7 @@ temp <- read_RF2R(file)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. read_RF2R(): Import RF-files to R. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. read_RF2R(): Import RF-files to R. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

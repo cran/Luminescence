@@ -14,7 +14,7 @@
 #' `norm = TRUE` or `norm = "max"`: Curve values are normalised to the highest
 #' count value in the curve
 #'
-#' `norm = "last"`: Curves values are normalised to the last count value
+#' `norm = "last"`: Curve values are normalised to the last count value
 #' (this can be useful in particular for radiofluorescence curves)
 #'
 #' `norm = "huot"`: Curve values are normalised as suggested by Sébastien Huot
@@ -33,12 +33,12 @@
 #' use local graphical parameters for plotting, e.g. the plot is shown in one
 #' column and one row. If `par.local = FALSE`, global parameters are inherited.
 #'
-#' @param norm [logical] [character] (*with default*): allows curve normalisation to the
-#' highest count value ('default'). Alternatively, the function offers the
-#' modes `"max"`, `"min"` and `"huot"` for a background corrected normalisation, see details.
+#' @param norm [logical] [character] (*with default*): whether curve
+#' normalisation should occur (`FALSE` by default). Alternatively, the function
+#' offers modes `"max"` (used with `TRUE`), `"last"` and `"huot"`, see details.
 #'
 #' @param smooth [logical] (*with default*):
-#' provides an automatic curve smoothing based on [zoo::rollmean]
+#' provides automatic curve smoothing based on the internal function `.smoothing`
 #'
 #' @param ... further arguments and graphical parameters that will be passed
 #' to the `plot` function
@@ -78,21 +78,25 @@ plot_RLum.Data.Curve<- function(
   norm = FALSE,
   smooth = FALSE,
   ...
-){
+) {
+  .set_function_name("plot_RLum.Data.Curve")
+  on.exit(.unset_function_name(), add = TRUE)
 
-# Integrity check -------------------------------------------------------------
+  ## Integrity tests  -------------------------------------------------------
 
-  ##check if object is of class RLum.Data.Curve
-  if(!inherits(object, "RLum.Data.Curve"))
-    stop("[plot_RLum.Data.Curve()] Input object is not of type RLum.Data.Curve", call. = FALSE)
+  .validate_class(object, "RLum.Data.Curve")
 
   ## check for NA values
   if(all(is.na(object@data))){
-    warning("[plot_RLum.Data.Curve()] Curve contains only NA-values, nothing plotted.", call. = FALSE)
+    .throw_warning("Curve contains only NA-values, nothing plotted")
     return(NULL)
-
   }
 
+  if (is.logical(norm))
+    norm <- norm[1]
+  else
+    norm <- .validate_args(norm, c("max", "last", "huot"),
+                           extra = "a logical value")
 
 # Preset plot -------------------------------------------------------------
     ## preset
@@ -109,7 +113,6 @@ plot_RLum.Data.Curve<- function(
       } else if(object@recordType[1] == "TL") {
         lab.unit <- "\u00B0C"
         lab.xlab <- "Temperature"
-
       }
     }
 
@@ -123,32 +126,12 @@ plot_RLum.Data.Curve<- function(
 
       xlab.xsyg <- temp.lab[1]
       ylab.xsyg <- temp.lab[2]
-
     }
 
-    ##normalise curves if argument has been set
-    if(norm[1] %in% c('max', 'last', 'huot') || norm[1] == TRUE){
-      if (norm[1] == "max" || norm[1] == TRUE) {
-        object@data[,2] <- object@data[,2] / max(object@data[,2])
-
-      } else if (norm[1] == "last") {
-        object@data[,2] <- object@data[,2] / object@data[nrow(object@data),2]
-
-      } else if (norm[1] == "huot") {
-        bg <- median(object@data[floor(nrow(object@data)*0.8):nrow(object@data),2])
-        object@data[,2] <-  (object@data[,2] - bg) / max(object@data[,2] - bg)
-
-      }
-
-      ##check for Inf and NA
-      if(any(is.infinite(object@data[,2])) || anyNA(object@data[,2])){
-        object@data[,2][is.infinite(object@data[,2]) | is.na(object@data[,2])] <- 0
-        warning("[plot_RLum.Data.Curve()] Normalisation led to Inf or NaN values. Values replaced by 0.", call. = FALSE)
-
-      }
-
+    ## curve normalisation
+    if (norm == TRUE || norm %in% c("max", "last", "huot")) {
+      object@data[, 2] <- .normalise_curve(object@data[, 2], norm)
     }
-
 
     ylab <- if (!is.na(ylab.xsyg)) {
       ylab.xsyg
@@ -203,8 +186,7 @@ plot_RLum.Data.Curve<- function(
     ##smooth
     if(smooth){
       k <- ceiling(length(object@data[, 2])/100)
-      object@data[, 2] <- zoo::rollmean(object@data[, 2],
-                                        k = k, fill = NA)
+      object@data[, 2] <- .smoothing(object@data[, 2], k = k, align = "center")
     }
 
     ##plot curve

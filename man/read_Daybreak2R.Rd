@@ -18,10 +18,10 @@ if the input is a DAT-file (binary) a \link[data.table:data.table]{data.table::d
 the \linkS4class{RLum.Analysis} object can be returned for debugging purposes.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enables or disables terminal feedback}
+enable/disable output to the terminal.}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables or disables \link{txtProgressBar}.}
+enable/disable \link{txtProgressBar}.}
 
 \item{...}{not in use, for compatibility reasons only}
 }
@@ -36,7 +36,7 @@ format described for the software TLAPLLIC v.3.2 used for a Daybreak, model 1100
 \note{
 \strong{\verb{[BETA VERSION]}}
 This function still needs to be tested properly. In particular
-the function has underwent only very rough rests using a few files.
+the function has underwent only very rough tests using a few files.
 }
 \section{Function version}{
  0.3.2
@@ -61,7 +61,7 @@ The ASCII-file import is based on a suggestion by Willian Amidon and Andrew Loui
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Zink, A., 2024. read_Daybreak2R(): Import measurement data produced by a Daybreak TL/OSL reader into R. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Zink, A., 2025. read_Daybreak2R(): Import measurement data produced by a Daybreak TL/OSL reader into R. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

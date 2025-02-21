@@ -1,4 +1,4 @@
-test_that("test_plot_RLum", {
+test_that("check functionality", {
   testthat::skip_on_cran()
 
   ## create dataset to test
@@ -10,7 +10,9 @@ test_that("test_plot_RLum", {
   expect_silent(plot_RLum(list(image_short, image_short), main = list("test1", "test2"), mtext = "test"))
 
   ## trigger error
-  expect_error(plot_RLum("error"), "\\[plot_RLum\\(\\)\\] Sorry, I don't know what to do for object of type 'character'.")
+  expect_error(plot_RLum("error"),
+               "[plot_RLum()] 'object' should be of class 'RLum'",
+               fixed = TRUE)
 
   ## test list of RLum.Analysis
   l <- list(set_RLum(
@@ -20,6 +22,10 @@ test_that("test_plot_RLum", {
       set_RLum("RLum.Data.Curve", data = matrix(1:20, ncol = 2)))))
 
   expect_silent(plot_RLum(l, main = list("test", "test2"), mtext = "test"))
+
+  ## empty object
+  expect_silent(plot_RLum(set_RLum("RLum.Analysis")))
+  expect_silent(plot_RLum(set_RLum("RLum.Data.Image")))
 
   ## plot results objects
   data(ExampleData.BINfileData, envir = environment())
@@ -34,6 +40,4 @@ test_that("test_plot_RLum", {
     background.integral.max = 1000,
     fit.method = "LIN")
   expect_null(plot_RLum.Results(results))
-
-
 })

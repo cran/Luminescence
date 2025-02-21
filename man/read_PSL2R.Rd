@@ -10,6 +10,7 @@ read_PSL2R(
   as_decay_curve = TRUE,
   smooth = FALSE,
   merge = FALSE,
+  verbose = TRUE,
   ...
 )
 }
@@ -35,6 +36,9 @@ to hardware errors.}
 \item{merge}{\link{logical} (\emph{with default}):
 \code{TRUE} to merge all \code{RLum.Analysis} objects. Only applicable if multiple
 files are imported.}
+
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 
 \item{...}{currently not used.}
 }
@@ -80,7 +84,7 @@ Sebastian Kreutzer, Institut of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2024. read_PSL2R(): Import PSL files to R. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2025. read_PSL2R(): Import PSL files to R. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

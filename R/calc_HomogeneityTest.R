@@ -1,7 +1,7 @@
-#' Apply a simple homogeneity test after Galbraith (2003)
+#' @title Apply a simple homogeneity test after Galbraith (2003)
 #'
+#' @description
 #' A simple homogeneity test for De estimates
-#'
 #' For details see Galbraith (2003).
 #'
 #' @param data [RLum.Results-class] or [data.frame] (**required**):
@@ -22,14 +22,14 @@
 #' \item{args}{[list] used arguments}
 #' \item{call}{[call] the function call}
 #'
-#' The output should be accessed using the function [get_RLum]
+#' The output should be accessed using the function [get_RLum].
 #'
 #' @section Function version: 0.3.0
 #'
 #' @author Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer,
 #' IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 #'
-#' @seealso [pchisq]
+#' @seealso [stats::pchisq]
 #'
 #' @references
 #' Galbraith, R.F., 2003. A simple homogeneity test for estimates
@@ -59,24 +59,16 @@ calc_HomogeneityTest <- function(
   data,
   log = TRUE,
   ...
-){
+) {
+  .set_function_name("calc_HomogeneityTest")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  ##============================================================================##
-  ## CONSISTENCY CHECK OF INPUT DATA
-  ##============================================================================##
+  ## Integrity checks -------------------------------------------------------
 
-  if(missing(data)==FALSE){
-    if(!is(data, "data.frame") & !is(data, "RLum.Results")){
-      stop(
-        "[calc_HomogeneityTest()] 'data' object has to be of type 'data.frame' or 'RLum.Results'!",
-        call. = FALSE
-      )
-    } else {
-      if(is(data, "RLum.Results")){
-        data <- get_RLum(data, "data")
-
-      }
-    }
+  .validate_class(data, c("data.frame", "RLum.Results"))
+  .validate_not_empty(data)
+  if (inherits(data, "RLum.Results")) {
+    data <- get_RLum(data, "data")
   }
 
   ##==========================================================================##
@@ -112,7 +104,7 @@ calc_HomogeneityTest <- function(
   df <- length(wi) - 1
   n <- length(wi)
 
-  P <- pchisq(G, df, lower.tail = FALSE)
+  P <- stats::pchisq(G, df, lower.tail = FALSE)
 
 
   ##============================================================================##

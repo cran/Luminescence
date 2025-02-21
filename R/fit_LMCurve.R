@@ -1,6 +1,6 @@
-#' @title Nonlinear Least Squares Fit for LM-OSL curves
+#' @title Non-linear Least Squares Fit for LM-OSL curves
 #'
-#' @description The function determines weighted nonlinear least-squares estimates of the
+#' @description The function determines weighted non-linear least-squares estimates of the
 #' component parameters of an LM-OSL curve (Bulur 1996) for a given number of
 #' components and returns various component parameters. The fitting procedure
 #' uses the function [nls] with the `port` algorithm.
@@ -71,7 +71,7 @@
 #'
 #' **Goodness of fit**
 #'
-#' The goodness of the fit is given by a pseudo-R^2 value (pseudo coefficient of
+#' The goodness of the fit is given by a pseudo-R² value (pseudo coefficient of
 #' determination). According to Lave (1970), the value is calculated as:
 #'
 #' \deqn{pseudoR^2 = 1 - RSS/TSS}
@@ -105,7 +105,7 @@
 #'
 #' @param input.dataType [character] (*with default*):
 #' alter the plot output depending on the input data: `"LM"` or `"pLM"` (pseudo-LM).
-#' See: [CW2pLM]
+#' See: [convert_CW2pLM]
 #'
 #' @param fit.method [character] (*with default*):
 #' select fit method, allowed values: `'port'` and `'LM'`. `'port'` uses the 'port'
@@ -119,7 +119,7 @@
 #' additional identifier used as column header for the table output.
 #'
 #' @param LED.power [numeric] (*with default*):
-#' LED power (max.) used for intensity ramping in mW/cm^2.
+#' LED power (max.) used for intensity ramping in mW/cm².
 #' **Note:** This value is used for the calculation of the absolute
 #' photoionisation cross section.
 #'
@@ -144,14 +144,19 @@
 #' see Details). **Note:** requires input for `values.bg`.
 #'
 #' @param verbose [logical] (*with default*):
-#'  terminal output with fitting results.
+#' enable/disable output to the terminal.
 #'
 #' @param plot [logical] (*with default*):
-#' returns a plot of the fitted curves.
+#' enable/disable the plot output.
 #'
 #' @param plot.BG [logical] (*with default*):
 #' returns a plot of the background values with the fit used for the
 #' background subtraction.
+#'
+#' @param method_control [list] (*optional*): options to control the output
+#' produced. Currently only the 'export.comp.contrib.matrix' (logical) option
+#' is supported, to enable/disable export of the component contribution
+#' matrix.
 #'
 #' @param ... Further arguments that may be passed to the plot output, e.g.
 #' `xlab`, `xlab`, `main`, `log`.
@@ -166,6 +171,7 @@
 #' `.. $fit` : nls ([nls] object)\cr
 #' `.. $component_matrix` : [matrix] with numerical xy-values of the single fitted components with the resolution of the input data
 #' `.. $component.contribution.matrix` : [list] component distribution matrix
+#'  (produced only if `method_control$export.comp.contrib.matrix = TRUE`)
 #'
 #' **`info:`**
 #'
@@ -180,15 +186,15 @@
 #' sum for this values.
 #'
 #' @note
-#' The pseudo-R^2 may not be the best parameter to describe the goodness
-#' of the fit. The trade off between the `n.components` and the pseudo-R^2
+#' The pseudo-R² may not be the best parameter to describe the goodness
+#' of the fit. The trade off between the `n.components` and the pseudo-R²
 #' value currently remains unconsidered.
 #'
 #' The function **does not** ensure that the fitting procedure has reached a
 #' global minimum rather than a local minimum! In any case of doubt, the use of
 #' manual start values is highly recommended.
 #'
-#' @section Function version: 0.3.4
+#' @section Function version: 0.3.5
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -259,23 +265,23 @@ fit_LMCurve<- function(
   verbose = TRUE,
   plot = TRUE,
   plot.BG = FALSE,
+  method_control = list(),
   ...
 ) {
   .set_function_name("fit_LMCurve")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # (0) Integrity checks -------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
   ##(1) data.frame or RLum.Data.Curve object?
-  if (!is(values, "data.frame") && !is(values, "RLum.Data.Curve")) {
-    .throw_error("'values' has to be of type 'data.frame' or 'RLum.Data.Curve'")
-  }
+  .validate_class(values, c("data.frame", "RLum.Data.Curve"))
+  .validate_not_empty(values)
 
-  if (is(values, "RLum.Data.Curve")) {
-    if (values@recordType != "RBR" && values@recordType != "LM-OSL") {
+  if (inherits(values, "RLum.Data.Curve")) {
+    if (!values@recordType %in% c("RBR", "LM-OSL")) {
       .throw_error("recordType should be 'RBR' or 'LM-OSL'. ",
-                   "Consider using as(object,'data.frame') if you had used ",
-                   "a pseudo transformation function.")
+                   "Consider using `as(object, 'data.frame')` if you ",
+                   "have used a pseudo transformation function")
     }
 
     values <- as(values,"data.frame")
@@ -283,16 +289,24 @@ fit_LMCurve<- function(
 
   ##(2) data.frame or RLum.Data.Curve object?
   if (!missing(values.bg)) {
-    if (!is(values.bg, "data.frame") && !is(values.bg, "RLum.Data.Curve")) {
-      .throw_error("'values.bg' must be of type 'data.frame' or 'RLum.Data.Curve'")
-    }
-    if (is(values, "RLum.Data.Curve") && values@recordType != "RBR") {
-      .throw_error("'recordType' should be 'RBR'!")
+    .validate_class(values.bg, c("data.frame", "RLum.Data.Curve"))
 
-      }else if(is(values.bg, "RLum.Data.Curve")){
-        values.bg <- as(values.bg,"data.frame")
-      }
+    if (inherits(values.bg, "RLum.Data.Curve") && (is.na(values.bg@recordType) || values.bg@recordType != "RBR"))
+      .throw_error("'recordType' for values.bg should be 'RBR'!")
+
+    if (inherits(values.bg, "RLum.Data.Curve"))
+      values.bg <- as(values.bg, "data.frame")
+
   }
+
+  input.dataType <- .validate_args(input.dataType, c("LM", "pLM"))
+  fit.method <- .validate_args(fit.method, c("port", "LM"))
+  bg.subtraction <- .validate_args(bg.subtraction,
+                                   c("polynomial", "linear", "channel"))
+  .validate_logical_scalar(verbose)
+  .validate_logical_scalar(plot)
+  .validate_logical_scalar(plot.BG)
+  .validate_class(method_control, "list")
 
   ## Set plot format parameters -----------------------------------------------
   extraArgs <- list(...) # read out additional arguments list
@@ -305,30 +319,24 @@ fit_LMCurve<- function(
 
   ylim      <- if("ylim" %in% names(extraArgs)) {extraArgs$ylim}
   else {
-
     if(input.dataType=="pLM"){
       c(0,max(values[,2]*1.1))
     }else{
       c(min(values[,2]),max(values[,2]*1.1))
     }
-
   }
 
   xlab      <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab}
   else {
-
     if(input.dataType=="LM"){"Time [s]"}else{"u [s]"}
-
   }
 
   ylab     <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab}
   else {
-
     if(input.dataType=="LM"){
       paste("LM-OSL [cts/",round(max(values[,1])/length(values[,1]),digits=2)," s]",sep="")
     }else{"pLM-OSL [a.u.]"}
   }
-
 
   main      <- if("main" %in% names(extraArgs)) {extraArgs$main}
   else {"Default"}
@@ -336,8 +344,10 @@ fit_LMCurve<- function(
   cex <- if("cex" %in% names(extraArgs)) {extraArgs$cex}
   else {0.8}
 
-
   fun <- if ("fun" %in% names(extraArgs)) extraArgs$fun else FALSE # nocov
+
+  method_control <- modifyList(x = list(export.comp.contrib.matrix = FALSE),
+                               val = method_control)
 
   # layout safety settings
   par.default <- par()[c("mfrow", "cex", "mar", "omi", "oma")]
@@ -357,7 +367,9 @@ fit_LMCurve<- function(
     if(bg.subtraction=="polynomial"){
 
       #fit polynomial function to background
-      glm.fit<-glm(values.bg[,2] ~ values.bg[,1]+I(values.bg[,1]^2)+I(values.bg[,1]^3))
+      glm.fit <- stats::glm(values.bg[, 2] ~ values.bg[, 1]
+                                         + I(values.bg[, 1]^2)
+                                         + I(values.bg[, 1]^3))
       glm.coef<-coef(glm.fit)
 
       #subtract background with fitted function
@@ -384,7 +396,7 @@ fit_LMCurve<- function(
     }else if(bg.subtraction=="linear"){
 
       #fit linear function to background
-      glm.fit<-glm(values.bg[,2] ~ values.bg[,1])
+      glm.fit <- stats::glm(values.bg[, 2] ~ values.bg[, 1])
       glm.coef<-coef(glm.fit)
 
       ##substract bg
@@ -415,9 +427,6 @@ fit_LMCurve<- function(
         plot(values.bg, ylab="LM-OSL [a.u.]", xlab="Time [s]", main="Background")
         mtext(side=3,sample_code,cex=.8*cex)
       }
-
-    } else {
-      .throw_error("Invalid method for background subtraction")
     }
   }
 
@@ -448,8 +457,9 @@ fit_LMCurve<- function(
     Im <- paste0("Im.",1:n.components)
     xm <- paste0("xm.",1:n.components)
 
-    as.formula(paste0("y ~ ", paste("(exp(0.5) * ", Im, "* x/", xm, ") * exp(-x^2/(2 *",xm,"^2))", collapse=" + ")))
-
+    stats::as.formula(paste0("y ~ ", paste("(exp(0.5) * ", Im, "* x /", xm,
+                                           ") * exp(-x^2 / (2 *", xm, "^2))",
+                                           collapse = " + ")))
   }
   ##////equation used for fitting///(end)
 
@@ -481,7 +491,6 @@ fit_LMCurve<- function(
 
     while(fit.trigger==FALSE){
 
-
       xm <- xm.pseudo[b.pseudo_start:(n.components + b.pseudo_end)]
       Im <- Im.pseudo[b.pseudo_start:(n.components + b.pseudo_end)]
 
@@ -495,10 +504,8 @@ fit_LMCurve<- function(
           xm.MC<-sample(rnorm(30,mean=xm[x],sd=xm[x]/10), replace=TRUE)
         })
 
-
         Im.MC<-sapply(1:length(xm),function(x){
           Im.MC<-sample(rnorm(30,mean=Im[x],sd=Im[x]/10), replace=TRUE)
-
         })
         ##---------------------------------------------------------------##
 
@@ -510,7 +517,7 @@ fit_LMCurve<- function(
                        data=data.frame(x=values[,1],y=values[,2]),
                        algorithm="port",
                        start=list(Im=Im.MC[i,],xm=xm.MC[i,]),#end start values input
-                       nls.control(
+                       stats::nls.control(
                          maxiter=500
                        ),#end nls control
                        lower=c(xm=min(values[,1]),Im=0),
@@ -529,7 +536,6 @@ fit_LMCurve<- function(
 
       }else{
 
-
         if(fit.method == "port") {
           fit <- try(nls(
             y ~ eval(fit.function),
@@ -537,7 +543,7 @@ fit_LMCurve<- function(
             data = data.frame(x = values[,1],y = values[,2]),
             algorithm = "port",
             start = list(Im = Im,xm = xm),#end start values input
-            nls.control(maxiter = 500),#end nls control
+            stats::nls.control(maxiter = 500),
             lower = c(xm = 0,Im = 0)
           ),# nls
           silent = TRUE)
@@ -562,11 +568,7 @@ fit_LMCurve<- function(
             trace = fit.trace,
             control = minpack.lm::nls.lm.control(maxiter = 500)
           ), silent = TRUE)
-
-        }else{
-          .throw_error("Unknown method for 'fit.method'")
         }
-
       }#endifelse::fit.advanced
 
 
@@ -586,7 +588,7 @@ fit_LMCurve<- function(
     fit<-try(nls(y~eval(fit.function),
                  trace=fit.trace, data.frame(x=values[,1],y=values[,2]),
                  algorithm="port", start=list(Im=start_values[,1],xm=start_values[,2]),#end start values input
-                 nls.control(maxiter=500),
+                 stats::nls.control(maxiter = 500),
                  lower=c(xm=0,Im=0),
                  #upper=c(xm=max(x),Im=max(y)*1.1)# set lower boundaries for components
                  ), outFile = stdout() # redirect error messages so they can be silenced
@@ -654,7 +656,7 @@ fit_LMCurve<- function(
 
     if(fit.calcError){
       ##option for confidence interval
-      values.confint <- try(confint(fit, level = 0.68), silent = TRUE)
+      values.confint <- try(stats::confint(fit, level = 0.68), silent = TRUE)
 
       if(!inherits(values.confint, "try-error")) {
         Im.confint <- values.confint[1:(length(values.confint[, 1]) / 2), ]
@@ -768,7 +770,6 @@ fit_LMCurve<- function(
       function(x){
         matrixStats::rowDiffs(cbind(rev(component.contribution.matrix[,(x+1)]),
                        component.contribution.matrix[,x]))
-
       })
 
     ##append to existing matrix
@@ -878,8 +879,7 @@ fit_LMCurve<- function(
   }else{
     output.table <- NA
     component.contribution.matrix <- NA
-    message("[fit_LMCurve] Fitting Error: Plot without fit produced!")
-
+    .throw_message("Fitting failed, plot without fit produced")
   }
 
   # Calculate component curves ----------------------------------------------
@@ -895,7 +895,6 @@ fit_LMCurve<- function(
       component_matrix[, 2 + i] <-
         exp(0.5) * Im[i] * values[, 1] /
         xm[i] * exp(-values[, 1] ^ 2 / (2 * xm[i] ^ 2))
-
     }
   }
 
@@ -909,9 +908,8 @@ fit_LMCurve<- function(
 
     ##change xlim values in case of the log plot the avoid problems
     if((log == "x" | log == "xy") && xlim[1] == 0){
-      warning("[fit_LMCurve()] x-axis limitation change to avoid 0 values for log-scale!", call. = FALSE)
+      .throw_warning("'xlim' changed to avoid 0 values for log-scale")
       xlim <- c(2^0.5/2 * max(values[,1])/length(values[,1]), xlim[2])
-
     }
 
     ##set plot frame
@@ -920,7 +918,7 @@ fit_LMCurve<- function(
 
     ##==upper plot==##
     ##open plot area
-    plot(
+    plot_check <- try(plot(
       NA,
       NA,
       xlim = xlim,
@@ -930,7 +928,14 @@ fit_LMCurve<- function(
       main = main,
       log = log,
       ylab = ylab
-    )#endplot
+    ), silent = TRUE)
+
+    if (is(plot_check, "try-error")) {
+      ## reset the graphic device if plotting failed
+      .throw_message("Figure margins too large or plot area too small, ",
+                     "nothing plotted")
+      grDevices::dev.off()
+    } else {
 
     mtext(side=3,sample_code,cex=0.8*cex)
 
@@ -961,7 +966,6 @@ fit_LMCurve<- function(
 
       ##additional legend
       legend("topright",c("pseudo sum function"),lty=2,lwd=2,col="red",bty="n")
-
     }
     ##==pseudo curve==##------------------------------------------------------##
 
@@ -979,11 +983,13 @@ fit_LMCurve<- function(
         legend.caption<-c(legend.caption,paste("component ",i,sep=""))
         curve.col<-c(curve.col,i+1)
       }
-      ##plot legend
-      legend(if(log=="x"| log=="xy"){
-        if(input.dataType=="pLM"){"topright"}else{"topleft"}}else{"topright"},
-        legend.caption,lty=1,lwd=2,col=col[curve.col], bty="n")
 
+      ## plot legend
+      legend.pos <- "topright"
+      if ((log == "x" || log == "xy") && input.dataType != "pLM")
+        legend.pos <- "topleft"
+      legend(legend.pos, legend.caption, lty = 1, lwd = 2, bty = "n",
+             col = col[curve.col])
 
       ##==lower plot==##
       ##plot residuals
@@ -1032,6 +1038,8 @@ fit_LMCurve<- function(
     }#end if try-error for fit
 
     if (fun == TRUE) sTeve() # nocov
+
+    } # end if (plot_check)
   }
   ##-----------------------------------------------------------------------------
   ##remove objects
@@ -1040,6 +1048,10 @@ fit_LMCurve<- function(
   ##============================================================================#
   ## Return Values
   ##============================================================================#
+
+  if (!method_control$export.comp.contrib.matrix) {
+    component.contribution.matrix <- NA
+  }
   newRLumResults.fit_LMCurve <- set_RLum(
     class = "RLum.Results",
     data = list(
@@ -1052,5 +1064,4 @@ fit_LMCurve<- function(
   )
 
   invisible(newRLumResults.fit_LMCurve)
-
 }

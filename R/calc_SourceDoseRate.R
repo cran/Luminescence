@@ -1,9 +1,10 @@
-#' Calculation of the source dose rate via the date of measurement
+#' @title Calculation of the source dose rate via the date of measurement
 #'
+#' @description
 #' Calculating the dose rate of the irradiation source via the date of
 #' measurement based on: source calibration date, source dose rate, dose rate
 #' error. The function returns a data.frame that provides the input argument
-#' dose_rate for the function [Second2Gray].
+#' dose_rate for the function [convert_Second2Gray].
 #'
 #' Calculation of the source dose rate based on the time elapsed since the last
 #' calibration of the irradiation source. Decay parameters assume a Sr-90 beta
@@ -25,7 +26,7 @@
 #'  `[3]` \tab Co-60 \tab 5.274 y \tab NNDC, Brookhaven National Laboratory \cr
 #'  `[4` \tab Cs-137 \tab 30.08 y \tab NNDC, Brookhaven National Laboratory}
 #'
-#' @param measurement.date [character] or [Date] (with default): Date of measurement in `"YYYY-MM-DD"`.
+#' @param measurement.date [character] or [Date] (*with default*): Date of measurement in `"YYYY-MM-DD"`.
 #' If no value is provided, the date will be set to today. The argument can be provided as vector.
 #'
 #' @param calib.date [character] or [Date] (**required**):
@@ -43,7 +44,7 @@
 #'
 #' @param dose.rate.unit [character] (*with default*):
 #' specify dose rate unit for input (`Gy/min` or `Gy/s`), the output is given in
-#' Gy/s as valid for the function [Second2Gray]
+#' Gy/s as valid for the function [convert_Second2Gray]
 #'
 #' @param predict [integer] (*with default*):
 #' option allowing to predict the dose rate of the source over time in days
@@ -67,18 +68,18 @@
 #' $ call (the original function call)
 #' ```
 #'
-#' The output should be accessed using the function [get_RLum].\cr
-#' A plot method of the output is provided via [plot_RLum]
+#' The output should be accessed using the function [get_RLum].
+#' A plot method of the output is provided via [plot_RLum].
 #'
 #' @note
-#' Please be careful when using the option `predict`, especially when a multiple set
-#' for `measurement.date` and `calib.date` is provided. For the source dose rate prediction
-#' the function takes the last value `measurement.date` and predicts from that the the source
-#' source dose rate for the number of days requested,
-#' means: the (multiple) original input will be replaced. However, the function
-#' do not change entries for the calibration dates, but mix them up. Therefore,
-#' it is not recommended to use this option when multiple calibration dates (`calib.date`)
-#' are provided.
+#' Please be careful when using the option `predict`, especially when a
+#' multiple set for `measurement.date` and `calib.date` is provided. For the
+#' source dose rate prediction, the function takes the last `measurement.date`
+#' value and predicts from that the source dose rate for the number of days
+#' requested, that is: the (multiple) original input will be replaced.
+#' However, the function does not change entries for the calibration dates,
+#' but mixes them up. Therefore, it is not recommended to use this option
+#' when multiple calibration dates (`calib.date`) are provided.
 #'
 #' @section Function version: 0.3.2
 #'
@@ -87,7 +88,7 @@
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
 #'
-#' @seealso [Second2Gray], [get_RLum], [plot_RLum]
+#' @seealso [convert_Second2Gray], [get_RLum], [plot_RLum]
 #'
 #' @references
 #' NNDC, Brookhaven National Laboratory `http://www.nndc.bnl.gov/`
@@ -95,7 +96,6 @@
 #' @keywords manip
 #'
 #' @examples
-#'
 #'
 #' ##(1) Simple function usage
 #' ##Basic calculation of the dose rate for a specific date
@@ -107,13 +107,13 @@
 #' ##show results
 #' get_RLum(dose.rate)
 #'
-#' ##(2) Usage in combination with another function (e.g., Second2Gray() )
+#' ##(2) Usage in combination with another function (e.g., convert_Second2Gray() )
 #' ## load example data
 #' data(ExampleData.DeValues, envir = environment())
 #'
 #' ## use the calculated variable dose.rate as input argument
 #' ## to convert De(s) to De(Gy)
-#' Second2Gray(ExampleData.DeValues$BT998, dose.rate)
+#' convert_Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 #'
 #' ##(3) source rate prediction and plotting
 #' dose.rate <-  calc_SourceDoseRate(measurement.date = "2012-01-27",
@@ -140,8 +140,12 @@ calc_SourceDoseRate <- function(
   source.type = "Sr-90",
   dose.rate.unit = "Gy/s",
   predict = NULL
-){
+) {
+  .set_function_name("calc_SourceDoseRate")
+  on.exit(.unset_function_name(), add = TRUE)
 
+  .validate_class(measurement.date, c("Date", "character"))
+  .validate_class(calib.date, c("Date", "character"))
 
   if (is(measurement.date, "character")) {
         measurement.date <- as.Date(measurement.date)
@@ -152,10 +156,14 @@ calc_SourceDoseRate <- function(
     calib.date <- as.Date(calib.date)
   }
 
+  ## source type and dose rate unit
+  source.type <- .validate_args(source.type,
+                                c("Sr-90", "Am-214", "Co-60", "Cs-137"))
+  dose.rate.unit <- .validate_args(dose.rate.unit, c("Gy/s", "Gy/min"))
+
   # --- if predict is set
   if(!is.null(predict) && predict > 1){
     measurement.date <- seq(tail(measurement.date), by = 1, length = predict)
-
   }
 
   # -- calc days since source calibration
@@ -173,10 +181,6 @@ calc_SourceDoseRate <- function(
     "Cs-137" = 30.08
     )
 
-  if(is.null(halflife.years))
-    stop("[calc_SourceDoseRate()] Source type unknown or currently not supported!", call. = FALSE)
-
-
   halflife.days  <- halflife.years * 365
 
   # N(t) = N(0)*e^((lambda * t) with lambda = log(2)/T1.2)
@@ -184,8 +188,6 @@ calc_SourceDoseRate <- function(
     exp((-log(2) / halflife.days) * as.numeric(decay.days))
   measurement.dose.rate.error <- (calib.error) *
     exp((-log(2) / halflife.days) * as.numeric(decay.days))
-
-
 
   # -- convert to input unit to [Gy/s]
   if(dose.rate.unit == "Gy/min"){
@@ -196,9 +198,7 @@ calc_SourceDoseRate <- function(
   }else if(dose.rate.unit == "Gy/s"){
     source.dose.rate <- measurement.dose.rate
     source.dose.rate.error <- measurement.dose.rate.error
-
   }
-
 
   # Output --------------------------------------------------------------------------------------
 
@@ -220,5 +220,4 @@ calc_SourceDoseRate <- function(
     ))
 
   return(temp.return)
-
 }

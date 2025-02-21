@@ -13,14 +13,15 @@ analyse_pIRIRSequence(
   dose.points = NULL,
   sequence.structure = c("TL", "IR50", "pIRIR225"),
   plot = TRUE,
-  plot.single = FALSE,
+  plot_singlePanels = FALSE,
   ...
 )
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Analysis} or \link{list} of \linkS4class{RLum.Analysis} objects (\strong{required}):
 input object containing data for analysis.
-If a \link{list} is provided the functions tries to iterate over the list.}
+If a \link{list} is provided the functions tries to iterate over each element
+in the list.}
 
 \item{signal.integral.min}{\link{integer} (\strong{required}):
 lower bound of the signal integral. Provide this value as vector for different
@@ -50,16 +51,17 @@ the analysis (Note: If a preheat without PMT measurement is used, i.e.
 preheat as none TL, remove the TL step.)}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enables or disables plot output.}
+enable/disable the plot output.}
 
-\item{plot.single}{\link{logical} (\emph{with default}):
-single plot output (\code{TRUE/FALSE}) to allow for plotting the results in single plot
-windows. Requires \code{plot = TRUE}.}
+\item{plot_singlePanels}{\link{logical} (\emph{with default}):
+enable/disable plotting of the results in a single windows for each plot.
+Ignored if \code{plot = FALSE}.}
 
-\item{...}{further arguments that will be passed to the function
-\link{analyse_SAR.CWOSL} and \link{plot_GrowthCurve}. Furthermore, the arguments \code{main} (headers), \code{log} (IRSL curves), \code{cex} (control
+\item{...}{further arguments that will be passed to
+\link{analyse_SAR.CWOSL} and \link{plot_GrowthCurve}. Furthermore, the
+arguments \code{main} (headers), \code{log} (IRSL curves), \code{cex} (control
 the size) and \code{mtext.outer} (additional text on the plot area) can be passed to influence the plotting. If the input
-is list, \code{main} can be passed as \link{vector} or \link{list}.}
+is a list, \code{main} can be passed as \link{vector} or \link{list}.}
 }
 \value{
 Plots (\emph{optional}) and an \linkS4class{RLum.Results} object is
@@ -82,11 +84,11 @@ including curve
 fitting on \linkS4class{RLum.Analysis} objects.
 }
 \details{
-To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement analyses
-this function has been written as extended wrapper function for the function
-\link{analyse_SAR.CWOSL}, facilitating an entire sequence analysis in
+To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement
+analyses, this function has been written as extended wrapper for function
+\link{analyse_SAR.CWOSL}, thus facilitating an entire sequence analysis in
 one run. With this, its functionality is strictly limited by the
-functionality of the function \link{analyse_SAR.CWOSL}.
+functionality provided by  \link{analyse_SAR.CWOSL}.
 
 \strong{Defining the sequence structure}
 
@@ -99,7 +101,8 @@ have to be removed before using the function.
 
 \strong{If the input is a \code{list}}
 
-If the input is a list of RLum.Analysis-objects, every argument can be provided as list to allow
+If the input is a list of \linkS4class{RLum.Analysis} objects, every argument
+can be provided as list to allow
 for different sets of parameters for every single input element.
 For further information see \link{analyse_SAR.CWOSL}.
 }
@@ -107,10 +110,10 @@ For further information see \link{analyse_SAR.CWOSL}.
 Best graphical output can be achieved by using the function \code{pdf}
 with the following options:
 
-\code{pdf(file = "<YOUR FILENAME>", height = 15, width = 15)}
+\code{pdf(file = "<YOUR FILENAME>", height = 20, width = 20)}
 }
 \section{Function version}{
- 0.2.4
+ 0.2.5
 }
 
 \examples{
@@ -134,9 +137,7 @@ sequence.structure <- as.vector(sapply(seq(0,length(object)-1,by = 4),
                                        function(x){sequence.structure + x}))
 
 object <-  sapply(1:length(sequence.structure), function(x){
-
   object[[sequence.structure[x]]]
-
 })
 
 object <- set_RLum(class = "RLum.Analysis", records = object, protocol = "pIRIR")
@@ -151,7 +152,7 @@ results <- analyse_pIRIRSequence(object,
      fit.method = "EXP",
      sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
      main = "Pseudo pIRIR data set based on quartz OSL",
-     plot.single = TRUE)
+     plot_singlePanels = TRUE)
 
 
 ##(3) Perform pIRIR analysis (for this example with quartz OSL data!)
@@ -173,7 +174,7 @@ pdf(file = tempfile, height = 15, width = 15)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -6,6 +6,11 @@
 \alias{show,Risoe.BINfileData-method}
 \alias{set_Risoe.BINfileData,ANY-method}
 \alias{get_Risoe.BINfileData,Risoe.BINfileData-method}
+\alias{add_metadata<-,Risoe.BINfileData-method}
+\alias{rename_metadata<-,Risoe.BINfileData-method}
+\alias{replace_metadata<-,Risoe.BINfileData-method}
+\alias{sort_RLum,Risoe.BINfileData-method}
+\alias{view,Risoe.BINfileData-method}
 \title{Class \code{"Risoe.BINfileData"}}
 \usage{
 \S4method{show}{Risoe.BINfileData}(object)
@@ -17,9 +22,19 @@
 )
 
 \S4method{get_Risoe.BINfileData}{Risoe.BINfileData}(object, ...)
+
+\S4method{add_metadata}{Risoe.BINfileData}(object, info_element) <- value
+
+\S4method{rename_metadata}{Risoe.BINfileData}(object, info_element) <- value
+
+\S4method{replace_metadata}{Risoe.BINfileData}(object, info_element, subset = NULL) <- value
+
+\S4method{sort_RLum}{Risoe.BINfileData}(object, info_element, decreasing = FALSE, ...)
+
+\S4method{view}{Risoe.BINfileData}(object, ...)
 }
 \arguments{
-\item{object}{an object of class \linkS4class{Risoe.BINfileData}}
+\item{object}{(\strong{required}) an object of class \linkS4class{Risoe.BINfileData}}
 
 \item{METADATA}{Object of class "data.frame" containing the meta information
 for each curve.}
@@ -30,6 +45,19 @@ for each curve.}
 values for internal use only.}
 
 \item{...}{other arguments that might be passed}
+
+\item{info_element}{\link{character} (\strong{required}): name of the metadata field
+to use in sorting.}
+
+\item{value}{(\strong{required}) The value assigned to the selected elements
+of the metadata field. If \code{NULL} the elements named in \code{info_element}
+will be removed.}
+
+\item{subset}{\link{expression} (\emph{optional}) logical expression to limit the
+substitution only to the selected subset of elements}
+
+\item{decreasing}{\link{logical} (\emph{with default}): whether the sort order should
+be decreasing (\code{FALSE} by default).}
 }
 \description{
 S4 class object for luminescence data in R. The object is produced as output
@@ -44,6 +72,16 @@ This construction method is intended for internal usage only.
 
 \item \code{get_Risoe.BINfileData(Risoe.BINfileData)}: Formal get-method for Risoe.BINfileData object. It does not allow accessing
 the object directly, it is just showing a terminal message.
+
+\item \code{add_metadata(Risoe.BINfileData) <- value}: Adds metadata to \linkS4class{Risoe.BINfileData} objects
+
+\item \code{rename_metadata(Risoe.BINfileData) <- value}: Renames a metadata entry of \linkS4class{Risoe.BINfileData} objects
+
+\item \code{replace_metadata(Risoe.BINfileData) <- value}: Replaces or removes metadata of \linkS4class{Risoe.BINfileData} objects
+
+\item \code{sort_RLum(Risoe.BINfileData)}: Sort method for \linkS4class{Risoe.BINfileData} objects
+
+\item \code{view(Risoe.BINfileData)}: View method for \linkS4class{Risoe.BINfileData} objects
 
 }}
 \section{Slots}{
@@ -244,7 +282,7 @@ showClass("Risoe.BINfileData")
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. Risoe.BINfileData-class(): Class 'Risoe.BINfileData'. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. Risoe.BINfileData-class(): Class 'Risoe.BINfileData'. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -262,5 +300,6 @@ The Sequence Editor User Manual - February 2016
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
 based on information provided by Torben Lapp and Karsten Bracht Nielsen (Risø DTU, Denmark)
 , RLum Developer Team}
+\keyword{class}
 \keyword{classes}
 \keyword{internal}

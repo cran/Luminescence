@@ -166,7 +166,7 @@
 #'
 #' ## load example data
 #' data(ExampleData.DeValues, envir = environment())
-#' ExampleData.DeValues <- Second2Gray(
+#' ExampleData.DeValues <- convert_Second2Gray(
 #'   ExampleData.DeValues$BT998, c(0.0438,0.0019))
 #'
 #' ## plot the example data straightforward
@@ -294,8 +294,13 @@ plot_RadialPlot <- function(
   .set_function_name("plot_RadialPlot")
   on.exit(.unset_function_name(), add = TRUE)
 
-  if (is(data, "list") && length(data) == 0) {
-    .throw_error("'data' is an empty list")
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_not_empty(data)
+  .validate_class(centrality, c("character", "numeric"))
+  if (is.character(centrality)) {
+    centrality <- .validate_args(centrality, c("mean", "mean.weighted",
+                                               "median", "median.weighted"))
   }
 
   ## Homogenise input data format
@@ -303,18 +308,16 @@ plot_RadialPlot <- function(
 
   ## Check input data
   for(i in 1:length(data)) {
-    if(is(data[[i]], "RLum.Results") == FALSE &
-         is(data[[i]], "data.frame") == FALSE) {
-      .throw_error("Error: Input data must be 'data.frame' or 'RLum.Results'")
-    } else {
-      if(is(data[[i]], "RLum.Results") == TRUE) {
-        data[[i]] <- get_RLum(data[[i]], "data")
-      }
+    .validate_class(data[[i]], c("data.frame", "RLum.Results"),
+                    name = "All elements of 'data'")
 
-      ## ensure that the dataset it not degenerate
-      if (nrow(data[[i]]) == 0) {
-       .throw_error("Input data ", i, " has 0 rows")
-      }
+    if (inherits(data[[i]], "RLum.Results")) {
+        data[[i]] <- get_RLum(data[[i]], "data")
+    }
+
+    ## ensure that the dataset it not degenerate
+    .validate_not_empty(data[[i]],
+                        name = paste0("Input 'data[[", i, "]]'"))
 
       ## if `data[[i]]` is a single-column data frame, append a second
       ## column with a small non-zero value (10^-9 for consistency with
@@ -325,7 +328,6 @@ plot_RadialPlot <- function(
         ## keep only the first two columns
         data[[i]] <- data[[i]][, 1:2]
       }
-    }
   }
 
   ## check data and parameter consistency--------------------------------------
@@ -409,7 +411,6 @@ plot_RadialPlot <- function(
       data[[i]][,1] <- data[[i]][,1] + De.add
 
     De.global <- De.global + De.add
-
   }
 
   ## calculate major preliminary tick values and tick difference
@@ -438,11 +439,7 @@ plot_RadialPlot <- function(
   ## calculate se-values based on log-option
   se <- lapply(1:length(data), function(x, De.add){
     if(log.z == TRUE) {
-      if(De.add != 0) {
-        data[[x]][,2] <- data[[x]][,2] / (data[[x]][,1] + De.add)
-      } else {
-        data[[x]][,2] / data[[x]][,1]
-      }
+      data[[x]][,2] <- data[[x]][,2] / (data[[x]][,1] + De.add)
     } else {
       data[[x]][,2]
     }}, De.add = De.add)
@@ -450,6 +447,24 @@ plot_RadialPlot <- function(
   data <- lapply(1:length(data), function(x) {
     cbind(data[[x]], se[[x]])})
   rm(se)
+
+  ## define function after isotone::weighted.mean
+  median.w <- function (y, w) {
+    ox <- order(y)
+    y <- y[ox]
+    w <- w[ox]
+    k <- 1
+    low <- cumsum(c(0, w))
+    up <- sum(w) - low
+    df <- low - up
+    repeat {
+      if (df[k] < 0)
+        k <- k + 1
+      else if (df[k] == 0)
+        return((w[k] * y[k] + w[k - 1] * y[k - 1]) / (w[k] + w[k - 1]))
+      else return(y[k - 1])
+    }
+  }
 
   ## calculate central values
   if(centrality[1] == "mean") {
@@ -463,24 +478,6 @@ plot_RadialPlot <- function(
       sum(data[[x]][,3] / data[[x]][,4]^2) /
         sum(1 / data[[x]][,4]^2)})
   } else if(centrality[1] == "median.weighted") {
-    ## define function after isotone::weighted.median
-    median.w <- function (y, w)
-    {
-      ox <- order(y)
-      y <- y[ox]
-      w <- w[ox]
-      k <- 1
-      low <- cumsum(c(0, w))
-      up <- sum(w) - low
-      df <- low - up
-      repeat {
-        if (df[k] < 0)
-          k <- k + 1
-        else if (df[k] == 0)
-          return((w[k] * y[k] + w[k - 1] * y[k - 1]) / (w[k] + w[k - 1]))
-        else return(y[k - 1])
-      }
-    }
     z.central <- lapply(1:length(data), function(x){
       rep(median.w(y = data[[x]][,3],
                    w = data[[x]][,4]), length(data[[x]][,3]))})
@@ -496,8 +493,6 @@ plot_RadialPlot <- function(
               length(centrality) > length(data)) {
     z.central <- lapply(1:length(data), function(x){
       rep(median(data[[x]][,3], na.rm = TRUE), length(data[[x]][,3]))})
-  } else {
-    .throw_error("Measure of centrality not supported")
   }
 
   data <- lapply(1:length(data), function(x) {
@@ -553,25 +548,6 @@ if(centrality[1] == "mean") {
   z.central.global <- sum(data.global[,3] / data.global[,4]^2) /
     sum(1 / data.global[,4]^2)
 } else if(centrality[1] == "median.weighted") {
-  ## define function after isotone::weighted.mean
-  median.w <- function (y, w)
-  {
-    ox <- order(y)
-    y <- y[ox]
-    w <- w[ox]
-    k <- 1
-    low <- cumsum(c(0, w))
-    up <- sum(w) - low
-    df <- low - up
-    repeat {
-      if (df[k] < 0)
-        k <- k + 1
-      else if (df[k] == 0)
-        return((w[k] * y[k] + w[k - 1] * y[k - 1])/(w[k] + w[k - 1]))
-
-      else return(y[k - 1])
-    }
-  }
   z.central.global <- median.w(y = data.global[,3], w = data.global[,4])
 } else if(is.numeric(centrality) == TRUE &
             length(centrality == length(data))) {
@@ -629,9 +605,8 @@ if(centrality[1] == "mean") {
   sub <- if("sub" %in% names(extraArgs)) {extraArgs$sub} else {""}
 
   if("xlab" %in% names(extraArgs)) {
-    if(length(extraArgs$xlab) != 2) {
-      .throw_error("'xlab' must have length 2")
-    } else {xlab <- extraArgs$xlab}
+    xlab <- extraArgs$xlab
+    .validate_length(xlab,  2)
   } else {
     xlab <- c(if(log.z == TRUE) {
       "Relative standard error (%)"
@@ -660,7 +635,6 @@ if(centrality[1] == "mean") {
     z.span <- ifelse(z.span > 1, 0.9, z.span)
     limits.z <- c((0.9 - z.span) * min(data.global[[1]]),
                   (1.1 + z.span) * max(data.global[[1]]))
-
   }
 
   if("xlim" %in% names(extraArgs)) {
@@ -786,7 +760,6 @@ if(centrality[1] == "mean") {
   ticks.major <- cbind(0,
     tick.x1.major, tick.x2.major, tick.y1.major, tick.y2.major)
 
-
   ## calculate minor z-tick coordinates
   tick.x1.minor <- r / sqrt(1 + f^2 * (
     tick.values.minor - z.central.global)^2)
@@ -810,7 +783,6 @@ if(centrality[1] == "mean") {
 
   } else {
     label.z.text <- signif(tick.values.major, 3)
-
   }
 
   ## subtract De.add from label values
@@ -940,10 +912,8 @@ if(centrality[1] == "mean") {
                               to = limits.z[2]),
                       silent = TRUE)
 
+    De.stats[i,6] <- NA
     if(!inherits(De.density, "try-error")) {
-      De.stats[i,6] <- NA
-
-    } else {
       De.stats[i,6] <- De.density$x[which.max(De.density$y)]
     }
   }
@@ -1206,79 +1176,16 @@ if(centrality[1] == "mean") {
     }
   }
 
-## remove dummy list element
-label.text[[1]] <- NULL
-  ## convert keywords into summary placement coordinates
-  if(missing(summary.pos) == TRUE) {
-    summary.pos <- c(limits.x[1], limits.y[2])
-    summary.adj <- c(0, 1)
-  } else if(length(summary.pos) == 2) {
-    summary.pos <- summary.pos
-    summary.adj <- c(0, 1)
-  } else if(summary.pos[1] == "topleft") {
-    summary.pos <- c(limits.x[1], limits.y[2])
-    summary.adj <- c(0, 1)
-  } else if(summary.pos[1] == "top") {
-    summary.pos <- c(mean(limits.x), limits.y[2])
-    summary.adj <- c(0.5, 1)
-  } else if(summary.pos[1] == "topright") {
-    summary.pos <- c(limits.x[2], limits.y[2])
-    summary.adj <- c(1, 1)
-  }  else if(summary.pos[1] == "left") {
-    summary.pos <- c(limits.x[1], mean(limits.y))
-    summary.adj <- c(0, 0.5)
-  } else if(summary.pos[1] == "center") {
-    summary.pos <- c(mean(limits.x), mean(limits.y))
-    summary.adj <- c(0.5, 0.5)
-  } else if(summary.pos[1] == "right") {
-    summary.pos <- c(limits.x[2], mean(limits.y))
-    summary.adj <- c(1, 0.5)
-  }else if(summary.pos[1] == "bottomleft") {
-    summary.pos <- c(limits.x[1], limits.y[1])
-    summary.adj <- c(0, 0)
-  } else if(summary.pos[1] == "bottom") {
-    summary.pos <- c(mean(limits.x), limits.y[1])
-    summary.adj <- c(0.5, 0)
-  } else if(summary.pos[1] == "bottomright") {
-    summary.pos <- c(limits.x[2], limits.y[1])
-    summary.adj <- c(1, 0)
-  }
+  ## remove dummy list element
+  label.text[[1]] <- NULL
 
-  ## convert keywords into legend placement coordinates
-  if(missing(legend.pos) == TRUE) {
-    legend.pos <- c(limits.x[1], limits.y[2])
-    legend.adj <- c(0, 1)
-  } else if(length(legend.pos) == 2) {
-    legend.pos <- legend.pos
-    legend.adj <- c(0, 1)
-  } else if(legend.pos[1] == "topleft") {
-    legend.pos <- c(limits.x[1], limits.y[2])
-    legend.adj <- c(0, 1)
-  } else if(legend.pos[1] == "top") {
-    legend.pos <- c(mean(limits.x), limits.y[2])
-    legend.adj <- c(0.5, 1)
-  } else if(legend.pos[1] == "topright") {
-    legend.pos <- c(limits.x[2], limits.y[2])
-    legend.adj <- c(1, 1)
-  } else if(legend.pos[1] == "left") {
-    legend.pos <- c(limits.x[1], mean(limits.y))
-    legend.adj <- c(0, 0.5)
-  } else if(legend.pos[1] == "center") {
-    legend.pos <- c(mean(limits.x), mean(limits.y))
-    legend.adj <- c(0.5, 0.5)
-  } else if(legend.pos[1] == "right") {
-    legend.pos <- c(limits.x[2], mean(limits.y))
-    legend.adj <- c(1, 0.5)
-  } else if(legend.pos[1] == "bottomleft") {
-    legend.pos <- c(limits.x[1], limits.y[1])
-    legend.adj <- c(0, 0)
-  } else if(legend.pos[1] == "bottom") {
-    legend.pos <- c(mean(limits.x), limits.y[1])
-    legend.adj <- c(0.5, 0)
-  } else if(legend.pos[1] == "bottomright") {
-    legend.pos <- c(limits.x[2], limits.y[1])
-    legend.adj <- c(1, 0)
-  }
+  ## convert keywords into summary and legend placement coordinates
+  coords <- .get_keyword_coordinates(summary.pos, limits.x, limits.y)
+  summary.pos <- coords$pos
+  summary.adj <- coords$adj
+  coords <- .get_keyword_coordinates(legend.pos, limits.x, limits.y)
+  legend.pos <- coords$pos
+  legend.adj <- coords$adj
 
   ## calculate line coordinates and further parameters
   if(!missing(line)) {
@@ -1556,7 +1463,7 @@ label.text[[1]] <- NULL
     ## plot y-axis
     if(y.ticks == TRUE) {
       char.height <- par()$cxy[2]
-      tick.space <- axisTicks(usr = limits.y, log = FALSE)
+      tick.space <- grDevices::axisTicks(usr = limits.y, log = FALSE)
       tick.space <- (max(tick.space) - min(tick.space)) / length(tick.space)
       if(tick.space < char.height * 1.5) {
         axis(side = 2, at = c(-2, 2), labels = c("", ""), las = 1)
@@ -1612,5 +1519,4 @@ label.text[[1]] <- NULL
                 polygons = polygons,
                 ellipse.lims = ellipse.lims))
   }
-
 }

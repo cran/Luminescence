@@ -28,7 +28,7 @@
 #'  measurement. Usually there is no reason for having a `tc` value different for the equivalent dose measurement
 #'  and the *g*-value measurement, except if different equipment was used.
 #'  However, if, for instance, the *g*-value measurement sequence was analysed
-#'  with the *Analyst* (Duller 2015) and the `'Luminescence` is used to correct for fading,
+#'  with the *Analyst* (Duller 2015) and `Luminescence` is used to correct for fading,
 #'  there is a high chance that the value returned by the *Analyst* comes normalised to 2-days;
 #'  even the `tc` values of the measurement were identical.
 #'  In such cases, the fading correction cannot be correct until the `tc.g_value` was manually
@@ -44,28 +44,32 @@
 #' @param dose_rate.source [numeric] vector of length 2 (**required**): Irradiation source dose rate in Gy/s,
 #' which is, according to Lamothe et al. (2003) De/t*.
 #'
-#' @param g_value [numeric] vector of length 2 (**required**): g_value in \%/decade *recalculated at the moment*
-#' the equivalent dose was calculated, i.e. `tc` is either similar for the *g*-value measurement **and** the De measurement or
-#' needs be to recalculated (cf. [calc_FadingCorr]). Inserting a normalised g-value, e.g., normalised to 2-days , will
-#' lead to wrong results
+#' @param g_value [numeric] vector of length 2 (**required**): g_value in
+#' %/decade *recalculated at the moment* the equivalent dose was calculated,
+#' i.e. `tc` is either similar for the *g*-value measurement **and** the
+#' De measurement or needs be to recalculated (cf. [calc_FadingCorr]).
+#' Inserting a normalised g-value, e.g., normalised to 2-days , will
+#' lead to wrong results.
 #'
-#' @param tc [numeric] (optional): time in seconds between the **end** of the irradiation and
-#' the prompt measurement used in the equivalent dose estimation (cf. Huntley & Lamothe 2001).
+#' @param tc [numeric] (*optional*): time in seconds between the **end** of
+#' the irradiation and the prompt measurement used in the equivalent dose
+#' estimation (cf. Huntley & Lamothe 2001).
 #' If set to `NULL` it is assumed that `tc` is similar for the equivalent dose
 #' estimation and the *g*-value estimation
 #'
-#' @param tc.g_value [numeric] (with default): the time in seconds between irradiation and the
+#' @param tc.g_value [numeric] (*with default*): the time in seconds between irradiation and the
 #' prompt measurement estimating the *g*-value. If the *g*-value was normalised to, e.g., 2 days,
 #' this time in seconds (i.e., `172800`) should be entered here along with the time used for the
 #' equivalent dose estimation. If nothing is provided the time is set to `tc`, which is the
 #' usual case for *g*-values obtained using the SAR method and *g*-values that had been not normalised to 2 days.
 #' Note: If this value is not `NULL` the functions expects a [numeric] value for `tc`.
 #'
-#' @param plot [logical] (with default): Enables/disables plot output
+#' @param plot [logical] (*with default*): enable/disable the plot output.
 #'
-#' @param verbose [logical] (with default): Enables/disables terminal verbose mode
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
 #'
-#' @param ... further arguments passed to the function [plot_GrowthCurve]
+#' @param ... further arguments passed to function [plot_GrowthCurve].
 #'
 #' @return The function returns are graphical output produced by the function [plot_GrowthCurve] and
 #' an [RLum.Results-class].
@@ -153,67 +157,47 @@ calc_Lamothe2003 <- function(
   verbose = TRUE,
   plot = TRUE,
   ...
-){
+) {
+  .set_function_name("calc_Lamothe2003")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  # Input parameter test ------------------------------------------------------------------------
-  ##object
-    if(missing(object)){
-      stop("[calc_Lamothe2003()] Input for 'object' missing but required!", call. = FALSE)
-    }
+  ## Input parameter test ---------------------------------------------------
 
-  ##dose_rate.envir
-  if(missing(dose_rate.envir)){
-    stop("[calc_Lamothe2003()] Input for 'dose_rate.envir' missing but required!", call. = FALSE)
+  .validate_class(object, c("data.frame", "RLum.Results"))
+
+  ## dose_rate.envir
+  .validate_class(dose_rate.envir, "numeric")
+  if (length(dose_rate.envir) < 2) {
+    .throw_error("'dose_rate.envir' should contain 2 elements")
+  }
+  if (length(dose_rate.envir) > 2) {
+    .throw_warning("'dose_rate.envir' has length > 2, taking only the first two entries")
+    dose_rate.envir <- dose_rate.envir[1:2]
   }
 
-  ##dose_rate.source
-  if(missing(dose_rate.source)){
-    stop("[calc_Lamothe2003()] Input for 'dose_rate.source' missing but required!", call. = FALSE)
+  ## dose_rate.source
+  .validate_class(dose_rate.source, "numeric")
+  if (length(dose_rate.source) < 2) {
+    .throw_error("'dose_rate.source' should contain 2 elements")
   }
-
-  ##g_value
-  if(missing(g_value)){
-    stop("[calc_Lamothe2003()] Input for 'g_value' missing but required!", call. = FALSE)
-  }
-
-  ##check input type and length
-  ##dose_rate.envir
-  if(!inherits(dose_rate.envir, "numeric") || length(dose_rate.envir) < 2){
-    stop("[calc_Lamothe2003()] Input for 'dose_rate.envir' is not of type 'numeric' and/or of length < 2!", call. = FALSE)
-
-  }else{
-    if(length(dose_rate.envir) > 2){
-      warning("[calc_Lamothe2003()] 'dose_rate.envir' has length > 2. Take only the first two entries.",call. = FALSE, immediate. = TRUE)
-      dose_rate.envir <- dose_rate.envir[1:2]
-    }
-
-  }
-
-  ##dose_rate.source
-  if(!inherits(dose_rate.source, "numeric") || length(dose_rate.source) < 2){
-    stop("[calc_Lamothe2003()] Input for 'dose_rate.source' is not of type 'numeric' and/or of length < 2!", call. = FALSE)
-
-  }else{
-    if(length(dose_rate.source) > 2){
-      warning("[calc_Lamothe2003()] 'dose_rate.source' has length > 2. Take only the first two entries.",call. = FALSE, immediate. = TRUE)
-      dose_rate.source <- dose_rate.source[1:2]
-    }
+  if (length(dose_rate.source) > 2) {
+    .throw_warning("'dose_rate.source' has length > 2, taking only the first two entries")
+    dose_rate.source <- dose_rate.source[1:2]
   }
 
   ## g_value
-  if (!inherits(g_value, "numeric") || length(g_value) < 2) {
-    stop("[calc_Lamothe2003()] Input for 'g_value' is not of type 'numeric' and/or of length < 2!", call. = FALSE)
-  } else {
-    if (length(g_value) > 2) {
-      warning("[calc_Lamothe2003()] 'g_value' has length > 2. Take only the first two entries.",
-              call. = FALSE, immediate. = TRUE)
-      g_value <- g_value[1:2]
-    }
+  .validate_class(g_value, "numeric")
+  if (length(g_value) < 2) {
+    .throw_error("'g_value' should contain 2 elements")
+  }
+  if (length(g_value) > 2) {
+    .throw_warning("'g_value' has length > 2, taking only the first two entries")
+    g_value <- g_value[1:2]
   }
 
   ##tc
   if(is.null(tc) && !is.null(tc.g_value))
-    stop("[calc_Lamothe2003()] If you set 'tc.g_value' you have to provide a value for 'tc' too!", call. = FALSE)
+    .throw_error("If you set 'tc.g_value' you have to provide a value for 'tc' too")
 
 
   # Input assignment -----------------------------------------------------------------------------
@@ -266,14 +250,9 @@ calc_Lamothe2003 <- function(
         ##merge output
         return(merge_RLum(results))
     }else{
-      stop(paste0("[calc_Lamothe2003()] Input for 'object' created by function ",object@originator, "() not supported!"), call. = FALSE)
-
+      .throw_error("Input for 'object' created by function ",
+                   object@originator, "() not supported")
     }
-
-
-  }else{
-    stop("[calc_Lamothe2003()] Unsupported data type for 'object'!", call. = FALSE)
-
   }
 
   # Apply correction----------------------------------------------------------------------------
@@ -306,14 +285,8 @@ calc_Lamothe2003 <- function(
   # apply to input data
   data[[2]][1] <-  data[[2]][1] / Fading_C
   data[[3]][1] <-  sqrt((data[[3]][1]/data[[2]][1])^2 +
-                            ((1/Fading_C - 1) * sFading_C/Fading_C)^2) * data[[2]][1]
+                        (sFading_C/Fading_C)^2) * data[[2]][1]
 
-  ##TODO discuss with Norbert
-  # data[[3]][1] <-  sqrt((data[[3]][1]/data[[2]][1])^2 +
-  #                         (sFading_C/Fading_C)^2) * data[[2]][1]
-  #
-  # print(LnTn_BEFORE.ERROR/LnTn_BEFORE)
-  # print(data[[3]][1]/ data[[2]][1] )
 
   # Fitting ---------------------------------------------------------------------------------
   ##set arguments
@@ -325,14 +298,13 @@ calc_Lamothe2003 <- function(
     txtProgressBar = verbose,
     output.plotExtended = FALSE,
     output.plot = plot
-
   )
 
   ##filter doubled arguments
   argument_list <- modifyList(x = argument_list, val = list(...))
 
   ##run plot function
-  fit_results <- do.call(what = plot_GrowthCurve,args = argument_list)
+  fit_results <- do.call(what = plot_GrowthCurve, args = argument_list)
 
 
   # Age calculation -----------------------------------------------------------------------------

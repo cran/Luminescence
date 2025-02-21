@@ -1,11 +1,7 @@
-#' @include get_Risoe.BINfileData.R set_Risoe.BINfileData.R
-NULL
-
 #' Class `"Risoe.BINfileData"`
 #'
 #' S4 class object for luminescence data in R. The object is produced as output
 #' of the function [read_BIN2R].
-#'
 #'
 #'
 #' @name Risoe.BINfileData-class
@@ -18,7 +14,7 @@ NULL
 #'
 #' @slot .RESERVED Object of class "list" containing list of undocumented raw values for internal use only.
 #'
-#' @keywords internal
+#' @keywords class
 #'
 #' @note
 #'
@@ -332,13 +328,19 @@ setMethod(f = "show",
               else
                 id_128 <- rep(TRUE, nrow(object@METADATA))
 
-              version <- suppressWarnings(paste(unique(object@METADATA[id_128,"VERSION"]), collapse = ", "))
-              systemID <- suppressWarnings(paste(unique(object@METADATA[id_128,"SYSTEMID"]), collapse = ", "))
+              version <- suppressWarnings(
+                  .collapse(unique(object@METADATA[id_128, "VERSION"]),
+                            quote = FALSE))
+              systemID <- suppressWarnings(
+                  .collapse(unique(object@METADATA[id_128, "SYSTEMID"]),
+                            quote = FALSE))
               filename <- as.character(object@METADATA[1,"FNAME"])
               records.overall <- length(object@DATA)
               records.type <- table(object@METADATA[id_128,"LTYPE"])
-              user <- paste(unique(as.character(object@METADATA[id_128,"USER"])), collapse = ", ")
-              date <- paste(unique(as.character(object@METADATA[id_128,"DATE"])), collapse = ", ")
+              user <- .collapse(unique(object@METADATA[id_128, "USER"]),
+                                quote = FALSE)
+              date <- .collapse(unique(object@METADATA[id_128, "DATE"]),
+                                quote = FALSE)
               run.range <- suppressWarnings(range(object@METADATA[id_128,"RUN"]))
               set.range <- suppressWarnings(range(object@METADATA[id_128,"SET"]))
               grain.range <- suppressWarnings(range(object@METADATA[id_128,"GRAIN"]))
@@ -371,19 +373,19 @@ setMethod(f = "show",
 
               ## if id_128
               if(any(!id_128))
-                cat("\n\t + additional ROI data found in record(s):", paste(which(!id_128), collapse = ", "), "\n")
+                cat("\n\t + additional ROI data found in record(s):",
+                    .collapse(which(!id_128), quote = FALSE))
 
             }else{
               cat("\n[Risoe.BINfileData object]")
               cat("\n\n >> This object is empty!<<")
-
-             }
+            }
+            cat("\n")
           }#end function
           )#end setMethod
 
 
 # set method for object class -----------------------------------
-
 #' @describeIn Risoe.BINfileData
 #' The Risoe.BINfileData is normally produced as output of the function read_BIN2R.
 #' This construction method is intended for internal usage only.
@@ -401,25 +403,25 @@ setMethod(f = "show",
 setMethod(f = "set_Risoe.BINfileData",
           signature = signature("ANY"),
           definition = function(METADATA, DATA, .RESERVED) {
+            .set_function_name("set_Risoe.BINfileData")
+            on.exit(.unset_function_name(), add = TRUE)
 
             if(length(METADATA) == 0){
               new("Risoe.BINfileData")
 
             }else{
+              .validate_class(METADATA, "data.frame")
               new(
                 "Risoe.BINfileData",
                 METADATA = METADATA,
                 DATA = DATA,
                 .RESERVED = .RESERVED
               )
-
             }
-
           })
 
 
-# get method for object class -----------------------------------
-
+# get () -----------------------------------------------------------------------
 #' @describeIn Risoe.BINfileData
 #' Formal get-method for Risoe.BINfileData object. It does not allow accessing
 #' the object directly, it is just showing a terminal message.
@@ -435,8 +437,235 @@ setMethod("get_Risoe.BINfileData",
           definition = function(object, ...) {
 
             cat("[get_Risoe.BINfileData()] No direct access is provided for this object type. Use the function 'Risoe.BINfileData2RLum.Analysis' for object coercing.")
+          }
+)
 
-          })##end setMethod
+## add_metadata() -----------------------------------------------------------
+#' @describeIn Risoe.BINfileData
+#' Adds metadata to [Risoe.BINfileData-class] objects
+#'
+#' @param object (**required**) an object of class [Risoe.BINfileData-class]
+#'
+#' @param info_element [character] (**required**) name of the metadata field
+#' to add
+#'
+#' @param value (**required**) The value assigned to the selected elements
+#' of the metadata field.
+#'
+#' @keywords internal
+#'
+#' @md
+#' @export
+setMethod("add_metadata<-",
+          signature= "Risoe.BINfileData",
+          definition = function(object, info_element, value) {
+            .set_function_name("add_metadata")
+            on.exit(.unset_function_name(), add = TRUE)
 
-##-------------------------------------------------------------------------------------------------##
-##=================================================================================================##
+            ## Integrity checks ---------------------------------------------
+
+            .validate_class(info_element, "character")
+            .validate_length(info_element, 1)
+            valid.names <- colnames(object@METADATA)
+            if (info_element %in% valid.names) {
+              .throw_error("'info_element' already present, to modify it ",
+                           "you should use `replace_metadata()`")
+            }
+
+            ## add the metadata element
+            object@METADATA[[info_element]] <- value
+            assign(x = deparse(substitute(object))[1], object)
+          })
+
+## rename_metadata() --------------------------------------------------------
+#' @describeIn Risoe.BINfileData
+#' Renames a metadata entry of [Risoe.BINfileData-class] objects
+#'
+#' @param object (**required**) an object of class [Risoe.BINfileData-class]
+#'
+#' @param info_element [character] (**required**) name of the metadata field
+#' to rename.
+#'
+#' @param value (**required**) The value assigned to the selected element
+#' of the metadata field.
+#'
+#' @keywords internal
+#'
+#' @md
+#' @export
+setMethod("rename_metadata<-",
+          signature= "Risoe.BINfileData",
+          definition = function(object, info_element, value) {
+            .set_function_name("rename_metadata")
+            on.exit(.unset_function_name(), add = TRUE)
+
+            ## Integrity checks ---------------------------------------------
+
+            .validate_class(info_element, "character")
+            .validate_length(info_element, 1)
+            valid.names <- colnames(object@METADATA)
+            if (!info_element %in% valid.names) {
+              .throw_error("'info_element' not recognised (",
+                           .collapse(info_element), "), valid terms are: ",
+                           .collapse(valid.names, quote = FALSE))
+            }
+
+            ## rename the metadata element
+            name.idx <- grep(info_element, valid.names)
+            colnames(object@METADATA)[name.idx] <- value
+            assign(x = deparse(substitute(object))[1], object)
+          })
+
+## replace_metadata() -------------------------------------------------------
+#' @describeIn Risoe.BINfileData
+#' Replaces or removes metadata of [Risoe.BINfileData-class] objects
+#'
+#' @param object (**required**) an object of class [Risoe.BINfileData-class]
+#'
+#' @param info_element [character] (**required**) name of the metadata field
+#' to replace or remove
+#'
+#' @param subset [expression] (*optional*) logical expression to limit the
+#' substitution only to the selected subset of elements
+#'
+#' @param value (**required**) The value assigned to the selected elements
+#' of the metadata field. If `NULL` the elements named in `info_element`
+#' will be removed.
+#'
+#' @keywords internal
+#'
+#' @md
+#' @export
+setMethod("replace_metadata<-",
+          signature= "Risoe.BINfileData",
+          definition = function(object, info_element, subset = NULL, value) {
+            .set_function_name("replace_metadata")
+            on.exit(.unset_function_name(), add = TRUE)
+
+            ## Integrity checks ---------------------------------------------
+
+            .validate_class(info_element, "character")
+            valid.names <- colnames(object@METADATA)
+            not.found <- setdiff(info_element, valid.names)
+            if (length(not.found) > 0) {
+              .throw_error("'info_element' not recognised (",
+                           .collapse(not.found), "), valid terms are: ",
+                           .collapse(valid.names, quote = FALSE))
+            }
+
+            ## select relevant rows
+            sel <- TRUE
+            if (!is.null(substitute(subset))) {
+
+              if (is.null(value)) {
+                ## assigning `NULL` indicates that we want to remove a field,
+                ## but that is incompatible with choosing a subset of rows
+                .throw_error("'subset' is incompatible with assigning NULL")
+              }
+
+              ## evaluate the subset expression to produce a selection
+              sel <- tryCatch(eval(
+                  expr = substitute(subset),
+                  envir = object@METADATA,
+                  enclos = parent.frame()
+              ), error = function(e) {
+                .throw_error("Invalid 'subset' expression, valid terms are: ",
+                             .collapse(valid.names, quote = FALSE))
+              })
+              if (!is.logical(sel)) {
+                .throw_error("'subset' should contain a logical expression")
+              }
+              if (all(is.na(sel))) {
+                sel <- FALSE
+              }
+              if (!any(sel)) {
+                .throw_message("'subset' expression produced an ",
+                               "empty selection, nothing done")
+                return(object)
+              }
+            }
+
+            if (!is.null(substitute(subset))) {
+              ## replace the metadata elements
+              for (field in info_element)
+                object@METADATA[[field]][sel] <- value
+            } else {
+              ## remove the metadata elements
+              object@METADATA[info_element] <- value
+            }
+            assign(x = deparse(substitute(object))[1], object)
+          })
+
+
+## sort_RLum () -------------------------------------------------------------
+#' @describeIn Risoe.BINfileData
+#'
+#' Sort method for [Risoe.BINfileData-class] objects
+#'
+#' @param object (**required**): an object of class [Risoe.BINfileData-class].
+#'
+#' @param info_element [character] (**required**): name of the metadata field
+#' to use in sorting.
+#'
+#' @param decreasing [logical] (*with default*): whether the sort order should
+#' be decreasing (`FALSE` by default).
+#'
+#' @param ... further arguments that might be passed to underlying methods.
+#'
+#' @keywords internal
+#'
+#' @md
+#' @export
+setMethod(
+  f = "sort_RLum",
+  signature = "Risoe.BINfileData",
+  function(object, info_element,
+           decreasing = FALSE, ...) {
+    .set_function_name("sort_RLum")
+    on.exit(.unset_function_name(), add = TRUE)
+
+    ## input validation
+    .validate_class(info_element, "character")
+    valid.names <- colnames(object@METADATA)
+    if (!info_element %in% valid.names) {
+      .throw_error("Invalid 'info_element' name, valid names are: ",
+                   .collapse(valid.names))
+    }
+    .validate_logical_scalar(decreasing)
+
+    ## determine the new ordering
+    ord <- order(object@METADATA[[info_element]], decreasing = decreasing)
+
+    ## reorder the object
+    object@METADATA <- object@METADATA[ord, ]
+    object@DATA <- object@DATA[ord]
+
+    return(object)
+  }
+)
+
+
+# view () -----------------------------------------------------------------------
+#'@describeIn Risoe.BINfileData
+#'View method for [Risoe.BINfileData-class] objects
+#'
+#' @param object (**required**) an object of class [Risoe.BINfileData-class]
+#'
+#'@param ... other arguments that might be passed
+#'
+#'@keywords internal
+#'
+#'@md
+#'@export
+setMethod("view",
+          signature= "Risoe.BINfileData",
+          definition = function(object, ...) {
+
+    ## set title
+    name <- list(...)$title
+    if (is.null(name))
+      name <- paste("METADATA for", deparse(substitute(object)))
+
+    ## run view
+    .view(x = object@METADATA, title = name)
+})

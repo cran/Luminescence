@@ -66,20 +66,20 @@ De-values are calculated and plotted until the start of the background
 integral.}
 
 \item{show_ShineDownCurve}{\link{logical} (\emph{with default}):
-enables or disables shine down curve in the plot output}
+enable/disable shine down curve in the plot output.}
 
 \item{respect_RC.Status}{\link{logical} (\emph{with default}):
-remove De-values with 'FAILED' RC.Status from the plot
-(cf. \link{analyse_SAR.CWOSL} and \link{analyse_pIRIRSequence})}
+remove De values with 'FAILED' RC.Status from the plot (cf. \link{analyse_SAR.CWOSL}
+and \link{analyse_pIRIRSequence}).}
 
-\item{multicore}{\link{logical} (\emph{with default}) : enables/disables multi core
+\item{multicore}{\link{logical} (\emph{with default}) : enable/disable multi core
 calculation if \code{object} is a \link{list} of \linkS4class{RLum.Analysis} objects. Can be an
 \link{integer} specifying the number of cores}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enables or disables terminal feedback}
+enable/disable output to the terminal.}
 
-\item{plot}{\link{logical} (\emph{with default}): enables/disables plot output
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.
 Disabling the plot is useful in cases where the output need to be processed
 differently.}
 
@@ -125,8 +125,9 @@ of the function output.
 
 \strong{analyse_function.control}
 
-The argument \code{analyse_function.control} currently supports the following arguments
-\code{sequence.structure}, \code{dose.points}, \code{mtext.outer}, \code{fit.method}, \code{fit.force_through_origin}, \code{plot}, \code{plot.single}
+The argument \code{analyse_function.control} currently supports the following arguments:
+\code{sequence.structure}, \code{dose.points}, \code{mtext.outer}, \code{fit.method},
+\code{fit.force_through_origin}, \code{plot}, \code{plot_singlePanels}
 }
 \note{
 The entire analysis is based on the used analysis functions, namely
@@ -136,7 +137,7 @@ It means, that every sequence should be checked carefully before running long
 calculations using several hundreds of channels.
 }
 \section{Function version}{
- 0.1.7
+ 0.1.8
 }
 
 \examples{
@@ -162,7 +163,7 @@ plot_DetPlot(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. plot_DetPlot(): Create De(t) plot. Function version 0.1.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_DetPlot(): Create De(t) plot. Function version 0.1.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

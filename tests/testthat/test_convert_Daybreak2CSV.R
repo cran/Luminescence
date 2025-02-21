@@ -2,9 +2,11 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(convert_Daybreak2CSV(),
-               "file is missing")
+               "'file' should be of class 'character' or 'RLum'")
+  expect_error(convert_Daybreak2CSV(character(0)),
+               "'file' cannot be an empty character")
   expect_error(convert_Daybreak2CSV(""),
-               "file name does not seem to exist")
+               "File does not exist")
 })
 
 test_that("check class and length of output", {

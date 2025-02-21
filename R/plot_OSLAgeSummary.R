@@ -11,7 +11,8 @@
 #'
 #'@param digits [integer] (*with default*): number of digits considered for the calculation
 #'
-#'@param verbose [logical] (*with default*): enable/disable additional terminal output
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
 #'
 #'@param ... further arguments to modify the plot, supported: `xlim`, `ylim`, `xlab`, `ylab`,
 #' `main`, `lwd`, `lty`, `col`, `polygon_col`, `polygon_density`, `rug`
@@ -44,19 +45,23 @@ plot_OSLAgeSummary <- function(
   digits = 1L,
   verbose = TRUE,
   ...
-){
-# Integrity tests ---------------------------------------------------------
-  if(is(object, "RLum.Results") &&
-     object@originator %in% c(".calc_BayesianCentralAgeModel", ".calc_IndividualAgeModel"))
-    object <- get_RLum(object, data.object = "A")
+) {
+  .set_function_name("plot_OSLAgeSummary")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  if(is(object, "RLum.Results") && object@originator == "combine_De_Dr")
-    object <- get_RLum(object, data.object = "Ages")
+  ## Integrity tests --------------------------------------------------------
+  .validate_class(object, c("RLum.Results", "numeric"))
 
-
-  if(!is(object, "numeric")) {
-    stop(paste0("[plot_OSLAgeSummary()] class ", class(object)[1],
-                " not supported as input for object!"),call. = FALSE)
+  if (inherits(object, "RLum.Results")) {
+    if (object@originator %in% c(".calc_BayesianCentralAgeModel",
+                                 ".calc_IndividualAgeModel")) {
+      data.object <- "A"
+    } else if (object@originator %in% "combine_De_Dr") {
+      data.object <- "Ages"
+    } else {
+      .throw_error("Object originator '", object@originator, "' not supported")
+    }
+    object <- get_RLum(object, data.object = data.object)
   }
 
   ## A should be a matrix
@@ -134,7 +139,7 @@ plot_OSLAgeSummary <- function(
   )
 
   ##add rug
-  if(plot_settings$rug) rug(A)
+  if (plot_settings$rug) graphics::rug(A)
 
   ## add text
   text(x = density_A$x[xy_id][1], y = density_A$y[xy_id][2], CI[1,1], pos = 2, cex = 0.6)

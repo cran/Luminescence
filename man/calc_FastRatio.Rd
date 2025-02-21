@@ -27,17 +27,17 @@ calc_FastRatio(
 x, y data of measured values (time and counts).}
 
 \item{stimulation.power}{\link{numeric} (\emph{with default}):
-Stimulation power in mW/cm^2}
+Stimulation power in mW/cm²}
 
 \item{wavelength}{\link{numeric} (\emph{with default}):
 Stimulation wavelength in nm}
 
 \item{sigmaF}{\link{numeric} (\emph{with default}):
-Photoionisation cross-section (cm^2) of the fast component.
+Photoionisation cross-section (cm²) of the fast component.
 Default value after Durcan & Duller (2011).}
 
 \item{sigmaM}{\link{numeric} (\emph{with default}):
-Photoionisation cross-section (cm^2) of the medium component.
+Photoionisation cross-section (cm²) of the medium component.
 Default value after Durcan & Duller (2011).}
 
 \item{Ch_L1}{\link{numeric} (\emph{with default}):
@@ -49,15 +49,14 @@ An integer specifying the channel for L2.}
 \item{Ch_L3}{\link{numeric} (\emph{optional}):
 A vector of length 2 with integer values specifying the start and end
 channels for L3 (e.g., \code{c(40, 50)}), with the second component greater
-than or equal to the first.
+than or equal to the first.}
 
-\\% of signal remaining from the fast component.
+\item{x}{\link{numeric} (\emph{with default}):
+Percentage of signal remaining from the fast component.
 Used to define the location of L2 and L3 (start).}
 
-\item{x}{\link{numeric} (\emph{with default}):}
-
 \item{x2}{\link{numeric} (\emph{with default}):
-\\% of signal remaining from the medium component.
+Percentage of signal remaining from the medium component.
 Used to define the location of L3 (end).}
 
 \item{dead.channels}{\link{numeric} (\emph{with default}):
@@ -72,7 +71,7 @@ fit CW-OSL curve using \link{fit_CWCurve} and derive the counts of L2 and L3
 from the fitted OSL curve (\strong{experimental}).}
 
 \item{plot}{\link{logical} (\emph{with default}):
-plot output (\code{TRUE}/\code{FALSE})}
+enable/disable the plot output.}
 
 \item{...}{available options: \code{verbose} (\link{logical}).
 Further arguments passed to \link{fit_CWCurve}.}
@@ -85,16 +84,15 @@ The slot \code{data} contains a \link{list} with the following elements:
 \item{data}{the original input data}
 \item{fit}{\linkS4class{RLum.Results} object if either \code{fitCW.sigma} or \code{fitCW.curve} is \code{TRUE}}
 \item{args}{\link{list} of used arguments}
-\item{call}{\verb{[call]} the function call}
+\item{call}{\link{call} the function call}
 }
 \description{
 Function to calculate the fast ratio of quartz CW-OSL single grain or single
 aliquot curves after Durcan & Duller (2011).
-}
-\details{
+
 This function follows the equations of Durcan & Duller (2011). The energy
 required to reduce the fast and medium quartz OSL components to \code{x} and
-\code{x2} \\% respectively using eq. 3 to determine channels L2 and L3 (start
+\code{x2} \% respectively using eq. 3 to determine channels L2 and L3 (start
 and end). The fast ratio is then calculated from: \eqn{(L1-L3)/(L2-L3)}.
 }
 \section{Function version}{
@@ -114,7 +112,7 @@ get_RLum(res)
 } 
 
 \section{How to cite}{
-King, G.E., Durcan, J., Burow, C., 2024. calc_FastRatio(): Calculate the Fast Ratio for CW-OSL curves. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+King, G.E., Durcan, J., Burow, C., 2025. calc_FastRatio(): Calculate the Fast Ratio for CW-OSL curves. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

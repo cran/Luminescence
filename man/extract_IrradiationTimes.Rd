@@ -45,7 +45,7 @@ this option is parsed only if a BIN/BINX file is produced and it will reset all 
 values to a max. value of 48, cf.\link{write_R2BIN}}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables \code{TRUE} or disables \code{FALSE} the progress bars during import and export}
+enable/disable the progress bar during import and export.}
 }
 \value{
 An \linkS4class{RLum.Results} object is returned with the
@@ -115,7 +115,7 @@ the time stamps this could produce negative values as the important function
 towards a correct time order.
 }
 \section{Function version}{
- 0.3.3
+ 0.3.4
 }
 
 \examples{
@@ -129,7 +129,7 @@ towards a correct time order.
 #     output <- extract_IrradiationTimes(file.XSYG = file.XSYG, file.BINX = file.BINX)
 #     get_RLum(output)
 #
-## export results additionally to a CSV.file in the same directory as the XSYG-file
+## export results additionally to a CSV-file in the same directory as the XSYG-file
 #       write.table(x = get_RLum(output),
 #                   file = paste0(file.BINX,"_extract_IrradiationTimes.csv"),
 #                   sep = ";",
@@ -138,7 +138,7 @@ towards a correct time order.
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. extract_IrradiationTimes(): Extract Irradiation Times from an XSYG-file. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. extract_IrradiationTimes(): Extract Irradiation Times from an XSYG-file. Function version 0.3.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

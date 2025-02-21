@@ -6,9 +6,11 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(merge_RLum.Results("error"),
-               "'objects' has to be of type 'list'")
+               "'objects' should be of class 'list'")
   expect_error(merge_RLum.Results(list(res, "error")),
-               "All objects to be merged must have type 'RLum.Results'")
+               "All elements of 'object' should be of class 'RLum.Results'")
+  expect_message(expect_null(merge_RLum.Results(list())),
+                 "'objects' contains no data, NULL returned")
 
   res2 <- res
   res2@originator <- "unknown"
@@ -36,5 +38,9 @@ test_that("Merge RLum.Results", {
   a <- merge_RLum.Results(list(res, res))
   expect_s3_class(a@data$summary, "data.frame")
 
-
+  empty <- set_RLum("RLum.Results")
+  expect_s4_class(merge_RLum.Results(list(empty)),
+                  "RLum.Results")
+  expect_s4_class(merge_RLum.Results(list(empty, empty)),
+                  "RLum.Results")
 })

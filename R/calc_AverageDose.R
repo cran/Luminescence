@@ -1,7 +1,9 @@
-#'Calculate the Average Dose and the dose rate dispersion
+#' @title Calculate the Average Dose and the dose rate dispersion
 #'
-#'This functions calculates the Average Dose and their extrinsic dispersion and estimates
-#'the standard errors by bootstrapping based on the Average Dose Model by Guerin et al., 2017
+#' @description
+#' This functions calculates the Average Dose and its extrinsic dispersion,
+#' estimating the standard errors by bootstrapping based on the Average
+#' Dose Model by Guerin et al., 2017.
 #'
 #' **`sigma_m`**\cr
 #'
@@ -26,10 +28,10 @@
 #' exclude NA values from the data set prior to any further operation.
 #'
 #' @param plot [logical] (*with default*):
-#' enables/disables plot output
+#' enable/disable the plot output.
 #'
 #' @param verbose [logical] (*with default*):
-#' enables/disables terminal output
+#' enable/disable output to the terminal.
 #'
 #' @param ... further arguments that can be passed to [graphics::hist]. As three plots
 #' are returned all arguments need to be provided as [list],
@@ -165,7 +167,8 @@ calc_AverageDose <- function(
 
       ##break loop if convergence is reached ... if not update values
       if(is.infinite(delta.temp) | is.infinite(sigma_d.temp)){
-        break()
+        .throw_warning("Inf/NaN values produced by .mle(), NA returned")
+        return(c(NA,NA))
 
       }else if (
         ##compare values ... if they are equal we have convergence
@@ -180,26 +183,18 @@ calc_AverageDose <- function(
         delta <- delta.temp
         sigma_d <- sigma_d.temp
         j <- j + 1
-
       }
-
     }
 
     ##if no convergence was reached stop entire function; no stop as this may happen during the
     ##bootstraping procedure
     if(j == iteration_limit){
-      warning("[calc_AverageDoseModel()] .mle() no convergence reached for the given limits. NA returned!")
+      .throw_warning("No convergence reached by .mle() after ",
+                     iteration_limit, " iterations, NA returned")
       return(c(NA,NA))
-
-    }else if(is.infinite(delta.temp) | is.infinite(sigma_d.temp)){
-      warning("[calc_AverageDoseModel()] .mle() gaves Inf values. NA returned!")
-      return(c(NA,NA))
-
     }else{
       return(c(round(c(delta, sigma_d),4)))
-
     }
-
   }
 
   .CredibleInterval <- function(a_chain, level = 0.95) {
@@ -225,7 +220,6 @@ calc_AverageDose <- function(
       CredibleIntervalInf = I[i, 1],
       CredibleIntervalSup = I[i, 2]
     ))
-
   }
 
   ##////////////////////////////////////////////////////////////////////////////////////////////////
@@ -234,21 +228,21 @@ calc_AverageDose <- function(
 
   # Integrity checks ----------------------------------------------------------------------------
 
-  if(!is(data, "RLum.Results") & !is(data, "data.frame")){
-    .throw_error("Input must be of type 'RLum.Results' or 'data.frame'")
-  }else {
-
-    if(is(data, "RLum.Results")){
-      data <- get_RLum(data)
-
-    }
-  }
-
+  .validate_class(data, c("RLum.Results", "data.frame"))
   .validate_positive_scalar(sigma_m)
   .validate_positive_scalar(Nb_BE, int = TRUE)
 
-
   # Data preparation -----------------------------------------------------------------------------
+
+  if (inherits(data, "RLum.Results")) {
+    data <- get_RLum(data)
+  }
+
+  ## check that we actually have data
+  if (length(data) == 0 || nrow(data) == 0) {
+    .throw_message("'data' contains no data, NULL returned")
+    return(NULL)
+  }
 
   ##problem: the entire code refers to column names the user may not provide...
   ##  >> to avoid changing the entire code, the data will shape to a format that
@@ -256,29 +250,32 @@ calc_AverageDose <- function(
 
   ##check for number of columns
   if(ncol(data)<2){
-    message("[calc_AverageDose()] Error: data set contains < 2 columns! ",
-            "NULL returned!")
+    .throw_message("'data' contains < 2 columns, NULL returned")
     return(NULL)
   }
 
   ##used only the first two colums
   if(ncol(data)>2){
     data <- data[,1:2]
-    .throw_warning("number of columns in data set > 2. ",
-                   "Only the first two columns were used.")
+    .throw_warning("'data' contains > 2 columns, ",
+                   "only the first 2 columns were used")
   }
 
   ##exclude NA values
-  if(any(is.na(data))){
+  if (anyNA(data)) {
     data <- na.exclude(data)
-    .throw_warning("NA values in data set detected. ",
-                   "Rows with NA values removed!")
+    .throw_warning("NA values in 'data' detected, rows with NA values removed")
+  }
+
+  if (any(data[, 1] <= 0)) {
+    data <- data[data[, 1] > 0, ]
+    .throw_warning("Non-positive values in 'data' detected, rows removed")
   }
 
   ##check data set
   if(nrow(data) == 0){
-    message("[calc_AverageDose()] Error: data set contains 0 rows! ",
-            "NULL returned!")
+    .throw_message("After NA removal, nothing is left from the data set, ",
+                   "NULL returned")
     return(NULL)
   }
 
@@ -298,6 +295,12 @@ calc_AverageDose <- function(
 
   # calculate starting values and weights
   sigma_d <- sd(dat$cd) / mean(dat$cd)
+
+  ## sigma_d may be NA if there is only one measurement (NA values in the
+  ## data have already been excluded prior to this)
+  if (is.na(sigma_d))
+    sigma_d <- 0
+
   wu <- 1 / (sigma_d ^ 2 + su ^ 2)
 
   delta <- mean(dat$cd)
@@ -327,9 +330,7 @@ calc_AverageDose <- function(
   if(verbose){
     cat(paste("\n\n>> Calculation <<\n"))
     cat(paste("log likelihood:\t", round(llik, 4)))
-
   }
-
 
   # standard errors obtained by bootstrap, we refer to Efron B. and Tibshirani R. (1986)
   # est ce qu'il faut citer l'article ici ou tout simplement dans la publi ?
@@ -345,7 +346,6 @@ calc_AverageDose <- function(
     X = 1:Nb_BE,
     FUN = function(x) {
       .mle(yu[I[, x]], su[I[, x]], sigma_d.start = sigma_d, delta.start = delta, wu.start = wu)
-
     },
     FUN.VALUE = vector(mode = "numeric", length = 2)
   ))
@@ -396,7 +396,6 @@ calc_AverageDose <- function(
       ))
     }
     cat("\n----------------------------------------------------------\n")
-
   }
 
   ##compile final results data frame
@@ -413,7 +412,6 @@ calc_AverageDose <- function(
     IC_SIGMA_D.UPPER = IC_sigma_d[3],
     L_MAX = llik,
     row.names = NULL
-
   )
 
   # Plotting ------------------------------------------------------------------------------------
@@ -446,7 +444,6 @@ calc_AverageDose <- function(
       paste("n = ", length(data_list[[2]])),
       paste("n = ", length(data_list[[3]]))),
     rug = list(TRUE, TRUE, TRUE)
-
   )
 
   ##modify this list by values the user provides
@@ -455,7 +452,6 @@ calc_AverageDose <- function(
   ##problem: the user might provid only one item, then the code will break
   plot_settings.user <- lapply(list(...), function(x){
     rep(x, length = 3)
-
   })
 
   ##modify
@@ -478,7 +474,7 @@ calc_AverageDose <- function(
   hist <- lapply(1:length(data_list), function(x){
     temp <- suppressWarnings(hist(
       x = data_list[[x]],
-      breaks = plot_settings$breaks[[x]],
+      breaks = if (NROW(data_list[[x]]) > 1) plot_settings$breaks[[x]] else 1,
       probability = plot_settings$probability[[x]],
       main = plot_settings$main[[x]],
       xlab = plot_settings$xlab[[x]],
@@ -488,14 +484,12 @@ calc_AverageDose <- function(
       col = plot_settings$col[[x]],
       border = plot_settings$border[[x]],
       density = plot_settings$density[[x]]
-
     ))
 
     if (plot) {
       ##add rug
       if (plot_settings$rug[[x]]) {
-        rug(data_list[[x]])
-
+        graphics::rug(data_list[[x]])
       }
 
       ##plot mtext
@@ -505,7 +499,6 @@ calc_AverageDose <- function(
     }
 
     return(temp)
-
   })
 
   # Return --------------------------------------------------------------------------------------
@@ -517,7 +510,5 @@ calc_AverageDose <- function(
       hist = hist
     ),
     info = list(call = sys.call())
-
   )
-
 }

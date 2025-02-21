@@ -84,7 +84,7 @@
 #' Requires `data` to be a [data.frame] with three columns.
 #'
 #' @param plot [logical] (*optional*):
-#' Show or hide the plot.
+#' enable/disable the plot output.
 #'
 #' @param legend [logical] (*optional*):
 #' Show or hide the equation inside the plot.
@@ -224,7 +224,10 @@ fit_SurfaceExposure <- function(
     legend = TRUE,
     error_bars = TRUE,
     coord_flip = FALSE,
-...) {
+    ...
+) {
+  .set_function_name("fit_SurfaceExposure")
+  on.exit(.unset_function_name(), add = TRUE)
 
   ## SETTINGS ----
   settings <- list(
@@ -233,7 +236,9 @@ fit_SurfaceExposure <- function(
   )
   settings <- modifyList(settings, list(...))
 
-  ## Input object handling -----------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_not_empty(data)
 
   ## Data type validation
   if (inherits(data, "RLum.Results"))
@@ -250,12 +255,14 @@ fit_SurfaceExposure <- function(
 
     # Global fitting requires and equal amount of ages to be provided
     if (length(data) != length(age))
-      stop("If 'data' is a list of data sets for global fitting, 'age' must be of the same length.", call. = FALSE)
+      .throw_error("If 'data' is a list of data sets for global fitting, ",
+                   "'age' must be of the same length.")
 
     # TODO: Support weighted fitting for global fit
     if (weights) {
       if (settings$verbose)
-        warning("[fit_SurfaceExposure()] Argument 'weights' is not supported when multiple data sets are provided for global fitting.", call. = FALSE)
+        .throw_warning("'weights' is not supported when multiple data sets ",
+                       "are provided for global fitting")
       weights <- FALSE
     }
 
@@ -263,7 +270,7 @@ fit_SurfaceExposure <- function(
     # between individual samples
     data_list <- data
 
-    for (i in 1:length(data))
+    for (i in seq_along(data))
       data[[i]]$group <- LETTERS[[i]]
 
     data <- do.call(rbind, data)
@@ -275,13 +282,15 @@ fit_SurfaceExposure <- function(
   }
 
   # Exit if data type is invalid
-  if (!inherits(data, "data.frame"))
-    stop("'data' must be of class data.frame.", call. = FALSE)
+  .validate_class(data, "data.frame")
+  if (ncol(data) < 2) {
+    .throw_error("'data' should have at least two columns")
+  }
 
   # Check which parameters have been provided
-  if (!is.null(age) && any(is.na(age))) age <- NULL
-  if (!is.null(sigmaphi) && any(is.na(sigmaphi))) sigmaphi <- NULL
-  if (!is.null(mu) && any(is.na(mu))) mu <- NULL
+  if (!is.null(age) && anyNA(age)) age <- NULL
+  if (!is.null(sigmaphi) && anyNA(sigmaphi)) sigmaphi <- NULL
+  if (!is.null(mu) && anyNA(mu)) mu <- NULL
 
   ## Weighting options (only available for global fitting)
   if (ncol(data) >= 3 && weights && !global_fit)
@@ -290,10 +299,10 @@ fit_SurfaceExposure <- function(
     wi <- rep(1, times = nrow(data))
 
   ## remove rows with NA
-  if (any(is.na(data))) {
-    data <- data[complete.cases(data), ]
+  if (anyNA(data)) {
+    data <- data[stats::complete.cases(data), ]
     if (settings$verbose)
-      warning("[fit_SurfaceExposure()] NA values in 'data' were removed.", call. = FALSE)
+      message("[fit_SurfaceExposure()] NA values in 'data' were removed")
   }
 
   ## extract errors into separate variable
@@ -318,24 +327,24 @@ fit_SurfaceExposure <- function(
 
   ## Functions
   # w/o dose rate
-  fun <- formula(y ~ exp(-sigmaphi * age * 365.25*24*3600 * exp(-mu * x)))
-  fun_global <- formula(y ~ exp(-sigmaphi * age[group] * 365.25*24*3600 * exp(-mu * x)))
+  fun <- y ~ exp(-sigmaphi * age * 365.25*24*3600 * exp(-mu * x))
+  fun_global <- y ~ exp(-sigmaphi * age[group] * 365.25*24*3600 * exp(-mu * x))
 
   # w/ dose rate (Sohbati et al. 2012, eq 12)
   if (!is.null(Ddot))
     Ddot <- Ddot / 1000 / 365.25 / 24 / 60 / 60
 
-  fun_w_dr <- formula( y ~ (sigmaphi * exp(-mu * x) * exp(-(age * 365.25*24*3600) * (sigmaphi * exp(-mu * x) + Ddot/D0)) + Ddot/D0) /
-                         (sigmaphi * exp(-mu * x) + Ddot/D0) )
-  fun_global_w_dr <- formula( y ~ (sigmaphi * exp(-mu * x) * exp(-(age[group] * 365.25*24*3600) * (sigmaphi * exp(-mu * x) + Ddot/D0)) + Ddot/D0) /
-                                (sigmaphi * exp(-mu * x) + Ddot/D0) )
+  fun_w_dr <- y ~ (sigmaphi * exp(-mu * x) * exp(-(age * 365.25*24*3600) * (sigmaphi * exp(-mu * x) + Ddot/D0)) + Ddot/D0) /
+                         (sigmaphi * exp(-mu * x) + Ddot/D0)
+  fun_global_w_dr <- y ~ (sigmaphi * exp(-mu * x) * exp(-(age[group] * 365.25*24*3600) * (sigmaphi * exp(-mu * x) + Ddot/D0)) + Ddot/D0) /
+                                (sigmaphi * exp(-mu * x) + Ddot/D0)
 
   ## start parameter
   start <- list(sigmaphi = if (is.null(sigmaphi)) 5.890e-09 else NULL,
                 mu = if (is.null(mu)) 1 else NULL,
                 age = if (is.null(age)) 2 else NULL)
 
-  start <- start[!sapply(start, is.null)]
+  start <- .rm_NULL_elements(start)
 
   ## fitting boundaries
   lower <- list(sigmaphi = if (is.null(sigmaphi)) -Inf else NULL,
@@ -360,12 +369,12 @@ fit_SurfaceExposure <- function(
 
   # (un)constrained fitting
   fit <- tryCatch({
-    minpack.lm::nlsLM(formula = use_fun,
+    suppressWarnings(minpack.lm::nlsLM(formula = use_fun,
                       data = data,
                       start = start,
                       lower = unlist(lower),
                       upper = unlist(upper),
-                      weights = wi)
+                      weights = wi))
   },
   error = function(e) { e }
   )
@@ -376,7 +385,7 @@ fit_SurfaceExposure <- function(
     coef <- as.data.frame(coef(summary(fit)))
   } else {
     if (settings$verbose)
-      message("[fit_SurfaceExposure()] Unable to fit the data. ",
+      .throw_message("Unable to fit the data. ",
               "Original error from minpack.lm::nlsLM(): ", fit$message)
 
     # Fill with NA values
@@ -512,7 +521,7 @@ fit_SurfaceExposure <- function(
 
     # add formula
     if (legend && !inherits(fit, "simpleError")) {
-      formula_text <- paste0("y = ", as.character(fit$m$formula())[3], "\t\t")
+      formula_text <- paste0("y = ", as.character(fit$m$formula())[3])
 
       if (!is.null(age)) {
         if (!global_fit) {
@@ -566,7 +575,7 @@ fit_SurfaceExposure <- function(
     cat(" Fixed parameters(s):\n",
         "--------------------\n")
     if (!is.null(age))
-      cat(paste0(" age (a):\t", paste(age, collapse = ", "), "\n"))
+      cat(paste0(" age (a):\t", .collapse(age, quote = FALSE), "\n"))
     if (!is.null(sigmaphi))
       cat(paste0(" sigmaphi:\t", sigmaphi, "\n"))
     if (!is.null(mu))

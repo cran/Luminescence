@@ -1,3 +1,4 @@
+## load data
 data(ExampleData.BINfileData, envir = environment())
 object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1)
 
@@ -5,9 +6,11 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_DetPlot("error"),
-               "Input must be an 'RLum.Analysis' object")
+               "'object' should be of class 'RLum.Analysis'")
+  expect_error(plot_DetPlot(set_RLum("RLum.Analysis")),
+               "'object' cannot be an empty RLum.Analysis")
   expect_error(plot_DetPlot(object, signal.integral.min = "error"),
-               "'signal.integral.min' must be a positive integer scalar")
+               "'signal.integral.min' should be a positive integer scalar")
   expect_error(plot_DetPlot(object, signal.integral.min = 1,
                             signal.integral.max = 1),
                "'signal.integral.max' must be greater than 'signal.integral.min'")
@@ -17,7 +20,7 @@ test_that("input validation", {
                             background.integral.max = 1000,
                             analyse_function = "error",
                             verbose = FALSE),
-               "Unknown 'analyse_function'")
+               "'analyse_function' should be one of 'analyse_SAR.CWOSL'")
 })
 
 test_that("plot_DetPlot", {
@@ -151,8 +154,19 @@ test_that("plot_DetPlot", {
       respect_RC.Status = TRUE,
       n.channels = 2)
 
+  expect_warning(plot_DetPlot(
+      tmp,
+      method = "expansion",
+      signal.integral.min = 1,
+      signal.integral.max = 2,
+      background.integral.min = 900,
+      background.integral.max = 1000,
+      plot.single = TRUE,
+      n.channels = 2),
+      "'plot.single' is deprecated, use 'plot_singlePanels' instead")
+
   ## analyse_pIRIRSequence on an inconsistent object
-  suppressWarnings( # ignore additional warnings from plot_GrowthCurve()
+  suppressWarnings( # ignore additional warnings from fit_DoseResponseCurve()
   expect_error(
       expect_warning(plot_DetPlot(
           object,

@@ -22,11 +22,10 @@
 #'@param dim.CCD [numeric] (*optional*): metric x and y for the recorded (chip)
 #'surface in µm. For instance `c(8192,8192)`, if set additional x and y-axes are shown
 #'
-#'@param bg_image [RLum.Data.Image-class] (*optional*): background image object
-#'please note that the dimensions are not checked.
+#' @param bg_image [RLum.Data.Image-class] (*optional*): background image object
+#' (please note that dimensions are not checked).
 #'
-#'@param plot [logical] (*with default*): enable or disable plot output to use
-#'the function only to extract the ROI data
+#' @param plot [logical] (*with default*): enable/disable the plot output.
 #'
 #'@param ... further parameters to manipulate the plot. On top of all arguments of
 #'[graphics::plot.default] the following arguments are supported: `lwd.ROI`, `lty.ROI`,
@@ -67,12 +66,20 @@ plot_ROI <- function(
   dim.CCD = NULL,
   bg_image = NULL,
   plot = TRUE,
-  ...) {
+  ...
+) {
+  .set_function_name("plot_ROI")
+  on.exit(.unset_function_name(), add = TRUE)
+
   ##helper function to extract content
   .spatial_data <- function(x) {
+    .validate_class(x, c("RLum.Analysis", "RLum.Results"),
+                    extra = "a 'list' of such objects",
+                    name = "'object'")
+
     ##ignore all none RLum.Analysis
     if (!inherits(x, "RLum.Analysis") || x@originator != "read_RF2R")
-      stop("[plot_ROI()] Input for 'object' not supported, please check documentation!", call. = FALSE)
+      .throw_error("Object originator '", x@originator, "' not supported")
 
     ##extract some of the elements
     info <- x@info
@@ -87,15 +94,17 @@ plot_ROI <- function(
       img_width = info$image_width,
       img_height = info$image_height,
       grain_d = info$grain_d)
-
   }
 
-  if(is(object, "RLum.Results") && object@originator == "extract_ROI") {
+  if (inherits(object, "RLum.Results") &&
+      ## use %in% instead of == to support the case when originator is NULL
+      object@originator %in% "extract_ROI") {
     m <- object@data$roi_coord
 
   } else {
     ## make sure the object is a list
     if(!is.list(object)) object <- list(object)
+    .validate_not_empty(object, "list")
 
     ##extract values and convert to numeric matrix
     m <- t(vapply(object, .spatial_data, character(length = 9)))
@@ -151,9 +160,10 @@ plot_ROI <- function(
 
     ## set plot area
     do.call(
-      what = plot.default,
+      what = graphics::plot.default,
       args = c(x = NA, y = NA,
-               plot_settings[names(plot_settings) %in% methods::formalArgs(plot.default)])
+               plot_settings[names(plot_settings) %in%
+                             methods::formalArgs(graphics::plot.default)])
     )
 
     ## add background image if available
@@ -162,7 +172,8 @@ plot_ROI <- function(
         as(bg_image, "RLum.Data.Image")
       }, silent = TRUE)
       if(inherits(a, "try-error")) {
-        warning("[plot_ROI()] 'bg_image' is not of type RLum.Data.Image and cannot be converted into such; background image plot skipped!")
+        .throw_warning("'bg_image' is not of class 'RLum.Data.Image' and ",
+                       "cannot be converted into it, background image plot skipped")
       } else {
         a <- a@data
         graphics::image(
@@ -175,7 +186,8 @@ plot_ROI <- function(
       }
    }
 
-    if (plot_settings$grid) grid(nx = max(m[,"img_width"]), ny = max(m[,"img_height"]))
+    if (plot_settings$grid) graphics::grid(nx = max(m[, "img_width"]),
+                                           ny = max(m[, "img_height"]))
 
     ## plot metric scale
     if (!is.null(dim.CCD)) {
@@ -218,7 +230,6 @@ plot_ROI <- function(
         lcol = plot_settings$col.ROI,
         lty = plot_settings$lty.ROI,
         lwd = plot_settings$lwd.ROI)
-
     }
 
     ## add distance marker
@@ -252,7 +263,6 @@ plot_ROI <- function(
         legend = plot_settings$legend.text,
         col = c(plot_settings$col.ROI, plot_settings$col.pixel, "red")
       )
-
     }
 
   }##end if plot
@@ -266,5 +276,4 @@ plot_ROI <- function(
     info = list(
       call = sys.call()
     )))
-
 }

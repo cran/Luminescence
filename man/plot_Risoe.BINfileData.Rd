@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot_Risoe.BINfileData.R
 \name{plot_Risoe.BINfileData}
 \alias{plot_Risoe.BINfileData}
-\title{Plot single luminescence curves from a BIN file object}
+\title{Plot Single Luminescence Curves from a Risoe.BINfileData-class object}
 \usage{
 plot_Risoe.BINfileData(
-  BINfileData,
+  data,
   position,
   run,
   set,
   sorter = "POSITION",
   ltype = c("IRSL", "OSL", "TL", "RIR", "RBR", "RL"),
-  curve.transformation,
+  curve.transformation = "None",
   dose_rate,
   temp.lab,
   cex.global = 1,
@@ -19,7 +19,7 @@ plot_Risoe.BINfileData(
 )
 }
 \arguments{
-\item{BINfileData}{\linkS4class{Risoe.BINfileData} (\strong{required}):
+\item{data}{\linkS4class{Risoe.BINfileData} (\strong{required}):
 requires an S4 object returned by the \link{read_BIN2R} function.}
 
 \item{position}{\link{vector} (\emph{optional}):
@@ -46,8 +46,9 @@ default.}
 
 \item{curve.transformation}{\link{character} (\emph{optional}):
 allows transforming CW-OSL and CW-IRSL curves to pseudo-LM curves via
-transformation functions. Allowed values are: \code{CW2pLM}, \code{CW2pLMi}, \code{CW2pHMi} and
-\code{CW2pPMi}. See details.}
+transformation functions. Allowed values are: \code{CW2pLM}, \code{CW2pLMi},
+\code{CW2pHMi} and \code{CW2pPMi}, see details. If set to \code{None} (default), no
+transformation is applied.}
 
 \item{dose_rate}{\link{numeric} (\emph{optional}):
 dose rate of the irradiation source at the measurement date.
@@ -66,7 +67,7 @@ Returns a plot.
 }
 \description{
 Plots single luminescence curves from an object returned by the
-\link{read_BIN2R} function.
+\link{read_BIN2R} function \linkS4class{Risoe.BINfileData}
 }
 \details{
 \strong{Nomenclature}
@@ -93,7 +94,7 @@ The function has been successfully tested for the Sequence Editor file
 output version 3 and 4.
 }
 \section{Function version}{
- 0.4.1
+ 0.4.2
 }
 
 \examples{
@@ -116,15 +117,15 @@ data(ExampleData.BINfileData, envir = environment())
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., 2024. plot_Risoe.BINfileData(): Plot single luminescence curves from a BIN file object. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., 2025. plot_Risoe.BINfileData(): Plot Single Luminescence Curves from a Risoe.BINfileData-class object. Function version 0.4.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 Duller, G., 2007. Analyst. pp. 1-45.
 }
 \seealso{
-\linkS4class{Risoe.BINfileData},\link{read_BIN2R}, \link{CW2pLM}, \link{CW2pLMi},
-\link{CW2pPMi}, \link{CW2pHMi}
+\linkS4class{Risoe.BINfileData}, \link{read_BIN2R}, \link{convert_CW2pLM},
+\link{convert_CW2pLMi}, \link{convert_CW2pPMi}, \link{convert_CW2pHMi}
 }
 \author{
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr

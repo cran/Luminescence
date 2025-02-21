@@ -1,3 +1,4 @@
+## load data
 data(ExampleData.BINfileData, envir = environment())
 object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1)
 results <- analyse_SAR.CWOSL(
@@ -14,7 +15,7 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_DRCSummary("test"),
-               "'object' is not of class 'RLum.Results'")
+               "'object' should be of class 'RLum.Results'")
   expect_error(plot_DRCSummary(set_RLum("RLum.Results")),
                "'object' was not created by a supported function")
 
@@ -36,7 +37,7 @@ test_that("Test plotting", {
     signal.integral.max = 2,
     background.integral.min = 900,
     background.integral.max = 1000,
-    NumberIterations.MC = 2,
+    n.MC = 2,
     plot = FALSE,
     verbose = FALSE
   )
@@ -55,6 +56,8 @@ test_that("Test plotting", {
                                 main = "Title"))
   expect_silent(plot_DRCSummary(list(results, results_LamW),
                                 source_dose_rate = 1))
+  l <- expect_silent(plot_DRCSummary(list()))
+  expect_length(l, 0)
 
   ##plus points
   expect_silent(plot_DRCSummary(results, show_dose_points = TRUE, show_natural = TRUE))

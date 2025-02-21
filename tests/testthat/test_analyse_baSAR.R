@@ -1,7 +1,5 @@
-##(1) load package test data set
+## load data
 data(ExampleData.BINfileData, envir = environment())
-
-##(2) selecting relevant curves, and limit dataset
 CWOSL.sub <- subset(CWOSL.SAR.Data,
                     subset = POSITION %in% c(1:3) & LTYPE == "OSL")
 
@@ -9,22 +7,24 @@ test_that("input validation", {
   skip_on_cran()
 
   expect_error(analyse_baSAR("error", verbose = FALSE),
-               "File does not exist")
+               "File '.*error' does not exist") # windows CI needs the regexp
   expect_error(analyse_baSAR(list("error"), verbose = FALSE),
-               "File does not exist")
+               "File '.*error' does not exist") # windows CI needs the regexp
   expect_error(analyse_baSAR(data.frame(), verbose = FALSE),
-               "'data.frame' as input is not supported")
+               "'object' should be of class 'Risoe.BINfileData', 'RLum.Results'")
+  expect_error(analyse_baSAR(character(0), verbose = FALSE),
+               "'object' cannot be an empty character")
   expect_error(analyse_baSAR(list(data.frame()), verbose = FALSE),
-               "Unsupported data type in the input list provided for 'object'")
-  expect_error(analyse_baSAR(list(data.frame(), matrix()), verbose = FALSE),
-               "'object' only accepts a list with objects of similar type")
+               "All elements of 'object' should be of class 'Risoe.BINfileData'")
+  expect_error(analyse_baSAR(list(CWOSL.sub, "error"), verbose = FALSE),
+               "'object' only accepts a list of objects of the same type")
   expect_error(analyse_baSAR(CWOSL.sub, n.MCMC = NULL),
-               "'n.MCMC' must be a positive integer scalar")
-
+               "'n.MCMC' should be a positive integer scalar")
   expect_error(analyse_baSAR(CWOSL.sub, verbose = FALSE),
                "'source_doserate' is missing, but the current implementation")
   expect_error(analyse_baSAR(CWOSL.sub, fit.method = "error"),
-               "'fit.method' not recognised, supported methods are")
+               "'fit.method' should be one of 'EXP', 'EXP+LIN' or 'LIN'",
+               fixed = TRUE)
   expect_error(analyse_baSAR(CWOSL.sub, verbose = FALSE,
                              source_doserate = c(0.04, 0.001)),
                'argument "signal.integral" is missing, with no default')
@@ -33,48 +33,50 @@ test_that("input validation", {
                              signal.integral = c(1:2)),
                'argument "background.integral" is missing, with no default')
 
-  ## XLS_file
+  ## CSV_file
+  csv.file <- tempfile()
   expect_error(analyse_baSAR(CWOSL.sub, verbose = FALSE,
                              source_doserate = c(0.04, 0.001),
                              signal.integral = c(1:2),
                              background.integral = c(80:100),
-                             XLS_file = list()),
-               "Input type for 'XLS_file' not supported")
+                             CSV_file = list()),
+               "'CSV_file' should be of class 'data.frame', 'character' or NULL")
   expect_error(analyse_baSAR(CWOSL.sub, verbose = FALSE,
                              source_doserate = c(0.04, 0.001),
                              signal.integral = c(1:2),
                              background.integral = c(80:100),
-                             XLS_file = "error"),
-               "XLS_file does not exist")
+                             CSV_file = "error"),
+               "'CSV_file' does not exist")
+  data.table::fwrite(data.frame(BIN_file = "a", DISC = 1), file = csv.file)
   expect_error(analyse_baSAR(CWOSL.sub, verbose = FALSE,
                              source_doserate = c(0.04, 0.001),
                              signal.integral = c(1:2),
                              background.integral = c(80:100),
-                             XLS_file = system.file("extdata/clippy.xls",
-                                                    package = "readxl")),
-               "The XLS_file requires at least 3 columns")
-  SW({
+                             CSV_file = csv.file),
+               "'CSV_file' should have at least 3 columns for the name of the")
+  data.table::fwrite(data.frame(a = "error", b = 1, c = 2), file = csv.file)
   expect_error(analyse_baSAR(CWOSL.sub, verbose = FALSE,
                              source_doserate = c(0.04, 0.001),
                              signal.integral = c(1:2),
                              background.integral = c(80:100),
-                             XLS_file = system.file("extdata/deaths.xls",
-                                                    package = "readxl")),
-               "One of the first 3 columns in your XLS_file has no header")
-  })
+                             CSV_file = csv.file),
+               "One of the first 3 columns in 'CSV_file' has no header")
   expect_error(analyse_baSAR(CWOSL.sub, verbose = FALSE,
                              source_doserate = c(0.04, 0.001),
                              signal.integral = c(1:2),
                              background.integral = c(80:100),
-                             XLS_file = data.frame(a = NA, b = NA)),
-               "The data.frame provided via 'XLS_file' must have at least 3")
+                             CSV_file = data.frame(a = NA, b = NA)),
+               "'CSV_file' should have at least 3 columns for the name of the")
   expect_warning(expect_error(
                  analyse_baSAR(CWOSL.sub, verbose = FALSE,
-                               source_doserate = c(0.04, 0.001),
-                               signal.integral = c(1:2),
-                               background.integral = c(80:100),
-                               XLS_file = data.frame(a = "error", b = 1, c = 2)),
-                 "BIN-file names in XLS_file do not match the loaded BIN-files",
+                               sigmab = list(0.23), sig0 = list(0.02),
+                               source_doserate = list(0.04, 0.001),
+                               signal.integral = list(1, 2),
+                               signal.integral.Tx = c(2:4),
+                               background.integral = list(80, 100),
+                               background.integral.Tx = c(80:100),
+                               CSV_file = data.frame(a = "error", b = 1, c = 2)),
+                 "BIN-file names provided via 'CSV_file' do not match the loaded BIN-files",
                  fixed = TRUE),
   "'error' not recognised or not loaded, skipped")
 
@@ -82,13 +84,18 @@ test_that("input validation", {
                              source_doserate = c(0.04, 0.001),
                              signal.integral = c(1:2),
                              background.integral = c(80:100),
-                             XLS_file = data.frame(a = NA, b = 1, c = 2)),
+                             CSV_file = data.frame(a = NA, b = 1, c = 2)),
                "Number of discs/grains = 0")
 
+  SW({
+  obj <- Risoe.BINfileData2RLum.Analysis(CWOSL.sub)
   expect_error(suppressWarnings(
-      analyse_baSAR(Risoe.BINfileData2RLum.Analysis(CWOSL.sub),
-                    verbose = FALSE)),
+      analyse_baSAR(obj, verbose = TRUE)),
       "No records of the appropriate type were found")
+  expect_error(suppressWarnings(
+    analyse_baSAR(obj, recordType = "NONE", verbose = TRUE)),
+    "No records of the appropriate type were found")
+  })
 
   expect_warning(expect_output(
       analyse_baSAR(CWOSL.sub, verbose = FALSE,
@@ -129,21 +136,43 @@ test_that("input validation", {
                     distribution = "user_defined")),
       "Channel numbers of Lx and Tx data differ")
 
+  SW({
   data(ExampleData.RLum.Analysis, envir = environment())
-  expect_error(analyse_baSAR(list(IRSAR.RF.Data), verbose = FALSE),
+  expect_error(analyse_baSAR(list(IRSAR.RF.Data), verbose = TRUE),
                "At least two aliquots are needed for the calculation")
+
+  expect_warning(expect_output(
+      analyse_baSAR(list(CWOSL.sub, CWOSL.sub), verbose = TRUE,
+                    source_doserate = c(0.04, 0.001),
+                    signal.integral = c(1:2),
+                    background.integral = c(80:100),
+                    fit.method = "LIN", fit.force_through_origin = FALSE,
+                    distribution = "normal",
+                    n.MCMC = 75)),
+      "'1' is a duplicate and therefore removed from the input")
+
+  CWOSL.min <- subset(CWOSL.sub, subset = ID < 20)
+  expect_warning(expect_error(
+      analyse_baSAR(CWOSL.min, source_doserate = c(0.04, 0.001),
+                    signal.integral = c(1:2),
+                    background.integral = c(5:15),
+                    method_control = list(n.chains = 1),
+                    n.MCMC = 10),
+      "In input 1 the number of data points (19) is not a multiple of the",
+      fixed = TRUE),
+      "Only multiple grain data provided, automatic selection skipped")
+  })
 })
 
 test_that("Full check of analyse_baSAR function", {
   skip_on_cran()
 
     set.seed(1)
-
     ##(3) run analysis
     ##please not that the here selected parameters are
     ##chosen for performance, not for reliability
     SW({
-    results <- suppressWarnings(analyse_baSAR(
+    expect_snapshot_RLum(results <- suppressWarnings(analyse_baSAR(
       object = CWOSL.sub,
       source_doserate = c(0.04, 0.001),
       signal.integral = c(1:2),
@@ -158,14 +187,30 @@ test_that("Full check of analyse_baSAR function", {
       verbose = TRUE,
       n.MCMC = 100,
       txtProgressBar = TRUE
-    ))
+      )),
+      tolerance = 1.5e-6)
     })
 
-    expect_s4_class(results, class = "RLum.Results")
-    expect_s3_class(results$summary, "data.frame")
-    expect_s3_class(results$mcmc, "mcmc.list")
-    expect_type(results$models, "list")
-    expect_type(round(sum(results$summary[, c(6:9)]), 2),type = "double")
+    ## source dose rate only scalar
+    SW({
+      expect_snapshot_RLum(results <- suppressWarnings(analyse_baSAR(
+        object = CWOSL.sub,
+        source_doserate = c(0.04),
+        signal.integral = c(1:2),
+        background.integral = c(80:100),
+        fit.method = "EXP",
+        method_control = list(inits = list(
+          list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 1),
+          list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 2),
+          list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 3)
+        )),
+        plot = TRUE,
+        verbose = TRUE,
+        n.MCMC = 100,
+        txtProgressBar = TRUE
+      )),
+      tolerance = 1.5e-6)
+    })
 
   ## rerun with previous results as input
   SW({
@@ -204,7 +249,8 @@ test_that("Full check of analyse_baSAR function", {
       "Your lower_centralD and/or upper_centralD values seem not to fit",
       fixed = TRUE))
 
-  analyse_baSAR(
+  expect_warning(
+    analyse_baSAR(
       object = results,
       plot = TRUE,
       verbose = TRUE,
@@ -216,9 +262,26 @@ test_that("Full check of analyse_baSAR function", {
       aliquot_range = 1:3,
       distribution_plot = "abanico",
       method_control = list(n.chains = 2, thin = 25),
-      n.MCMC = 100)
+      plot.single = TRUE,
+      n.MCMC = 100),
+    "'plot.single' is deprecated, use 'plot_singlePanels' instead")
 
-  expect_warning(expect_error(
+  expect_message(
+      analyse_baSAR(
+          object = results,
+          plot = FALSE,
+          verbose = TRUE,
+          txtProgressBar = FALSE,
+          fit.method = "EXP",
+          fit.force_through_origin = TRUE,
+          distribution = "cauchy",
+          aliquot_range = 100:300,
+          distribution_plot = NULL,
+          method_control = list(n.chains = 1, thin = 25),
+          n.MCMC = 100),
+      "Error: 'aliquot_range' out of bounds, input ignored")
+
+  expect_warning(expect_message(
       analyse_baSAR(
           object = results,
           plot = TRUE,
@@ -232,9 +295,160 @@ test_that("Full check of analyse_baSAR function", {
       "Plots for 'central_D' and 'sigma_D' could not be produced",
       fixed = TRUE),
       "'source_doserate' is ignored in this mode as it was already set")
+
+  CWOSL.mod <- CWOSL.sub
+  CWOSL.mod@METADATA$SEL <- FALSE
+  expect_warning(expect_null(analyse_baSAR(CWOSL.mod, verbose = TRUE,
+                                           source_doserate = c(0.04, 0.001),
+                                           signal.integral = c(1:2),
+                                           background.integral = c(80:100),
+                                           method_control = list(n.chains = 1),
+                                           n.MCMC = 100)),
+                 "No records selected, NULL returned")
+
+  CWOSL.mod <- CWOSL.sub
+  CWOSL.mod@METADATA$SEL[19:24] <- FALSE
+  expect_message(analyse_baSAR(CWOSL.mod, verbose = TRUE,
+                               source_doserate = c(0.04, 0.001),
+                               signal.integral = c(1:2),
+                               background.integral = c(80:100),
+                               method_control = list(n.chains = 1),
+                               n.MCMC = 100),
+                 "Record pre-selection in BIN-file detected")
+
+  CWOSL.mod <- CWOSL.sub
+  CWOSL.mod@METADATA$GRAIN[-c(19:24)] <- 2
+  expect_warning(analyse_baSAR(CWOSL.mod, verbose = TRUE,
+                               source_doserate = c(0.04, 0.001),
+                               signal.integral = c(1:2),
+                               background.integral = c(80:100),
+                               method_control = list(n.chains = 1),
+                               n.MCMC = 100),
+                 "Automatic grain selection: 3 curves with grain index 0 have been removed")
   })
 
   results2@originator <- "unknown"
   expect_error(analyse_baSAR(object = results2),
                "'object' is of type 'RLum.Results', but was not produced by")
+
+  results2@originator <- "analyse_baSAR"
+  results2@data$input_object <- results2$input_object[1:2, ]
+  expect_message(expect_null(analyse_baSAR(object = results2)),
+                 "Error: Number of aliquots < 3, NULL returned")
+
+  SW({
+  expect_warning(analyse_baSAR(CWOSL.sub, source_doserate = c(0.04, 0.001),
+                               signal.integral = c(1:2),
+                               background.integral = c(8:10),
+                               method_control = list(n.chains = 1),
+                               n.MCMC = 10),
+                 "Number of background channels for Tx < 25")
+
+  analyse_baSAR(CWOSL.sub,
+                CSV_file = CWOSL.sub@METADATA[, c("FNAME", "POSITION", "GRAIN")],
+                source_doserate = c(0.04, 0.001),
+                signal.integral = c(1:2),
+                background.integral = c(8:10),
+                method_control = list(n.chains = 1),
+                aliquot_range = 1:2,
+                n.MCMC = 10)
+
+  vnames <- c("central_D", "sigma_D", "")
+  expect_message(analyse_baSAR(CWOSL.sub,
+                               source_doserate = c(0.04, 0.001),
+                               signal.integral = 1:2,
+                               background.integral = 60:100,
+                               method_control = list(n.chains = 1,
+                                                     variable.names = vnames),
+                               plot_reduced = FALSE,
+                               n.MCMC = 10, verbose = FALSE),
+                 "Dose-response curves could not be plotted as 'variable.names'")
+
+  vnames <- c("D", "Q", "a", "b", "c", "g")
+  expect_message(analyse_baSAR(CWOSL.sub,
+                               source_doserate = c(0.04, 0.001),
+                               signal.integral = 1:2,
+                               background.integral = 60:100,
+                               method_control = list(n.chains = 1,
+                                                     variable.names = vnames),
+                               n.MCMC = 10, verbose = FALSE),
+                 "Plots for 'central_D' and 'sigma_D' could not be produced")
+  })
+})
+
+test_that("regression tests", {
+  skip_on_cran()
+
+  ## issue 407
+  SW({
+  expect_warning(expect_s4_class(
+      analyse_baSAR(CWOSL.sub, verbose = FALSE, plot = FALSE,
+                    source_doserate = c(0.04, 0.001),
+                    signal.integral = c(1:2),
+                    background.integral = c(80:100),
+                    method_control = list(n.chains = 1, thin = 60),
+                    n.MCMC = 60),
+      "RLum.Results"),
+      "'thin = 60' is too high for 'n.MCMC = 60', reset to 30")
+  })
+
+  ## check parameters irradiation times
+  SW({
+  expect_s4_class(suppressWarnings(analyse_baSAR(CWOSL.sub,
+                verbose = FALSE,
+                plot = FALSE,
+                source_doserate = c(0.04, 0.001),
+                signal.integral = c(1:2),
+                irradiation_times = c(0, 0, 0, 0, 0, 0, 450, 450, 450, 0, 0, 0,
+                                      1050, 1050, 1050, 0, 0, 0, 2000, 2000, 2000, 0, 0, 0,
+                                      2550, 2550, 2550, 0, 0, 0, 450, 450,
+                                      450, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                background.integral = c(80:100),
+                n.MCMC = 10)), "RLum.Results")
+  })
+
+  ## have all irradiation times identical
+  expect_message(
+    suppressWarnings(analyse_baSAR(CWOSL.sub,
+                verbose = FALSE,
+                plot = FALSE,
+                source_doserate = c(0.04, 0.001),
+                signal.integral = c(1:2),
+                irradiation_times = c(0),
+                background.integral = c(80:100),
+                n.MCMC = 10)),
+     regexp = "Error: All irradiation times are identical, NULL returned")
+
+  ## test removal of unwanted curves
+  ## check irradiation times assignment and non-OSL curve removal
+  tmp_object <- Risoe.BINfileData2RLum.Analysis(CWOSL.sub)
+  tmp_curves <- tmp_object[[3]]@records[[1]]
+  tmp_curves@recordType <- "NONE"
+  tmp_object[[3]]@records <- c(tmp_object[[3]]@records, rep(tmp_curves,2))
+
+  SW({
+  expect_s4_class(
+    suppressWarnings(
+      analyse_baSAR(tmp_object,
+                verbose = TRUE,
+                plot = FALSE,
+                recordType = c("OSL", "NONE"),
+                source_doserate = c(0.04, 0.001),
+                signal.integral = c(1:2),
+                background.integral = c(80:100),
+                n.MCMC = 10)), "RLum.Results")
+  })
+
+  tmp_object[[3]] <- set_RLum("RLum.Analysis")
+  SW({
+  expect_message(expect_null(
+      analyse_baSAR(tmp_object,
+                    verbose = FALSE,
+                    recordType = c("OSL", "NONE"),
+                    source_doserate = c(0.04, 0.001),
+                    signal.integral = c(1:2),
+                    background.integral = c(80:100),
+                    n.MCMC = 10)),
+      "Object conversion failed, NULL returned")
+  })
 })

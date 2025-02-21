@@ -31,10 +31,10 @@ sample size used for the bootstrapping}
 exclude NA values from the data set prior to any further operation.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enables/disables plot output}
+enable/disable the plot output.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enables/disables terminal output}
+enable/disable output to the terminal.}
 
 \item{...}{further arguments that can be passed to \link[graphics:hist]{graphics::hist}. As three plots
 are returned all arguments need to be provided as \link{list},
@@ -91,10 +91,10 @@ The function returns two different plot panels.
 dose and the sigma values.
 }
 \description{
-This functions calculates the Average Dose and their extrinsic dispersion and estimates
-the standard errors by bootstrapping based on the Average Dose Model by Guerin et al., 2017
-}
-\details{
+This functions calculates the Average Dose and its extrinsic dispersion,
+estimating the standard errors by bootstrapping based on the Average
+Dose Model by Guerin et al., 2017.
+
 \strong{\code{sigma_m}}\cr
 
 The program requires the input of a known value of \code{sigma_m},
@@ -127,7 +127,7 @@ plot_AbanicoPlot(
 } 
 
 \section{How to cite}{
-Christophe, C., Philippe, A., Kreutzer, S., 2024. calc_AverageDose(): Calculate the Average Dose and the dose rate dispersion. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Christophe, C., Philippe, A., Kreutzer, S., 2025. calc_AverageDose(): Calculate the Average Dose and the dose rate dispersion. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

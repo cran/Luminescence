@@ -9,7 +9,13 @@
 \alias{structure_RLum,RLum.Analysis-method}
 \alias{length_RLum,RLum.Analysis-method}
 \alias{names_RLum,RLum.Analysis-method}
+\alias{add_metadata<-,RLum.Analysis-method}
+\alias{rename_metadata<-,RLum.Analysis-method}
+\alias{replace_metadata<-,RLum.Analysis-method}
 \alias{smooth_RLum,RLum.Analysis-method}
+\alias{sort_RLum,RLum.Analysis-method}
+\alias{melt_RLum,RLum.Analysis-method}
+\alias{view,RLum.Analysis-method}
 \title{Class \code{"RLum.Analysis"}}
 \usage{
 \S4method{show}{RLum.Analysis}(object)
@@ -45,10 +51,22 @@
 
 \S4method{names_RLum}{RLum.Analysis}(object)
 
+\S4method{add_metadata}{RLum.Analysis}(object, info_element) <- value
+
+\S4method{rename_metadata}{RLum.Analysis}(object, info_element) <- value
+
+\S4method{replace_metadata}{RLum.Analysis}(object, info_element, subset = NULL) <- value
+
 \S4method{smooth_RLum}{RLum.Analysis}(object, ...)
+
+\S4method{sort_RLum}{RLum.Analysis}(object, slot = NULL, info_element = NULL, decreasing = FALSE, ...)
+
+\S4method{melt_RLum}{RLum.Analysis}(object)
+
+\S4method{view}{RLum.Analysis}(object, ...)
 }
 \arguments{
-\item{object}{\code{\link{get_RLum}}: \code{\link{names_RLum}}, \code{\link{length_RLum}}, \code{\link{structure_RLum}} (\strong{required}):
+\item{object}{(\strong{required}):
 an object of class \linkS4class{RLum.Analysis}}
 
 \item{class}{\code{\link{set_RLum}} \link{character} (\strong{required}):
@@ -99,10 +117,10 @@ coerce to the next possible layer (which are \code{RLum.Data}-objects),
 \code{drop = FALSE} keeps the original \code{RLum.Analysis}}
 
 \item{recursive}{\code{\link{get_RLum}}: \link{logical} (\emph{with default}):
-if \code{TRUE} (the default) and the result of the \code{get_RLum()} request is a single
-object this object will be unlisted, means only the object itself and no
-list containing exactly one object is returned. Mostly this makes things
-easier, however, if this method is used within a loop this might be undesired.}
+if \code{TRUE} (default) when the result of the \code{get_RLum()} request is a single
+object, the object itself will be returned directly, rather than being
+wrapped in a list. Mostly this makes things easier, but this might be
+undesired if this method is used within a loop.}
 
 \item{info.object}{\code{\link{get_RLum}}: \link{character} (\emph{optional}):
 name of the wanted info element}
@@ -117,11 +135,23 @@ An environment passed to \link{eval} as the enclosure. This argument is only
 relevant when subsetting the object and should not be used manually.}
 
 \item{fullExtent}{\link{structure_RLum}; \link{logical} (\emph{with default}):
-extents the returned \code{data.frame} to its full extent, i.e. all info elements
+extends the returned \code{data.frame} to its full extent, i.e. all info elements
 are part of the return as well. The default value is \code{FALSE} as the data
 frame might become rather big.}
 
-\item{...}{further arguments passed to underlying methods}
+\item{info_element}{\link{character} (\emph{optional}): name of the \code{info} field
+to use in sorting.}
+
+\item{value}{(\strong{required}) The value assigned to the selected elements
+of the metadata field. If \code{NULL} the elements named in \code{info_element}
+will be removed.}
+
+\item{...}{other arguments that might be passed}
+
+\item{slot}{\link{character} (\emph{optional}): slot name to use in sorting.}
+
+\item{decreasing}{\link{logical} (\emph{with default}): whether the sort order should
+be decreasing (\code{FALSE} by default).}
 }
 \value{
 \strong{\code{get_RLum}}:
@@ -148,6 +178,14 @@ Returns the names of the record types (\code{recordType}) in this object.
 \strong{\code{smooth_RLum}}
 
 Same object as input, after smoothing
+
+\strong{\code{sort_RLum}}
+
+Same object as input, but sorted according to the specified parameters.
+
+\strong{\code{melt_RLum}}
+
+Flat \link{data.frame} with \code{X}, \code{Y}, \code{TYPE}, \code{UID}
 }
 \description{
 Object class to represent analysis data for protocol analysis, i.e. all curves,
@@ -175,11 +213,26 @@ Currently supported objects are: RLum.Data.Curve and RLum.Data.Spectrum
 
 \item \code{length_RLum(RLum.Analysis)}: Returns the length of the object, i.e., number of stored records.
 
-\item \code{names_RLum(RLum.Analysis)}: Returns the names of the \linkS4class{RLum.Data} objects objects (same as shown with the show method)
+\item \code{names_RLum(RLum.Analysis)}: Returns the names of the \linkS4class{RLum.Data} objects (same as shown with the
+\code{show} method)
+
+\item \code{add_metadata(RLum.Analysis) <- value}: Adds metadata to \linkS4class{RLum.Analysis} objects
+
+\item \code{rename_metadata(RLum.Analysis) <- value}: Renames a metadata entry of \linkS4class{RLum.Analysis} objects
+
+\item \code{replace_metadata(RLum.Analysis) <- value}: Replaces or removes metadata of \linkS4class{RLum.Analysis} objects
 
 \item \code{smooth_RLum(RLum.Analysis)}: Smoothing of \code{RLum.Data} objects contained in this \code{RLum.Analysis} object
-\link[zoo:rollmean]{zoo::rollmean} or \link[zoo:rollmean]{zoo::rollmedian}. In particular the internal
-function \code{.smoothing} is used.
+using the internal function \code{.smoothing}.
+
+\item \code{sort_RLum(RLum.Analysis)}: Sorting of \code{RLum.Data} objects contained in this \code{RLum.Analysis} object.
+At least one of \code{slot} and \code{info_element} must be provided. If both are
+given, ordering by \code{slot} always supersedes ordering by \code{info_element}.
+
+\item \code{melt_RLum(RLum.Analysis)}: Melts \linkS4class{RLum.Analysis} objects into a flat data.frame to be used
+in combination with other packages such as \code{ggplot2}.
+
+\item \code{view(RLum.Analysis)}: View method for \linkS4class{RLum.Analysis} objects
 
 }}
 \section{Slots}{
@@ -200,7 +253,7 @@ Objects can be created by calls of the form \code{set_RLum("RLum.Analysis", ...)
 }
 
 \section{Class version}{
- 0.4.17
+ 0.4.18
 }
 
 \examples{
@@ -230,7 +283,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. RLum.Analysis-class(): Class 'RLum.Analysis'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. RLum.Analysis-class(): Class 'RLum.Analysis'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{classes}

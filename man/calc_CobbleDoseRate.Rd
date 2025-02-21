@@ -10,7 +10,8 @@ calc_CobbleDoseRate(input, conversion = "Guerinetal2011")
 \item{input}{\link{data.frame} (\strong{required}): A table containing all relevant information
 for each individual layer. For the table layout see details.}
 
-\item{conversion}{Which dose rate conversion factors to use. For accepted values see \link{BaseDataSet.ConversionFactors}}
+\item{conversion}{\link{character} (\emph{with default}): dose rate conversion factors
+to use, see \link{BaseDataSet.ConversionFactors} for the accepted values.}
 }
 \value{
 The function returns an \linkS4class{RLum.Results} object for which the first element
@@ -61,7 +62,7 @@ COLUMN \tab DATA TYPE \tab DESCRIPTION\cr
 \strong{Water content}
 The water content provided by the user should be calculated according to:
 
-\deqn{(Wet_weight - Dry_weight) / Dry_weight * 100}
+\deqn{(Wet\_weight - Dry\_weight) / Dry\_weight * 100}
 }
 \section{Function version}{
  0.1.0
@@ -77,7 +78,7 @@ calc_CobbleDoseRate(ExampleData.CobbleData)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., 2024. calc_CobbleDoseRate(): Calculate dose rate of slices in a spherical cobble. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., 2025. calc_CobbleDoseRate(): Calculate dose rate of slices in a spherical cobble. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

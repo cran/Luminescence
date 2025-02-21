@@ -20,11 +20,11 @@
 #'
 #' \tabular{lll}{
 #' **ARGUMENT** \tab **FUNCTION** \tab **DESCRIPTION**\cr
-#' `mode` \tab `plot_GrowthCurve` \tab as in [plot_GrowthCurve]; sets the mode used for fitting\cr
-#' `fit.method` \tab `plot_GrowthCurve` \tab as in [plot_GrowthCurve]; sets the function applied for fitting\cr
+#' `mode` \tab `fit_DoseResponseCurve` \tab as in [fit_DoseResponseCurve]; sets the mode used for fitting\cr
+#' `fit.method` \tab `fit_DoseResponseCurve` \tab as in [fit_DoseResponseCurve]; sets the function applied for fitting\cr
 #' }
 #'
-#' @param object [RLum.Analysis-class] or [list] **(required)**:
+#' @param object [RLum.Analysis-class] or [list] (**required**):
 #' results obtained from the measurement.
 #' Alternatively a list of [RLum.Analysis-class] objects can be provided to allow an automatic analysis
 #'
@@ -45,10 +45,10 @@
 #' See details for further explanations
 #'
 #' @param verbose [logical] (*with default*):
-#' enable/disable verbose mode
+#' enable/disable output to the terminal.
 #'
 #' @param plot [logical] (*with default*):
-#' enable/disable plot output
+#' enable/disable the plot output.
 #'
 #' @param ... further arguments that can be passed to the plot output
 #'
@@ -68,7 +68,7 @@
 #'  `$data` \tab `data.frame` \tab correction value and error \cr
 #'  `$table` \tab `data.frame` \tab table used for plotting  \cr
 #'  `$table_mean` \tab `data.frame` \tab table used for fitting \cr
-#'  `$fit` \tab `lm` or `nls` \tab the fitting as returned by the function [plot_GrowthCurve]
+#'  `$fit` \tab `lm` or `nls` \tab the fitting as returned by the function [fit_DoseResponseCurve]
 #' }
 #'
 #'**slot:** **`@info`**
@@ -85,7 +85,7 @@
 #'
 #' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
-#' @seealso [plot_GrowthCurve]
+#' @seealso [fit_DoseResponseCurve]
 #'
 #' @references
 #'
@@ -121,23 +121,14 @@ analyse_Al2O3C_ITC <- function(
   # SELF CALL -----------------------------------------------------------------------------------
   if(is.list(object)){
     ##check whether the list contains only RLum.Analysis objects
-    if(!all(unique(sapply(object, class)) == "RLum.Analysis")){
-      .throw_error("All elements in the 'object' list must be of type 'RLum.Analysis'")
-    }
+    lapply(object,
+           function(x) .validate_class(x, "RLum.Analysis",
+                                       name = "All elements of 'object'"))
 
-    ##expand input arguments
-    if(!is.null(signal_integral)){
-      signal_integral <- rep(list(signal_integral, length = length(object)))
-    }
-
-    ##dose points
-    if(is(dose_points, "list")){
-      dose.points <- rep(dose_points, length = length(object))
-
-    }else{
-      dose_points <- rep(list(dose_points), length = length(object))
-
-    }
+    ## expand input arguments
+    rep.length <- length(object)
+    signal_integral <- .listify(signal_integral, rep.length)
+    dose_points <- .listify(dose_points, rep.length)
 
     ##method_control
     ##verbose
@@ -163,21 +154,16 @@ analyse_Al2O3C_ITC <- function(
 
       }else{
         return(results)
-
       }
-
     })
 
     ##return
     return(merge_RLum(results_full))
-
   }
 
-  # Integrity check  ---------------------------------------------------------------------------
-  ##check input object
-  if(!inherits(object, "RLum.Analysis")){
-    .throw_error("'object' must be of type 'RLum.Analysis'")
-  }
+  ## Integrity tests  -------------------------------------------------------
+
+  .validate_class(object, "RLum.Analysis")
 
   ##TODO
   ##implement more checks ... if you find some time, somehow, somewhere
@@ -191,18 +177,14 @@ analyse_Al2O3C_ITC <- function(
   method_control_settings <- list(
     mode = "extrapolation",
     fit.method = "EXP"
-
   )
 
   ## modify on request
   if (!is.null(method_control)) {
-    if (!is.list(method_control)) {
-      .throw_error("'method_control' is expected to be a list")
-    }
-      method_control_settings <- modifyList(x = method_control_settings, val = method_control)
-
-    }
-
+    .validate_class(method_control, "list")
+    method_control_settings <- modifyList(x = method_control_settings,
+                                          val = method_control)
+  }
 
   ##dose points enhancement
   ##make sure that the dose_point is enhanced
@@ -220,7 +202,6 @@ analyse_Al2O3C_ITC <- function(
       .throw_warning("Input for 'signal_integral' corrected to 1:",
                      max(signal_integral))
    }
-
   }
 
   ##calculate curve sums, assuming the background
@@ -255,15 +236,12 @@ analyse_Al2O3C_ITC <- function(
 
 
   ##calculate GC
-  GC <- plot_GrowthCurve(
-    sample = df_mean,
+  GC <- fit_DoseResponseCurve(
+    object = df_mean,
     mode = method_control_settings$mode,
-    output.plotExtended = FALSE,
-    output.plot = FALSE,
     fit.method = method_control_settings$fit.method,
     verbose = FALSE
   )
-
 
   ##output
   if(verbose){
@@ -271,7 +249,6 @@ analyse_Al2O3C_ITC <- function(
     cat(paste0("\n Used fit:\t\t",method_control_settings$fit.method))
     cat(paste0("\n Time correction value:\t", round(GC$De$De,3), " \u00B1 ", round(GC$De$De.Error, 3)))
     cat("\n\n")
-
   }
 
 
@@ -287,7 +264,6 @@ analyse_Al2O3C_ITC <- function(
       legend.pos = "right",
       legend.text = "dose points",
       mtext = ""
-
     )
 
     ##modify list on request
@@ -359,7 +335,6 @@ analyse_Al2O3C_ITC <- function(
 
     ##add mtext
     mtext(side = 3, text = plot_settings$mtext)
-
   }
 
   # Output --------------------------------------------------------------------------------------
@@ -376,5 +351,4 @@ analyse_Al2O3C_ITC <- function(
     ),
     info = list(call = sys.call())
   ))
-
 }

@@ -26,7 +26,7 @@ A \code{data.frame} with one of the following structures:
 c) \code{LxTx} error.
 \item If a \strong{two column} data frame is provided it is automatically
 assumed that errors on \code{LxTx} are missing. A third column will be attached
-with an arbitrary 5 \\% error on the provided \code{LxTx} values.
+with an arbitrary 5 \% error on the provided \code{LxTx} values.
 \item Can also be a \strong{wide table}, i.e. a \link{data.frame} with a number of columns divisible by 3
 and where each triplet has the aforementioned column structure.
 }
@@ -46,7 +46,7 @@ and where each triplet has the aforementioned column structure.
 \code{Ln/Tn}-value. If you want to provide more than one \code{Ln/Tn}-value consider
 using the argument \code{LnTn}.}
 
-\item{LnTn}{\link{data.frame} (\strong{optional}):
+\item{LnTn}{\link{data.frame} (\emph{optional}):
 This argument should \strong{only} be used to provide more than one \code{Ln/Tn}-value.
 It assumes a two column data frame with the following structure:
 
@@ -93,14 +93,14 @@ is an experimental adaptation of the model and should be used
 with great care.}
 
 \item{lower.bounds}{\link{numeric} (\emph{with default}):
-Only applicable for \code{fit.method = 'GOK'}. A vector of length 3 that
-contains the lower bound values for fitting the general-order kinetics
-function using \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}. In most cases, the default values
-(c(\verb{-Inf, -Inf, -Inf})) are appropriate for finding a best fit, but
-sometimes it may be useful to restrict the lower bounds to e.g.
-c(\verb{0, 0, 0}). The values of the vector are for parameters
-\code{a}, \code{D0} and \code{c} in that particular order (see details in
-\link{plot_GrowthCurve}).}
+A vector of length 4 that contains the lower bound values to be applied
+when fitting the models with \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}. In most cases, the
+default values (\code{c(-Inf, -Inf, -Inf, -Inf)}) are appropriate for finding
+a best fit, but sometimes it may be useful to restrict the lower bounds to
+e.g. \code{c(0, 0, 0, 0)}. The values of the vectors are, respectively, for
+parameters \code{a}, \code{D0}, \code{c} and \code{d} in that order (parameter \code{d} is ignored
+when \code{fit.method = "EXP"}). More details can be found in
+\link{fit_DoseResponseCurve}.}
 
 \item{summary}{\link{logical} (\emph{with default}):
 If \code{TRUE} (the default) various parameters provided by the user
@@ -108,7 +108,7 @@ and calculated by the model are added as text on the right-hand side of the
 plot.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enables/disables plot output.}
+enable/disable the plot output.}
 
 \item{...}{Further parameters:
 \itemize{
@@ -119,7 +119,7 @@ iterations for the results to converge. Decreasing the number of iterations
 will often result in unstable estimates.
 }
 
-All other arguments are passed to \link{plot} and \link{plot_GrowthCurve} (in particular
+All other arguments are passed to \link{plot} and \link{fit_DoseResponseCurve} (in particular
 \code{mode} for the fit mode and \code{fit.force_through_origin})}
 }
 \value{
@@ -181,7 +181,7 @@ irradiation (Auclair et al. 2003) and \eqn{\tilde{s}} (\eqn{3\times10^{15}} s\eq
 Using fit parameters \eqn{A} and \eqn{D_0}, the function then computes a natural dose
 response curve using the environmental dose rate, \eqn{\dot{D}} (Gy/s) and equations
 \verb{[1]} and \verb{[2]}. Computed \eqn{\frac{L_x}{T_x}} values are then fitted using the
-\link{plot_GrowthCurve} function and the laboratory measured LnTn can then
+\link{fit_DoseResponseCurve} function and the laboratory measured LnTn can then
 be interpolated onto this curve to determine the fading corrected
 \eqn{D_e} value, from which the fading corrected age is calculated.
 
@@ -205,6 +205,10 @@ The \link{calc_Huntley2006} function also calculates the level of saturation (\e
 and the field saturation (i.e. athermal steady state, (n/N)_SS) value for
 the sample under investigation using the sample specific \eqn{\rho}',
 unfaded \eqn{D_0} and \eqn{\dot{D}} values, following the approach of Kars et al. (2008).
+
+The computation is done using 1000 equally-spaced points in the interval
+[0.01, 3]. This can be controlled by setting option \code{rprime}, such as
+in \code{rprime = seq(0.01, 3, length.out = 1000)} (the default).
 
 \strong{Uncertainties}
 
@@ -282,7 +286,7 @@ kars <- calc_Huntley2006(
 } 
 
 \section{How to cite}{
-King, G.E., Burow, C., Kreutzer, S., 2024. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+King, G.E., Burow, C., Kreutzer, S., 2025. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -1,6 +1,3 @@
-#' @include get_RLum.R set_RLum.R names_RLum.R bin_RLum.Data.R
-NULL
-
 #' Class `"RLum.Data.Spectrum"`
 #'
 #' Class for representing luminescence spectra data (TL/OSL/RF).
@@ -13,7 +10,8 @@ NULL
 #' Object of class [character] containing the type of the curve (e.g. "TL" or "OSL")
 #'
 #' @slot curveType
-#' Object of class [character] containing curve type, allowed values are measured or predefined
+#' Object of class [character] containing curve type, allowed values are
+#' "measured" or "predefined"
 #'
 #' @slot data
 #' Object of class [matrix] containing spectrum (count) values.
@@ -75,23 +73,21 @@ setClass(
 )
 
 
-
-# as() -----------------------------------------------------------------------------------------
+## as() ---------------------------------------------------------------------
 ##data.frame
 ##COERCE RLum.Data.Spectrum >> data.frame AND data.frame >> RLum.Data.Spectrum
 #' as()
 #'
 #' for `[RLum.Data.Spectrum-class]`
 #'
-#'
 #' **[RLum.Data.Spectrum-class]**
 #'
-#' \tabular{ll}{
+#' \tabular{lll}{
 #'   **from** \tab **to**\cr
 #'   `data.frame` \tab `data.frame`\cr
 #'   `matrix` \tab `matrix`
+#'   `list` \tab `list`
 #' }
-#'
 #'
 #' @md
 #' @name as
@@ -108,9 +104,7 @@ setAs("data.frame", "RLum.Data.Spectrum",
 setAs("RLum.Data.Spectrum", "data.frame",
       function(from){
         as.data.frame(from@data)
-
       })
-
 
 ##MATRIX
 ##COERCE RLum.Data.Spectrum >> matrix AND matrix >> RLum.Data.Spectrum
@@ -126,10 +120,27 @@ setAs("matrix", "RLum.Data.Spectrum",
 setAs("RLum.Data.Spectrum", "matrix",
       function(from){
         from@data
-
       })
 
-# show() -------------------------------------------------------------------------------------
+## LIST
+## COERCE RLum.Data.Spectrum >> list AND list >> RLum.Data.Spectrum
+setAs("list", "RLum.Data.Spectrum",
+      function(from, to){
+        if (length(from) == 0)
+          return(set_RLum("RLum.Data.Spectrum"))
+        new(to,
+            recordType = NA_character_,
+            curveType = NA_character_,
+            data = matrix(unlist(from)),
+            info = list())
+      })
+
+setAs("RLum.Data.Spectrum", "list",
+      function(from){
+        apply(from@data, 2, list)
+      })
+
+## show() -------------------------------------------------------------------
 #' @describeIn RLum.Data.Spectrum
 #' Show structure of `RLum.Data.Spectrum` object
 #'
@@ -157,15 +168,15 @@ setMethod("show",
             cat("\n\t .. .. range count values:", z.range)
             cat("\n\t additional info elements:", length(object@info))
             #cat("\n\t\t >> names:", names(object@info))
+            cat("\n")
           }
 )
 
 
-
-# set_RLum() ----------------------------------------------------------------------------------
+## set_RLum() ---------------------------------------------------------------
 #' @describeIn RLum.Data.Spectrum
-#' Construction method for RLum.Data.Spectrum object. The slot info is optional
-#' and predefined as empty list by default
+#' Construction method for RLum.Data.Spectrum object. The `info` slot is
+#' optional and by default it is set to an empty list
 #'
 #' @param class [`set_RLum`]; [character] (*automatic*):
 #' name of the `RLum` class to create.
@@ -188,8 +199,8 @@ setMethod("show",
 #'
 #' @param data [`set_RLum`]; [matrix]:
 #' raw curve data. If data is of type `RLum.Data.Spectrum`, this can be used
-#' to re-construct the object. If the object is reconstructed, `.uid`, `.pid` and `orginator`
-#' are always taken from the input object
+#' to re-construct the object. If the object is reconstructed, `.uid`, `.pid`
+#' and `originator` are always taken from the input object
 #'
 #' @param info [`set_RLum`] [list]:
 #' info elements
@@ -234,7 +245,6 @@ setMethod(
       if (missing(info))
         info <- data@info
 
-
       ##check for missing .uid and .pid >> this are always taken from the
       ##original dataset
 
@@ -250,7 +260,6 @@ setMethod(
       newRLumDataSpectrum@.uid = data@.uid
       newRLumDataSpectrum@.pid = data@.pid
 
-
     } else {
       ##set empty class from object
       newRLumDataSpectrum <- new("RLum.Data.Spectrum")
@@ -263,7 +272,6 @@ setMethod(
       newRLumDataSpectrum@info = info
       newRLumDataSpectrum@.uid = .uid
       newRLumDataSpectrum@.pid = .pid
-
     }
 
     return(newRLumDataSpectrum)
@@ -272,18 +280,16 @@ setMethod(
 )
 
 
-
-# get_RLum() ----------------------------------------------------------------------------------
+## get_RLum() ---------------------------------------------------------------
 #' @describeIn RLum.Data.Spectrum
-#' Accessor method for RLum.Data.Spectrum object. The argument info.object
-#' is optional to directly access the info elements. If no info element name
-#' is provided, the raw curve data (matrix) will be returned
+#' Accessor method for `RLum.Data.Spectrum` object.
 #'
 #' @param object [`get_RLum`], [`names_RLum`] (**required**):
 #' an object of class [RLum.Data.Spectrum-class]
 #'
 #' @param info.object [`get_RLum`]; [character] (*optional*):
-#' the name of the info object to be called
+#' the name of the info object to be called. If no info element name
+#' is provided, the raw curve data (matrix) will be returned
 #'
 #' @return
 #'
@@ -297,33 +303,25 @@ setMethod(
 setMethod("get_RLum",
           signature("RLum.Data.Spectrum"),
           definition = function(object, info.object) {
-            ##if missing info.object just show the curve values
+              .set_function_name("get_RLum")
+              on.exit(.unset_function_name(), add = TRUE)
 
-            if (missing(info.object) == FALSE){
-              if(is(info.object, "character") == FALSE)
-                stop("[get_RLum] 'info.object' has to be a character!", call. = FALSE)
+              ##if missing info.object just show the curve values
+              if (!missing(info.object)) {
+                .validate_class(info.object, "character")
 
-
-              if (info.object %in% names(object@info) == TRUE){
+                if (!info.object %in% names(object@info)) {
+                  .throw_error("Invalid element name, valid names are: ",
+                               .collapse(names(object@info)))
+                }
                 unlist(object@info[info.object])
-
               } else {
-                stop(paste0(
-                  "[get_RLum] Invalid element name. Valid names are: ",
-                  paste(names(object@info), collapse = ", ")
-                ),
-                call. = FALSE)
-
+                object@data
               }
-            } else {
-              object@data
-
-            }
           })
 
 
-
-# names() -------------------------------------------------------------------------------------
+## names() ------------------------------------------------------------------
 #' @describeIn RLum.Data.Spectrum
 #' Returns the names info elements coming along with this curve object
 #'
@@ -339,12 +337,10 @@ setMethod("names_RLum",
           "RLum.Data.Spectrum",
           function(object){
             names(object@info)
-
           })
 
 
-
-# bin_RLum() ----------------------------------------------------------------------------------#
+## bin_RLum() ---------------------------------------------------------------
 #' @describeIn RLum.Data.Spectrum
 #' Allows binning of RLum.Data.Spectrum data. Count values and values on the x-axis are summed-up;
 #' for wavelength/energy values the mean is calculated.
@@ -370,12 +366,16 @@ setMethod("names_RLum",
 setMethod(f = "bin_RLum.Data",
           signature = "RLum.Data.Spectrum",
           function(object, bin_size.col = 1, bin_size.row = 1) {
+            .set_function_name("bin_RLum.Data.Spectrum")
+            on.exit(.unset_function_name(), add = TRUE)
 
-            ##make sure that we have no input problems
-            if (!inherits(bin_size.col, "numeric") || !inherits(bin_size.row, "numeric")){
-              stop("[bin_RLum.Data()] 'bin_size.row' and 'bin_size.col' must be of class 'numeric'!",
-                   call. = FALSE)
+            ## Integrity checks ---------------------------------------------
+
+            if (length(object@data) < 2) {
+              .throw_error("'object' contains no data")
             }
+            .validate_class(bin_size.row, c("numeric", "integer"))
+            .validate_class(bin_size.col, c("numeric", "integer"))
 
             ##make sure that we do not get in trouble with negative values
             bin_size.col <- abs(bin_size.col)
@@ -402,4 +402,3 @@ setMethod(f = "bin_RLum.Data",
             ##return object
             return(object)
           })
-

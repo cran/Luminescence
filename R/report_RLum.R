@@ -194,21 +194,14 @@ report_RLum <- function(
   .set_function_name("report_RLum")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## ------------------------------------------------------------------------ ##
-  ## PRE-CHECKS ----
+  ## Integrity checks -------------------------------------------------------
 
   # check if required namespace(s) are available
+  .require_suggested_package("rmarkdown", "Creating object reports")
+  .require_suggested_package("pander", "Creating object reports")
   # nocov start
-  for (package.name in c("rmarkdown", "pander")) {
-    if (!requireNamespace(package.name, quietly = TRUE))
-      .throw_error("Creating object reports requires the '", package.name,
-                   "' package. To install it, run 'install.packages('",
-                   package.name, "')' in your R console.")
-  }
-  if (!requireNamespace("rstudioapi", quietly = TRUE)) {
-    .throw_warning("Creating object reports requires the 'rstudioapi' ",
-                   "package. To install it, run 'install.packages('rstudioapi')' ",
-                   "in your R console.")
+  if (.require_suggested_package("rstudioapi", "Creating object reports",
+                                 throw.error = FALSE)) {
     isRStudio <- FALSE
   } else {
     isRStudio <- rstudioapi::isAvailable()
@@ -224,9 +217,9 @@ report_RLum <- function(
   ## STRUCTURE ----
   structure <- list(header = TRUE,
                     main = TRUE,
-                    structure = ifelse(compact, FALSE, TRUE),
+                    structure = !compact,
                     rds = TRUE,
-                    session = ifelse(compact, FALSE, TRUE),
+                    session = !compact,
                     plot = TRUE)
 
   # specifying report components has higher precedence than the 'compact' arg
@@ -234,7 +227,7 @@ report_RLum <- function(
 
 
   ## OPTIONS ----
-  options <- list(short_table = ifelse(compact, TRUE, FALSE),
+  options <- list(short_table = compact,
                   theme = "cerulean",
                   highlight = "haddock",
                   css = TRUE)
@@ -317,10 +310,7 @@ report_RLum <- function(
   # INFO ----
   # check if Luminescence package is installed and get details
   pkg <- as.data.frame(installed.packages(), row.names = FALSE)
-  if ("Luminescence" %in% pkg$Package)
-    pkg <- pkg[which(pkg$Package == "Luminescence"), ]
-  else
-    pkg <- data.frame(LibPath = "-", Version = "not installed", Built = "-")
+  pkg <- pkg[which(pkg$Package == "Luminescence"), ]
 
   # Title
   writeLines(paste("<div align='center'><h1>", title, "</h1></div>\n\n<hr>"), tmp)
@@ -366,7 +356,6 @@ report_RLum <- function(
       # hide @.pid and @.uid if this is a shortened report (default)
       if (elements$bud[i] %in% c(".uid", ".pid") && compact == TRUE)
         next();
-
 
       # HEADER
       short.name <- elements$bud[i]
@@ -456,7 +445,6 @@ report_RLum <- function(
         # write table using pander and end each table with a horizontal line
         writeLines(suppressWarnings(pander::pander_return(table)), tmp)
         writeLines("\n\n<hr>", tmp)
-
       }
     }
   }#EndOf::Main
@@ -550,7 +538,6 @@ report_RLum <- function(
             tmp)
         }
       }
-
     }
   }#EndOf::Plot
 
@@ -608,9 +595,6 @@ report_RLum <- function(
 # all slots/elements along with their class, length, depth.
 # ---------------------------------------------------------------------------- #
 .tree_RLum <- function(x, root) {
-
-  if (missing(root))
-    root <- deparse(substitute(x))
 
   ## S4 object -----
   if (isS4(x)) {
@@ -722,8 +706,6 @@ report_RLum <- function(
 # the structure of the object as a data.frame
 # ---------------------------------------------------------------------------- #
 .struct_RLum <- function(x, root) {
-  if (missing(root))
-    root <- deparse(substitute(x))
   s <- capture.output(.tree_RLum(x, root = root))
   df <- as.data.frame(do.call(rbind, strsplit(s, "|", fixed = TRUE)), stringsAsFactors = FALSE)
   names(df) <- c("branch", "class", "length", "depth", "endpoint", "row", "col")

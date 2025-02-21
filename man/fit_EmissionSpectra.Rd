@@ -21,11 +21,12 @@ fit_EmissionSpectra(
 \item{object}{\linkS4class{RLum.Data.Spectrum}, \link{matrix} (\strong{required}): input
 object. Please note that an energy spectrum is expected}
 
-\item{frame}{\link{numeric} (\emph{optional}): defines the frame to be analysed}
+\item{frame}{\link{integer} (\emph{optional}): number of the frame to be analysed. If
+\code{NULL}, all available frames are analysed.}
 
-\item{n_components}{\link{numeric} (\emph{optional}): allows a number of the aimed number of
-components. However, it defines rather a maximum than than a minimum. Can be combined with
-other parameters.}
+\item{n_components}{\link{integer} (\emph{optional}): maximum number of components
+desired: the number of component actually fitted may be smaller than this.
+Can be combined with other parameters.}
 
 \item{start_parameters}{\link{numeric} (\emph{optional}): allows to provide own start parameters for a
 semi-automated procedure. Parameters need to be provided in eV. Every value provided replaces a
@@ -34,16 +35,18 @@ value from the automated peak finding algorithm (in ascending order).}
 \item{sub_negative}{\link{numeric} (\emph{with default}): substitute negative values in the input object
 by the number provided here (default: \code{0}). Can be set to \code{NULL}, i.e. negative values are kept.}
 
-\item{input_scale}{\link{character} (\emph{optional}): defines whether your x-values define wavelength or
-energy values. For the analysis an energy scale is expected, allowed values are \code{'wavelength'} and
-\code{'energy'}. If nothing (\code{NULL}) is defined, the function tries to understand the input
+\item{input_scale}{\link{character} (\emph{optional}): defines whether your x-values
+are expressed as wavelength or energy values. Allowed values are \code{"wavelength"},
+\code{"energy"} or \code{NULL}, in which case the function tries to guess the input
 automatically.}
 
-\item{method_control}{\link{list} (\emph{optional}): options to control the fit method, see details}
+\item{method_control}{\link{list} (\emph{optional}): options to control the fit method
+and the output produced, see details.}
 
-\item{verbose}{\link{logical} (\emph{with default}): enable/disable verbose mode}
+\item{verbose}{\link{logical} (\emph{with default}): enable/disable output to the
+terminal.}
 
-\item{plot}{\link{logical} (\emph{with default}): enable/disable plot output}
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.}
 
 \item{...}{further arguments to be passed to control the plot output
 (supported: \code{main}, \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{log}, \code{mtext}, \code{legend} (\code{TRUE} or \code{FALSE}),
@@ -62,8 +65,10 @@ automatically.}
 \strong{Element} \tab \strong{Type} \tab \strong{Description}\cr
 \verb{$data} \tab \code{matrix} \tab the final fit matrix \cr
 \verb{$fit} \tab \code{nls} \tab the fit object returned by \link[minpack.lm:nls.lm]{minpack.lm::nls.lm} \cr
-\verb{$fit_info} \tab \code{list} \tab a few additional parameters that can be used to asses the quality
-of the fit
+\verb{$fit_info} \tab \code{list} \tab a few additional parameters that can be used
+to assess the quality of the fit \cr
+\verb{$df_plot} \tab \code{list} \tab values of all curves in the plot for each
+frame analysed (only if \code{method_control$export.plot.data = TRUE})
 }
 
 \strong{slot:} \strong{\verb{@info}}
@@ -76,7 +81,7 @@ The original function call
 
 The terminal output provides brief information on the
 deconvolution process and the obtained results.
-Terminal output is only shown of the argument \code{verbose = TRUE}.
+Terminal output is only shown when \code{verbose = TRUE}.
 
 ---------------------------\cr
 \verb{[ PLOT OUTPUT ]}      \cr
@@ -140,13 +145,15 @@ run  at least 10,000 iterations (parameter \code{method_control = list(max.runs 
 \strong{Parameter} \tab \strong{Type} \tab \strong{Default} \tab \strong{Description}\cr
 \code{max.runs} \tab \link{integer} \tab \code{10000} \tab maximum allowed search iterations, if exceed
 the searching stops \cr
-\code{graining} \tab \link{numeric} \tab \code{15} \tab gives control over how coarse or fine the spectrum is split into search intervals for the peak finding algorithm \cr
-\code{norm} \tab \link{logical} \tab \code{TRUE} \tab normalises data to the highest count value before fitting \cr
-\code{trace} \tab \link{logical} \tab \code{FALSE} \tab enables/disables the tracing of the minimisation routine
+\code{graining} \tab \link{numeric} \tab \code{15} \tab control over how coarse or fine the spectrum is split into search intervals for the peak finding algorithm \cr
+\code{norm} \tab \link{logical} \tab \code{TRUE} \tab normalise data to the highest count value before fitting \cr
+\code{export.plot.data} \tab \link{logical} \tab \code{FALSE} \tab enable/disable export
+of the values of all curves in the plot for each frame analysed \cr
+\code{trace} \tab \link{logical} \tab \code{FALSE} \tab enable/disable the tracing of the minimisation routine
 }
 }
 \section{Function version}{
- 0.1.1
+ 0.1.2
 }
 
 \examples{
@@ -182,11 +189,12 @@ results <- fit_EmissionSpectra(
 \link{convert_Wavelength2Energy}, \link[minpack.lm:nls.lm]{minpack.lm::nls.lm}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2025. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

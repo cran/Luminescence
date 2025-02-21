@@ -4,7 +4,7 @@
 #' Draws a kernel density plot in combination with a boxplot in its middle. The shape of the violin
 #' is constructed using a mirrored density curve. This plot is especially designed for cases
 #' where the individual errors are zero or too small to be visualised. The idea for this plot is
-#' based on the the 'volcano plot' in the ggplot2 package by Hadley Wickham and Winston Chang.
+#' based on the 'volcano plot' in the ggplot2 package by Hadley Wickham and Winston Chang.
 #' The general idea for the violin plot seems to have been introduced by
 #' Hintze and Nelson (1998).
 #'
@@ -25,10 +25,10 @@
 #' function
 #'
 #' @param boxplot [logical] (*with default*):
-#' enable or disable boxplot
+#' enable/disable boxplot
 #'
 #' @param rug [logical] (*with default*):
-#' enable or disable rug
+#' enable/disable rug
 #'
 #' @param summary [character] (*optional*):
 #' add statistic measures of centrality and dispersion to the plot.
@@ -44,7 +44,8 @@
 #' exclude NA values from the data set prior to any further operations.
 #'
 #' @param ... further arguments and graphical parameters passed to
-#' [plot.default], [stats::density] and [boxplot]. See details for further information
+#' [plot.default], [stats::density] and [boxplot]. See details for further
+#' information.
 #'
 #' @note
 #' Although the code for this function was developed independently and just the idea for the plot
@@ -74,7 +75,8 @@
 #'
 #' ## read example data set
 #' data(ExampleData.DeValues, envir = environment())
-#' ExampleData.DeValues <- Second2Gray(ExampleData.DeValues$BT998, c(0.0438,0.0019))
+#' ExampleData.DeValues <- convert_Second2Gray(ExampleData.DeValues$BT998,
+#'                                             c(0.0438,0.0019))
 #'
 #' ## create plot straightforward
 #' plot_ViolinPlot(data = ExampleData.DeValues)
@@ -93,25 +95,18 @@ plot_ViolinPlot <- function(
   .set_function_name("plot_ViolinPlot")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity tests and conversion --------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
-    ##Prechecks
+  .validate_class(data, c("RLum.Results", "data.frame", "matrix"))
+  .validate_not_empty(data)
+  .validate_class(summary.pos, "character")
 
-    if(missing(data)){
-      .throw_error("I don't know what to do, data input needed.")
-
-    }else{
-
-      ##check for RLum.Results object
-      if(is(data, "RLum.Results")){
-        data <- get_RLum(data, "data")
-      }
-
-      ##if data.frame or matrix
-      if(is(data, "data.frame") | is(data, "matrix")){
-        data <- data[,1]
-      }
-    }
+  if (inherits(data, "RLum.Results")) {
+    data <- get_RLum(data, "data")
+  }
+  if (is.data.frame(data) || is.matrix(data)) {
+    data <- data[, 1]
+  }
 
     ##Remove NA values
     if(na.rm){
@@ -122,19 +117,13 @@ plot_ViolinPlot <- function(
       }
     }
 
-    #Further checks
-    if(!is(summary.pos, "character")){
-      .throw_error("'summary.pos' needs to be of type character")
-    }
-
   ##stop if only one or 0 values are left in data
   if(length(data) == 0){
-    .throw_warning("Actually it is rather hard to plot 0 values, returning")
+    .throw_warning("After NA removal, nothing is left from the data set")
     return()
   }
 
   # Pre-calculations ----------------------------------------------------------------------------
-
 
   ##density for the violin
   if(length(data)>1){
@@ -162,7 +151,7 @@ plot_ViolinPlot <- function(
     if(!all(summary %in% names(stat.summary[[1]]))){
       .throw_warning("Only keywords for weighted statistical measures ",
                      "are supported. Valid keywords are: ",
-                     paste(names(stat.summary[[1]]), collapse = ", "))
+                     .collapse(names(stat.summary[[1]])))
     }
 
     ##make sure that only valid keywords make it
@@ -213,13 +202,11 @@ plot_ViolinPlot <- function(
       col = plot.settings$col.violin,
       border = plot.settings$col.violin
     )
-
-
   }
 
   ##add the boxplot
   if(boxplot){
-    boxplot(
+    graphics::boxplot(
       data,
       outline = TRUE,
       boxwex = 0.4,
@@ -228,19 +215,16 @@ plot_ViolinPlot <- function(
       add = TRUE,
       col = plot.settings$col.boxplot
     )
-
   }
 
   ##add rug
   if(rug){
-    rug(x = data)
-
+    graphics::rug(x = data)
   }
 
   ##add mtext
   if(!is.null(plot.settings$mtext)){
     mtext(side = 3, text = plot.settings$mtext)
-
   }
 
   ##add stat.text
@@ -259,7 +243,7 @@ plot_ViolinPlot <- function(
     }else{
       .throw_warning("Value provided for 'summary.pos' is not ",
                      "a valid keyword, valid keywords are:",
-                     paste(valid_keywords, collapse = ", "))
+                     .collapse(valid_keywords))
     }
   }
 }

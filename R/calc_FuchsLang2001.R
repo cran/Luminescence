@@ -1,8 +1,10 @@
-#' Apply the model after Fuchs & Lang (2001) to a given De distribution.
+#' @title Apply the model after Fuchs & Lang (2001) to a given De distribution
 #'
-#' This function applies the method according to Fuchs & Lang (2001) for
+#' @description This function applies the method according to Fuchs & Lang (2001) for
 #' heterogeneously bleached samples with a given coefficient of variation
 #' threshold.
+#'
+#' @details
 #'
 #' **Used values**
 #'
@@ -29,7 +31,7 @@
 #' number of the first aliquot that is used for the calculations
 #'
 #' @param plot [logical] (*with default*):
-#' plot output `TRUE`/`FALSE`
+#' enable/disable the plot output.
 #'
 #' @param ... further arguments and graphical parameters passed to [plot]
 #'
@@ -83,17 +85,16 @@ calc_FuchsLang2001 <- function(
   startDeValue = 1,
   plot = TRUE,
   ...
-){
+) {
+  .set_function_name("calc_FuchsLang2001")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity Tests ---------------------------------------------------------
-  if(!missing(data)){
-    if(!is(data, "data.frame") & !is(data,"RLum.Results")){
-      stop("[calc_FuchsLang2001()] 'data' has to be of type 'data.frame' or 'RLum.Results'!", call. = FALSE)
-    } else {
-      if(is(data, "RLum.Results")){
-        data <- get_RLum(data, "data")
-      }
-    }
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(data, c("data.frame", "RLum.Results"))
+  .validate_not_empty(data)
+  if (inherits(data, "RLum.Results")) {
+    data <- get_RLum(data, "data")
   }
 
   # Deal with extra arguments -----------------------------------------------
@@ -183,7 +184,8 @@ calc_FuchsLang2001 <- function(
 
   # additional calculate weighted mean
   w <- 1 / (data_ordered[startDeValue:endDeValue, 2]) ^ 2 #weights for weighted mean
-  weighted_mean <- round(weighted.mean(data_ordered[startDeValue:endDeValue,1], w), digits=2)
+  weighted_mean <- round(stats::weighted.mean(data_ordered[startDeValue:endDeValue, 1], w),
+                         digits = 2)
   weighted_sd <- round(sqrt(1 / sum(w)), digits = 2)
   n.usedDeValues <- endDeValue - startDeValue + 1
 

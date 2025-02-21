@@ -1,5 +1,6 @@
-#' Convert Risoe.BINfileData object to an RLum.Analysis object
+#' @title Convert Risoe.BINfileData object to an RLum.Analysis object
 #'
+#' @description
 #' Converts values from one specific position of a Risoe.BINfileData S4-class
 #' object to an RLum.Analysis object.
 #'
@@ -49,7 +50,7 @@
 #' not contain any records. Set to `FALSE` to discard all empty objects.
 #'
 #' @param txtProgressBar [logical] (*with default*):
-#' enables or disables [txtProgressBar].
+#' enable/disable the progress bar.
 #'
 #' @return Returns an [RLum.Analysis-class] object.
 #'
@@ -91,14 +92,11 @@ Risoe.BINfileData2RLum.Analysis<- function(
   .set_function_name("Risoe.BINfileData2RLum.Analysis")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity Check ---------------------------------------------------------
+  ## Integrity tests --------------------------------------------------------
 
-  if (!is(object,"Risoe.BINfileData")){
-    .throw_error("Input object is not of type 'Risoe.BINfileData'.")
-  }
-
-  if (!is.null(pos) && !is(pos,"numeric")){
-    .throw_error("Argument 'pos' has to be of type numeric.")
+  .validate_class(object, "Risoe.BINfileData")
+  if (!is.null(pos)) {
+    .validate_class(pos, c("numeric", "integer"))
   }
 
   if (is.null(pos)) {
@@ -110,7 +108,7 @@ Risoe.BINfileData2RLum.Analysis<- function(
 
     if (length(setdiff(pos, positions.valid)) > 0) {
       .throw_warning("Invalid position number skipped: ",
-                     paste(setdiff(pos, positions.valid), collapse = ", "))
+                     .collapse(setdiff(pos, positions.valid), quote = FALSE))
       pos <- intersect(pos, positions.valid)
     }
   }
@@ -125,7 +123,7 @@ Risoe.BINfileData2RLum.Analysis<- function(
       grain.valid <- unique(object@METADATA[["GRAIN"]])
       if(length(setdiff(grain, grain.valid)) > 0){
         .throw_warning("Invalid grain number skipped: ",
-                       paste(setdiff(grain, grain.valid), collapse = ", "))
+                       .collapse(setdiff(grain, grain.valid), quote = FALSE))
 
         grain <- intersect(grain, grain.valid)
       }
@@ -137,11 +135,10 @@ Risoe.BINfileData2RLum.Analysis<- function(
     } else{
       if (TRUE %in% unique(unique(object@METADATA[["RUN"]]) %in% run) != TRUE) {
         ##get and check valid positions
-        run.valid <-
-          paste(as.character(unique(object@METADATA[, "RUN"])), collapse = ", ")
-
-        .throw_error("run = ", paste(run, collapse = ","),
-                     " contains invalid runs. Valid runs are: ", run.valid)
+        .throw_error("run = ", .collapse(run, quote = FALSE),
+                     " contains invalid runs. Valid runs are: ",
+                     .collapse(unique(object@METADATA[, "RUN"]),
+                               quote = FALSE))
       }
     }
 
@@ -152,10 +149,10 @@ Risoe.BINfileData2RLum.Analysis<- function(
       if(TRUE %in% unique(unique(object@METADATA[["SET"]]) %in% set) != TRUE){
 
         ##get and check valid positions
-        set.valid <- paste(as.character(unique(object@METADATA[,"SET"])), collapse=", ")
-
-        .throw_error("set = ", paste(set, collapse = ","),
-                     " contains invalid sets. Valid sets are: ", set.valid)
+        .throw_error("set = ", .collapse(set, quote = FALSE),
+                     " contains invalid sets. Valid sets are: ",
+                     .collapse(unique(object@METADATA[, "SET"]),
+                               quote = FALSE))
       }
     }
 
@@ -165,11 +162,9 @@ Risoe.BINfileData2RLum.Analysis<- function(
     } else{
       if (TRUE %in% unique(unique(object@METADATA[, "LTYPE"]) %in% ltype) != TRUE) {
         ##get and check valid positions
-        ltype.valid <-
-          paste(as.character(unique(object@METADATA[, "LTYPE"])), collapse = ", ")
-
-        .throw_error("ltype = ", paste(ltype, collapse = ","),
-                     " contains invalid ltypes. Valid ltypes are: ", ltype.valid)
+        .throw_error("ltype = ", .collapse(ltype),
+                     " contains invalid ltypes. Valid ltypes are: ",
+                     .collapse(unique(object@METADATA[, "LTYPE"])))
       }
     }
 
@@ -179,11 +174,9 @@ Risoe.BINfileData2RLum.Analysis<- function(
     } else{
       if (TRUE %in% unique(unique(object@METADATA[, "DTYPE"]) %in% dtype) != TRUE) {
         ##get and check valid positions
-        dtype.valid <-
-          paste(as.character(unique(object@METADATA[, "DTYPE"])), collapse = ", ")
-
-        .throw_error("dtype = ", paste(dtype, collapse = ","),
-                     " contains invalid dtypes. Valid dtypes are: ", dtype.valid)
+        .throw_error("dtype = ", .collapse(dtype),
+                     " contains invalid dtypes. Valid dtypes are: ",
+                     .collapse(unique(object@METADATA[, "DTYPE"])))
       }
     }
 
@@ -209,11 +202,6 @@ Risoe.BINfileData2RLum.Analysis<- function(
       ##update progress bar
       if(txtProgressBar){
         setTxtProgressBar(pb, value = pos)
-      }
-
-      ##if no grain information is given, we select all grains in the particular position
-      if(is.null(grain)){
-        grain <- unique(object@METADATA[object@METADATA[["POSITION"]] == pos, "GRAIN"])
       }
 
       ##loop over the grains and produce RLum.Analysis objects

@@ -1,13 +1,23 @@
+test_that("input validation", {
+  testthat::skip_on_cran()
+
+  expect_error(plot_ROI(object = "stop"),
+               "[plot_ROI()] 'object' should be of class 'RLum.Analysis'",
+               fixed = TRUE)
+
+  empty <- set_RLum("RLum.Results", originator = NA_character_)
+  expect_error(plot_ROI(empty),
+               "Object originator 'NA' not supported")
+  expect_error(plot_ROI(list()),
+               "'object' cannot be an empty list")
+})
+
 test_that("Complete test", {
   testthat::skip_on_cran()
 
   ##create suitable dataset
   file <- system.file("extdata", "RF_file.rf", package = "Luminescence")
-  temp <- read_RF2R(file)
-
-  ##crash function
-  expect_error(plot_ROI(object = "stop"),
-               regexp = "\\[plot\\_ROI\\(\\)\\] Input for 'object' not supported, please check documentation!")
+  temp <- read_RF2R(file, verbose = FALSE)
 
   ##test standard cases
   expect_silent(plot_ROI(temp))
@@ -31,6 +41,6 @@ test_that("Complete test", {
 
   ## trigger warning
   expect_warning(plot_ROI(t, bg_image = "stop", exclude_ROI = NULL),
-    "\\[plot\\_ROI\\(\\)] 'bg\\_image' is not of type RLum.Data.Image and cannot be converted into such; background image plot skipped!")
-
+                 "[plot_ROI()] 'bg_image' is not of class 'RLum.Data.Image'",
+                 fixed = TRUE)
 })

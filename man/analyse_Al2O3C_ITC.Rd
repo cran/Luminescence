@@ -16,7 +16,7 @@ analyse_Al2O3C_ITC(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} or \link{list} \strong{(required)}:
+\item{object}{\linkS4class{RLum.Analysis} or \link{list} (\strong{required}):
 results obtained from the measurement.
 Alternatively a list of \linkS4class{RLum.Analysis} objects can be provided to allow an automatic analysis}
 
@@ -37,10 +37,10 @@ optional parameters to control the calculation.
 See details for further explanations}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enable/disable verbose mode}
+enable/disable output to the terminal.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enable/disable plot output}
+enable/disable the plot output.}
 
 \item{...}{further arguments that can be passed to the plot output}
 }
@@ -60,7 +60,7 @@ Function returns results numerically and graphically:
 \verb{$data} \tab \code{data.frame} \tab correction value and error \cr
 \verb{$table} \tab \code{data.frame} \tab table used for plotting  \cr
 \verb{$table_mean} \tab \code{data.frame} \tab table used for fitting \cr
-\verb{$fit} \tab \code{lm} or \code{nls} \tab the fitting as returned by the function \link{plot_GrowthCurve}
+\verb{$fit} \tab \code{lm} or \code{nls} \tab the fitting as returned by the function \link{fit_DoseResponseCurve}
 }
 
 \strong{slot:} \strong{\verb{@info}}
@@ -96,8 +96,8 @@ handled using the argument \code{method_control} only, e.g.,
 
 \tabular{lll}{
 \strong{ARGUMENT} \tab \strong{FUNCTION} \tab \strong{DESCRIPTION}\cr
-\code{mode} \tab \code{plot_GrowthCurve} \tab as in \link{plot_GrowthCurve}; sets the mode used for fitting\cr
-\code{fit.method} \tab \code{plot_GrowthCurve} \tab as in \link{plot_GrowthCurve}; sets the function applied for fitting\cr
+\code{mode} \tab \code{fit_DoseResponseCurve} \tab as in \link{fit_DoseResponseCurve}; sets the mode used for fitting\cr
+\code{fit.method} \tab \code{fit_DoseResponseCurve} \tab as in \link{fit_DoseResponseCurve}; sets the function applied for fitting\cr
 }
 }
 \section{Function version}{
@@ -115,7 +115,7 @@ analyse_Al2O3C_ITC(data_ITC)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -124,7 +124,7 @@ Determination Using a Passive Dosimeter: Techniques and Workflow for alpha-Al2O3
 Geochronometria 45, 56-67. doi: 10.1515/geochr-2015-0086
 }
 \seealso{
-\link{plot_GrowthCurve}
+\link{fit_DoseResponseCurve}
 }
 \author{
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)

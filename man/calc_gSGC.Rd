@@ -26,19 +26,19 @@ presented function parameters for two dose ranges: \code{"0-450"} and \code{"0-2
 
 \item{gSGC.parameters}{\link{list} (\emph{optional}):
 option to provide own function parameters used for fitting as named list.
-Nomenclature follows Li et al., 2015, i.e. \code{list(A,A.error,D0,D0.error,c,c.error,Y0,Y0.error,range)},
-range requires a vector for the range the function is considered as valid, e.g. \code{range = c(0,250)}\cr
+Nomenclature follows Li et al., 2015, i.e. \code{list(A, A.error, D0, D0.error, c, c.error, Y0, Y0.error, range)}, where \code{range} is defines the interval
+where the function is considered as valid, e.g. \code{range = c(0,250)}.\cr
 Using this option overwrites the default parameter list of the gSGC, meaning the argument
 \code{gSGC.type} will be without effect}
 
 \item{n.MC}{\link{integer} (\emph{with default}):
 number of Monte Carlo simulation runs for error estimation, see details.}
 
-\item{verbose}{\link{logical}:
-enable or disable terminal output}
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 
-\item{plot}{\link{logical}:
-enable or disable graphical feedback as plot}
+\item{plot}{\link{logical} (\emph{with default}):
+enable/disable the plot output.}
 
 \item{...}{parameters will be passed to the plot output}
 }
@@ -81,7 +81,7 @@ get_RLum(results, data.object = "De")
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. calc_gSGC(): Calculate De value based on the gSGC by Li et al., 2015. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. calc_gSGC(): Calculate De value based on the gSGC by Li et al., 2015. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

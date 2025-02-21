@@ -60,11 +60,12 @@
 #' Currently only the normal distribution is supported
 #' (e.g., `profiling_config = list(E.distribution = "norm")`
 #'
-#' @param verbose [logical]:
-#' enables/disables verbose mode
+#' @param verbose [logical] (*with default*):
+#' enable/disable output to the terminal.
 #'
-#' @param plot [logical]:
-#' enables/disables output plot, currently only in combination with `profiling = TRUE`.
+#' @param plot [logical] (*with default*):
+#' enable/disable the plot output, currently only in combination with
+#' `profiling = TRUE`.
 #'
 #' @param ... further arguments that can be passed in combination with the plot output.
 #' Standard plot parameters are supported ([plot.default])
@@ -118,7 +119,7 @@
 #'   T = T,
 #'   output_unit = "Ma"
 #' )
-#' contour(x = E, y = T, z = temp$lifetimes[1,,],
+#' graphics::contour(x = E, y = T, z = temp$lifetimes[1,,],
 #'         ylab = "Temperature [\u00B0C]",
 #'         xlab = "Trap depth [eV]",
 #'         main = "Thermal Lifetime Contour Plot"
@@ -154,12 +155,10 @@ calc_ThermalLifetime <- function(
   .set_function_name("calc_ThermalLifetime")
   on.exit(.unset_function_name(), add = TRUE)
 
-# Integrity -----------------------------------------------------------------------------------
+  ## Integrity tests --------------------------------------------------------
 
-  if (missing(E) || missing(s)) {
-    .throw_error("'E' or 's' or both are missing, but required.")
-  }
-
+  .validate_class(E, "numeric")
+  .validate_class(s, "numeric")
 
 # Set variables -------------------------------------------------------------------------------
 
@@ -176,13 +175,11 @@ calc_ThermalLifetime <- function(
     n = 1000,
     E.distribution = "norm",
     s.distribution = "norm"
-
   )
 
   ##replace if set
   if(!is.null(profiling_config)){
     profiling_settings <- modifyList(profiling_settings, profiling_config)
-
   }
 
   ##check for odd input values
@@ -263,18 +260,14 @@ calc_ThermalLifetime <- function(
       FUN.VALUE = matrix(numeric(), ncol = length(E), nrow = length(s))
     )
 
-
-
     ##transform to an arry in either case to have the same output
     if (!is(lifetimes, "array")) {
       lifetimes <-
         array(lifetimes, dim = c(length(s), length(E), length(T)))
-
     }
 
     ##set dimnames to make reading more clear
     dimnames(lifetimes) <- list(s, E, paste0("T = ", T, " \u00B0C"))
-
   }
 
  ##re-calculate lifetimes accourding to the chosen output unit
@@ -296,7 +289,6 @@ calc_ThermalLifetime <- function(
   }else{
     lifetimes <- temp.lifetimes
     rm(temp.lifetimes)
-
   }
 
 
@@ -327,7 +319,6 @@ calc_ThermalLifetime <- function(
 
     cat("\n\t--------------------------")
     cat(paste0("\n\t(", length(lifetimes), " lifetimes calculated in total)"))
-
   }
 
 
@@ -376,7 +367,6 @@ calc_ThermalLifetime <- function(
     lifetimes_density.y <- matrix(unlist(lapply(1:length(lifetimes_density), function(i){
       lifetimes_density[[i]]$y
 
-
     })), nrow = length(lifetimes_density[[1]]$y))
 
 
@@ -395,7 +385,6 @@ calc_ThermalLifetime <- function(
       ylim = plot.settings$ylim,
       log = plot.settings$log
     )
-
   }
 
   # Return values -------------------------------------------------------------------------------
@@ -405,5 +394,4 @@ calc_ThermalLifetime <- function(
                profiling_matrix = profiling_matrix),
    info = list(call = sys.call())
  ))
-
 }

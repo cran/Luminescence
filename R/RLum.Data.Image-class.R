@@ -1,6 +1,3 @@
-#' @include get_RLum.R set_RLum.R names_RLum.R
-NULL
-
 #' Class `"RLum.Data.Image"`
 #'
 #' Class for representing luminescence image data (TL/OSL/RF). Such data are for example produced
@@ -101,7 +98,6 @@ setAs("RLum.Data.Image", "data.frame",
           } else {
             stop("No viable coercion to data.frame, object contains multiple frames.",
                  call. = FALSE)
-
           }
         })
 
@@ -123,7 +119,6 @@ setAs("RLum.Data.Image", "matrix",
           from@data[,,1, drop = TRUE]
         } else {
          stop("No viable coercion to matrix, object contains multiple frames. Please convert to array instead.", call. = FALSE)
-
         }
       })
 
@@ -135,7 +130,6 @@ setAs("array", "RLum.Data.Image",
             curveType = "NA",
             data = from,
             info = list())
-
       })
 
 ## to array ----
@@ -146,23 +140,26 @@ setAs("RLum.Data.Image", "array",
 ## from list ----
 setAs("list", "RLum.Data.Image",
       function(from, to){
-        array_list <- lapply(from, function(x) array(unlist(as.vector(x)), c(nrow(x), ncol(x), 1)))
+        if (length(from) == 0)
+          return(set_RLum("RLum.Data.Image"))
 
+        array_list <- lapply(from, function(x) array(unlist(as.vector(x)), c(nrow(x), ncol(x), 1)))
         new(to,
             recordType = "unknown curve type",
             curveType = "NA",
             data = array(unlist(array_list),
                          c(nrow(array_list[[1]]), ncol(array_list[[1]]), length(array_list))),
             info = list())
-
       })
 
 ## to list ----
 setAs("RLum.Data.Image", "list",
       function(from){
-       lapply(1:dim(from@data)[3], function(x) from@data[,,x])
-
-    })
+        num.images <- dim(from@data)[3]
+        if (is.na(num.images))
+          return(list())
+        lapply(1:num.images, function(x) from@data[,,x])
+      })
 
 # show() --------------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Image
@@ -190,9 +187,9 @@ setMethod("show",
             cat("\n\t .. .. full pixel value range:", paste(format(range(object@data), scientific = TRUE, digits = 2), collapse=" : "))
             cat("\n\t additional info elements:", length(object@info))
             #cat("\n\t\t >> names:", names(object@info))
+            cat("\n")
           }
 )
-
 
 
 # set_RLum() ----------------------------------------------------------------------------------
@@ -321,21 +318,17 @@ setMethod(
 setMethod("get_RLum",
           signature("RLum.Data.Image"),
           definition = function(object, info.object) {
+            .set_function_name("get_RLum")
+            on.exit(.unset_function_name(), add = TRUE)
 
-            ##if missing info.object just show the curve values
             if(!missing(info.object)){
-              if(!inherits(info.object, "character"))
-                stop("[get_RLum] 'info.object' has to be a character!", call. = FALSE)
-
+              .validate_class(info.object, "character")
               if(info.object %in% names(object@info)){
                 unlist(object@info[info.object])
 
               } else {
-                stop(paste0(
-                  "[get_RLum] Invalid element name. Valid names are: ",
-                  paste(names(object@info), collapse = ", ")
-                ),
-                call. = FALSE)
+                .throw_error("Invalid element name, valid names are: ",
+                             .collapse(names(object@info)))
              }
             } else {
               object@data
@@ -360,4 +353,3 @@ setMethod(
   "names_RLum",
   "RLum.Data.Image",
   function(object) names(object@info))
-

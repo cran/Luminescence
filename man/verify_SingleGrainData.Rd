@@ -8,6 +8,7 @@ zero-light level grains}
 verify_SingleGrainData(
   object,
   threshold = 10,
+  use_fft = FALSE,
   cleanup = FALSE,
   cleanup_level = "aliquot",
   verbose = TRUE,
@@ -23,8 +24,11 @@ input object. The function also accepts a list with objects of allowed type.}
 numeric threshold value for the allowed difference between the \code{mean} and
 the \code{var} of the count values (see details)}
 
+\item{use_fft}{\link{logical} (\emph{with default}): applies an additional approach based on \link[stats:fft]{stats::fft}.
+The threshold is fixed and cannot be changed.}
+
 \item{cleanup}{\link{logical} (\emph{with default}):
-if set to \code{TRUE}, curves identified as zero light level curves are
+if set to \code{TRUE}, curves/aliquots identified as zero light level curves/aliquots are
 automatically removed. Output is an object as same type as the input, i.e.
 either \linkS4class{Risoe.BINfileData} or \linkS4class{RLum.Analysis}}
 
@@ -39,10 +43,10 @@ if all curves of this aliquot are marked as invalid.
 }}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enables or disables the terminal feedback}
+enable/disables output to the terminal.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enables or disables the graphical feedback}
+enable/disable the plot output.}
 
 \item{...}{further parameters to control the plot output; if selected.
 Supported arguments \code{main}, \code{ylim}}
@@ -74,7 +78,7 @@ The original function call
 For \code{cleanup = TRUE} the same object as the input is returned, but cleaned up
 (invalid curves were removed). This means: Either a \linkS4class{Risoe.BINfileData}
 or an \linkS4class{RLum.Analysis} object is returned in such cases.
-A \linkS4class{Risoe.BINfileData} object can be exported to a BIN-file by
+A \linkS4class{Risoe.BINfileData} object can be exported to a BINX-file by
 using the function \link{write_R2BIN}.
 }
 \description{
@@ -111,10 +115,11 @@ remove identify invalid grains before the conversion to an
 
 The function checking for invalid curves works rather robust and it is likely
 that Reg0 curves within a SAR cycle are removed as well. Therefore it is
-strongly recommended to use the argument \code{cleanup = TRUE} carefully.
+strongly recommended to use the argument \code{cleanup = TRUE} carefully if
+the cleanup works only on curves.
 }
 \section{Function version}{
- 0.2.3
+ 0.2.5
 }
 
 \examples{
@@ -156,7 +161,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. verify_SingleGrainData(): Verify single grain data sets and check for invalid grains, i.e. zero-light level grains. Function version 0.2.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. verify_SingleGrainData(): Verify single grain data sets and check for invalid grains, i.e. zero-light level grains. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

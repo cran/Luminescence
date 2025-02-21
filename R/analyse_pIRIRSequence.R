@@ -4,11 +4,11 @@
 #' including curve
 #' fitting on [RLum.Analysis-class] objects.
 #'
-#' @details To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement analyses
-#' this function has been written as extended wrapper function for the function
-#' [analyse_SAR.CWOSL], facilitating an entire sequence analysis in
+#' @details To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement
+#' analyses, this function has been written as extended wrapper for function
+#' [analyse_SAR.CWOSL], thus facilitating an entire sequence analysis in
 #' one run. With this, its functionality is strictly limited by the
-#' functionality of the function [analyse_SAR.CWOSL].
+#' functionality provided by  [analyse_SAR.CWOSL].
 #'
 #' **Defining the sequence structure**
 #'
@@ -21,13 +21,15 @@
 #'
 #' **If the input is a `list`**
 #'
-#' If the input is a list of RLum.Analysis-objects, every argument can be provided as list to allow
+#' If the input is a list of [RLum.Analysis-class] objects, every argument
+#' can be provided as list to allow
 #' for different sets of parameters for every single input element.
 #' For further information see [analyse_SAR.CWOSL].
 #'
 #' @param object [RLum.Analysis-class] or [list] of [RLum.Analysis-class] objects (**required**):
 #' input object containing data for analysis.
-#' If a [list] is provided the functions tries to iterate over the list.
+#' If a [list] is provided the functions tries to iterate over each element
+#' in the list.
 #'
 #' @param signal.integral.min [integer] (**required**):
 #' lower bound of the signal integral. Provide this value as vector for different
@@ -57,16 +59,17 @@
 #' preheat as none TL, remove the TL step.)
 #'
 #' @param plot [logical] (*with default*):
-#' enables or disables plot output.
+#' enable/disable the plot output.
 #'
-#' @param plot.single [logical] (*with default*):
-#' single plot output (`TRUE/FALSE`) to allow for plotting the results in single plot
-#' windows. Requires `plot = TRUE`.
+#' @param plot_singlePanels [logical] (*with default*):
+#' enable/disable plotting of the results in a single windows for each plot.
+#' Ignored if `plot = FALSE`.
 #'
-#' @param ... further arguments that will be passed to the function
-#' [analyse_SAR.CWOSL] and [plot_GrowthCurve]. Furthermore, the arguments `main` (headers), `log` (IRSL curves), `cex` (control
+#' @param ... further arguments that will be passed to
+#' [analyse_SAR.CWOSL] and [plot_GrowthCurve]. Furthermore, the
+#' arguments `main` (headers), `log` (IRSL curves), `cex` (control
 #' the size) and `mtext.outer` (additional text on the plot area) can be passed to influence the plotting. If the input
-#' is list, `main` can be passed as [vector] or [list].
+#' is a list, `main` can be passed as [vector] or [list].
 #'
 #' @return
 #' Plots (*optional*) and an [RLum.Results-class] object is
@@ -87,9 +90,9 @@
 #' Best graphical output can be achieved by using the function `pdf`
 #' with the following options:
 #'
-#' `pdf(file = "<YOUR FILENAME>", height = 15, width = 15)`
+#' `pdf(file = "<YOUR FILENAME>", height = 20, width = 20)`
 #'
-#' @section Function version: 0.2.4
+#' @section Function version: 0.2.5
 #'
 #' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
@@ -129,9 +132,7 @@
 #'                                        function(x){sequence.structure + x}))
 #'
 #' object <-  sapply(1:length(sequence.structure), function(x){
-#'
 #'   object[[sequence.structure[x]]]
-#'
 #' })
 #'
 #' object <- set_RLum(class = "RLum.Analysis", records = object, protocol = "pIRIR")
@@ -146,7 +147,7 @@
 #'      fit.method = "EXP",
 #'      sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
 #'      main = "Pseudo pIRIR data set based on quartz OSL",
-#'      plot.single = TRUE)
+#'      plot_singlePanels = TRUE)
 #'
 #'
 #' ##(3) Perform pIRIR analysis (for this example with quartz OSL data!)
@@ -176,18 +177,20 @@ analyse_pIRIRSequence <- function(
   dose.points = NULL,
   sequence.structure = c("TL", "IR50", "pIRIR225"),
   plot = TRUE,
-  plot.single = FALSE,
+  plot_singlePanels = FALSE,
   ...
 ) {
   .set_function_name("analyse_pIRIRSequence")
   on.exit(.unset_function_name(), add = TRUE)
 
-  if (missing("object"))
-    .throw_error("No value set for 'object'")
-
 # SELF CALL -----------------------------------------------------------------------------------
  if(is.list(object)){
-    ##make live easy
+
+   lapply(object, function(x) {
+     .validate_class(x, "RLum.Analysis", name = "All elements of 'object'")
+   })
+
+    ## make life easy
     if(missing("signal.integral.min")){
       signal.integral.min <- 1
       .throw_warning("'signal.integral.min' missing, set to 1")
@@ -198,40 +201,22 @@ analyse_pIRIRSequence <- function(
       .throw_warning("'signal.integral.max' missing, set to 2")
     }
 
-    ##now we have to extend everything to allow list of arguments ... this is just consequent
-    signal.integral.min <- rep(list(signal.integral.min), length = length(object))
-    signal.integral.max <- rep(list(signal.integral.max), length = length(object))
-    background.integral.min <- rep(list(background.integral.min), length = length(object))
-    background.integral.max <- rep(list(background.integral.max), length = length(object))
-    sequence.structure <- rep(list(sequence.structure), length = length(object))
+   ## expand input arguments
+   rep.length <- length(object)
 
-    if(!is.null(dose.points)){
+   signal.integral.min <- .listify(signal.integral.min, rep.length)
+   signal.integral.max <- .listify(signal.integral.max, rep.length)
+   background.integral.min <- .listify(background.integral.min, rep.length)
+   background.integral.max <- .listify(background.integral.max, rep.length)
+   sequence.structure <- .listify(sequence.structure, rep.length)
+   dose.points <- .listify(dose.points, rep.length)
 
-      if(is(dose.points, "list")){
-        dose.points <- rep(dose.points, length = length(object))
+   if ("main" %in% names(list(...))) {
+     main_list <- .listify(list(...)$main, rep.length)
+   }
 
-      }else{
-        dose.points <- rep(list(dose.points), length = length(object))
-
-      }
-
-    }else{
-      dose.points <- rep(list(NULL), length(object))
-
-    }
-
-    ##main
-    if("main" %in% names(list(...))){
-      main_list <- rep(list(...)$main, length.out = length(object))
-
-      if(!inherits(main_list, "list")){
-        main_list <- as.list(main_list)
-
-      }
-    }
-
-    ##run analysis
-    temp <- .warningCatcher(lapply(1:length(object), function(x) {
+   ## run analysis
+   temp <- .warningCatcher(lapply(1:length(object), function(x) {
       analyse_pIRIRSequence(object[[x]],
                         signal.integral.min = signal.integral.min[[x]],
                         signal.integral.max = signal.integral.max[[x]],
@@ -240,7 +225,7 @@ analyse_pIRIRSequence <- function(
                         dose.points = dose.points[[x]],
                         sequence.structure = sequence.structure[[x]],
                         plot = plot,
-                        plot.single = plot.single,
+                        plot_singlePanels = plot_singlePanels,
                         main = ifelse("main"%in% names(list(...)), main_list[[x]], paste0("ALQ #",x)),
                         ...)
     }))
@@ -256,37 +241,44 @@ analyse_pIRIRSequence <- function(
       return(NULL)
     else
       return(results)
-
   }
 
-# General Integrity Checks ---------------------------------------------------
-  ##GENERAL
-    ##INPUT OBJECTS
-    if(is(object, "RLum.Analysis")==FALSE){
-      .throw_error("Input object is not of type 'RLum.Analysis'")
-    }
+  ## Integrity checks -------------------------------------------------------
 
-    ##CHECK ALLOWED VALUES IN SEQUENCE STRUCTURE
-    temp.collect.invalid.terms <- paste(sequence.structure[
-      (!grepl("TL",sequence.structure)) &
-      (!grepl("IR",sequence.structure)) &
-      (!grepl("OSL",sequence.structure)) &
-      (!grepl("EXCLUDE",sequence.structure))],
-      collapse = ", ")
+  .validate_class(object, "RLum.Analysis", extra = "'list'")
 
-    if(temp.collect.invalid.terms != ""){
-      .throw_error("'", temp.collect.invalid.terms,
-                   "' not allowed in 'sequence.structure'")
-    }
+  ## there must be at least an IR step
+  if (!any(grepl("IR", sequence.structure))) {
+    .throw_error("'sequence.structure' should contain at least one IR step")
+  }
+
+  ## check allowed values in sequence structure
+  temp.collect.invalid.terms <- .collapse(
+      sequence.structure[!grepl("TL",  sequence.structure) &
+                         !grepl("IR",  sequence.structure) &
+                         !grepl("OSL", sequence.structure) &
+                         !grepl("EXCLUDE", sequence.structure)])
+
+  if (temp.collect.invalid.terms != "") {
+    .throw_error(temp.collect.invalid.terms,
+                 " not allowed in 'sequence.structure'")
+  }
+
+  ## deprecated argument
+  if ("plot.single" %in% names(list(...))) {
+    plot_singlePanels <- list(...)$plot.single
+    .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
+                   "instead")
+  }
 
   ## CHECK FOR PLOT ...we safe users the pain by checking whether plot device has the
   ## required size.
-    if (plot[1] && !plot.single && all(grDevices::dev.size("in") < 18)) {
+    if (plot[1] && !plot_singlePanels && all(grDevices::dev.size("in") < 18)) {
       plot <- FALSE
       .throw_warning("Argument 'plot' reset to 'FALSE'. The smallest plot ",
                      "size required is 18 x 18 in.\n",
                      "Consider plotting via `pdf(..., height = 18, width = 18)` ",
-                     "or setting `plot.single = TRUE`")
+                     "or setting `plot_singlePanels = TRUE`")
     }
 
 # Deal with extra arguments -------------------------------------------------------------------
@@ -325,8 +317,8 @@ analyse_pIRIRSequence <- function(
       )
 
   .throw_warning("The following unrecognised record types have been removed: ",
-                 paste(temp.sequence.structure[temp.sequence.rm.id,
-                                               "recordType"], collapse = ", "))
+                 .collapse(temp.sequence.structure[temp.sequence.rm.id,
+                                                   "recordType"]))
   }
 
   ##(2) Apply user sequence structure
@@ -349,8 +341,8 @@ analyse_pIRIRSequence <- function(
       sequence.structure, nrow(temp.sequence.structure)/2/length(sequence.structure))
 
   }else{
-    message("[analyse_pIRIRSequence()] Error: The number of records is not a ",
-            "multiple of the defined sequence structure, NULL returned")
+    .throw_message("The number of records is not a multiple of the defined ",
+                   "sequence structure, NULL returned")
     return(NULL)
   }
 
@@ -384,9 +376,8 @@ analyse_pIRIRSequence <- function(
 
   ##(1) find out how many runs are needed for the analysis by checking for "IR"
   ##    now should by every signal except the TL curves
-  n.TL<- table(grepl("TL", sequence.structure))["TRUE"]
-  if(is.na(n.TL)) {n.TL<- 0}
-  n.loops <- as.numeric(length(grepl("TL", sequence.structure)) - n.TL)
+  n.TL <- sum(grepl("TL", sequence.structure))
+  n.loops <- as.numeric(length(sequence.structure) - n.TL)
 
   ##grep ids of TL curves (we need them later on)
   TL.curves.id <- temp.sequence.structure[
@@ -405,59 +396,29 @@ analyse_pIRIRSequence <- function(
   ## unfortunately a little bit more complicated then expected previously due
   ## the order of the produced plots by the previous functions
 
-  if(plot.single == FALSE & plot == TRUE){
+  if (plot && !plot_singlePanels) {
 
     ##first (Tx,Tn, Lx,Ln)
     temp.IRSL.layout.vector.first <- c(3,5,6,7,3,5,6,8)
 
-  ##middle (any other Lx,Ln)
-  if(n.loops > 2){
+    ## middle (any other Lx,Ln)
+    temp.IRSL.layout.vector.middle <- NULL
+    if (n.loops > 2) {
     temp.IRSL.layout.vector.middle <-
-      vapply(
-        2:(n.loops - 1),
-        FUN = function(x) {
-
-          offset <- 5 * x - 1
-          c((offset):(offset + 3),
-            (offset):(offset + 2), offset + 4)
-
-        },
+      vapply(2:(n.loops - 1),
+        FUN = function(x) 5 * x - 1 + c(0:3, 0:2, 4),
         FUN.VALUE = vector(mode = "numeric", length = 8)
       )
-  }
+    }
 
-  ##last (Lx,Ln and legend)
-  temp.IRSL.layout.vector.last <- c(
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 1,
-           max(temp.IRSL.layout.vector.first) + 1),
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 2,
-           max(temp.IRSL.layout.vector.first) + 2),
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 4,
-           max(temp.IRSL.layout.vector.first) + 4),
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 5,
-           max(temp.IRSL.layout.vector.first) + 5),
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 1,
-           max(temp.IRSL.layout.vector.first) + 1),
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 2,
-           max(temp.IRSL.layout.vector.first) + 2),
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 4,
-           max(temp.IRSL.layout.vector.first) + 4),
-    ifelse(n.loops > 2,max(temp.IRSL.layout.vector.middle) + 6,
-           max(temp.IRSL.layout.vector.first) + 6))
-
-  ##options for different sets of curves
-  if(n.loops > 2){
+    ## last (Lx, Ln and legend)
+    temp.IRSL.layout.vector.last <- c(1, 2, 4, 5, 1, 2, 4, 6) +
+      (if (n.loops > 2) max(temp.IRSL.layout.vector.middle)
+       else max(temp.IRSL.layout.vector.first))
 
     temp.IRSL.layout.vector <- c(temp.IRSL.layout.vector.first,
                                  temp.IRSL.layout.vector.middle,
                                  temp.IRSL.layout.vector.last)
-
-  }else{
-
-    temp.IRSL.layout.vector <- c(temp.IRSL.layout.vector.first,
-                                 temp.IRSL.layout.vector.last)
-
-  }
 
   ##get layout information
   def.par <- par(no.readonly = TRUE)
@@ -484,7 +445,6 @@ analyse_pIRIRSequence <- function(
 
   ## show the regions that have been allocated to each plot for debug
   #layout.show(nf)
-
   }
 
   ##(1) INFO PLOT
@@ -523,7 +483,6 @@ analyse_pIRIRSequence <- function(
       temp.signal.integral.max <- signal.integral.max
       temp.background.integral.min <- background.integral.min
       temp.background.integral.max <- background.integral.max
-
     }
 
     ##(c) call analysis sequence and plot
@@ -548,15 +507,14 @@ analyse_pIRIRSequence <- function(
       background.integral.max = temp.background.integral.max,
       plot = plot,
       dose.points = dose.points,
-      plot.single = temp.plot.single,
-      output.plotExtended.single = TRUE,
+      plot_singlePanels = temp.plot.single,
       cex.global = cex,
       ...
     ) ##TODO should be replaced be useful explicit arguments
 
       ##check whether NULL was return
       if (is.null(temp.results)) {
-        message("[plot_pIRIRSequence()] An error occurred, analysis skipped. Check your sequence!")
+        .throw_message("Analysis skipped: check your sequence, NULL returned")
         return(NULL)
       }
 
@@ -610,24 +568,17 @@ if(plot){
   ##extract LnLnxTnTx.table
   LnLxTnTx.table <- get_RLum(temp.results.final, "LnLxTnTx.table")
 
-    ##remove Inf
-    if(any(is.infinite(LnLxTnTx.table[["LxTx"]])))
-      LnLxTnTx.table[["LxTx"]][is.infinite(LnLxTnTx.table[["LxTx"]])] <- NA
-
-    if(any(is.infinite(LnLxTnTx.table[["LxTx.Error"]])))
-      LnLxTnTx.table[["LxTx.Error"]][is.infinite(LnLxTnTx.table[["LxTx.Error"]])] <- NA
+  ## remove Inf
+  LnLxTnTx.table$LxTx[is.infinite(LnLxTnTx.table$LxTx)] <- NA
+  LnLxTnTx.table$LxTx.Error[is.infinite(LnLxTnTx.table$LxTx.Error)] <- NA
 
   ##plot growth curves
+  min.LxTx <- min(LnLxTnTx.table$LxTx, na.rm = TRUE)
+  max.LxTx <- max(LnLxTnTx.table$LxTx, na.rm = TRUE)
+  max.LxTx.Error <- max(LnLxTnTx.table$LxTx.Error, na.rm = TRUE)
   plot(NA, NA,
        xlim = range(get_RLum(temp.results.final, "LnLxTnTx.table")$Dose),
-       ylim = c(
-         if(min(LnLxTnTx.table$LxTx, na.rm = TRUE) -
-            max(LnLxTnTx.table$LxTx.Error, na.rm = TRUE) < 0){
-            min(LnLxTnTx.table$LxTx, na.rm = TRUE)-
-            max(LnLxTnTx.table$LxTx.Error, na.rm = TRUE)
-         }else{0},
-           max(LnLxTnTx.table$LxTx, na.rm = TRUE)+
-           max(LnLxTnTx.table$LxTx.Error, na.rm = TRUE)),
+       ylim = c(min(min.LxTx - max.LxTx.Error, 0), max.LxTx + max.LxTx.Error),
        xlab = "Dose [s]",
        ylab = expression(L[x]/T[x]),
        main = "Summarised Dose Response Curves")
@@ -668,7 +619,6 @@ if(plot){
         temp.results.final, "Formula")[[pIRIR.curve.names[j]]]
 
      try(lines(x, eval(temp.curve.formula), col = j), silent = TRUE)
-
     }
 
     rm(x)
@@ -697,13 +647,12 @@ if(plot){
         , "TnTx"]
 
       temp.curve.TnTx.matrix[,j] <- temp.curve.TnTx.sel/temp.curve.TnTx.sel[1]
-
     }
 
     plot(NA, NA,
        xlim = c(0,nrow(LnLxTnTx.table)/
                      n.loops),
-       ylim = if(any(is.na(range(temp.curve.TnTx.matrix)))) c(0,1) else range(temp.curve.TnTx.matrix),
+       ylim = if (anyNA(range(temp.curve.TnTx.matrix))) c(0,1) else range(temp.curve.TnTx.matrix),
        xlab = "# Cycle",
        ylab = expression(T[x]/T[n]),
        main = "Sensitivity change")
@@ -834,8 +783,10 @@ if(plot){
          pch = c(1:length(pIRIR.curve.names)))
 
 
-   ##reset graphic settings
-   if(plot.single == FALSE){par(def.par)}
+  ##reset graphic settings
+  if (!plot_singlePanels) {
+    par(def.par)
+  }
 
 }##end plot == TRUE
 

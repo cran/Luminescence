@@ -1,10 +1,11 @@
-#' Estimate the amount of grains on an aliquot
+#' @title Estimate the amount of grains on an aliquot
 #'
+#' @description
 #' Estimate the number of grains on an aliquot. Alternatively, the packing
 #' density of an aliquot is computed.
 #'
 #' This function can be used to either estimate the number of grains on an
-#' aliquot or to compute the packing density depending on the the arguments
+#' aliquot or to compute the packing density depending on the arguments
 #' provided.
 #'
 #' The following function is used to estimate the number of grains `n`:
@@ -34,7 +35,7 @@
 #'
 #' For the mean grain size random samples are taken first from
 #' \eqn{N(\mu_y, \sigma_y)}, where \eqn{\mu_y = mean.grain.size} and
-#' \eqn{\sigma_y = (max.grain.size-min.grain.size)/4} so that 95\% of all
+#' \eqn{\sigma_y = (max.grain.size-min.grain.size)/4} so that 95% of all
 #' grains are within the provided the grain size range. This effectively takes
 #' into account that after sieving the sample there is still a small chance of
 #' having grains smaller or larger than the used mesh sizes. For each random
@@ -86,7 +87,7 @@
 #' Note that this overrides `packing.density`.
 #'
 #' @param plot [logical] (*with default*):
-#' plot output (`TRUE`/`FALSE`)
+#' enable/disable the plot output.
 #'
 #' @param ... further arguments to pass (`main, xlab, MC.iter`).
 #'
@@ -219,10 +220,9 @@ calc_AliquotSize <- function(
   }
 
   # function to calculate the amount of grains
-  calc_n<- function(sd, gs, d) {
-    n<- ((pi*(sd/2)^2)/
-           (pi*(gs/2000)^2))*d
-    return(n)
+  ## original formula: n <- ((pi * (sd / 2)^2) / (pi * (gs / 2000)^2)) * d
+  calc_n <- function(sd, gs, d) {
+    (1000 * sd / gs)^2 * d
   }
 
   # calculate the amount of grains on the aliquot
@@ -267,41 +267,31 @@ calc_AliquotSize <- function(
       # draw random samples from the grain size spectrum (gs.mc) and calculate
       # the mean for each sample. This gives an approximation of the variation
       # in mean grain size on the sample disc
-      gs.mc.sampleMean<- vector(mode = "numeric")
-
-
-      for(i in 1:length(gs.mc)) {
-        gs.mc.sampleMean[i]<- mean(sample(gs.mc, calc_n(
-          sample(sd.mc, size = 1),
-          grain.size,
-          sample(d.mc, size = 1)
-        ), replace = TRUE))
-      }
-
-      # create empty vector for MC estimates of n
-      MC.n<- vector(mode="numeric")
+      gs.mc.sampleMean <-
+        sapply(1:length(gs.mc),
+               function(x) mean(sample(gs.mc,
+                                       calc_n(
+                                           sample(sd.mc, size = 1),
+                                           grain.size,
+                                           sample(d.mc, size = 1)
+                                       ), replace = TRUE)))
 
       # calculate n for each MC data set
-      for(i in 1:length(gs.mc)) {
-        MC.n[i]<- calc_n(sd.mc[i],
-                         gs.mc.sampleMean[i],
-                         d.mc[i])
-      }
+      MC.n <- apply(data.frame(sd.mc, gs.mc.sampleMean, d.mc), 1,
+                    function(x) calc_n(x[1], x[2], x[3]))
 
       # summarize MC estimates
       MC.q<- quantile(MC.n, c(0.05,0.95))
       MC.n.kde<- density(MC.n, n = 10000)
 
       # apply student's t-test
-      MC.t.test<- t.test(MC.n)
+      MC.t.test<- stats::t.test(MC.n)
       MC.t.lower<- MC.t.test["conf.int"]$conf.int[1]
       MC.t.upper<- MC.t.test["conf.int"]$conf.int[2]
       MC.t.se<- (MC.t.upper-MC.t.lower)/3.92
 
-
       # get unweighted statistics from calc_Statistics() function
       MC.stats<- calc_Statistics(as.data.frame(cbind(MC.n,0.0001)))$unweighted
-
     }
   }#EndOf:estimate number of grains
 
@@ -359,7 +349,6 @@ calc_AliquotSize <- function(
     }
 
 
-
     if(MC == TRUE && range.flag == TRUE) {
       cat(paste(cat(paste("\n\n --------------- Monte Carlo Estimates -------------------"))))
       cat(paste("\n number of iterations (n)     :", settings$MC.iter))
@@ -374,12 +363,11 @@ calc_AliquotSize <- function(
     } else {
       cat(paste("\n ---------------------------------------------------------\n"))
     }
-
   }
+
   ##==========================================================================##
   ##RETURN VALUES
   ##==========================================================================##
-
 
   # prepare return values for mode: estimate grains
   if(missing(grains.counted) == TRUE) {
@@ -446,5 +434,4 @@ calc_AliquotSize <- function(
 
   # Return values
   invisible(newRLumResults.calc_AliquotSize)
-
 }

@@ -10,7 +10,8 @@ read_HeliosOSL2R(file, verbose = TRUE, ...)
 \item{file}{\link{character} (\strong{required}): path to file to be imported. Can be a \link{list}
 for further processing}
 
-\item{verbose}{\link{logical}: enable/disable terminal feedback}
+\item{verbose}{\link{logical} (\emph{with default}): enable/disable output to the
+terminal.}
 
 \item{...}{not in use, for compatibility reasons only}
 }
@@ -41,7 +42,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. read_HeliosOSL2R(): Import Luminescence Data from Helios Luminescence Reader. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. read_HeliosOSL2R(): Import Luminescence Data from Helios Luminescence Reader. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

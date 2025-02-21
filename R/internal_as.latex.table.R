@@ -133,8 +133,6 @@
       for(i in 1:length(text)){
         text[[i]][grepl(pattern = "Mineral", x = text[[i]], fixed = TRUE)] <-
           "\t\\multicolumn{1}{p{0.5cm}}{\\centering \\textbf{M.}} & "
-
-
       }
 
     ##put things again together (single character)
@@ -156,7 +154,6 @@
     return(text)
 
   }# EndOf::use_DRAC
-
 }
 
 ################################################################################
@@ -175,9 +172,8 @@
   .set_function_name("as.latex.table.data.frame")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## Integrity checks ----
-  if (!is.data.frame(x))
-    .throw_error("'x' must be a data frame")
+  ## Integrity tests --------------------------------------------------------
+  .validate_class(x, "data.frame")
   if (!is.null(col.names) && length(col.names) != ncol(x))
     .throw_error("Length of 'col.names' does not match the number of columns")
   if (!is.null(row.names) && length(row.names) != nrow(x))
@@ -222,7 +218,6 @@
       colnames(x.chunk) <- names(x[i])
     }
 
-
     ## Comments ----
     tex.comment.usePackage <- ifelse(comments,
                                      "% add usepackage{adjustbox} to latex preamble \n",
@@ -252,10 +247,11 @@
     tex.table.rows <- gsub("_", "\\_", tex.table.rows, fixed = TRUE)
 
     ## Tex table ----
-    if (nchar(pos) != 1 && nchar(pos) != ncol(x))
+    pos.chars <- unlist(strsplit(pos, split = ""))
+    if (!all(pos.chars %in% c("l", "c", "r")) ||
+        (length(pos.chars) != 1 && length(pos.chars) != ncol(x))) {
       pos <- "c"
-    if (!any(strsplit(pos, split = "")[[1]] %in% c("l", "c", "r")))
-      pos <- "c"
+    }
     if (nchar(pos) == 1)
       pos <- paste0(rep(pos, ncol(x)), collapse = "")
 

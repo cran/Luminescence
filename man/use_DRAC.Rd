@@ -8,8 +8,9 @@ use_DRAC(file, name, print_references = TRUE, citation_style = "text", ...)
 }
 \arguments{
 \item{file}{\link{character} (\strong{required}):
-spreadsheet to be passed to the DRAC website for calculation. Can also be a
-DRAC template object obtained from \code{template_DRAC()}.}
+name of a CSV file (formatted according to the DRAC v1.2 CSV template) to
+be sent to the DRAC website for calculation. It can also be a DRAC template
+object obtained from \code{\link[=template_DRAC]{template_DRAC()}}.}
 
 \item{name}{\link{character} (\emph{with default}):
 Optional user name submitted to DRAC. If omitted, a random name will be generated}
@@ -25,6 +26,10 @@ or \code{"R"}. Default is \code{"text"}.}
 \item{...}{Further arguments.
 \itemize{
 \item \code{url} \link{character}: provide an alternative URL to DRAC
+\item \code{ignore_version} \link{logical}: ignores the version check, this might come in handy
+if the version has changed, but not the column order
+\item \code{user} \link{character}: option to provide username for secured site
+\item \code{password} \link{character}: password for secured site, only works jointly with \code{user}
 \item \code{verbose} \link{logical}: show or hide console output
 }}
 }
@@ -52,11 +57,10 @@ The output should be accessed using the function \link{get_RLum}.
 }
 \description{
 The function provides an interface from R to DRAC. An R-object or a
-pre-formatted XLS/XLSX file is passed to the DRAC website and the
-results are re-imported into R.
+CSV file is passed to the DRAC website and results are re-imported into R.
 }
 \section{Function version}{
- 0.14
+ 0.15
 }
 
 \examples{
@@ -112,7 +116,7 @@ output <- use_DRAC(input)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Burow, C., 2024. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Burow, C., 2025. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.15. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -1,17 +1,18 @@
-#' Export XSYG-file(s) to CSV-files
+#' @title Export XSYG-file(s) to CSV-files
 #'
+#' @description
 #' This function is a wrapper function around the functions [read_XSYG2R] and
-#' [write_RLum2CSV] and it imports an XSYG-file and directly exports its content 
-#' to CSV-files. If nothing is set for the argument `path` ([write_RLum2CSV]) 
+#' [write_RLum2CSV] and it imports an XSYG-file and directly exports its content
+#' to CSV-files. If nothing is set for the argument `path` ([write_RLum2CSV])
 #' the input folder will become the output folder.
 #'
-#' @param file [character] (**required**): 
+#' @param file [character] (**required**):
 #' name of the XSYG-file to be converted to CSV-files
 #'
-#' @param ... further arguments that will be passed to the function 
+#' @param ... further arguments that will be passed to the function
 #' [read_XSYG2R] and [write_RLum2CSV]
 #'
-#' @return 
+#' @return
 #' The function returns either a CSV-file (or many of them) or for the option `export = FALSE`
 #' a list comprising objects of type [data.frame] and [matrix]
 #'
@@ -44,17 +45,14 @@
 convert_XSYG2CSV <- function(
   file,
   ...
+) {
+  .set_function_name("convert_XSYG2CSV")
+  on.exit(.unset_function_name(), add = TRUE)
 
-){
+  ## Integrity checks -------------------------------------------------------
 
-  # General tests -------------------------------------------------------------------------------
-
-  ##file is missing?
-  if(missing(file)){
-    stop("[convert_XSYG2CSV()] file is missing!", call. = FALSE)
-
-  }
-
+  .validate_class(file, c("character", "RLum"))
+  .validate_not_empty(file)
 
   ##set input arguments
   convert_XSYG2R_settings.default <- list(
@@ -62,7 +60,6 @@ convert_XSYG2CSV <- function(
     pattern = ".xsyg",
     txtProgressBar = TRUE,
     export = TRUE
-
   )
 
   ##modify list on demand
@@ -76,11 +73,9 @@ convert_XSYG2CSV <- function(
       recalculate.TL.curves = convert_XSYG2R_settings$recalculate.TL.curves,
       pattern = convert_XSYG2R_settings$pattern,
       txtProgressBar = convert_XSYG2R_settings$txtProgressBar
-
    )
   }else{
     object <- file
-
   }
 
   # Export to CSV -------------------------------------------------------------------------------
@@ -95,7 +90,5 @@ convert_XSYG2CSV <- function(
 
   }else{
     do.call("write_RLum2CSV", arguments)
-
   }
-
 }

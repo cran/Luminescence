@@ -37,7 +37,7 @@ are expected to be provided in meter (unit: m).
 Expected are x and y coordinates, e.g.,
 \verb{coord = list(samp1 = c(0.1, 0.2)}. If you have not measured x coordinates, please x should be 0.}
 
-\item{plot}{\link{logical} (\emph{with default}): enable/disable plot output}
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.}
 
 \item{...}{other parameters to be passed to modify the plot output.
 Supported are \code{run} to provide the run name ,
@@ -127,7 +127,7 @@ Institute of Geography, Ruprecht-Karl University of Heidelberg, Germany
 , RLum Developer Team} 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2024. analyse_portableOSL(): Analyse portable CW-OSL measurements. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2025. analyse_portableOSL(): Analyse portable CW-OSL measurements. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

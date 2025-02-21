@@ -41,7 +41,7 @@
 #'
 #' **Note:** Further parameters can be adjusted via `par`. For example
 #' to set the background transparent and reduce the thickness of the lines use:
-#' `par(bg = NA, lwd = 0.7)` previous the function call.
+#' `par(bg = NA, lwd = 0.7)` before the function call.
 #'
 #'**`plot.type = "single"`**
 #'
@@ -92,10 +92,10 @@
 #' use local graphical parameters for plotting, e.g. the plot is shown in one column and one row.
 #' If `par.local = FALSE` global parameters are inherited.
 #'
-#' @param plot.type [character] (*with default*): plot type, for
-#' 3D-plot use `persp`, or `interactive`, for a 2D-plot `image`, `contour`,
+#' @param plot.type [character] (*with default*): for a 3D-plot use `persp`
+#' or `interactive`; for a 2D-plot you can use `image`, `contour`,
 #' `single` or `multiple.lines` (along the time or temperature axis)
-#' or `transect` (along the wavelength axis) \cr
+#' or `transect` (along the wavelength axis)
 #'
 #' @param optical.wavelength.colours [logical] (*with default*):
 #' use optical wavelength colour palette. Note: For this, the spectrum range is
@@ -129,7 +129,7 @@
 #' minimum (`norm = "min"`) count values. The normalisation is applied after the binning.
 #'
 #' @param rug [logical] (*with default*):
-#' enables or disables colour rug. Currently only implemented for plot
+#' enable/disable colour rug. Currently only implemented for plot
 #' type `multiple.lines` and `single`
 #'
 #' @param limit_counts [numeric] (*optional*):
@@ -137,20 +137,21 @@
 #' this threshold will be replaced by this threshold. This is helpful
 #' especially in case of TL-spectra.
 #'
-#' @param xaxis.energy [logical] (*with default*): enables or disables energy instead of
+#' @param xaxis.energy [logical] (*with default*): enable/disable energy instead of
 #' wavelength axis. For the conversion the function [convert_Wavelength2Energy] is used.
 #'
-#' **Note:** This option means not only simply redrawing the axis,
-#' instead the spectrum in terms of intensity is recalculated, s. details.
+#' **Note:** Besides being used in setting the axis, with this option the
+#' the spectrum is recalculated in terms of intensity, see details.
 #'
 #' @param legend.text [character] (*with default*):
 #' possibility to provide own legend text. This argument is only considered for
 #' plot types providing a legend, e.g. `plot.type="transect"`
 #'
-#' @param plot [logical] (*with default*): enables/disables plot output. If the plot
-#' output is disabled, the [matrix] used for the plotting and the calculated colour values
-#' (as attributes) are returned. This way, the (binned, transformed etc.) output can
-#' be used in other functions and packages, such as plotting with the package `'plot3D'`
+#' @param plot [logical] (*with default*): enable/disable the plot output. If
+#' the plot output is disabled, the [matrix] used for the plotting and the
+#' calculated colour values (as attributes) are returned. This way, the
+#' (binned, transformed etc.) output can be used in other functions and
+#' packages, such as plotting with the package `'plot3D'`
 #'
 #' @param ... further arguments and graphical parameters that will be passed
 #' to the `plot` function.
@@ -255,28 +256,31 @@ plot_RLum.Data.Spectrum <- function(
   .set_function_name("plot_RLum.Data.Spectrum")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity check -----------------------------------------------------------
+  ## Integrity tests  -------------------------------------------------------
 
-  ##check if object is of class RLum.Data.Spectrum
-  if(!inherits(object, "RLum.Data.Spectrum")){
-    if(inherits(object, "matrix")){
-      if(is.null(colnames(object))){
+  .validate_class(object, c("RLum.Data.Spectrum", "matrix"))
+
+  if (inherits(object, "matrix")) {
+    if (is.null(colnames(object))) {
         colnames(object) <- 1:ncol(object)
-
-      }
-      if(is.null(rownames(object))){
-        rownames(object) <- 1:nrow(object)
-      }
-
-      object <- set_RLum(class = "RLum.Data.Spectrum",
-                         data = object)
-
-      message("[plot_RLum.Data.Spectrum()] Input has been converted to a RLum.Data.Spectrum object using set_RLum()")
-
-    }else{
-      .throw_error("'object' must be of type 'RLum.Data.Spectrum' or 'matrix'")
     }
+    if (is.null(rownames(object))) {
+        rownames(object) <- 1:nrow(object)
+    }
+
+    object <- set_RLum(class = "RLum.Data.Spectrum", data = object)
+    message("[plot_RLum.Data.Spectrum()] Input has been converted to a ",
+            "'RLum.Data.Spectrum' object using set_RLum()")
   }
+
+  if (length(object@data) < 2) {
+    .throw_error("'object' contains no data")
+  }
+  .validate_args(norm, c("min", "max"), null.ok = TRUE)
+  .validate_args(plot.type, c("contour", "persp", "single", "multiple.lines",
+                              "image", "transect", "interactive"))
+  .validate_positive_scalar(bin.rows, int = TRUE)
+  .validate_positive_scalar(bin.cols, int = TRUE)
 
   ##XSYG
   ##check for curveDescripter
@@ -420,13 +424,17 @@ plot_RLum.Data.Spectrum <- function(
 
   ##check for the case of a single column matrix
   if(ncol(temp.xyz)>1){
-    ##reduce for xlim
-    temp.xyz <- temp.xyz[as.numeric(rownames(temp.xyz)) >= xlim[1] &
-                           as.numeric(rownames(temp.xyz)) <= xlim[2],]
 
-    ##reduce for ylim
-    temp.xyz <- temp.xyz[, as.numeric(colnames(temp.xyz)) >= ylim[1] &
-                           as.numeric(colnames(temp.xyz)) <= ylim[2]]
+    x.vals <- as.numeric(rownames(temp.xyz))
+    y.vals <- as.numeric(colnames(temp.xyz))
+
+    ## limit the data according to xlim and ylim
+    temp.xyz <- temp.xyz[x.vals >= xlim[1] & x.vals <= xlim[2],
+                         y.vals >= ylim[1] & y.vals <= ylim[2],
+                         drop = FALSE]
+    if (nrow(temp.xyz) == 0 || ncol(temp.xyz) == 0) {
+      .throw_error("No data left after applying 'xlim' and 'ylim'")
+    }
   }
 
   ## wavelength
@@ -437,7 +445,8 @@ plot_RLum.Data.Spectrum <- function(
 
   # Background spectrum -------------------------------------------------------------------------
   if(!is.null(bg.spectrum)){
-    if(inherits(bg.spectrum, "RLum.Data.Spectrum") || inherits(bg.spectrum, "matrix")){
+    .validate_class(bg.spectrum, c("RLum.Data.Spectrum", "matrix"))
+
       ##case RLum
       if(inherits(bg.spectrum, "RLum.Data.Spectrum")) bg.xyz <- bg.spectrum@data
 
@@ -454,7 +463,6 @@ plot_RLum.Data.Spectrum <- function(
 
       ##convert to energy scale if needed
       if(xaxis.energy){
-
         #conversion
         bg.xyz <- convert_Wavelength2Energy(cbind(as.numeric(rownames(bg.xyz)), bg.xyz), digits = 5)
         rownames(bg.xyz) <- bg.xyz[,1]
@@ -468,10 +476,6 @@ plot_RLum.Data.Spectrum <- function(
       ##reduce for xlim
       bg.xyz <- bg.xyz[as.numeric(rownames(bg.xyz)) >= xlim[1] &
                              as.numeric(rownames(bg.xyz)) <= xlim[2],,drop = FALSE]
-
-    }else{
-      .throw_error("Input for 'bg.spectrum' not supported")
-    }
   }
 
   # Background subtraction ---------------------------------------------------
@@ -502,26 +506,20 @@ plot_RLum.Data.Spectrum <- function(
 
     ##check worst case
     if(sum(temp.xyz) == 0){
-      message("[plot_RLum.Data.Spectrum()] After background subtraction all counts < 0. Nothing plotted, NULL returned!")
+      .throw_message("After background subtraction all counts < 0: ",
+                     "nothing plotted, NULL returned")
       return(NULL)
     }
   }
 
-  # Channel binning ---------------------------------------------------------
-  ##rewrite arguments; makes things easier
-  bin.cols <- bin.cols[1]
-  bin.rows <- bin.rows[1]
-
-  ##fatal check (not needed anymore, but never change running code)
-  if(bin.cols < 1 | bin.rows < 1)
-    .throw_error("'bin.cols' and 'bin.rows' have to be > 1!")
+  ## Channel binning --------------------------------------------------------
 
   if(bin.rows > 1){
     temp.xyz <- .matrix_binning(temp.xyz, bin_size = bin.rows, bin_col = FALSE, names = "mean")
     x <- as.numeric(rownames(temp.xyz))
 
     ##remove last channel (this is the channel that included less data)
-    if(length(x)%%bin.rows != 0){
+    if (length(x) %% bin.rows != 0 && length(x) > bin.rows) {
       .throw_warning(length(x) %% bin.rows,
                      " channels removed due to row (wavelength) binning")
 
@@ -536,7 +534,7 @@ plot_RLum.Data.Spectrum <- function(
     y <- as.numeric(colnames(temp.xyz))
 
     ##remove last channel (this is the channel that included less data)
-    if(length(y)%%bin.cols != 0){
+    if (length(y) %% bin.cols != 0 && length(y) > bin.cols) {
       .throw_warning(length(y) %% bin.cols,
                      " channels removed due to column (frame) binning")
 
@@ -547,8 +545,15 @@ plot_RLum.Data.Spectrum <- function(
   }
 
   ##limit z-values if requested, this idea was taken from the Diss. by Thomas Schilles, 2002
-  if(!is.null(limit_counts[1]))
+  if(!is.null(limit_counts[1])) {
+    if(min(temp.xyz) > limit_counts[1]) {
+      limit_counts <- floor(limit_counts[1] + min(temp.xyz))
+      .throw_warning(
+        "Lowest count value is larger than the set count threshold. Set limit_counts = ", limit_counts, ".")
+    }
+
     temp.xyz[temp.xyz[] > max(min(temp.xyz), limit_counts[1])] <- limit_counts[1]
+  }
 
   # Normalise if wanted -------------------------------------------------------------------------
   if(!is.null(norm)){
@@ -567,88 +572,60 @@ plot_RLum.Data.Spectrum <- function(
   if("col" %in% names(extraArgs) == FALSE | plot.type == "single" | plot.type == "multiple.lines"){
     if(optical.wavelength.colours == TRUE | (rug == TRUE & (plot.type != "persp" & plot.type != "interactive"))){
 
+      col.labels <- c(violet = "#EE82EE",
+                      blue   = "#0000FF",
+                      green  = "#00FF00",
+                      yellow = "#FFFF00",
+                      orange = "#FFA500",
+                      red    = "#FF0000",
+                      infra  = "#BEBEBE")
+
       ##make different colour palette for energy values
       if (xaxis.energy) {
-        col.violet <- c(2.76, ifelse(max(xlim) <= 4.13, max(xlim), 4.13))
-        col.blue <- c(2.52, 2.76)
-        col.green <- c(2.18, 2.52)
-        col.yellow <- c(2.10, 2.18)
-        col.orange <- c(2.00, 2.10)
-        col.red <- c(1.57, 2.00)
-        col.infrared <-
-          c(1.55, ifelse(min(xlim) >= 1.55, min(xlim), 1.57))
-
-        #set colour palette
-        col <- unlist(sapply(1:length(x), function(i){
-          if(x[i] >= col.violet[1] & x[i] < col.violet[2]){"#EE82EE"}
-          else if(x[i] >= col.blue[1] & x[i] < col.blue[2]){"#0000FF"}
-          else if(x[i] >= col.green[1] & x[i] < col.green[2]){"#00FF00"}
-          else if(x[i] >= col.yellow[1] & x[i] < col.yellow[2]){"#FFFF00"}
-          else if(x[i] >= col.orange[1] & x[i] < col.orange[2]){"#FFA500"}
-          else if(x[i] >= col.red[1] & x[i] < col.red[2]){"#FF0000"}
-          else if(x[i] <= col.infrared[2]){"#BEBEBE"}
-        }))
-
+        ## as thresholds are descending, we must reverse the labels, as cut()
+        ## will sort the cutpoints in increasing order
+        col.breaks <- c(min(max(xlim), 4.13), 2.76, 2.52, 2.18, 2.10, 2.00, 1.57, 0)
+        col.labels <- rev(col.labels)
       }else{
-        ##wavelength colours for wavelength axis
-        col.violet <- c(ifelse(min(xlim) <= 300, min(xlim), 300),450)
-        col.blue <- c(450,495)
-        col.green <- c(495,570)
-        col.yellow <- c(570,590)
-        col.orange <- c(590,620)
-        col.red <- c(620,790)
-        col.infrared <-
-          c(790, ifelse(max(xlim) >= 800, max(xlim), 800))
-
-        #set colour palette
-        col <- unlist(lapply(1:length(x), function(i){
-          if(x[i] >= col.violet[1] & x[i] < col.violet[2]){"#EE82EE"}
-          else if(x[i] >= col.blue[1] & x[i] < col.blue[2]){"#0000FF"}
-          else if(x[i] >= col.green[1] & x[i] < col.green[2]){"#00FF00"}
-          else if(x[i] >= col.yellow[1] & x[i] < col.yellow[2]){"#FFFF00"}
-          else if(x[i] >= col.orange[1] & x[i] < col.orange[2]){"#FFA500"}
-          else if(x[i] >= col.red[1] & x[i] < col.red[2]){"#FF0000"}
-          else if(x[i] >= col.infrared[1]){"#BEBEBE"}
-        }))
+        ## colour thresholds for wavelength axis
+        col.breaks <- c(min(xlim, 300), 450, 495, 570, 590, 620, 790, Inf)
       }
 
-      ##find unique colours
-      col.unique <- unique(col)
+      ## assign colours according to the defined thresholds
+      col <- cut(x, col.breaks, labels = col.labels, right = FALSE)
+
+      ## when using labels, cut generates a factor variable
+      col <- as.character(col)
 
       ##if only one colour value, then skip gradient calculation as it causes
       ##an error
+      col.unique <- unique(col)
       if(length(col.unique) > 1){
         ##set colour function for replacement
-        colfunc <- colorRampPalette(col.unique)
+        colfunc <- grDevices::colorRampPalette(col.unique)
 
-        ##get index for colour values to be cut from the current palette
-        col.unique.index <- vapply(col.unique, function(i) which.max(col == i), numeric(1))
+        ## index of the first occurrence of each colour besides the first,
+        ## as we are trying to find where transition between colours occur
+        col.first.idx <- match(col.unique, col)[-1]
 
-        ##remove last index (no colour gradient needed), for energy axis use the first value
-        col.unique.index <- col.unique.index[-length(col.unique.index)]
+        ## size of the colour transition band
+        band.size <- 50 / bin.rows
 
         ##set borders for colour gradient recalculation
-        col.unique.index.min <- floor(col.unique.index - (50/bin.rows))
-        col.unique.index.max <- ceiling(col.unique.index + (50/bin.rows))
-
-        ##set negative values to the lowest index
-        col.unique.index.min[col.unique.index.min<=0] <- 1
+        grad.min <- pmax(floor(col.first.idx - band.size), 1)
+        grad.max <- ceiling(col.first.idx + band.size)
 
         ##build up new index sequence (might be better)
-        col.gradient.index <- unlist(lapply(seq_along(col.unique.index.min), function(j){
-            seq(col.unique.index.min[j],col.unique.index.max[j], by = 1)
-
-          }))
+        gradient.idx <- unlist(lapply(seq_along(grad.min),
+                                      function(j) grad.min[j]:grad.max[j]))
 
         ##generate colour ramp and replace values
-        col[col.gradient.index] <- colfunc(length(col.gradient.index))
+        col[gradient.idx] <- colfunc(length(gradient.idx))
 
         ##correct for overcharged colour values (causes zebra colour pattern)
-        if (diff(c(length(col), nrow(temp.xyz))) < 0) {
-          col <- col[1:c(length(col) - diff(c(length(col), nrow(temp.xyz))))]
-
-        }else if(diff(c(length(col), nrow(temp.xyz))) > 0){
-          col <- col[1:c(length(col) + diff(c(length(col), nrow(temp.xyz))))]
+        size.diff <- length(col) - nrow(temp.xyz)
+        if (size.diff != 0) {
+          col <- col[1:(length(col) + size.diff)]
         }
       }
 
@@ -686,17 +663,16 @@ if(plot){
                    "reset to 'single'")
   }
 
-  ##do not let old code break down ...
-  if(plot.type == "persp3d"){
-    plot.type <- "interactive"
-    .throw_warning("'plot.type' has been automatically reset to interactive")
+  if (nrow(temp.xyz) == 1 && plot.type != "single") {
+    .throw_message("Insufficient data for plotting, NULL returned")
+    return(NULL)
   }
 
-  if(plot.type == "persp" && ncol(temp.xyz) > 1){
+  if (plot.type == "persp") {
 
     ## Plot: perspective plot ----
     ## ==========================================================================#
-    pmat <- persp(
+    pmat <- graphics::persp(
       x, y, temp.xyz,
       shade = shade,
       axes = if(box[1] == "alternate") FALSE else axes,
@@ -820,24 +796,18 @@ if(plot){
         zlab,
         srt = m,
         xpd = TRUE)
-
     }
 
     ##plot additional mtext
     mtext(mtext, side = 3, cex = cex * 0.8)
 
-  }else if(plot.type == "interactive" && ncol(temp.xyz) > 1) {
+  } else if (plot.type == "interactive") {
     ## ==========================================================================#
     ##interactive plot and former persp3d
     ## ==========================================================================#
 
     ## Plot: interactive ----
-    ##http://r-pkgs.had.co.nz/description.html
-    if (!requireNamespace("plotly", quietly = TRUE)) {
-      # nocov start
-      .throw_error("Package 'plotly' needed for this plot type. Please install it.")
-      # nocov end
-    }
+    .require_suggested_package("plotly", "Displaying interactive plots")
 
        ##set up plot
         p <- plotly::plot_ly(
@@ -856,13 +826,11 @@ if(plot){
          scene = list(
            xaxis = list(
              title = ylab
-
            ),
            yaxis = list(
              title = xlab
            ),
            zaxis = list(title = zlab)
-
          ),
          title = main
        )
@@ -871,10 +839,10 @@ if(plot){
        on.exit(return(p), add = TRUE)
 
 
-  }else if(plot.type == "contour" && ncol(temp.xyz) > 1) {
+  } else if (plot.type == "contour") {
     ## Plot: contour plot ----
     ## ==========================================================================#
-    contour(x,y,temp.xyz,
+    graphics::contour(x,y,temp.xyz,
             xlab = xlab,
             ylab = ylab,
             main = main,
@@ -885,20 +853,20 @@ if(plot){
     ##plot additional mtext
     mtext(mtext, side = 3, cex = cex*0.8)
 
-  }else if(plot.type == "image" && ncol(temp.xyz) > 1) {
+  } else if (plot.type == "image") {
     ## Plot: image plot ----
     ## ==========================================================================#
     graphics::image(x,y,temp.xyz,
             xlab = xlab,
             ylab = ylab,
             main = main,
-            col = if(is.null(list(...)$col)) grDevices::hcl.colors(50, palette = "Inferno") else
-              list(...)$col
+            col = if(is.null(extraArgs$col)) grDevices::hcl.colors(50, palette = "Inferno") else
+              extraArgs$col
     )
 
-    if(is.null(list(...)$contour) || list(...)$contour != FALSE) {
-      contour(x, y, temp.xyz,
-              col = if(is.null(list(...)$contour.col)) rgb(1,1,1,0.8) else list(...)$contour.col,
+    if (is.null(extraArgs$contour) || extraArgs$contour != FALSE) {
+      graphics::contour(x, y, temp.xyz,
+              col = if(is.null(extraArgs$contour.col)) rgb(1,1,1,0.8) else extraArgs$contour.col,
               labcex = 0.6 * cex,
               add = TRUE)
     }
@@ -978,13 +946,12 @@ if(plot){
 
       ## add box if needed
       if(box) graphics::box()
-
     }
 
     ##plot additional mtext
     mtext(mtext, side = 3, cex = cex*0.8)
 
-  }else if(plot.type == "multiple.lines" && ncol(temp.xyz) > 1) {
+  } else if (plot.type == "multiple.lines") {
     ## Plot: multiple.lines ----
     ## ========================================================================#
     col.rug <- col
@@ -1086,7 +1053,7 @@ if(plot){
     par(par.default)
     rm(par.default)
 
-  }else if(plot.type == "transect" && ncol(temp.xyz) > 1) {
+  } else if (plot.type == "transect") {
     ## Plot: transect plot ----
     ## ========================================================================#
 
@@ -1115,12 +1082,7 @@ if(plot){
 
     ##plot additional mtext
     mtext(mtext, side = 3, cex = cex*0.8)
-
-  }else{
-    .throw_error("Unknown plot type")
- }
-
-## option for plotting nothing
+  }
 }
 
 # Return ------------------------------------------------------------------
@@ -1130,5 +1092,4 @@ attr(temp.xyz, "pmat") <- pmat
 
 ## return visible or not
 if(plot) invisible(temp.xyz) else return(temp.xyz)
-
 }

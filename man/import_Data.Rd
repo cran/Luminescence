@@ -7,7 +7,7 @@
 import_Data(file, ..., fastForward = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{file}{\link{character} (\strong{required}): file to be imported, can be a \link{list}}
+\item{file}{\link{character} (\strong{required}): file to be imported, can be a \link{list} or a \link{character} vector}
 
 \item{...}{arguments to be further passed down to supported functions (please check the functions
 to determine the correct arguments)}
@@ -15,14 +15,19 @@ to determine the correct arguments)}
 \item{fastForward}{\link{logical} (\emph{with default}): option to create \linkS4class{RLum} objects
 during import or a \link{list} of such objects}
 
-\item{verbose}{\link{logical} (\emph{with default}): enable/disable verbose mode}
+\item{verbose}{\link{logical} (\emph{with default}): enable/disable output to the
+terminal.}
+}
+\value{
+Always returns a \link{list}; empty or filled with \linkS4class{RLum.Analysis} objects
 }
 \description{
 Convenience wrapper function to provide a quicker and more standardised way of
-reading data into R by looping through all in the package available data import functions starting with \code{read_}.
+reading data into R by looping through all in the package available data import
+functions starting with \code{read_}. Import data types can be mixed.
 }
 \section{Function version}{
- 0.1.1
+ 0.1.5
 }
 
 \examples{
@@ -37,15 +42,14 @@ temp <- import_Data(file)
 
 }
 \seealso{
-\link{read_BIN2R}, \link{read_XSYG2R}, \link{read_PSL2R}, \link{read_SPE2R}, \link{read_TIFF2R}, \link{read_RF2R},
-\link{read_Daybreak2R}
+\link{read_HeliosOSL2R}, \link{read_BIN2R}, \link{read_Daybreak2R}, \link{read_RF2R}, \link{read_SPE2R}, \link{read_PSL2R}, \link{read_XSYG2R}, \link{read_TIFF2R}
 }
 \author{
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. import_Data(): Import Luminescence Data into R. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. import_Data(): Import Luminescence Data into R. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

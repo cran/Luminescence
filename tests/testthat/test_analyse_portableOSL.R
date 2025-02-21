@@ -1,3 +1,4 @@
+## load data
 data(ExampleData.portableOSL, envir = environment())
 
 ## generate test data set for profile
@@ -62,13 +63,14 @@ test_that("check class and length of output", {
         signal.integral = 1:5,
         invert = TRUE,
         mode = "surface",
-        xlim = c(0.1, 0.4),
-        ylim = c(0.1, 0.4),
+        xlim = c(0.1, 0.6),
+        ylim = c(0.1, 0.6),
         zlim = c(0.1, 2),
         zlim_image = c(1, 2),
-        col_ramp = "red",
+        col_ramp = grDevices::topo.colors(20),
         surface_values = c("BSL", "IRSL"),
         normalise = TRUE,
+        contour = TRUE,
         plot = TRUE
       ), "RLum.Results")
 
@@ -76,6 +78,8 @@ test_that("check class and length of output", {
     expect_s4_class(
       suppressWarnings(analyse_portableOSL(ExampleData.portableOSL)),
       "RLum.Results")
+    expect_warning(expect_null(analyse_portableOSL(list())),
+                   "Nothing was merged as the object list was found to be empty")
 
     ## check additional argument sample
     expect_s4_class(analyse_portableOSL(
@@ -89,13 +93,24 @@ test_that("check class and length of output", {
       sample = "test"
     ),
     "RLum.Results")
+
+    ## more coverage
+    expect_s4_class(analyse_portableOSL(
+        surface,
+        signal.integral = 1:5,
+        mode = "surface",
+        bg_img = as.raster(matrix(0:1, ncol = 4, nrow = 3))
+    ), "RLum.Results")
 })
 
 test_that("input validation", {
     testthat::skip_on_cran()
 
     expect_error(analyse_portableOSL("error"),
-                 "Only objects of class 'RLum.Analysis' are allowed")
+                 "[analyse_portableOSL()] 'object' should be of class 'RLum.Analysis'",
+                 fixed = TRUE)
+    expect_error(analyse_portableOSL(set_RLum("RLum.Analysis")),
+                 "'object' cannot be an empty RLum.Analysis")
 
     ## Only RLum.Data.Curves
     tmp <- merged
@@ -118,7 +133,7 @@ test_that("input validation", {
     ## coordinates not list or matrix
     expect_error(analyse_portableOSL(surface, signal.integral = 1:5,
                                      coord = "error"),
-      "'coord' must be a matrix or a list")
+      "'coord' should be of class 'matrix' or 'list'")
 
     ## coordinates are not of the correct size
     expect_error(analyse_portableOSL(surface, signal.integral = 1:5,
@@ -138,6 +153,14 @@ test_that("input validation", {
         plot = TRUE,
         sample = "test"),
       "Surface interpolation failed: this happens when all points are")
+
+    expect_error(
+      analyse_portableOSL(
+        merged,
+        signal.integral = 1:5,
+        mode = "surface",
+        surface_value = "error"),
+      "Unknown value to plot, valid values are:")
 
     expect_warning(
       analyse_portableOSL(
@@ -174,5 +197,4 @@ test_that("check output", {
     )
 
   expect_equal(round(sum(results$summary[,c(-1, -2, -10,-11)]), digits = 2), 175.44)
-
 })

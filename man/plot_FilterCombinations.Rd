@@ -16,8 +16,8 @@ plot_FilterCombinations(
 \arguments{
 \item{filters}{\link{list} (\strong{required}):
 a named list of filter data for each filter to be shown.
-The filter data itself should be either provided as \link{data.frame} or \link{matrix}.
-(for more options s. Details)}
+The filter data itself should be either provided as \link{data.frame} or \link{matrix}
+(see details for more options).}
 
 \item{wavelength_range}{\link{numeric} (\emph{with default}):
 wavelength range used for the interpolation}
@@ -26,10 +26,10 @@ wavelength range used for the interpolation}
 show net transmission window as polygon.}
 
 \item{interactive}{\link{logical} (\emph{with default}):
-enable/disable interactive plot}
+enable/disable interactive plots.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enables or disables the plot output}
+enable/disable the plot output.}
 
 \item{...}{further arguments that can be passed to control the plot output.
 Supported are \code{main}, \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{type}, \code{lty}, \code{lwd}.
@@ -58,8 +58,7 @@ Returns an S4 object of type \linkS4class{RLum.Results}.
 The function allows to plot transmission windows for different filters. Missing data for specific
 wavelengths are automatically interpolated for the given filter data using the function \link{approx}.
 With that a standardised output is reached and a net transmission window can be shown.
-}
-\details{
+
 \strong{Calculations}
 
 \strong{Net transmission window}
@@ -169,7 +168,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

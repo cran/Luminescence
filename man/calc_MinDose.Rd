@@ -28,8 +28,8 @@ additional spread in De values.
 This value represents the expected overdispersion in the data should the sample be
 well-bleached (Cunningham & Walling 2012, p. 100).
 \strong{NOTE}: For the logged model (\code{log = TRUE}) this value must be
-a fraction, e.g. 0.2 (= 20 \\%). If the un-logged model is used (\code{log = FALSE}),
-sigmab must be provided in the same absolute units of the De values (seconds or Gray).
+a fraction, e.g. 0.2 (= 20 \%). If the un-logged model is used (\code{log = FALSE}),
+\code{sigmab} must be provided in the same absolute units of the De values (seconds or Gray).
 See details.}
 
 \item{log}{\link{logical} (\emph{with default}):
@@ -43,11 +43,12 @@ used by default.}
 apply the recycled bootstrap approach of Cunningham & Wallinga (2012).}
 
 \item{init.values}{\link{numeric} (\emph{optional}):
-a named list with starting values for gamma, sigma, p0 and mu
-(e.g. \code{list(gamma=100, sigma=1.5, p0=0.1, mu=100)}). If no values are provided reasonable values
-are tried to be estimated from the data. \strong{NOTE} that the initial values must always be given
-in the absolute units. The the logged model is applied (\code{log = TRUE}), the provided \code{init.values}
-are automatically log transformed.}
+a named list with starting values for \code{gamma}, \code{sigma}, \code{p0} and \code{mu}
+(e.g. \code{list(gamma=100, sigma=1.5, p0=0.1, mu=100)}). If no values are
+provided, reasonable values will be estimated from the data.
+\strong{NOTE}: the initial values must always be given in the absolute units.
+If a logged model is applied (\code{log = TRUE}), the provided \code{init.values}
+are automatically log-transformed.}
 
 \item{level}{\link{logical} (\emph{with default}):
 the confidence level required (defaults to 0.95).}
@@ -57,7 +58,7 @@ If \code{TRUE} the console output will also show the logged values of the final 
 and confidence intervals (only applicable if \code{log = TRUE}).}
 
 \item{plot}{\link{logical} (\emph{with default}):
-plot output (\code{TRUE}/\code{FALSE})}
+enable/disable the plot output.}
 
 \item{multicore}{\link{logical} (\emph{with default}):
 enable parallel computation of the bootstrap by creating a multicore SNOW cluster. Depending
@@ -66,7 +67,7 @@ the computation time. Note that this option is highly experimental and may not
 work on all machines. (\code{TRUE}/\code{FALSE})}
 
 \item{...}{(\emph{optional}) further arguments for bootstrapping
-(\verb{bs.M, bs.N, bs.h, sigmab.sd}). See details for their usage.
+(\code{bs.M}, \code{bs.N}, \code{bs.h}, \code{sigmab.sd}). See details for their usage.
 Further arguments are
 \itemize{
 \item \code{verbose} to de-/activate console output (logical),
@@ -79,17 +80,17 @@ Returns a plot (\emph{optional}) and terminal output. In addition an
 \linkS4class{RLum.Results} object is returned containing the
 following elements:
 
-\item{.$summary}{\link{data.frame} summary of all relevant model results.}
-\item{.$data}{\link{data.frame} original input data}
-\item{args}{\link{list} used arguments}
-\item{call}{\link{call} the function call}
-\item{.$mle}{\link[bbmle:mle2]{bbmle::mle2} object containing the maximum log likelihood functions for all parameters}
-\item{BIC}{\link{numeric} BIC score}
-\item{.$confint}{\link{data.frame} confidence intervals for all parameters}
-\item{.$profile}{\link[stats:profile]{stats::profile} the log likelihood profiles}
-\item{.$bootstrap}{\link{list} bootstrap results}
+\item{$summary}{\link{data.frame} summary of all relevant model results.}
+\item{$data}{\link{data.frame} original input data}
+\item{$args}{\link{list} used arguments}
+\item{$call}{\link{call} the function call}
+\item{$mle}{\link[bbmle:mle2]{bbmle::mle2} object containing the maximum log likelihood functions for all parameters}
+\item{$BIC}{\link{numeric} BIC score}
+\item{$confint}{\link{data.frame} confidence intervals for all parameters}
+\item{$profile}{\link[stats:profile]{stats::profile} the log likelihood profiles}
+\item{$bootstrap}{\link{list} bootstrap results}
 
-The output should be accessed using the function \link{get_RLum}
+The output should be accessed using the function \link{get_RLum}.
 }
 \description{
 Function to fit the (un-)logged three or four parameter minimum dose model
@@ -113,7 +114,7 @@ where \code{gamma=mu}. For \code{par=4} the 4-parameter model is applied instead
 In the original version of the minimum dose model, the basic data are the natural
 logarithms of the De estimates and relative standard errors of the De
 estimates. The value for \code{sigmab} must be provided as a ratio
-(e.g, 0.2 for 20 \\%). This model will be applied if \code{log = TRUE}.
+(e.g, 0.2 for 20 \%). This model will be applied if \code{log = TRUE}.
 
 If \code{log=FALSE}, the modified un-logged model will be applied instead. This
 has essentially the same form as the original version.  \code{gamma} and
@@ -133,13 +134,13 @@ samples containing negative, zero or near-zero De estimates (Arnold et al.
 The log likelihood calculations use the \link{nlminb} function for box-constrained
 optimisation using PORT routines.  Accordingly, initial values for the four
 parameters can be specified via \code{init.values}. If no values are
-provided for \code{init.values} reasonable starting values are estimated
+provided for \code{init.values}, reasonable starting values are estimated
 from the input data.  If the final estimates of \emph{gamma}, \emph{mu},
 \emph{sigma} and \emph{p0} are totally off target, consider providing custom
 starting values via \code{init.values}.
-In contrast to previous versions of this function the boundaries for the
+In contrast to previous versions of this function, the boundaries for the
 individual model parameters are no longer required to be explicitly specified.
-If you want to override the default boundary values use the arguments
+If you want to override the default boundary values use arguments
 \code{gamma.lower}, \code{gamma.upper}, \code{sigma.lower}, \code{sigma.upper}, \code{p0.lower}, \code{p0.upper},
 \code{mu.lower} and \code{mu.upper}.
 
@@ -150,9 +151,9 @@ described in Wallinga & Cunningham (2012). By default, the minimum age model
 produces 1000 first level and 3000 second level bootstrap replicates
 (actually, the number of second level bootstrap replicates is three times
 the number of first level replicates unless specified otherwise).  The
-uncertainty on sigmab is 0.04 by default. These values can be changed by
+uncertainty on \code{sigmab} is 0.04 by default. These values can be changed by
 using the arguments \code{bs.M} (first level replicates), \code{bs.N}
-(second level replicates) and \code{sigmab.sd} (error on sigmab). With
+(second level replicates) and \code{sigmab.sd} (error on \code{sigmab}). With
 \code{bs.h} the bandwidth of the kernel density estimate can be specified.
 By default, \code{h} is calculated as
 
@@ -166,11 +167,11 @@ automatically, but can be changed with \code{cores}. The multicore support
 is only available when \code{bootstrap=TRUE} and spawns \code{n} R instances
 for each core to get MAM estimates for each of the N and M bootstrap
 replicates. Note that this option is highly experimental and may or may not
-work for your machine. Also the performance gain increases for larger number
-of bootstrap replicates. Also note that with each additional core and hence
-R instance and depending on the number of bootstrap replicates the memory
-usage can significantly increase. Make sure that memory is always available,
-otherwise there will be a massive performance hit.
+work for your machine. The performance gain increases for larger number
+of bootstrap replicates. However, note that with each additional core (and
+hence R instance) the memory usage can significantly increase and depending
+on the number of bootstrap replicates. When insufficient memory is available,
+there will be a massive performance hit.
 
 \strong{Likelihood profiles}
 
@@ -178,7 +179,7 @@ The likelihood profiles are generated and plotted by the \code{bbmle} package.
 The profile likelihood plots look different to ordinary profile likelihood as
 
 "\verb{[...]} the plot method for likelihood profiles displays the square root of
-the the deviance difference (twice the difference in negative log-likelihood from
+the deviance difference (twice the difference in negative log-likelihood from
 the best fit), so it will be V-shaped for cases where the quadratic approximation
 works well \verb{[...]}." (Bolker 2016).
 
@@ -295,7 +296,7 @@ summary(bs$poly.fits$poly.three$fitted.values)
 } 
 
 \section{How to cite}{
-Burow, C., 2024. calc_MinDose(): Apply the (un-)logged minimum age model (MAM) after Galbraith et al. (1999) to a given De distribution. Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. calc_MinDose(): Apply the (un-)logged minimum age model (MAM) after Galbraith et al. (1999) to a given De distribution. Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

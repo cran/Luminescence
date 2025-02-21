@@ -1,7 +1,10 @@
+## load data
 data(ExampleData.RLum.Analysis, envir = environment())
 obj <- IRSAR.RF.Data
+data(ExampleData.XSYG, envir = environment())
+sar <- OSL.SARMeasurement$Sequence.Object[1:9]
 
-##construct empty object
+## construct test object
 tmp <- set_RLum(
     "RLum.Analysis",
     protocol = "testthat",
@@ -16,11 +19,16 @@ tmp <- set_RLum(
     info = list(el = "test")
 )
 
+## missing info slot to test very old objects (before commit 5226b88, Jan 2016)
+old <- tmp
+attr(old, "info") <- NULL
+
 test_that("Check the example and the numerical values", {
   testthat::skip_on_cran()
 
   ## set_RLum()
   expect_s4_class(tmp, "RLum.Analysis")
+  expect_s4_class(set_RLum("RLum.Analysis", records = tmp, .pid = "test"), "RLum.Analysis")
 
   ##overwrite object
   expect_s4_class(set_RLum("RLum.Analysis", records = tmp), "RLum.Analysis")
@@ -47,6 +55,7 @@ test_that("Check the example and the numerical values", {
 
   ## show()
   expect_output(print(tmp))
+  expect_output(print(old))
 
   ## names()
   expect_type(names(tmp), "character")
@@ -63,21 +72,26 @@ test_that("get_RLum", {
                "[get_RLum()] Invalid subset expression, valid terms are:",
                fixed = TRUE)
   expect_error(get_RLum(tmp, record.id = "character"),
-               "'record.id' has to be of type 'numeric' or 'logical'")
+               "'record.id' should be of class 'integer', 'numeric' or 'logical'")
   expect_error(get_RLum(tmp, recordType = 1L),
-               "'recordType' has to be of type 'character'")
+               "'recordType' should be of class 'character'")
   expect_error(get_RLum(tmp, curveType = 1L),
-               "'curveType' has to be of type 'character'")
+               "'curveType' should be of class 'character'")
   expect_error(get_RLum(tmp, RLum.type = 1L),
-               "'RLum.type' has to be of type 'character'")
+               "'RLum.type' should be of class 'character'")
   expect_error(get_RLum(tmp, get.index = "a"),
-               "'get.index' has to be of type 'logical'")
+               "'get.index' should be a single logical value")
 
   ## check functionality
   expect_length(get_RLum(obj, subset = (recordType == "RF")), 2)
   expect_length(get_RLum(tmp, subset = (el == "2")), 1)
   expect_s4_class(get_RLum(tmp, subset = (el == "2")), "RLum.Analysis")
   expect_type(get_RLum(tmp, info.object = "el"), "character")
+
+  ## check subset for info elements
+  t_subset <- IRSAR.RF.Data
+  t_subset@records[[1]]@info <- list(TEST = "SUBSET")
+  expect_length(get_RLum(t_subset, subset = c(TEST == "SUBSET")), 1)
 
   expect_type(get_RLum(obj, get.index = FALSE), "list")
   expect_type(get_RLum(obj, get.index = NULL), "list")
@@ -109,7 +123,35 @@ test_that("get_RLum", {
   SW({
   expect_message(expect_null(get_RLum(obj, subset = (recordType == "error"))),
                  "'subset' expression produced an empty selection, NULL returned")
+  expect_message(expect_null(get_RLum(obj, subset = (recordType == NA))),
+                 "'subset' expression produced an empty selection, NULL returned")
   })
+})
+
+test_that("sort_RLum", {
+  testthat::skip_on_cran()
+
+  ## input validation
+  expect_error(sort_RLum(sar, slot = NA),
+               "'slot' should be of class 'character' or NULL")
+  expect_error(sort_RLum(sar, slot = "error"),
+               "Invalid 'slot' name, valid names are:")
+  expect_error(sort_RLum(sar, info_element = NA),
+               "'info_element' should be of class 'character' or NULL")
+  expect_error(sort_RLum(sar, info_element = "error"),
+               "Invalid 'info_element' name, valid names are:")
+  expect_error(sort_RLum(sar, slot = NULL, info_element = NULL),
+               "At least one of 'slot' and 'info_element' should not be NULL")
+  expect_error(sort_RLum(sar, slot = "recordType", decreasing = "error"),
+               "'decreasing' should be a single logical value")
+  expect_error(sort_RLum(sar, slot = "data"),
+               "Records could not be sorted according to slot = 'data'")
+  expect_error(sort_RLum(sar, info_element = "offset"),
+               "Records could not be sorted according to info_element = 'offset'")
+
+  ## check functionality
+  expect_snapshot_RLum(sort_RLum(sar, slot = "recordType"))
+  expect_snapshot_RLum(sort_RLum(sar, info_element = "curveDescripter"))
 })
 
 test_that("structure_RLum", {
@@ -181,4 +223,8 @@ test_that("structure_RLum", {
   expect_equal(ncol(res2), 13)
   expect_equal(names(res2), names(res))
   expect_equal(res2$info, NA)
+
+  ## melt
+  t <- melt_RLum(tmp)
+  expect_type(t, "list")
 })

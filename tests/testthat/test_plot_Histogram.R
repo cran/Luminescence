@@ -5,9 +5,15 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_Histogram("error"),
-               "Input data format is neither 'data.frame' nor 'RLum.Results'")
+               "'data' should be of class 'data.frame' or 'RLum.Results'")
+  expect_error(plot_Histogram(iris[0, ]),
+               "'data' contains no data")
+  expect_error(plot_Histogram(data.frame()),
+               "'data' contains no data")
+  expect_error(plot_Histogram(set_RLum("RLum.Results")),
+               "'data' contains no data")
   expect_error(plot_Histogram(df, ylim = c(0, 1)),
-               "'ylim' must be a vector of length 4")
+               "'ylim' should have length 4")
 })
 
 test_that("check functionality", {

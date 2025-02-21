@@ -19,8 +19,9 @@
 #'
 #' **analyse_function.control**
 #'
-#' The argument `analyse_function.control` currently supports the following arguments
-#' `sequence.structure`, `dose.points`, `mtext.outer`, `fit.method`, `fit.force_through_origin`, `plot`, `plot.single`
+#' The argument `analyse_function.control` currently supports the following arguments:
+#' `sequence.structure`, `dose.points`, `mtext.outer`, `fit.method`,
+#' `fit.force_through_origin`, `plot`, `plot_singlePanels`
 #'
 #' @param object [RLum.Analysis-class] (**required**): input object containing data for analysis
 #' Can be provided as a [list] of such objects.
@@ -62,20 +63,20 @@
 #' integral.
 #'
 #' @param show_ShineDownCurve [logical] (*with default*):
-#' enables or disables shine down curve in the plot output
+#' enable/disable shine down curve in the plot output.
 #'
 #' @param respect_RC.Status [logical] (*with default*):
-#'  remove De-values with 'FAILED' RC.Status from the plot
-#'  (cf. [analyse_SAR.CWOSL] and [analyse_pIRIRSequence])
+#' remove De values with 'FAILED' RC.Status from the plot (cf. [analyse_SAR.CWOSL]
+#' and [analyse_pIRIRSequence]).
 #'
 #' @param verbose [logical] (*with default*):
-#' enables or disables terminal feedback
+#' enable/disable output to the terminal.
 #'
-#' @param multicore [logical] (*with default*) : enables/disables multi core
+#' @param multicore [logical] (*with default*) : enable/disable multi core
 #' calculation if `object` is a [list] of [RLum.Analysis-class] objects. Can be an
 #' [integer] specifying the number of cores
 #'
-#' @param plot [logical] (*with default*): enables/disables plot output
+#' @param plot [logical] (*with default*): enable/disable the plot output.
 #' Disabling the plot is useful in cases where the output need to be processed
 #' differently.
 #'
@@ -110,7 +111,7 @@
 #' It means, that every sequence should be checked carefully before running long
 #' calculations using several hundreds of channels.
 #'
-#' @section Function version: 0.1.7
+#' @section Function version: 0.1.8
 #'
 #' @author Sebastian Kreutzer, Institute of Geography, Ruprecht-Karl University of Heidelberg (Germany)
 #'
@@ -198,13 +199,12 @@ plot_DetPlot <- function(
      fun = function(x, arg = args_default) do.call(plot_DetPlot, c(list(object = x), arg)))
 
    return(merge_RLum(return_list))
-
   }
 
-# Integrity Tests -----------------------------------------------------------------------------
-  ##check input
-  if(!inherits(object, "RLum.Analysis"))
-    .throw_error("Input must be an 'RLum.Analysis' object")
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(object, "RLum.Analysis")
+  .validate_not_empty(object)
 
   ##get structure
   object.structure <- structure_RLum(object)
@@ -219,6 +219,17 @@ plot_DetPlot <- function(
   ## background.integral
   .validate_positive_scalar(background.integral.min, int = TRUE)
   .validate_positive_scalar(background.integral.min, int = TRUE)
+
+  ## analyse_function
+  analyse_function <- .validate_args(analyse_function,
+                                     c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"))
+
+  ## deprecated argument
+  if ("plot.single" %in% names(list(...))) {
+    plot_singlePanels <- list(...)$plot.single
+    .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
+                   "instead")
+  }
 
 # Set parameters ------------------------------------------------------------------------------
   ##set n.channels
@@ -239,7 +250,7 @@ plot_DetPlot <- function(
      fit.force_through_origin = FALSE,
      trim_channels = FALSE,
      plot = FALSE,
-     plot.single = FALSE
+     plot_singlePanels = FALSE
   )
 
   analyse_function.settings <- modifyList(analyse_function.settings, analyse_function.control)
@@ -266,7 +277,7 @@ plot_DetPlot <- function(
         fit.method = analyse_function.settings$fit.method,
         trim_channels = analyse_function.settings$trim_channels,
         plot = analyse_function.settings$plot,
-        plot.single = analyse_function.settings$plot.single,
+        plot_singlePanels = analyse_function.settings$plot_singlePanels,
         verbose = verbose
       )
     }))
@@ -283,7 +294,7 @@ plot_DetPlot <- function(
         dose.points = analyse_function.settings$dose.points,
         mtext.outer = analyse_function.settings$mtext.outer,
         plot = analyse_function.settings$plot,
-        plot.single = analyse_function.settings$plot.single,
+        plot_singlePanels = analyse_function.settings$plot_singlePanels,
         sequence.structure = analyse_function.settings$sequence.structure,
         verbose = verbose
       )
@@ -302,9 +313,6 @@ plot_DetPlot <- function(
     }
     rm(result.temp.list)
   }
-  else{
-   .throw_error("Unknown 'analyse_function'")
-  }
 
 
 # Plot ----------------------------------------------------------------------------------------
@@ -314,7 +322,6 @@ plot_DetPlot <- function(
 
     }else{
       pIRIR_signals <- NA
-
     }
 
     ##run this in a loop to account for pIRIR data
@@ -424,9 +431,7 @@ plot_DetPlot <- function(
       } ## end plot
       ##set return
       return(df_final)
-
     })
-
 
 
 # Return ------------------------------------------------------------------
@@ -440,5 +445,4 @@ plot_DetPlot <- function(
     info = list(
       call = sys.call())
   ))
-
 }

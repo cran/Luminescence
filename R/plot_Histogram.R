@@ -89,8 +89,8 @@
 #'
 #' ## load data
 #' data(ExampleData.DeValues, envir = environment())
-#' ExampleData.DeValues <-
-#'   Second2Gray(ExampleData.DeValues$BT998, dose.rate = c(0.0438,0.0019))
+#' ExampleData.DeValues <- convert_Second2Gray(ExampleData.DeValues$BT998,
+#'                                             dose.rate = c(0.0438,0.0019))
 #'
 #' ## plot histogram the easiest way
 #' plot_Histogram(ExampleData.DeValues)
@@ -131,13 +131,16 @@ plot_Histogram <- function(
   .set_function_name("plot_Histogram")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity tests ---------------------------------------------------------
-  ## check/adjust input data structure
-  if (!is(data, "RLum.Results") && !is.data.frame(data)) {
-    .throw_error("Input data format is neither 'data.frame' nor 'RLum.Results'")
-  }
-  if (is(data, "RLum.Results")) {
+  ## Integrity tests --------------------------------------------------------
+
+  .validate_class(data, c("data.frame", "RLum.Results"))
+  if (inherits(data, "RLum.Results")) {
     data <- get_RLum(data)[,1:2]
+  }
+
+  ## check that we actually have data
+  if (length(data) == 0 || nrow(data) == 0) {
+    .throw_error("'data' contains no data")
   }
 
   ## handle error-free data sets
@@ -240,9 +243,7 @@ plot_Histogram <- function(
 
   if("ylim" %in% names(extraArgs)) {
     ylim.plot <- extraArgs$ylim
-    if (length(ylim.plot) < 4) {
-      .throw_error("'ylim' must be a vector of length 4")
-    }
+    .validate_length(ylim.plot, 4, name = "'ylim'")
   } else {
     H.lim <- hist(data[,1],
                   breaks = breaks.plot,
@@ -285,7 +286,7 @@ plot_Histogram <- function(
         main = main.plot)
 
   ## Optionally, add rug ------------------------------------------------------
-  if(rug == TRUE) {rug(data[,1], col = colour[2])}
+  if (rug) graphics::rug(data[, 1], col = colour[2])
 
   ## Optionally, add a normal curve based on the data -------------------------
   if(normal_curve == TRUE){
@@ -605,40 +606,9 @@ plot_Histogram <- function(
   label.text[[1]] <- NULL
 
   ## convert keywords into summary placement coordinates
-  if(missing(summary.pos) == TRUE) {
-    summary.pos <- c(xlim.plot[1], ylim.plot[2])
-    summary.adj <- c(0, 1)
-  } else if(length(summary.pos) == 2) {
-    summary.pos <- summary.pos
-    summary.adj <- c(0, 1)
-  } else if(summary.pos[1] == "topleft") {
-    summary.pos <- c(xlim.plot[1], ylim.plot[2])
-    summary.adj <- c(0, 1)
-  } else if(summary.pos[1] == "top") {
-    summary.pos <- c(mean(xlim.plot), ylim.plot[2])
-    summary.adj <- c(0.5, 1)
-  } else if(summary.pos[1] == "topright") {
-    summary.pos <- c(xlim.plot[2], ylim.plot[2])
-    summary.adj <- c(1, 1)
-  } else if(summary.pos[1] == "left") {
-    summary.pos <- c(xlim.plot[1], mean(ylim.plot[1:2]))
-    summary.adj <- c(0, 0.5)
-  } else if(summary.pos[1] == "center") {
-    summary.pos <- c(mean(xlim.plot), mean(ylim.plot[1:2]))
-    summary.adj <- c(0.5, 0.5)
-  } else if(summary.pos[1] == "right") {
-    summary.pos <- c(xlim.plot[2], mean(ylim.plot[1:2]))
-    summary.adj <- c(1, 0.5)
-  }else if(summary.pos[1] == "bottomleft") {
-    summary.pos <- c(xlim.plot[1], ylim.plot[1])
-    summary.adj <- c(0, 0)
-  } else if(summary.pos[1] == "bottom") {
-    summary.pos <- c(mean(xlim.plot), ylim.plot[1])
-    summary.adj <- c(0.5, 0)
-  } else if(summary.pos[1] == "bottomright") {
-    summary.pos <- c(xlim.plot[2], ylim.plot[1])
-    summary.adj <- c(1, 0)
-  }
+  coords <- .get_keyword_coordinates(summary.pos, xlim.plot, ylim.plot)
+  summary.pos <- coords$pos
+  summary.adj <- coords$adj
 
   ## add summary content
   for(i in 1:length(data.stats)) {
@@ -704,13 +674,7 @@ plot_Histogram <- function(
 
   ## Optionally: Interactive Plot ----------------------------------------------
   if (interactive) {
-
-    if (!requireNamespace("plotly", quietly = TRUE))
-      # nocov start
-      stop("The interactive histogram requires the 'plotly' package. To install",
-           " this package run 'install.packages('plotly')' in your R console.",
-           call. = FALSE)
-      # nocov end
+    .require_suggested_package("plotly", "The interactive histogram")
 
     ## tidy data ----
     data <- as.data.frame(data)

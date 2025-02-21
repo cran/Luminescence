@@ -12,8 +12,8 @@ plot_RLum.Analysis(
   abline = NULL,
   combine = FALSE,
   records_max = NULL,
-  curve.transformation,
-  plot.single = FALSE,
+  curve.transformation = "None",
+  plot_singlePanels = FALSE,
   ...
 )
 }
@@ -50,12 +50,13 @@ the other number of curves to be shown a distributed evenly, this may result
 in fewer curves plotted as specified. This parameter has only
 an effect for  n > 2.}
 
-\item{curve.transformation}{\link{character} (\emph{optional}):
+\item{curve.transformation}{\link{character} (\emph{with default}):
 allows transforming CW-OSL and CW-IRSL curves to pseudo-LM curves via
 transformation functions. Allowed values are: \code{CW2pLM}, \code{CW2pLMi},
-\code{CW2pHMi} and \code{CW2pPMi}. See details.}
+\code{CW2pHMi} and \code{CW2pPMi}, see details. If set to \code{None} (default), no
+transformation is applied.}
 
-\item{plot.single}{\link{logical} (\emph{with default}):
+\item{plot_singlePanels}{\link{logical} (\emph{with default}):
 global par settings are considered, normally this should end in one plot per page}
 
 \item{...}{further arguments and graphical parameters will be passed to
@@ -99,7 +100,7 @@ way you might expect them to work. This function was designed to serve as an ove
 plot, if you want to have more control, extract the objects and plot them individually.
 }
 \section{Function version}{
- 0.3.15
+ 0.3.16
 }
 
 \examples{
@@ -139,7 +140,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.15. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

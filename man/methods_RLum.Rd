@@ -42,6 +42,7 @@
 \alias{as.list.RLum.Results}
 \alias{as.list.RLum.Data.Curve}
 \alias{as.list.RLum.Data.Image}
+\alias{as.list.RLum.Data.Spectrum}
 \alias{as.list.RLum.Analysis}
 \alias{as.matrix.RLum.Data.Curve}
 \alias{as.matrix.RLum.Data.Spectrum}
@@ -56,9 +57,13 @@
 \alias{merge.RLum}
 \alias{unlist.RLum.Analysis}
 \alias{+.RLum.Data.Curve}
+\alias{+.RLum.Data.Spectrum}
 \alias{-.RLum.Data.Curve}
+\alias{-.RLum.Data.Spectrum}
 \alias{*.RLum.Data.Curve}
+\alias{*.RLum.Data.Spectrum}
 \alias{/.RLum.Data.Curve}
+\alias{/.RLum.Data.Spectrum}
 \alias{[.RLum.Data.Curve}
 \alias{[.RLum.Data.Spectrum}
 \alias{[.RLum.Data.Image}
@@ -152,6 +157,8 @@ bin(x, ...)
 
 \method{as.list}{RLum.Data.Image}(x, ...)
 
+\method{as.list}{RLum.Data.Spectrum}(x, ...)
+
 \method{as.list}{RLum.Analysis}(x, ...)
 
 \method{as.matrix}{RLum.Data.Curve}(x, ...)
@@ -180,11 +187,19 @@ is.RLum.Results(x, ...)
 
 \method{+}{RLum.Data.Curve}(x, y)
 
+\method{+}{RLum.Data.Spectrum}(x, y)
+
 \method{-}{RLum.Data.Curve}(x, y)
+
+\method{-}{RLum.Data.Spectrum}(x, y)
 
 \method{*}{RLum.Data.Curve}(x, y)
 
+\method{*}{RLum.Data.Spectrum}(x, y)
+
 \method{/}{RLum.Data.Curve}(x, y)
+
+\method{/}{RLum.Data.Spectrum}(x, y)
 
 \method{[}{RLum.Data.Curve}(x, y, z, drop = TRUE)
 
@@ -229,14 +244,14 @@ of the object structure. Works also on \linkS4class{RLum.Analysis} objects.}
 remove records from data set, can be disabled, to just set the column \code{SET} to \code{TRUE} or \code{FALSE}}
 
 \item{row.names}{\link{logical} (\emph{with default}):
-enables or disables row names (\code{as.data.frame})}
+enable/disable row names (\code{as.data.frame}).}
 
 \item{optional}{\link{logical} (\emph{with default}):
 logical. If TRUE, setting row names and converting column names
 (to syntactic names: see make.names) is optional (see \link[base:as.data.frame]{base::as.data.frame})}
 
 \item{recursive}{\link{logical} (\emph{with default}):
-enables or disables further sub-setting (\code{unlist})}
+enable/disable further sub-setting (\code{unlist}).}
 
 \item{z}{\link{integer} (\emph{optional}):
 the column index of the matrix, data.frame}
@@ -250,7 +265,7 @@ name of the wanted record type or data object or row in the \code{RLum.Data.Curv
 \item{j}{\link{integer} (\emph{optional}):
 column of the data matrix in the \code{RLum.Data.Curve} object}
 
-\item{value}{\link{numeric} \strong{(required)}:
+\item{value}{\link{numeric} (\strong{required}):
 numeric value which replace the value in the \code{RLum.Data.Curve} object}
 }
 \description{

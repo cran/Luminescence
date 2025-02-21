@@ -8,15 +8,16 @@ test_that("input validation", {
   skip_on_cran()
 
   expect_error(analyse_SAR.TL(),
-               "No value set for 'object'")
+               "is missing, with no default")
   expect_error(analyse_SAR.TL("test"),
-               "Input object is not of type 'RLum.Analyis'")
+               "[analyse_SAR.TL()] 'object' should be of class 'RLum.Analysis'",
+               fixed = TRUE)
   expect_error(analyse_SAR.TL(object),
                "No value set for 'signal.integral.min'")
   expect_error(analyse_SAR.TL(object, signal.integral.min = 1),
                "No value set for 'signal.integral.max'")
   expect_error(analyse_SAR.TL(list(object, "test")),
-               "elements in the input list must be of class 'RLum.Analysis'")
+               "All elements of 'object' should be of class 'RLum.Analysis'")
   expect_error(analyse_SAR.TL(object, signal.integral.min = 1,
                               signal.integral.max = 2),
                "Input TL curves are not a multiple of the sequence structure")
@@ -25,6 +26,19 @@ test_that("input validation", {
                               signal.integral.max = 220,
                               sequence.structure = c("SIGNAL", "BACKGROUND")),
                "Length of 'dose.points' not compatible with number of signals")
+  expect_error(analyse_SAR.TL(object, signal.integral.min = 1,
+                              signal.integral.max = 2,
+                              sequence.structure = c("SIGNAL", "BACKGROUND"),
+                              integral_input = "error"),
+               "[analyse_SAR.TL()] 'integral_input' should be one of ",
+               fixed = TRUE)
+
+  obj.rm <- object
+  obj.rm@records[[1]]@data <- obj.rm@records[[1]]@data[1:225, ]
+  expect_error(analyse_SAR.TL(obj.rm, signal.integral.min = 210,
+                              signal.integral.max = 220,
+                              sequence.structure = c("SIGNAL", "BACKGROUND")),
+               "Signal range differs, check sequence structure")
 })
 
 test_that("Test examples", {
@@ -65,15 +79,22 @@ test_that("Test examples", {
         log = "x",
         sequence.structure = c("SIGNAL", "BACKGROUND"))
     ),
-    "log-scale needs positive values; log-scale disabled"
+    "Non-positive values detected, log-scale disabled"
   )
+
+  SW({
+  expect_message(analyse_SAR.TL(object, signal.integral.min = 2,
+                                signal.integral.max = 3,
+                                sequence.structure = "SIGNAL"),
+                 "Too many curves, only the first 21 curves are plotted")
+  })
 
   expect_warning(
   expect_snapshot_RLum(
     analyse_SAR.TL(object, signal.integral.min = 2, signal.integral.max = 3,
                    sequence.structure = c("SIGNAL", "EXCLUDE"))
     ),
-  "'fit.weights' ignored since the error column is invalid or 0")
+  "Error column invalid or 0, 'fit.weights' ignored")
   })
 })
 
@@ -106,6 +127,14 @@ test_that("regression tests", {
                    signal.integral.min = 210, signal.integral.max = 220,
                    sequence.structure = c("SIGNAL", "BACKGROUND"))
   ),
-  "[plot_GrowthCurve()] Error: All points have the same dose, NULL returned",
+  "[fit_DoseResponseCurve()] Error: All points have the same dose, NULL returned",
   fixed = TRUE)
+
+  ## issue 519
+  bin.v8 <- system.file("extdata/BINfile_V8.binx", package = "Luminescence")
+  SW({
+  expect_error(
+      analyse_SAR.TL(read_BIN2R(bin.v8, fastForward = TRUE, verbose = FALSE)),
+      "Input TL curves are not a multiple of the sequence structure")
+  })
 })

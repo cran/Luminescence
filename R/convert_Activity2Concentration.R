@@ -46,7 +46,7 @@
 #'
 #' \deqn{f.U = A_{U} / 10^6}
 #'
-#' @param data [data.frame] **(required)**:
+#' @param data [data.frame] (**required**):
 #' provide dose rate data (activity or concentration) in three columns.
 #' The first column indicates the nuclide, the 2nd column measured value and
 #' in the 3rd column its error value. Allowed nuclide data are
@@ -58,7 +58,7 @@
 #' The default value is `"activity"`
 #'
 #' @param verbose [logical] (*with default*):
-#' enable or disable verbose mode
+#' enable/disable output to the terminal.
 #'
 #' @section Function version: 0.1.2
 #'
@@ -104,13 +104,15 @@ convert_Activity2Concentration <- function(
   input_unit = "activity",
   verbose = TRUE
 
-){
-  # Integrity checks ----------------------------------------------------------------------------
-  if(missing(data))
-    stop("[convert_Activity2Concentration()] I'm still waiting for input data ...", call. = FALSE)
+) {
+  .set_function_name("convert_Activity2Concentration")
+  on.exit(.unset_function_name(), add = TRUE)
+
+  ## Integrity tests --------------------------------------------------------
+  .validate_class(data, "data.frame")
 
   if(ncol(data)<3)
-    stop("[convert_Activity2Concentration()] Input data.frame should have at least three columns.", call. = FALSE)
+    .throw_error("'data' should have at least 3 columns")
 
   # Set output data.frame -----------------------------------------------------------------------
   output <- data.frame(
@@ -135,10 +137,9 @@ convert_Activity2Concentration <- function(
 
   ## check input unit
   ## we silently let the old input values unflagged for back compatibility reasons
-  input_unit <- tolower(input_unit[1])
-  if(!input_unit[1] %in% c("activity", "abundance", "bq/kg", "ppm/%"))
-    stop("[convert_Activity2Concentrations()] Input for parameter 'input_unit' invalid. Valid are 'activity' or 'abundance'!",
-         call. = FALSE)
+  if (!tolower(input_unit[1]) %in% c("bq/kg", "ppm/%")) {
+    input_unit <- .validate_args(tolower(input_unit), c("activity", "abundance"))
+  }
 
   # Set conversion factors ----------------------------------------------------------------------
 
@@ -166,7 +167,6 @@ convert_Activity2Concentration <- function(
     output[U,2:3] <- data[U,2:3]
     output[Th,2:3] <- data[Th,2:3]
     output[K,2:3] <- data[K,2:3]
-
   }
 
   ##Concentration to activity
@@ -178,7 +178,6 @@ convert_Activity2Concentration <- function(
     output[U,4:5] <- data[U,2:3]
     output[Th,4:5] <- data[Th,2:3]
     output[K,4:5] <- data[K,2:3]
-
   }
 
   # Return value --------------------------------------------------------------------------------
@@ -188,5 +187,4 @@ convert_Activity2Concentration <- function(
     class = "RLum.Results",
     data = list(data = output),
     info = list(call = sys.call())))
-
 }

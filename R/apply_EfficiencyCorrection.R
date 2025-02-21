@@ -50,8 +50,9 @@
 apply_EfficiencyCorrection <- function(
   object,
   spectral.efficiency
-){
-
+) {
+  .set_function_name("apply_EfficiencyCorrection")
+  on.exit(.unset_function_name(), add = TRUE)
 
   # self-call -----------------------------------------------------------------------------------
 
@@ -62,14 +63,12 @@ apply_EfficiencyCorrection <- function(
         apply_EfficiencyCorrection(object = o, spectral.efficiency = spectral.efficiency)
 
       }else{
-        warning(paste0("[apply_EfficiencyCorrection()] Skipping ",class(o)," object in input list."), call. = FALSE)
+        .throw_warning("Skipping '", class(o), "' object in input list")
         return(o)
       }
-
     })
 
     return(output_list)
-
   }
 
   ##the case of an RLum.Analysis object
@@ -79,28 +78,19 @@ apply_EfficiencyCorrection <- function(
         apply_EfficiencyCorrection(object = o, spectral.efficiency = spectral.efficiency)
 
       }else{
-        warning(paste0("[apply_EfficiencyCorrection()] Skipping ",class(o)," object in input list."), call. = FALSE)
+        .throw_warning("Skipping '", class(o), "' object in input list")
         return(o)
       }
-
     })
 
     return(object)
-
   }
 
 
+  ## Integrity checks -------------------------------------------------------
 
-  # Integrity check -----------------------------------------------------------
-
-  ##check if object is of class RLum.Data.Spectrum
-  if(!inherits(object, "RLum.Data.Spectrum"))
-    stop("[apply_EfficiencyCorrection()] Input object is not of type RLum.Data.Spectrum",call. = FALSE)
-
-
-  if(!inherits(spectral.efficiency, "data.frame"))
-    stop("[apply_EfficiencyCorrection()] 'spectral.efficiency' is not of type data.frame", call. = FALSE)
-
+  .validate_class(object, "RLum.Data.Spectrum")
+  .validate_class(spectral.efficiency, "data.frame")
 
   ## grep data matrix from the input object
   temp.matrix <- as(object, "matrix")
@@ -110,7 +100,7 @@ apply_EfficiencyCorrection <- function(
 
   ##test max
   if(max(temp.efficiency[,2]) > 1)
-    stop("[apply_EfficiencyCorrection()] Relative quantum efficiency values > 1 are not allowed.", call. = FALSE)
+    .throw_error("Relative quantum efficiency values > 1 are not allowed")
 
   # Apply method ------------------------------------------------------------
 

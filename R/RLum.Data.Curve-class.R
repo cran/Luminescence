@@ -1,6 +1,3 @@
-#' @include get_RLum.R set_RLum.R names_RLum.R length_RLum.R bin_RLum.Data.R smooth_RLum.R
-NULL
-
 #' Class `"RLum.Data.Curve"`
 #'
 #' Class for representing luminescence curve data.
@@ -13,7 +10,8 @@ NULL
 #' Object of class "character" containing the type of the curve (e.g. "TL" or "OSL")
 #'
 #' @slot curveType
-#' Object of class "character" containing curve type, allowed values are measured or predefined
+#' Object of class "character" containing curve type, allowed values are
+#' "measured" or "predefined"
 #'
 #' @slot data
 #' Object of class [matrix] containing curve x and y data.
@@ -25,8 +23,8 @@ NULL
 #'          recordType = 'never seen before')
 #' ```
 #' would just change the `recordType`. Missing arguments  the value is taken
-#' from the input object in 'data' (which is already an RLum.Data.Curve object
-#' in this example)
+#' from the input object in 'data' (which is already an `RLum.Data.Curve`
+#' object in this example)
 #'
 #'
 #' @note
@@ -80,7 +78,7 @@ setClass("RLum.Data.Curve",
 #'
 #' **[RLum.Data.Curve-class]**
 #'
-#' \tabular{ll}{
+#' \tabular{lll}{
 #'  **from** \tab **to**\cr
 #'   `list` \tab `list` \cr
 #'   `data.frame` \tab `data.frame`\cr
@@ -103,7 +101,8 @@ setClass("RLum.Data.Curve",
 #' @name as
 setAs("list", "RLum.Data.Curve",
       function(from,to){
-
+        if (length(from) == 0)
+          return(set_RLum("RLum.Data.Curve"))
         new(to,
             recordType = "unknown curve type",
             curveType = NA_character_,
@@ -115,7 +114,6 @@ setAs("list", "RLum.Data.Curve",
 setAs("RLum.Data.Curve", "list",
       function(from){
           list(x = from@data[,1], y = from@data[,2])
-
       })
 
 ##DATA.FRAME
@@ -132,10 +130,8 @@ setAs("data.frame", "RLum.Data.Curve",
 
 setAs("RLum.Data.Curve", "data.frame",
       function(from){
-
         data.frame(x = from@data[,1],
                    y = from@data[,2])
-
       })
 
 
@@ -148,13 +144,11 @@ setAs("matrix", "RLum.Data.Curve",
             curveType = NA_character_,
             data = from,
             info = list())
-
       })
 
 setAs("RLum.Data.Curve", "matrix",
       function(from){
         from@data
-
       })
 
 # show() --------------------------------------------------------------------------------------
@@ -211,7 +205,7 @@ setMethod("show",
 #'
 #' @param data [`set_RLum`]; [matrix] (**required**):
 #' raw curve data. If `data` itself is a `RLum.Data.Curve`-object this can be
-#' used to re-construct the object (s. details), i.e. modified parameters except
+#' used to re-construct the object (see details), i.e. modified parameters except
 #' `.uid`, `.pid` and `originator`. The rest will be subject to copy and paste unless provided.
 #'
 #' @param info [`set_RLum`]; [list] (*optional*):
@@ -283,7 +277,6 @@ setMethod(
       newRLumDataCurve@info <- info
       newRLumDataCurve@.uid <- .uid
       newRLumDataCurve@.pid <- .pid
-
     }
     return(newRLumDataCurve)
   }
@@ -313,8 +306,9 @@ setMethod(
 setMethod("get_RLum",
           signature("RLum.Data.Curve"),
           definition = function(object, info.object = NULL) {
+          .set_function_name("get_RLum")
+          on.exit(.unset_function_name(), add = TRUE)
 
-           ##if info.object == NULL just show the curve values
            if(!is.null(info.object)) {
               if(info.object %in% names(object@info)){
                 unlist(object@info[info.object])
@@ -322,26 +316,19 @@ setMethod("get_RLum",
               }else{
                 ##check for entries
                 if(length(object@info) == 0){
-                  warning("[get_RLum()] This RLum.Data.Curve object has no info objects! NULL returned!)")
+                  .throw_warning("This RLum.Data.Curve object has no ",
+                                 "info objects, NULL returned")
                   return(NULL)
-
-                }else{
-                  ##grep names
-                  temp.element.names <- paste(names(object@info), collapse = ", ")
-
-                  warning.text <- paste("[get_RLum()] Invalid info.object name. Valid names are:", temp.element.names)
-
-                   warning(warning.text, call. = FALSE)
-                  return(NULL)
-
                 }
-
+                .throw_warning("Invalid 'info.object' name, valid names are: ",
+                               .collapse(names(object@info)))
+                return(NULL)
               }
 
-             }else{
-                object@data
-
-             }
+           } else {
+             ## if info.object == NULL just show the curve values
+             object@data
+           }
           })
 
 
@@ -362,7 +349,6 @@ setMethod("length_RLum",
           "RLum.Data.Curve",
           function(object){
             max(object@data[,1])
-
           })
 
 
@@ -382,7 +368,6 @@ setMethod("names_RLum",
           "RLum.Data.Curve",
           function(object){
             names(object@info)
-
           })
 
 
@@ -438,15 +423,13 @@ setMethod(f = "bin_RLum.Data",
 
               ##just return the object
               return(object)
-
             }
-
           })
 
 
 # smooth_RLum() -------------------------------------------------------------------------------
 #' @describeIn RLum.Data.Curve
-#' Smoothing of RLum.Data.Curve objects using the function [zoo::rollmean] or [zoo::rollmedian][zoo::rollmean].
+#' Smoothing of RLum.Data.Curve objects using a rolling mean or median.
 #' In particular the internal function `.smoothing` is used.
 #'
 #' @param k [`smooth_RLum`]; [integer] (*with default*):
@@ -488,7 +471,30 @@ setMethod(
         set_RLum(class = "RLum.Data.Curve",
                  originator = "smooth_RLum",
                  data = object)
-
     }
  )
 
+# melt_RLum() -------------------------------------------------------------------------------
+#' @describeIn RLum.Data.Curve
+#' Melts [RLum.Data.Curve-class] objects into a flat data.frame to be used
+#' in combination with other packages such as `ggplot2`.
+#'
+#' @return
+#'
+#' **`melt_RLum`**
+#'
+#' Flat [data.frame] with `X`, `Y`, `TYPE`, `UID`
+#'
+#' @md
+#' @export
+setMethod(
+  f = "melt_RLum",
+  signature = "RLum.Data.Curve",
+  function(object) {
+    data.frame(
+      X = object@data[,1],
+      Y = object@data[,2],
+      TYPE = object@recordType,
+      UID = object@.uid)
+  }
+)

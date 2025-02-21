@@ -1,16 +1,28 @@
+## load data
 data(ExampleData.XSYG, envir = environment())
 
 test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_RLum.Data.Spectrum("error"),
-               "'object' must be of type 'RLum.Data.Spectrum' or 'matrix'")
+               "'object' should be of class 'RLum.Data.Spectrum' or 'matrix'")
+  expect_error(plot_RLum.Data.Spectrum(set_RLum("RLum.Data.Spectrum")),
+               "'object' contains no data")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "error"),
-               "Unknown plot type")
+               "'plot.type' should be one of 'contour', 'persp', 'single'")
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, norm = "error"),
+               "'norm' should be one of 'min', 'max' or NULL")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bg.spectrum = "error"),
-               "Input for 'bg.spectrum' not supported")
+               "'bg.spectrum' should be of class 'RLum.Data.Spectrum' or 'matrix'")
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bin.rows = 1.7),
+               "'bin.rows' should be a positive integer scalar")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bin.cols = 0),
-               "'bin.cols' and 'bin.rows' have to be > 1")
+               "'bin.cols' should be a positive integer scalar")
+
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, xlim = c(0, 100)),
+      "No data left after applying 'xlim' and 'ylim'")
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, ylim = c(5, 10)),
+      "No data left after applying 'xlim' and 'ylim'")
 
   expect_warning(plot_RLum.Data.Spectrum(TL.Spectrum, bg.channels = -2),
                  "'bg.channels' out of range")
@@ -23,16 +35,15 @@ test_that("check functionality", {
     m <- TL.Spectrum@data
     bg.spectrum <- set_RLum(class = "RLum.Data.Spectrum", data = TL.Spectrum@data[,15:16, drop = FALSE])
 
-
     ##try a matrix as input
     expect_message(plot_RLum.Data.Spectrum(object = m),
-                   regexp = "Input has been converted to a RLum.Data.Spectrum object using set_RLum()")
+                   "Input has been converted to a 'RLum.Data.Spectrum' object")
 
     ##remove rownames and column names
     rownames(m) <- NULL
     colnames(m) <- NULL
     expect_message(plot_RLum.Data.Spectrum(object = m),
-        regexp = "Input has been converted to a RLum.Data.Spectrum object using set_RLum()")
+        regexp = "Input has been converted to a 'RLum.Data.Spectrum' object")
 
     ## test duplicated column names
     t <- TL.Spectrum
@@ -103,6 +114,18 @@ test_that("check functionality", {
       bin.rows = 10,
       bin.cols = 1
     )), "double")
+
+    expect_warning(plot_RLum.Data.Spectrum(
+      TL.Spectrum,
+      plot.type = "persp",
+      xlim = c(310, 750),
+      limit_counts = 2,
+      lphi = 20,
+      ltheta = -15,
+      ticktype = "simple",
+      bin.rows = 1,
+      bin.cols = 1
+    ), "Lowest count value is larger than the set count threshold")
 
     ## check our axes
     expect_type(suppressWarnings(plot_RLum.Data.Spectrum(
@@ -188,6 +211,18 @@ test_that("check functionality", {
         bin.cols = 1,
         contour = FALSE)))
 
+  expect_silent(suppressWarnings(
+      plot_RLum.Data.Spectrum(
+        TL.Spectrum,
+        plot.type = "transect",
+        xlim = c(310, 750),
+        ylim = c(0, 350),
+#        bin.rows = 50,
+        ## bin.cols = 1,
+        zlim = c(0, 1e6),
+        ylab = "Counts [1 / summed channels]",
+        contour = TRUE)))
+
     ## plot: single ------------
     expect_silent(suppressWarnings(
       plot_RLum.Data.Spectrum(
@@ -209,6 +244,7 @@ test_that("check functionality", {
         ylim = c(0, 300),
         bin.rows = 10,
         bin.cols = 6,
+        col = 1,
         contour = FALSE)))
 
     ### plot_image: colour changes -------
@@ -261,6 +297,7 @@ test_that("check functionality", {
         bin.rows = 10,
         bin.cols = 1,
         type = "contour",
+        norm = "max",
         showscale = TRUE
       )
     ))
@@ -269,5 +306,27 @@ test_that("check functionality", {
   plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "multiple.lines",
                           phi = 15, theta = -30, r = 10, log = "xyz",
                           shade = 0.4, expand = 0.5, border = 1,
-                          axes = FALSE, norm = "min", col = 2)
+                          axes = FALSE, norm = "min", col = 2, zlim = c(0, 2))
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 415
+  expect_silent(plot_RLum.Data.Spectrum(
+      TL.Spectrum,
+      ylim = c(0, 100),
+      bin.cols = 3))
+  expect_warning(plot_RLum.Data.Spectrum(
+      TL.Spectrum,
+      ylim = c(0, 100),
+      bin.cols = 8),
+      "Single column matrix: plot.type has been automatically reset to")
+  expect_silent(plot_RLum.Data.Spectrum(
+      TL.Spectrum,
+      bin.rows = 600))
+  expect_message(expect_null(plot_RLum.Data.Spectrum(
+      TL.Spectrum,
+      bin.rows = 2000)),
+      "Insufficient data for plotting, NULL returned")
 })

@@ -20,7 +20,7 @@
 #' **Plot**
 #'
 #' If a vector (`c(k.min:k.max)`) is provided
-#' for `n.components` a plot is generated showing the the k components
+#' for `n.components` a plot is generated showing the k components
 #' equivalent doses as normal distributions. By default `pdf.weight` is
 #' set to `FALSE`, so that the area under each normal distribution is
 #' always 1. If `TRUE`, the probability density functions are weighted by
@@ -33,7 +33,7 @@
 #' `pdf.sigma = "se"` the standard error of each component is taken
 #' instead.\cr
 #' The stacked [graphics::barplot] shows the proportion of each component (in
-#' per cent) calculated by the FFM. The last plot shows the achieved BIC scores
+#' per cent) calculated by the FMM. The last plot shows the achieved BIC scores
 #' and maximum log-likelihood estimates for each iteration of k.
 #'
 #' @param data [RLum.Results-class] or [data.frame] (**required**):
@@ -53,10 +53,6 @@
 #' @param grain.probability [logical] (*with default*):
 #' prints the estimated probabilities of which component each grain is in
 #'
-#' @param dose.scale [numeric]:
-#' manually set the scaling of the y-axis of the first plot with a vector
-#' in the form of `c(min, max)`
-#'
 #' @param pdf.weight [logical] (*with default*):
 #' weight the probability density functions by the components proportion (applies only
 #' when a vector is provided for `n.components`)
@@ -68,17 +64,14 @@
 #' parameter of the normal distribution
 #'
 #' @param pdf.colors [character] (*with default*):
-#' colour coding of the components in the the plot.
+#' colour coding of the components in the plot.
 #' Possible options are `"gray"`, `"colors"` and `"none"`
-#'
-#' @param pdf.scale [numeric]:
-#' manually set the max density value for proper scaling of the x-axis of the first plot
 #'
 #' @param plot.proportions [logical] (*with default*):
 #' plot [graphics::barplot] showing the proportions of components if
 #' `n.components` a vector with a length > 1 (e.g., `n.components = c(2:3)`)
 #'
-#' @param plot [logical] (*with default*):  plot output
+#' @param plot [logical] (*with default*): enable/disable the  plot output.
 #'
 #' @param ... further arguments to pass. See details for their usage.
 #'
@@ -102,7 +95,7 @@
 #' `mle` and `grain.probability` are lists containing matrices of the
 #' results for each iteration of the model.
 #'
-#' The output should be accessed using the function [get_RLum]
+#' The output should be accessed using the function [get_RLum].
 #'
 #' @section Function version: 0.4.2
 #'
@@ -170,7 +163,7 @@
 #' ## the following lines to make the example work.
 #' FMM<- calc_FiniteMixture(ExampleData.DeValues$CA1,
 #'                          sigmab = 0.2, n.components = c(2:4),
-#'                          pdf.weight = TRUE, dose.scale = c(0, 100))
+#'                          pdf.weight = TRUE)
 #'
 #' ## show structure of the results
 #' FMM
@@ -186,41 +179,33 @@ calc_FiniteMixture <- function(
   sigmab,
   n.components,
   grain.probability = FALSE,
-  dose.scale,
   pdf.weight = TRUE,
   pdf.sigma = "sigmab",
   pdf.colors = "gray",
-  pdf.scale,
   plot.proportions = TRUE,
   plot=TRUE,
   ...
-){
+) {
+  .set_function_name("calc_FiniteMixture")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  ## CONSISTENCY CHECK OF INPUT DATA --------
-  ##============================================================================##
-  if (!is(data, "data.frame") && !is(data,"RLum.Results")) {
-    stop("[calc_FiniteMixture()] 'data' object has to be of type ",
-         "'data.frame' or 'RLum.Results'!", call. = FALSE)
-  }
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(data, c("data.frame", "RLum.Results"))
   if (is(data, "RLum.Results")) {
     data <- get_RLum(data, "data")
   }
   if (ncol(data) < 2) {
-    stop("[calc_FiniteMixture()] 'data' object must have two columns",
-         call. = FALSE)
+    .throw_error("'data' object must have two columns")
   }
   if (sigmab < 0 || sigmab > 1) {
-    stop("[calc_FiniteMixture()] 'sigmab' must be a value between 0 and 1",
-         call. = FALSE)
+    .throw_error("'sigmab' must be a value between 0 and 1")
   }
   if(any(n.components<2) == TRUE) {
-    stop("[calc_FiniteMixture()] At least two components need to be fitted",
-         call. = FALSE)
+    .throw_error("At least two components need to be fitted")
   }
-  if (pdf.sigma != "se" && pdf.sigma != "sigmab") {
-    stop("Only 'se' or 'sigmab' allowed for the pdf.sigma argument",
-         call. = FALSE)
-  }
+  pdf.sigma <- .validate_args(pdf.sigma, c("sigmab", "se"))
+  pdf.colors <- .validate_args(pdf.colors, c("gray", "colors", "none"))
 
   ## set expected column names
   colnames(data)[1:2] <- c("ED", "ED_Error")
@@ -272,7 +257,6 @@ calc_FiniteMixture <- function(
     # grain probabilities
     vmat.n<- vector(mode = "list", length = length(n.components))
     grain.probability.n<- vector(mode = "list", length = length(n.components))
-
   }
 
   ## start actual calculation (loop) for each provided maximum components to
@@ -318,7 +302,7 @@ calc_FiniteMixture <- function(
     bic<- -2*llik + (2*k - 1)*log(n)
 
     # calculate the covariance matrix and standard errors of the estimates
-    # i.e., the dose estimtes in Gy and relative standard errors, and
+    # i.e., the dose estimates in Gy and relative standard errors, and
     # the mixing proportions and standard errors.
     aui<- matrix(0,n,k)
     bui<- matrix(0,n,k)
@@ -347,12 +331,10 @@ calc_FiniteMixture <- function(
 
     invvmat<- rbind(cbind(Au,Bu),cbind(t(Bu),Cu))
     vmat<- solve(invvmat, tol=.Machine$double.xmin)
-    rek<- sqrt(sum(vmat[1:(k-1),1:(k-1)]))
 
     # calculate DE, relative standard error, standard error
     dose<- exp(mu)
-    re<- sqrt(diag(vmat))[-c(1:(k-1))]
-
+    re <- suppressWarnings(sqrt(diag(vmat)))[-c(1:(k-1))]
     if (any(is.nan(re)))
       re[is.nan(re)] <- NA
 
@@ -364,6 +346,7 @@ calc_FiniteMixture <- function(
 
     # this calculates the proportional standard error of the proportion of grains
     # in the fitted components. However, the calculation is most likely erroneous.
+    # rek<- sqrt(sum(vmat[1:(k-1),1:(k-1)]))
     # sep<-  c(sqrt(diag(vmat))[c(1:(k-1))],rek)
 
     # rename proportion
@@ -595,8 +578,9 @@ calc_FiniteMixture <- function(
       single.comp=single.comp))
 
   if (anyNA(unlist(summary)) && verbose)
-    warning("\n[calc_FiniteMixture] The model produced NA values. Either the input data are inapplicable for the model",
-            " or the the model parameters need to be adjusted (e.g. 'sigmab')", call. = FALSE)
+    .throw_warning("The model produced NA values: either the input data are ",
+                   "inapplicable for the model, or the model parameters ",
+                   "need to be adjusted (e.g. 'sigmab')")
 
   ##=========##
   ## PLOTTING -----------
@@ -605,5 +589,4 @@ calc_FiniteMixture <- function(
 
   # Return values
   invisible(newRLumResults.calc_FiniteMixture)
-
 }

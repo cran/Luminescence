@@ -21,10 +21,10 @@ be provided, but only the first column will be considered by the
 function}
 
 \item{boxplot}{\link{logical} (\emph{with default}):
-enable or disable boxplot}
+enable/disable boxplot}
 
 \item{rug}{\link{logical} (\emph{with default}):
-enable or disable rug}
+enable/disable rug}
 
 \item{summary}{\link{character} (\emph{optional}):
 add statistic measures of centrality and dispersion to the plot.
@@ -40,13 +40,14 @@ below the plot header. However, this latter option in only possible if
 exclude NA values from the data set prior to any further operations.}
 
 \item{...}{further arguments and graphical parameters passed to
-\link{plot.default}, \link[stats:density]{stats::density} and \link{boxplot}. See details for further information}
+\link{plot.default}, \link[stats:density]{stats::density} and \link{boxplot}. See details for further
+information.}
 }
 \description{
 Draws a kernel density plot in combination with a boxplot in its middle. The shape of the violin
 is constructed using a mirrored density curve. This plot is especially designed for cases
 where the individual errors are zero or too small to be visualised. The idea for this plot is
-based on the the 'volcano plot' in the ggplot2 package by Hadley Wickham and Winston Chang.
+based on the 'volcano plot' in the ggplot2 package by Hadley Wickham and Winston Chang.
 The general idea for the violin plot seems to have been introduced by
 Hintze and Nelson (1998).
 
@@ -75,7 +76,8 @@ two other R packages exist providing a possibility to produces this kind of plot
 
 ## read example data set
 data(ExampleData.DeValues, envir = environment())
-ExampleData.DeValues <- Second2Gray(ExampleData.DeValues$BT998, c(0.0438,0.0019))
+ExampleData.DeValues <- convert_Second2Gray(ExampleData.DeValues$BT998,
+                                            c(0.0438,0.0019))
 
 ## create plot straightforward
 plot_ViolinPlot(data = ExampleData.DeValues)
@@ -83,7 +85,7 @@ plot_ViolinPlot(data = ExampleData.DeValues)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. plot_ViolinPlot(): Create a violin plot. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_ViolinPlot(): Create a violin plot. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

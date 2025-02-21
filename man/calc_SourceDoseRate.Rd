@@ -15,7 +15,7 @@ calc_SourceDoseRate(
 )
 }
 \arguments{
-\item{measurement.date}{\link{character} or \link{Date} (with default): Date of measurement in \code{"YYYY-MM-DD"}.
+\item{measurement.date}{\link{character} or \link{Date} (\emph{with default}): Date of measurement in \code{"YYYY-MM-DD"}.
 If no value is provided, the date will be set to today. The argument can be provided as vector.}
 
 \item{calib.date}{\link{character} or \link{Date} (\strong{required}):
@@ -33,7 +33,7 @@ see details for further information}
 
 \item{dose.rate.unit}{\link{character} (\emph{with default}):
 specify dose rate unit for input (\code{Gy/min} or \code{Gy/s}), the output is given in
-Gy/s as valid for the function \link{Second2Gray}}
+Gy/s as valid for the function \link{convert_Second2Gray}}
 
 \item{predict}{\link{integer} (\emph{with default}):
 option allowing to predict the dose rate of the source over time in days
@@ -56,16 +56,15 @@ $ parameters (list)
 $ call (the original function call)
 }\if{html}{\out{</div>}}
 
-The output should be accessed using the function \link{get_RLum}.\cr
-A plot method of the output is provided via \link{plot_RLum}
+The output should be accessed using the function \link{get_RLum}.
+A plot method of the output is provided via \link{plot_RLum}.
 }
 \description{
 Calculating the dose rate of the irradiation source via the date of
 measurement based on: source calibration date, source dose rate, dose rate
 error. The function returns a data.frame that provides the input argument
-dose_rate for the function \link{Second2Gray}.
-}
-\details{
+dose_rate for the function \link{convert_Second2Gray}.
+
 Calculation of the source dose rate based on the time elapsed since the last
 calibration of the irradiation source. Decay parameters assume a Sr-90 beta
 source. \deqn{dose.rate = D0 * exp(-log(2) / T.1/2 * t)} \cr with: D0 <-
@@ -87,21 +86,20 @@ original .BIN file (using e.g., \code{BINfile <- readBIN2R()} and the slot
 \verb{[4} \tab Cs-137 \tab 30.08 y \tab NNDC, Brookhaven National Laboratory}
 }
 \note{
-Please be careful when using the option \code{predict}, especially when a multiple set
-for \code{measurement.date} and \code{calib.date} is provided. For the source dose rate prediction
-the function takes the last value \code{measurement.date} and predicts from that the the source
-source dose rate for the number of days requested,
-means: the (multiple) original input will be replaced. However, the function
-do not change entries for the calibration dates, but mix them up. Therefore,
-it is not recommended to use this option when multiple calibration dates (\code{calib.date})
-are provided.
+Please be careful when using the option \code{predict}, especially when a
+multiple set for \code{measurement.date} and \code{calib.date} is provided. For the
+source dose rate prediction, the function takes the last \code{measurement.date}
+value and predicts from that the source dose rate for the number of days
+requested, that is: the (multiple) original input will be replaced.
+However, the function does not change entries for the calibration dates,
+but mixes them up. Therefore, it is not recommended to use this option
+when multiple calibration dates (\code{calib.date}) are provided.
 }
 \section{Function version}{
  0.3.2
 }
 
 \examples{
-
 
 ##(1) Simple function usage
 ##Basic calculation of the dose rate for a specific date
@@ -113,13 +111,13 @@ dose.rate <-  calc_SourceDoseRate(measurement.date = "2012-01-27",
 ##show results
 get_RLum(dose.rate)
 
-##(2) Usage in combination with another function (e.g., Second2Gray() )
+##(2) Usage in combination with another function (e.g., convert_Second2Gray() )
 ## load example data
 data(ExampleData.DeValues, envir = environment())
 
 ## use the calculated variable dose.rate as input argument
 ## to convert De(s) to De(Gy)
-Second2Gray(ExampleData.DeValues$BT998, dose.rate)
+convert_Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 
 ##(3) source rate prediction and plotting
 dose.rate <-  calc_SourceDoseRate(measurement.date = "2012-01-27",
@@ -139,14 +137,14 @@ xtable::xtable(get_RLum(dose.rate))
 } 
 
 \section{How to cite}{
-Fuchs, M.C., Kreutzer, S., 2024. calc_SourceDoseRate(): Calculation of the source dose rate via the date of measurement. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Fuchs, M.C., Kreutzer, S., 2025. calc_SourceDoseRate(): Calculation of the source dose rate via the date of measurement. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 NNDC, Brookhaven National Laboratory \verb{http://www.nndc.bnl.gov/}
 }
 \seealso{
-\link{Second2Gray}, \link{get_RLum}, \link{plot_RLum}
+\link{convert_Second2Gray}, \link{get_RLum}, \link{plot_RLum}
 }
 \author{
 Margret C. Fuchs, HZDR, Helmholtz-Institute Freiberg for Resource Technology (Germany) \cr

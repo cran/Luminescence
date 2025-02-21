@@ -40,7 +40,7 @@ provided the mean packing density and its standard deviation is calculated.
 Note that this overrides \code{packing.density}.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-plot output (\code{TRUE}/\code{FALSE})}
+enable/disable the plot output.}
 
 \item{...}{further arguments to pass (\verb{main, xlab, MC.iter}).}
 }
@@ -59,10 +59,9 @@ The output should be accessed using the function \link{get_RLum}.
 \description{
 Estimate the number of grains on an aliquot. Alternatively, the packing
 density of an aliquot is computed.
-}
-\details{
+
 This function can be used to either estimate the number of grains on an
-aliquot or to compute the packing density depending on the the arguments
+aliquot or to compute the packing density depending on the arguments
 provided.
 
 The following function is used to estimate the number of grains \code{n}:
@@ -92,7 +91,7 @@ when setting \code{MC = TRUE}. Each of the parameters necessary to calculate
 
 For the mean grain size random samples are taken first from
 \eqn{N(\mu_y, \sigma_y)}, where \eqn{\mu_y = mean.grain.size} and
-\eqn{\sigma_y = (max.grain.size-min.grain.size)/4} so that 95\\% of all
+\eqn{\sigma_y = (max.grain.size-min.grain.size)/4} so that 95\% of all
 grains are within the provided the grain size range. This effectively takes
 into account that after sieving the sample there is still a small chance of
 having grains smaller or larger than the used mesh sizes. For each random
@@ -135,7 +134,7 @@ calc_AliquotSize(grain.size = c(100,200), sample.diameter = 8,
 } 
 
 \section{How to cite}{
-Burow, C., 2024. calc_AliquotSize(): Estimate the amount of grains on an aliquot. Function version 0.31. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. calc_AliquotSize(): Estimate the amount of grains on an aliquot. Function version 0.31. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

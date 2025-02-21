@@ -21,16 +21,17 @@ X,Y data of measured values (time and counts). See details on individual data st
 \item{log}{\link{character} (\emph{optional}):
 logarithmic axes (\code{c("x", "y", "xy")}).}
 
-\item{smooth}{\link{character} (\emph{optional}):
-apply data smoothing. Use \code{"rmean"} to calculate the rolling where \code{k}
-determines the width of the rolling window (see \link[zoo:rollmean]{zoo::rollmean}). \code{"spline"}
+\item{smooth}{\link{character} (\emph{with default}):
+apply data smoothing. If \code{"none"} (default), no data smoothing is applied.
+Use \code{"rmean"} to calculate the rolling mean, where \code{k} determines the
+width of the rolling window (see \link[data.table:froll]{data.table::frollmean}). \code{"spline"}
 applies a smoothing spline to each curve (see \link[stats:smooth.spline]{stats::smooth.spline})}
 
 \item{k}{\link{integer} (\emph{with default}):
 integer width of the rolling window.}
 
 \item{legend}{\link{logical} (\emph{with default}):
-show or hide the plot legend.}
+enable/disable the plot legend.}
 
 \item{legend.pos}{\link{character} (\emph{with default}):
 keyword specifying the position of the legend (see \link{legend}).}
@@ -42,9 +43,8 @@ Returns a plot and \linkS4class{RLum.Analysis} object.
 }
 \description{
 This function creates a Natural/Regenerated signal vs. time (NR(t)) plot
-as shown in Steffen et al. 2009
-}
-\details{
+as shown in Steffen et al. 2009.
+
 This function accepts the individual curve data in many different formats. If
 \code{data} is a \code{list}, each element of the list must contain a two
 column \code{data.frame} or \code{matrix} containing the \code{XY} data of the curves
@@ -131,7 +131,7 @@ par(mfrow = c(1, 1))
 } 
 
 \section{How to cite}{
-Burow, C., 2024. plot_NRt(): Visualise natural/regenerated signal ratios. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. plot_NRt(): Visualise natural/regenerated signal ratios. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

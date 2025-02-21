@@ -22,8 +22,7 @@ A list object with layout definitions for plot functions.
 \description{
 This helper function returns a list with layout definitions for homogeneous
 plotting.
-}
-\details{
+
 The easiest way to create a user-specific layout definition is perhaps to
 create either an empty or a default layout object and fill/modify the
 definitions (\code{user.layout <- get_Layout(data = "empty")}).
@@ -61,6 +60,6 @@ Michael Dietze, GFZ Potsdam (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., 2024. get_Layout(): Collection of layout definitions. Function version 0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Dietze, M., 2025. get_Layout(): Collection of layout definitions. Function version 0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 

@@ -65,9 +65,9 @@ plot_RLum.Results<- function(
   ## CONSISTENCY CHECK OF INPUT DATA
   ##============================================================================##
 
-  ##check if object is of class RLum.Data.Curve
-  if(!is(object,"RLum.Results")){
-    .throw_error("Input object is not of type 'RLum.Results'")
+  .validate_class(object, "RLum.Results")
+  if (is.null(object@originator) || is.na(object@originator)) {
+    .throw_error("Object originator not supported")
   }
 
   ##============================================================================##
@@ -117,12 +117,12 @@ plot_RLum.Results<- function(
   switch(object@originator,
       "analyse_SAR.CWOSL" = plot_AbanicoPlot(object),
       "analyse_pIRIRSequence" = plot_AbanicoPlot(object),
-      "analyse_IRSARRF" = plot_AbanicoPlot(object),
+      "analyse_IRSAR.RF" = plot_AbanicoPlot(object),
     NULL
     )
 
   ## CASE 1: Minimum Age Model / Maximum Age Model -------
-  if(object@originator=="calc_MinDose" || object@originator=="calc_MaxDose") {
+  if (object@originator %in% c("calc_MinDose", "calc_MaxDose")) {
 
     ## single MAM estimate
     # plot profile log likelihood
@@ -214,7 +214,7 @@ plot_RLum.Results<- function(
         pairs<- pairs[order(pairs[,1]),]
 
         # remove invalid NA values
-        pairs<- na.omit(pairs)
+        pairs <- stats::na.omit(pairs)
 
         plot(x=pairs[,1],
              y=pairs[,2],
@@ -355,11 +355,9 @@ plot_RLum.Results<- function(
       y<- c(0, y, 0)
 
       # cutoff negative y values
-      neg<- which(y<0)
-      if (length(neg) != 0) {
-        y<- y[-neg]
-        x<- x[-neg]
-      }
+      y.idx <- !is.na(y) & y >= 0
+      x <- x[y.idx]
+      y <- y[y.idx]
 
       # add bootstrap likelihood polygon to plot
       polygon(x, y, col = "grey80", border = NA)
@@ -375,7 +373,7 @@ plot_RLum.Results<- function(
       sd<- object@data$summary$de_err
 
 
-      if (any(is.na(c(mean, sd)))) {
+      if (anyNA(c(mean, sd))) {
         .throw_warning("Unable to plot the MAM single estimate (NA value)")
 
       } else {
@@ -403,7 +401,7 @@ plot_RLum.Results<- function(
         y<- y/max(y)
 
         # fit a smoothing spline
-        l<- spline(x = x, y = y, method = "n", n = 1000)
+        l<- stats::spline(x = x, y = y, method = "n", n = 1000)
 
         # make the endpoints zero
         l$y[1]<- l$y[length(l$y)]<- 0
@@ -413,7 +411,6 @@ plot_RLum.Results<- function(
 
         # add vertical lines of the mean values
         #points(x = 80, y = 100,type = "l")
-
       }
 
       #### ------ PLOT DE
@@ -442,7 +439,7 @@ plot_RLum.Results<- function(
       err<- object@data$data[order(object@data$data[,1]),2]
 
       # fancy error bars
-      arrows(x0 = x-err, y0 = y,
+      graphics::arrows(x0 = x-err, y0 = y,
              x1 =  x+err, y1 = y,
              code = 3, angle = 90, length = 0.05)
 
@@ -566,7 +563,7 @@ plot_RLum.Results<- function(
           col="red",lty="dashed", lwd = lwd)
 
     #plot some further informations into the grafik
-    arrows(
+    graphics::arrows(
       usedDeValues[length(usedDeValues[,1])-n.usedDeValues+1,1]+usedDeValues[length(usedDeValues[,1])-n.usedDeValues+1,1]*0.02, #x1
       max(o)+0.5, #y1
       max(usedDeValues[,1]-usedDeValues[,1]*0.02), #x2
@@ -649,11 +646,11 @@ plot_RLum.Results<- function(
         poly.border<- FALSE
       }
       if(pdf.colors == "gray" || pdf.colors == "grey") {
-        col.n<- gray.colors(length(n.components)*2)
+        col.n <- grDevices::gray.colors(length(n.components)*2)
         poly.border<- FALSE
       }
       if(pdf.colors == "none") {
-        col.n<- NULL
+        col.n <- rgb(0,0,0,0)
         poly.border<- TRUE
       }
 
@@ -815,18 +812,18 @@ plot_RLum.Results<- function(
           # main title
           mtext(main,
                 side = 3, font = 2, line = 3.5, adj = 0.5,
-                at = grconvertX(0.5, from = "ndc", to = "user"))
+                at = graphics::grconvertX(0.5, from = "ndc", to = "user"))
 
           # subtitle
           mtext(as.expression(bquote(italic(sigma[b]) == .(sigmab) ~
                                        "|" ~ n == .(length(object@data$data[,1])))),
                 side = 3, font = 1, line = 2.2, adj = 0.5,
-                at = grconvertX(0.5, from = "ndc", to = "user"), cex = 0.9)
+                at = graphics::grconvertX(0.5, from = "ndc", to = "user"), cex = 0.9)
 
           # x-axis label
           mtext("Density [a.u.]",
                 side = 1, line = 0.5, adj = 0.5,
-                at = grconvertX(0.5, from = "ndc", to = "user"))
+                at = graphics::grconvertX(0.5, from = "ndc", to = "user"))
 
           # draw y-axis with proper labels
           axis(side=2, labels = TRUE)
@@ -836,25 +833,20 @@ plot_RLum.Results<- function(
           # create legend labels
           dose.lab.legend<- paste("c", 1:n.components[length(n.components)], sep="")
 
-          if(max(n.components)>8) {
-            ncol.temp<- 8
-            yadj<- 1.025
-          } else {
-            ncol.temp<- max(n.components)
-            yadj<- 0.93
-          }
+          ncol.temp <- min(max(n.components), 8)
+          yadj <- if (max(n.components) > 8) 1.025 else 0.93
 
           # add legend
           if(i==n.plots) {
-            legend(grconvertX(0.55, from = "ndc", to = "user"),
-                   grconvertY(yadj, from = "ndc", to = "user"),
+            legend(graphics::grconvertX(0.55, from = "ndc", to = "user"),
+                   graphics::grconvertY(yadj, from = "ndc", to = "user"),
                    legend = dose.lab.legend,
                    col = col.n[1:max(n.components)],
                    pch = 15, adj = c(0,0.2), pt.cex=1.4,
                    bty = "n", ncol=ncol.temp, x.intersp=0.4)
 
             mtext("Components: ", cex = 0.8,
-                  at = grconvertX(0.5, from = "ndc", to = "user"))
+                  at = graphics::grconvertX(0.5, from = "ndc", to = "user"))
           }
         }
 
@@ -870,7 +862,7 @@ plot_RLum.Results<- function(
         prop.matrix<- comp.n[pos.n+2,]*100
 
         # stacked barplot of proportions without x-axis
-        barplot(prop.matrix,
+        graphics::barplot(prop.matrix,
                 width=1,
                 xlim=c(0.2, length(n.components)-0.2),
                 ylim=c(0,100),
@@ -889,7 +881,7 @@ plot_RLum.Results<- function(
         axis(side = 1, labels = n.components, at = n.components+0.5-n.components[1])
 
         # draw a box (not possible with barplot())
-        box(lty=1, col="black")
+        graphics::box(lty = 1, col = "black")
 
         # add subtitle
         mtext("Proportion of components",
@@ -942,8 +934,8 @@ plot_RLum.Results<- function(
             side=4,line=3, cex=1.3)
 
       # legend
-      legend(grconvertX(0.75, from = "nfc", to = "user"),
-             grconvertY(0.96, from = "nfc", to = "user"),
+      legend(graphics::grconvertX(0.75, from = "nfc", to = "user"),
+             graphics::grconvertY(0.96, from = "nfc", to = "user"),
              legend = c("BIC", as.expression(bquote(italic(L)[max]))),
              pch = c(22,16), pt.bg=c("white","black"),
              adj = 0, pt.cex=1.3, lty=c(1,2),
@@ -988,7 +980,7 @@ plot_RLum.Results<- function(
            ylim = c(0, max(MC.n.kde$y)*1.1))
 
       # add rugs to histogram
-      rug(MC.n)
+      graphics::rug(MC.n)
 
       # add KDE curve
       lines(MC.n.kde, col = "black", lwd = 1)
@@ -1022,7 +1014,7 @@ plot_RLum.Results<- function(
            xlab=xlab,  ylim=c(0.5,1.5),
            xaxt="n", yaxt="n", ylab="")
       par(bty="n")
-      boxplot(MC.n, horizontal = TRUE, add = TRUE, bty="n")
+      graphics::boxplot(MC.n, horizontal = TRUE, add = TRUE, bty = "n")
     } else {
       on.exit(NULL, add = TRUE) # FIXME(mcol): seems unnecessary
     }
@@ -1036,10 +1028,9 @@ plot_RLum.Results<- function(
     ##get data
     df <- get_RLum(object = object, data.object = "dose.rate")
 
-    ##reduce the size for plotting, more than 100 points makes no sense
-    if(nrow(df)>100) {
+    ##reduce the size for plotting, more than 100 points make no sense
+    if(nrow(df)>100)
       df <- df[seq(1,nrow(df), length = 100),]
-    }
 
     ##plot settings
     plot.settings <- list(
@@ -1096,7 +1087,7 @@ plot_RLum.Results<- function(
     mtext(side = 3, plot.settings$mtext)
 
     if(!is.null(plot.settings$grid)){
-      grid(eval(plot.settings$grid))
+      graphics::grid(eval(plot.settings$grid))
     }
 
   }#EndOf::Case 6 - calc_SourceDoseRate()

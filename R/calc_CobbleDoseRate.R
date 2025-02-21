@@ -44,12 +44,13 @@
 #'**Water content**
 #'The water content provided by the user should be calculated according to:
 #'
-#'\deqn{(Wet_weight - Dry_weight) / Dry_weight * 100}
+#'\deqn{(Wet\_weight - Dry\_weight) / Dry\_weight * 100}
 #'
 #'@param input [data.frame] (**required**): A table containing all relevant information
 #'for each individual layer. For the table layout see details.
 #'
-#'@param conversion Which dose rate conversion factors to use. For accepted values see [BaseDataSet.ConversionFactors]
+#' @param conversion [character] (*with default*): dose rate conversion factors
+#' to use, see [BaseDataSet.ConversionFactors] for the accepted values.
 #'
 #'@references
 #'Riedesel, S., Autzen, M., 2020. Beta and gamma dose rate attenuation in rocks and sediment.
@@ -81,12 +82,29 @@
 #'@md
 #'@export
 calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
+  .set_function_name("calc_CobbleDoseRate")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity tests ---------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
+  .validate_class(input, "data.frame")
+  .validate_not_empty(input)
   if ((max(input[,1])>input$CobbleDiameter[1]*10) ||
       ((max(input[,1]) + input[length(input[,1]),3]) > input$CobbleDiameter[1]*10))
-    stop("[calc_CobblDoseRate()] Slices outside of cobble. Please check your distances and make sure they are in mm and diameter is in cm!", call. = FALSE)
+    .throw_error("Slices outside of cobble: please ensure your distances ",
+                 "are in mm and diameter is in cm")
 
+
+  ## conversion factors: we do not use BaseDataSet.ConversionFactors directly
+  ## as it is in alphabetical level, but we want to have 'Guerinetal2011'
+  ## in first position, as that is our default value
+  BaseDataSet.ConversionFactors <- NULL
+  load(system.file("data", "BaseDataSet.ConversionFactors.rda",
+                   package = "Luminescence"))
+  valid_conversion_factors <- c("Guerinetal2011", "Cresswelletal2018",
+                                "AdamiecAitken1998", "Liritzisetal2013")
+  stopifnot(all(names(BaseDataSet.ConversionFactors) %in%
+                valid_conversion_factors))
+  conversion <- .validate_args(conversion, valid_conversion_factors)
 
   # Calculate Dose Rate -----------------------------------------------------
   SedDoseData <- matrix(data = NA, nrow = 1, ncol = 10)

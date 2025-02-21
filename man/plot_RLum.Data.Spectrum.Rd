@@ -33,10 +33,10 @@ automatically if not provided.}
 use local graphical parameters for plotting, e.g. the plot is shown in one column and one row.
 If \code{par.local = FALSE} global parameters are inherited.}
 
-\item{plot.type}{\link{character} (\emph{with default}): plot type, for
-3D-plot use \code{persp}, or \code{interactive}, for a 2D-plot \code{image}, \code{contour},
+\item{plot.type}{\link{character} (\emph{with default}): for a 3D-plot use \code{persp}
+or \code{interactive}; for a 2D-plot you can use \code{image}, \code{contour},
 \code{single} or \code{multiple.lines} (along the time or temperature axis)
-or \code{transect} (along the wavelength axis) \cr}
+or \code{transect} (along the wavelength axis)}
 
 \item{optical.wavelength.colours}{\link{logical} (\emph{with default}):
 use optical wavelength colour palette. Note: For this, the spectrum range is
@@ -70,7 +70,7 @@ Binning is applied after the background subtraction.}
 minimum (\code{norm = "min"}) count values. The normalisation is applied after the binning.}
 
 \item{rug}{\link{logical} (\emph{with default}):
-enables or disables colour rug. Currently only implemented for plot
+enable/disable colour rug. Currently only implemented for plot
 type \code{multiple.lines} and \code{single}}
 
 \item{limit_counts}{\link{numeric} (\emph{optional}):
@@ -78,20 +78,21 @@ value to limit all count values to this value, i.e. all count values above
 this threshold will be replaced by this threshold. This is helpful
 especially in case of TL-spectra.}
 
-\item{xaxis.energy}{\link{logical} (\emph{with default}): enables or disables energy instead of
+\item{xaxis.energy}{\link{logical} (\emph{with default}): enable/disable energy instead of
 wavelength axis. For the conversion the function \link{convert_Wavelength2Energy} is used.
 
-\strong{Note:} This option means not only simply redrawing the axis,
-instead the spectrum in terms of intensity is recalculated, s. details.}
+\strong{Note:} Besides being used in setting the axis, with this option the
+the spectrum is recalculated in terms of intensity, see details.}
 
 \item{legend.text}{\link{character} (\emph{with default}):
 possibility to provide own legend text. This argument is only considered for
 plot types providing a legend, e.g. \code{plot.type="transect"}}
 
-\item{plot}{\link{logical} (\emph{with default}): enables/disables plot output. If the plot
-output is disabled, the \link{matrix} used for the plotting and the calculated colour values
-(as attributes) are returned. This way, the (binned, transformed etc.) output can
-be used in other functions and packages, such as plotting with the package \code{'plot3D'}}
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output. If
+the plot output is disabled, the \link{matrix} used for the plotting and the
+calculated colour values (as attributes) are returned. This way, the
+(binned, transformed etc.) output can be used in other functions and
+packages, such as plotting with the package \code{'plot3D'}}
 
 \item{...}{further arguments and graphical parameters that will be passed
 to the \code{plot} function.}
@@ -145,7 +146,7 @@ Arguments that will be passed to \link[graphics:persp]{graphics::persp}:
 
 \strong{Note:} Further parameters can be adjusted via \code{par}. For example
 to set the background transparent and reduce the thickness of the lines use:
-\code{par(bg = NA, lwd = 0.7)} previous the function call.
+\code{par(bg = NA, lwd = 0.7)} before the function call.
 
 \strong{\code{plot.type = "single"}}
 
@@ -266,7 +267,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.6.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.6.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

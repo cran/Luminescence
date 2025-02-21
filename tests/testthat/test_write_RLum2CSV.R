@@ -1,18 +1,21 @@
-test_that("test errors and general export function", {
+## load data
+data(ExampleData.portableOSL, envir = environment())
+
+test_that("input validation", {
   testthat::skip_on_cran()
 
-  ##test error
-  expect_error(write_RLum2CSV(),
-               "input object is missing")
   expect_error(write_RLum2CSV(object = "", export = FALSE),
-               regexp = "[write_RLum2CSV()] Object needs to be a member of the object class RLum!",
+               "[write_RLum2CSV()] 'object' should be of class 'RLum.Analysis'",
                fixed = TRUE)
-
-  ##test export
-  data("ExampleData.portableOSL", envir = environment())
   expect_error(write_RLum2CSV(ExampleData.portableOSL[[1]], export = TRUE,
                               path = "non-existing"),
                "Directory provided via the argument 'path' does not exist")
+  expect_error(write_RLum2CSV(set_RLum("RLum.Results"), verbose = FALSE),
+               "'object' cannot be an empty RLum.Results")
+})
+
+test_that("check functionality", {
+  testthat::skip_on_cran()
 
   ## move temporarily to avoid polluting the working directory
   cwd <- setwd(tempdir())
@@ -34,23 +37,33 @@ test_that("test errors and general export function", {
 
   ##using option compact
   expect_warning(write_RLum2CSV(object = results,export = FALSE),
-                 regexp = "elements could not be converted to a CSV-structure!")
+                 "elements could not be converted to CSV")
 
   ##using option compact = FALSE
   expect_warning(write_RLum2CSV(object = results, export = FALSE,
                                 compact = FALSE),
-                 "elements could not be converted to a CSV-structure")
+                 "elements could not be converted to CSV")
   expect_warning(write_RLum2CSV(object = results,export = FALSE, compact = TRUE),
-                 regexp = "elements could not be converted to a CSV-structure!")
+                 "elements could not be converted to CSV")
+
+  ## no valid records
+  res.invalid <- results
+  res.invalid@data$summary <- res.invalid@data$data <- NULL
+  res.invalid@data$args$sigmab <- NULL
+  expect_warning(expect_error(write_RLum2CSV(res.invalid, export = FALSE)),
+                 "elements could not be converted to CSV")
 
   ##real export
   expect_warning(
     write_RLum2CSV(object = results, path = tempdir(), compact = TRUE),
-    regexp = "elements could not be converted to a CSV-structure!")
+    "elements could not be converted to CSV")
 
   ## data.frame
   df <- results@data$data
   expect_null(write_RLum2CSV(object = df, path = tempdir()))
   attr(df, "filename") <- "test"
   expect_null(write_RLum2CSV(object = df, path = tempdir()))
+
+  ## empty list
+  expect_null(write_RLum2CSV(list()))
 })

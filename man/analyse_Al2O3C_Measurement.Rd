@@ -34,8 +34,9 @@ made by Kreutzer et al., 2018}
 \item{recordType}{\link{character} (\emph{with default}): input curve selection, which is passed to
 function \link{get_RLum}. To deactivate the automatic selection set the argument to \code{NULL}}
 
-\item{calculate_TL_dose}{\link{logical} (\emph{with default}): Enables/disables experimental dose estimation
-based on the TL curves. Taken is the ratio of the peak sums of each curves +/- 5 channels.}
+\item{calculate_TL_dose}{\link{logical} (\emph{with default}):
+enables/disable experimental dose estimation based on the TL curves.
+It is computed as the ratio of the peak sums of each curves +/- 5 channels.}
 
 \item{irradiation_time_correction}{\link{numeric} or \linkS4class{RLum.Results} (\emph{optional}):
 information on the used irradiation time correction obtained by another experiments.
@@ -46,19 +47,20 @@ information on the used irradiation time correction obtained by another experime
 If a \code{numeric} vector is provided it has to be of length three:
 mean, 2.5 \% quantile, 97.5 \% quantile.}
 
-\item{travel_dosimeter}{\link{numeric} (\emph{optional}): specify the position of the travel dosimeter
-(so far measured at the same time). The dose of travel dosimeter will be subtracted from all
-other values.}
+\item{travel_dosimeter}{\link{numeric} (\emph{optional}): specify the position of
+the travel dosimeter (so far measured at the same time). The dose of
+travel dosimeter will be subtracted from all other values.}
 
 \item{test_parameters}{\link{list} (\emph{with default}):
 set test parameters. Supported parameters are: \code{TL_peak_shift} All input: \link{numeric}
-values, \code{NA} and \code{NULL} (s. Details)}
+values, \code{NA} and \code{NULL} (see details).}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enable/disable verbose mode}
+enable/disable output to the terminal.}
 
-\item{plot}{\link{logical} (\emph{with default}): enable/disable plot output, if \code{object} is of type \link{list},
-a \link{numeric} vector can be provided to limit the plot output to certain aliquots}
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.
+If \code{object} is of type \link{list}, a numeric vector can be provided to limit
+the plot output to certain aliquots.}
 
 \item{...}{further arguments that can be passed to the plot output, supported are \code{norm}, \code{main}, \code{mtext},
 \code{title} (for self-call mode to specify, e.g., sample names)}
@@ -104,9 +106,10 @@ FI lexsyg SMART reader using Al2O3:C chips according to Kreutzer et al., 2018
 \details{
 \strong{Working with a travel dosimeter}
 
-The function allows to define particular aliquots as travel dosimeters. For example:
-\code{travel_dosimeter = c(1,3,5)} sets aliquots 1, 3 and 5 as travel dosimeters. These dose values
-of this dosimeters are combined and automatically subtracted from the obtained dose values
+The function allows to define particular position numbers as travel
+dosimeters. For example: \code{travel_dosimeter = c(1,3,5)} sets positions 1,
+3 and 5 as travel dosimeters. These dose values #' of this dosimeters
+are combined and automatically subtracted from the obtained dose values
 of the other dosimeters.
 
 \strong{Calculate TL dose}
@@ -146,7 +149,7 @@ analyse_Al2O3C_Measurement(data_CrossTalk)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_Al2O3C_Measurement(): Al2O3:C Passive Dosimeter Measurement Analysis. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_Al2O3C_Measurement(): Al2O3:C Passive Dosimeter Measurement Analysis. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

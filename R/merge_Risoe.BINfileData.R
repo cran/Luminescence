@@ -83,37 +83,29 @@ merge_Risoe.BINfileData <- function(
   output.file,
   keep.position.number = FALSE,
   position.number.append.gap = 0
-){
+) {
+  .set_function_name("merge_Risoe.BINfileData")
+  on.exit(.unset_function_name(), add = TRUE)
 
   # Integrity Checks --------------------------------------------------------
+
+  .validate_class(input.objects, c("character", "list"))
   if(length(input.objects) < 2){
     message("[merge_Risoe.BINfileData()] Nothing done: at least two input objects are needed!")
     return(input.objects)
-
   }
 
-  if(is(input.objects, "character") == TRUE){
+  if (is.character(input.objects)) {
     for(i in 1:length(input.objects)){
       if(file.exists(input.objects[i])==FALSE){
-        stop("[merge_Risoe.BINfileData()] File '", input.objects[i],
-             "' does not exist!", call. = FALSE)
+        .throw_error("File '", input.objects[i], "' does not exist")
       }
     }
 
   }else{
-
-    if(is(input.objects, "list") == TRUE){
-      for(i in 1:length(input.objects)){
-        if(is(input.objects[[i]], "Risoe.BINfileData") == FALSE){
-
-          stop("[merge_Risoe.BINfileData()] Input list does not contain Risoe.BINfileData objects!")
-
-        }
-
-      }
-
-    }else{
-      stop("[merge_Risoe.BINfileData()] Input object is neither a character nor a list!")
+    for (i in 1:length(input.objects)) {
+      .validate_class(input.objects[[i]], "Risoe.BINfileData",
+                      name = "All elements of 'input.objects'")
     }
   }
 
@@ -123,12 +115,11 @@ merge_Risoe.BINfileData <- function(
   ##loop over all files to store the results in a list
   ##or the input is already a list
 
-  if(is(input.objects, "character") == TRUE){
+  if (is.character(input.objects)) {
     temp <- lapply(input.objects, read_BIN2R, txtProgressBar = FALSE)
 
   }else{
     temp <- input.objects
-
   }
 
   # Get POSITION values -------------------------------------------------------
@@ -147,34 +138,25 @@ merge_Risoe.BINfileData <- function(
     return(temp)
   }))
 
-
   temp.position.values <- c(temp[[1]]@METADATA[["POSITION"]], temp.position.values)
 
 
   # Get overall record length -----------------------------------------------
   temp.record.length <- sum(sapply(1:length(temp), function(x){
     length(temp[[x]]@METADATA[,"ID"])
-
   }))
 
 
   # Merge Files -------------------------------------------------------------
   ##loop for similar input objects
   for(i in 1:length(input.objects)){
-    if(exists("temp.new.METADATA") == FALSE){
+    if (!exists("temp.new.METADATA")) {
 
       temp.new.METADATA <- temp[[i]]@METADATA
       temp.new.DATA <- temp[[i]]@DATA
-
-
-      if(inherits(try(temp[[i]]@.RESERVED, silent = TRUE), "try-error")){
-
-        temp.new.RESERVED <- list()
-
-      }else{
-
+      temp.new.RESERVED <- list()
+      if (".RESERVED" %in% slotNames(temp[[i]])) {
         temp.new.RESERVED <- temp[[i]]@.RESERVED
-
       }
 
     }else{
@@ -182,19 +164,13 @@ merge_Risoe.BINfileData <- function(
       temp.new.METADATA <- rbind(temp.new.METADATA, temp[[i]]@METADATA)
       temp.new.DATA <- c(temp.new.DATA, temp[[i]]@DATA)
 
-      if(inherits(try(temp[[i]]@.RESERVED, silent = TRUE), "try-error")){
-
-        temp.new.RESERVED <- c(temp.new.RESERVED, list())
-
-      }else{
-
-        temp.new.RESERVED <- c(temp.new.RESERVED, temp[[i]]@.RESERVED)
-
+      new.reserved <- list()
+      if (".RESERVED" %in% slotNames(temp[[i]])) {
+        new.reserved <- temp[[i]]@.RESERVED
       }
-
+      temp.new.RESERVED <- c(temp.new.RESERVED, new.reserved)
     }
   }
-
 
   ##SET RECORD ID in METADATA
   temp.new.METADATA$ID <- 1:temp.record.length
@@ -202,7 +178,6 @@ merge_Risoe.BINfileData <- function(
   ##SET POSITION VALUES
   if(keep.position.number == FALSE){
     temp.new.METADATA$POSITION <- temp.position.values
-
   }
 
   ##TODO version number?
@@ -211,9 +186,7 @@ merge_Risoe.BINfileData <- function(
     METADATA = temp.new.METADATA,
     DATA = temp.new.DATA,
     .RESERVED = temp.new.RESERVED
-
   )
-
 
   # OUTPUT ------------------------------------------------------------------
   if(missing(output.file) == FALSE){
@@ -221,7 +194,5 @@ merge_Risoe.BINfileData <- function(
 
   }else{
     return(temp.new)
-
   }
-
 }

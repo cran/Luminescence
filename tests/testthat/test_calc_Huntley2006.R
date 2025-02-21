@@ -1,3 +1,4 @@
+## load data
 set.seed(1)
 data("ExampleData.Fading", envir = environment())
 fading_data <- ExampleData.Fading$fading.data$IR50
@@ -27,50 +28,74 @@ test_that("input validation", {
   rhop.test@originator <- "unexpected"
 
   expect_error(calc_Huntley2006(),
-               "\"data\" is missing, with no default")
+               "'data' should be of class 'data.frame'")
   expect_error(calc_Huntley2006("test"),
-               "'data' must be a data frame")
+               "'data' should be of class 'data.frame'")
+  expect_error(calc_Huntley2006(data.frame()),
+               "'data' cannot be an empty data.frame")
 
   expect_error(calc_Huntley2006(data, fit.method = "test"),
-               "Invalid fit option 'test'")
+               "'fit.method' should be one of 'EXP' or 'GOK'")
   expect_error(calc_Huntley2006(data, fit.method = "GOK", lower.bounds = 0),
-               "Argument 'lower.bounds' must be of length 4")
+               "'lower.bounds' should have length 4")
 
   expect_error(calc_Huntley2006(data, LnTn = list()),
-               "'LnTn' must be a data frame with 2 columns")
+               "'LnTn' should be of class 'data.frame'")
   expect_error(calc_Huntley2006(data, LnTn = data),
-               "'LnTn' must be a data frame with 2 columns")
+               "'LnTn' should be a data frame with 2 columns")
   expect_error(calc_Huntley2006(cbind(data, data), LnTn = data[, 1:2]),
-               "When 'LnTn' is specified, the 'data' data frame must have")
+               "When 'LnTn' is specified, 'data' should have only 2 or 3")
   expect_error(calc_Huntley2006(cbind(data, data[, 1])),
                "The number of columns in 'data' must be a multiple of 3")
 
   expect_error(calc_Huntley2006(data, rhop = 1),
-               "'rhop' must be a vector of length 2")
+               "'rhop' should have length 2")
   expect_error(calc_Huntley2006(data, rhop = "test"),
-               "'rhop' must be a numeric vector or an RLum.Results object")
+               "'rhop' should be of class 'numeric' or 'RLum.Results'")
   expect_error(calc_Huntley2006(data, rhop = rhop.test),
-               "'rhop' accepts RLum.Results objects only if produced by")
+               "'rhop' accepts only RLum.Results objects produced by")
   expect_error(calc_Huntley2006(data, rhop = c(-1, 4.9e-7)),
                "'rhop' must be a positive number")
 
   expect_error(calc_Huntley2006(data, rhop = rhop),
-               "\"ddot\" is missing, with no default")
+               "'ddot' should be of class 'numeric'")
   expect_error(calc_Huntley2006(data, rhop = rhop, ddot = ddot),
-               "\"readerDdot\" is missing, with no default")
+               "'readerDdot' should be of class 'numeric'")
   expect_error(calc_Huntley2006(data, rhop = rhop,
                                 ddot = "test", readerDdot = readerDdot),
-               "'ddot' and 'readerDdot' must be numeric vectors")
+               "'ddot' should be of class 'numeric'")
+  expect_error(calc_Huntley2006(data, rhop = rhop,
+                                ddot = 0.4, readerDdot = readerDdot),
+               "'ddot' should have length 2")
   expect_error(calc_Huntley2006(data, rhop = rhop,
                                 ddot = ddot, readerDdot = "test"),
-               "'ddot' and 'readerDdot' must be numeric vectors")
+               "'readerDdot' should be of class 'numeric'")
+  expect_error(calc_Huntley2006(data, rhop = rhop,
+                                ddot = ddot, readerDdot = 0.13),
+               "'readerDdot' should have length 2")
+  expect_error(calc_Huntley2006(data, rhop = rhop,
+                                ddot = ddot, readerDdot = readerDdot,
+                                rprime = list()),
+               "'rprime' should be of class 'numeric'")
 
   SW({
   expect_warning(calc_Huntley2006(data[, 1:2], rhop = rhop, n.MC = 2,
                                   ddot = ddot, readerDdot = readerDdot,
                                   fit.method = "GOK"),
-                 "'data' only had two columns")
+                 "'data' has only two columns: we assume that the errors")
   })
+
+  expect_warning(expect_error(
+      calc_Huntley2006(data = data[1:20, ], rhop = rhop, ddot = ddot,
+                       readerDdot = c(0.002, 0.003), n.MC = 2,
+                       plot = FALSE, verbose = FALSE),
+      "Simulated D0 is NA: either your input values are unsuitable"),
+      "Ln/Tn is smaller than the minimum computed LxTx value")
+
+  expect_error(calc_Huntley2006(data = data[1:20, ], LnTn = data[1, c(2, 3)],
+                                rhop = c(2, 2), ddot = c(7.00, 0.004),
+                                readerDdot = c(0.01, 0.02), verbose = FALSE),
+               "Could not fit simulated curve, check suitability of model")
 })
 
 test_that("check class and length of output", {
@@ -81,6 +106,9 @@ test_that("check class and length of output", {
   expect_s3_class(rhop$fading_results, "data.frame")
   expect_s3_class(rhop$fit, "lm")
   expect_s3_class(rhop$rho_prime, "data.frame")
+  expect_equal(round(sum(rhop$fading_results[,1:9]),0),415)
+  expect_equal(round(sum(rhop$rho_prime),5),2e-05)
+  expect_equal(round(sum(rhop$irr.times)), 2673108)
 
   ##kars
   expect_s4_class(huntley, class = "RLum.Results")
@@ -89,19 +117,7 @@ test_that("check class and length of output", {
   expect_type(huntley$Ln, "double")
   expect_type(huntley$fits, "list")
 
-})
-
-test_that("check values from analyse_FadingMeasurement()", {
-    expect_equal(round(sum(rhop$fading_results[,1:9]),0),415)
-    expect_equal(round(sum(rhop$rho_prime),5),2e-05)
-    expect_equal(round(sum(rhop$irr.times)), 2673108)
-
-})
-
-test_that("check values from calc_Huntley2008()", {
-  testthat::skip_on_cran()
-
-  expect_equal(round(huntley$results$Sim_Age, 1), 34)
+  expect_equal(round(huntley$results$Sim_Age, 1), 34.10)
   expect_equal(round(huntley$results$Sim_Age_2D0, 0), 175)
   expect_equal(round(sum(huntley$Ln),2), 0.16)
 
@@ -114,71 +130,73 @@ test_that("check values from calc_Huntley2008()", {
 test_that("Further tests calc_Huntley2006", {
   testthat::skip_on_cran()
 
+  os <- tolower(Sys.info()[["sysname"]])
+  snapshot.tolerance <- switch(os,
+                               "linux" = 1.5e-5,
+                               "darwin" = 8.0e-2,
+                               "windows" = 8.0e-2)
+
   ## check extrapolation
   set.seed(1)
-  expect_s4_class(
-    object = suppressWarnings(
+  expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
         rhop = rhop,
         ddot = ddot,
         readerDdot = readerDdot,
-        n.MC = 500,
+        n.MC = 100,
         fit.method = "GOK",
         mode = "extrapolation",
-        plot = FALSE, verbose = FALSE)),
-  class = "RLum.Results")
+        plot = TRUE, verbose = FALSE),
+      tolerance = snapshot.tolerance)
 
   ## check force through origin EXP with wrong mode settings
   set.seed(1)
-  expect_s4_class(
-    object = suppressWarnings(
+  expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
         rhop = rhop,
         ddot = ddot,
         readerDdot = readerDdot,
-        n.MC = 500,
+        n.MC = 100,
         fit.method = "EXP",
         fit.force_through_origin = TRUE,
         mode = "extrapolation",
-        plot = FALSE,
-        verbose = FALSE)),
-    class = "RLum.Results")
+        plot = TRUE,
+        verbose = FALSE),
+      tolerance = max(snapshot.tolerance, 8.0e-3))
 
   ## EXP ... normal
   set.seed(1)
-  expect_s4_class(
-    object = suppressWarnings(
+  expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
         rhop = rhop,
         ddot = ddot,
         readerDdot = readerDdot,
-        n.MC = 500,
+        n.MC = 100,
         fit.method = "EXP",
         fit.force_through_origin = TRUE,
         mode = "interpolation",
         plot = FALSE,
-        verbose = FALSE)),
-    class = "RLum.Results")
+        verbose = FALSE),
+      tolerance = snapshot.tolerance)
 
   ## GOK normal
   set.seed(1)
-  expect_s4_class(
-    object = suppressWarnings(
+  expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
         rhop = rhop,
         ddot = ddot,
         readerDdot = readerDdot,
-        n.MC = 500,
+        n.MC = 100,
         fit.method = "GOK",
         fit.force_through_origin = TRUE,
         mode = "interpolation",
         plot = FALSE,
-        verbose = FALSE)),
-    class = "RLum.Results")
+        verbose = FALSE),
+      tolerance = if (os == "darwin") 1.7e-1 else max(snapshot.tolerance, 1.5e-3))
 
   ## check warning for failed fits
   ## dataset provided by Christine Neudorf
@@ -200,8 +218,56 @@ test_that("Further tests calc_Huntley2006", {
     normalise = FALSE,
     fit.method = "EXP",
     summary = TRUE,
-    plot = FALSE,
+    plot = TRUE,
     n.MC = 100),
     regexp = "\\[calc\\_Huntley2006\\(\\)\\] Ln\\/Tn is smaller than the minimum computed LxTx value.")
   })
+
+  ## failing to fit unfaded EXP model
+  ## test derived from data provided by Salome Oehler
+  input <- data.frame(dose = c(0, 1550, 9300, 37200, 71500,
+                               0, 1550, 9300, 37200, 71500),
+                      LxTx = c(0.79, 4.67, 14.41, 26.59, 24.88,
+                               0.95, 4.87, 14.17, 21.98, 25.12),
+                      LxTx_error = c(0.002, 0.006, 0.01, 0.04, 0.02,
+                                     0.002, 0.011, 0.02, 0.03, 0.03))
+  set.seed(1)
+  expect_error(calc_Huntley2006(input,
+                                rhop = c(6.5e-06, 2.0e-08),
+                                ddot = c(8.5, 1.5),
+                                fit.method = "EXP",
+                                mode = "extrapolation",
+                                readerDdot = c(0.154, 0.1),
+                                n.MC = 2),
+               "Could not fit unfaded curve, check suitability of model and")
+
+  ## more coverage
+  expect_s4_class(
+    calc_Huntley2006(
+      data = data[1:10, ],
+      LnTn = data[1:10, c(2, 3)],
+      rhop = rhop, ddot = ddot, readerDdot = readerDdot,
+      n.MC = 2, plot = TRUE, verbose = FALSE),
+    class = "RLum.Results")
+  expect_s4_class(
+    calc_Huntley2006(
+      data = data[1:10, ],
+      LnTn = data[1, c(2, 3)],
+      rhop = rhop, ddot = ddot, readerDdot = readerDdot,
+      rprime = c(0.01, 2.2, length.out = 500),
+      n.MC = 2, plot = FALSE, verbose = FALSE),
+    class = "RLum.Results")
+
+  expect_error(
+    calc_Huntley2006(
+      data = iris[, 1:3],
+      rhop = rhop, ddot = ddot, readerDdot = readerDdot,
+      n.MC = 2, plot = FALSE, verbose = FALSE),
+    "Unable to fit growth curve to measured data, try setting")
+  expect_warning(
+    calc_Huntley2006(
+      data = data[8:12, ],
+      rhop = rhop, ddot = ddot, readerDdot = readerDdot,
+      n.MC = 2, plot = FALSE, verbose = FALSE),
+    "Ln is >10 % larger than the maximum computed LxTx value")
 })

@@ -6,10 +6,12 @@ test_that("input validation", {
 
   expect_error(extract_IrradiationTimes("fail"),
                "Wrong XSYG file name or file does not exist!")
+  expect_error(extract_IrradiationTimes(character(0)),
+               "'object' cannot be an empty character")
   expect_error(extract_IrradiationTimes(tempdir()),
                "File is expected to have 'xsyg' or 'XSYG' extension")
   expect_error(extract_IrradiationTimes(FALSE),
-               "neither of type 'character' nor of type 'RLum.Analysis")
+               "'object' should be of class 'character', 'RLum.Analysis' or a")
   expect_error(extract_IrradiationTimes(xsyg, file.BINX = "fail"),
                "Wrong BINX file name or file does not exist!")
   expect_error(extract_IrradiationTimes(xsyg, file.BINX = tempdir()),
@@ -46,4 +48,34 @@ test_that("Test the extraction of irradiation times", {
   temp <- expect_s4_class(extract_IrradiationTimes(temp)[[1]], "RLum.Results")
   })
   expect_type(temp$irr.times$START, "double")
+
+  ## write results to BINX-file
+  tmp_BINX <- tempfile(fileext = ".binx")
+  file.copy(
+    from = system.file("extdata/BINfile_V8.binx", package = "Luminescence"),
+    to = tmp_BINX, overwrite = TRUE)
+  expect_message(
+    extract_IrradiationTimes(xsyg, file.BINX = tmp_BINX, txtProgressBar = FALSE),
+    "XSYG-file and BINX-file do not contain similar entries, BINX-file update skipped")
+
+  tmp_XSYG <- test_path("_data/xsyg-tests/XSYG_file_TL_CASE3.xsyg")
+  tmp_BINX <- tempfile(fileext = ".binx")
+  write_R2BIN(read_BIN2R(binx, position = 2, verbose = FALSE),
+              tmp_BINX, verbose = FALSE)
+  expect_message(extract_IrradiationTimes(tmp_XSYG, file.BINX = tmp_BINX,
+                                          txtProgressBar = FALSE),
+                 "'Time Since Irradiation' was redefined in the exported BINX-file")
+
+  ## empty list
+  expect_null(extract_IrradiationTimes(list()))
+
+  ## special case extraction with startDate missing
+  tmp <- read_XSYG2R(xsyg, verbose = FALSE, fastForward = TRUE)
+    ## remove startDate
+    tmp[[1]]@records[[9]]@info$startDate <- NULL
+    ## test
+    expect_s4_class(
+      object = extract_IrradiationTimes(tmp[[1]]), class = "RLum.Results")
+
+
 })

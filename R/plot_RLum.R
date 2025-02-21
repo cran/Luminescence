@@ -61,11 +61,14 @@
 plot_RLum<- function(
   object,
   ...
-){
-# Define dispatcher function ----------------------------------------------------------
-##check if object is of class RLum
+) {
+  .set_function_name("plot_RLum")
+  on.exit(.unset_function_name(), add = TRUE)
+
+  ## Define dispatcher function ---------------------------------------------
   RLum.dispatcher <- function(object, ...) {
-    if (inherits(object, "RLum")) {
+    .validate_class(object, "RLum")
+
       ##grep object class
       object.class <- is(object)[1]
 
@@ -83,16 +86,9 @@ plot_RLum<- function(
 
         }else{
           plot_RLum.Analysis(object = object, ...)
-
         },
 
         RLum.Results = plot_RLum.Results(object = object, ...))
-    }else{
-      stop(paste0(
-        "[plot_RLum()] Sorry, I don't know what to do for object of type '", is(object)[1], "'."
-      ), call. = FALSE)
-
-    }
   }
 
   # Run dispatcher ------------------------------------------------------------------------------
@@ -106,11 +102,9 @@ plot_RLum<- function(
     ##(2) check if empty, if empty do nothing ...
     if (length(object) != 0) {
       ## If we iterate over a list, this might be extremely useful to have different plot titles
+      main <- NULL
       if("main" %in% names(list(...))){
-        if(is(list(...)$main,"list")){
-          main.list <- rep(list(...)$main, length = length(object))
-
-        }
+        main <- .listify(list(...)$main, length = length(object))
       }
 
       ##set also mtext, but in a different way
@@ -120,31 +114,19 @@ plot_RLum<- function(
 
         }else{
           mtext <- NULL
-
         }
       }else{
         mtext <- rep(list(...)$mtext, length.out = length(object))
-
       }
-      if(exists("main.list")){
-        ##dispatch objects
-        for (i in 1:length(object)) {
-          RLum.dispatcher(object = object[[i]],
-                          main = main.list[[i]],
-                          mtext = mtext[[i]],
-                          ...)
-        }
-      }else{
-        for (i in 1:length(object)) {
-          RLum.dispatcher(object = object[[i]],
-                          mtext = mtext[[i]],
-                          ...)
-        }
+      for (i in 1:length(object)) {
+        RLum.dispatcher(object = object[[i]],
+                        main = main[[i]],
+                        mtext = mtext[[i]],
+                        ...)
       }
     }
   }else{
     ##dispatch object
     RLum.dispatcher(object = object, ...)
-
   }
 }

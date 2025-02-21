@@ -53,7 +53,7 @@
 #' Expected are x and y coordinates, e.g.,
 #' `coord = list(samp1 = c(0.1, 0.2)`. If you have not measured x coordinates, please x should be 0.
 #'
-#' @param plot [logical] (*with default*): enable/disable plot output
+#' @param plot [logical] (*with default*): enable/disable the plot output.
 #'
 #' @param ... other parameters to be passed to modify the plot output.
 #' Supported are `run` to provide the run name ,
@@ -125,7 +125,7 @@ analyse_portableOSL <- function(
 
 # Self-call ---------------------------------------------------------------
   if (inherits(object, "list")) {
-      temp <- .warningCatcher(lapply(1:length(object), function(x) {
+      temp <- .warningCatcher(lapply(seq_along(object), function(x) {
         analyse_portableOSL(
           object = object[[x]],
           signal.integral = signal.integral,
@@ -136,14 +136,13 @@ analyse_portableOSL <- function(
       }))
 
       return(merge_RLum(temp))
-
   }
 
-# Start function ----------------------------------------------------------
-  ## INPUT VERIFICATION ----
+  ## Start function ---------------------------------------------------------
+
   ## only RLum.Analysis objects
-  if (!inherits(object, "RLum.Analysis"))
-    .throw_error("Only objects of class 'RLum.Analysis' are allowed")
+  .validate_class(object, "RLum.Analysis")
+  .validate_not_empty(object)
 
   ## only curve objects
   if (!all(sapply(object, class) == "RLum.Data.Curve"))
@@ -212,9 +211,7 @@ analyse_portableOSL <- function(
     coord <- .extract_PSL_coord(object)
 
   } else {
-    if(!inherits(coord, "matrix") && !inherits(coord, "list"))
-      .throw_error("'coord' must be a matrix or a list")
-
+    .validate_class(coord, c("matrix", "list"))
     if(inherits(coord, "list"))
       coord <- do.call(rbind, coord)
 
@@ -241,7 +238,7 @@ analyse_portableOSL <- function(
   )
 
     ## if coordinates exist, sort by depth
-    if(!any(is.na(coord[,2])))
+    if (!anyNA(coord[, 2]))
       summary <- summary[order(coord[,2]),]
 
    ### INVERT ----------
@@ -288,7 +285,7 @@ analyse_portableOSL <- function(
        xlim = attr(m_list, "xlim"),
        ylim = attr(m_list, "ylim"),
        zlim = if(mode == "surface") NA else attr(m_list, "zlim"),
-       ylab = if(!any(is.na(summary$COORD_Y))) "Depth [m]" else "Index",
+       ylab = if (!anyNA(summary$COORD_Y)) "Depth [m]" else "Index",
        xlab = "x [m]",
        grid = TRUE,
        contour = FALSE,
@@ -301,8 +298,8 @@ analyse_portableOSL <- function(
    if(mode[1] == "surface") {
      ### check for validity of surface value -------
      if(!all(plot_settings$surface_value %in% names(m_list)))
-       .throw_error("Unknown value to plot: Valid are: ",
-                    paste(names(m_list), collapse = ", "))
+       .throw_error("Unknown value to plot, valid values are: ",
+                    .collapse(names(m_list)))
 
      ## set par -------
      if(length(plot_settings$surface_value) > 1) {
@@ -336,8 +333,8 @@ analyse_portableOSL <- function(
        ## show only warning
        if(inherits(s, "try-error"))
          .throw_warning("Surface interpolation failed: this happens when ",
-                        "all points are arranged in one line. ",
-                        "Nothing plotted!")
+                        "all points are arranged in one line or xlim/ylim/zlim ",
+                        "are too tight. Nothing plotted!")
 
        ## show error
        if(!inherits(s, "try-error")) {
@@ -359,9 +356,8 @@ analyse_portableOSL <- function(
          ## add background image if available -------
          if (!is.null(plot_settings$bg_img)) {
            ## get corner positions
-           if(!is.null(plot_settings$bg_img_positions))
-             positions <- plot_settings$bg_img_positions[1:4]
-           else
+           positions <- plot_settings$bg_img_positions[1:4]
+           if (is.null(positions))
              positions <- par()$usr
 
            graphics::rasterImage(
@@ -458,7 +454,7 @@ analyse_portableOSL <- function(
 
     par(mar = c(5, 4, 4, 1) + 0.1)
 
-    frame()
+    graphics::frame()
 
     mtext(side= 3, plot_settings$main, cex = 0.7, line = 2)
 
@@ -481,7 +477,7 @@ analyse_portableOSL <- function(
       bty = "n",
       yaxt = "n"
     )
-      if(plot_settings$grid) grid()
+      if (plot_settings$grid) graphics::grid()
       lines(
         x = m_list[["BSL"]][,"value"],
         y = m_list[["BSL"]][,"y"],
@@ -513,7 +509,7 @@ analyse_portableOSL <- function(
         bty = "n",
         yaxt = "n"
     )
-      if(plot_settings$grid) grid()
+      if (plot_settings$grid) graphics::grid()
 
       lines(
         x = m_list[["IRSL"]][,"value"],
@@ -542,7 +538,7 @@ analyse_portableOSL <- function(
       yaxt = "n"
     )
 
-      if(plot_settings$grid) grid()
+      if (plot_settings$grid) graphics::grid()
       lines(
         x = m_list[["BSL_depletion"]][,"value"],
         y = m_list[["BSL_depletion"]][,"y"],
@@ -564,7 +560,7 @@ analyse_portableOSL <- function(
       yaxt = "n"
     )
 
-      if(plot_settings$grid) grid()
+      if (plot_settings$grid) graphics::grid()
 
       lines(
         x = m_list[["IRSL_depletion"]][,"value"],
@@ -587,7 +583,7 @@ analyse_portableOSL <- function(
       yaxt = "n"
     )
 
-      if(plot_settings$grid) grid()
+      if (plot_settings$grid) graphics::grid()
 
       lines(
         x = m_list[["IRSL_BSL_RATIO"]][,"value"],
@@ -653,7 +649,7 @@ analyse_portableOSL <- function(
     if (sigint[2] > length(raw_signal)) {
       sigint[2] <- length(raw_signal)
       .throw_warning("'signal.integral' (",
-                     paste(range(signal.integral), collapse = ", "), ") ",
+                     .collapse(range(signal.integral), quote = FALSE), ") ",
                      "exceeded the number of available data points (n = ",
                      length(raw_signal),") and has been automatically ",
                      "reduced to the maximum number.")
@@ -717,8 +713,8 @@ analyse_portableOSL <- function(
     numeric(2)) |> t()
 
   ## if NA, assign index
-  if(any(is.na(coord[,1]))) coord[,1] <- 0
-  if(any(is.na(coord[,2]))) coord[,2] <- 1:nrow(coord)
+  if (anyNA(coord[, 1])) coord[, 1] <- 0
+  if (anyNA(coord[, 2])) coord[, 2] <- 1:nrow(coord)
 
   return(coord)
 }

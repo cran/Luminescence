@@ -1,6 +1,3 @@
-#' @include get_RLum.R set_RLum.R length_RLum.R names_RLum.R
-NULL
-
 #' Class `"RLum.Results"`
 #'
 #' Object class contains results data from functions (e.g., [analyse_SAR.CWOSL]).
@@ -139,7 +136,7 @@ setMethod("show",
 #' @describeIn RLum.Results
 #' Construction method for an RLum.Results object.
 #'
-#' @param class [`set_RLum`]; [character] **(required)**:
+#' @param class [`set_RLum`]; [character] (**required**):
 #' name of the `RLum` class to create
 #'
 #' @param originator [`set_RLum`]; [character] (*automatic*):
@@ -231,6 +228,9 @@ setMethod(
   "get_RLum",
   signature = signature("RLum.Results"),
   definition = function(object, data.object, info.object = NULL, drop = TRUE) {
+    .set_function_name("get_RLum")
+    on.exit(.unset_function_name(), add = TRUE)
+
     ##if info.object is set, only the info objects are returned
     if (!is.null(info.object)) {
       if (info.object %in% names(object@info)) {
@@ -239,12 +239,11 @@ setMethod(
       } else {
         ##check for entries
         if (length(object@info) == 0) {
-          warning("[get_RLum()] This 'RLum.Results' object has no info ",
-                  "objects, NULL returned)", call. = FALSE)
+          .throw_warning("This 'RLum.Results' object has no info objects, ",
+                         "NULL returned")
         } else {
-          warning("[get_RLum()] Invalid 'info.object' name, valid names are: ",
-                  paste(names(object@info), collapse = ", "),
-                  call. = FALSE)
+          .throw_warning("Invalid 'info.object' name, valid names are: ",
+                         .collapse(names(object@info)))
         }
         return(NULL)
       }
@@ -252,8 +251,10 @@ setMethod(
     } else{
       if (!missing(data.object)) {
         ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        .validate_class(data.object, c("character", "numeric"))
+
         ##CASE1: data.object is of type 'character'
-        if (is(data.object, "character")) {
+        if (is.character(data.object)) {
           #check if the provided names are available
           if (all(data.object %in% names(object@data))) {
             ##account for multiple inputs
@@ -267,44 +268,35 @@ setMethod(
 
             }
           } else {
-            stop("[get_RLum()] unknown 'data.object', valid names are: ",
-                 paste(names(object@data), collapse = ", "), call. = FALSE)
+            .throw_error("Unknown 'data.object', valid names are: ",
+                         .collapse(names(object@data)))
           }
         }
 
         ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         ##CASE2: data.object is of type 'numeric'
-        else if (is(data.object, "numeric")) {
+        else if (is.numeric(data.object)) {
           ##check if index is valid
           if (max(data.object) > length(object@data)) {
-            stop("[get_RLum] 'data.object' index out of bounds!")
+            .throw_error("'data.object' index out of bounds")
 
           } else if (length(data.object) > 1) {
             temp.return <- lapply(data.object, function(x) {
               object@data[[x]]
-
             })
           } else {
             temp.return <- list(object@data[[data.object]])
-
           }
 
           ##restore names as that get los with this method
           names(temp.return) <-
             names(object@data)[data.object]
-
-        }
-        ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        ##CASE3: data.object is of an unsupported type
-        else{
-          stop("[get_RLum] 'data.object' has to be of type character or numeric!", call. = FALSE)
         }
 
         ##the CASE data.object is missing
       } else{
         ##return always the first object if nothing is specified
         temp.return <- object@data[1]
-
       }
 
       ##CHECK whether an RLum.Results object needs to be produced ...
@@ -363,3 +355,32 @@ setMethod("names_RLum",
           function(object){
              names(object@data)
           })
+
+## view() -------------------------------------------------------------------
+#' @describeIn RLum.Results
+#'
+#' View method for [RLum.Results-class] objects
+#'
+#' @param object an object of class [RLum.Results-class]
+#'
+#' @param element [integer] (*with default*): index of the element to display
+#'
+#' @param ... other arguments that might be passed
+#'
+#' @keywords internal
+#'
+#' @md
+#' @export
+setMethod("view",
+          signature = "RLum.Results",
+          definition = function(object, element = 1, ...) {
+
+    ## set title
+    name <- list(...)$title
+    if (is.null(name))
+      name <- deparse(substitute(object))
+
+    ## run view
+    data <- get_RLum(object, data.object = element)
+    .view(x = data, title = name)
+})

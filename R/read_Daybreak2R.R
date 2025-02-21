@@ -15,10 +15,10 @@
 #' the [RLum.Analysis-class] object can be returned for debugging purposes.
 #'
 #' @param verbose [logical] (*with default*):
-#' enables or disables terminal feedback
+#' enable/disable output to the terminal.
 #'
 #' @param txtProgressBar [logical] (*with default*):
-#' enables or disables [txtProgressBar].
+#' enable/disable [txtProgressBar].
 #'
 #' @param ... not in use, for compatibility reasons only
 #'
@@ -28,7 +28,7 @@
 #' @note
 #' **`[BETA VERSION]`**
 #' This function still needs to be tested properly. In particular
-#' the function has underwent only very rough rests using a few files.
+#' the function has underwent only very rough tests using a few files.
 #'
 #' @section Function version: 0.3.2
 #'
@@ -57,7 +57,9 @@ read_Daybreak2R <- function(
   verbose = TRUE,
   txtProgressBar = TRUE,
   ...
-){
+) {
+  .set_function_name("read_Daybreak2R")
+  on.exit(.unset_function_name(), add = TRUE)
 
   ##TODO
   ## - run tests
@@ -70,7 +72,11 @@ read_Daybreak2R <- function(
   # Option (b): The input is just a path, the function tries to grep ALL Daybreaks-txt files in the
   # directory and import them, if this is detected, we proceed as list
 
+  .validate_class(file, c("character", "list"))
+  .validate_logical_scalar(verbose)
+
   if(is(file, "character")) {
+    .validate_not_empty(file)
     ##If this is not really a path we skip this here
     if (dir.exists(file) & length(dir(file)) > 0) {
       if(verbose){
@@ -81,34 +87,30 @@ read_Daybreak2R <- function(
         as.list(paste0(file,dir(
           file, recursive = FALSE, pattern = ".txt"
         )))
-
     }
-
   }
 
   ##if the input is already a list
   if (is(file, "list")) {
-    temp.return <- lapply(1:length(file), function(x) {
+    temp.return <- lapply(seq_along(file), function(x) {
       read_Daybreak2R(
         file = file[[x]],
-        txtProgressBar = txtProgressBar
+        txtProgressBar = txtProgressBar,
+        verbose = verbose
       )
     })
 
     ##return
       return(temp.return)
-
   }
 
 
-  # Integrity checks ----------------------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
   ##check if file exists
   if(!file.exists(file)){
-    stop("[read_Daybreak2R()] file name does not seem to exist.", call. = FALSE)
-
+    .throw_error("File does not exist")
   }
-
 
   ##check for file extension ... distinguish between TXT and DAT
   if(substr(file, start = nchar(file) - 3, stop = nchar(file)) == ".DAT"){
@@ -163,8 +165,10 @@ read_Daybreak2R <- function(
 
       ##TERMINAL FEEDBACK
       if(verbose){
-        cat("\n[read_Daybreak2R()]")
-        cat(paste("\n >> Importing:", file[1],"\n"))
+        cat("\n[read_Daybreak()] Importing ...")
+        cat("\n path: ", dirname(file[1]))
+        cat("\n file: ", .shorten_filename(basename(file[1])))
+        cat("\n")
       }
 
       ##PROGRESS BAR
@@ -302,7 +306,6 @@ read_Daybreak2R <- function(
 
       ##return object
       return(output)
-
       }
 
   }else{
@@ -311,7 +314,6 @@ read_Daybreak2R <- function(
 
     if(verbose){
       cat("\n[read_Daybreak] file extension not of type '.DAT' try to import ASCII-file ... \n")
-
     }
 
     ##read file
@@ -320,7 +322,7 @@ read_Daybreak2R <- function(
     ## check whether the file contains non-ASCII characters: the [^ -~]
     ## regexp matches all ASCII characters from space to tilde
     if (any(grepl("[^ -~]", file2read[1]))) {
-      stop("[read_Daybreak2R()] The provided file is no ASCII-file and cannot be imported!", call. = FALSE)
+      .throw_error("The provided file is not ASCII and cannot be imported")
     }
 
     ##(0) get rid off all the empty lines
@@ -343,7 +345,6 @@ read_Daybreak2R <- function(
         return(file2read[records.row_number[x]:length(file2read)])
 
       }
-
     })
 
       ##clear memory
@@ -352,8 +353,10 @@ read_Daybreak2R <- function(
 
     ##TERMINAL FEEDBACK
     if(verbose){
-      cat("\n[read_Daybreak2R()]")
-      cat(paste("\n >> Importing:", file[1],"\n"))
+      cat("\n[read_Daybreak()] Importing ...")
+      cat("\n path: ", dirname(file[1]))
+      cat("\n file: ", .shorten_filename(basename(file[1])))
+      cat("\n")
     }
 
     ##PROGRESS BAR
@@ -415,9 +418,7 @@ read_Daybreak2R <- function(
           point.y <- rep(1, length(point.x))
 
           data <- matrix(c(point.x,point.y), ncol = 2)
-
         }
-
       }
 
       ##update progress bar
@@ -447,7 +448,6 @@ read_Daybreak2R <- function(
     positions.id <-  sapply(RLum.Data.Curve.list, function(x){
 
       get_RLum(x, info.object = "position")
-
     })
 
     ##(4)
@@ -460,7 +460,6 @@ read_Daybreak2R <- function(
       ##make list
       temp.list <- lapply(n, function(x){
         RLum.Data.Curve.list[[x]]
-
       })
 
       ##put in RLum.Analysis object
@@ -475,8 +474,6 @@ read_Daybreak2R <- function(
       object <- .set_pid(object)
 
       return(object)
-
-
     })
 
     ##TERMINAL FEEDBACK

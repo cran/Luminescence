@@ -1,11 +1,12 @@
+## load data
 data(ExampleData.DeValues, envir = environment())
-df <- Second2Gray(ExampleData.DeValues$BT998, c(0.0438,0.0019))
+df <- convert_Second2Gray(ExampleData.DeValues$BT998, c(0.0438,0.0019))
 
 test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_KDE("error"),
-               "Input data must be one of 'data.frame', 'RLum.Results' or")
+               "'data' should be of class 'RLum.Results', 'data.frame' or 'numeric'")
   expect_error(plot_KDE(df[0, ]),
                "Input data 1 has 0 rows")
   expect_error(plot_KDE(list()),
@@ -14,20 +15,10 @@ test_that("input validation", {
                               "Inf values removed in rows: 1 in data.frame 1"),
                "Your input is empty due to Inf removal")
   expect_error(plot_KDE(df, ylim = c(0, 1)),
-               "'ylim' must be a vector of length 4")
+               "'ylim' should have length 4")
 
   expect_warning(plot_KDE(df[1, ]),
                  "Single data point found, no density calculated")
-
-  ## deprecated arguments
-  expect_warning(plot_KDE(df, centrality = TRUE),
-                 "Argument 'centrality' no longer supported")
-  expect_warning(plot_KDE(df, dispersion = TRUE),
-                 "Argument 'dispersion' no longer supported")
-  expect_warning(plot_KDE(df, polygon.col = TRUE),
-                 "Argument 'polygon.col' no longer supported")
-  expect_warning(plot_KDE(df, weights = TRUE),
-                 "Argument 'weights' no longer supported")
 })
 
 test_that("check functionality", {
@@ -51,6 +42,13 @@ test_that("check functionality", {
   expect_silent(plot_KDE(data = df, summary.pos = "bottomleft"))
   expect_silent(plot_KDE(data = df, summary.pos = "bottom"))
   expect_silent(plot_KDE(data = df, summary.pos = "bottomright"))
+  expect_silent(plot_KDE(data = df, sub = "test"))
+
+  ## specify layout
+  layout <- get_Layout("default")
+  layout$kde$dimension$figure.width <- 100
+  layout$kde$dimension$figure.height <- 100
+  plot_KDE(data = df, layout = layout)
 
   ## numeric vector
   expect_silent(plot_KDE(df[, 1]))

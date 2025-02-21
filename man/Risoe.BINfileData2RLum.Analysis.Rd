@@ -59,7 +59,7 @@ If \code{TRUE} (default) an \code{RLum.Analysis} object is returned even if it d
 not contain any records. Set to \code{FALSE} to discard all empty objects.}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables or disables \link{txtProgressBar}.}
+enable/disable the progress bar.}
 }
 \value{
 Returns an \linkS4class{RLum.Analysis} object.
@@ -67,8 +67,7 @@ Returns an \linkS4class{RLum.Analysis} object.
 \description{
 Converts values from one specific position of a Risoe.BINfileData S4-class
 object to an RLum.Analysis object.
-}
-\details{
+
 The \linkS4class{RLum.Analysis} object requires a set of curves for
 specific further protocol analyses. However, the \linkS4class{Risoe.BINfileData}
 usually contains a set of curves for different aliquots and different
@@ -99,7 +98,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. Risoe.BINfileData2RLum.Analysis(): Convert Risoe.BINfileData object to an RLum.Analysis object. Function version 0.4.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. Risoe.BINfileData2RLum.Analysis(): Convert Risoe.BINfileData object to an RLum.Analysis object. Function version 0.4.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{manip}

@@ -5,27 +5,27 @@
 \title{Apply the central age model (CAM) after Galbraith et al. (1999) to a given
 De distribution}
 \usage{
-calc_CentralDose(data, sigmab, log = TRUE, na.rm = FALSE, plot = TRUE, ...)
+calc_CentralDose(data, sigmab, log = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
-for \link{data.frame}: two columns with De \code{(data[,1])} and De error \code{(data[,2])}}
+for \link{data.frame}: two columns with De \code{(data[,1])} and De error \code{(data[,2])}.
+Records containing missing values will be removed.}
 
 \item{sigmab}{\link{numeric} (\emph{with default}):
 additional spread in De values.
 This value represents the expected overdispersion in the data should the sample be
 well-bleached (Cunningham & Walling 2012, p. 100).
 \strong{NOTE}: For the logged model (\code{log = TRUE}) this value must be
-a fraction, e.g. 0.2 (= 20 \\%). If the un-logged model is used (\code{log = FALSE}),
+a fraction, e.g. 0.2 (= 20 \%). If the un-logged model is used (\code{log = FALSE}),
 sigmab must be provided in the same absolute units of the De values (seconds or Gray).}
 
 \item{log}{\link{logical} (\emph{with default}):
-fit the (un-)logged central age model to De data}
-
-\item{na.rm}{\link{logical} (\emph{with default}): strip \code{NA} values before the computation proceeds}
+fit the (un-)logged central age model to De data. Log transformation is
+allowed only if the De values are positive.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-plot output}
+enable/disable the plot output.}
 
 \item{...}{further arguments (\code{trace}, \code{verbose}).}
 }
@@ -39,14 +39,13 @@ Returns a plot (\emph{optional}) and terminal output. In addition an
 \item{.$call}{\link{call} the function call}
 \item{.$profile}{\link{data.frame} the log likelihood profile for sigma}
 
-The output should be accessed using the function \link{get_RLum}
+The output should be accessed using the function \link{get_RLum}.
 }
 \description{
 This function calculates the central dose and dispersion of the De
 distribution, their standard errors and the profile log likelihood function
-for sigma.
-}
-\details{
+for \code{sigma}.
+
 This function uses the equations of Galbraith & Roberts (2012). The
 parameters \code{delta} and \code{sigma} are estimated by numerically solving
 eq. 15 and 16. Their standard errors are approximated using eq. 17.
@@ -58,7 +57,7 @@ be found in the appendix of Galbraith & Laslett (1993, 468-470) and
 Galbraith & Roberts (2012, 15)
 }
 \section{Function version}{
- 1.4.1
+ 1.5
 }
 
 \examples{
@@ -72,7 +71,7 @@ calc_CentralDose(ExampleData.DeValues$CA1)
 } 
 
 \section{How to cite}{
-Burow, C., 2024. calc_CentralDose(): Apply the central age model (CAM) after Galbraith et al. (1999) to a given De distribution. Function version 1.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. calc_CentralDose(): Apply the central age model (CAM) after Galbraith et al. (1999) to a given De distribution. Function version 1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

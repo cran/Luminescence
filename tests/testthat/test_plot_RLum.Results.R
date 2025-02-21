@@ -1,10 +1,14 @@
+## load data
 data(ExampleData.DeValues, envir = environment())
 
 test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_RLum.Results("error"),
-               "Input object is not of type 'RLum.Results'")
+               "'object' should be of class 'RLum.Results'")
+  expect_error(plot_RLum.Results(set_RLum("RLum.Results",
+                                          originator = NA_character_)),
+               "Object originator not supported")
 })
 
 test_that("check functionality", {
@@ -40,11 +44,15 @@ test_that("check functionality", {
   expect_silent(plot_RLum.Results(d4, pdf.colors = "colors"))
   expect_silent(plot_RLum.Results(d4, main = "Title", plot.proportions = FALSE,
                                   pdf.weight = FALSE, pdf.sigma = "sigmab"))
+  expect_silent(plot_RLum.Results(d4, main = "Title", plot.proportions = FALSE,
+                                  pdf.weight = TRUE, pdf.sigma = "se",
+                                  pdf.scale = 1))
 
   ## calc_AliquotSize
   d5 <- calc_AliquotSize(grain.size = c(100, 150), sample.diameter = 1,
                          MC.iter = 100, plot = FALSE, verbose = FALSE)
   expect_silent(plot_RLum.Results(d5))
+  expect_silent(plot_RLum.Results(d5, main = "MC simulation", xlab = "Grains"))
 
   ## calc_SourceDoseRate
   d6 <- calc_SourceDoseRate(measurement = "2012-01-27", calib = "2014-12-19",
@@ -55,4 +63,23 @@ test_that("check functionality", {
   data(ExampleData.CW_OSL_Curve, envir = environment())
   d7 <- calc_FastRatio(ExampleData.CW_OSL_Curve, plot = FALSE, verbose = FALSE)
   expect_silent(plot_RLum.Results(d7))
+  d7 <- calc_FastRatio(ExampleData.CW_OSL_Curve, dead.channels = c(1, 1),
+                       plot = FALSE, fitCW.curve = FALSE, verbose = FALSE)
+  expect_silent(plot_RLum.Results(d7))
+  d7_fit <- calc_FastRatio(ExampleData.CW_OSL_Curve, dead.channels = c(1, 1),
+                       plot = FALSE, fitCW.curve = TRUE, verbose = FALSE)
+  expect_s4_class(d7_fit@data$fit, "RLum.Results")
+  expect_silent(plot_RLum.Results(d7_fit))
+
+  ## analyse_IRSAR.RF
+  data(ExampleData.RLum.Analysis, envir = environment())
+  d8 <- analyse_IRSAR.RF(IRSAR.RF.Data, method = "VSLIDE", n.MC = 10,
+                         plot = FALSE, txtProgressBar = FALSE)
+  SW({
+  expect_warning(plot_RLum.Results(d8))
+  })
+
+  ## no valid originator
+  expect_silent(plot_RLum.Results(set_RLum("RLum.Results",
+                                           originator = "error")))
 })

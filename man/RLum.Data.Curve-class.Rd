@@ -10,6 +10,7 @@
 \alias{names_RLum,RLum.Data.Curve-method}
 \alias{bin_RLum.Data,RLum.Data.Curve-method}
 \alias{smooth_RLum,RLum.Data.Curve-method}
+\alias{melt_RLum,RLum.Data.Curve-method}
 \title{Class \code{"RLum.Data.Curve"}}
 \usage{
 \S4method{show}{RLum.Data.Curve}(object)
@@ -34,6 +35,8 @@
 \S4method{bin_RLum.Data}{RLum.Data.Curve}(object, bin_size = 2)
 
 \S4method{smooth_RLum}{RLum.Data.Curve}(object, k = NULL, fill = NA, align = "right", method = "mean")
+
+\S4method{melt_RLum}{RLum.Data.Curve}(object)
 }
 \arguments{
 \item{object}{\code{\link{get_RLum}}, \code{\link{length_RLum}}, \code{\link{names_RLum}} (\strong{required}):
@@ -60,7 +63,7 @@ curve type (e.g., "predefined" or "measured")}
 
 \item{data}{\code{\link{set_RLum}}; \link{matrix} (\strong{required}):
 raw curve data. If \code{data} itself is a \code{RLum.Data.Curve}-object this can be
-used to re-construct the object (s. details), i.e. modified parameters except
+used to re-construct the object (see details), i.e. modified parameters except
 \code{.uid}, \code{.pid} and \code{originator}. The rest will be subject to copy and paste unless provided.}
 
 \item{info}{\code{\link{set_RLum}}; \link{list} (\emph{optional}):
@@ -114,6 +117,10 @@ Same object as input, after applying the binning.
 \strong{\code{smooth_RLum}}
 
 Same object as input, after smoothing
+
+\strong{\code{melt_RLum}}
+
+Flat \link{data.frame} with \code{X}, \code{Y}, \code{TYPE}, \code{UID}
 }
 \description{
 Class for representing luminescence curve data.
@@ -136,8 +143,11 @@ value time/temperature of the curve (corresponding to the stimulation length)
 
 \item \code{bin_RLum.Data(RLum.Data.Curve)}: Allows binning of specific objects
 
-\item \code{smooth_RLum(RLum.Data.Curve)}: Smoothing of RLum.Data.Curve objects using the function \link[zoo:rollmean]{zoo::rollmean} or \link[zoo:rollmean]{zoo::rollmedian}.
+\item \code{smooth_RLum(RLum.Data.Curve)}: Smoothing of RLum.Data.Curve objects using a rolling mean or median.
 In particular the internal function \code{.smoothing} is used.
+
+\item \code{melt_RLum(RLum.Data.Curve)}: Melts \linkS4class{RLum.Data.Curve} objects into a flat data.frame to be used
+in combination with other packages such as \code{ggplot2}.
 
 }}
 \section{Slots}{
@@ -145,7 +155,8 @@ In particular the internal function \code{.smoothing} is used.
 \describe{
 \item{\code{recordType}}{Object of class "character" containing the type of the curve (e.g. "TL" or "OSL")}
 
-\item{\code{curveType}}{Object of class "character" containing curve type, allowed values are measured or predefined}
+\item{\code{curveType}}{Object of class "character" containing curve type, allowed values are
+"measured" or "predefined"}
 
 \item{\code{data}}{Object of class \link{matrix} containing curve x and y data.
 'data' can also be of type \code{RLum.Data.Curve} to change object values without
@@ -157,8 +168,8 @@ de-constructing the object. For example:
 }\if{html}{\out{</div>}}
 
 would just change the \code{recordType}. Missing arguments  the value is taken
-from the input object in 'data' (which is already an RLum.Data.Curve object
-in this example)}
+from the input object in 'data' (which is already an \code{RLum.Data.Curve}
+object in this example)}
 }}
 
 \note{
@@ -194,7 +205,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. RLum.Data.Curve-class(): Class 'RLum.Data.Curve'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. RLum.Data.Curve-class(): Class 'RLum.Data.Curve'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{classes}

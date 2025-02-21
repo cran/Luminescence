@@ -1,3 +1,39 @@
+test_that("input validation", {
+  testthat::skip_on_cran()
+
+  ## wrong file name
+  expect_error(use_DRAC("error"),
+               "[use_DRAC()] Input file does not exist",
+               fixed = TRUE)
+  expect_error(use_DRAC(NA),
+               "'file' should be of class 'character', 'DRAC.list' or")
+  expect_error(use_DRAC(character(0)),
+               "'file' cannot be an empty character")
+
+  ## CSV file with the wrong header
+  fake <- data.table::fread(test_path("_data/DRAC_Input_Template.csv"))
+  fake[1, 1] <- "error"
+  fake.csv <- tempfile(fileext = ".csv")
+  data.table::fwrite(fake, file = fake.csv)
+  expect_error(use_DRAC(fake.csv),
+               "you are not using the original DRAC v1.2 CSV template")
+
+  ## exceed allowed limit
+  SW({
+  expect_warning(input <- template_DRAC(preset = "DRAC-example_quartz",
+                                        nrow = 5001),
+                 "More than 5000 datasets might not be supported")
+  })
+  expect_error(use_DRAC(input), "The limit of allowed datasets is 5000")
+
+  ## citation style
+  expect_error(use_DRAC(template_DRAC(preset = "DRAC-example_quartz",
+                                      notification = FALSE),
+                        citation_style = "error"),
+               "[use_DRAC()] 'citation_style' should be one of",
+               fixed = TRUE)
+})
+
 ##Full check
 test_that("Test DRAC", {
   testthat::skip_on_cran()
@@ -24,8 +60,8 @@ test_that("Test DRAC", {
  input$`Calculate external Rb from K conc?` <- "Y"
  input$`Calculate internal Rb from K conc?` <- "Y"
  input$`Scale gammadoserate at shallow depths?` <- "Y"
- input$`Grain size min (microns)` <- 90
- input$`Grain size max (microns)` <- 125
+ input$`Grain size min (microns)` <- 90L
+ input$`Grain size max (microns)` <- 125L
  input$`Water content ((wet weight - dry weight)/dry weight) %` <- 5
  input$`errWater content %` <- 2
  input$`Depth (m)` <- 2.2
@@ -58,21 +94,21 @@ test_that("Test DRAC", {
                  "RLum.Results")
 
  ## XLS input
- fake.xls <- system.file("extdata/clippy.xls", package = "readxl")
+ file.create(fake.xls <- tempfile(fileext = ".xls"))
  expect_error(use_DRAC(fake.xls),
-              "you are not using the original DRAC v1.1 XLSX template")
+              "XLS/XLSX format no longer supported, use CSV instead")
 
- ## crash function
- ## wrong file name
- expect_error(use_DRAC("error"), "\\[use_DRAC\\(\\)\\] It seems that the file doesn't exist!")
- expect_error(use_DRAC(NA),
-              "The provided data object is not a valid DRAC template")
-
- ## exceed allowed limit
+ ## communicate with non sufficient dataset
  SW({
- expect_warning(input <- template_DRAC(preset = "DRAC-example_quartz",
-                                       nrow = 5001),
-                "More than 5000 datasets might not be supported")
+ t <- template_DRAC(notification = FALSE)
+ expect_error(use_DRAC(t),
+              "We got a response from the server")
+ print("N")
  })
- expect_error(use_DRAC(input), "The limit of allowed datasets is 5000!")
+
+ SW({
+ ## communicate with fake url
+ expect_error(use_DRAC(t, url = "iamnotvali8793270942hd.valid"),
+              "Transmission failed with HTTP status code: URL invalid")
+ })
 })

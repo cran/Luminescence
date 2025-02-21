@@ -1,33 +1,41 @@
-set.seed(1)
-temp <- calc_FadingCorr(
-  age.faded = c(0.1,0),
-  g_value = c(5.0, 1.0),
-  tc = 2592000,
-  tc.g_value = 172800,
-  n.MC = 100, verbose = FALSE)
+test_that("input validation", {
+  testthat::skip_on_cran()
 
-
+  expect_error(calc_FadingCorr("error"),
+               "'age.faded' should be of class 'numeric'")
+  expect_error(calc_FadingCorr(c(0.1, 0), "error"),
+               "'g_value' should be of class 'numeric' or 'RLum.Results'")
+  expect_error(calc_FadingCorr(age.faded = c(0.1, 0), g_value = c(5.0, 1.0)),
+               "[calc_FadingCorr()] 'tc' should be of class 'numeric'",
+               fixed = TRUE)
+  expect_error(calc_FadingCorr(age.faded = c(0.1, 0), g_value = c(5.0, 1.0),
+                               tc = 2592000, n.MC = "error"),
+               "'n.MC' should be a positive integer scalar")
+  expect_error(calc_FadingCorr(age.faded = c(0.1, 0), g_value = c(5.0, 1.0),
+                               tc = 2592000, interval = "error"),
+               "'interval' should be of class 'numeric'")
+  expect_error(calc_FadingCorr(age.faded = c(0.1, 0), g_value = c(5.0, 1.0),
+                               tc = 2592000, interval = 1),
+               "'interval' should have length 2")
+  expect_error(calc_FadingCorr(age.faded = c(0.1, 0), g_value = c(5.0, 1.0),
+                               tc = 2592000, txtProgressBar = "error"),
+               "'txtProgressBar' should be a single logical value")
+  expect_error(calc_FadingCorr(age.faded = c(0.1, 0), g_value = c(5.0, 1.0),
+                               tc = 2592000, verbose = "error"),
+               "'verbose' should be a single logical value")
+})
 
 test_that("check class and length of output", {
   testthat::skip_on_cran()
-
-  ##trigger some errors
-  expect_error(calc_FadingCorr(age.faded = "test", g_value = "test"),
-    "\\[calc_FadingCorr\\(\\)\\] 'tc' needs to be set!")
-
-  expect_error(
-    calc_FadingCorr(age.faded = "test", g_value = "test", tc = 200),
-    "\\[calc\\_FadingCorr\\(\\)\\] 'age.faded', 'g_value' and 'tc' need be of type numeric\\!")
 
   ##check message
   expect_message(calc_FadingCorr(
     age.faded = c(6.404856, 0.51),
     g_value = c(17.5,1.42),
     tc = 462,
-    n.MC = 100), "\\[calc_FadingCorr\\(\\)\\] No solution found, return NULL. This usually happens for very large, unrealistic g-values")
-
-  expect_s4_class(temp, "RLum.Results")
-  expect_equal(length(temp), 2)
+    n.MC = 100),
+    "[calc_FadingCorr()] Error: No solution found, NULL returned: this usually",
+    fixed = TRUE)
 
   ##check the verbose mode
   SW({
@@ -51,7 +59,7 @@ test_that("check class and length of output", {
   expect_message(
       expect_null(calc_FadingCorr(age.faded = c(0.1,0),
                                g_value = fading, tc = 2592000)),
-               "Unknown originator for the provided RLum.Results object")
+               "Unknown originator for the provided 'g_value' object")
 
   ## auto, seed (Note: this is slow!)
   SW({
@@ -67,8 +75,18 @@ test_that("check class and length of output", {
 test_that("check values from output example 1", {
   testthat::skip_on_cran()
 
-  results <- get_RLum(temp)
+  set.seed(1)
+  temp <- calc_FadingCorr(
+      age.faded = c(0.1,0),
+      g_value = c(5.0, 1.0),
+      tc = 2592000,
+      tc.g_value = 172800,
+      n.MC = 100, verbose = FALSE)
 
+  expect_s4_class(temp, "RLum.Results")
+  expect_equal(length(temp), 2)
+
+  results <- get_RLum(temp)
   expect_equal(results$AGE, 0.1169)
   expect_equal(results$AGE.ERROR, 0.0035)
   expect_equal(results$AGE_FADED, 0.1)
@@ -82,5 +100,27 @@ test_that("check values from output example 1", {
   expect_equal(results$n.MC, 100)
   expect_equal(results$OBSERVATIONS, 100)
   expect_equal(results$SEED, NA)
+})
 
+test_that("snapshot tests", {
+  testthat::skip_on_cran()
+
+  snapshot.tolerance <- 1.5e-4
+
+  set.seed(1)
+  expect_snapshot_RLum(calc_FadingCorr(
+      age.faded = c(1, 0),
+      g_value = c(5.0, 1.0),
+      tc = 25920,
+      tc.g_value = 172800,
+      n.MC = 20, verbose = FALSE),
+      tolerance = snapshot.tolerance)
+
+  expect_snapshot_RLum(calc_FadingCorr(
+      age.faded = c(10, 0),
+      g_value = c(5.0, 1.0),
+      tc = 2592000,
+      tc.g_value = 172800,
+      n.MC = 20, verbose = FALSE),
+      tolerance = snapshot.tolerance)
 })

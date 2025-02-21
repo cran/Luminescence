@@ -27,23 +27,19 @@ merge_RLum.Results <- function(
   .set_function_name("merge_RLum.Results")
   on.exit(.unset_function_name(), add = TRUE)
 
-            ##-------------------------------------------------------------
-            ##Some integrity checks
+  ## Integrity checks -------------------------------------------------------
 
-            ##check if input object is a list
-            if(!is(objects, "list")){
-              .throw_error("'objects' has to be of type 'list'")
-            }else{
-              ##check if objects in the list are of type RLum.Results
-              temp.originator <- sapply(1:length(objects), function(x){
-                if(is(objects[[x]], "RLum.Results") == FALSE){
-                  .throw_error("All objects to be merged must have type 'RLum.Results'")
-                }
+  .validate_class(objects, "list")
 
-                objects[[x]]@originator
-
-              })
-              }
+  ## check if objects in the list are of type RLum.Results
+  temp.originator <- sapply(objects, function(x) {
+    .validate_class(x, "RLum.Results", name = "All elements of 'object'")
+    x@originator
+  })
+  if (length(objects) == 0) {
+    .throw_message("'objects' contains no data, NULL returned")
+    return(NULL)
+  }
 
             ##check if originator is different
             if(length(unique(temp.originator))>1){
@@ -52,7 +48,8 @@ merge_RLum.Results <- function(
 
             ##-------------------------------------------------------------
             ##merge objects depending on the data structure
-            for(i in 1:length(objects[[1]]@data)){
+            for (i in seq_along(objects[[1]]@data)) {
+
               ## shelf list of attributes
               attr_list <- unlist(
                 lapply(1:length(objects), function(x) attributes(objects[[x]]@data[[i]])),
@@ -80,7 +77,6 @@ merge_RLum.Results <- function(
 
                 }else{
                   objects[[1]]@data[[i]] <- as.data.frame(data.table::rbindlist(temp.list))
-
                 }
 
                 ## continue attribute preservation
@@ -101,7 +97,6 @@ merge_RLum.Results <- function(
                   for(n in names(attrs))
                     attr(objects[[1]]@data[[i]], n) <- attrs[[n]]
                 }
-
 
               }else{
                 ##all other elements

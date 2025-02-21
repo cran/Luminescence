@@ -21,7 +21,8 @@
 #'@param method_control [list] (*with default*): parameters passed down
 #' to the jags process
 #'
-#'@param verbose [logical] (*with default*): enable/disable terminal feedback
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
 #'
 #'@return An [RLum.Results-class] object to be used in [combine_De_Dr]
 #'
@@ -204,7 +205,8 @@
 #'
 #'@param method_control [list] (*with default*): parameters passed down to the jags process
 #'
-#'@param verbose [logical] (*with default*): enable/disable terminal feedback
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
 #'
 #'@return An [RLum.Results-class] object
 #'
@@ -403,7 +405,9 @@
 #'@param outlier_method [character] (*with default*): select the outlier detection
 #'method, either `"default"` or `"RousseeuwCroux1993"`. See details for further information.
 #'
-#'@param outlier_analysis_plot [logical] (*with default*): enables/disables the outlier analysis plot. Note: the outlier analysis will happen with or without plot output
+#' @param outlier_analysis_plot [logical] (*with default*): enable/disable the
+#' outlier analysis plot. Note: the outlier analysis will happen independently
+#' of the plot output.
 #'
 #'@param method_control [list] (*with default*): named [list] of further parameters passed down
 #' to the [rjags::rjags] modelling
@@ -411,9 +415,10 @@
 #'@param par_local [logical] (*with default*): if set to `TRUE` the function uses its
 #'own [graphics::par] settings (which will end in two plots next to each other)
 #'
-#'@param verbose [logical] (*with default*): enable/disable terminal feedback
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
 #'
-#'@param plot [logical] (*with default*): enable/disable plot output
+#' @param plot [logical] (*with default*): enable/disable the plot output.
 #'
 #'@param ... a few further arguments to fine-tune the plot output such as
 #'`cdf_ADr_quantiles` (`TRUE`/`FALSE`), `legend.pos`, `legend` (`TRUE`/`FALSE`)
@@ -507,23 +512,20 @@ combine_De_Dr <- function(
   plot = TRUE,
   ...
 ) {
+  .set_function_name("combine_De_Dr")
+  on.exit(.unset_function_name(), add = TRUE)
 
-# Check input data --------------------------------------------------------
-if (!all(t_pkg <- c(
-  requireNamespace("rjags", quietly = TRUE),
-  requireNamespace("coda", quietly = TRUE),
-  requireNamespace("mclust", quietly = TRUE)))) {
-  # nocov start
-  t_names <- c('rjags', 'coda', 'mclust')
-    stop(paste0("[combine_De_Dr()] To use this function you have to first
-         install the package(s) ", paste(t_names[!t_pkg], collapse = ",")),
-         call. = FALSE)
-  # nocov end
-}
+  ## check package availability ---------------------------------------------
+  .require_suggested_package("rjags")
+  .require_suggested_package("coda")
+  .require_suggested_package("mclust")
 
-# Integrity checks --------------------------------------------------------
- if(length(De) != length(s))
-   stop("[combine_De_Dr()] 'De' and 's' are not of similar length!", call. = FALSE)
+  ## Integrity checks -------------------------------------------------------
+
+  if (length(De) != length(s))
+    .throw_error("'De' and 's' should have the same length")
+  .validate_logical_scalar(verbose)
+  .validate_logical_scalar(plot)
 
 # Prepare data ------------------------------------------------------------
   ## we have to fetch the function otherwise
@@ -720,7 +722,7 @@ if(plot){
     N <- length(De)
 
     ##plot with outliers
-    boxplot(fit_IAM$sig_a, outline = FALSE,
+    graphics::boxplot(fit_IAM$sig_a, outline = FALSE,
             col = (abs(as.numeric(
               1:length(De) %in% out
             ) - 1) + 2),
@@ -739,7 +741,7 @@ if(plot){
 
     ##plot sd of outliers
     if(length(out) > 0){
-      boxplot(fit_IAM$sig_a[, out],
+      graphics::boxplot(fit_IAM$sig_a[, out],
               outline = FALSE,
               names = out,
               ylab = "Individual sd [a.u.]",

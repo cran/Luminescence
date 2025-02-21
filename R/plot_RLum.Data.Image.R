@@ -71,15 +71,20 @@ plot_RLum.Data.Image <- function(
   par.local = TRUE,
   plot.type = "plot.raster",
   ...
-){
+) {
+  .set_function_name("plot_RLum.Data.Image")
+  on.exit(.unset_function_name(), add = TRUE)
 
-# Integrity check -----------------------------------------------------------
-  ##check if object is of class RLum.Data.Image
-  if(!inherits(object, "RLum.Data.Image"))
-    stop("[plot_RLum.Data.Image()] Input object is not of type RLum.Data.Image.", call. = FALSE)
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(object, "RLum.Data.Image")
 
   ## extract object
   object <- object@data
+  if (length(dim(object)) != 3) {
+    ## the object is empty or malformed
+    return(NULL)
+  }
 
 # Define additional functions ---------------------------------------------
 .stretch <- function(x, type = "lin"){
@@ -96,7 +101,6 @@ plot_RLum.Data.Image <- function(
       x[x < 0] <- r[1]
       x[x > r[2]] <- r[2]
     }
-
   }
 
   if(type[1] == "hist")
@@ -104,6 +108,8 @@ plot_RLum.Data.Image <- function(
 
   return(x)
 }
+
+ plot.type <- .validate_args(plot.type, c("plot.raster", "contour"))
 
 # Plot settings -----------------------------------------------------------
 plot_settings <- modifyList(x = list(
@@ -127,7 +133,6 @@ plot_settings <- modifyList(x = list(
     frames[1] <- max(1,min(frames))
     frames[length(frames)] <- min(dim(object)[3],max(frames))
     object <- object[,,frames,drop = FALSE]
-
   }
 
   ## enforce xlim, ylim and zlim directly here
@@ -174,7 +179,6 @@ plot_settings <- modifyList(x = list(
         ylab[c(1,length(ylab))] <- c(0,dim(x)[2])
         yat <- seq(0,1,length.out = length(ylab))
         graphics::axis(side = 2, at = yat, labels = ylab)
-
       }
 
       ## add legend
@@ -230,7 +234,6 @@ plot_settings <- modifyList(x = list(
         main = paste0(plot_settings$main, " #",i),
         col = plot_settings$col)
       graphics::box()
-
      }
 
     ## axes
@@ -244,12 +247,6 @@ plot_settings <- modifyList(x = list(
       ylab[c(1,length(ylab))] <- c(0,dim(x)[1])
       yat <- seq(0,1,length.out = length(ylab))
       graphics::axis(side = 2, at = yat, labels = ylab)
-
     }
-
-  }else{
-    stop("[plot_RLum.Data.Image()] Unknown plot type.", call. = FALSE)
-
   }
-
 }

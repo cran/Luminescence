@@ -1,21 +1,16 @@
-##//////////////////////////////////////////////////////////////////////////////
-##//zzz.R
-##//////////////////////////////////////////////////////////////////////////////
-##
-##==============================================================================
-##author: R Luminescence Package Team
-##organisation:
-##version.: 0.2.1
-##date: 2013-11-10
-##==============================================================================
+## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+## Variables and functions loaded when package is attached
+## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Set namespace .LuminescenceEnv ------------------------------------------
 .LuminescenceEnv <- new.env(parent = emptyenv())
-
 
 # Assign variables to Namespace -------------------------------------------
 ##variable col to define colours in the functions for output
 assign("col",
-       unlist(colors())[c(261,552,51,62,76,151,451,474,654,657,100,513,23,612,129,27,551,393,80,652,555)],
+       c("#000000", "#FF3000", "#6495ED", "#458B00", "#FFB90F", "#8B6914",
+         "#FF00FF", "#00FA9A", "#EEEE00", "#9ACD32", "#8B0000", "#EEE8AA",
+         "#8B7D6B", "#00EE76", "#1E90FF", "#0000FF", "#551A8B", "#7CFC00",
+         "#A9A9A9", "#FFFF00", "#CD0000"),
        pos = ".LuminescenceEnv",
        envir = .LuminescenceEnv)
 
@@ -25,7 +20,6 @@ assign("col",
 assign("fn_stack", list(),
        pos = ".LuminescenceEnv",
        envir = .LuminescenceEnv)
-
 
 ##==============================================================================
 ##on Attach
@@ -78,6 +72,12 @@ assign("fn_stack", list(),
 #' @md
 #' @export
 sTeve<- function(n_frames = 10, t_animation = 2, n.tree = 7, type) {
+  .set_function_name("sTeve")
+  on.exit(.unset_function_name(), add = TRUE)
+
+  .validate_class(n_frames, c("integer", "numeric"))
+  .validate_class(t_animation, c("integer", "numeric"))
+  .validate_class(n.tree, c("integer", "numeric"))
 
   ## allow new overlay plot
   par(new = TRUE)
@@ -87,6 +87,7 @@ sTeve<- function(n_frames = 10, t_animation = 2, n.tree = 7, type) {
 
   ## select showtime item based on month or user-defined type
   if(missing(type) == TRUE) {
+    # nocov start
     if(month >= 1 & month <= 3) {
       type <- 1
     } else if(month >3 & month <= 11) {
@@ -94,8 +95,9 @@ sTeve<- function(n_frames = 10, t_animation = 2, n.tree = 7, type) {
     } else if(month > 11 & month <= 12) {
       type <- 3
     }
+    # nocov end
   }
-
+  .validate_class(type, c("integer", "numeric"))
 
 
   if(type == 1) {

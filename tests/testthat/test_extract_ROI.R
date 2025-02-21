@@ -1,20 +1,33 @@
-test_that("extract_ROI", {
+## generate random data
+m <- matrix(runif(100,0,255), ncol = 10, nrow = 10)
+set.seed(12245)
+a <- array(runif(300, 0,255), c(10,10,3))
+RLum <- set_RLum("RLum.Data.Image", data = a)
+RLum_list <- list(RLum, RLum)
+roi <- matrix(c(2.,4,2,5,6,7,3,1,1), ncol = 3)
+
+test_that("input validation", {
   testthat::skip_on_cran()
 
-  ## generate random data
-  m <- matrix(runif(100,0,255), ncol = 10, nrow = 10)
-  set.seed(12245)
-  a <- array(runif(300, 0,255), c(10,10,3))
-  RLum <- set_RLum("RLum.Data.Image", data = a)
-  RLum_list <- list(RLum, RLum)
-  roi <- matrix(c(2.,4,2,5,6,7,3,1,1), ncol = 3)
+  expect_error(extract_ROI(object = "error", roi),
+               "[extract_ROI()] 'object' should be of class 'RLum.Data.Image'",
+               fixed = TRUE)
+  expect_error(extract_ROI(object = m, "error"),
+               "[extract_ROI()] 'roi' should be of class 'matrix'",
+               fixed = TRUE)
+  expect_error(extract_ROI(object = m, matrix()),
+               "[extract_ROI()] 'roi' does not have the expected format",
+               fixed = TRUE)
+  expect_error(extract_ROI(object = m, matrix(ncol = 3, nrow = 0)),
+               "[extract_ROI()] 'roi' does not have the expected format",
+               fixed = TRUE)
+  expect_error(extract_ROI(object = RLum, roi, roi_summary = "error"),
+               "[extract_ROI()] 'roi_summary' should be one of 'mean', 'median'",
+               fixed = TRUE)
+})
 
-
-  ## crash the function
-  expect_error(extract_ROI(object = "error", roi), "\\[extract_ROI\\(\\)\\] Input for argument 'object' not supported\\!")
-  expect_error(extract_ROI(object = m, "error"), "\\[extract_ROI\\(\\)\\] Please check the format of roi, it looks wrong\\!")
-  expect_error(extract_ROI(object = m, matrix()), "\\[extract_ROI\\(\\)\\] Please check the format of roi, it looks wrong\\!")
-  expect_error(extract_ROI(object = m, matrix(ncol = 3, nrow = 0)), "\\[extract_ROI\\(\\)\\] Please check the format of roi, it looks wrong\\!")
+test_that("extract_ROI", {
+  testthat::skip_on_cran()
 
   ## run function for all supported input objects
   ## matrix
@@ -55,9 +68,4 @@ test_that("extract_ROI", {
 
   t_sum <- expect_type(extract_ROI(object = RLum, roi, roi_summary = "sum")@data$roi_summary, "double")
   expect_equal(sum(t_sum), 8117, tolerance = 0.001)
-
-  ## crash
-  expect_error(extract_ROI(object = RLum, roi, roi_summary = "error"),
-               "\\[extract\\_ROI\\(\\)\\] roi\\_summary method not supported, check manual!")
-
 })

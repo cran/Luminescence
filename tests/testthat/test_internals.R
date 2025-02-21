@@ -18,7 +18,7 @@ test_that("Test internals", {
 
   ##test some functions
   ##missing arguments must be identified
-  expect_error(f(), "Argument <a> missing; with no default!")
+  expect_error(f(), "Argument 'a' missing, with no default")
 
   ##check whether the objects are properly recycled
   expect_type(f(object, a = 1), "list")
@@ -40,14 +40,24 @@ test_that("Test internals", {
 
   # .smoothing ----------------------------------------------------------------------------------
   expect_silent(Luminescence:::.smoothing(runif(100), k = 5, method = "median"))
-  suppressWarnings( # suppress second warning: number of items to replace
-                    #   is not a multiple of replacement length
-  expect_warning(.smoothing(runif(100), k = 4, method = "median"),
-                 "'k' must be odd")
-  )
   expect_silent(.smoothing(runif(200), method = "median"))
   expect_silent(.smoothing(runif(100), k = 4, method = "mean"))
-  expect_error(Luminescence:::.smoothing(runif(100), method = "test"))
+  expect_silent(.smoothing(runif(100), k = 4, method = "median"))
+  expect_error(.smoothing(runif(100), method = "error"),
+               "'method' should be one of 'mean' or 'median'")
+  expect_error(.smoothing(runif(100), align = "error"),
+               "'align' should be one of 'right', 'center' or 'left'")
+
+  ## .normalise_curve() -----------------------------------------------------
+  data <- runif(100)
+  expect_equal(data, .normalise_curve(data, FALSE))
+  expect_equal(.normalise_curve(data, TRUE), .normalise_curve(data, "max"))
+  expect_silent(.normalise_curve(data, "last"))
+  expect_silent(.normalise_curve(data, "huot"))
+
+  data[100] <- 0
+  expect_warning(.normalise_curve(data, "last"),
+                 "Curve normalisation produced Inf/NaN values, values replaced")
 
   # fancy_scientific ()--------------------------------------------------------------------------
   plot(seq(1e10, 1e20, length.out = 10),1:10, xaxt = "n")
@@ -58,6 +68,36 @@ test_that("Test internals", {
   plot(1:length(y), y, yaxt = "n", log = "y")
   expect_silent(Luminescence:::.add_fancy_log_axis(side = 2, las = 1))
   expect_null(.add_fancy_log_axis(side = 1, las = 1))
+
+  # .get_keyword_coordinates() ----------------------------------------------
+  xlim <- c(0, 5)
+  ylim <- c(2, 10)
+  coords <- .get_keyword_coordinates(xlim = xlim, ylim = ylim)
+  expect_type(coords, "list")
+  expect_named(coords, c("pos", "adj"))
+  expect_length(coords, 2)
+  expect_equal(coords$pos,
+               c(0, 10))
+  expect_equal(.get_keyword_coordinates(pos = c(1, 2), xlim, ylim)$pos,
+               c(1, 2))
+  expect_equal(.get_keyword_coordinates(pos = "topleft", xlim, ylim)$pos,
+               c(0, 10))
+  expect_equal(.get_keyword_coordinates(pos = "top", xlim, ylim)$pos,
+               c(2.5, 10))
+  expect_equal(.get_keyword_coordinates(pos = "topright", xlim, ylim)$pos,
+               c(5, 10))
+  expect_equal(.get_keyword_coordinates(pos = "left", xlim, ylim)$pos,
+               c(0, 6))
+  expect_equal(.get_keyword_coordinates(pos = "center", xlim, ylim)$pos,
+               c(2.5, 6))
+  expect_equal(.get_keyword_coordinates(pos = "right", xlim, ylim)$pos,
+               c(5, 6))
+  expect_equal(.get_keyword_coordinates(pos = "bottomleft", xlim, ylim)$pos,
+               c(0, 2))
+  expect_equal(.get_keyword_coordinates(pos = "bottom", xlim, ylim)$pos,
+               c(2.5, 2))
+  expect_equal(.get_keyword_coordinates(pos = "bottomright", xlim, ylim)$pos,
+               c(5, 2))
 
   # .create_StatisticalSummaryText() ------------------------------------------------------------
   stats <- calc_Statistics(data.frame(1:10,1:10))
@@ -85,6 +125,13 @@ test_that("Test internals", {
       c(list(set_RLum("RLum.Analysis"), set_RLum("RLum.Analysis")), 2), class = "RLum.Analysis"),
     "list")
 
+  # .rm_NULL_elements() -----------------------------------------------------------
+  expect_type(.rm_NULL_elements(list("a", NULL)),
+    "list")
+  t <- expect_type(.rm_NULL_elements(list(NULL, NULL)),
+              "list")
+  expect_length(t, 0)
+
   # .matrix_binning() ---------------------------------------------------------------------------
   m <- matrix(data = c(rep(1:20, each = 20)), ncol = 20, nrow = 20)
   rownames(m) <- 1:nrow(m)
@@ -92,7 +139,7 @@ test_that("Test internals", {
 
     ##crash the function
     expect_error(Luminescence:::.matrix_binning("none matrix"),
-                 regexp = "Input is not of class 'matrix'!")
+                 "'m' should be of class 'matrix'")
 
     ##test operation modes and arguments
     expect_type(Luminescence:::.matrix_binning(m, bin_size = 4, bin_col = FALSE), "integer")
@@ -189,25 +236,201 @@ test_that("Test internals", {
   expect_error(SW(.throw_error("error message")),
                "error message")
 
+  ## .validate_args() -------------------------------------------------------
+  fun1 <- function(arg) {
+    .validate_args(arg, c("val1", "val2", "val3"), null.ok = TRUE)
+  }
+  expect_silent(fun1(NULL))
+  expect_equal(fun1(arg = "val1"), "val1")
+  expect_equal(fun1(arg = c("val1", "val2")), "val1")
+  expect_equal(fun1(arg = c("val3", "val2")), "val3")
+  expect_error(fun1(arg = c("error", "val1")),
+               "[test()] 'arg' contains multiple values but not all of them",
+               fixed = TRUE)
+  expect_error(fun1(arg = "error"),
+               "[test()] 'arg' should be one of 'val1', 'val2', 'val3' or NULL",
+               fixed = TRUE)
+
+  fun2 <- function(arg = c("val1", "val2", "val3")) {
+    .validate_args(arg, c("val1", "val2", "val3"), name = "other_name")
+  }
+  expect_equal(fun2(), "val1")
+  expect_error(fun2(arg = NULL),
+               "[test()] 'other_name' should be one of 'val1', 'val2' or 'val3'",
+               fixed = TRUE)
+  expect_error(fun2(arg = "error"),
+               "[test()] 'other_name' should be one of 'val1', 'val2' or 'val3'",
+               fixed = TRUE)
+
+  fun3 <- function(arg) {
+    .validate_args(arg, c("val1", "val2"),
+                   extra = "'other.val'", null.ok = FALSE)
+  }
+  expect_error(fun3(arg = "error"),
+               "[test()] 'arg' should be one of 'val1', 'val2' or 'other.val'",
+               fixed = TRUE)
+
+  fun4 <- function(arg) {
+    .validate_args(arg, c("val1", "val2"),
+                   extra = "'other.val'", null.ok = TRUE)
+  }
+  expect_error(fun4(arg = "error"),
+               "[test()] 'arg' should be one of 'val1', 'val2', 'other.val' or NULL",
+               fixed = TRUE)
+
+  fun.err <- function(arg) {
+    .validate_args(arg)
+  }
+  expect_error(fun.err("val1"),
+               "is missing, with no default")
+
+  ## .validate_class() ------------------------------------------------------
+  fun1 <- function(arg) {
+    .validate_class(arg, "data.frame")
+  }
+  fun2 <- function(arg) {
+    .validate_class(arg, "data.frame", throw.error = FALSE)
+  }
+  expect_true(fun1(iris))
+  expect_true(.validate_class(iris, c("data.frame", "integer")))
+  expect_true(.validate_class(iris, c("data.frame", "integer"),
+                              throw.error = FALSE))
+  expect_warning(expect_false(.validate_class(arg <- NULL, "data.frame",
+                                   throw.error = FALSE)),
+      "'arg' should be of class 'data.frame'")
+  expect_error(fun1(),
+               "'arg' should be of class 'data.frame'")
+  expect_error(fun1(NULL),
+               "'arg' should be of class 'data.frame'")
+  expect_error(.validate_class(test <- 1:5),
+               "is missing, with no default")
+  expect_error(.validate_class(test <- 1:5, "data.frame"),
+               "'test' should be of class 'data.frame'")
+  expect_error(.validate_class(test <- 1:5, c("list", "data.frame", "numeric")),
+               "'test' should be of class 'list', 'data.frame' or 'numeric'")
+  expect_error(.validate_class(test <- 1:5, c("list", "data.frame")),
+               "'test' should be of class 'list' or 'data.frame'")
+  expect_error(.validate_class(test <- 1:5, c("list", "data.frame"),
+                               extra = "another type"),
+               "'test' should be of class 'list', 'data.frame' or another")
+  expect_error(.validate_class(test <- 1:5, c("list", "data.frame"),
+                               name = "'other_name'"),
+               "'other_name' should be of class 'list' or 'data.frame'")
+  expect_warning(fun2(),
+                 "'arg' should be of class 'data.frame'")
+
+  ## .validate_not_empty() --------------------------------------------------
+  expect_true(.validate_not_empty(letters, "vector"))
+
+  expect_error(.validate_not_empty(test <- c(), "vector"),
+               "'test' cannot be an empty vector")
+  expect_error(.validate_not_empty(test <- list()),
+               "'test' cannot be an empty list")
+  expect_error(.validate_not_empty(test <- numeric(0)),
+               "'test' cannot be an empty numeric")
+  expect_error(.validate_not_empty(test <- data.frame()),
+               "'test' cannot be an empty data.frame")
+  expect_error(.validate_not_empty(iris[0, ]),
+               "'iris' cannot be an empty data.frame")
+  expect_error(.validate_not_empty(iris[, 0]),
+               "'iris' cannot be an empty data.frame")
+  expect_error(.validate_not_empty(test <- matrix(NA, 0, 5)),
+               "'test' cannot be an empty matrix")
+  expect_error(.validate_not_empty(test <- matrix(NA, 5, 0)),
+               "'test' cannot be an empty matrix")
+  expect_error(.validate_not_empty(test <- set_RLum("RLum.Analysis")),
+               "'test' cannot be an empty RLum.Analysis")
+  expect_error(.validate_not_empty(list(), "list", name = "'other_name'"),
+               "'other_name' cannot be an empty list")
+  expect_warning(expect_false(.validate_not_empty(test <- list(), "list",
+                                                  throw.error = FALSE)),
+                 "'test' cannot be an empty list")
+
+  ## .validate_length() -----------------------------------------------------
+  expect_true(.validate_length(letters, 26))
+  expect_error(.validate_length(letters),
+               "is missing, with no default")
+  expect_error(.validate_length(letters, 25),
+               "'letters' should have length 25")
+  expect_error(.validate_length(letters, 25, name = "'other_name'"),
+               "'other_name' should have length 25")
+  expect_warning(expect_false(.validate_length(letters, 25, throw.error = FALSE)),
+                 "'letters' should have length 25")
+
   ## .validate_positive_scalar() --------------------------------------------
+  expect_silent(.validate_positive_scalar(int = TRUE))
   expect_silent(.validate_positive_scalar(1.3))
   expect_silent(.validate_positive_scalar(2, int = TRUE))
   expect_silent(.validate_positive_scalar(NULL, int = TRUE, null.ok = TRUE))
 
   expect_error(.validate_positive_scalar(test <- "a"),
-               "'test' must be a positive scalar")
+               "'test' should be a positive scalar")
   expect_error(.validate_positive_scalar(test <- NULL),
-               "'test' must be a positive scalar")
+               "'test' should be a positive scalar")
   expect_error(.validate_positive_scalar(iris),
-               "'iris' must be a positive scalar")
-  expect_error(.validate_positive_scalar(1:2, name = "var"),
-               "'var' must be a positive scalar")
-  expect_error(.validate_positive_scalar(0, name = "var"),
-               "'var' must be a positive scalar")
-  expect_error(.validate_positive_scalar(-1, name = "var"),
-               "'var' must be a positive scalar")
-  expect_error(.validate_positive_scalar(1.5, int = TRUE, name = "var"),
-               "'var' must be a positive integer")
+               "'iris' should be a positive scalar")
+  expect_error(.validate_positive_scalar(1:2, name = "'var'"),
+               "'var' should be a positive scalar")
+  expect_error(.validate_positive_scalar(0, name = "'var'"),
+               "'var' should be a positive scalar")
+  expect_error(.validate_positive_scalar(-1, name = "'var'"),
+               "'var' should be a positive scalar")
+  expect_error(.validate_positive_scalar(1.5, int = TRUE, name = "'var'"),
+               "'var' should be a positive integer")
+  expect_error(.validate_positive_scalar(NA, int = TRUE, name = "The variable"),
+               "The variable should be a positive integer")
+
+  ## .validate_logical_scalar() ---------------------------------------------
+  expect_silent(.validate_logical_scalar())
+  expect_silent(.validate_logical_scalar(TRUE))
+  expect_silent(.validate_logical_scalar(FALSE))
+  expect_silent(.validate_logical_scalar(NULL, null.ok = TRUE))
+
+  expect_error(.validate_logical_scalar(test <- "a"),
+               "'test' should be a single logical value")
+  expect_error(.validate_logical_scalar(test <- NULL),
+               "'test' should be a single logical value")
+  expect_error(.validate_logical_scalar(iris),
+               "'iris' should be a single logical value")
+  expect_error(.validate_logical_scalar(c(TRUE, FALSE), name = "'var'"),
+               "'var' should be a single logical value")
+  expect_error(.validate_logical_scalar(0, name = "'var'"),
+               "'var' should be a single logical value")
+  expect_error(.validate_logical_scalar(NA, name = "The variable"),
+               "The variable should be a single logical value")
+
+  ## .require_suggested_package() -------------------------------------------
+  expect_true(.require_suggested_package("utils"))
+  expect_error(.require_suggested_package("error"),
+               "This function requires the 'error' package: to install it")
+  expect_error(.require_suggested_package("error",
+                                          reason = "Reporting a good error"),
+               "Reporting a good error requires the 'error' package")
+  expect_warning(
+      expect_false(.require_suggested_package("error", throw.error = FALSE),
+                   "This function requires the 'error' package: to install it"))
+
+  ## .listify() -------------------------------------------------------------
+  expect_equal(.listify(1, length = 3),
+               list(1, 1, 1))
+  expect_equal(.listify(letters, length = 5),
+               .listify(list(letters), length = 5))
+
+
+  ## .collapse() ------------------------------------------------------------
+  expect_equal(.collapse(1:3),
+               "'1', '2', '3'")
+  expect_equal(.collapse(1:3, quote = FALSE),
+               "1, 2, 3")
+  expect_equal(.collapse(NULL), "")
+
+  ## .shorten_filename() ----------------------------------------------------
+  expect_equal(.shorten_filename("/path/to/filename"),
+               "/path/to/filename")
+  expect_equal(.shorten_filename("/path/to/a_somewhat_longer_filename",
+                                 max.width = 27),
+               "/path/…what_longer_filename")
+
 
   ## C++ code ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   ##
@@ -227,4 +450,56 @@ test_that("Test internals", {
       TOLOFF = 0
     )
   )
+  ## cover NA case
+  expect_type(
+    Luminescence:::src_create_RLumDataCurve_matrix(
+      DATA = 1:100,
+      VERSION = 4,
+      NPOINTS = 0,
+      LTYPE = "OSL",
+      LOW = 0,
+      HIGH = 500,
+      AN_TEMP = 0,
+      TOLDELAY = 0,
+      TOLON = 0,
+      TOLOFF = 0), type = "double")
+
+  ## case for a delayed hit ramp start
+  expect_type(
+    Luminescence:::src_create_RLumDataCurve_matrix(
+      DATA = 1:100,
+      VERSION = 4,
+      NPOINTS = 0,
+      LTYPE = "OSL",
+      LOW = 0,
+      HIGH = 500,
+      AN_TEMP = 0,
+      TOLDELAY = 10,
+      TOLON = 0,
+      TOLOFF = 0), type = "double")
+  ## case for a delayed hit ramp start
+  expect_type(
+    Luminescence:::src_create_RLumDataCurve_matrix(
+      DATA = 1:100,
+      VERSION = 4,
+      NPOINTS = 0,
+      LTYPE = "OSL",
+      LOW = 0,
+      HIGH = 500,
+      AN_TEMP = 100,
+      TOLDELAY = 0,
+      TOLON = 0,
+      TOLOFF = 0), type = "double")
+  ## generate strange curve and more tests
+  expect_type(Luminescence:::src_create_RLumDataCurve_matrix(
+    DATA = 1:100,
+    VERSION = 4,
+    NPOINTS = 100,
+    LTYPE = "TL",
+    LOW = 0,
+    HIGH = 500,
+    AN_TEMP = 200,
+    TOLDELAY = 10,
+    TOLON = 10,
+    TOLOFF = 400),  type = "double")
 })

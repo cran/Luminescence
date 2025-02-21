@@ -10,11 +10,9 @@ calc_FiniteMixture(
   sigmab,
   n.components,
   grain.probability = FALSE,
-  dose.scale,
   pdf.weight = TRUE,
   pdf.sigma = "sigmab",
   pdf.colors = "gray",
-  pdf.scale,
   plot.proportions = TRUE,
   plot = TRUE,
   ...
@@ -38,10 +36,6 @@ log-likelihood) is provided.}
 \item{grain.probability}{\link{logical} (\emph{with default}):
 prints the estimated probabilities of which component each grain is in}
 
-\item{dose.scale}{\link{numeric}:
-manually set the scaling of the y-axis of the first plot with a vector
-in the form of \code{c(min, max)}}
-
 \item{pdf.weight}{\link{logical} (\emph{with default}):
 weight the probability density functions by the components proportion (applies only
 when a vector is provided for \code{n.components})}
@@ -53,17 +47,14 @@ deviation (i.e. \code{sigmab}) as assumed by the FFM. Alternatively,
 parameter of the normal distribution}
 
 \item{pdf.colors}{\link{character} (\emph{with default}):
-colour coding of the components in the the plot.
+colour coding of the components in the plot.
 Possible options are \code{"gray"}, \code{"colors"} and \code{"none"}}
-
-\item{pdf.scale}{\link{numeric}:
-manually set the max density value for proper scaling of the x-axis of the first plot}
 
 \item{plot.proportions}{\link{logical} (\emph{with default}):
 plot \link[graphics:barplot]{graphics::barplot} showing the proportions of components if
 \code{n.components} a vector with a length > 1 (e.g., \code{n.components = c(2:3)})}
 
-\item{plot}{\link{logical} (\emph{with default}):  plot output}
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the  plot output.}
 
 \item{...}{further arguments to pass. See details for their usage.}
 }
@@ -87,7 +78,7 @@ If a vector for \code{n.components} is provided (e.g.  \code{c(2:8)}),
 \code{mle} and \code{grain.probability} are lists containing matrices of the
 results for each iteration of the model.
 
-The output should be accessed using the function \link{get_RLum}
+The output should be accessed using the function \link{get_RLum}.
 }
 \description{
 This function fits a k-component mixture to a De distribution with differing
@@ -111,7 +102,7 @@ Indications of overfitting are:
 \strong{Plot}
 
 If a vector (\code{c(k.min:k.max)}) is provided
-for \code{n.components} a plot is generated showing the the k components
+for \code{n.components} a plot is generated showing the k components
 equivalent doses as normal distributions. By default \code{pdf.weight} is
 set to \code{FALSE}, so that the area under each normal distribution is
 always 1. If \code{TRUE}, the probability density functions are weighted by
@@ -124,7 +115,7 @@ determined by a common \code{sigmab} (see \code{pdf.sigma}). For
 \code{pdf.sigma = "se"} the standard error of each component is taken
 instead.\cr
 The stacked \link[graphics:barplot]{graphics::barplot} shows the proportion of each component (in
-per cent) calculated by the FFM. The last plot shows the achieved BIC scores
+per cent) calculated by the FMM. The last plot shows the achieved BIC scores
 and maximum log-likelihood estimates for each iteration of k.
 }
 \section{Function version}{
@@ -149,7 +140,7 @@ calc_FiniteMixture(ExampleData.DeValues$CA1,
 ## the following lines to make the example work.
 FMM<- calc_FiniteMixture(ExampleData.DeValues$CA1,
                          sigmab = 0.2, n.components = c(2:4),
-                         pdf.weight = TRUE, dose.scale = c(0, 100))
+                         pdf.weight = TRUE)
 
 ## show structure of the results
 FMM
@@ -161,7 +152,7 @@ get_RLum(object = FMM, data.object = "components")
 } 
 
 \section{How to cite}{
-Burow, C., 2024. calc_FiniteMixture(): Apply the finite mixture model (FMM) after Galbraith (2005) to a given De distribution. Function version 0.4.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. calc_FiniteMixture(): Apply the finite mixture model (FMM) after Galbraith (2005) to a given De distribution. Function version 0.4.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

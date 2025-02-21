@@ -1,3 +1,4 @@
+## load data
 set.seed(1)
 data(ExampleData.BINfileData, envir = environment())
 object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1)
@@ -11,7 +12,6 @@ sequence.structure <-
 
 object <-  sapply(1:length(sequence.structure), function(x) {
   object[[sequence.structure[x]]]
-
 })
 
 object <-
@@ -30,12 +30,15 @@ results <- analyse_pIRIRSequence(
   sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
   main = "Pseudo pIRIR data set based on quartz OSL",
   plot = TRUE,
-  plot.single = TRUE,
+  plot_singlePanels = TRUE,
   verbose = FALSE
 )
 
-## plot.single = FALSE && plot == TRUE
-suppressWarnings( # warnings thrown by analyse_SAR.CWOSL and plot_GrowthCurve
+## check plot_RLum.Results
+expect_silent(plot_RLum.Results(results))
+
+## plot_singlePanels = FALSE && plot == TRUE
+suppressWarnings( # warnings thrown by analyse_SAR.CWOSL and fit_DoseResponseCurve
   analyse_pIRIRSequence(
     object,
     signal.integral.min = c(1, 2),
@@ -46,14 +49,14 @@ suppressWarnings( # warnings thrown by analyse_SAR.CWOSL and plot_GrowthCurve
     sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
     main = "Pseudo pIRIR data set based on quartz OSL",
     plot = TRUE,
-    plot.single = FALSE,
+    plot_singlePanels = FALSE,
     verbose = FALSE
   )
 )
 })
 
 test_that("check plot stuff", {
-  ## it show throw a warning about the plot size
+  ## it should throw a warning about the plot size
   expect_warning(analyse_pIRIRSequence(
     object,
     signal.integral.min = 1,
@@ -64,12 +67,14 @@ test_that("check plot stuff", {
     sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
     main = "Pseudo pIRIR data set based on quartz OSL",
     plot = TRUE,
-    plot.single = FALSE,
+    plot_singlePanels = FALSE,
     verbose = FALSE),
     "[analyse_pIRIRSequence()] Argument 'plot' reset to 'FALSE'",
     fixed = TRUE)
-  
-  ## here it should not throw any warning because we used plot.single = TRUE
+
+  ## this should not throw any warning because we print to a large enough pdf
+  pdf.out <- tempfile(fileext = ".pdf")
+  pdf(pdf.out, width = 20, height = 20)
   expect_silent(analyse_pIRIRSequence(
     object,
     signal.integral.min = 1,
@@ -80,27 +85,79 @@ test_that("check plot stuff", {
     sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
     main = "Pseudo pIRIR data set based on quartz OSL",
     plot = TRUE,
-    plot.single = TRUE,
+    plot_singlePanels = FALSE,
     verbose = FALSE))
+  dev.off()
+
+  ## more coverage: get n.loops > 2
+  pdf(pdf.out, width = 25, height = 25)
+  suppressWarnings(analyse_pIRIRSequence(
+      object,
+      signal.integral.min = 1,
+      signal.integral.max = 2,
+      background.integral.min = 900,
+      background.integral.max = 1000,
+      fit.method = "EXP",
+      sequence.structure = c("TL", paste0("pseudoIRSL", 1:6)),
+      main = "Pseudo pIRIR data set based on quartz OSL",
+      plot = TRUE,
+      verbose = FALSE))
+  dev.off()
+  unlink(pdf.out)
+
+  ## this should not throw any warning with plot_singlePanels = TRUE
+  expect_silent(analyse_pIRIRSequence(
+    object,
+    signal.integral.min = 1,
+    signal.integral.max = 2,
+    background.integral.min = 900,
+    background.integral.max = 1000,
+    fit.method = "EXP",
+    sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
+    main = "Pseudo pIRIR data set based on quartz OSL",
+    plot = TRUE,
+    plot_singlePanels = TRUE,
+    verbose = FALSE))
+
+  suppressWarnings( # duplicated plot.single warnings from sanalyse_SAR.CWOSL()
+  expect_warning(analyse_pIRIRSequence(
+    object,
+    signal.integral.min = 1,
+    signal.integral.max = 2,
+    background.integral.min = 900,
+    background.integral.max = 1000,
+    fit.method = "EXP",
+    plot = TRUE,
+    plot.single = TRUE,
+    verbose = FALSE),
+    "'plot.single' is deprecated, use 'plot_singlePanels' instead")
+  )
 })
 
 test_that("input validation", {
-  expect_error(analyse_pIRIRSequence(),
-               "No value set for 'object'")
   expect_error(analyse_pIRIRSequence("test"),
-               "Input object is not of type 'RLum.Analysis'")
+               "'object' should be of class 'RLum.Analysis' or 'list'")
+  expect_error(analyse_pIRIRSequence(list(data.frame())),
+               "All elements of 'object' should be of class 'RLum.Analysis'")
   expect_error(analyse_pIRIRSequence(list("test"),
                                      signal.integral.min = 1,
                                      signal.integral.max = 2,
                                      background.integral.min = 900,
                                      background.integral.max = 1000),
-               "Input object is not of type 'RLum.Analysis'")
+               "'object' should be of class 'RLum.Analysis'")
   expect_error(analyse_pIRIRSequence(object,
                                      signal.integral.min = 1,
                                      signal.integral.max = 2,
                                      background.integral.min = 900,
                                      background.integral.max = 1000,
-                                     sequence.structure = "error"),
+                                     sequence.structure = "TL"),
+               "'sequence.structure' should contain at least one IR step")
+  expect_error(analyse_pIRIRSequence(object,
+                                     signal.integral.min = 1,
+                                     signal.integral.max = 2,
+                                     background.integral.min = 900,
+                                     background.integral.max = 1000,
+                                     sequence.structure = c("IR50", "error")),
                "'error' not allowed in 'sequence.structure'")
 
   SW({
@@ -145,7 +202,7 @@ test_that("input validation", {
                                        background.integral.min = 900,
                                        background.integral.max = 1000,
                                        plot = FALSE),
-                 "The following unrecognised record types have been removed: error")
+                 "The following unrecognised record types have been removed:")
 
   object.noTL <- subset(object, recordType != "TL")
   expect_warning(analyse_pIRIRSequence(list(object.noTL),

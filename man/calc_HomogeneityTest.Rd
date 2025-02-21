@@ -25,12 +25,10 @@ following elements:
 \item{args}{\link{list} used arguments}
 \item{call}{\link{call} the function call}
 
-The output should be accessed using the function \link{get_RLum}
+The output should be accessed using the function \link{get_RLum}.
 }
 \description{
 A simple homogeneity test for De estimates
-}
-\details{
 For details see Galbraith (2003).
 }
 \section{Function version}{
@@ -57,7 +55,7 @@ calc_HomogeneityTest(df)
 } 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2024. calc_HomogeneityTest(): Apply a simple homogeneity test after Galbraith (2003). Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2025. calc_HomogeneityTest(): Apply a simple homogeneity test after Galbraith (2003). Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -65,7 +63,7 @@ Galbraith, R.F., 2003. A simple homogeneity test for estimates
 of dose obtained using OSL. Ancient TL 21, 75-77.
 }
 \seealso{
-\link{pchisq}
+\link[stats:Chisquare]{stats::pchisq}
 }
 \author{
 Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer,

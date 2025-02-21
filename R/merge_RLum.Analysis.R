@@ -51,29 +51,27 @@
 #' @export
 merge_RLum.Analysis<- function(
   objects
-){
+) {
+  .set_function_name("merge_RLum.Analysis")
+  on.exit(.unset_function_name(), add = TRUE)
 
-  # Ingegrity checks ----------------------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(objects, "list")
+  .validate_not_empty(objects)
 
   ##check if object is of class RLum
-  temp.class.test <- sapply(1:length(objects), function(x){
-
-    if(is(objects[[x]], "RLum") == FALSE){
-      stop("[merge_RLum.Analysis()]: At least element #", x,
-           " is not of class 'RLum' or a derivative class!", call. = FALSE)
-    }
-
-    ##provide class of objects
-    is(objects[[x]])[1]
-
+  temp.class.test <- sapply(objects, function(x) {
+    .validate_class(x, "RLum",
+                    name = "All elements of 'object'")
+    class(x)[1]
   })
 
   ##check if at least one object of RLum.Analysis is provided
   if(!"RLum.Analysis"%in%temp.class.test){
-    stop("[merge_RLum.Analysis()] At least one input object in the list ",
-         "has to be of class 'RLum.Analysis'!")
+    .throw_error("At least one input object in the list ",
+                 "has to be of class 'RLum.Analysis'")
   }
-
 
 
   # Merge objects -------------------------------------------------------------------------------
@@ -85,34 +83,25 @@ merge_RLum.Analysis<- function(
   ##(1) collect all elements in a list
   temp.element.list <- unlist(lapply(1:length(objects), function(x){
 
+    .validate_class(objects[[x]], c("RLum.Analysis", "RLum.Data"))
+
     ##Depending on the element the right functions is used
-    if(is(objects[[x]])[1] == "RLum.Analysis"){
+    if (inherits(objects[[x]], "RLum.Analysis")) {
 
       ##grep export meta data from the first RLum.Analysis objects an write
       if(!exists("temp.meta.data.first")){
 
         assign("temp.meta.data.first", objects[[x]]@protocol, envir = temp.environment)
-
       }
 
       ##return to list
       get_RLum(objects[[x]])
 
-    }else if((is(objects[[x]])[1] == "RLum.Data.Curve") |
-               (is(objects[[x]])[1] == "RLum.Data.Image") |
-               (is(objects[[x]])[1] == "RLum.Data.Spectrum")){
-
+    } else {
+      ## RLum.Data.Curve, RLum.Data.Image, RLum.Data.Spectrum
       ##return to list
       objects[[x]]
-
-    }else{
-
-      stop("[merge_RLum.Analysis()] Object of class '",
-           class(objects[[x]]), "' not supported!")
-
     }
-
-
   }))
 
 
@@ -133,5 +122,4 @@ merge_RLum.Analysis<- function(
 
   # Return object -------------------------------------------------------------------------------
   return( temp.new.RLum.Analysis)
-
 }

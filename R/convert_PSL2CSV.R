@@ -57,15 +57,14 @@ convert_PSL2CSV <- function(
   extract_raw_data = FALSE,
   single_table = FALSE,
   ...
+) {
+  .set_function_name("convert_PSL2CSV")
+  on.exit(.unset_function_name(), add = TRUE)
 
-){
+  ## Integrity checks -------------------------------------------------------
 
-  # General tests -------------------------------------------------------------------------------
-  ##file is missing?
-  if(missing(file)){
-    stop("[convert_PSL2CSV()] 'file' is missing!", call. = FALSE)
-
-  }
+  .validate_class(file, c("character", "RLum"))
+  .validate_not_empty(file)
 
   ##set input arguments
   convert_PSL2R_settings.default <- list(
@@ -73,7 +72,8 @@ convert_PSL2CSV <- function(
     as_decay_curve = TRUE,
     smooth = FALSE,
     merge = if(single_table) TRUE else FALSE,
-    export = TRUE
+    export = TRUE,
+    verbose = TRUE
   )
 
   ##modify list on demand
@@ -86,12 +86,11 @@ convert_PSL2CSV <- function(
       drop_bg = convert_PSL2R_settings$drop_bg,
       as_decay_curve = convert_PSL2R_settings$as_decay_curve,
       smooth = convert_PSL2R_settings$smooth,
-      merge = convert_PSL2R_settings$merge
-
+      merge = convert_PSL2R_settings$merge,
+      verbose = convert_PSL2R_settings$verbose
    )
   }else{
     object <- file
-
   }
 
   ## try to extract file name from object ... this will be needed later
@@ -106,7 +105,6 @@ convert_PSL2CSV <- function(
 
     names(psl_raw) <- names(object)
     object <- psl_raw
-
   }
 
   # single_table ------------------------------------------------------------
@@ -118,7 +116,6 @@ convert_PSL2CSV <- function(
 
     } else {
       l <- object
-
     }
 
     ## get max row number
@@ -145,7 +142,6 @@ convert_PSL2CSV <- function(
         rep(names(l), each = ncol(l[[1]])),
         "_",
         rep(colnames(l[[1]]), length(l)))
-
     }
 
     ## overwrite object
@@ -154,7 +150,6 @@ convert_PSL2CSV <- function(
     ## if possible, provide the file name as attribute
     if(!inherits(filename, "try-error"))
       attr(object, "filename") <- gsub(".", "_", filename, fixed = TRUE)
-
   }
 
   # Export to CSV -------------------------------------------------------------------------------
@@ -176,7 +171,5 @@ convert_PSL2CSV <- function(
 
   }else{
     do.call("write_RLum2CSV", arguments)
-
   }
-
 }

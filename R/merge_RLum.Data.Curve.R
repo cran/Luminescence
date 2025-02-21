@@ -1,18 +1,12 @@
-#' Merge function for RLum.Data.Curve S4 class objects
+#' @title Merge function for RLum.Data.Curve S4 class objects
 #'
-#' Function allows merging of RLum.Data.Curve objects in different ways
+#' @description This function allows to merge [RLum.Data.Curve-class] objects in different
+#' ways without modifying the original objects. Merging is always applied on
+#' the 2nd column of the object's data matrix.
 #'
-#' This function simply allowing to merge [RLum.Data.Curve-class]
-#' objects without touching the objects itself. Merging is always applied on
-#' the 2nd column of the data matrix of the object.
+#' **Supported merge operations are:**
 #'
-#' **Supported merge operations are [RLum.Data.Curve-class]**
-#'
-#' `"sum"`
-#'
-#' All count values will be summed up using the function [rowSums].
-#'
-#' `"mean"`
+#' `"mean"` (default)
 #'
 #' The mean over the count values is calculated using the function
 #' [rowMeans].
@@ -21,6 +15,10 @@
 #'
 #' The median over the count values is calculated using the function
 #' [matrixStats::rowMedians].
+#'
+#' `"sum"`
+#'
+#' All count values will be summed up using the function [rowSums].
 #'
 #' `"sd"`
 #'
@@ -61,10 +59,11 @@
 #' Values of the first object are divided by row sums of the last objects.
 #'
 #' @param object [list] of [RLum.Data.Curve-class] (**required**):
-#' list of S4 objects of class `RLum.Curve`.
+#' list of objects to be merged.
 #'
 #' @param merge.method [character] (**required**):
-#' method for combining of the objects, e.g.  `'mean'`, `'sum'`, see details for
+#' method for combining of the objects, e.g. `'mean'` (default), `'median'`,
+#' `'sum'`, see details for
 #' further information and allowed methods.  Note: Elements in slot info will
 #' be taken from the first curve in the list.
 #'
@@ -78,7 +77,7 @@
 #'
 #' @note
 #' The information from the slot `recordType` is taken from the first
-#' [RLum.Data.Curve-class] object in the input list. The slot
+#' object in the input list. The slot
 #' 'curveType' is filled with the name `merged`.
 #'
 #' @section S3-generic support:
@@ -97,7 +96,6 @@
 #' @keywords utilities internal
 #'
 #' @examples
-#'
 #'
 #' ##load example data
 #' data(ExampleData.XSYG, envir = environment())
@@ -125,55 +123,59 @@ merge_RLum.Data.Curve<- function(
   .set_function_name("merge_RLum.Data.Curve")
   on.exit(.unset_function_name(), add = TRUE)
 
-# Integrity checks ----------------------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(object, "list")
 
   ##(1) check if object is of class RLum.Data.Curve
-  temp.recordType.test <- sapply(1:length(object), function(x){
-    if(!inherits(object[[x]], "RLum.Data.Curve")){
-      .throw_error("At least object ", x, " is not of class 'RLum.Data.Curve'")
-    }
-
-    ##provide class of objects
-    return(object[[x]]@recordType)
-
+  num.objects <- length(object)
+  temp.recordType.test <- sapply(object, function(x) {
+    .validate_class(x, "RLum.Data.Curve",
+                    name = "All elements of 'object'")
+    return(x@recordType)
   })
 
   ##(2) Check for similar record types
   record.types <- unique(temp.recordType.test)
   if (length(record.types) > 1) {
     .throw_error("Only similar record types are supported; you are trying to merge: ",
-                 paste0("'", record.types, "'", collapse = ", "))
+                 .collapse(record.types))
   }
 
-# Merge objects ----------------------------------------------------------------
+  merge.method <- .validate_args(merge.method,
+                                 c("mean", "median", "sum", "sd", "var", "max",
+                                   "min", "append", "-", "*", "/"))
+
+  ## Merge objects ----------------------------------------------------------
   ##merge data objects
   ##problem ... how to handle data with different resolution or length?
 
   ##(1) build new data matrix
-    ##first find shortest object
-    check.length <- vapply(object, function(x) nrow(x@data), numeric(1))
+  ## first find the shortest object
+  check.rows <- vapply(object, function(x) nrow(x@data), numeric(1))
+  if (length(check.rows) < 2) {
+    .throw_error("'object' contains no data")
+  }
+  num.rows <- min(check.rows)
 
-    ## do something about it
-    temp.matrix  <- .warningCatcher(sapply(1:length(object), function(x){
-      ##check if the objects are of equal length
-      if (length(unique(check.length)) != 1) {
-        ##but we have to at least check the resolution (roughly)
-        if (round(diff(object[[x]]@data[,1]),1)[1] != round(diff(object[[1]]@data[,1]),1)[1])
-          .throw_error("The objects do not seem to have the same channel resolution")
+  ## channel resolution of the first object: we need to round as there may
+  ## otherwise be numerical artefacts that would make the step not unique
+  step <- round(diff(object[[1]]@data[, 1]), 1)[1]
 
-        ## either way, throw a warning
-        .throw_warning("The number of channels between the curves differs. ",
-                       "Resulting curve has the length of shortest curve.")
+  ## extract the curve values from each object
+  temp.matrix <- sapply(1:num.objects, function(x) {
+    ## check the resolution (roughly)
+    if (round(diff(object[[x]]@data[, 1]), 1)[1] != step)
+      .throw_error("The objects do not seem to have the same channel resolution")
+    ## limit all objects to the shortest one
+    object[[x]]@data[1:num.rows, 2]
+  })
 
-      ##if this is OK, we can continue and shorten the rest of the objects
-      return(object[[x]]@data[1:min(check.length),2])
-
-    }else{
-      object[[x]]@data[,2]
-
-    }
-
-  }))
+  ## throw the warning only now to avoid printing it in case of error
+  if (length(unique(check.rows)) != 1) {
+    .throw_warning("The number of channels differs between the curves, the ",
+                   "merged curve will have the length of the shortest object")
+  }
 
   ##(2) apply selected method for merging
   if(merge.method == "sum"){
@@ -201,72 +203,63 @@ merge_RLum.Data.Curve<- function(
     temp.matrix <- sapply(temp.matrix, c)
 
   }else if(merge.method == "-"){
-    if(ncol(temp.matrix) > 2){
+    if (num.objects > 2) {
       temp.matrix  <- temp.matrix[,1] - rowSums(temp.matrix[,-1])
     }else{
       temp.matrix <-  temp.matrix[,1] - temp.matrix[,2]
     }
-
   }else if(merge.method == "*"){
-    if(ncol(temp.matrix) > 2){
+    if (num.objects > 2) {
       temp.matrix  <- temp.matrix[,1] * rowSums(temp.matrix[,-1])
     }else{
       temp.matrix <-  temp.matrix[,1] * temp.matrix[,2]
     }
-
   }else if(merge.method == "/"){
-    if(ncol(temp.matrix) > 2){
+    if (num.objects > 2) {
       temp.matrix  <- temp.matrix[,1] / rowSums(temp.matrix[,-1])
     }else{
       temp.matrix <-  temp.matrix[,1] / temp.matrix[,2]
     }
 
-    ##get index of inf values
+    ## replace infinities with 0 and throw warning
     id.inf <- which(is.infinite(temp.matrix) == TRUE)
-
-    ##replace with 0 and throw warning
     if (length(id.inf) > 0) {
       temp.matrix[id.inf]  <- 0
       .throw_warning(length(id.inf),
-                     " 'inf' values have been replaced by 0 in the matrix.")
+                     " 'inf' values have been replaced by 0 in the matrix")
     }
-  }else{
-    .throw_error("Unsupported or unknown merge method")
   }
 
-  ##add first column
+  ## add back the first column to RLum.Data.Curve objects
   #If we append the data of the second to the first curve we have to recalculate
   #the x-values (probably time/channel). The difference should always be the
   #same, so we just expand the sequence if this is true. If this is not true,
   #we revert to the default behaviour (i.e., append the x values)
-  if (merge.method[1] == "append" & length(unique(diff(object[[1]]@data[,1])))) {
-      step <- unique(diff(object[[1]]@data[,1]))
-      newx <- seq(from = min(object[[1]]@data[,1]), by = step, length.out = sum(check.length))
-      temp.matrix <- cbind(newx, temp.matrix)
+  if (merge.method == "append") {
+    newx <- seq(from = min(object[[1]]@data[, 1]), by = step,
+                length.out = sum(check.rows))
+    temp.matrix <- cbind(newx, temp.matrix)
   } else {
-    temp.matrix <- cbind(object[[1]]@data[1:min(check.length),1], temp.matrix)
+    temp.matrix <- cbind(object[[1]]@data[1:num.rows, 1], temp.matrix)
   }
-
-
 
   ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ##merge info objects as simple as possible ... just keep them all ... other possibility
-  ##would be to chose on the the input objects
+  ##would be to choose on the input objects
 
-  ##unlist is needed here, as otherwise i would cause unexpected behaviour further using
+  ##unlist is needed here, as otherwise it would cause unexpected behaviour further using
   ##the RLum.object
   if(missing(method.info)){
-    temp.info <- unlist(lapply(1:length(object), function(x){
+    temp.info <- unlist(lapply(1:num.objects, function(x) {
       object[[x]]@info
 
     }), recursive = FALSE)
 
   }else{
     temp.info <- object[[method.info]]@info
-
   }
 
-  # Build new RLum.Data.Curve object --------------------------------------------------------------
+  ## Build new RLum.Data.Curve object ---------------------------------------
   temp.new.Data.Curve <- set_RLum(
     class = "RLum.Data.Curve",
     originator = "merge_RLum.Data.Curve",
@@ -277,10 +270,7 @@ merge_RLum.Data.Curve<- function(
     .pid = unlist(lapply(object, function(x) {
       x@.uid
     }))
-
   )
 
-# Return object -------------------------------------------------------------------------------
   return(temp.new.Data.Curve)
-
 }

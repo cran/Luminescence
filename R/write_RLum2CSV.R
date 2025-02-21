@@ -21,30 +21,29 @@
 #' @param path [character] (*optional*):
 #' character string naming folder for the output to be written. If nothing
 #' is provided `path` will be set to the working directory.
-#' **Note:** this argument is ignored if the the argument `export` is set to `FALSE`.
+#' **Note:** this argument is ignored when `export = FALSE`.
 #'
 #' @param prefix [character] (*with default*):
 #' optional prefix to name the files. This prefix is valid for all written files
 #'
 #' @param export [logical] (*with default*):
-#' enable or disable the file export. If set to `FALSE` nothing is written to
+#' enable/disable the file export. If set to `FALSE` nothing is written to
 #' the file connection, but a list comprising objects of type [data.frame] and [matrix]
-#' is returned instead
+#' is returned instead.
 #'
-#' @param compact [logical] (*with default*): if `TRUE` (the default) the output will be more
-#' simple but less comprehensive, means not all elements in the objects will be fully broken down.
-#' This is in particular useful for writing `RLum.Results` objects to CSV-files, such objects
-#' can be rather complex and not all information are needed in a CSV-file or can be meaningful translated
-#' to it.
+#' @param compact [logical] (*with default*): if `TRUE` (default) the output
+#' will be simpler but less comprehensive, that is not all elements in the
+#' objects will be fully broken down. This is in particular useful for writing
+#' `RLum.Results` objects to CSV files, as such objects can be rather complex
+#' and not all information are needed in a CSV file or can be meaningfully
+#' translated to CSV format.
 #'
 #' @param ... further arguments that will be passed to the function
 #' [utils::write.table]. All arguments except the argument `file` are supported
 #'
-#'
 #' @return
 #' The function returns either a CSV-file (or many of them) or for the
 #' option `export == FALSE` a list comprising objects of type [data.frame] and [matrix]
-#'
 #'
 #' @section Function version: 0.2.2
 #'
@@ -83,33 +82,27 @@ write_RLum2CSV <- function(
   export = TRUE,
   compact = TRUE,
   ...
-
-){
-  # General tests -------------------------------------------------------------------------------
-  if(missing(object)){
-    stop("[write_RLum2CSV()] input object is missing!", call. = FALSE)
-
-  }
+) {
+  .set_function_name("write_RLum2CSV")
+  on.exit(.unset_function_name(), add = TRUE)
 
   # Self-call -----------------------------------------------------------------------------------
   ##this option allows to work on a list of RLum-objects
   if(is.list(object) && !is.data.frame(object)){
-    ##extent the list of arguments if set
-      ##path
-      path <- rep(list(path), length = length(object))
+    ## expand input arguments
+    rep.length <- length(object)
+    path <- .listify(path, rep.length)
+    export <- .listify(export, rep.length)
 
       ##prefix ... create automatic prefix if nothing is provided
       prefix <- as.list(paste0(prefix[1], "[[",1:length(object),"]]_"))
 
-      ##export
-      export <- rep(list(export), length = length(object))
-
       ## write list name to object
-      for (i in 1:length(object))
+      for (i in seq_along(object))
         attr(object[[i]], "list_name") <- names(object)[i]
 
     ##execute the self-call function
-      temp <- lapply(1:length(object), function(x){
+      temp <- lapply(seq_along(object), function(x) {
         write_RLum2CSV(
           object = object[[x]],
           path = path[[x]],
@@ -117,7 +110,6 @@ write_RLum2CSV <- function(
           export = export[[x]],
           ...
         )
-
       })
 
       ##this prevents that we get a list of NULL
@@ -126,42 +118,38 @@ write_RLum2CSV <- function(
 
       }else{
         return(temp)
-
       }
-
   }
 
-  # Integrity tests -----------------------------------------------------------------------------
-  ##check path
-    ##if NULL condition
-    if(export == TRUE && is.null(path)){
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(object, c("RLum.Analysis", "RLum.Data.Curve",
+                            "RLum.Data.Image", "RLum.Data.Spectrum",
+                            "RLum.Results", "data.frame"))
+  .validate_not_empty(object)
+
+  ## check export path
+  if (export == TRUE) {
+    if (is.null(path)) {
       path <- getwd()
-      message(paste0("[write_RLum2CSV()] Path automatically set to: ", path))
-
+      message("[write_RLum2CSV()] Path automatically set to: ", path)
+    } else if (!dir.exists(path)) {
+      .throw_error("Directory provided via the argument 'path' does not exist")
     }
-
-    ##non NULL conditon
-    if(export == TRUE && !dir.exists(path)){
-      stop("[write_RLum2CSV()] Directory provided via the argument 'path' does not exist!", call. = FALSE)
-
-    }
+  }
 
   ## What do we need at the end of the day is a named list of data.frames or matrices we can export
   ## using the function write.table; the name of the list elements will become the file names
-  if(inherits(object, "RLum")){
-    if(is(object, "RLum.Analysis") ||
-       is(object, "RLum.Data.Curve") ||
-       is(object, "RLum.Data.Spectrum") || is(object, "RLum.Data.Image")){
 
-      ##extract all elements ... depending on the input
-      if(is(object, "RLum.Analysis")){
+  ## extract all elements ... depending on the input
+  if (inherits(object, "RLum.Analysis")) {
         ##tricky, we cannot use get_RLum() as the function lapply calls as.list() for an object!
         object_list <- lapply(object, function(x){get_RLum(x)})
 
         ##change names of the list and produce the right format straight away
         names(object_list) <- paste0(1:length(object_list),"_",names(object))
 
-      } else {
+  } else if (inherits(object, "RLum.Data")) {
 
         ##get object and make list
         object_list <- list(get_RLum(object))
@@ -169,9 +157,7 @@ write_RLum2CSV <- function(
         ##set new name
         names(object_list) <- paste0("1_",object@recordType)
 
-      }
-
-    } else if (is(object, "RLum.Results")){
+  } else if (inherits(object, "RLum.Results")) {
       ##unlist what ever comes, but do not break structures like matrices, numerics and
       names <- names(object@data)
 
@@ -187,7 +173,6 @@ write_RLum2CSV <- function(
 
         ##now we return whatever we have
         return(e)
-
       })
 
       ##now unlist again one level
@@ -202,31 +187,23 @@ write_RLum2CSV <- function(
       ##remove unwanted objects
       object_list <- object_list[object_list_rm]
 
-
       ##set warning
       if(any(!object_list_rm))
-        warning(paste0("[write_RLum2CSV()] ", length(which(!object_list_rm)), " elements could not be converted to a CSV-structure!"), call. = FALSE)
+        .throw_warning(length(which(!object_list_rm)),
+                       " elements could not be converted to CSV")
+
+      if (length(object_list) == 0) {
+        .throw_error("No valid records in 'object'")
+      }
 
       ##adjust the names
       names(object_list) <- paste0(1:length(object_list),"_",names(object_list))
-
-    } else {
-      # nocov start
-      message("[write_RLum2CSV()] Error: One particular RLum-object ",
-              "is not yet supported, NULL returned")
-      return(NULL)
-      # nocov end
-    }
 
   } else if (inherits(object, "data.frame")) {
     object_list <- list(object)
     if(!is.null(attr(object, "filename"))) filename <- attr(object, "filename") else  filename <- ""
 
     names(object_list) <- paste0("conv_", attr(object, "list_name"), filename)
-
-  }else{
-   stop("[write_RLum2CSV()] Object needs to be a member of the object class RLum!", call. = FALSE)
-
   }
 
   # Export --------------------------------------------------------------------------------------
@@ -243,7 +220,6 @@ write_RLum2CSV <- function(
       col.names = FALSE,
       qmethod = c("escape", "double"),
       fileEncoding = ""
-
     )
 
     ##modify on demand
@@ -264,12 +240,9 @@ write_RLum2CSV <- function(
         col.names =  export_settings$col.names,
         qmethod =  export_settings$qmethod,
         fileEncoding =  export_settings$fileEncoding)
-
     }
 
   }else{
     return(object_list)
-
   }
-
 }

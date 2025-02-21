@@ -67,7 +67,7 @@ If \code{TRUE} the fit will be weighted by the inverse square of the error.
 Requires \code{data} to be a \link{data.frame} with three columns.}
 
 \item{plot}{\link{logical} (\emph{optional}):
-Show or hide the plot.}
+enable/disable the plot output.}
 
 \item{legend}{\link{logical} (\emph{optional}):
 Show or hide the equation inside the plot.}
@@ -217,7 +217,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Burow, C., 2024. fit_SurfaceExposure(): Nonlinear Least Squares Fit for OSL surface exposure data. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. fit_SurfaceExposure(): Nonlinear Least Squares Fit for OSL surface exposure data. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

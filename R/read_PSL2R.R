@@ -29,6 +29,9 @@
 #' `TRUE` to merge all `RLum.Analysis` objects. Only applicable if multiple
 #' files are imported.
 #'
+#' @param verbose [logical] (*with default*):
+#' enable/disable output to the terminal.
+#'
 #' @param ... currently not used.
 #'
 #' @return
@@ -61,23 +64,47 @@
 #'
 #' @md
 #' @export
-read_PSL2R <- function(file, drop_bg = FALSE, as_decay_curve = TRUE, smooth = FALSE, merge = FALSE, ...) {
-  ## INPUT VALIDATION ----
+read_PSL2R <- function(
+  file,
+  drop_bg = FALSE,
+  as_decay_curve = TRUE,
+  smooth = FALSE,
+  merge = FALSE,
+  verbose = TRUE,
+  ...
+) {
+  .set_function_name("read_PSL2R")
+  on.exit(.unset_function_name(), add = TRUE)
+
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(file, "character")
+  .validate_not_empty(file)
+
   if (length(file) == 1) {
     if (!grepl(".psl$", file, ignore.case = TRUE)) {
       file <- list.files(file, pattern = ".psl$", full.names = TRUE, ignore.case = TRUE)
       if (length(file) == 0)
-        stop("[read_PSL2R()]: No .psl files found", call. = FALSE)
-      message("[read_PSL2R()]: The following files were found and imported: \n", paste(" ..", file, collapse = "\n"))
+        .throw_error("No .psl files found")
+      message("[read_PSL2R()] The following files were found and imported:\n",
+              paste(" ..", file, collapse = "\n"))
     }
   }
   if (!all(file.exists(file)))
-    stop("The following files do not exist, please check: \n",
-         paste(file[!file.exists(file)], collapse = "\n"), call. = FALSE)
+    .throw_error("The following files do not exist, please check:\n",
+                 paste(file[!file.exists(file)], collapse = "\n"))
 
   ## MAIN ----
   results <- vector("list", length(file))
   for (i in 1:length(file)) {
+
+    if (verbose) {
+      cat("\n[read_PSL2R()] Importing ...")
+      cat("\n path: ", dirname(file[i]))
+      cat("\n file: ", .shorten_filename(basename(file[i])))
+      cat("\n")
+    }
+
     ## Read in file ----
     doc <- readLines(file[i])
 
@@ -143,14 +170,14 @@ read_PSL2R <- function(file, drop_bg = FALSE, as_decay_curve = TRUE, smooth = FA
         if (x@recordType != "USER")
           return(x)
       })
-      measurements_formatted <- measurements_formatted[!sapply(measurements_formatted, is.null)]
+      measurements_formatted <- .rm_NULL_elements(measurements_formatted)
     }
 
     # decay curve smoothing using Tukey's Running Median Smoothing (?smooth)
     if (smooth) {
       measurements_formatted <- lapply(measurements_formatted, function(x) {
         if (x@recordType != "USER")
-          x@data[,2] <- smooth(x@data[ ,2])
+          x@data[, 2] <- stats::smooth(x@data[, 2])
         return(x)
       })
     }
@@ -175,7 +202,6 @@ read_PSL2R <- function(file, drop_bg = FALSE, as_decay_curve = TRUE, smooth = FA
        STIM = strsplit(tmp[2], split = " ", fixed = TRUE)[[1]][2],
        ON_OFF = strsplit(tmp[3], split = "(us)", fixed = TRUE)[[1]][2],
        CYCLE = strsplit(tmp[4], split = "(ms),", fixed = TRUE)[[1]][2])
-
     }))
 
     ## RETURN ----
@@ -216,8 +242,9 @@ format_Measurements <- function(x, convert, header) {
   settings_stimulation_unit <- gsub("[^0-9]", "", settings_split[which(grepl("Stim", settings_split))])
   settings_on_time <- as.integer(unlist(strsplit(gsub("[^0-9,]", "", settings_split[which(grepl("Off", settings_split))]), ","))[1])
   settings_off_time <- as.integer(unlist(strsplit(gsub("[^0-9,]", "", settings_split[which(grepl("Off", settings_split))]), ","))[2])
-  settings_cycle <- na.omit(as.integer(unlist(strsplit(gsub("[^0-9,]", "", settings_split[which(grepl("No", settings_split))]), ","))))[1]
-  settings_stimulation_time <- na.omit(as.integer(unlist(strsplit(gsub("[^0-9,]", "", settings_split[which(grepl("No", settings_split))]), ","))))[2]
+  vals <- stats::na.omit(as.integer(unlist(strsplit(gsub("[^0-9,]", "", settings_split[which(grepl("No", settings_split))]), ","))))
+  settings_cycle <- vals[1]
+  settings_stimulation_time <- vals[2]
 
   settings_list <- list("measurement" = settings_measurement,
                         "stimulation_unit" = switch(settings_stimulation_unit, "0" = "USER", "1" = "IRSL", "2" = "OSL"),
@@ -281,7 +308,6 @@ format_Measurements <- function(x, convert, header) {
     raw_data = df))
 
   return(object)
-
 }
 
 ## ---------------------------- FORMAT HEADER ------------------------------- ##

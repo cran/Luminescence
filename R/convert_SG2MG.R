@@ -17,8 +17,9 @@
 #'
 #' @section Function version: 0.1.0
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany), Norbert Mercier, IRAMAT-CRP2A, UMR 5060, CNRS-Université Bordeaux Montaigne (France);
-#'
+#' @author
+#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Norbert Mercier, IRAMAT-CRP2A, UMR 5060, CNRS-Université Bordeaux Montaigne (France)
 #'
 #' @seealso [Risoe.BINfileData-class], [read_BIN2R], [write_R2BIN]
 #'
@@ -36,13 +37,18 @@ convert_SG2MG <- function(
   object,
   write_file = FALSE,
   ...
-  ){
+) {
+  .set_function_name("convert_SG2MG")
+  on.exit(.unset_function_name(), add = TRUE)
 
-# Check input -------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(object, c("character", "Risoe.BINfileData"))
+  .validate_not_empty(object)
+
   if(!is(object, "Risoe.BINfileData")) {
     file_name <- object
     object <- read_BIN2R(object, ...)
-
   }
 
 # Transform ---------------------------------------------------------------
@@ -63,7 +69,6 @@ convert_SG2MG <- function(
       matrix(
         unlist(object@DATA[records_id]),
         ncol = length(records_id)))
-
   }
 
   ## clean dataset and remove all irrelevant data
@@ -86,10 +91,8 @@ convert_SG2MG <- function(
 
       write_R2BIN(object, paste0(dirname,"/",filename[1],"_SG.",filename[2]), ...)
     }
-
   }
 
 # Return object -----------------------------------------------------------
 return(object)
-
 }

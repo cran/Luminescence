@@ -1,5 +1,6 @@
-#' Plot filter combinations along with the (optional) net transmission window
+#' @title Plot filter combinations along with the (optional) net transmission window
 #'
+#' @description
 #' The function allows to plot transmission windows for different filters. Missing data for specific
 #' wavelengths are automatically interpolated for the given filter data using the function [approx].
 #' With that a standardised output is reached and a net transmission window can be shown.
@@ -75,8 +76,8 @@
 #'
 #' @param filters [list] (**required**):
 #' a named list of filter data for each filter to be shown.
-#' The filter data itself should be either provided as [data.frame] or [matrix].
-#' (for more options s. Details)
+#' The filter data itself should be either provided as [data.frame] or [matrix]
+#' (see details for more options).
 #'
 #' @param wavelength_range [numeric] (*with default*):
 #' wavelength range used for the interpolation
@@ -85,10 +86,10 @@
 #' show net transmission window as polygon.
 #'
 #' @param interactive [logical] (*with default*):
-#' enable/disable interactive plot
+#' enable/disable interactive plots.
 #'
 #' @param plot [logical] (*with default*):
-#' enables or disables the plot output
+#' enable/disable the plot output.
 #'
 #' @param ... further arguments that can be passed to control the plot output.
 #' Supported are `main`, `xlab`, `ylab`, `xlim`, `ylim`, `type`, `lty`, `lwd`.
@@ -161,29 +162,24 @@ plot_FilterCombinations <- function(
   .set_function_name("plot_FilterCombinations")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity tests -----------------------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
-  #check filters
-  if (!is(filters, "list")) {
-    .throw_error("'filters' should be of type 'list'")
-  }
+  .validate_class(filters, "list")
+  .validate_not_empty(filters, "list")
 
   #input should either data.frame or matrix
   lapply(filters, function(x) {
-    if (!is(x, "data.frame") & !is(x, "matrix") & !is(x, "list")) {
-      .throw_error("All elements of 'filter' must be of type ",
-                   "'matrix', 'data.frame' or 'list'")
-    }
+    .validate_class(x, c("data.frame", "matrix", "list"),
+                    name = "All elements of 'filters'")
   })
 
   #check for named list, if not set names
   if (is.null(names(filters))) {
-    names(filters) <- paste("Filter ", 1:length(filters))
-
+    names(filters) <- paste("Filter ", seq_along(filters))
   }
 
 
-  # Data Preparation ----------------------------------------------------------------------------
+  ## Data preparation -------------------------------------------------------
 
   ## check if filters are provided with their thickness, if so correct
   ## transmission for this ... relevant for glass filters
@@ -279,13 +275,7 @@ plot_FilterCombinations <- function(
     plot_settings <- modifyList(plot_settings, list(...))
 
     if(interactive){
-
-      ##check for plotly
-      if (!requireNamespace("plotly", quietly = TRUE)) {
-        # nocov start
-        .throw_error("Package 'plotly' is required for interactive plots")
-        # nocov end
-      }
+      .require_suggested_package("plotly", "Producing interactive plots")
 
       ##create basic plot
       p <-

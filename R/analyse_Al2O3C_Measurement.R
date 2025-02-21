@@ -7,9 +7,10 @@
 #'
 #' **Working with a travel dosimeter**
 #'
-#' The function allows to define particular aliquots as travel dosimeters. For example:
-#' `travel_dosimeter = c(1,3,5)` sets aliquots 1, 3 and 5 as travel dosimeters. These dose values
-#' of this dosimeters are combined and automatically subtracted from the obtained dose values
+#' The function allows to define particular position numbers as travel
+#' dosimeters. For example: `travel_dosimeter = c(1,3,5)` sets positions 1,
+#' 3 and 5 as travel dosimeters. These dose values #' of this dosimeters
+#' are combined and automatically subtracted from the obtained dose values
 #' of the other dosimeters.
 #'
 #' **Calculate TL dose**
@@ -53,27 +54,29 @@
 #' information on the used irradiation time correction obtained by another experiments.
 #' If a `numeric` is provided it has to be of length two: mean, standard error
 #'
-#' @param calculate_TL_dose [logical] (*with default*): Enables/disables experimental dose estimation
-#' based on the TL curves. Taken is the ratio of the peak sums of each curves +/- 5 channels.
+#' @param calculate_TL_dose [logical] (*with default*):
+#' enables/disable experimental dose estimation based on the TL curves.
+#' It is computed as the ratio of the peak sums of each curves +/- 5 channels.
 #'
 #' @param cross_talk_correction [numeric] or [RLum.Results-class] (*optional*):
 #' information on the used irradiation time correction obtained by another experiments.
 #' If a `numeric` vector is provided it has to be of length three:
 #' mean, 2.5 % quantile, 97.5 % quantile.
 #'
-#' @param travel_dosimeter [numeric] (*optional*): specify the position of the travel dosimeter
-#' (so far measured at the same time). The dose of travel dosimeter will be subtracted from all
-#' other values.
+#' @param travel_dosimeter [numeric] (*optional*): specify the position of
+#' the travel dosimeter (so far measured at the same time). The dose of
+#' travel dosimeter will be subtracted from all other values.
 #'
 #' @param test_parameters [list] (*with default*):
 #' set test parameters. Supported parameters are: `TL_peak_shift` All input: [numeric]
-#' values, `NA` and `NULL` (s. Details)
+#' values, `NA` and `NULL` (see details).
 #'
 #' @param verbose [logical] (*with default*):
-#' enable/disable verbose mode
+#' enable/disable output to the terminal.
 #'
-#' @param plot [logical] (*with default*): enable/disable plot output, if `object` is of type [list],
-#' a [numeric] vector can be provided to limit the plot output to certain aliquots
+#' @param plot [logical] (*with default*): enable/disable the plot output.
+#' If `object` is of type [list], a numeric vector can be provided to limit
+#' the plot output to certain aliquots.
 #'
 #' @param ... further arguments that can be passed to the plot output, supported are `norm`, `main`, `mtext`,
 #' `title` (for self-call mode to specify, e.g., sample names)
@@ -151,50 +154,29 @@ analyse_Al2O3C_Measurement <- function(
   .set_function_name("analyse_Al2O3C_Measurement")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # Self call -----------------------------------------------------------------------------------
+  ## Self call --------------------------------------------------------------
   if(is(object, "list")){
-    if(!all(unlist(lapply(object, function(x){is(x, "RLum.Analysis")})))){
-      .throw_error("Elements in 'object' are not all of type 'RLum.Analysis'")
-    }
 
-    ##expand input arguments
+    .validate_not_empty(object, "list")
+    lapply(object,
+           function(x) .validate_class(x, "RLum.Analysis",
+                                       name = "All elements of 'object'"))
+
+    ## expand input arguments
+    rep.length <- length(object)
+
     if(!is.null(signal_integral)){
-      signal_integral <- rep(list(signal_integral), length = length(object))
+      signal_integral <- .listify(list(signal_integral), rep.length)
     }
 
-    ##dose points
-    if(is(dose_points, "list")){
-      dose_points <- rep(dose_points, length = length(object))
+    dose_points <- .listify(dose_points, rep.length)
+    irradiation_time_correction <- .listify(irradiation_time_correction,
+                                            rep.length)
+    cross_talk_correction <- .listify(cross_talk_correction, rep.length)
 
-    }else{
-      dose_points <- rep(list(dose_points), length = length(object))
-    }
-
-    ##irradiation time correction
-    if(is(irradiation_time_correction, "list")){
-      irradiation_time_correction <- rep(irradiation_time_correction, length = length(object))
-
-    }else{
-      irradiation_time_correction <- rep(list(irradiation_time_correction), length = length(object))
-    }
-
-    ##cross talk correction
-    if(is( cross_talk_correction, "list")){
-      cross_talk_correction <- rep( cross_talk_correction, length = length(object))
-
-    }else{
-      cross_talk_correction <- rep(list( cross_talk_correction), length = length(object))
-    }
-
-    ##test_parameters
-    if(is(test_parameters[[1]], "list")){
-      test_parameters <- rep(test_parameters, length = length(object))
-
-    }else{
-      test_parameters <- rep(list(test_parameters), length = length(object))
-    }
-
-    ##verbose
+    ## since `test_parameters` is always expected to be a list, we can't
+    ## use .listify() as it will not generate sublists
+    test_parameters <- rep(list(test_parameters), rep.length)
 
     ##plot
     if(is(plot, "logical")){
@@ -204,8 +186,8 @@ analyse_Al2O3C_Measurement <- function(
       plot <- 1:length(object)%in%plot
     }
 
-    ##run analyis
-    results <- lapply(1:length(object), function(x) {
+    ## run analysis
+    results <- lapply(seq_along(object), function(x) {
       temp <- analyse_Al2O3C_Measurement(
         object = object[[x]],
         signal_integral = signal_integral[[x]],
@@ -242,17 +224,15 @@ analyse_Al2O3C_Measurement <- function(
     ##travel dosimeter
     ##check for travel dosimeter and subtract the values so far this is meaningful at all
     if(!is.null(travel_dosimeter)){
-      ##check data type
-      if(!is(travel_dosimeter, "numeric"))
-        .throw_error("Input for 'travel_dosimeter' is not numeric")
+      .validate_class(travel_dosimeter, c("numeric", "integer"))
 
       ##check whether everything is subtracted from everything ... you never know, users do weird stuff
       if(length(travel_dosimeter) == nrow(results$data))
-        message("[analyse_Al2O3C_Measurement()] Error: 'travel_dosimeter' specifies every position, nothing corrected")
+        .throw_message("'travel_dosimeter' specifies every position, nothing corrected")
 
       ##check if the position is valid
       if(any(!travel_dosimeter%in%results$data$POSITION))
-        message("[analyse_Al2O3C_Measurement()] Error: Invalid position in 'travel_dosimeter', nothing corrected")
+        .throw_message("Invalid position in 'travel_dosimeter', nothing corrected")
 
       ##correct for the travel dosimeter calculating the weighted mean and the sd (as new error)
       ##if only one value is given just take it
@@ -290,24 +270,22 @@ analyse_Al2O3C_Measurement <- function(
 
     ##return results
     return(results)
-
-  } else if (!is(object, "RLum.Analysis")) {
-    .throw_error("'object' must be an 'RLum.Analysis' object or ",
-                 "a list of such objects")
   }
 
-  # Integrity check  ---------------------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
   ##TODO ... do more, push harder
   ##Add sufficient unit tests
 
-  # Preparation ---------------------------------------------------------------------------------
+  .validate_class(object, "RLum.Analysis",
+                  extra = "a 'list' of such objects")
+
+  ## Preparation ------------------------------------------------------------
 
   ##select curves based on the recordType selection; if not NULL
   if(!is.null(recordType)){
     object_raw <- object
     object <- get_RLum(object, recordType = recordType, drop = FALSE)
-
   }
 
   ##set signal integral
@@ -325,6 +303,8 @@ analyse_Al2O3C_Measurement <- function(
 
   ## Set Irradiation Time Correction ---------------
   if (!is.null(irradiation_time_correction)) {
+    .validate_class(irradiation_time_correction, c("RLum.Results", "numeric"))
+
     if (is(irradiation_time_correction, "RLum.Results")) {
       if (irradiation_time_correction@originator == "analyse_Al2O3C_ITC") {
         irradiation_time_correction <- get_RLum(irradiation_time_correction)
@@ -342,23 +322,16 @@ analyse_Al2O3C_Measurement <- function(
                      "was created by an unsupported function")
       }
     } else if (is.numeric(irradiation_time_correction)) {
-      if (length(irradiation_time_correction) != 2)
-        .throw_error("'irradiation_time_correction' must have length 2")
-    } else {
-      .throw_error("'irradiation_time_correction' must be a numeric vector or an 'RLum.Results' object")
+      .validate_length(irradiation_time_correction, 2)
     }
   }
 
-
-  ## Set Cross Talk Correction ---------------
-  ##check wehther the information on the position was stored in the input
-  ##object
-  if(!is.null(get_RLum(object = object[[1]], info.object = "position"))){
-    POSITION <- get_RLum(object = object[[1]], info.object = "position")
-
-  }else{
-    message("[analyse_Al2O3_Measurement()] Aliquot position number was not found. No cross talk correction was applied!")
-    cross_talk_correction <- c(0,0,0)
+  ## Set Cross-Talk Correction ----------------------------------------------
+  ## check whether information on the position was stored in the input object
+  POSITION <- get_RLum(object = object[[1]], info.object = "position")
+  if (is.null(POSITION)) {
+    .throw_message("Aliquot position not found, no cross-talk correction applied")
+    cross_talk_correction <- NULL
     POSITION <- NA
   }
 
@@ -367,16 +340,24 @@ analyse_Al2O3C_Measurement <- function(
 
   }else{
 
-    ##check whether the input is of type RLum.Results and check orignator
+    ## check whether the input is of type RLum.Results and check originator
     if (is(cross_talk_correction, "RLum.Results") &&
         cross_talk_correction@originator == "analyse_Al2O3C_CrossTalk") {
 
-        ##grep cross talk correction and calculate values for
-        ##this particular carousel position
-        cross_talk_correction <-
-          as.numeric(predict(cross_talk_correction$fit,
-                  newdata = data.frame(x = POSITION),
-                  interval = "confidence"))
+      ## calculate the cross-talk correction values for this particular
+      ## carousel position
+      interval <- ifelse(length(POSITION) > 1, "confidence", "none")
+      cross_talk_correction <-
+        as.numeric(predict(cross_talk_correction$fit,
+                           newdata = data.frame(x = POSITION),
+                           interval = interval))
+
+      ## we could not compute a confidence interval, so we create it manually
+      if (length(POSITION) == 1) {
+        cross_talk_correction <- matrix(cross_talk_correction, 1, 3,
+                                        dimnames = list("position",
+                                                        c("fit", "lwr", "upr")))
+      }
 
     }else{
       .throw_error("The object provided for 'cross_talk_correction' was ",
@@ -384,7 +365,7 @@ analyse_Al2O3C_Measurement <- function(
     }
   }
 
-  # Calculation ---------------------------------------------------------------------------------
+  # Calculation -------------------------------------------------------------
   ##we have two dose points, and one background curve, we do know only the 2nd dose
 
   ##set test parameters
@@ -398,8 +379,7 @@ analyse_Al2O3C_Measurement <- function(
     test_parameters <- modifyList(test_parameters.default, test_parameters)
 
     ##remove NULL elements from list
-    test_parameters <- test_parameters[!sapply(test_parameters, is.null)]
-
+    test_parameters <- .rm_NULL_elements(test_parameters)
   }else{
     test_parameters <- test_parameters.default
   }
@@ -411,24 +391,20 @@ analyse_Al2O3C_Measurement <- function(
 
   ##do the same for the TL
   if (calculate_TL_dose[1] && any(grepl("TL", names(object)))){
-    NATURAL_TL <- try(sum(
-      object@records[[2]]@data[
-        (which.max(object@records[[2]]@data[,2])-5):(which.max(object@records[[2]]@data[,2])+5),2]), silent = TRUE)
-    REGENERATED_TL <- try(sum(
-      object@records[[4]]@data[
-        (which.max(object@records[[4]]@data[,2])-5):(which.max(object@records[[4]]@data[,2])+5),2]), silent = TRUE)
-
-    ##catch errors if the integration fails
-    if(inherits(NATURAL_TL, "try-error")){
-      NATURAL_TL <- NA
-      .throw_warning("Natural TL signal out of bounds, NA returned")
-    }
-
-    if(inherits(REGENERATED_TL, "try-error")){
-      REGENERATED_TL <- NA
-      .throw_warning("Regenerated TL signal out of bounds, NA returned")
-    }
-
+    nat_integr.idx <- which.max(object@records[[2]]@data[, 2]) + c(-5, 5)
+    NATURAL_TL <- tryCatch(
+        sum(object@records[[2]]@data[nat_integr.idx, 2]),
+        error = function(e) {
+          .throw_warning("Natural TL signal out of bounds, NA returned")
+          NA
+        })
+    reg_integr.idx <- which.max(object@records[[4]]@data[, 2]) + c(-5, 5)
+    REGENERATED_TL <- tryCatch(
+        sum(object@records[[4]]@data[reg_integr.idx, 2]),
+        error = function(e) {
+          .throw_warning("Regenerated TL signal out of bounds, NA returned")
+          NA
+        })
   }else{
     NATURAL_TL <- NA
     REGENERATED_TL <- NA
@@ -547,6 +523,7 @@ analyse_Al2O3C_Measurement <- function(
   }
 
   ##stimulation_power
+  TP_stimulation_power <- data.frame(stringsAsFactors = FALSE)
   if(any("stimulation_power"%in%names(test_parameters))){
      ##get curves ids holding the information on the stimulation power
      temp_curves_OSL <- get_RLum(object_raw, recordType = "OSL", curveType = "measured")
@@ -560,7 +537,7 @@ analyse_Al2O3C_Measurement <- function(
      })
 
      ##remove NULL
-     temp_curves_OSL <- temp_curves_OSL[!sapply(temp_curves_OSL, is.null)]
+     temp_curves_OSL <- .rm_NULL_elements(temp_curves_OSL)
 
      ##check whether something is left
      if(length(temp_curves_OSL) < 2){
@@ -596,10 +573,7 @@ analyse_Al2O3C_Measurement <- function(
        VALUE = TP_stimulation_power.value,
        STATUS = TP_stimulation_power.status,
        stringsAsFactors = FALSE)
-
-   }else{
-     TP_stimulation_power <- data.frame(stringsAsFactors = FALSE)
-   }
+  }
 
    ##compile all test parameter df
    df_test_parameters <- rbind(
@@ -637,7 +611,7 @@ analyse_Al2O3C_Measurement <- function(
 
      plot_RLum(
        object,
-       plot.single = TRUE,
+       plot_singlePanels = TRUE,
        combine = TRUE,
        mtext = list(paste0("DE: ", round(data$DE,2), " \u00b1 ", round(data$DE_ERROR,2)), ""),
        xlab = list("Simulation [s]", "Temperature [\u00B0C]"),

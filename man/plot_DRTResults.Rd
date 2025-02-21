@@ -44,8 +44,8 @@ Set \code{error.range} to 0 to void plotting of error ranges.}
 optional vector of preheat temperatures to be used for grouping the De values.
 If specified, the temperatures are assigned to the x-axis.}
 
-\item{boxplot}{\link{logical}:
-optionally plot values, that are grouped by preheat temperature as boxplots.
+\item{boxplot}{\link{logical} (\emph{with default}):
+plot values that are grouped by preheat temperature as boxplots.
 Only possible when \code{preheat} vector is specified.}
 
 \item{mtext}{\link{character}:
@@ -84,7 +84,7 @@ use local graphical parameters for plotting, e.g. the plot is shown in one
 column and one row. If \code{par.local = FALSE}, global parameters are inherited,
 i.e. parameters provided via \code{par()} work}
 
-\item{na.rm}{\link{logical}: indicating whether \code{NA} values are
+\item{na.rm}{\link{logical} (\emph{with default}): indicating whether \code{NA} values are
 removed before plotting from the input data set}
 
 \item{...}{further arguments and graphical parameters passed to \link{plot}, supported are:
@@ -193,7 +193,7 @@ plot_DRTResults(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., 2024. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., 2025. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

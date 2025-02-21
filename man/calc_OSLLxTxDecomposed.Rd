@@ -14,19 +14,19 @@ calc_OSLLxTxDecomposed(
 }
 \arguments{
 \item{Lx.data}{\link{data.frame} (\strong{required}): Component table created by
-\verb{[OSLdecomposition::RLum.OSL_decomposition]} and per default located
+\code{OSLdecomposition::RLum.OSL_decomposition} and per default located
 at \code{object@records[[...]]@info$COMPONENTS}.The value of \verb{$n[OSL.component]}
 is set as \code{LnLx}. The value of \verb{$n.error[OSL.component]} is set as \code{LnLx.error}}
 
 \item{Tx.data}{\link{data.frame} (\emph{optional}): Component table created by
-\verb{[OSLdecomposition::RLum.OSL_decomposition]} and per default located at
+\code{OSLdecomposition::RLum.OSL_decomposition} and per default located at
 \code{object@records[[...]]@info$COMPONENTS}. The value of \verb{$n[OSL.component]}
 is set as \code{TnTx}. The value of \verb{$n.error[OSL.component]} is set as \code{TnTx.error}}
 
 \item{OSL.component}{\link{integer} or \link{character} (\emph{optional}):
 a single index or a name describing which OSL signal component shall be evaluated.
 This argument can either be the name of the OSL component assigned by
-\verb{[OSLdecomposition::RLum.OSL_global_fitting]} or the index of component.
+\code{OSLdecomposition::RLum.OSL_global_fitting} or the index of component.
 Then \code{'1'} selects the fastest decaying component, \code{'2'} the
 second fastest and so on. If not defined, the fastest decaying component is selected.}
 
@@ -57,7 +57,7 @@ Slot \code{data} contains a \link{list} with the following structure:
 }
 \description{
 Calculate \code{Lx/Tx} ratios from a given set of decomposed
-CW-OSL curves decomposed by \verb{[OSLdecomposition::RLum.OSL_decomposition]}
+CW-OSL curves decomposed by \code{OSLdecomposition::RLum.OSL_decomposition}.
 }
 \section{Function version}{
  0.1.0
@@ -65,7 +65,7 @@ CW-OSL curves decomposed by \verb{[OSLdecomposition::RLum.OSL_decomposition]}
  
 
 \section{How to cite}{
-Mittelstrass, D., 2024. calc_OSLLxTxDecomposed(): Calculate Lx/Tx ratio for decomposed CW-OSL signal components. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Mittelstrass, D., 2025. calc_OSLLxTxDecomposed(): Calculate Lx/Tx ratio for decomposed CW-OSL signal components. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -75,7 +75,7 @@ talk presented at DLED 2019, Bingen, Germany
 \url{http://luminescence.de/OSLdecomp_talk.pdf}\cr
 }
 \seealso{
-\linkS4class{RLum.Data.Curve}, \link{plot_GrowthCurve}, \link{analyse_SAR.CWOSL}
+\linkS4class{RLum.Data.Curve}, \link{fit_DoseResponseCurve}, \link{analyse_SAR.CWOSL}
 }
 \author{
 Dirk Mittelstrass

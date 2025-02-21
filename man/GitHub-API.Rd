@@ -27,7 +27,7 @@ branch of a GitHub repository (defaults to \code{'master'}).}
 number of commits returned (defaults to 5).}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-print the output to the console (defaults to \code{TRUE}).}
+enable/disable output to the terminal.}
 }
 \value{
 \code{github_commits}: \link{data.frame} with columns:
@@ -90,7 +90,7 @@ github_commits(user = "r-lum", repo = "luminescence", branch = "master", n = 10)
 } 
 
 \section{How to cite}{
-Burow, C., 2024. GitHub-API(): GitHub API. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. GitHub-API(): GitHub API. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

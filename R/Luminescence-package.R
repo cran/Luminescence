@@ -1,6 +1,4 @@
 #' @title Comprehensive Luminescence Dating Data Analysis\cr
-#'
-#'
 #' \if{html}{
 #' \figure{Luminescence_logo.png}{options: width="75" alt="r-luminescence.org"}
 #' }
@@ -109,12 +107,9 @@
 #' @import utils methods data.table
 #'
 #' @importFrom  Rcpp evalCpp
-#'
-#' @importFrom graphics plot plot.default frame abline mtext text lines par layout lines arrows axTicks axis barplot box boxplot contour curve grconvertX grconvertY hist legend persp points polygon rug segments title grid close.screen screen split.screen
-#' @importFrom grDevices adjustcolor axisTicks colorRampPalette gray.colors rgb topo.colors xy.coords dev.off
-#' @importFrom stats formula approx as.formula complete.cases density dnorm glm lm median na.exclude na.omit nls nls.control pchisq pnorm quantile rnorm runif sd smooth smooth.spline spline t.test uniroot var weighted.mean setNames coef confint predict update residuals fitted qf
-#' @importFrom parallel parLapply makeCluster stopCluster
-#' @importFrom httr GET accept_json status_code content
+#' @importFrom graphics plot abline mtext text lines par layout lines axTicks axis curve hist legend points polygon segments title
+#' @importFrom grDevices adjustcolor rgb
+#' @importFrom stats approx density dnorm median na.exclude nls quantile rnorm runif sd uniroot setNames coef predict residuals
 #'
 #' @useDynLib Luminescence, .registration = TRUE
 #'
@@ -400,19 +395,19 @@ NULL
 #'
 #' \deqn{y = 0.0002*x + 4.0914}
 #'
-#' @keywords datasets
+#' @keywords datasets internal
 #'
 #' @examples
 #'
 #' ##load data
 #' data(BaseDataSet.CosmicDoseRate)
 #'
+#' @docType data
 #' @name BaseDataSet.CosmicDoseRate
 #' @aliases values.cosmic.Softcomp values.factor.Altitude values.par.FJH
 #'
 #' @md
 NULL
-
 
 #' @title Example data from a SAR OSL and SAR TL measurement for the package
 #' Luminescence
@@ -467,7 +462,7 @@ NULL
 #'
 #' @docType data
 #'
-#' @keywords datasets
+#' @keywords datasets internal
 #'
 #' @examples
 #'
@@ -525,7 +520,7 @@ NULL
 #' Reference: \tab Bos & Wallinga (2012) and Baartman et al. (2011)
 #' }
 #'
-#' @keywords datasets
+#' @keywords datasets internal
 #'
 #' @examples
 #'
@@ -594,6 +589,9 @@ NULL
 #' Material: \tab Beach deposit, coarse grain quartz measured on aluminium discs on a Risø TL/OSL DA-15 reader\cr
 #' }
 #'
+#'
+#' @keywords datasets internal
+#'
 #' @examples
 #'
 #' ##show LM data
@@ -623,6 +621,8 @@ NULL
 #' Material: \tab Middle grain (38-63 \eqn{\mu}m) quartz measured on a Risoe TL/OSL DA-15 reader.
 #' }
 #'
+#' @keywords datasets internal
+#'
 #' @examples
 #'
 #' ## plot Lx/Tx data vs dose [s]
@@ -646,6 +646,8 @@ NULL
 #' @source
 #' Arbitrary OSL measurement.
 #'
+#' @keywords datasets internal
+#'
 #' @examples
 #'
 #' ##load data
@@ -657,6 +659,32 @@ NULL
 #'
 #' @name ExampleData.LxTxOSLData
 #' @aliases Lx.data Tx.data
+#' @md
+NULL
+
+#' Example equivalent dose data from mortar samples
+#'
+#' Arbitrary data to test the function `calc_EED_Model`
+#'
+#' @format Two [`data.frame`]s containing De and De error
+#'
+#' @references unpublished data
+#'
+#' @source
+#' Arbitrary measurements.
+#'
+#' @keywords datasets internal
+#'
+#' @examples
+#'
+#' ##load data
+#' data(ExampleData.MortarData, envir = environment())
+#'
+#' ##plot data
+#' plot(MortarData)
+#'
+#' @name ExampleData.MortarData
+#' @aliases MortarData
 #' @md
 NULL
 
@@ -693,7 +721,7 @@ NULL
 #' Reference: \tab Kreutzer et al. (2014)
 #' }
 #'
-#' @keywords datasets
+#' @keywords datasets internal
 #'
 #' @examples
 #'
@@ -812,7 +840,7 @@ NULL
 #' Heating: \tab 1 K/s, up to 500 deg. C
 #' }
 #'
-#' @keywords datasets
+#' @keywords datasets internal
 #'
 #' @examples
 #' ##show data
@@ -917,7 +945,7 @@ NULL
 #' ##(2) plot values as histogram (with second to gray conversion)
 #' data(ExampleData.DeValues, envir = environment())
 #'
-#' De.values <- Second2Gray(ExampleData.DeValues$BT998,
+#' De.values <- convert_Second2Gray(ExampleData.DeValues$BT998,
 #'                          dose.rate = c(0.0438, 0.0019))
 #'
 #'
@@ -1006,7 +1034,7 @@ NULL
 #' IR50_De.LxTx <- ExampleData.Fading$equivalentDose.data$IR50
 #'
 #' ## Calculate the De of the IR50 signal
-#' IR50_De <- plot_GrowthCurve(IR50_De.LxTx,
+#' IR50_De <- fit_DoseResponseCurve(IR50_De.LxTx,
 #'                                 mode = "interpolation",
 #'                                 fit.method = "EXP")
 #'
@@ -1206,7 +1234,7 @@ NULL
 #' Environmental Dose Rate Determination Using a Passive Dosimeter: Techniques and Workflow for alpha-Al2O3:C Chips.
 #' Geochronometria 45, 56–67.
 #'
-#' @keywords datasets
+#' @keywords datasets internal
 #'
 #' @examples
 #'
@@ -1313,6 +1341,3 @@ NULL
 #' @name extdata
 #' @md
 NULL
-
-
-

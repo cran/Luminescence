@@ -26,7 +26,7 @@ Lowest.De used to create Graph.IEU \verb{[Dbar.Fixed vs Z]}}
 number of decimal points for rounding calculations (e.g. 2)}
 
 \item{plot}{\link{logical} (\emph{with default}):
-plot output}
+enable/disable the plot output.}
 
 \item{...}{further arguments (\verb{trace, verbose}).}
 }
@@ -65,7 +65,7 @@ ieu <- calc_IEU(ExampleData.DeValues$CA1, a = 0.2, b = 1.9, interval = 1)
 } 
 
 \section{How to cite}{
-Smedley, R.K., 2024. calc_IEU(): Apply the internal-external-uncertainty (IEU) model after Thomsen et al. (2007) to a given De distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Smedley, R.K., Colombo, M., 2025. calc_IEU(): Apply the internal-external-uncertainty (IEU) model after Thomsen et al. (2007) to a given De distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -82,5 +82,6 @@ using single grains of quartz. Radiation Measurements 42, 370-379.
 }
 \author{
 Rachel Smedley, Geography & Earth Sciences, Aberystwyth University (United Kingdom) \cr
-Based on an excel spreadsheet and accompanying macro written by Kristina Thomsen.
+Based on an excel spreadsheet and accompanying macro written by Kristina Thomsen. \cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}

@@ -1,9 +1,10 @@
 #' @title Analyse fading measurements and returns the fading rate per decade (g-value)
 #'
 #' @description
-#' The function analysis fading measurements and returns a fading rate including an error estimation.
-#' The function is not limited to standard fading measurements, as can be seen, e.g., Huntley and
-#' Lamothe (2001). Additionally, the density of recombination centres (rho') is estimated after
+#' The function analyses fading measurements and returns a fading rate
+#' including an error estimation. The function is not limited to standard
+#' fading measurements, as can be seen, e.g., Huntley and Lamothe (2001).
+#' Additionally, the density of recombination centres (rho') is estimated after
 #' Kars et al. (2008).
 #'
 #' @details
@@ -97,18 +98,18 @@
 #' without irradiation times.*
 #'
 #' @param n.MC [integer] (*with default*):
-#' number for Monte Carlo runs for the error estimation
+#' number for Monte Carlo runs for the error estimation.
 #'
 #' @param verbose [logical] (*with default*):
-#' enables/disables verbose mode
+#' enable/disable output to the terminal.
 #'
 #' @param plot [logical] (*with default*):
-#' enables/disables plot output
+#' enable/disable the plot output.
 #'
-#' @param plot.single [logical] (*with default*):
-#' enables/disables single plot mode, i.e. one plot window per plot.
+#' @param plot_singlePanels [logical] (*with default*) or [numeric] (*optional*):
+#' enable/disable single plot mode, i.e. one plot window per plot.
 #' Alternatively a vector specifying the plot to be drawn, e.g.,
-#' `plot.single = c(3,4)` draws only the last two plots
+#' `plot_singlePanels = c(3,4)` draws only the last two plots
 #'
 #' @param ... (*optional*) further arguments that can be passed to internally used functions. Supported arguments:
 #' `xlab`, `log`, `mtext`, `plot.trend` (enable/disable trend blue line), and `xlim` for the
@@ -137,7 +138,7 @@
 #' `call` \tab `call` \tab the original function call\cr
 #' }
 #'
-#' @section Function version: 0.1.22
+#' @section Function version: 0.1.23
 #'
 #' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
 #' Christoph Burow, University of Cologne (Germany)
@@ -196,32 +197,33 @@ analyse_FadingMeasurement <- function(
   n.MC = 100,
   verbose = TRUE,
   plot = TRUE,
-  plot.single = FALSE,
+  plot_singlePanels = FALSE,
   ...
 ) {
   .set_function_name("analyse_FadingMeasurement")
   on.exit(.unset_function_name(), add = TRUE)
 
-  # Integrity Tests -----------------------------------------------------------------------------
+  ## Integrity Tests --------------------------------------------------------
+
+  .validate_class(object, c("RLum.Analysis", "data.frame", "list"))
+  .validate_class(plot_singlePanels, c("logical", "integer", "numeric"))
+
   if (is(object, "list")) {
-    if (any(sapply(object, class) != "RLum.Analysis")) {
-      ##warning
-      warning(paste("[analyse_FadingMeasurement()]",
-                    length(which(sapply(object, class) != "RLum.Analysis")), "non-supported records removed!"), call. = FALSE)
+    wrong.class <- sapply(object, class) != "RLum.Analysis"
+    if (any(wrong.class)) {
+      .throw_warning(sum(wrong.class), " unsupported records removed")
 
-      ##remove unwanted stuff
-      object[sapply(object, class) != "RLum.Analysis"] <- NULL
-
-      ##check whether this is empty now
-      if(length(object) == 0)
-        .throw_error("'object' must be an 'RLum.Analysis' object ",
-                     "or a 'list' of such objects")
+      ## remove unwanted stuff
+      object[wrong.class] <- NULL
+      if (length(object) == 0) {
+        .throw_error("No valid records in 'object' left")
+      }
     }
-
   } else if (inherits(object, "RLum.Analysis")) {
     object <- list(object)
 
   } else if(inherits(object,"data.frame")){
+    .validate_not_empty(object)
     if (ncol(object) %% 3 != 0) {
       .throw_error("'object': if you provide a data.frame as input, ",
                    "the number of columns must be a multiple of 3.")
@@ -231,7 +233,7 @@ analyse_FadingMeasurement <- function(
                           setNames(object[ , col:c(col+2)], c("LxTx", "LxTxError", "timeSinceIrr"))
                           })
                         )
-      object <- object[complete.cases(object), ]
+      object <- object[stats::complete.cases(object), ]
     }
 
     ##set table and object
@@ -239,17 +241,23 @@ analyse_FadingMeasurement <- function(
     TIMESINCEIRR <- object[[3]]
     irradiation_times <- TIMESINCEIRR
     object <- NULL
-
-
-  }else{
-    .throw_error("'object' must be an 'RLum.Analysis' object ",
-                 "or a 'list' of such objects")
   }
 
+  if (!is(t_star, "function")) {
+    t_star <- .validate_args(t_star, c("half", "half_complex", "end"),
+                             extra = "a function")
+  }
 
   # Prepare data --------------------------------------------------------------------------------
   if(!is.null(object)){
     originators <- unique(unlist(lapply(object, slot, name = "originator")))
+
+    if (!(length(structure) == 1 && structure == "Lx" ||
+          length(structure) == 2 && all(structure == c("Lx", "Tx")))) {
+      .throw_message("'structure' can only be 'Lx' or c('Lx', 'Tx'), ",
+                     "NULL returned")
+      return(NULL)
+    }
 
     ## support read_XSYG2R()
     if (length(originators) == 1 && originators == "read_XSYG2R") {
@@ -281,18 +289,21 @@ analyse_FadingMeasurement <- function(
 
       ##assign object, unlist and drop it
       object_clean <- unlist(get_RLum(object))
+      bin.version <- object_clean[[1]]@info$VERSION
+      if (as.integer(bin.version) < 5) {
+        .throw_error("BIN-file has version ", bin.version,
+                     ", but only versions from 05 on are supported")
+      }
 
       ##set TIMESINCEIRR vector
       TIMESINCEIRR <- vapply(object_clean, function(o){
         o@info$TIMESINCEIRR
-
       }, numeric(1))
-
 
       ##check whether we have negative irradiation times, sort out such values
       if(any(TIMESINCEIRR < 0)){
         #count affected records
-        rm_records <- length(which(TIMESINCEIRR < 0))
+        rm_records <- sum(TIMESINCEIRR < 0)
 
         ##now we have a problem and we first have to make sure that we understand
         ##the data structure and remove also the corresponding values
@@ -308,13 +319,17 @@ analyse_FadingMeasurement <- function(
         }else{
           object_clean[TIMESINCEIRR < 0] <- NULL
           TIMESINCEIRR <- TIMESINCEIRR[!TIMESINCEIRR < 0]
-
         }
 
-        ##return warning
-        .throw_warning(rm_records, " records 'time since irradiation' value removed from the dataset")
-        rm(rm_records)
+        .throw_warning("removed ", rm_records, " records with negative ",
+                       "'time since irradiation'")
 
+        ## check if we have removed everything
+        if (length(object_clean) == 0) {
+          .throw_message("After record removal nothing is left from ",
+                         "the data set, NULL returned")
+          return(NULL)
+        }
       }
 
       ##set irradiation times
@@ -325,7 +340,7 @@ analyse_FadingMeasurement <- function(
 
       ##not support
     }else{
-      message("[analyse_FadingMeasurement()] Error: Unknown or unsupported originator")
+      .throw_message("Unknown or unsupported originator, NULL returned")
       return(NULL)
     }
 
@@ -352,18 +367,14 @@ analyse_FadingMeasurement <- function(
         t_star <- t0 * 10^((t2 * log10(t2/t0) - t1 * log10(t1/t0) - (t2 - t1) * log10(exp(1))) /
                      (t2 - t1))
 
-
       }else if (t_star == "end"){
         ##set t_start as t_1 (so after the end of irradiation)
         t_star <- t1
-
-      }else{
-        .throw_error("Invalid input for t_star.")
       }
     }
 
     ##overwrite TIMESINCEIRR
-    TIMESINCEIRR <- t_star
+    TIMESINCEIRR <- pmax(t_star, 1e-6)
     rm(t_star)
 
     # Calculation ---------------------------------------------------------------------------------
@@ -375,14 +386,9 @@ analyse_FadingMeasurement <- function(
       ##we need only every 2nd irradiation time, the one from the Tx should be the same ... all the time
       TIMESINCEIRR <- TIMESINCEIRR[seq(1,length(TIMESINCEIRR), by = 2)]
 
-
     }else if(length(structure) == 1){
       Lx_data <- object_clean
       Tx_data <- NULL
-
-    }else{
-      message("[analyse_FadingMeasurement()] Error: I have no idea what your structure means")
-      return(NULL)
     }
 
     ##calculate Lx/Tx table
@@ -417,7 +423,6 @@ analyse_FadingMeasurement <- function(
         }
       )
     })))$LxTx.table
-
   }
 
   ##create unique identifier
@@ -426,15 +431,13 @@ analyse_FadingMeasurement <- function(
   ##normalise data to prompt measurement
   tc <- min(TIMESINCEIRR)[1]
 
-  ##remove NA values in LxTx table
+  ## remove Inf values in LxTx table
   if(any(is.infinite(LxTx_table[["LxTx"]]))){
     rm_id <- which(is.infinite(LxTx_table[["LxTx"]]))
     LxTx_table <- LxTx_table[-rm_id,]
     TIMESINCEIRR <- TIMESINCEIRR[-rm_id]
     rm(rm_id)
-
   }
-
 
   ##normalise
   if(length(structure) == 2 | is.null(object)){
@@ -443,16 +446,14 @@ analyse_FadingMeasurement <- function(
     LxTx_NORM.ERROR <-
       LxTx_table[["LxTx.Error"]] / LxTx_table[["LxTx"]][which(TIMESINCEIRR == tc)[1]]
 
-
   }else{
     LxTx_NORM <-
       LxTx_table[["Net_LnLx"]] / LxTx_table[["Net_LnLx"]][which(TIMESINCEIRR== tc)[1]]
     LxTx_NORM.ERROR <-
        LxTx_table[["Net_LnLx.Error"]] / LxTx_table[["Net_LnLx"]][which(TIMESINCEIRR == tc)[1]]
-
   }
 
-  ##normalise time since irradtion
+  ## normalise time since irradiation
   TIMESINCEIRR_NORM <- TIMESINCEIRR/tc
 
   ##add dose and time since irradiation
@@ -486,7 +487,7 @@ analyse_FadingMeasurement <- function(
   ##apply the fit
   fit_matrix <- vapply(X = 2:(n.MC+1), FUN = function(x){
     ##fit
-    fit <- try(stats::lm(y~x, data = data.frame(
+    fit <- try(stats::lm(y ~ x, data = data.frame(
       x = MC_matrix[,1],
       y = MC_matrix[,x]))$coefficients, silent = TRUE)
 
@@ -495,7 +496,6 @@ analyse_FadingMeasurement <- function(
 
     }else{
       return(fit)
-
     }
 
   }, FUN.VALUE = vector("numeric", length = 2))
@@ -519,8 +519,9 @@ analyse_FadingMeasurement <- function(
   ## calculate rho prime for all MC samples
   fit_vector_rhop <- suppressWarnings(apply(MC_matrix_rhop, MARGIN = 2, FUN = function(x) {
     tryCatch({
-      coef(minpack.lm::nlsLM(x ~ c * exp(-rhop * (log(1.8 * Hs * LxTx_table$TIMESINCEIRR))^3),
-                             start = list(c = x[1], rhop = 10^-5.5)))[["rhop"]]
+      coef(minpack.lm::nlsLM(x ~ c * exp(-rhop * (log(1.8 * Hs * TIMESINCEIRR))^3),
+                             start = list(c = x[1], rhop = 10^-5.5),
+                             data = LxTx_table))[["rhop"]]
     },
     error = function(e) {
       return(NA)
@@ -610,13 +611,20 @@ analyse_FadingMeasurement <- function(
   }
 
 
-  # Plotting ------------------------------------------------------------------------------------
+  ## Plotting ---------------------------------------------------------------
   if(plot) {
-    if (!plot.single[1]) {
+
+    ## deprecated argument
+    if ("plot.single" %in% names(list(...))) {
+      plot_singlePanels <- list(...)$plot.single
+      .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
+                     "instead")
+    }
+
+    if (!plot_singlePanels[1]) {
       par.default <- par()$mfrow
       on.exit(par(mfrow = par.default), add = TRUE)
       par(mfrow = c(2, 2))
-
     }
 
     ##get package
@@ -630,7 +638,6 @@ analyse_FadingMeasurement <- function(
       log = "",
       mtext = "",
       plot.trend = TRUE
-
     )
 
     ##modify on request
@@ -644,30 +651,30 @@ analyse_FadingMeasurement <- function(
       irradiation_times.unique <-
         irradiation_times.unique[seq(1, length(irradiation_times.unique),
                                      length.out = 5)]
-
     }
 
     ## plot Lx-curves -----
     if (!is.null(object)) {
       if (length(structure) == 2) {
 
-        if (is(plot.single, "logical") ||
-            (is(plot.single, "numeric") & 1 %in% plot.single)) {
+        if (is.logical(plot_singlePanels) ||
+            (is.numeric(plot_singlePanels) && 1 %in% plot_singlePanels)) {
+          records <- object_clean[seq(1, length(object_clean), by = 2)]
           plot_RLum(
             set_RLum(class = "RLum.Analysis",
-                     records = object_clean[seq(1, length(object_clean), by = 2)]),
-            combine = TRUE,
+                     records = records),
+            combine = length(records) > 1,
             col = c(col[1:5], rep(
               rgb(0, 0, 0, 0.3), abs(length(TIMESINCEIRR) - 5)
-            )),
+            ))[1:length(records)],
             records_max = 10,
-            plot.single = TRUE,
+            plot_singlePanels = TRUE,
             legend.text = c(paste(round(irradiation_times.unique, 1), "s")),
             xlab = plot_settings$xlab,
             xlim = plot_settings$xlim,
             log = plot_settings$log,
             legend.pos = "outside",
-            main = expression(paste(L[x], " - curves")),
+            main = bquote(L[x] ~ "- curve"),
             mtext = plot_settings$mtext
           )
 
@@ -677,23 +684,23 @@ analyse_FadingMeasurement <- function(
             object_clean[[1]][range(background.integral), 1]),
             lty = c(2,2,2,2),
             col = c("green", "green", "red", "red"))
-
         }
 
         # plot Tx-curves ----
-        if (is(plot.single, "logical") ||
-            (is(plot.single, "numeric") & 2 %in% plot.single)) {
+        if (is.logical(plot_singlePanels) ||
+            (is.numeric(plot_singlePanels) && 2 %in% plot_singlePanels)) {
+          records <- object_clean[seq(2, length(object_clean), by = 2)]
           plot_RLum(
             set_RLum(class = "RLum.Analysis",
-                     records = object_clean[seq(2, length(object_clean), by = 2)]),
-            combine = TRUE,
+                     records = records),
+            combine = length(records) > 1,
             records_max = 10,
-            plot.single = TRUE,
+            plot_singlePanels = TRUE,
             legend.text = paste(round(irradiation_times.unique, 1), "s"),
             xlab = plot_settings$xlab,
             log = plot_settings$log,
             legend.pos = "outside",
-            main = bquote(expression(paste(T[x], " - curves"))),
+            main = bquote(T[x] ~ "- curve"),
             mtext = plot_settings$mtext
           )
 
@@ -725,18 +732,18 @@ analyse_FadingMeasurement <- function(
         }
 
       } else{
-        if (is(plot.single, "logical") ||
-            (is(plot.single, "numeric") & 1 %in% plot.single)) {
+        if (is.logical(plot_singlePanels) ||
+            (is.numeric(plot_singlePanels) && 1 %in% plot_singlePanels)) {
           plot_RLum(
             set_RLum(class = "RLum.Analysis", records = object_clean),
-            combine = TRUE,
+            combine = length(object_clean) > 1,
             records_max = 10,
-            plot.single = TRUE,
+            plot_singlePanels = TRUE,
             legend.text = c(paste(round(irradiation_times.unique, 1), "s")),
             legend.pos = "outside",
             xlab = plot_settings$xlab,
             log = plot_settings$log,
-            main = expression(paste(L[x], " - curves")),
+            main = bquote(L[x] ~ " - curves"),
             mtext = plot_settings$mtext
           )
 
@@ -753,12 +760,11 @@ analyse_FadingMeasurement <- function(
             lty = 2,
             col = "red"
           )
-
         }
 
         ##empty Tx plot
-        if (is(plot.single, "logical") ||
-            (is(plot.single, "numeric") & 2 %in% plot.single)) {
+        if (is.logical(plot_singlePanels) ||
+            (is.numeric(plot_singlePanels) && 2 %in% plot_singlePanels)) {
           plot(
             NA,
             NA,
@@ -771,14 +777,12 @@ analyse_FadingMeasurement <- function(
           text(x = 0.5,
                y = 0.5,
                labels = expression(paste("No ", T[x], " curves detected")))
-
         }
-
       }
 
     }else{
-      if (is(plot.single, "logical") ||
-          (is(plot.single, "numeric") & 1 %in% plot.single)) {
+      if (is.logical(plot_singlePanels) ||
+          (is.numeric(plot_singlePanels) && 1 %in% plot_singlePanels)) {
         ##empty Lx plot
         plot(
           NA,
@@ -792,11 +796,10 @@ analyse_FadingMeasurement <- function(
         text(x = 0.5,
              y = 0.5,
              labels = expression(paste("No ", L[x], " curves detected")))
-
       }
 
-      if (is(plot.single, "logical") ||
-          (is(plot.single, "numeric") & 2 %in% plot.single)) {
+      if (is.logical(plot_singlePanels) ||
+          (is.numeric(plot_singlePanels) && 2 %in% plot_singlePanels)) {
         ##empty Tx plot
         plot(
           NA,
@@ -810,14 +813,12 @@ analyse_FadingMeasurement <- function(
         text(x = 0.5,
              y = 0.5,
              labels = expression(paste("No ", T[x], " curves detected")))
-
-
       }
     }
 
     ## plot fading ----
-    if (is(plot.single, "logical") ||
-        (is(plot.single, "numeric") & 3 %in% plot.single)) {
+    if (is.logical(plot_singlePanels) ||
+        (is.numeric(plot_singlePanels) && 3 %in% plot_singlePanels)) {
 
       if(all(is.na(LxTx_table[["LxTx_NORM"]]))){
           shape::emptyplot()
@@ -839,7 +840,6 @@ analyse_FadingMeasurement <- function(
             }
           } else {
             plot_settings$ylim
-
           },
           xlim = range(LxTx_table[["TIMESINCEIRR_NORM.LOG"]], na.rm = TRUE),
           main = "Signal Fading"
@@ -885,7 +885,6 @@ analyse_FadingMeasurement <- function(
             cex.axis = 0.7,
             tick = FALSE,
             line = 0.75)
-
         }
 
         mtext(
@@ -947,7 +946,6 @@ analyse_FadingMeasurement <- function(
           y0 = LxTx_table[["LxTx_NORM"]] + LxTx_table[["LxTx_NORM.ERROR"]],
           y1 = LxTx_table[["LxTx_NORM"]] - LxTx_table[["LxTx_NORM.ERROR"]],
           col = "grey"
-
         )
 
         ##add legend
@@ -962,8 +960,8 @@ analyse_FadingMeasurement <- function(
       }#end if a
     }#
 
-    if (is(plot.single, "logical") ||
-        (is(plot.single, "numeric") & 4 %in% plot.single)) {
+    if (is.logical(plot_singlePanels) ||
+        (is.numeric(plot_singlePanels) && 4 %in% plot_singlePanels)) {
 
       if(all(is.na(g_value.MC))){
         shape::emptyplot()
@@ -972,7 +970,7 @@ analyse_FadingMeasurement <- function(
       }else{
         plot(density(g_value.MC),
              main = "Density: g-values (%/decade)")
-        rug(x = g_value.MC)
+        graphics::rug(x = g_value.MC)
         abline(v = c(g_value[["Q_0.16"]], g_value[["Q_0.84"]]),
                lty = 2,
                col = "darkgreen")
@@ -986,12 +984,8 @@ analyse_FadingMeasurement <- function(
           col = c("darkgreen", "red"),
           bty = "n"
         )
-
-
       }
-
     }
-
   }
 
   # Terminal ------------------------------------------------------------------------------------
@@ -1011,7 +1005,6 @@ analyse_FadingMeasurement <- function(
     cat(paste0("\nrho':\t\t\t", format(rhoPrime$MEAN, digits = 3), " \u00b1 ", format(rhoPrime$SD, digits = 3)))
     cat(paste0("\nlog10(rho'):\t\t", suppressWarnings(round(log10(rhoPrime$MEAN), 2)), " \u00b1 ", round(rhoPrime$SD /  (rhoPrime$MEAN * log(10, base = exp(1))), 2)))
     cat("\n---------------------------------------------------\n")
-
   }
 
   # Return --------------------------------------------------------------------------------------
@@ -1047,7 +1040,6 @@ analyse_FadingMeasurement <- function(
       UID = uid,
       stringsAsFactors = FALSE
     )
-
   }
 
   ##return
@@ -1062,5 +1054,4 @@ analyse_FadingMeasurement <- function(
     ),
     info = list(call = sys.call())
   ))
-
 }

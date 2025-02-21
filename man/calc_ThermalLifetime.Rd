@@ -50,11 +50,12 @@ allows to set configuration parameters used for the profiling
 Currently only the normal distribution is supported
 (e.g., \code{profiling_config = list(E.distribution = "norm")}}
 
-\item{verbose}{\link{logical}:
-enables/disables verbose mode}
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 
-\item{plot}{\link{logical}:
-enables/disables output plot, currently only in combination with \code{profiling = TRUE}.}
+\item{plot}{\link{logical} (\emph{with default}):
+enable/disable the plot output, currently only in combination with
+\code{profiling = TRUE}.}
 
 \item{...}{further arguments that can be passed in combination with the plot output.
 Standard plot parameters are supported (\link{plot.default})}
@@ -128,7 +129,7 @@ temp <- calc_ThermalLifetime(
   T = T,
   output_unit = "Ma"
 )
-contour(x = E, y = T, z = temp$lifetimes[1,,],
+graphics::contour(x = E, y = T, z = temp$lifetimes[1,,],
         ylab = "Temperature [\u00B0C]",
         xlab = "Trap depth [eV]",
         main = "Thermal Lifetime Contour Plot"
@@ -151,7 +152,7 @@ calc_ThermalLifetime(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. calc_ThermalLifetime(): Calculates the Thermal Lifetime using the Arrhenius equation. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. calc_ThermalLifetime(): Calculates the Thermal Lifetime using the Arrhenius equation. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

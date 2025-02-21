@@ -1,8 +1,9 @@
-#' Calculate De value based on the gSGC by Li et al., 2015
+#' @title Calculate De value based on the gSGC by Li et al., 2015
 #'
-#' Function returns De value and De value error using the global standardised growth
+#' @description Function returns De value and De value error using the global standardised growth
 #' curve (gSGC) assumption proposed by Li et al., 2015 for OSL dating of sedimentary quartz
 #'
+#' @details
 #' The error of the De value is determined using a Monte Carlo simulation approach.
 #' Solving of the equation is realised using [uniroot].
 #' Large values for `n.MC` will significantly increase the computation time.
@@ -19,19 +20,20 @@
 #'
 #' @param gSGC.parameters [list] (*optional*):
 #' option to provide own function parameters used for fitting as named list.
-#' Nomenclature follows Li et al., 2015, i.e. `list(A,A.error,D0,D0.error,c,c.error,Y0,Y0.error,range)`,
-#' range requires a vector for the range the function is considered as valid, e.g. `range = c(0,250)`\cr
+#' Nomenclature follows Li et al., 2015, i.e. `list(A, A.error, D0, D0.error,
+#' c, c.error, Y0, Y0.error, range)`, where `range` is defines the interval
+#' where the function is considered as valid, e.g. `range = c(0,250)`.\cr
 #' Using this option overwrites the default parameter list of the gSGC, meaning the argument
 #' `gSGC.type` will be without effect
 #'
 #' @param n.MC [integer] (*with default*):
 #' number of Monte Carlo simulation runs for error estimation, see details.
 #'
-#' @param verbose [logical]:
-#' enable or disable terminal output
+#' @param verbose [logical] (*with default*):
+#' enable/disable output to the terminal.
 #'
-#' @param plot [logical]:
-#' enable or disable graphical feedback as plot
+#' @param plot [logical] (*with default*):
+#' enable/disable the plot output.
 #'
 #' @param ... parameters will be passed to the plot output
 #'
@@ -86,19 +88,19 @@ calc_gSGC<- function(
   .set_function_name("calc_gSGC")
   on.exit(.unset_function_name(), add = TRUE)
 
-##============================================================================##
-##CHECK INPUT DATA
-##============================================================================##
+  ## Integrity checks -------------------------------------------------------
 
-  if (!is.data.frame(data))
-    .throw_error("'data' must be a data.frame")
+  .validate_class(data, "data.frame")
   if (ncol(data) != 5)
     .throw_error("'data' is expected to have 5 columns")
-  if (!is.character(gSGC.type))
-    .throw_error("'gSGC.type' must be of type 'character'")
+  gSGC.type <- .validate_args(gSGC.type, c("0-250", "0-450"))
 
   ##rename columns for consistency reasons
   colnames(data) <- c('LnTn', 'LnTn.error', 'Lr1Tr1', 'Lr1Tr1.error', 'Dr1')
+
+  ## ensure errors are not negative
+  data$LnTn.error <- abs(data$LnTn.error)
+  data$Lr1Tr1.error <- abs(data$Lr1Tr1.error)
 
 
 ##============================================================================##
@@ -147,9 +149,6 @@ calc_gSGC<- function(
         Y0.error <- 0.00490
 
         range <- c(0.1,250)
-
-      }else{
-        .throw_error("Unknown 'gSGC.type'")
       }
     }
 

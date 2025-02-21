@@ -13,7 +13,7 @@ analyse_FadingMeasurement(
   n.MC = 100,
   verbose = TRUE,
   plot = TRUE,
-  plot.single = FALSE,
+  plot_singlePanels = FALSE,
   ...
 )
 }
@@ -54,18 +54,18 @@ For more information see details. \cr
 without irradiation times.}}
 
 \item{n.MC}{\link{integer} (\emph{with default}):
-number for Monte Carlo runs for the error estimation}
+number for Monte Carlo runs for the error estimation.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enables/disables verbose mode}
+enable/disable output to the terminal.}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enables/disables plot output}
+enable/disable the plot output.}
 
-\item{plot.single}{\link{logical} (\emph{with default}):
-enables/disables single plot mode, i.e. one plot window per plot.
+\item{plot_singlePanels}{\link{logical} (\emph{with default}) or \link{numeric} (\emph{optional}):
+enable/disable single plot mode, i.e. one plot window per plot.
 Alternatively a vector specifying the plot to be drawn, e.g.,
-\code{plot.single = c(3,4)} draws only the last two plots}
+\code{plot_singlePanels = c(3,4)} draws only the last two plots}
 
 \item{...}{(\emph{optional}) further arguments that can be passed to internally used functions. Supported arguments:
 \code{xlab}, \code{log}, \code{mtext}, \code{plot.trend} (enable/disable trend blue line), and \code{xlim} for the
@@ -95,9 +95,10 @@ Slot: \strong{@info}
 }
 }
 \description{
-The function analysis fading measurements and returns a fading rate including an error estimation.
-The function is not limited to standard fading measurements, as can be seen, e.g., Huntley and
-Lamothe (2001). Additionally, the density of recombination centres (rho') is estimated after
+The function analyses fading measurements and returns a fading rate
+including an error estimation. The function is not limited to standard
+fading measurements, as can be seen, e.g., Huntley and Lamothe (2001).
+Additionally, the density of recombination centres (rho') is estimated after
 Kars et al. (2008).
 }
 \details{
@@ -156,7 +157,7 @@ not all pause steps are plotted to avoid graphically overloaded plots.
 However, \emph{all} pause times are taken into consideration for the analysis.
 }
 \section{Function version}{
- 0.1.22
+ 0.1.23
 }
 
 \examples{
@@ -184,7 +185,7 @@ n.MC = 10)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2024. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.22. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Burow, C., 2025. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.23. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

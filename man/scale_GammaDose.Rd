@@ -12,7 +12,7 @@ scale_GammaDose(
   fractional_gamma_dose = c("Aitken1985")[1],
   verbose = TRUE,
   plot = TRUE,
-  plot_single = TRUE,
+  plot_singlePanels = FALSE,
   ...
 )
 }
@@ -53,14 +53,14 @@ Factors to scale gamma dose rate values. Valid options are:
 \item \code{"Aitken1985"} (default): Table H1 in the appendix
 }}
 
-\item{verbose}{\link{logical} (\emph{optional}):
-Show or hide console output (defaults to \code{TRUE}).}
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 
-\item{plot}{\link{logical} (\emph{optional}):
-Show or hide the plot (defaults to \code{TRUE}).}
+\item{plot}{\link{logical} (\emph{with default}):
+enable/disable the plot output.}
 
-\item{plot_single}{\link{logical} (\emph{optional}):
-Show all plots in one panel (defaults to \code{TRUE}).}
+\item{plot_singlePanels}{\link{logical} (\emph{with default}):
+enable/disable single plot mode, i.e. one plot window per plot.}
 
 \item{...}{Further parameters passed to \link{barplot}.}
 }
@@ -208,7 +208,7 @@ density and water content is not constant for the entire section.
 \strong{cross-checked.}
 }
 \section{Function version}{
- 0.1.2
+ 0.1.3
 }
 
 \section{Acknowledgements}{
@@ -236,7 +236,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., Burow, C., 2024. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., Burow, C., 2025. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

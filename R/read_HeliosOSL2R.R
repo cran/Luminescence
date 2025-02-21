@@ -6,7 +6,8 @@
 #'@param file [character] (**required**): path to file to be imported. Can be a [list]
 #'for further processing
 #'
-#'@param verbose [logical]: enable/disable terminal feedback
+#' @param verbose [logical] (*with default*): enable/disable output to the
+#' terminal.
 #'
 #'@param ... not in use, for compatibility reasons only
 #'
@@ -33,40 +34,50 @@ read_HeliosOSL2R <- function(
   verbose = TRUE,
   ...
 ) {
+  .set_function_name("read_HeliosOSL2R")
+  on.exit(.unset_function_name(), add = TRUE)
 
 # Self-call ---------------------------------------------------------------
   if(inherits(file, "list")) {
     out <- lapply(file, function(x) {
-      read_HeliosOSL2R(x)
+      tmp <- try(read_HeliosOSL2R(x, verbose = verbose), silent = TRUE)
+      if(inherits(tmp, "try-error")) {
+        .throw_message(strsplit(tmp, ":", fixed = TRUE)[[1]][2], "->... record skipped!")
+        return(NULL)
+      }
+      tmp
 
     })
+
+    ## remove NULL
+    out <- .rm_NULL_elements(out)
+
+    if(length(out) == 0)
+      out <- NULL
 
     return(out)
   }
 
 
-# Incoming ----------------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(file, c("character", "list"))
+  .validate_not_empty(file)
+
   ## check file format
   if (tolower(ext <- tools::file_ext(file)) != "osl")
-    stop(paste0("[read_HeliosOSL2R()] File extension <", ext, "> unsupported!"),
-         call. = FALSE)
+    .throw_error("File extension '", ext, "' not supported")
 
   ## fix path
   file <- normalizePath(file)
 
-# Import ------------------------------------------------------------------
-  if(verbose) {
-    file_name <- basename(file)
-    len_str <- nchar(basename(file_name))
-    if(len_str > 50)
-      file_name <- paste0(
-        substr(file_name, start = 1, stop = 10),
-        "...",
-        substr(file_name, start = len_str - 40, stop = len_str))
+  ## Import -----------------------------------------------------------------
 
-    cat("\n[read_HeliosOSL2R()] \n -> Importing ... \n -> path: ", dirname(file))
-    cat("\n -> file: ", file_name, "\n")
-
+  if (verbose) {
+    cat("\n[read_HeliosOSL2R()] Importing ...")
+    cat("\n path: ", dirname(file))
+    cat("\n file: ", .shorten_filename(basename(file)))
+    cat("\n")
   }
 
   ## read entire file

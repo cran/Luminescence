@@ -1,3 +1,4 @@
+## load data
 data(ExampleData.DeValues, envir = environment())
 ExampleData.DeValues <- ExampleData.DeValues$CA1
 
@@ -5,13 +6,15 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_AbanicoPlot(data = "error"),
-               "Input data format must be 'data.frame' or 'RLum.Results'")
+               "All elements of 'data' should be of class 'data.frame'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues[, 1, drop = FALSE]),
                "Data set (1) has fewer than 2 columns: data without errors",
                fixed = TRUE)
 
+  expect_message(expect_null(plot_AbanicoPlot(list())),
+                 "Error: 'data' is empty, nothing plotted")
   expect_message(expect_null(plot_AbanicoPlot(ExampleData.DeValues[0, ])),
-                 "Error: Nothing plotted, your data set is empty")
+                 "Error: 'data' is empty, nothing plotted")
 
   expect_warning(expect_message(
       expect_null(plot_AbanicoPlot(ExampleData.DeValues[1, ])),
@@ -19,13 +22,19 @@ test_that("input validation", {
       "Data sets 1 are found to be empty or consisting of only 1 row")
 
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, plot = FALSE),
-               "'plot.ratio' must be a positive scalar")
+               "'plot.ratio' should be a positive scalar")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, xlab = "x"),
                "'xlab' must have length 2")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, z.0 = "error"),
-               "Value for 'z.0' not supported")
+               "'z.0' should be one of 'mean', 'mean.weighted', 'median' or")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, dispersion = "error"),
-               "Measure of dispersion not supported")
+               "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, dispersion = "p5"),
+               "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, dispersion = "p5a"),
+               "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, dispersion = "p500"),
+               "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
 
   ## zero-error values
   data.zeros <- ExampleData.DeValues
@@ -35,7 +44,11 @@ test_that("input validation", {
   data.zeros[, 2] <- 0
   expect_error(plot_AbanicoPlot(data.zeros),
                "Data set contains only values with zero errors")
+
+  expect_warning(plot_AbanicoPlot(ExampleData.DeValues, xlim = c(2, 12)),
+                 "Lower x-axis limit was 2, reset to zero")
 })
+
 
 test_that("Test examples from the example page", {
   testthat::skip_on_cran()
@@ -173,8 +186,13 @@ test_that("Test examples from the example page", {
                    summary = c("n", "in.2s", "median")))
 
   ## create Abanico plot with predefined layout definition
-  expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
+  layout <- expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
                    layout = "journal"))
+
+  ## trigger a few test cases related to layout
+  layout$abanico$colour$centrality <- 1:2
+  expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
+                                 layout = "journal"))
 
   ## now with predefined layout definition and further modifications
   expect_silent(plot_AbanicoPlot(data = data.3,
@@ -232,4 +250,84 @@ test_that("more coverage", {
                                   at = seq(20, 120, nrow(data.na) - 1)),
                  "Data set (1): 1 NA value excluded",
                  fixed = TRUE)
+  expect_message(plot_AbanicoPlot(data.na, y.axis = TRUE,
+                                  yaxt = "y", ylim = c(2, 3),
+                                  dispersion = "2sd"),
+                 "Data set (1): 1 NA value excluded",
+                 fixed = TRUE)
+
+  ## further edge tests ... check for wrong bw parameter
+  expect_warning(
+    object = plot_AbanicoPlot(data = ExampleData.DeValues, bw = "tests"),
+    regexp = "Option for bw not possible. Set to nrd0!")
+
+  ## negative values
+  df <-  ExampleData.DeValues
+  df[,1] <- -df[,1]
+  expect_message(
+    object = plot_AbanicoPlot(data = df),
+    regexp = "Attention, small standardised estimate scatter. Toggle off y.axis?")
+
+  ## test boundaries
+  expect_warning(
+    object = plot_AbanicoPlot(
+    data = data.frame(x = c(0,1), y = c(0.1,01))),
+    regexp = "Found zero values in x-column of dataset 1: set log.z = FALSE")
+
+  ## handling of negative values; before it produced wrong plots
+ expect_silent(plot_AbanicoPlot(data = data.frame(
+    x = c(-1,10),
+    y = c(0.1,3)
+
+  ), log.z = TRUE, summary = c("mean", "sd.abs")))
+
+ ## handling of negative values; but with zlim
+ expect_silent(plot_AbanicoPlot(data = data.frame(
+   x = c(-1,10),
+   y = c(0.1,3),
+   zlim = c(2,10)
+
+ ), log.z = TRUE, summary = c("mean", "sd.abs")))
+
+ ## test lines 2144 onwards
+ par(mfrow = c(4,4))
+ expect_silent(plot_AbanicoPlot(data = data.frame(
+   x = c(-1,10),
+   y = c(0.1,3)
+
+ ), log.z = TRUE, summary = c("mean", "sd.abs")))
+ par(mfrow = c(1,1))
+
+ ## test lines 2888 onwards (same was above, just with the rotated plot)
+ par(mfrow = c(3,3))
+ expect_silent(plot_AbanicoPlot(data = data.frame(
+   x = c(-1,10),
+   y = c(0.1,3)
+
+ ), log.z = TRUE, rotate = TRUE))
+ par(mfrow = c(1,1))
+
+ ## test centrality from layout
+ layout <- get_Layout("default")
+
+ ## trigger a few test cases related to layout
+ layout$abanico$colour$centrality <- 1:2
+ expect_silent(
+   plot_AbanicoPlot(data = list(ExampleData.DeValues, ExampleData.DeValues),
+                  layout = layout))
+
 })
+
+test_that("Test graphical snapshot", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+  testthat::skip_if_not(getRversion() >= "4.4.0")
+
+  SW({
+    vdiffr::expect_doppelganger(
+      title = "Abanico expected",
+      fig = plot_AbanicoPlot(data = ExampleData.DeValues))
+  })
+
+})
+

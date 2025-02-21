@@ -21,7 +21,7 @@
 #' In the original version of the minimum dose model, the basic data are the natural
 #' logarithms of the De estimates and relative standard errors of the De
 #' estimates. The value for `sigmab` must be provided as a ratio
-#' (e.g, 0.2 for 20 \%). This model will be applied if `log = TRUE`.
+#' (e.g, 0.2 for 20 %). This model will be applied if `log = TRUE`.
 #'
 #' If `log=FALSE`, the modified un-logged model will be applied instead. This
 #' has essentially the same form as the original version.  `gamma` and
@@ -41,13 +41,13 @@
 #' The log likelihood calculations use the [nlminb] function for box-constrained
 #' optimisation using PORT routines.  Accordingly, initial values for the four
 #' parameters can be specified via `init.values`. If no values are
-#' provided for `init.values` reasonable starting values are estimated
+#' provided for `init.values`, reasonable starting values are estimated
 #' from the input data.  If the final estimates of *gamma*, *mu*,
 #' *sigma* and *p0* are totally off target, consider providing custom
 #' starting values via `init.values`.
-#' In contrast to previous versions of this function the boundaries for the
+#' In contrast to previous versions of this function, the boundaries for the
 #' individual model parameters are no longer required to be explicitly specified.
-#' If you want to override the default boundary values use the arguments
+#' If you want to override the default boundary values use arguments
 #' `gamma.lower`, `gamma.upper`, `sigma.lower`, `sigma.upper`, `p0.lower`, `p0.upper`,
 #' `mu.lower` and `mu.upper`.
 #'
@@ -58,9 +58,9 @@
 #' produces 1000 first level and 3000 second level bootstrap replicates
 #' (actually, the number of second level bootstrap replicates is three times
 #' the number of first level replicates unless specified otherwise).  The
-#' uncertainty on sigmab is 0.04 by default. These values can be changed by
+#' uncertainty on `sigmab` is 0.04 by default. These values can be changed by
 #' using the arguments `bs.M` (first level replicates), `bs.N`
-#' (second level replicates) and `sigmab.sd` (error on sigmab). With
+#' (second level replicates) and `sigmab.sd` (error on `sigmab`). With
 #' `bs.h` the bandwidth of the kernel density estimate can be specified.
 #' By default, `h` is calculated as
 #'
@@ -74,11 +74,11 @@
 #' is only available when `bootstrap=TRUE` and spawns `n` R instances
 #' for each core to get MAM estimates for each of the N and M bootstrap
 #' replicates. Note that this option is highly experimental and may or may not
-#' work for your machine. Also the performance gain increases for larger number
-#' of bootstrap replicates. Also note that with each additional core and hence
-#' R instance and depending on the number of bootstrap replicates the memory
-#' usage can significantly increase. Make sure that memory is always available,
-#' otherwise there will be a massive performance hit.
+#' work for your machine. The performance gain increases for larger number
+#' of bootstrap replicates. However, note that with each additional core (and
+#' hence R instance) the memory usage can significantly increase and depending
+#' on the number of bootstrap replicates. When insufficient memory is available,
+#' there will be a massive performance hit.
 #'
 #' **Likelihood profiles**
 #'
@@ -86,7 +86,7 @@
 #' The profile likelihood plots look different to ordinary profile likelihood as
 #'
 #' "`[...]` the plot method for likelihood profiles displays the square root of
-#' the the deviance difference (twice the difference in negative log-likelihood from
+#' the deviance difference (twice the difference in negative log-likelihood from
 #' the best fit), so it will be V-shaped for cases where the quadratic approximation
 #' works well `[...]`." (Bolker 2016).
 #'
@@ -102,8 +102,8 @@
 #' This value represents the expected overdispersion in the data should the sample be
 #' well-bleached (Cunningham & Walling 2012, p. 100).
 #' **NOTE**: For the logged model (`log = TRUE`) this value must be
-#' a fraction, e.g. 0.2 (= 20 \%). If the un-logged model is used (`log = FALSE`),
-#' sigmab must be provided in the same absolute units of the De values (seconds or Gray).
+#' a fraction, e.g. 0.2 (= 20 %). If the un-logged model is used (`log = FALSE`),
+#' `sigmab` must be provided in the same absolute units of the De values (seconds or Gray).
 #' See details.
 #'
 #' @param log [logical] (*with default*):
@@ -117,11 +117,12 @@
 #' apply the recycled bootstrap approach of Cunningham & Wallinga (2012).
 #'
 #' @param init.values [numeric] (*optional*):
-#' a named list with starting values for gamma, sigma, p0 and mu
-#' (e.g. `list(gamma=100, sigma=1.5, p0=0.1, mu=100)`). If no values are provided reasonable values
-#' are tried to be estimated from the data. **NOTE** that the initial values must always be given
-#' in the absolute units. The the logged model is applied (`log = TRUE`), the provided `init.values`
-#' are automatically log transformed.
+#' a named list with starting values for `gamma`, `sigma`, `p0` and `mu`
+#' (e.g. `list(gamma=100, sigma=1.5, p0=0.1, mu=100)`). If no values are
+#' provided, reasonable values will be estimated from the data.
+#' **NOTE**: the initial values must always be given in the absolute units.
+#' If a logged model is applied (`log = TRUE`), the provided `init.values`
+#' are automatically log-transformed.
 #'
 #' @param level [logical] (*with default*):
 #' the confidence level required (defaults to 0.95).
@@ -131,7 +132,7 @@
 #' and confidence intervals (only applicable if `log = TRUE`).
 #'
 #' @param plot [logical] (*with default*):
-#' plot output (`TRUE`/`FALSE`)
+#' enable/disable the plot output.
 #'
 #' @param multicore [logical] (*with default*):
 #' enable parallel computation of the bootstrap by creating a multicore SNOW cluster. Depending
@@ -140,7 +141,7 @@
 #' work on all machines. (`TRUE`/`FALSE`)
 #'
 #' @param ... (*optional*) further arguments for bootstrapping
-#' (`bs.M, bs.N, bs.h, sigmab.sd`). See details for their usage.
+#' (`bs.M`, `bs.N`, `bs.h`, `sigmab.sd`). See details for their usage.
 #' Further arguments are
 #' - `verbose` to de-/activate console output (logical),
 #' - `debug` for extended console output (logical) and
@@ -150,17 +151,17 @@
 #' [RLum.Results-class] object is returned containing the
 #' following elements:
 #'
-#' \item{.$summary}{[data.frame] summary of all relevant model results.}
-#' \item{.$data}{[data.frame] original input data}
-#' \item{args}{[list] used arguments}
-#' \item{call}{[call] the function call}
-#' \item{.$mle}{[bbmle::mle2] object containing the maximum log likelihood functions for all parameters}
-#' \item{BIC}{[numeric] BIC score}
-#' \item{.$confint}{[data.frame] confidence intervals for all parameters}
-#' \item{.$profile}{[stats::profile] the log likelihood profiles}
-#' \item{.$bootstrap}{[list] bootstrap results}
+#' \item{$summary}{[data.frame] summary of all relevant model results.}
+#' \item{$data}{[data.frame] original input data}
+#' \item{$args}{[list] used arguments}
+#' \item{$call}{[call] the function call}
+#' \item{$mle}{[bbmle::mle2] object containing the maximum log likelihood functions for all parameters}
+#' \item{$BIC}{[numeric] BIC score}
+#' \item{$confint}{[data.frame] confidence intervals for all parameters}
+#' \item{$profile}{[stats::profile] the log likelihood profiles}
+#' \item{$bootstrap}{[list] bootstrap results}
 #'
-#' The output should be accessed using the function [get_RLum]
+#' The output should be accessed using the function [get_RLum].
 #'
 #' @note
 #' The default starting values for *gamma*, *mu*, *sigma*
@@ -341,23 +342,18 @@ calc_MinDose <- function(
   .set_function_name("calc_MinDose")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## ============================================================================##
-  ## CONSISTENCY CHECK OF INPUT DATA
-  ## ============================================================================##
-  if (!missing(data)) {
-    if (!is(data, "data.frame") & !is(data, "RLum.Results")) {
-      .throw_error("Error: 'data' object must be of type ",
-                   "'data.frame' or 'RLum.Results'")
-    }
-    if (is(data, "RLum.Results")) {
-      data <- get_RLum(data, "data")
-    }
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(data, c("data.frame", "RLum.Results"))
+  .validate_not_empty(data)
+  if (is(data, "RLum.Results")) {
+    data <- get_RLum(data, "data")
   }
 
-  if (any(!complete.cases(data))) {
+  if (any(!stats::complete.cases(data))) {
     message("\n[calc_MinDose] Warning: Input data contained NA/NaN values, ",
             "which were removed prior to calculations!")
-    data <- data[complete.cases(data), ]
+    data <- data[stats::complete.cases(data), ]
   }
 
   if (!missing(init.values)) {
@@ -444,7 +440,7 @@ calc_MinDose <- function(
   } else {
     cores <- parallel::detectCores()
     if (multicore)
-      message(paste("Logical CPU cores detected:", cores))
+      message(paste("Logical CPU cores detected:", cores)) # nocov
   }
 
   ## WARNINGS ----
@@ -556,7 +552,7 @@ calc_MinDose <- function(
     res1 <- (gamma - mu)/sigma
     lf1i <- log(p0) - log(si) - 0.5*((zi-gamma)/si)^2   - logsqrt2pi
     lf2i <- log(1-p0) - 0.5*log(s2) - 0.5*(zi-mu)^2/s2  - logsqrt2pi
-    lf2i <- lf2i + log(1-pnorm(res0)) - log(1-pnorm(res1))
+    lf2i <- lf2i + log(1 - stats::pnorm(res0)) - log(1 - stats::pnorm(res1))
     llik <- log( exp(lf1i) + exp(lf2i) )
     negll <- -sum(llik)
 
@@ -624,7 +620,7 @@ calc_MinDose <- function(
 
   if (any(is.nan(coef_err)))
     coef_err[which(is.nan(coef_err))] <- t(as.data.frame(ests@coef))[which(is.nan(coef_err))] / 100
-  if (any(is.na(coef_err)))
+  if (anyNA(coef_err))
     coef_err[which(is.na(coef_err))] <- t(as.data.frame(ests@coef))[which(is.na(coef_err))] / 100
 
   if (par == 3)
@@ -799,14 +795,9 @@ calc_MinDose <- function(
     # Function to extract the estimate of gamma from mle2 objects and converting
     # it back to the 'normal' scale
     save_Gamma <- function(d) {
-      if (log) {
-        if (invert) {
-          m <- exp((bbmle::coef(d)[["gamma"]]-x.offset)*-1)
-        } else {
-          m <- exp(bbmle::coef(d)[["gamma"]])
-        }
-      } else {
-        m <- bbmle::coef(d)[["gamma"]]
+      m <- bbmle::coef(d)[["gamma"]]
+      if (log && invert) {
+        m <- exp(-(m - x.offset))
       }
       return(m)
     }
@@ -905,21 +896,19 @@ calc_MinDose <- function(
 
     ## if the input values are too close to zero, we may get
     ## Inf values >>> we remove them here with a warning
-    if(any(is.infinite(pairs))){
-      inf_count <- length(which(is.infinite(pairs[,2])))/nrow(pairs)
-      pairs <- pairs[!is.infinite(pairs[,2]),]
-      .throw_warning("Inf values produced by bootstrapping removed ",
-                     "for LOcal polynominal regrESSion fitting (loess)!",
-                     "\n The removed values represent ",
-                     round(inf_count * 100,2), " % of the total dataset. ",
-                     "This message usually indicates that your values ",
-                     "are close to 0.")
+    is.inf <- is.infinite(pairs[, 2])
+    if (any(is.inf)) {
+      .throw_warning("Inf values produced by bootstrapping removed for loess ",
+                     "fitting (", round(sum(is.inf) / nrow(pairs) * 100, 2),
+                     "% of the total dataset). This message usually indicates ",
+                     "that your values are close to 0.")
+      pairs <- pairs[!is.inf, ]
     }
 
-    poly.three <- lm(pairs[ ,2] ~ poly(pairs[ ,1], degree = 3, raw = TRUE))
-    poly.four <- lm(pairs[ ,2] ~ poly(pairs[ ,1], degree = 4, raw = TRUE))
-    poly.five <- lm(pairs[ ,2] ~ poly(pairs[ ,1], degree = 5, raw = TRUE))
-    poly.six <- lm(pairs[ ,2] ~ poly(pairs[ ,1], degree = 6, raw = TRUE))
+    poly.three <- stats::lm(pairs[, 2] ~ poly(pairs[, 1], degree = 3, raw = TRUE))
+    poly.four <- stats::lm(pairs[, 2] ~ poly(pairs[, 1], degree = 4, raw = TRUE))
+    poly.five <- stats::lm(pairs[, 2] ~ poly(pairs[, 1], degree = 5, raw = TRUE))
+    poly.six <- stats::lm(pairs[, 2] ~ poly(pairs[, 1], degree = 6, raw = TRUE))
 
     ## --------- FIT LOESS -------------- ##
     # Polynomials are probably not reasonable and often suffer badly from
@@ -1042,7 +1031,8 @@ calc_MinDose <- function(
   #   options(warn = 0)
 
   if (!is.na(summary$mu) && !is.na(summary$de)) {
-    if (log(summary$de) > summary$mu)
+    ## equivalent to log(summary$de) > summary$mu, but also valid if de < 0
+    if (summary$de > exp(summary$mu))
       .throw_warning("Gamma is larger than mu, consider running the model ",
                      "with new boundary values (see details '?calc_MinDose')")
   }

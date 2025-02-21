@@ -17,7 +17,7 @@ analyse_SAR.CWOSL(
   mtext.outer = "",
   plot = TRUE,
   plot_onePage = FALSE,
-  plot.single = FALSE,
+  plot_singlePanels = FALSE,
   onlyLxTxTable = FALSE,
   ...
 )
@@ -26,7 +26,7 @@ analyse_SAR.CWOSL(
 \item{object}{\linkS4class{RLum.Analysis} (\strong{required}):
 input object containing data for analysis, alternatively a \link{list} of
 \linkS4class{RLum.Analysis} objects can be provided. The object should contain \strong{only} curves
-considered part of the SAR protocol (see Details.)}
+considered part of the SAR protocol (see Details).}
 
 \item{signal.integral.min}{\link{integer} (\strong{required}):
 lower bound of the signal integral. Can be a \link{list} of \link{integer}s, if \code{object} is
@@ -54,9 +54,9 @@ case no integrals are taken into account.}
 
 \item{OSL.component}{\link{character} or \link{integer} (\emph{optional}): s single index
 or a \link{character} defining the signal component to be evaluated.
-It requires that the object was processed by \verb{[OSLdecomposition::RLum.OSL_decomposition]}.
+It requires that the object was processed by \code{OSLdecomposition::RLum.OSL_decomposition}.
 This argument can either be the name of the OSL component assigned by
-\verb{[OSLdecomposition::RLum.OSL_global_fitting]} or the index in the descending
+\code{OSLdecomposition::RLum.OSL_global_fitting} or the index in the descending
 order of decay rates. Then \code{"1"} selects the fastest decaying component, \code{"2"}
 the second fastest and so on. Can be a \link{list} of \link{integer}s or strings (or mixed)
 If object is a \link{list} and this parameter is provided as \link{list} it alternates over
@@ -91,18 +91,20 @@ before passing the input object.}
 option to provide an outer margin \code{mtext}. Can be a \link{list} of \link{character}s,
 if \code{object} is of type \link{list}}
 
-\item{plot}{\link{logical} (\emph{with default}): enables or disables plot output.}
+\item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.}
 
-\item{plot_onePage}{\link{logical} (\emph{with default}): enables or disables on page plot output}
+\item{plot_onePage}{\link{logical} (\emph{with default}): enable/disable one page
+plot output.}
 
-\item{plot.single}{\link{logical} (\emph{with default}) or \link{numeric} (\emph{optional}):
+\item{plot_singlePanels}{\link{logical} (\emph{with default}) or \link{numeric} (\emph{optional}):
 single plot output (\code{TRUE/FALSE}) to allow for plotting the results in single plot windows.
 If a \link{numeric} vector is provided the plots can be selected individually, i.e.
-\code{plot.single = c(1,2,3,4)} will plot the TL and Lx, Tx curves but not the legend (5) or the
+\code{plot_singlePanels = c(1,2,3,4)} will plot the TL and Lx, Tx curves but
+not the legend (5) or the
 growth curve (6), (7) and (8) belong to rejection criteria plots. Requires
 \code{plot = TRUE}.}
 
-\item{onlyLxTxTable}{\link{logical} (with default): If \code{TRUE} the dose response
+\item{onlyLxTxTable}{\link{logical} (\emph{with default}): If \code{TRUE} the dose response
 curve fitting and plotting is skipped.
 This allows to get hands on the \code{Lx/Tx} table for large datasets
 without the need for a curve fitting.}
@@ -217,7 +219,7 @@ This function must not be mixed up with the function
 \strong{The function currently does support only 'OSL', 'IRSL' and 'POSL' data!}
 }
 \section{Function version}{
- 0.10.3
+ 0.10.5
 }
 
 \examples{
@@ -257,7 +259,7 @@ get_RLum(results, data.object = "LnLxTnTx.table")
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_SAR.CWOSL(): Analyse SAR CW-OSL measurements. Function version 0.10.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_SAR.CWOSL(): Analyse SAR CW-OSL measurements. Function version 0.10.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

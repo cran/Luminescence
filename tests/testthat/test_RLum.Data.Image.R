@@ -16,7 +16,8 @@ test_that("check class ", {
   expect_output(show(ExampleData.RLum.Data.Image))
 
   ##get-method
-  expect_error(get_RLum(ExampleData.RLum.Data.Image, info.object = 1), regexp = "'info.object' has to be a character!")
+  expect_error(get_RLum(ExampleData.RLum.Data.Image, info.object = 1),
+               "'info.object' should be of class 'character'")
   expect_error(get_RLum(ExampleData.RLum.Data.Image, info.object = "unknown"))
   expect_type(get_RLum(ExampleData.RLum.Data.Image, info.object = "NumFrames"), "integer")
 
@@ -40,10 +41,14 @@ test_that("check class ", {
   ## to and from list
   expect_s4_class(as(list(matrix(1, nrow = 10, ncol = 5), matrix(1, nrow = 10, ncol = 5)), "RLum.Data.Image"),
                   "RLum.Data.Image")
+  expect_s4_class(as(list(), "RLum.Data.Image"),
+                  "RLum.Data.Image")
   expect_type(as(ExampleData.RLum.Data.Image, "list"), "list")
+  res <- as(set_RLum("RLum.Data.Image"), "list")
+  expect_type(res, "list")
+  expect_length(res, 0)
 
   ## check edge cases
   expect_error(as(from_array, "matrix"), "No viable coercion to matrix, object contains multiple frames. Please convert to array instead.")
   expect_error(as(from_array, "data.frame"), "No viable coercion to data.frame, object contains multiple frames.")
-
 })

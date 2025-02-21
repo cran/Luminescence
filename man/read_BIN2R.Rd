@@ -25,8 +25,9 @@ read_BIN2R(
 \item{file}{\link{character} or \link{list} (\strong{required}): path and file name of the
 BIN/BINX file (URLs are supported). If input is a \code{list} it should comprise
 only \code{character}s representing each valid path and BIN/BINX-file names.
-Alternatively the input character can be just a directory (path), in this case the
-the function tries to detect and import all BIN/BINX files found in the directory.}
+Alternatively, the input character can be just a directory (path), in which
+case the function tries to detect and import all BIN/BINX files found in
+the directory.}
 
 \item{show.raw.values}{\link{logical} (\emph{with default}):
 shows raw values from BIN-file for \code{LTYPE}, \code{DTYPE} and \code{LIGHTSOURCE} without
@@ -60,10 +61,11 @@ Can be provided as \code{list} if \code{file} is a \code{list}.}
 
 \item{show.record.number}{\link{logical} (\emph{with default}):
 shows record number of the imported record, for debugging usage only.
-Can be provided as \code{list} if \code{file} is a \code{list}.}
+Can be provided as \code{list} if \code{file} is a \code{list}.
+Ignored if \code{verbose = FALSE}.}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables or disables \link{txtProgressBar}.}
+enable/disable the progress bar. Ignored if \code{verbose = FALSE}.}
 
 \item{forced.VersionNumber}{\link{integer} (\emph{optional}):
 allows to cheat the version number check in the function by own values for
@@ -84,7 +86,7 @@ passed to the function \link{list.files} used internally to construct a \code{li
 of wanted files}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enables or disables verbose mode}
+enable/disable output to the terminal.}
 
 \item{...}{further arguments that will be passed to the function
 \link{Risoe.BINfileData2RLum.Analysis}. Please note that any matching argument
@@ -117,7 +119,7 @@ The function works for BIN/BINX-format versions 03, 04, 05, 06, 07 and 08. The
 version number depends on the used Sequence Editor.
 }
 \section{Function version}{
- 0.17.3
+ 0.18
 }
 
 \examples{
@@ -129,7 +131,7 @@ temp
 } 
 
 \section{How to cite}{
-Kreutzer, S., Fuchs, M.C., 2024. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.17.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Fuchs, M.C., Colombo, M., 2025. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -144,6 +146,7 @@ DTU Nutech, 2016. The Sequence Editor, Users Manual, February, 2016.
 \author{
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
 Margret C. Fuchs, HZDR Freiberg, (Germany) \cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
 based on information provided by Torben Lapp and Karsten Bracht Nielsen (Risø DTU, Denmark)
 , RLum Developer Team}
 \keyword{IO}

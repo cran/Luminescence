@@ -9,6 +9,7 @@ write_R2BIN(
   file,
   version,
   compatibility.mode = FALSE,
+  verbose = TRUE,
   txtProgressBar = TRUE
 )
 }
@@ -37,8 +38,11 @@ This option accounts for potential compatibility problems with the Analyst softw
 It further limits the maximum number of points per curve to 9,999. If a curve contains more
 data the curve data get binned using the smallest possible bin width.}
 
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
+
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
-enables or disables \link{txtProgressBar}.}
+enable/disable the progress bar. Ignored if \code{verbose = FALSE}.}
 }
 \value{
 Write a binary file and returns the name and path of the file as \link{character}.
@@ -75,7 +79,7 @@ ROI definitions (introduced in BIN-file version 8) are not supported!
 There are furthermore ignored by the function \link{read_BIN2R}.
 }
 \section{Function version}{
- 0.5.3
+ 0.5.4
 }
 
 \examples{
@@ -93,7 +97,7 @@ write_R2BIN(temp, file = temp_file)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. write_R2BIN(): Export Risoe.BINfileData into Risø BIN/BINX-file. Function version 0.5.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. write_R2BIN(): Export Risoe.BINfileData into Risø BIN/BINX-file. Function version 0.5.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

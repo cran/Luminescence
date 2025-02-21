@@ -7,7 +7,7 @@
 convert_Activity2Concentration(data, input_unit = "activity", verbose = TRUE)
 }
 \arguments{
-\item{data}{\link{data.frame} \strong{(required)}:
+\item{data}{\link{data.frame} (\strong{required}):
 provide dose rate data (activity or concentration) in three columns.
 The first column indicates the nuclide, the 2nd column measured value and
 in the 3rd column its error value. Allowed nuclide data are
@@ -19,7 +19,7 @@ specify unit of input data given in the dose rate data frame, choose between
 The default value is \code{"activity"}}
 
 \item{verbose}{\link{logical} (\emph{with default}):
-enable or disable verbose mode}
+enable/disable output to the terminal.}
 }
 \value{
 Returns an \linkS4class{RLum.Results} object with a \link{data.frame} containing
@@ -103,7 +103,7 @@ convert_Activity2Concentration(data)
 } 
 
 \section{How to cite}{
-Fuchs, M.C., 2024. convert_Activity2Concentration(): Convert Nuclide Activities to Abundance and Vice Versa. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Fuchs, M.C., 2025. convert_Activity2Concentration(): Convert Nuclide Activities to Abundance and Vice Versa. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

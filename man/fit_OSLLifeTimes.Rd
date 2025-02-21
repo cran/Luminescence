@@ -17,7 +17,7 @@ fit_OSLLifeTimes(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Analysis}, \link{data.frame} or \link{matrix} \strong{(required)}:
+\item{object}{\linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Analysis}, \link{data.frame} or \link{matrix} (\strong{required}):
 Input object containing the data to be analysed. All objects can be provided also as list for an automated
 processing. Please note: \code{NA} values are automatically removed and the dataset should comprise at least 5 data points (possibly more if \code{n.components} is
 set to a value greater than 1)}
@@ -37,13 +37,15 @@ of components.}
 \item{method_control}{\link{list} (\emph{optional}): Named to allow a more fine control of the fitting process. See details
 for allowed options.}
 
-\item{plot}{\link{logical} (\emph{with default}): Enable/disable plot output}
+\item{plot}{\link{logical} (\emph{with default}): Enable/disable the plot output.}
 
-\item{plot_simple}{\link{logical} (\emph{with default}): Enable/disable reduced plot output. If \code{TRUE}, no
+\item{plot_simple}{\link{logical} (\emph{with default}): Enable/disable the reduced
+plot output. If \code{TRUE}, no
 residual plot is shown, however, plot output can be combined using the standard R layout options,
 such as \code{par(mfrow = c(2,2))}.}
 
-\item{verbose}{\link{logical} (\emph{with default}): Enable/disable terminal feedback}
+\item{verbose}{\link{logical} (\emph{with default}): Enable/disable output to the
+terminal.}
 
 \item{...}{parameters passed to \link{plot.default} to control the plot output, supported are:
 \code{main}, \code{xlab}, \code{ylab}, \code{log}, \code{xlim}, \code{ylim}, \code{col}, \code{lty}, \code{legend.pos}, \code{legend.text}. If the input
@@ -86,7 +88,7 @@ that if you access the \code{nls} fitting object, the values are not sorted.
 \emph{(3) Further information}\cr
 \itemize{
 \item The photon count sum
-\item Durbin-Watson residual statistic to asses whether the residuals are correlated, ideally
+\item Durbin-Watson residual statistic to assess whether the residuals are correlated, ideally
 the residuals should be not correlated at all. Rough measures are: \cr
 D = 0: the residuals are systematically correlated \cr
 D = 2: the residuals are randomly distributed \cr
@@ -138,13 +140,13 @@ with \eqn{w = 1} for unweighted regression analysis (\code{method_control = list
 \strong{Parameter} \tab \strong{Type} \tab \strong{Description}\cr
 \code{p} \tab \link{numeric} \tab controls the probability for the F statistic reference values. For a significance level of 5 \% a value of 0.95 (the default) should be added, for 1 \%, a value of 0.99 is sufficient: 1 > p > 0 (cf. \link[stats:Fdist]{stats::FDist})\cr
 \code{seed} \tab \link{numeric} \tab set the seed for the random number generator, provide a value here to get reproducible results \cr
-\code{DEoptim.trace} \tab \link{logical} \tab enables/disables the tracing of the differential evolution (cf. \link[DEoptim:DEoptim.control]{DEoptim::DEoptim.control}) \cr
-\code{DEoptim.itermax} \tab \link{logical} \tab controls the number of the allowed generations (cf. \link[DEoptim:DEoptim.control]{DEoptim::DEoptim.control}) \cr
-\code{weights} \tab \link{logical} \tab enables/disables the weighting for the start parameter estimation and fitting (see equations above).
+\code{DEoptim.trace} \tab \link{logical} \tab enable/disable the tracing of the differential evolution (cf. \link[DEoptim:DEoptim.control]{DEoptim::DEoptim.control}) \cr
+\code{DEoptim.itermax} \tab \link{logical} \tab control the number of the allowed generations (cf. \link[DEoptim:DEoptim.control]{DEoptim::DEoptim.control}) \cr
+\code{weights} \tab \link{logical} \tab enable/disable the weighting for the start parameter estimation and fitting (see equations above).
 The default values is \code{TRUE} \cr
-\code{nlsLM.trace} \tab \link{logical} \tab enables/disables trace mode for the nls fitting (\link[minpack.lm:nlsLM]{minpack.lm::nlsLM}), can be used to identify convergence problems, default is \code{FALSE} \cr
-\code{nlsLM.upper} \tab \link{logical} \tab enables/disables upper parameter boundary, default is \code{TRUE} \cr
-\code{nlsLM.lower} \tab \link{logical} \tab enables/disables lower parameter boundary, default is \code{TRUE}
+\code{nlsLM.trace} \tab \link{logical} \tab enable/disable trace mode for the nls fitting (\link[minpack.lm:nlsLM]{minpack.lm::nlsLM}), can be used to identify convergence problems, default is \code{FALSE} \cr
+\code{nlsLM.upper} \tab \link{logical} \tab enable/disable upper parameter boundary, default is \code{TRUE} \cr
+\code{nlsLM.lower} \tab \link{logical} \tab enable/disable lower parameter boundary, default is \code{TRUE}
 }
 }
 \section{Function version}{
@@ -170,7 +172,7 @@ object = ExampleData.TR_OSL)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Schmidt, C., 2024. fit_OSLLifeTimes(): Fitting and Deconvolution of OSL Lifetime Components. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Schmidt, C., 2025. fit_OSLLifeTimes(): Fitting and Deconvolution of OSL Lifetime Components. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

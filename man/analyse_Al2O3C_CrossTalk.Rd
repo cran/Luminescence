@@ -16,7 +16,7 @@ analyse_Al2O3C_CrossTalk(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} \strong{(required)}:
+\item{object}{\linkS4class{RLum.Analysis} or \link{list} (\strong{required}):
 measurement input}
 
 \item{signal_integral}{\link{numeric} (\emph{optional}):
@@ -32,14 +32,15 @@ made by Kreutzer et al., 2018}
 function \link{get_RLum}. To deactivate the automatic selection set the argument to \code{NULL}}
 
 \item{irradiation_time_correction}{\link{numeric} or \linkS4class{RLum.Results} (\emph{optional}):
-information on the used irradiation time correction obtained by another experiments.}
+information on the used irradiation time correction obtained by another
+experiment.}
 
 \item{method_control}{\link{list} (\emph{optional}):
 optional parameters to control the calculation.
 See details for further explanations}
 
 \item{plot}{\link{logical} (\emph{with default}):
-enable/disable plot output}
+enable/disable the plot output.}
 
 \item{...}{further arguments that can be passed to the plot output}
 }
@@ -92,7 +93,7 @@ analyse_Al2O3C_CrossTalk(data_CrossTalk)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_Al2O3C_CrossTalk(): Al2O3:C Reader Cross Talk Analysis. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_Al2O3C_CrossTalk(): Al2O3:C Reader Cross Talk Analysis. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

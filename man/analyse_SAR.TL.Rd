@@ -32,9 +32,9 @@ requires the channel number for the upper signal integral bound
 (e.g. \code{signal.integral.max = 200})}
 
 \item{integral_input}{\link{character} (\emph{with default}):
-defines the input for the the arguments \code{signal.integral.min} and
+defines the input for the arguments \code{signal.integral.min} and
 \code{signal.integral.max}. These limits can be either provided \code{'channel'}
-number (the default) or \code{'temperature'}. If \code{'temperature'} is chosen the
+number (the default) or \code{'temperature'}. If \code{'temperature'} is chosen, the
 best matching channel is selected.}
 
 \item{sequence.structure}{\link{vector} \link{character} (\emph{with default}):
@@ -55,7 +55,7 @@ a character string which contains \code{"x"} if the x-axis is to be logarithmic,
 are to be logarithmic. See
 \link{plot.default}).}
 
-\item{...}{further arguments that will be passed to the function \link{plot_GrowthCurve}}
+\item{...}{further arguments that will be passed to the function \link{fit_DoseResponseCurve}}
 }
 \value{
 A plot (\emph{optional}) and an \linkS4class{RLum.Results} object is
@@ -65,7 +65,7 @@ returned containing the following elements:
 \item{LnLxTnTx.values}{\link{data.frame} of all calculated \code{Lx/Tx} values including signal, background counts and the dose points.}
 \item{rejection.criteria}{\link{data.frame} with values that might by used as rejection criteria. NA is produced if no R0 dose point exists.}
 
-\strong{note:} the output should be accessed using the function \link{get_RLum}
+The output should be accessed using the function \link{get_RLum}.
 }
 \description{
 The function performs a SAR TL analysis on a
@@ -115,7 +115,7 @@ analyse_SAR.TL(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -127,7 +127,7 @@ improved single-aliquot regenerative-dose protocol. Radiation Measurements
 32, 57-73.
 }
 \seealso{
-\link{calc_TLLxTxRatio}, \link{plot_GrowthCurve}, \linkS4class{RLum.Analysis},
+\link{calc_TLLxTxRatio}, \link{fit_DoseResponseCurve}, \linkS4class{RLum.Analysis},
 \linkS4class{RLum.Results}, \link{get_RLum}
 }
 \author{

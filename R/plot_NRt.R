@@ -1,7 +1,8 @@
-#' Visualise natural/regenerated signal ratios
+#' @title Visualise natural/regenerated signal ratios
 #'
+#' @description
 #' This function creates a Natural/Regenerated signal vs. time (NR(t)) plot
-#' as shown in Steffen et al. 2009
+#' as shown in Steffen et al. 2009.
 #'
 #' This function accepts the individual curve data in many different formats. If
 #' `data` is a `list`, each element of the list must contain a two
@@ -19,16 +20,17 @@
 #' @param log [character] (*optional*):
 #' logarithmic axes (`c("x", "y", "xy")`).
 #'
-#' @param smooth [character] (*optional*):
-#' apply data smoothing. Use `"rmean"` to calculate the rolling where `k`
-#' determines the width of the rolling window (see [zoo::rollmean]). `"spline"`
+#' @param smooth [character] (*with default*):
+#' apply data smoothing. If `"none"` (default), no data smoothing is applied.
+#' Use `"rmean"` to calculate the rolling mean, where `k` determines the
+#' width of the rolling window (see [data.table::frollmean]). `"spline"`
 #' applies a smoothing spline to each curve (see [stats::smooth.spline])
 #'
 #' @param k [integer] (*with default*):
 #' integer width of the rolling window.
 #'
 #' @param legend [logical] (*with default*):
-#' show or hide the plot legend.
+#' enable/disable the plot legend.
 #'
 #' @param legend.pos [character] (*with default*):
 #' keyword specifying the position of the legend (see [legend]).
@@ -126,18 +128,19 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
   .set_function_name("plot_NRt")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## DATA INPUT EVALUATION -----
+  ## Integrity checks -------------------------------------------------------
+
+  .validate_class(data, c("list", "data.frame", "matrix", "RLum.Analysis"))
   if (inherits(data, "list")) {
     if (length(data) < 2)
-      .throw_error("The provided list only contains curve data ",
-                   "of the natural signal")
-    if (all(sapply(data, class) == "RLum.Data.Curve"))
+      .throw_error("'data' contains only curve data for the natural signal")
+    if (all(sapply(data, class) == "RLum.Data.Curve") ||
+        all(sapply(data, class) == "RLum.Analysis"))
       curves <- lapply(data, get_RLum)
   }
   else if (inherits(data, "data.frame") || inherits(data, "matrix")) {
     if (ncol(data) < 3)
-      .throw_error("The provided ", class(data)[1],
-                   " only contains curve data of the natural signal")
+      .throw_error("'data' contains only curve data for the natural signal")
     if (is.matrix(data))
       data <- as.data.frame(data)
     curves <- apply(data[2:ncol(data)], MARGIN = 2, function(curve) {
@@ -145,18 +148,16 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
     })
   }
   else if (inherits(data, "RLum.Analysis")) {
-    RLum.objects <- get_RLum(data)
+    RLum.objects <- get_RLum(data, drop = FALSE)
     if (any(sapply(RLum.objects, class) != "RLum.Data.Curve"))
       .throw_error("The provided 'RLum.Analysis' object ",
                    "must exclusively contain 'RLum.Data.Curve' objects")
     curves <- lapply(RLum.objects, get_RLum)
     if (length(curves) < 2)
-      .throw_error("The provided 'RLum.Analysis' object ",
-                   "only contains curve data of the natural signal")
-  } else {
-    .throw_error("'data' is expected to be a list, matrix, data.frame or ",
-                 "'RLum.Analysis' object")
+      .throw_error("'data' contains only curve data for the natural signal")
   }
+
+  smooth <- .validate_args(smooth, c("none", "spline", "rmean"))
 
   ## BASIC SETTINGS ------
   natural <- curves[[1]]
@@ -171,15 +172,26 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
   ## DATA TRANSFORMATION -----
 
   # calculate ratios
-  NR <- lapply(regCurves, FUN = function(reg, nat) { nat[ ,2] / reg[ ,2] }, natural)
+  NR <- lapply(regCurves, natural, FUN = function(reg, nat) {
+    ratio <- nat[, 2] / reg[, 2]
+
+    ## avoid infinities and NaNs
+    ratio[is.infinite(ratio)] <- NA
+    ratio[nat[, 2] == 0] <- 0
+    ratio
+  })
 
   # smooth spline
   if (smooth[1] == "spline") {
-    NR <- lapply(NR, function(nr) { smooth.spline(nr)$y })
+    NR <- lapply(NR, function(nr) { stats::smooth.spline(nr)$y })
   }
   if (smooth[1] == "rmean") {
-    NR <- lapply(NR, function(nr) { zoo::rollmean(nr, k) })
-    time <- zoo::rollmean(time, k)
+    ## here we'd like to use the smoothed values with no fill: as .smoothing()
+    ## relies on data.table::frollmean(), the only way to remove the fill
+    ## is by setting `fill = NA` (which is already the default) and then
+    ## omitting the NA values
+    NR <- lapply(NR, function(nr) stats::na.omit(.smoothing(nr, k)))
+    time <- stats::na.omit(.smoothing(time, k))
   }
 
   # normalise data
@@ -191,7 +203,8 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
   # default values
   settings <- list(
     xlim = if (log == "x" || log ==  "xy") c(0.1, max(time)) else c(0, max(time)),
-    ylim = range(pretty(c(min(sapply(NRnorm, min)), max(sapply(NRnorm, max))))),
+    ylim = range(pretty(c(min(sapply(NRnorm, min, na.rm = TRUE)),
+                          max(sapply(NRnorm, max, na.rm = TRUE))))),
     xlab = "Time [s]",
     ylab = "Natural signal / Regenerated signal",
     cex = 1L,
@@ -199,7 +212,6 @@ plot_NRt <- function(data, log = FALSE, smooth = c("none", "spline", "rmean"), k
 
   # override defaults with user settings
   settings <- modifyList(settings, list(...))
-
 
 
   ## PLOTTING ----------

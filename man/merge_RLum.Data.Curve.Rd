@@ -8,10 +8,11 @@ merge_RLum.Data.Curve(object, merge.method = "mean", method.info)
 }
 \arguments{
 \item{object}{\link{list} of \linkS4class{RLum.Data.Curve} (\strong{required}):
-list of S4 objects of class \code{RLum.Curve}.}
+list of objects to be merged.}
 
 \item{merge.method}{\link{character} (\strong{required}):
-method for combining of the objects, e.g.  \code{'mean'}, \code{'sum'}, see details for
+method for combining of the objects, e.g. \code{'mean'} (default), \code{'median'},
+\code{'sum'}, see details for
 further information and allowed methods.  Note: Elements in slot info will
 be taken from the first curve in the list.}
 
@@ -25,20 +26,13 @@ If nothing is provided all elements are combined.}
 Returns an \linkS4class{RLum.Data.Curve} object.
 }
 \description{
-Function allows merging of RLum.Data.Curve objects in different ways
-}
-\details{
-This function simply allowing to merge \linkS4class{RLum.Data.Curve}
-objects without touching the objects itself. Merging is always applied on
-the 2nd column of the data matrix of the object.
+This function allows to merge \linkS4class{RLum.Data.Curve} objects in different
+ways without modifying the original objects. Merging is always applied on
+the 2nd column of the object's data matrix.
 
-\strong{Supported merge operations are \linkS4class{RLum.Data.Curve}}
+\strong{Supported merge operations are:}
 
-\code{"sum"}
-
-All count values will be summed up using the function \link{rowSums}.
-
-\code{"mean"}
+\code{"mean"} (default)
 
 The mean over the count values is calculated using the function
 \link{rowMeans}.
@@ -47,6 +41,10 @@ The mean over the count values is calculated using the function
 
 The median over the count values is calculated using the function
 \link[matrixStats:rowMedians]{matrixStats::rowMedians}.
+
+\code{"sum"}
+
+All count values will be summed up using the function \link{rowSums}.
 
 \code{"sd"}
 
@@ -88,7 +86,7 @@ Values of the first object are divided by row sums of the last objects.
 }
 \note{
 The information from the slot \code{recordType} is taken from the first
-\linkS4class{RLum.Data.Curve} object in the input list. The slot
+object in the input list. The slot
 'curveType' is filled with the name \code{merged}.
 }
 \section{S3-generic support}{
@@ -103,7 +101,6 @@ This function is fully operational via S3-generics:
 }
 
 \examples{
-
 
 ##load example data
 data(ExampleData.XSYG, envir = environment())
@@ -130,7 +127,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. merge_RLum.Data.Curve(): Merge function for RLum.Data.Curve S4 class objects. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. merge_RLum.Data.Curve(): Merge function for RLum.Data.Curve S4 class objects. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{internal}

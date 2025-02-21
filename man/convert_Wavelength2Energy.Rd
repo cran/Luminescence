@@ -13,9 +13,10 @@ column. The function supports a list of allowed input objects.}
 
 \item{digits}{\link{integer} (\emph{with default}): set the number of digits on the returned energy axis}
 
-\item{order}{\link{logical} (\emph{with default}): enables/disables sorting of the values in ascending energy
-order. After the conversion the longest wavelength has the lowest energy value and the shortest
-wavelength the highest. While this is correct, some R functions expect increasing x-values.}
+\item{order}{\link{logical} (\emph{with default}): enable/disable sorting of the
+values in ascending energy order. After the conversion, the longest
+wavelength has the lowest energy value and the shortest wavelength the
+highest. While this is correct, some R functions expect increasing x-values.}
 }
 \value{
 The same object class as provided as input is returned.
@@ -30,7 +31,7 @@ and apply, e.g., a signal deconvolution.
 \details{
 The intensity of the spectrum is re-calculated using the following approach to recalculate
 wavelength and corresponding intensity values
-(e.g., Appendix 4 in Blasse and Grabmeier, 1994; Mooney and Kambhampati, 2013):
+(e.g., Appendix 4 in Blasse and Grabmaier, 1994; Mooney and Kambhampati, 2013):
 
 \deqn{\phi_{E} = \phi_{\lambda} * \lambda^2 / (hc)}
 
@@ -106,7 +107,7 @@ plot(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2024. convert_Wavelength2Energy(): Emission Spectra Conversion from Wavelength to Energy Scales (Jacobian Conversion). Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. convert_Wavelength2Energy(): Emission Spectra Conversion from Wavelength to Energy Scales (Jacobian Conversion). Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

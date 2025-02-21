@@ -54,14 +54,15 @@ curve type (e.g. "predefined" or "measured")}
 
 \item{data}{\code{\link{set_RLum}}; \link{matrix}:
 raw curve data. If data is of type \code{RLum.Data.Spectrum}, this can be used
-to re-construct the object. If the object is reconstructed, \code{.uid}, \code{.pid} and \code{orginator}
-are always taken from the input object}
+to re-construct the object. If the object is reconstructed, \code{.uid}, \code{.pid}
+and \code{originator} are always taken from the input object}
 
 \item{info}{\code{\link{set_RLum}} \link{list}:
 info elements}
 
 \item{info.object}{\code{\link{get_RLum}}; \link{character} (\emph{optional}):
-the name of the info object to be called}
+the name of the info object to be called. If no info element name
+is provided, the raw curve data (matrix) will be returned}
 
 \item{bin_size.col}{\link{integer} (\emph{with default}):
 set number of channels used for each bin, e.g. \code{bin_size.col = 2} means that
@@ -99,12 +100,10 @@ Class for representing luminescence spectra data (TL/OSL/RF).
 \itemize{
 \item \code{show(RLum.Data.Spectrum)}: Show structure of \code{RLum.Data.Spectrum} object
 
-\item \code{set_RLum(RLum.Data.Spectrum)}: Construction method for RLum.Data.Spectrum object. The slot info is optional
-and predefined as empty list by default
+\item \code{set_RLum(RLum.Data.Spectrum)}: Construction method for RLum.Data.Spectrum object. The \code{info} slot is
+optional and by default it is set to an empty list
 
-\item \code{get_RLum(RLum.Data.Spectrum)}: Accessor method for RLum.Data.Spectrum object. The argument info.object
-is optional to directly access the info elements. If no info element name
-is provided, the raw curve data (matrix) will be returned
+\item \code{get_RLum(RLum.Data.Spectrum)}: Accessor method for \code{RLum.Data.Spectrum} object.
 
 \item \code{names_RLum(RLum.Data.Spectrum)}: Returns the names info elements coming along with this curve object
 
@@ -117,7 +116,8 @@ for wavelength/energy values the mean is calculated.
 \describe{
 \item{\code{recordType}}{Object of class \link{character} containing the type of the curve (e.g. "TL" or "OSL")}
 
-\item{\code{curveType}}{Object of class \link{character} containing curve type, allowed values are measured or predefined}
+\item{\code{curveType}}{Object of class \link{character} containing curve type, allowed values are
+"measured" or "predefined"}
 
 \item{\code{data}}{Object of class \link{matrix} containing spectrum (count) values.
 Row labels indicate wavelength/pixel values, column labels are temperature or time values.}
@@ -164,7 +164,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2024. RLum.Data.Spectrum-class(): Class 'RLum.Data.Spectrum'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., 2024. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 0.9.26. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. RLum.Data.Spectrum-class(): Class 'RLum.Data.Spectrum'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{classes}

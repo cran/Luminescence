@@ -34,8 +34,11 @@
 #' It further limits the maximum number of points per curve to 9,999. If a curve contains more
 #' data the curve data get binned using the smallest possible bin width.
 #'
+#' @param verbose [logical] (*with default*):
+#' enable/disable output to the terminal.
+#'
 #' @param txtProgressBar [logical] (*with default*):
-#' enables or disables [txtProgressBar].
+#' enable/disable the progress bar. Ignored if `verbose = FALSE`.
 #'
 #' @return Write a binary file and returns the name and path of the file as [character].
 #'
@@ -55,7 +58,7 @@
 #' BIN/BINX-file may not fully compatible, at least not similar to the ones
 #' directly produced by the Risø readers!
 #'
-#' @section Function version: 0.5.3
+#' @section Function version: 0.5.4
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -91,6 +94,7 @@ write_R2BIN <- function(
   file,
   version,
   compatibility.mode = FALSE,
+  verbose = TRUE,
   txtProgressBar = TRUE
 ) {
   .set_function_name("write_R2BIN")
@@ -100,12 +104,14 @@ write_R2BIN <- function(
   ##set supported BIN format version
   VERSION.supported <- as.raw(c(3, 4, 5, 6, 7, 8))
 
-  # Check integrity ---------------------------------------------------------
-  ##check if input object is of type 'Risoe.BINfileData'
-  if(!inherits(object, "Risoe.BINfileData"))
-    .throw_error("Input object is not of type Risoe.BINfileData!")
+  ## Integrity tests --------------------------------------------------------
 
-  ## check if it fulfils the latest definition ...
+  .validate_class(object, "Risoe.BINfileData")
+  .validate_class(file, "character")
+  .validate_logical_scalar(verbose)
+  .validate_logical_scalar(txtProgressBar)
+
+  ## check if it fulfills the latest definition ...
   if(ncol(object@METADATA) != ncol(set_Risoe.BINfileData()@METADATA)){
     .throw_error("Your Risoe.BINfileData object is not compatible with the ",
                  "latest specification of this S4-class object. You are ",
@@ -113,10 +119,6 @@ write_R2BIN <- function(
                  "workspace you produced manually or with an old version. ",
                  "Please re-import the BIN-file using function read_BIN2R().")
   }
-
-  ##check if input file is of type 'character'
-  if(is(file, "character") == FALSE)
-    .throw_error("argument 'file' has to be of type character!")
 
   # Check Risoe.BINfileData Struture ----------------------------------------
   ##check whether the BIN-file DATA slot contains more than 9999 records; needs to be run all the time
@@ -131,9 +133,8 @@ write_R2BIN <- function(
 
   ##force compatibility
   if(compatibility.mode && any(temp_check)){
-    ##drop warning
-    warning("[write_R2BIN()] Compatibility mode selected: Some data sets are longer than 9,999 points and will be binned!",
-            call. = FALSE)
+    .throw_warning("Compatibility mode selected: some data sets have ",
+                   "more than 9,999 points and will be binned")
 
     ##BIN data to reduce amount of data if the BIN-file is too long
     object@DATA <- lapply(object@DATA, function(x){
@@ -144,7 +145,6 @@ write_R2BIN <- function(
         ##it should be symmetric, thus, remove values
         if((length(x)/bin_width)%%2 != 0){
           x <- x[-length(x)]
-
         }
 
         ##create matrix and return
@@ -152,9 +152,7 @@ write_R2BIN <- function(
 
       }else{
         x
-
       }
-
     })
 
     ##reset temp_check
@@ -174,11 +172,12 @@ write_R2BIN <- function(
 
     ##write comment
     object@METADATA[["COMMENT"]] <- paste(object@METADATA[["COMMENT"]], " - binned")
-
   }
 
   if(any(temp_check))
-    stop(paste("[write_R2BIN()]", length(which(temp_check)), " out of ",length(temp_check), "records contain more than 9,999 data points. This violates the BIN/BINX-file definition!"), call. = FALSE)
+    .throw_error(length(which(temp_check)), " out of ", length(temp_check),
+                 " records contain more than 9,999 data points. ",
+                 "This violates the BIN/BINX-file definition")
 
   ##remove
   rm(temp_check)
@@ -231,11 +230,10 @@ write_R2BIN <- function(
        version %in% VERSION.supported == FALSE){
 
     ##show error message
-    error.text <- paste("[write_R2BIN()] Writing BIN-files in format version (",
-                        object@METADATA[1,"VERSION"],") is currently not supported!
-                        Supported version numbers are: ",
-                        paste(VERSION.supported,collapse=", "),".",sep="")
-    stop(error.text)
+    .throw_error("Writing BIN-files in format version (",
+                 object@METADATA[1, "VERSION"], ") is currently not supported, ",
+                 "supported version numbers are: ",
+                 .collapse(VERSION.supported))
   }
 
   ##CHECK file name for version == 06 it has to be *.binx and correct for it
@@ -254,25 +252,22 @@ write_R2BIN <- function(
   ##SEQUENCE
   if (suppressWarnings(max(nchar(as.character(object@METADATA[,"SEQUENCE"]), type =
                                  "bytes"), na.rm = TRUE)) > 8) {
-    stop("[write_R2BIN()] Value in 'SEQUENCE' exceeds storage limit!")
-
+    .throw_error("Value in 'SEQUENCE' exceeds storage limit")
   }
 
   ##USER
   if (suppressWarnings(max(nchar(as.character(object@METADATA[,"USER"]), type =
                                  "bytes"), na.rm = TRUE)) > 8) {
-    stop("[write_R2BIN()] 'USER' exceeds storage limit!")
-
+    .throw_error("'USER' exceeds storage limit")
   }
 
   ##SAMPLE
   if (suppressWarnings(max(nchar(as.character(object@METADATA[,"SAMPLE"]), type =
                                  "bytes"), na.rm = TRUE)) > 20) {
-    stop("[write_R2BIN()] 'SAMPLE' exceeds storage limit!")
-
+    .throw_error("'SAMPLE' exceeds storage limit")
   }
 
-  ##enables compatibility to the Analyst as the the max value for POSITION becomes 48
+  ## enables compatibility to the Analyst as the max value for POSITION becomes 48
   if(compatibility.mode){
     ##just do if position values > 48
     if(max(object@METADATA[,"POSITION"])>48){
@@ -304,8 +299,7 @@ write_R2BIN <- function(
 
   ##COMMENT
   if(max(nchar(as.character(object@METADATA[,"COMMENT"]), type="bytes"))>80){
-    stop("[write_R2BIN()] 'COMMENT' exceeds storage limit!", call. = FALSE)
-
+    .throw_error("'COMMENT' exceeds storage limit")
   }
 
   # Translation Matrices -----------------------------------------------------
@@ -387,8 +381,17 @@ write_R2BIN <- function(
   ##get records
   n.records <- length(object@METADATA[,"ID"])
 
-  ##output
-  message(paste0("[write_R2BIN()]\n\t >> ",file))
+  ## don't show the progress bar if not verbose
+  if (!verbose)
+    txtProgressBar <- FALSE
+
+  if (verbose) {
+    cat("\n[write_R2BIN()] Exporting ...")
+    cat("\n path: ", dirname(file))
+    cat("\n file: ", .shorten_filename(basename(file)))
+    cat("\n n_rec:", n.records)
+    cat("\n")
+  }
 
   ##set progressbar
   if(txtProgressBar)
@@ -921,7 +924,7 @@ write_R2BIN <- function(
       FNAME_SIZE <- as.integer(nchar(as.character(object@METADATA[ID,"FNAME"]), type="bytes"))
 
         ##correct for case that this is of 0 length
-        if(length(FNAME_SIZE) == 0){FNAME_SIZE <- as.integer(0)}
+        if(is.na(FNAME_SIZE) || length(FNAME_SIZE) == 0){FNAME_SIZE <- as.integer(0)}
 
       writeBin(FNAME_SIZE,
                con,
@@ -1311,7 +1314,6 @@ write_R2BIN <- function(
 
       ##update progress bar
       if(txtProgressBar)  setTxtProgressBar(pb, ID)
-
     }
   }
 
@@ -1320,7 +1322,8 @@ write_R2BIN <- function(
   if(txtProgressBar) close(pb)
 
   ##output
-  message("\t >> ", ID - 1, " records have been written successfully!\n\n")
+  if (verbose)
+    message("\t >> ", ID - 1, " records written successfully\n")
 
   ## return path
   invisible(file)
