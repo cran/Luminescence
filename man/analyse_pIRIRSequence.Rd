@@ -110,7 +110,7 @@ For further information see \link{analyse_SAR.CWOSL}.
 Best graphical output can be achieved by using the function \code{pdf}
 with the following options:
 
-\code{pdf(file = "<YOUR FILENAME>", height = 20, width = 20)}
+\code{pdf(file = "<YOUR FILENAME>", height = 18, width = 18)}
 }
 \section{Function version}{
  0.2.5
@@ -159,7 +159,7 @@ results <- analyse_pIRIRSequence(object,
 ## Alternative for PDF output, uncomment and complete for usage
 \dontrun{
 tempfile <- tempfile(fileext = ".pdf")
-pdf(file = tempfile, height = 15, width = 15)
+pdf(file = tempfile, height = 18, width = 18)
   results <- analyse_pIRIRSequence(object,
          signal.integral.min = 1,
          signal.integral.max = 2,
@@ -174,7 +174,7 @@ pdf(file = tempfile, height = 15, width = 15)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

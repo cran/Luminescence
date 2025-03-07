@@ -25,8 +25,10 @@ objects or a \link{data.frame} with three columns
 Can also be a wide table, i.e. a \link{data.frame} with a number of columns divisible by 3
 and where each triplet has the before mentioned column structure.
 
-\strong{Please note: The input object should solely consists of the curve needed for the data analysis, i.e.
-only IRSL curves representing Lx (and Tx)}
+\strong{Please note: The input object should solely consists of the curve needed
+for the data analysis, i.e. only IRSL curves representing Lx (and Tx). If
+the object originated from an XSYG file, also the irradiation steps must
+be preserved in the input object.}
 
 If data from multiple aliquots are provided please \strong{see the details below} with regard to
 Lx/Tx normalisation. \strong{The function assumes that all your measurements are related to
@@ -185,7 +187,7 @@ n.MC = 10)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2025. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.23. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Burow, C., 2025. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.23. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

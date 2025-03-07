@@ -29,6 +29,13 @@ test_that("input validation", {
   expect_message(expect_null(analyse_FadingMeasurement(read_PSL2R(psl.file))),
                  "Error: Unknown or unsupported originator, NULL returned")
   })
+
+  ## no irradiation steps
+  xsyg.file <- system.file("extdata/XSYG_file.xsyg", package = "Luminescence")
+  SW({
+  expect_error(analyse_FadingMeasurement(read_XSYG2R(xsyg.file, fastForward = TRUE)),
+               "No irradiation times could be retrieved, check that 'object'")
+  })
 })
 
 test_that("general test", {
@@ -116,7 +123,6 @@ test_that("test XSYG file fading data", {
 
     time <- time + x + 60
     l <- c(l, irr, lum)
-
   }
 
   ## generate object
@@ -154,6 +160,10 @@ test_that("test XSYG file fading data", {
   expect_error(analyse_FadingMeasurement(object, signal.integral = 1:2,
                                          background.integral = 2),
                "'signal.integral' and 'background.integral' overlap")
+
+  obj.sub <- get_RLum(object, record.id = 1:2, drop = FALSE)
+  expect_message(expect_null(analyse_FadingMeasurement(obj.sub)),
+                 "After irradiation step removal not enough curves are left")
 
   SW({
   expect_warning(analyse_FadingMeasurement(object, signal.integral = 1:2,
