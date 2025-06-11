@@ -355,7 +355,7 @@ report_RLum <- function(
       # SKIP ELEMENT?
       # hide @.pid and @.uid if this is a shortened report (default)
       if (elements$bud[i] %in% c(".uid", ".pid") && compact == TRUE)
-        next();
+        next()
 
       # HEADER
       short.name <- elements$bud[i]
@@ -406,9 +406,9 @@ report_RLum <- function(
       # the content of a branch is only printed if it was determined an endpoint
       # in the objects structure
       if (elements$endpoint[i]) {
-        table <- tryCatch(eval(parse(text = elements$branch[i])),
+        table <- tryCatch(eval.parent(parse(text = elements$branch[i])),
                           error = function(e) {
-                            return(NULL)
+                            return(NULL) # nocov
                           })
         # exceptions: content may be NULL; convert raw to character to stay
         # compatible with pander::pander
@@ -611,45 +611,27 @@ report_RLum <- function(
     ## List objects -----
   }  else if (inherits(x, "list") | typeof(x) == "list" & !inherits(x, "data.frame")) {
 
-    if (!is.null(names(x)) && length(x) != 0) {
+    ## print -----
+    cat(c(root, .class(x), base::length(x), .depth(root), FALSE,
+          .dimension(x), "\n"), sep = "|")
 
-      # print -----
-      cat(c(root, .class(x), base::length(x), .depth(root), FALSE, .dimension(x), "\n"), sep = "|")
-
-      element <- names(x)
+    if (length(x) > 0) {
+      element <- if (!is.null(names(x))) names(x) else paste0("[[", seq_along(x), "]]")
 
       for (i in 1:length(x)) {
-
         if (grepl(" ", element[i]))
           element[i] <- paste0("`", element[i], "`")
 
-        if (element[i] == "")
+        if (is.null(names(x)))
+          list.root <- paste0(root, element[i])
+        else if (element[i] == "")
           list.root <- paste0(root, "[[", i, "]]")
         else
           list.root <- paste0(root, "$", element[i])
 
         .tree_RLum(x[[i]], root = list.root)
       }
-    } else if (length(x) != 0) {
-
-      # print -----
-      cat(c(root, .class(x), base::length(x), .depth(root), FALSE, .dimension(x), "\n"), sep = "|")
-
-      element <- paste0("[[", seq(1, length(x),1), "]]")
-
-      for (i in 1:length(x)) {
-        if (grepl(" ", element[i]))
-          element[i] <- paste0("`", element[i], "`")
-
-        list.root <- paste0(root, element[i])
-        .tree_RLum(x[[i]], root = list.root)
-      }
-    } else if (length(x) == 0) {
-
-      cat(c(root, .class(x), base::length(x), .depth(root), FALSE, .dimension(x), "\n"), sep = "|")
-
     }
-
     invisible()
 
     ## Data frames -----

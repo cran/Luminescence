@@ -134,7 +134,7 @@
 #' **Caution:** If you are using early light subtraction (EBG), please either provide your
 #' own `sigmab` value or use `background.count.distribution = "poisson"`.
 #'
-#' @section Function version: 0.8.0
+#' @section Function version: 0.8.1
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -146,10 +146,10 @@
 #' `https://users.aber.ac.uk/ggd`\cr
 #'
 #' Galbraith, R.F., 2002. A note on the variance of a background-corrected OSL
-#' count. Ancient TL, 20 (2), 49-51.
+#' count. Ancient TL, 20 (2), 49-51. \doi{10.26034/la.atl.2002.348}
 #'
 #' Galbraith, R.F., 2014. A further note on the variance of a
-#' background-corrected OSL count. Ancient TL, 31 (2), 1-3.
+#' background-corrected OSL count. Ancient TL, 31 (2), 1-3. \doi{10.26034/la.atl.2014.477}
 #'
 #' @keywords datagen
 #'
@@ -186,52 +186,40 @@ calc_OSLLxTxRatio <- function(
   .set_function_name("calc_OSLLxTxRatio")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## Integrity tests --------------------------------------------------------
-
+  ## Integrity checks -------------------------------------------------------
   .validate_class(Lx.data, c("RLum.Data.Curve", "data.frame", "numeric", "matrix"))
 
+  ## Lx - coerce if required
+  Lx.data <- switch(
+    class(Lx.data)[1],
+    "RLum.Data.Curve" = as(Lx.data, "data.frame"),
+    "matrix" = as.data.frame(Lx.data),
+    "data.frame" = Lx.data,
+    data.frame(x = 1:length(Lx.data),y = Lx.data)
+  )
+  len.Lx <- nrow(Lx.data)
+
+  ## Tx - coerce if required
   if(!is.null(Tx.data)){
-    ##(a) - check data type
-    if(is(Lx.data)[1]!=is(Tx.data)[1]){
-      .throw_error("'Lx.data' and 'Tx.data' have different types")
+    .validate_class(Tx.data, c("RLum.Data.Curve", "data.frame", "numeric", "matrix"))
+
+    Tx.data <- switch(
+      class(Tx.data)[1],
+      "RLum.Data.Curve" = as(Tx.data, "data.frame"),
+      "matrix" = as.data.frame(Tx.data),
+      "data.frame" = Tx.data,
+      data.frame(x = 1:length(Tx.data),y = Tx.data)
+    )
+    len.Tx <- nrow(Tx.data)
+
+    ## check channel number
+    if (len.Lx != len.Tx) {
+      .throw_error("Different number of channels for Lx (", len.Lx, ") ",
+                   "and Tx (", len.Tx, ")")
     }
-
-    ##(b) - test if data.type is valid in general
-    if(inherits(Lx.data, "RLum.Data.Curve")){
-      Lx.data <- as(Lx.data, "data.frame")
-      Tx.data <- as(Tx.data, "data.frame")
-    }
-
-    ##(c) - convert vector to data.frame if necessary
-    if(is(Lx.data)[1] != "data.frame" &
-       is(Lx.data)[1] != "matrix"){
-      Lx.data <- data.frame(x = 1:length(Lx.data), y = Lx.data)
-      Tx.data <- data.frame(x = 1:length(Tx.data), y = Tx.data)
-    }
-
-    ##(d) - check if Lx and Tx curves have the same channel length
-    if(length(Lx.data[,2]) != length(Tx.data[,2]))
-      .throw_error("Channel numbers of Lx and Tx data differ")
-
-  }else{
+  } else {
     Tx.data <- data.frame(x = NA,y = NA)
-
-    ##support RLum.objects
-    if(inherits(Lx.data, "RLum.Data.Curve")){
-      Lx.data <- as(Lx.data, "data.frame")
-    }
-
-    ##check for matrix
-    if(is(Lx.data)[1] == "matrix"){
-      Lx.data <- as.data.frame(Lx.data)
-    }
-
-    ##no it should be a data.frame, if not, try to produce one
-    if(is(Lx.data)[1]!="data.frame") {
-      Lx.data <- data.frame(x = 1:length(Lx.data),y = Lx.data)
-    }
-
-  }#endif::missing Tx.data
+  }
 
   # Alternate mode ----------------------------------------------------------
   if (anyNA(c(signal.integral, background.integral))) {
@@ -262,14 +250,13 @@ calc_OSLLxTxRatio <- function(
 
   # Continue checks ---------------------------------------------------------
   ##(e) - check if signal integral is valid
-  if(min(signal.integral) < 1 | max(signal.integral>length(Lx.data[,2]))){
-    .throw_error("'signal.integral' is not valid")
+  if (min(signal.integral) < 1 || max(signal.integral) > len.Lx) {
+    .throw_error("'signal.integral' is not valid, max: ", len.Lx)
   }
 
   ##(f) - check if background integral is valid
-  if(min(background.integral)<1 | max(background.integral>length(Lx.data[,2]))){
-    .throw_error("'background.integral' is not valid, max: ",
-                 length(Lx.data[, 2]))
+  if (min(background.integral) < 1 || max(background.integral) > len.Lx) {
+    .throw_error("'background.integral' is not valid, max: ", len.Lx)
   }
 
   ##(g) - check if signal and background integral overlapping
@@ -278,8 +265,7 @@ calc_OSLLxTxRatio <- function(
   }
 
   ##(h) - similar procedure for the Tx limits
-  if(all(c(!is.null(signal.integral.Tx),!is.null(background.integral.Tx)))){
-
+  if(!anyNA(Tx.data) && all(c(!is.null(signal.integral.Tx),!is.null(background.integral.Tx)))){
     if(use_previousBG){
       .throw_warning("With 'use_previousBG = TRUE' independent Lx and Tx ",
                      "integral limits are not allowed. Integral limits ",
@@ -288,19 +274,18 @@ calc_OSLLxTxRatio <- function(
       background.integral.Tx <- background.integral
     }
 
-    if(min(signal.integral.Tx) < 1 | max(signal.integral.Tx>length(Tx.data[,2]))){
-      .throw_error("'signal.integral.Tx' is not valid")
+    if (min(signal.integral.Tx) < 1 || max(signal.integral.Tx) > len.Tx) {
+      .throw_error("'signal.integral.Tx' is not valid, max: ", len.Tx)
     }
-    if(min(background.integral.Tx)<1 | max(background.integral.Tx>length(Tx.data[,2]))){
-      .throw_error("'background.integral.Tx' is not valid, max: ",
-                   length(Tx.data[, 2]))
+    if (min(background.integral.Tx) < 1 || max(background.integral.Tx) > len.Tx) {
+      .throw_error("'background.integral.Tx' is not valid, max: ", len.Tx)
     }
 
     if(min(background.integral.Tx)<=max(signal.integral.Tx)){
       .throw_error("'signal.integral.Tx' and 'background.integral.Tx' overlap")
     }
 
-  }else if(!all(c(is.null(signal.integral.Tx),is.null(background.integral.Tx)))){
+  }else if(!anyNA(Tx.data) && !all(c(is.null(signal.integral.Tx),is.null(background.integral.Tx)))){
     .throw_error("You have to provide both 'signal.integral.Tx' and ",
                  "'background.integral.Tx'")
   }else{
@@ -320,7 +305,7 @@ calc_OSLLxTxRatio <- function(
   ##--------------------------------------------------------------------------##
   ##(2) - read data and produce background subtracted values
 
-  ## calculate k value - express the background as mutiple value from the number
+  ## calculate k value - express the background as multiple value from the number
   ## of signal integral channels, however, it can be < 1 also
   n <- length(signal.integral)
   m <- length(background.integral)
@@ -349,12 +334,10 @@ calc_OSLLxTxRatio <- function(
   Tx.signal <- sum(Tx.curve[signal.integral.Tx])
 
   ##use previous BG
-  if(use_previousBG){
+  if(use_previousBG)
     Tx.background <- Lx.background
-
-  }else{
-    Tx.background <- sum(Tx.curve[background.integral.Tx])*1/k.Tx
-  }
+  else
+    Tx.background <- sum(Tx.curve[background.integral.Tx]) * 1 / k.Tx
 
   TnTx <- (Tx.signal-Tx.background)
 
@@ -376,15 +359,17 @@ calc_OSLLxTxRatio <- function(
   ## Galbraith (2002), Galbraith (2014)
   ## If else condition for the case that k < 2
 
-  if(round(k,digits = 1) >= 2 & ((min(background.integral) + length(signal.integral)*(2+1)) <= length(Lx.curve))){
+  len.sig.integral <- length(signal.integral)
+  min.bg.integral <- min(background.integral)
+  if (round(k, digits = 1) >= 2 &&
+      min.bg.integral + len.sig.integral * (2 + 1) <= len.Lx) {
 
     ##(b)(1)(1)
     ## note that m = n*k = multiple of background.integral from signal.integral
     Y.i <- vapply(0:round(k,digits=0), function(i){
-      sum(Lx.curve[
-        (min(background.integral)+length(signal.integral)*i):
-          (min(background.integral)+length(signal.integral)+length(signal.integral)*i)])
-    }, FUN.VALUE = vector(mode = "numeric", length = 1L))
+      sum(Lx.curve[min.bg.integral +
+                   (len.sig.integral * i):(len.sig.integral * (i + 1))])
+    }, FUN.VALUE = numeric(1))
 
     Y.i <- na.exclude(Y.i)
     sigmab.LnLx <- abs(stats::var(Y.i) - mean(Y.i))  ##sigmab is denoted as sigma^2 = s.Y^2-Y.mean
@@ -402,20 +387,17 @@ calc_OSLLxTxRatio <- function(
                           mean(Lx.curve[background.integral])) * n)
   }
 
-  if (round(k.Tx, digits = 1) >= 2 &
-      ((
-        min(background.integral.Tx) + length(signal.integral.Tx) * (2 + 1)
-      ) <= length(Tx.curve))) {
+  len.sig.integral.Tx <- length(signal.integral.Tx)
+  min.bg.integral.Tx <- min(background.integral.Tx)
+  if (round(k.Tx, digits = 1) >= 2 &&
+      min.bg.integral.Tx + len.sig.integral.Tx * (2 + 1) <= length(Tx.curve)) {
     ##(b)(1)(1)
     ## note that m.Tx = n.Tx*k.Tx = multiple of background.integral.Tx from signal.integral.Tx
     ## also for the TnTx signal
     Y.i_TnTx <- vapply(0:round(k.Tx, digits = 0), function(i) {
-      sum(Tx.curve[(min(background.integral.Tx) + length(signal.integral.Tx) *
-                      i):(
-                        min(background.integral.Tx) + length(signal.integral.Tx) + length(signal.integral.Tx) *
-                          i
-                      )])
-    }, FUN.VALUE = vector(mode = "numeric", length = 1L))
+      sum(Tx.curve[min.bg.integral.Tx +
+                   (len.sig.integral.Tx * i):(len.sig.integral.Tx * (i + 1))])
+    }, FUN.VALUE = numeric(1))
 
     Y.i_TnTx <- na.exclude(Y.i_TnTx)
     sigmab.TnTx <- abs(stats::var(Y.i_TnTx) - mean(Y.i_TnTx))
@@ -423,7 +405,7 @@ calc_OSLLxTxRatio <- function(
   } else{
     ## provide warning if m is < 25, as suggested by Rex Galbraith
     ## low number of degree of freedom
-    if (m.Tx < 25 && use_previousBG == FALSE) {
+    if (!anyNA(Tx.data) && m.Tx < 25 && use_previousBG == FALSE) {
       .throw_warning("Number of background channels for Tx < 25, ",
                      "error estimation might not be reliable")
     }
@@ -434,14 +416,8 @@ calc_OSLLxTxRatio <- function(
 
   ##account for a manually set sigmab value
   if (!is.null(sigmab)) {
-      if (length(sigmab) == 2) {
-        sigmab.LnLx <- sigmab[1]
-        sigmab.TnTx <- sigmab[2]
-
-      }else{
-        sigmab.LnLx <- sigmab[1]
-        sigmab.TnTx <- sigmab[1]
-      }
+    sigmab.LnLx <- sigmab[1]
+    sigmab.TnTx <- sigmab[length(sigmab)]
   }
 
   ##(c)
@@ -452,13 +428,11 @@ calc_OSLLxTxRatio <- function(
   ## Equation 6 is appropriate to be implemented as standard
 
   if(background.count.distribution == "poisson"){
-
     ##(c.1) estimate relative standard error for assuming a poisson distribution
     LnLx.relError <- sqrt((Y.0 + Y.1/k^2))/(Y.0-Y.1/k)        ##  rse(mu.s)
     TnTx.relError <- sqrt((Y.0_TnTx + Y.1_TnTx/k^2))/(Y.0_TnTx-Y.1_TnTx/k)
 
   }else{
-
     ##(c.2) estimate relative standard error for a non-poisson distribution
     if(background.count.distribution != "non-poisson"){
       .throw_warning("Unknown method for 'background.count.distribution', ",
@@ -482,26 +456,19 @@ calc_OSLLxTxRatio <- function(
     if(is.nan(TnTx.Error)) TnTx.Error <- 0
 
   ##combine results
-  LnLxTnTx <- cbind(
-    Lx.signal,
-    Lx.background,
-    Tx.signal,
-    Tx.background,
-    LnLx,
-    LnLx.Error,
-    TnTx,
-    TnTx.Error
+  LnLxTnTx <- data.frame(
+    LnLx = Lx.signal,
+    LnLx.BG = Lx.background,
+    TnTx = Tx.signal,
+    TnTx.BG = Tx.background,
+    Net_LnLx = LnLx,
+    Net_LnLx.Error = LnLx.Error,
+    Net_TnTx = TnTx,
+    Net_TnTx.Error = TnTx.Error
   )
 
-  ##--------------------------------------------------------------------------##
-  ##(4) Calculate LxTx error according Galbraith (2014)
-
-  #transform results in a data.frame
-  LnLxTnTx <- as.data.frame((LnLxTnTx))
-  colnames(LnLxTnTx)<-c("LnLx", "LnLx.BG",
-                        "TnTx", "TnTx.BG",
-                        "Net_LnLx", "Net_LnLx.Error",
-                        "Net_TnTx", "Net_TnTx.Error")
+  ## ------------------------------------------------------------------------
+  ## (4) Calculate LxTx error according Galbraith (2014)
 
   temp <- .calculate_LxTx_error(LnLxTnTx, sig0, digits)
 

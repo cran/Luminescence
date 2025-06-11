@@ -134,7 +134,8 @@ test_that("input validation", {
                     signal.integral = c(1:2),
                     background.integral = c(80:100),
                     distribution = "user_defined")),
-      "Channel numbers of Lx and Tx data differ")
+      "Different number of channels for Lx (250) and Tx (1000)",
+      fixed = TRUE)
 
   SW({
   data(ExampleData.RLum.Analysis, envir = environment())
@@ -149,7 +150,7 @@ test_that("input validation", {
                     fit.method = "LIN", fit.force_through_origin = FALSE,
                     distribution = "normal",
                     n.MCMC = 75)),
-      "'1' is a duplicate and therefore removed from the input")
+      "'ExampleData.BINfileData' is a duplicate and therefore removed from the input")
 
   CWOSL.min <- subset(CWOSL.sub, subset = ID < 20)
   expect_warning(expect_error(
@@ -161,7 +162,37 @@ test_that("input validation", {
       "In input 1 the number of data points (19) is not a multiple of the",
       fixed = TRUE),
       "Only multiple grain data provided, automatic selection skipped")
+
+  CWOSL.sub2 <- CWOSL.sub
+  CWOSL.sub2@METADATA$FNAME <- "Other file"
+  expect_warning(analyse_baSAR(list(CWOSL.sub, CWOSL.sub2),
+                               source_doserate = list(c(0.04, 0.001), c(0.05, 0.02)),
+                               signal.integral = c(1:2),
+                               background.integral = c(5:15),
+                               method_control = list(n.chains = 1),
+                               n.MCMC = 10),
+                 "Provided source dose rate errors differ")
   })
+
+  CWOSL.mod <- CWOSL.sub
+  CWOSL.mod@METADATA$POSITION[c(1:nrow(CWOSL.mod@METADATA))] <- 2.5
+  expect_warning(expect_message(expect_null(
+      analyse_baSAR(CWOSL.mod, verbose = FALSE,
+                    source_doserate = c(0.04, 0.001),
+                    signal.integral = 1:2,
+                    background.integral = 80:100)),
+      "position number 2 does not exist, NULL returned"),
+      "Only multiple grain data provided, automatic selection skipped")
+
+  CWOSL.mod <- CWOSL.sub
+  CWOSL.mod@METADATA$GRAIN[c(1:nrow(CWOSL.mod@METADATA))] <- 2
+  expect_warning(expect_message(expect_null(
+      analyse_baSAR(CWOSL.mod, verbose = FALSE,
+                    source_doserate = c(0.04, 0.001),
+                    signal.integral = 1:2,
+                    background.integral = 80:100)),
+      "grain number 0 does not exist, NULL returned"),
+      "Only multiple grain data provided, automatic selection skipped")
 })
 
 test_that("Full check of analyse_baSAR function", {
@@ -222,16 +253,16 @@ test_that("Full check of analyse_baSAR function", {
       n.MCMC = 100),
      "Number of aliquots used:.+3/3")
 
-  expect_warning(analyse_baSAR(
+  expect_output(analyse_baSAR(
       object = results,
       plot = FALSE,
       verbose = FALSE,
       txtProgressBar = FALSE,
-      method_control = list(upper_centralD = 200),
-      n.MCMC = 100),
-      "You have modified the upper central_D boundary")
+      baSAR_model = "empty",
+      n.MCMC = 10),
+      "Error parsing model file")
 
-    expect_warning(analyse_baSAR(
+  expect_warning(analyse_baSAR(
       object = results,
       plot = FALSE,
       verbose = FALSE,
@@ -315,7 +346,7 @@ test_that("Full check of analyse_baSAR function", {
                                background.integral = c(80:100),
                                method_control = list(n.chains = 1),
                                n.MCMC = 100),
-                 "Record pre-selection in BIN-file detected")
+                 "Record pre-selection in BIN-file detected, record reduced to")
 
   CWOSL.mod <- CWOSL.sub
   CWOSL.mod@METADATA$GRAIN[-c(19:24)] <- 2
@@ -345,13 +376,24 @@ test_that("Full check of analyse_baSAR function", {
                                n.MCMC = 10),
                  "Number of background channels for Tx < 25")
 
+  df <- CWOSL.sub@METADATA[, c("FNAME", "POSITION", "GRAIN")]
   analyse_baSAR(CWOSL.sub,
-                CSV_file = CWOSL.sub@METADATA[, c("FNAME", "POSITION", "GRAIN")],
+                CSV_file = df,
                 source_doserate = c(0.04, 0.001),
                 signal.integral = c(1:2),
                 background.integral = c(8:10),
                 method_control = list(n.chains = 1),
                 aliquot_range = 1:2,
+                n.MCMC = 10)
+
+  df$FNAME[3] <- NA
+  analyse_baSAR(CWOSL.sub,
+                CSV_file = df,
+                source_doserate = c(0.04, 0.001),
+                signal.integral = 1:2,
+                background.integral = 8:40,
+                method_control = list(n.chains = 1),
+                aliquot_range = 1:4,
                 n.MCMC = 10)
 
   vnames <- c("central_D", "sigma_D", "")
@@ -391,6 +433,20 @@ test_that("regression tests", {
                     n.MCMC = 60),
       "RLum.Results"),
       "'thin = 60' is too high for 'n.MCMC = 60', reset to 30")
+
+  ## issue 834
+  df <- CWOSL.sub@METADATA[, c("FNAME", "POSITION", "GRAIN")]
+  expect_warning(expect_s4_class(
+      analyse_baSAR(CWOSL.sub,
+                    CSV_file = df,
+                    source_doserate = c(0.04, 0.001),
+                    signal.integral = 1:2,
+                    background.integral = 8:40,
+                    method_control = list(n.chains = 1),
+                    aliquot_range = 1,
+                    n.MCMC = 10),
+      "RLum.Results"),
+      "Adaptation incomplete")
   })
 
   ## check parameters irradiation times

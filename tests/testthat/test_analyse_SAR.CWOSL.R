@@ -61,11 +61,11 @@ test_that("tests class elements", {
     ), tolerance = snapshot.tolerance
   )
 
-  ##remove position information from the curve
-  ##data
+  ## remove position and grain information from the curve data
   object_f <- object[[1]]
   object_f@records <- lapply(object_f@records, function(x){
     x@info$POSITION <- NULL
+    x@info$GRAIN <- NULL
     x
   })
   t <- expect_s4_class(
@@ -102,6 +102,22 @@ test_that("simple run", {
       fit.weights = FALSE
     ),
     "[analyse_SAR.CWOSL()] No signal or background integral applied as they",
+    fixed = TRUE)
+
+  ##signal integral set to NA
+  expect_error(
+    analyse_SAR.CWOSL(
+      object = object,
+      signal.integral.min = 1,
+      signal.integral.max = 2,
+      background.integral.min = 900,
+      background.integral.max = 1000,
+      fit.method = "OTORX",
+      plot = FALSE,
+      verbose = FALSE,
+      fit.weights = FALSE
+    ),
+    "Column 'Test_Dose' missing but mandatory for 'OTORX' fitting!",
     fixed = TRUE)
 
   expect_s4_class(
@@ -545,7 +561,7 @@ test_that("advance tests run", {
        signal.integral.max = 2,
        background.integral.min = 200,
        background.integral.max = 1000,
-       fit.method = "LambertW",
+       fit.method = "OTOR",
        n.MC = 10,
        plot = FALSE,
        verbose = FALSE))
@@ -629,6 +645,19 @@ test_that("advance tests run", {
       plot = FALSE,
       verbose = FALSE)
 
+  ## OTORX
+  expect_s4_class(suppressWarnings(analyse_SAR.CWOSL(
+      object = object[[1]],
+      signal.integral.min = 1,
+      signal.integral.max = 2,
+      fit.method = "OTORX",
+      dose.points.test = 5,
+      background.integral.min = c(900, 975),
+      background.integral.max = c(900, 975),
+      plot = FALSE,
+      n.MC = 10,
+      verbose = FALSE)), class = "RLum.Results")
+
   object[[1]]@records[[2]][1, 1] <- 0
   expect_warning(analyse_SAR.CWOSL(
       object = object[[1]],
@@ -639,5 +668,45 @@ test_that("advance tests run", {
       log = "x",
       verbose = FALSE),
       "Curves shifted by one channel for log-plot")
+  })
+
+  ## simulate single grain
+  sg <- get_RLum(object, recordType = "OSL", drop = FALSE)
+  replace_metadata(sg[[1]], info_element = "GRAIN") <- 1
+  replace_metadata(sg[[2]], info_element = "GRAIN") <- 2
+
+  expect_s4_class(analyse_SAR.CWOSL(
+    object = sg,
+    signal.integral.min = 1,
+    signal.integral.max = 2,
+    background.integral.min = 900,
+    background.integral.max = 975,
+    plot_onePage = TRUE,
+    verbose = FALSE), "RLum.Results")
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+  testthat::skip_if_not(getRversion() >= "4.4.0")
+
+  SW({
+  vdiffr::expect_doppelganger("default",
+                              analyse_SAR.CWOSL(
+                                  object = object[[1]],
+                                  signal.integral.min = 1,
+                                  signal.integral.max = 2,
+                                  background.integral.min = 900,
+                                  background.integral.max = 1000,
+                                  plot_onePage = TRUE))
+
+  vdiffr::expect_doppelganger("list-cex",
+                              analyse_SAR.CWOSL(
+                                  object = list(object[[1]]),
+                                  signal.integral.min = 1,
+                                  signal.integral.max = 5,
+                                  background.integral.min = 800,
+                                  background.integral.max = 1000,
+                                  plot_onePage = TRUE, cex = 1.9))
   })
 })

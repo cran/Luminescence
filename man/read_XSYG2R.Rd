@@ -29,8 +29,9 @@ if set to \code{TRUE}, TL curves are returned as temperature against count value
 count TL curve. Select \code{FALSE} to import the raw data delivered by the
 lexsyg. Works for TL curves and spectra.}
 
-\item{n_records}{\link{numeric} (\emph{with default}): set the number of records to be imported; by default
-the function attempts to import all records}
+\item{n_records}{\link{numeric} (\emph{with default}):
+number of records to be imported; by default the function attempts to import
+all records.}
 
 \item{fastForward}{\link{logical} (\emph{with default}):
 if \code{TRUE} for a more efficient data processing only a list of \linkS4class{RLum.Analysis}
@@ -149,7 +150,7 @@ be done using the functions provided with the package \code{'XML'}.
 Corresponding values in the XSXG file are skipped.
 }
 \section{Function version}{
- 0.6.14
+ 0.6.15
 }
 
 \examples{
@@ -181,7 +182,7 @@ structure_RLum(OSL.SARMeasurement$Sequence.Object)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. read_XSYG2R(): Import XSYG files to R. Function version 0.6.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. read_XSYG2R(): Import XSYG files to R. Function version 0.6.15. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

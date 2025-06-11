@@ -104,17 +104,21 @@
 #' using the bin number.
 #'
 #' @param bg.spectrum [RLum.Data.Spectrum-class] or [matrix] (*optional*): Spectrum
-#' used for the background subtraction. By definition, the background spectrum should have been
-#' measured with the same setting as the signal spectrum. If a spectrum is provided, the
-#' argument `bg.channels` works only on the provided background spectrum.
+#' used for the background subtraction. The background spectrum should be
+#' measured with the same setting as the signal spectrum. The argument `bg.channels` controls
+#' how the subtraction is performed. If nothing is set for `bg.channels` or the number
+#' of channels is identical to the number of channels in the background spectrum, a channel-wise
+#' subtraction is performed. Otherwise a the *arithmetic mean* is is calculated and this signal
+#' subtracted from the signal.
 #'
-#' @param bg.channels [vector] (*optional*):
-#' defines the channels used for background subtraction. If a vector is
-#' provided, the mean of the channels is used for subtraction. If a spectrum
+#' @param bg.channels [vector] (*optional*): defines the channels used for background
+#' subtraction. If the number of channels is identical to the number of channels
+#' in the background spectrum, a channel-wise subtracting is applied otherwise his number
+#' is taken to select channels for calculating the *arithmetic mean* . If a spectrum
 #' is provided via `bg.spectrum`, this argument only works on the background
 #' spectrum.
 #'
-#' **Note:** Background subtraction is applied prior to channel binning
+#' **Note:** Background subtraction is applied prior to channel binning!
 #'
 #' @param bin.rows [integer] (*with default*):
 #' allow summing-up wavelength channels (horizontal binning),
@@ -163,7 +167,7 @@
 #'
 #' @note Not all additional arguments (`...`) will be passed similarly!
 #'
-#' @section Function version: 0.6.9
+#' @section Function version: 0.6.10
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -287,17 +291,12 @@ plot_RLum.Data.Spectrum <- function(
   ##XSYG
   ##check for curveDescripter
   if("curveDescripter" %in% names(object@info) == TRUE){
-
     temp.lab <- strsplit(object@info$curveDescripter, split = ";")[[1]]
-    xlab <- if(xaxis.energy == FALSE){
-      temp.lab[2]}else{"Energy [eV]"}
+    xlab <- temp.lab[2]
     ylab <- temp.lab[1]
     zlab <- temp.lab[3]
-
   }else{
-
-    xlab <- if(xaxis.energy == FALSE){
-      "Row values [a.u.]"}else{"Energy [eV]"}
+    xlab <- "Row values [a.u.]"
     ylab <- "Column values [a.u.]"
     zlab <- "Cell values [a.u.]"
   }
@@ -310,6 +309,9 @@ plot_RLum.Data.Spectrum <- function(
     ##modify row order (otherwise subsequent functions, like persp, have a problem)
     object@data[] <- object@data[order(as.numeric(rownames(object@data))),]
     rownames(object@data) <- sort(as.numeric(rownames(object@data)))
+
+    ## update axis label
+    xlab <- "Energy [eV]"
   }
 
   ## check for duplicated column names (e.g., temperature not increasing)
@@ -448,20 +450,16 @@ plot_RLum.Data.Spectrum <- function(
   # Background spectrum -------------------------------------------------------------------------
   if(!is.null(bg.spectrum)){
     .validate_class(bg.spectrum, c("RLum.Data.Spectrum", "matrix"))
+    if (inherits(bg.spectrum, "RLum.Data.Spectrum"))
+      bg.xyz <- bg.spectrum@data
+    else
+      bg.xyz <- bg.spectrum
 
-      ##case RLum
-      if(inherits(bg.spectrum, "RLum.Data.Spectrum")) bg.xyz <- bg.spectrum@data
-
-      ##case matrix
-      if(inherits(bg.spectrum, "matrix")) bg.xyz <- bg.spectrum
-
-      ##take care of channel settings, otherwise set bg.channels
-      if(is.null(bg.channels))
-        bg.channels <- c(1:ncol(bg.xyz))
-
-      ##set rownames
-      if(is.null(rownames(bg.xyz)))
-        rownames(bg.xyz) <- 1:nrow(bg.xyz)
+    ## set row and column names
+    if (is.null(rownames(bg.xyz)))
+      rownames(bg.xyz) <- 1:nrow(bg.xyz)
+    if (is.null(colnames(bg.xyz)))
+      colnames(bg.xyz) <- 1:ncol(bg.xyz)
 
       ##convert to energy scale if needed
       if(xaxis.energy){
@@ -478,6 +476,16 @@ plot_RLum.Data.Spectrum <- function(
       ##reduce for xlim
       bg.xyz <- bg.xyz[as.numeric(rownames(bg.xyz)) >= xlim[1] &
                              as.numeric(rownames(bg.xyz)) <= xlim[2],,drop = FALSE]
+
+      ##reduce for ylim by only if channels is NULL
+      if(is.null(bg.channels)) {
+      bg.xyz <- bg.xyz[,as.numeric(colnames(bg.xyz)) >= ylim[1] &
+                         as.numeric(colnames(bg.xyz)) <= ylim[2],drop = FALSE]
+      }
+
+      ##take care of channel settings, otherwise set bg.channels
+      if(is.null(bg.channels))
+        bg.channels <- c(1:ncol(bg.xyz))
   }
 
   # Background subtraction ---------------------------------------------------
@@ -495,13 +503,14 @@ plot_RLum.Data.Spectrum <- function(
                      min(bg.channels), ":", max(bg.channels))
     }
 
-    if(length(bg.channels) > 1){
-      temp.bg.signal <- rowMeans(bg.xyz[,bg.channels])
-      temp.xyz <- temp.xyz - temp.bg.signal
-
-    }else{
+    ## the challenge we have here is that we want to maintain
+    ## a channel-wise subtraction if the spectra are identical.
+    if(length(bg.channels) > 1 &&
+       (length(bg.channels) != ncol(bg.xyz) ||
+       length(bg.channels) != ncol(temp.xyz)))
+      temp.xyz <- temp.xyz - rowMeans(bg.xyz[,bg.channels])
+    else
       temp.xyz <- temp.xyz - bg.xyz[,bg.channels]
-    }
 
     ##set values < 0 to 0
     temp.xyz[temp.xyz < 0] <- 0
@@ -515,7 +524,6 @@ plot_RLum.Data.Spectrum <- function(
   }
 
   ## Channel binning --------------------------------------------------------
-
   if(bin.rows > 1){
     temp.xyz <- .matrix_binning(temp.xyz, bin_size = bin.rows, bin_col = FALSE, names = "mean")
     x <- as.numeric(rownames(temp.xyz))
@@ -821,7 +829,6 @@ if(plot){
           #colors = col[1:(length(col)-1)],
         )
 
-
        ##change graphical parameters
        p <-  plotly::layout(
          p = p,
@@ -993,7 +1000,6 @@ if(plot){
         border = NA,
         lwd = NA)
 
-
       ## add rectangle from zero to first value
       graphics::rect(
         xleft = par()$usr[1],
@@ -1040,9 +1046,7 @@ if(plot){
     ##legend
     legend(x = par()$usr[2],
            y = par()$usr[4],
-
            legend = legend.text,
-
            lwd= lwd,
            lty = frames,
            bty = "n",

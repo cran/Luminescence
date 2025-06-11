@@ -10,7 +10,9 @@
 #' data frame with columns for `Dose`, `LxTx`, `LxTx.Error` and `TnTx`.
 #' The column for the test dose response is optional, but requires `'TnTx'` as
 #' column name if used. For exponential fits at least three dose points
-#' (including the natural) should be provided.
+#' (including the natural) should be provided. If `fit.method = "OTORX"` you have
+#' to provide the test dose in the same unit as the dose in a column called `Test_Dose`.
+#' The function searches explicitly for this column name.
 #'
 #' @param mode [character] (*with default*):
 #' selects calculation mode of the function.
@@ -30,7 +32,8 @@
 #' - `EXP+LIN`,
 #' - `EXP+EXP`,
 #' - `GOK`,
-#' - `LambertW`
+#' - `OTOR`,
+#' - `OTORX`
 #'
 #' See details in [fit_DoseResponseCurve].
 #'
@@ -49,9 +52,6 @@
 #' single plot output (`TRUE/FALSE`) to allow for plotting the results in
 #' single plot windows. Requires `plotExtended = TRUE`.
 #'
-#' @param cex.global [numeric] (*with default*):
-#' global scaling factor.
-#'
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
@@ -68,7 +68,7 @@
 #' Along with a plot (if wanted) the `RLum.Results` object produced by
 #' [fit_DoseResponseCurve] is returned.
 #'
-#' @section Function version: 1.2.1
+#' @section Function version: 1.2.2
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
@@ -133,7 +133,6 @@ plot_GrowthCurve <- function(
   output.plot = TRUE,
   output.plotExtended = TRUE,
   plot_singlePanels = FALSE,
-  cex.global = 1,
   verbose = TRUE,
   n.MC = 100,
   ...
@@ -159,7 +158,6 @@ plot_GrowthCurve <- function(
   .validate_logical_scalar(output.plotExtended)
   .validate_logical_scalar(plot_singlePanels)
   .validate_logical_scalar(verbose)
-  .validate_positive_scalar(cex.global)
 
   ## remaining input validation occurs inside the fitting function
   fit <- fit_DoseResponseCurve(sample, mode, fit.method,
@@ -174,7 +172,7 @@ plot_GrowthCurve <- function(
   if (output.plot) {
     plot_DoseResponseCurve(fit, plot_extended = output.plotExtended,
                            plot_singlePanels = plot_singlePanels,
-                           cex.global = cex.global, verbose = verbose, ...)
+                           verbose = verbose, ...)
   }
 
   invisible(fit)

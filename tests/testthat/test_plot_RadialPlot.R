@@ -26,6 +26,16 @@ test_that("input validation", {
                "'centrality' should be of class 'character' or 'numeric'")
   expect_error(plot_RadialPlot(df, centrality = "error"),
                "'centrality' should be one of 'mean', 'mean.weighted', 'median'")
+  expect_error(plot_RadialPlot(df, summary = 5),
+               "'summary' should be of class 'character'")
+  expect_error(plot_RadialPlot(df, summary.pos = list()),
+               "'summary.pos' should be of class 'numeric' or 'character'")
+  expect_error(plot_RadialPlot(df, summary.pos = 5),
+               "'summary.pos' should have length 2")
+  expect_error(plot_RadialPlot(df, summary.pos = "error"),
+               "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
+  expect_error(plot_RadialPlot(list(df, df), lty = 1),
+               "'lty' should have length 2")
 
   expect_warning(plot_RadialPlot(df, xlim = c(-1, 100), show = FALSE),
                  "Lower x-axis limit not set to zero, corrected")
@@ -35,20 +45,16 @@ test_that("input validation", {
                  "Option 'log.z' is not set to 'TRUE' altough more than one")
 })
 
-test_that("dedicated test for the radialplot", {
+test_that("check functionality", {
   testthat::skip_on_cran()
 
-  ##distribution plots
-
   ## standard data
-  ## simple test
   expect_silent(
   plot_RadialPlot(
     data = df,
     centrality = 5))
 
   ## standard data with two datasets
-  ## simple test
   expect_silent(
     plot_RadialPlot(
       data = list(df, df),
@@ -79,7 +85,7 @@ test_that("dedicated test for the radialplot", {
       log.z = FALSE))
 
   ## single-column data frame
-  expect_message(plot_RadialPlot(df[, 1, drop = FALSE]),
+  expect_message(plot_RadialPlot(data.frame(x = c(-0.1, -1.2, 10))),
                  "Attention, small standardised estimate scatter")
 
   ## data frame with more than 2 columns
@@ -89,6 +95,13 @@ test_that("dedicated test for the radialplot", {
   df.neg <- df
   df.neg[, 1] <- df.neg[, 1] - 5
   plot_RadialPlot(df.neg)
+
+  ## data frame with zeros
+  df.zeros <- data.frame(ED = c(rep(0, 4), 10),
+                         ED_Error = rnorm(5) + 3)
+  expect_silent(plot_RadialPlot(df.zeros))
+  expect_silent(plot_RadialPlot(df.zeros, zlim = c(5, 10),
+                                centrality = "median.weighted"))
 
   ## more coverage
   expect_type(plot_RadialPlot(df, main = "Title", sub = "Subtitle", rug = TRUE,
@@ -108,22 +121,6 @@ test_that("dedicated test for the radialplot", {
   plot_RadialPlot(df, show = FALSE, centrality = "median",
                   summary.pos = "topleft", legend.pos = "topright",
                   log.z = FALSE, rug = TRUE)
-  plot_RadialPlot(df, show = FALSE, centrality = "median.weighted",
-                  summary.pos = "top", legend.pos = "bottom")
-  plot_RadialPlot(df, show = FALSE,
-                  summary.pos = "topright", legend.pos = "topleft")
-  plot_RadialPlot(df, show = FALSE,
-                  summary.pos = "left", legend.pos = "right")
-  plot_RadialPlot(df, show = FALSE,
-                  summary.pos = "center", legend.pos = "center")
-  plot_RadialPlot(df, show = FALSE,
-                  summary.pos = "right", legend.pos = "left")
-  plot_RadialPlot(df, show = FALSE,
-                  summary.pos = "bottomleft", legend.pos = "bottomright")
-  plot_RadialPlot(df, show = FALSE,
-                  summary.pos = "bottom", legend.pos = "top")
-  plot_RadialPlot(df, show = FALSE,
-                  summary.pos = "bottomright", legend.pos = "bottomleft")
 
   ## RLum.Results object
   expect_silent(plot_RadialPlot(calc_CommonDose(ExampleData.DeValues$BT998,
@@ -146,4 +143,26 @@ test_that("dedicated test for the radialplot", {
       log.z = FALSE),
       "\\[plot\\_RadialPlot\\(\\)\\] z-scale touches.*"
     )
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+  testthat::skip_if_not(getRversion() >= "4.4.0")
+
+  SW({
+  vdiffr::expect_doppelganger("RadialPlot defaults",
+                              plot_RadialPlot(df, centrality = 6))
+  vdiffr::expect_doppelganger("RadialPlot summary sub",
+                              plot_RadialPlot(df, summary.pos = "sub",
+                                              summary = c("n", "se.rel", "kurtosis")))
+  vdiffr::expect_doppelganger("RadialPlot summary left",
+                              plot_RadialPlot(df, summary.pos = "left",
+                                              summary = c("mean", "in.2s", "skewness")))
+  df2 <- data.frame(x = df$x - 1, y = df$y * 0.75)
+  vdiffr::expect_doppelganger("RadialPlot list",
+                              plot_RadialPlot(list(df, df2),
+                                              centrality = c(5, 4),
+                                              rug = TRUE, col = c(2, 3)))
+  })
 })

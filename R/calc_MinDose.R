@@ -362,7 +362,7 @@ calc_MinDose <- function(
     }
     exp.names <- c("gamma", "sigma", "p0", "mu")
     mis.names <- setdiff(exp.names, names(init.values))
-    if (length(init.values) != length(exp.names) || length(mis.names) > 0) {
+    if (length(init.values) < length(exp.names) || length(mis.names) > 0) {
       .throw_error("Please provide initial values for all model parameters. ",
                    "\nMissing parameters: ",
                    paste(mis.names, collapse = ", "))
@@ -387,8 +387,8 @@ calc_MinDose <- function(
     .validate_logical_scalar(invert)
     if (!log) {
       log <- TRUE # overwrite user choice as max dose model currently only supports the logged version
-      cat(paste("\n[WARNING] The maximum dose model only supports the logged version.",
-                "'log' was automatically changed to TRUE.\n\n"))
+      .throw_warning("The maximum dose model only supports the logged version, ",
+                     "'log' reset to TRUE\n")
     }
   } else {
     invert <- FALSE
@@ -448,12 +448,9 @@ calc_MinDose <- function(
   } else {
     cores <- parallel::detectCores()
     if (multicore)
-      message(paste("Logical CPU cores detected:", cores)) # nocov
+      message("Logical CPU cores detected: ", cores) # nocov
   }
 
-  ## WARNINGS ----
-  # if (!debug)
-  #   options(warn = -1)
 
   ##============================================================================##
   ## START VALUES
@@ -588,7 +585,7 @@ calc_MinDose <- function(
       )
 
     }, error = function(e) {
-      .throw_error("Sorry, seems like I encountered an error: ", e)
+      .throw_error("Sorry, seems like I encountered an error: ", e) # nocov
     })
     return(mle)
   }
@@ -599,12 +596,10 @@ calc_MinDose <- function(
 
   # combine errors
   if (log) {
+    lcd <- log(data[, 1]) * ifelse(invert, -1, 1)
     if (invert) {
-      lcd <- log(data[ ,1])*-1
       x.offset <- abs(min(lcd))
       lcd <- lcd+x.offset
-    } else {
-      lcd <- log(data[ ,1])
     }
     lse <- sqrt((data[ ,2]/data[ ,1])^2 + sigmab^2)
   } else {
@@ -624,7 +619,7 @@ calc_MinDose <- function(
   )
 
   if (debug)
-    print(bbmle::summary(ests))
+    print(suppressWarnings(bbmle::summary(ests)))
 
   if (any(is.nan(coef_err)))
     coef_err[which(is.nan(coef_err))] <- t(as.data.frame(ests@coef))[which(is.nan(coef_err))] / 100
@@ -636,6 +631,9 @@ calc_MinDose <- function(
   if (par == 4)
     which <- c("gamma", "sigma", "p0", "mu")
 
+  prof.lower <- c(gamma = -Inf, sigma = 0, p0 = 0, mu = -Inf)
+  prof.upper <- c(gamma = Inf, sigma = Inf, p0 = 1, mu = Inf)
+
   # calculate profile log likelihoods
   prof <- suppressWarnings(
     bbmle::profile(ests,
@@ -645,15 +643,8 @@ calc_MinDose <- function(
                    quietly = TRUE,
                    tol.newmin = Inf,
                    skiperrs = TRUE,
-                   prof.lower=c(gamma = -Inf,
-                                sigma = 0,
-                                p0 = 0,
-                                mu = -Inf),
-                   prof.upper=c(gamma = Inf,
-                                sigma = Inf,
-                                p0 = 1,
-                                mu = Inf)
-    )
+                   prof.lower = prof.lower,
+                   prof.upper = prof.upper)
   )
   # Fallback when profile() returns a 'better' fit
   maxsteps <- 100
@@ -672,32 +663,19 @@ calc_MinDose <- function(
                      maxsteps = maxsteps,
                      tol.newmin = Inf,
                      skiperrs = TRUE,
-                     prof.lower=c(gamma = -Inf,
-                                  sigma = 0,
-                                  p0 = 0,
-                                  mu = -Inf),
-                     prof.upper=c(gamma = Inf,
-                                  sigma = Inf,
-                                  p0 = 1,
-                                  mu = Inf)
-      )
+                     prof.lower = prof.lower,
+                     prof.upper = prof.upper)
     )
     maxsteps <- maxsteps - 10
     cnt <- cnt + 1
   }
 
-  ## TODO: reduce the redundant code
   ## DELETE rows where z = -Inf/Inf
-  prof@profile$gamma <-  prof@profile$gamma[which(prof@profile$gamma["z"] != Inf), ]
-  prof@profile$gamma <-  prof@profile$gamma[which(prof@profile$gamma["z"] != -Inf), ]
-  prof@profile$sigma <-  prof@profile$sigma[which(prof@profile$sigma["z"] != Inf), ]
-  prof@profile$sigma <-  prof@profile$sigma[which(prof@profile$sigma["z"] != -Inf), ]
-  prof@profile$p0 <-  prof@profile$p0[which(prof@profile$p0["z"] != Inf), ]
-  prof@profile$p0 <-  prof@profile$p0[which(prof@profile$p0["z"] != -Inf), ]
-
+  prof@profile$gamma <- prof@profile$gamma[!is.infinite(prof@profile$gamma[["z"]]), ]
+  prof@profile$sigma <- prof@profile$sigma[!is.infinite(prof@profile$sigma[["z"]]), ]
+  prof@profile$p0 <- prof@profile$p0[!is.infinite(prof@profile$p0[["z"]]), ]
   if (par == 4) {
-    prof@profile$mu <-  prof@profile$mu[which(prof@profile$mu["z"] != Inf), ]
-    prof@profile$mu <-  prof@profile$mu[which(prof@profile$mu["z"] != -Inf), ]
+    prof@profile$mu <- prof@profile$mu[!is.infinite(prof@profile$mu[["z"]]), ]
   }
 
   # calculate Bayesian Information Criterion (BIC)
@@ -850,8 +828,9 @@ calc_MinDose <- function(
                          "\n N = %d",
                          "\n sigmab = %.2f \U00B1 %.2f",
                          "\n h = %.2f",
-                         "\n\n Creating %d bootstrap replicates..."),
-                   M, N, sigmab, sigmab.sd, h, N+M)
+                         "\n\nCreating %d bootstrap replicates%s..."),
+                   M, N, sigmab, sigmab.sd, h, N+M,
+                   if (multicore) paste(" using", cores, "cores") else "")
     if (verbose)
       message(msg)
 
@@ -866,28 +845,19 @@ calc_MinDose <- function(
     # MULTICORE: The call to 'Get_mle' is the bottleneck of the function.
     # Using multiple CPU cores can reduce the computation cost, but may
     # not work for all machines.
+    if (verbose)
+      message("Applying the model to all replicates, this may take a while...")
     if (multicore) {
-      if (verbose) {
-        message("\n Spawning ", cores, " instances of R for ",
-                "parallel computation. This may take a few seconds...")
-      }
       cl <- parallel::makeCluster(cores)
-      if (verbose) {
-        message(" Done!\n Applying the model to all replicates. ",
-                "This may take a while...")
-      }
       mle <- parallel::parLapply(cl, replicates, Get_mle)
       parallel::stopCluster(cl)
     } else {
-      if (verbose) {
-        message("\n Applying the model to all replicates. This may take a while...")
-      }
       mle <- lapply(replicates, Get_mle)
     }
 
     # Final bootstrap calculations
     if (verbose)
-      message("\n Calculating the likelihoods...")
+      message("Calculating likelihoods...")
     # Save 2nd- and 1st-level bootstrap results (i.e. estimates of gamma)
     b2mamvec <- as.matrix(sapply(mle[1:N], save_Gamma, simplify = TRUE))
     theta <- sapply(mle[c(N+1):c(N+M)], save_Gamma)
@@ -899,7 +869,7 @@ calc_MinDose <- function(
 
     ## --------- FIT POLYNOMIALS -------------- ##
     if (verbose)
-      message("\n Fit curves to dose-likelihood pairs...")
+      message("Fitting curves to dose-likelihood pairs...")
     # polynomial fits of increasing degrees
 
     ## if the input values are too close to zero, we may get
@@ -925,7 +895,13 @@ calc_MinDose <- function(
     # distribution where actually none is given. The non-parametric
     # LOESS (LOcal polynomial regrESSion) often yields better results than
     # standard polynomials.
-    loess <- loess(pairs[ ,2] ~ pairs[ ,1])
+    if (nrow(pairs) >= 7) {
+      loess <- loess(pairs[, 2] ~ pairs[, 1])
+    } else {
+      loess <- NA
+      .throw_warning("Not enough bootstrap replicates for loess fitting, try ",
+                     "increasing `bs.M`")
+    }
 
   }#EndOf::Bootstrap
 
@@ -955,7 +931,6 @@ calc_MinDose <- function(
                   muend,
                   0),
         row.names="", check.names = FALSE), 2)
-
 
       if (log && log.output) {
         tmp$`log(gamma)` = round(log(tmp$gamma),2)
@@ -995,9 +970,6 @@ calc_MinDose <- function(
       print(round(data.frame(De=pal,
                              error=gamma_err,
                              row.names=""), 2))
-
-    } else if (bootstrap && verbose) {
-      message("\n Finished!")
     }
   }
 
@@ -1034,9 +1006,6 @@ calc_MinDose <- function(
   ## PLOTTING
   if (plot)
     try(plot_RLum.Results(newRLumResults.calc_MinDose, ...))
-
-  # if (!debug)
-  #   options(warn = 0)
 
   if (!is.na(summary$mu) && !is.na(summary$de)) {
     ## equivalent to log(summary$de) > summary$mu, but also valid if de < 0

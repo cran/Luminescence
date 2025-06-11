@@ -196,12 +196,8 @@ calc_FastRatio <- function(object,
     P <- stimulation.power
     lamdaLED <- wavelength
 
-    ## Constants
     ## c = speed of light, h = Planck's constant
-    h <- 6.62607004E-34
-    c <- 299792458
-
-    I0 <- (P / 1000) / (h * c / (lamdaLED * 10^-9))
+    I0 <- (P / 1000) / (.const$c * .const$h / (lamdaLED * 10^-9))
     Ch_width <- max(A[ ,1]) / length(A[ ,1])
 
     # remove dead channels
@@ -291,7 +287,6 @@ calc_FastRatio <- function(object,
       .throw_warning(msg)
       return(NULL)
     }
-
     Cts_L2 <- A[Ch_L2, 2]
 
     # optional: predict the counts from the fitted curve
@@ -316,7 +311,6 @@ calc_FastRatio <- function(object,
       t_L3_start <- A[Ch_L3st,1]
       t_L3_end <- A[Ch_L3end,1]
     }
-
     Cts_L3 <- mean(A[Ch_L3st:Ch_L3end, 2])
 
     # optional: predict the counts from the fitted curve
@@ -334,8 +328,6 @@ calc_FastRatio <- function(object,
 
     ## Fast Ratio
     FR <- (Cts_L1 - Cts_L3) / (Cts_L2 - Cts_L3)
-    if (length(FR) != 1)
-      FR <- NA
 
     ## Fast Ratio - Error calculation
     FR_se <- NA

@@ -60,6 +60,7 @@ test_that("input validation", {
                      mode = "extrapolation"),
     "Mode 'extrapolation' for fitting method 'EXP+EXP' not supported",
     fixed = TRUE)
+
 })
 
 test_that("weird LxTx values", {
@@ -217,7 +218,7 @@ test_that("snapshot tests", {
 
   expect_snapshot_RLum(fit_DoseResponseCurve(
       LxTxData,
-      fit.method = "LambertW",
+      fit.method = "OTOR",
       verbose = FALSE,
       n.MC = 10
   ), tolerance = snapshot.tolerance)
@@ -238,7 +239,6 @@ test_that("snapshot tests", {
       verbose = TRUE,
       n.MC = 10
   ), tolerance = 5.0e-5)
-  })
 
   expect_snapshot_RLum(fit_DoseResponseCurve(
       LxTxData,
@@ -247,6 +247,24 @@ test_that("snapshot tests", {
       verbose = FALSE,
       n.MC = 10
   ), tolerance = 5.0e-5)
+
+  expect_snapshot_RLum(fit_DoseResponseCurve(
+      LxTxData,
+      fit.method = "GOK",
+      mode = "extrapolation",
+      verbose = FALSE,
+      n.MC = 10
+  ), tolerance = 5e-5)
+
+  expect_snapshot_RLum(fit_DoseResponseCurve(
+      cbind(LxTxData, Test_Dose = 17),
+      fit.method = "OTORX",
+      fit.force_through_origin = TRUE,
+      mode = "interpolation",
+      verbose = TRUE,
+      n.MC = 10
+  ), tolerance = 5.0e-5)
+  })
 })
 
 test_that("additional tests", {
@@ -315,16 +333,49 @@ test_that("additional tests", {
     n.MC = 10,
     fit.force_through_origin = TRUE
   ), "RLum.Results")
-temp_LambertW <-
+temp_OTOR <-
   fit_DoseResponseCurve(
     LxTxData,
-    fit.method = "LambertW",
+    fit.method = "OTOR",
     verbose = FALSE,
     n.MC = 10
   )
+temp_OTORX <-
+  fit_DoseResponseCurve(
+    cbind(LxTxData, Test_Dose = 17),## we have to set the TEST_DOSE
+    fit.method = "OTORX",
+    fit.force_through_origin = TRUE,
+    verbose = FALSE,
+    n.MC = 10
+  )
+## test reference dataset from
+## (https://raw.githubusercontent.com/jll2/LumDRC/refs/heads/main/otorx.py)
+LxTxData_alt <- data.frame(
+  Dose = c(0, 17, 47, 94, 201, 402, 804, 1.07e+03, 1.68e+03, 3.35e+03, 5.36e+03,
+           6.7e+03, 8.04e+03, 1e+04, 47, 94, 3.35e+03, 5.36e+03),
+  LxTx = c(10, 1.09, 2.3, 3.67, 5.63, 8.09, 10.3, 11.4, 13, 14.8, 15.8, 16.9,
+           17, 17.1, 2.26, 3.65, 15.6, 15.9),
+  LxTx.Error = 0.1,
+  TEST_DOSE = 17)
+temp_OTORX_alt <-
+  fit_DoseResponseCurve(
+    cbind(LxTxData_alt, Test_Dose = 17),## we have to set the TEST_DOSE
+    fit.method = "OTORX",
+    fit.force_through_origin = TRUE,
+    verbose = FALSE,
+    n.MC = 10)
+
+  temp_OTORX_alt2 <-
+    fit_DoseResponseCurve(
+      cbind(LxTxData_alt, Test_Dose = 17),## we have to set the TEST_DOSE
+      fit.method = "OTORX",
+      fit.force_through_origin = FALSE,
+      verbose = FALSE,
+      n.MC = 10)
+
 
   ## FIXME(mcol): duplicate of a test in the snapshot block, we need it
-  ##              here too as coverage currenlty runs on 4.3
+  ##              here too as coverage currently runs on 4.3
   temp_QDR2 <- fit_DoseResponseCurve(
       LxTxData,
       fit.method = "QDR",
@@ -341,7 +392,10 @@ temp_LambertW <-
   expect_s3_class(temp_EXPEXP$Fit, class = "nls")
   expect_s3_class(temp_QDR$Fit, class = "lm")
   expect_s3_class(temp_GOK$Fit, class = "nls")
-  expect_s3_class(temp_LambertW$Fit, class = "nls")
+  expect_s3_class(temp_OTOR$Fit, class = "nls")
+  expect_s3_class(temp_OTORX$Fit, class = "nls")
+  expect_s3_class(temp_OTORX_alt$Fit, class = "nls")
+  expect_s3_class(temp_OTORX_alt2$Fit, class = "nls")
 
    expect_equal(round(temp_EXP$De[[1]], digits = 2), 1737.88)
    expect_equal(round(sum(temp_EXP$De.MC, na.rm = TRUE), digits = 0), 17562)
@@ -368,9 +422,12 @@ temp_LambertW <-
      }
    }
 
-   expect_equal(round(temp_LambertW$De[[1]], digits = 2),  1784.78)
-   expect_equal(round(sum(temp_LambertW$De.MC, na.rm = TRUE), digits = 0), 17422)
-
+   expect_equal(round(temp_OTOR$De[[1]], digits = 2),  1784.78)
+   expect_equal(round(temp_OTORX$De[[1]], digits = 2),  1785.43)
+   expect_equal(round(temp_OTORX_alt$De[[1]], digits = 2),  758.280)
+   expect_equal(round(temp_OTORX_alt2$De[[1]], digits = 2),  793.21, tolerance = 0.2)
+   expect_equal(round(sum(temp_OTOR$De.MC, na.rm = TRUE), digits = 0), 17422)
+   expect_equal(round(sum(temp_OTORX$De.MC, na.rm = TRUE), digits = 0), 14477, tolerance = 0.2)
 
 # Check extrapolation -----------------------------------------------------
   ## load data
@@ -395,13 +452,28 @@ temp_LambertW <-
     fit_DoseResponseCurve(LxTxData,mode = "interpolation", fit.method = "GOK"),
     "RLum.Results")
 
-  LambertW <- expect_s4_class(
-    fit_DoseResponseCurve(LxTxData,mode = "extrapolation", fit.method = "LambertW"), "RLum.Results")
+  OTOR <- expect_s4_class(
+    fit_DoseResponseCurve(LxTxData,mode = "extrapolation", fit.method = "OTOR"), "RLum.Results")
+
+  ##OTORX
+  OTORX <- expect_s4_class(
+    fit_DoseResponseCurve(
+      object = cbind(LxTxData, Test_Dose = 17),
+      mode = "extrapolation", fit.method = "OTORX"), "RLum.Results")
+
+  ##OTORX ... trigger uniroot warning
+  LxTxData[1,2:3] <- c(5, 0.001)
+  expect_warning(
+    fit_DoseResponseCurve(
+      object = cbind(LxTxData, Test_Dose = 17),
+      mode = "extrapolation", fit.method = "OTORX"))
+
   })
 
   expect_equal(round(LIN$De$De,0), 165)
   expect_equal(round(EXP$De$De,0),  110)
-  expect_equal(round(LambertW$De$De,0),  114)
+  expect_equal(round(OTOR$De$De,0),  114)
+  expect_equal(round(OTORX$De$De,0),  110)
 
   #it fails on some unix platforms for unknown reason.
   #expect_equivalent(round(EXPLIN$De$De,0), 110)
@@ -440,18 +512,29 @@ temp_LambertW <-
     "RLum.Results"
   )
 
-  ## LambertW
+  ## OTOR
   expect_s4_class(
     fit_DoseResponseCurve(
       LxTxData,
       mode = "alternate",
-      fit.method = "LambertW",
+      fit.method = "OTOR",
       verbose = FALSE
     ),
     "RLum.Results"
   )
 
-  ## trigger LambertW related warning for
+  ## OTORX
+  expect_s4_class(
+    fit_DoseResponseCurve(
+      cbind(LxTxData, Test_Dose = 17),
+      mode = "alternate",
+      fit.method = "OTORX",
+      verbose = FALSE
+    ),
+    "RLum.Results"
+  )
+
+  ## trigger OTOR related warning for
   ## extrapolation mode
   tmp <- structure(list(
     dose = c(
@@ -530,7 +613,7 @@ temp_LambertW <-
   expect_warning(fit_DoseResponseCurve(
     tmp,
     mode = "extrapolation",
-    fit.method = "LambertW",
+    fit.method = "OTOR",
     verbose = FALSE),
     "[fit_DoseResponseCurve()] Standard root estimation using stats::uniroot()",
     fixed = TRUE)
@@ -550,6 +633,21 @@ temp_LambertW <-
                all = FALSE, fixed = TRUE)
   expect_match(warnings, "Fitting a non-linear least-squares model requires",
                all = FALSE, fixed = TRUE)
+
+  ## more coverage
+  tmp$dose <- c(0:6, 1000 + 0:6, 20000 + 0:6)
+  expect_output(fit_DoseResponseCurve(
+      tmp[4:8, ],
+      fit.method = "GOK",
+      verbose = TRUE,
+      n.MC = 10),
+      "Fit failed for GOK")
+  expect_output(fit_DoseResponseCurve(
+      cbind(tmp[4:8, ], Test_Dose = 17),
+      fit.method = "OTORX",
+      verbose = TRUE,
+      n.MC = 10),
+      "Fit failed for OTORX")
 })
 
 test_that("regression tests", {
@@ -567,6 +665,41 @@ test_that("regression tests", {
   expect_s4_class(
     fit_DoseResponseCurve(df, fit.method = "EXP+EXP"), "RLum.Results")
   expect_s4_class(
-    fit_DoseResponseCurve(df, fit.method = "LambertW"), "RLum.Results")
+    fit_DoseResponseCurve(df, fit.method = "OTOR"), "RLum.Results")
   })
+
+  ## issue 723
+  set.seed(1)
+  df <- data.frame(DOSE = c(0, 5, 10, 20, 25),
+                   LxTx = c(40, -10, 30, -5, -20), LxTx_X = c(2, 2, 1, 2, 1))
+  SW({
+  expect_s4_class(fit_DoseResponseCurve(df, fit.method = "EXP"),
+                  "RLum.Results")
+  })
+})
+
+test_that("test internal functions", {
+  testthat::skip_on_cran()
+
+  ## reference tests from
+  ## https://github.com/jll2/LumDRC/blob/main/otorx.py
+  expect_equal(sum(Luminescence:::.nN2D(
+    nN = 1-exp(-1),
+    Q = c(0.5,0.6,0.7,0.8),
+    D63 = c(1,10,100,1000))), expected = 1111)
+
+  expect_equal(sum(Luminescence:::.nN2D(
+    nN = 0.5,
+    Q = c(0.5,0.6,0.7,0.8),
+    D63 = c(1,10,100,1000))),
+    expected = 661, tolerance = 2)
+
+  expect_equal(sum(Luminescence:::.D2nN(
+    D = 1,
+    Q = c(-10,-3,0.1,1),
+    a = 0,
+    D63 = 1)), expected = 2.5, tolerance = 1)
+
+  expect_error(Luminescence:::.D2nN(D = 1, Q = c(-10, 0.1, 0, 0), D63 = 1),
+               "Unsupported zero and non-zero Q")
 })

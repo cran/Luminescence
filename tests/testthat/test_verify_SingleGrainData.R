@@ -7,7 +7,13 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(verify_SingleGrainData("test"),
-               "'object' should be of class 'Risoe.BINfileData' or 'RLum.Analysis'")
+               "'object' should be of class 'Risoe.BINfileData', 'RLum.Analysis'")
+  expect_error(verify_SingleGrainData(object, threshold = "error"),
+               "'threshold' should be of class 'numeric' or 'integer'")
+  expect_error(verify_SingleGrainData(object, use_fft = "error"),
+               "'use_fft' should be a single logical value")
+  expect_error(verify_SingleGrainData(object, cleanup = "error"),
+               "'cleanup' should be a single logical value")
   expect_error(verify_SingleGrainData(object, cleanup_level = "error"),
                "'cleanup_level' should be one of 'aliquot' or 'curve'")
 
@@ -27,7 +33,7 @@ test_that("check functionality", {
   expect_equal(sum(output@data$selection_full$VALID), 11)
   expect_equal(output@originator, "verify_SingleGrainData")
 
-  expect_output(res <- verify_SingleGrainData(object, cleanup = TRUE,
+  expect_message(res <- verify_SingleGrainData(object, cleanup = TRUE,
                                               cleanup_level = "curve",
                                               threshold = 100),
                 "RLum.Analysis object reduced to records")
@@ -36,7 +42,7 @@ test_that("check functionality", {
   expect_length(res@records, 5)
 
   ## threshold too high, empty object generated
-  expect_output(res <- verify_SingleGrainData(object, cleanup = TRUE,
+  expect_message(res <- verify_SingleGrainData(object, cleanup = TRUE,
                                               cleanup_level = "curve",
                                               threshold = 2000),
                 "RLum.Analysis object reduced to records")
@@ -44,16 +50,26 @@ test_that("check functionality", {
   expect_equal(res@originator, "read_XSYG2R")
   expect_length(res@records, 0)
 
+  ## threshold too high on a list
+  expect_message(res <- verify_SingleGrainData(list(object), cleanup = TRUE,
+                                               cleanup_level = "curve",
+                                               threshold = 2000),
+                 "RLum.Analysis object reduced to records")
+  expect_type(res, "list")
+  expect_s4_class(res[[1]], "RLum.Analysis")
+  expect_equal(res[[1]]@originator, "read_XSYG2R")
+  expect_length(res[[1]]@records, 0)
+
   ## check for cleanup
   data(ExampleData.BINfileData, envir = environment())
   t <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)
   expect_warning(
     object = verify_SingleGrainData(t, cleanup = TRUE, threshold = 20000),
-    regexp = "Verification and cleanup removed all records. NULL returned!")
+    regexp = "Verification and cleanup removed all records, NULL returned")
   expect_null(suppressWarnings(verify_SingleGrainData(t, cleanup = TRUE, threshold = 20000)))
 
   ## Risoe.BINfileData
-  res <- expect_silent(verify_SingleGrainData(CWOSL.SAR.Data))
+  res <- expect_silent(verify_SingleGrainData(CWOSL.SAR.Data, plot = TRUE))
   expect_s4_class(res, "RLum.Results")
 
   res <- expect_output(verify_SingleGrainData(CWOSL.SAR.Data, cleanup = TRUE,
@@ -72,7 +88,7 @@ test_that("check functionality", {
   ## remove all and cleanup
   expect_warning(
     object = verify_SingleGrainData(CWOSL.SAR.Data, cleanup = TRUE, threshold = 20000),
-    regexp = "Verification and cleanup removed all records. NULL returned!")
+    regexp = "Verification and cleanup removed all records, NULL returned")
   expect_null(suppressWarnings(verify_SingleGrainData(CWOSL.SAR.Data, cleanup = TRUE, threshold = 20000)))
 
   ## empty list
@@ -86,15 +102,15 @@ test_that("check functionality", {
   expect_length(res@records, 0)
   expect_equal(res@originator, "verify_SingleGrainData")
 
-  ##check options
-  expect_silent(suppressWarnings(verify_SingleGrainData(object, plot = TRUE)))
-  expect_silent(suppressWarnings(verify_SingleGrainData(object, threshold = 100)))
-  expect_silent(suppressWarnings(verify_SingleGrainData(object, verbose = FALSE)))
-  expect_silent(suppressWarnings(verify_SingleGrainData(object, cleanup = TRUE)))
-  expect_silent(verify_SingleGrainData(object, cleanup_level = "curve"))
-  expect_silent(suppressWarnings(verify_SingleGrainData(list(object), cleanup = TRUE)))
+  ## list
   expect_silent(suppressWarnings(verify_SingleGrainData(list(object))))
+})
 
-  ## use fft option
-  expect_silent(suppressWarnings(verify_SingleGrainData(list(object), use_fft = TRUE)))
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 740
+  object@records[[1]]@info$position <- "123"
+  expect_s4_class(verify_SingleGrainData(object),
+                  "RLum.Results")
 })

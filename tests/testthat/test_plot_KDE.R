@@ -14,6 +14,16 @@ test_that("input validation", {
   expect_error(expect_warning(plot_KDE(data.frame(a = Inf, b = 1)),
                               "Inf values removed in rows: 1 in data.frame 1"),
                "Your input is empty due to Inf removal")
+  expect_error(plot_KDE(df, summary.method = "error"),
+               "'summary.method' should be one of 'MCM', 'weighted' or 'unweighted'")
+  expect_error(plot_KDE(df, summary = 5),
+               "'summary' should be of class 'character'")
+  expect_error(plot_KDE(df, summary.pos = list()),
+               "'summary.pos' should be of class 'numeric' or 'character'")
+  expect_error(plot_KDE(df, summary.pos = 5),
+               "'summary.pos' should have length 2")
+  expect_error(plot_KDE(df, summary.pos = "error"),
+               "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
   expect_error(plot_KDE(df, ylim = c(0, 1)),
                "'ylim' should have length 4")
 
@@ -33,15 +43,7 @@ test_that("check functionality", {
                          xlab = "x", ylab = "y", layout = "default", log = "x",
                          xlim = c(100, 180), ylim = c(0, 0.07, 0, 0.01),
                          col = 2, lty = 2, lwd = 2, cex = 1))
-  expect_silent(plot_KDE(data = df, summary.pos = "topleft"))
-  expect_silent(plot_KDE(data = df, summary.pos = "top"))
-  expect_silent(plot_KDE(data = df, summary.pos = "topright"))
-  expect_silent(plot_KDE(data = df, summary.pos = "left"))
-  expect_silent(plot_KDE(data = df, summary.pos = "center"))
-  expect_silent(plot_KDE(data = df, summary.pos = "right"))
-  expect_silent(plot_KDE(data = df, summary.pos = "bottomleft"))
-  expect_silent(plot_KDE(data = df, summary.pos = "bottom"))
-  expect_silent(plot_KDE(data = df, summary.pos = "bottomright"))
+  expect_silent(plot_KDE(data = df, summary = "mean", summary.pos = "right"))
   expect_silent(plot_KDE(data = df, sub = "test"))
 
   ## specify layout
@@ -76,4 +78,21 @@ test_that("check functionality", {
   df.na[3, 1] <- NA
   expect_message(plot_KDE(df.na),
                  "2 NA values excluded from data set 1")
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+  testthat::skip_if_not(getRversion() >= "4.4.0")
+
+  SW({
+  vdiffr::expect_doppelganger("KDE expected",
+                              plot_KDE(data = df))
+  vdiffr::expect_doppelganger("KDE summary sub",
+                              plot_KDE(data = df, summary.pos = "sub",
+                                       summary = c("n", "se.rel", "kurtosis")))
+  vdiffr::expect_doppelganger("KDE summary left",
+                              plot_KDE(data = df, summary.pos = "left",
+                                       summary = c("mean", "in.2s", "skewness")))
+  })
 })

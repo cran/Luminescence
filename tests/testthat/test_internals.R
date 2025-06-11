@@ -252,7 +252,7 @@ test_that("Test internals", {
                fixed = TRUE)
 
   fun2 <- function(arg = c("val1", "val2", "val3")) {
-    .validate_args(arg, c("val1", "val2", "val3"), name = "other_name")
+    .validate_args(arg, c("val1", "val2", "val3"), name = "'other_name'")
   }
   expect_equal(fun2(), "val1")
   expect_error(fun2(arg = NULL),
@@ -369,6 +369,8 @@ test_that("Test internals", {
                "'test' should be a positive scalar")
   expect_error(.validate_positive_scalar(iris),
                "'iris' should be a positive scalar")
+  expect_error(.validate_positive_scalar(iris, null.ok = TRUE),
+               "'iris' should be a positive scalar or NULL")
   expect_error(.validate_positive_scalar(1:2, name = "'var'"),
                "'var' should be a positive scalar")
   expect_error(.validate_positive_scalar(0, name = "'var'"),
@@ -392,6 +394,8 @@ test_that("Test internals", {
                "'test' should be a single logical value")
   expect_error(.validate_logical_scalar(iris),
                "'iris' should be a single logical value")
+  expect_error(.validate_logical_scalar(iris, null.ok = TRUE),
+               "'iris' should be a single logical value or NULL")
   expect_error(.validate_logical_scalar(c(TRUE, FALSE), name = "'var'"),
                "'var' should be a single logical value")
   expect_error(.validate_logical_scalar(0, name = "'var'"),
@@ -427,10 +431,27 @@ test_that("Test internals", {
   ## .shorten_filename() ----------------------------------------------------
   expect_equal(.shorten_filename("/path/to/filename"),
                "/path/to/filename")
-  expect_equal(.shorten_filename("/path/to/a_somewhat_longer_filename",
-                                 max.width = 27),
-               "/path/…what_longer_filename")
+  max.width <- 27
+  shortened <- .shorten_filename("/path/to/a_somewhat_longer_filename",
+                                 max.width = max.width)
+  expect_equal(shortened,
+               "/path/to/a_s...ger_filename")
+  expect_equal(nchar(shortened), max.width)
 
+  ## check vector
+  max.width <- 10
+  shortened <- .shorten_filename(c("short", NA, "muchmuchlonger"), 10)
+  expect_equal(shortened,
+               c("short", NA, "muc...nger"))
+  expect_equal(nchar(shortened), c(5, NA, max.width))
+
+  ## .rescale() ----------------------------------------------------
+  x <- stats::rnorm(100)
+  y_dens <- stats::density(x)
+  expect_equal(max(.rescale(
+   x = y_dens$y,
+   range_old = c(min(y_dens$y), max(y_dens$y)),
+   range_new = c(0, 20))), 20)
 
   ## C++ code ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   ##

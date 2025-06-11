@@ -45,7 +45,7 @@ is provided the function directly starts with the Bayesian Analysis (see details
 if a \code{character}, it must be the path to a CSV file with data for the
 analysis. Either way, data should contain 3 columns:
 the name of the file, the disc position and the grain position
-(the last being 0 for multi-grain measurements).\cr}
+(the last being 0 for multi-grain measurements).}
 
 \item{aliquot_range}{\link{numeric} (\emph{optional}):
 allows to limit the range of the aliquots used for the analysis.
@@ -385,7 +385,6 @@ results <- analyse_baSAR(
   fit.method = "LIN",
   plot = FALSE,
   n.MCMC = 200
-
 )
 
 print(results)
@@ -411,7 +410,7 @@ list(
 } 
 
 \section{How to cite}{
-Mercier, N., Kreutzer, S., 2025. analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.36. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Mercier, N., Kreutzer, S., 2025. analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.36. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

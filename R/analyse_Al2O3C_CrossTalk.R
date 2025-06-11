@@ -260,8 +260,7 @@ analyse_Al2O3C_CrossTalk <- function(
     AD_matrix <- t(vapply(sort(unique(APPARENT_DOSE$POSITION)), function(x){
         c(x,mean(APPARENT_DOSE[["AD"]][APPARENT_DOSE[["POSITION"]] == x]),
           sd(APPARENT_DOSE[["AD"]][APPARENT_DOSE[["POSITION"]] == x]))
-
-    }, FUN.VALUE = vector(mode = "numeric", length = 3)))
+    }, FUN.VALUE = numeric(3)))
 
     ##create colour ramp
     col.seq <- data.frame(
@@ -281,7 +280,7 @@ analyse_Al2O3C_CrossTalk <- function(
     if (plot) {
 
       ##set layout matrix
-      layout(mat = matrix(
+      graphics::layout(mat = matrix(
         c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 3),
         5,
         5,

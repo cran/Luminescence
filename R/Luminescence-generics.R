@@ -1,4 +1,4 @@
-## --------------------------------------------------------------------------
+# bin_RLum.Data -----------------------------------------------------------
 #' @title Channel binning for RLum.Data S4 class objects.
 #'
 #' @description
@@ -52,8 +52,7 @@ setGeneric("bin_RLum.Data", function(object, ...) {
   standardGeneric("bin_RLum.Data")
 })
 
-
-## --------------------------------------------------------------------------
+# get_Risoe.BINfileData() -------------------------------------------------
 #' @title General accessor function for Risoe.BINfileData objects
 #'
 #' @description
@@ -87,7 +86,7 @@ setGeneric("get_Risoe.BINfileData", function(object, ...) {
 })
 
 
-## --------------------------------------------------------------------------
+# get_RLum() --------------------------------------------------------------
 #' @title General accessor function for RLum S4 class objects
 #'
 #' @description
@@ -209,7 +208,66 @@ setMethod("get_RLum", signature = "NULL",
     })
 
 
-## --------------------------------------------------------------------------
+# remove_RLum() -------------------------------------------------------------
+#' @title Strips records from RLum-class objects
+#'
+#' @description
+#' Remove records from an RLum-class object in a convenient way using
+#' [get_RLum] for the selection.
+#'
+#' @param object [RLum-class] (**required**):  S4 object of class `RLum`
+#'
+#' @param ... further arguments passed to the specific class method
+#'
+#' @return
+#' Same as input, can be empty
+#'
+#' @section Function version: 0.1.0
+#'
+#' @author
+#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'
+#' @seealso [RLum.Analysis-class]
+#'
+#' @examples
+#' ## load example data
+#' data(ExampleData.XSYG, envir = environment())
+#' sar <- OSL.SARMeasurement$Sequence.Object[1:9]
+#'
+#' ## strop only OSL curves
+#' sar <- remove_RLum(sar, recordType = "OSL")
+#' sar
+#'
+#' @keywords utilities
+#'
+#' @md
+#' @export
+setGeneric("remove_RLum", function(object, ...) {
+  standardGeneric("remove_RLum")
+})
+
+#' @describeIn remove_RLum
+#' Returns a list of [RLum-class] objects where the selected records are stripped
+#'
+#' @md
+#' @export
+setMethod("remove_RLum", signature = "list",
+          function(object, ...) {
+            ## apply method in the objects and return the same
+            tmp <- lapply(object, function(x) {
+              if (inherits(x, "RLum.Analysis")) {
+                return(remove_RLum(x,...))
+              } else {
+                return(x)
+              }
+            })
+
+            ## remove empty elements
+            tmp[vapply(tmp,length, numeric(1)) != 0]
+
+})
+
+# length_RLum() -----------------------------------------------------------
 #' @title Length retrieval function for RLum S4 class objects
 #'
 #' @description
@@ -245,7 +303,7 @@ setGeneric("length_RLum", function(object) {
 })
 
 
-## --------------------------------------------------------------------------
+# melt_RLum() -------------------------------------------------------------
 #' @title Melt RLum-class objects into a flat data.frame
 #'
 #' @param object [RLum-class] (**required**):
@@ -307,7 +365,7 @@ setMethod("melt_RLum", signature = "list",
     })
 
 
-## --------------------------------------------------------------------------
+# add_metadata<-() --------------------------------------------------------
 #' @title Safe manipulation of object metadata
 #'
 #' @description
@@ -377,7 +435,7 @@ setGeneric("replace_metadata<-", function (object, ..., value) {
 })
 
 
-## --------------------------------------------------------------------------
+# names_RLum() ------------------------------------------------------------
 #' @title Name retrieval function for RLum S4 class objects
 #'
 #' @description
@@ -429,7 +487,7 @@ setMethod("names_RLum", signature = "list",
     })
 
 
-## --------------------------------------------------------------------------
+# replicate_RLum() --------------------------------------------------------
 #' @title General replication function for RLum S4 class objects
 #'
 #' @description
@@ -461,7 +519,7 @@ setGeneric("replicate_RLum", function (object, times = NULL) {
 })
 
 
-## --------------------------------------------------------------------------
+# set_Risoe.BINfileData() -------------------------------------------------
 #' @title General setter function for Risoe.BINfileData objects
 #'
 #' @description
@@ -497,7 +555,8 @@ setGeneric("set_Risoe.BINfileData", function(METADATA = data.frame(),
 })
 
 
-## --------------------------------------------------------------------------
+
+# set_RLum() --------------------------------------------------------------
 #' @title General setter function for RLum S4 class objects
 #'
 #' @description
@@ -590,7 +649,7 @@ setGeneric("set_RLum", function (class, originator, .uid = create_UID(),
 })
 
 
-## --------------------------------------------------------------------------
+# smooth_RLum() -----------------------------------------------------------
 #' @title Smoothing of data for RLum S4-class objects
 #'
 #' @description
@@ -663,7 +722,7 @@ setMethod("smooth_RLum", signature = "list",
     })
 
 
-## --------------------------------------------------------------------------
+# sort_RLum() -------------------------------------------------------------
 #' @title Sort data for RLum S4-class objects
 #'
 #' @description
@@ -705,8 +764,25 @@ setGeneric("sort_RLum", function(object, ...) {
   standardGeneric("sort_RLum")
 })
 
+#' @describeIn sort_RLum
+#' Returns a list of [RLum-class] objects that had been passed to [sort_RLum]
+#'
+#' @md
+#' @export
+setMethod("sort_RLum", signature = "list",
+          function(object, ...) {
+            ## apply method in the objects and return the same
+            lapply(object, function(x) {
+              if (inherits(x, "RLum.Analysis")) {
+                return(sort_RLum(x,...))
+              } else {
+                return(x)
+              }
+            })
+          })
 
-## --------------------------------------------------------------------------
+
+# structure_RLum() --------------------------------------------------------
 #' @title General structure function for RLum S4 class objects
 #'
 #' @description
@@ -766,7 +842,7 @@ setMethod("structure_RLum", signature = "list",
     })
 
 
-## --------------------------------------------------------------------------
+# view() ------------------------------------------------------------------
 #' @title Convenience data visualisation function
 #'
 #' @description

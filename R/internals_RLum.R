@@ -84,8 +84,8 @@
       assign(x = "warning_collector",
              value = temp,
              envir = env)
-      ##TODO should be replaced tryInvokeRestart once R 4.1 was released
-      invokeRestart("muffleWarning")
+
+      tryInvokeRestart ("muffleWarning")
     }
   )
 
@@ -164,9 +164,8 @@
   .validate_args(method, c("mean", "median"))
 
   ##set k
-  if (is.null(k)){
+  if (is.null(k))
    k <- ceiling(length(x) / 100)
-  }
 
   ##smooth data
   if(method == "mean"){
@@ -910,7 +909,6 @@ fancy_scientific <- function(l) {
     destfile = tempfile(),
     verbose = TRUE
 ) {
-
   ## get name of calling function
   caller <- paste0("[", as.character(sys.call(which = -1)[[1]]), "()]")
   out_file_path <- NULL
@@ -919,8 +917,8 @@ fancy_scientific <- function(l) {
   if(grepl(pattern = "https?\\:\\/\\/", x = url, perl = TRUE)) {
     ## status reports
     if (verbose) {
-      message(paste0(caller, " URL detected: ", url))
-      message(paste0(caller, " Attempting download ... "), appendLF = FALSE)
+      message(caller, " URL detected: ", url)
+      message(caller, " Attempting download ... ", appendLF = FALSE)
     }
 
     ## extract URL from string only
@@ -1140,7 +1138,7 @@ SW <- function(expr) {
 
   ## name of the argument to report if not specified
   if (is.null(name))
-    name <- all.vars(match.call())[1]
+    name <- sprintf("'%s'", all.vars(match.call())[1])
 
   ## `arg` will have multiple values when the available choices are listed
   ## in the function's formal arguments: in that case all elements in `arg`
@@ -1151,7 +1149,7 @@ SW <- function(expr) {
 
     ## we throw an error to catch cases when the formal arguments are
     ## changed but `choices` has not been updated
-    .throw_error("'", name, "' contains multiple values but not all of them ",
+    .throw_error(name, " contains multiple values but not all of them ",
                  "match 'choices'")
   }
 
@@ -1172,7 +1170,7 @@ SW <- function(expr) {
 
   idx.match <- pmatch(arg, choices, nomatch = 0L, duplicates.ok = TRUE)
   if (all(idx.match == 0L))
-    .throw_error("'", name, "' should be one of ",
+    .throw_error(name, " should be one of ",
                  .collapse(msg.head, quote = FALSE), msg.tail)
   idx <- idx.match[idx.match > 0L]
   choices[idx]
@@ -1331,7 +1329,7 @@ SW <- function(expr) {
     if (is.null(name))
       name <- sprintf("'%s'", all.vars(match.call())[1])
     .throw_error(name, " should be a positive ", if (int) "integer ",
-                 "scalar")
+                 "scalar", if (null.ok) " or NULL")
   }
 }
 
@@ -1353,7 +1351,8 @@ SW <- function(expr) {
   if (!is.logical(val) || length(val) != 1 || is.na(val)) {
     if (is.null(name))
       name <- sprintf("'%s'", all.vars(match.call())[1])
-    .throw_error(name, " should be a single logical value")
+    .throw_error(name, " should be a single logical value",
+                 if (null.ok) " or NULL")
   }
 }
 
@@ -1431,7 +1430,7 @@ SW <- function(expr) {
 #' Shorten a filename to the given width by cutting out characters from the
 #' middle, leaving the most significant parts.
 #'
-#' @param filename [character] (**required**) A file name
+#' @param filename [character] (**required**) A file name; can be a vector
 #' @param max.width [integer] (*with default*) The maximum width available
 #'
 #' @return
@@ -1440,15 +1439,60 @@ SW <- function(expr) {
 #' @md
 #' @noRd
 .shorten_filename <- function(filename, max.width = 70) {
-  name.len <- nchar(filename)
+  ## optimised for speed with ChatGPT, 2025
+  ## get length
+  name.len <- nchar(filename, keepNA = FALSE)
 
-  ## return the current file name if it already fits the available width
-  if (name.len <= max.width)
+  ## logical index of names to shorten
+  to_shorten <- name.len > max.width
+
+  ## get out if nothing needs shortening
+  if (!any(to_shorten))
     return(filename)
 
-  ## shorten the filename
-  part1.end <- ceiling(max.width / 5)
-  part2.beg <- part1.end + name.len - max.width + 2
-  paste0(substring(filename, first = 1, last = part1.end), "\u2026", # "…"
-         substring(filename, first = part2.beg))
+  # calculate parts
+  dots <- "..."  # \u2026
+  max.width <- max.width - nchar(dots)
+  part1_last <- floor(max.width / 2)
+  part2_first <- floor(name.len[to_shorten] - max.width / 2) + 1
+
+  # shorten what needs to be shortened
+  filename[to_shorten] <- paste0(
+    substring(filename[to_shorten], 1, part1_last),
+    dots,
+    substring(filename[to_shorten], part2_first)
+  )
+
+  ## return
+  filename
+}
+#'@title Affine Transformation of Values
+#'
+#'@description Affine (linear) transformation of values; which we use
+#'a couple of times within functions
+#'
+#'@param x [numeric] (*required*): values to be transformed
+#'
+#'@param range_old [numeric] (*required*): original scale limits
+#'
+#'@param range_new [numeric] (*required*): new scale limits
+#'
+#'@returns rescaled values values
+#'
+#'@examples
+#'
+#' x <- stats::rnorm(100)
+#' y_dens <- stats::density(x)
+#' .rescale(
+#'  x = y_dens$y,
+#'  range_old = c(min(y_dens$y), max(y_dens$y)),
+#'  range_new = c(0,20))
+#'
+#'@md
+#'@noRd
+.rescale <- function(x, range_old, range_new) {
+  range_new[1] +
+    (x - range_old[1]) * (range_new[2] - range_new[1]) /
+    (range_old[2] - range_old[1])
+
 }

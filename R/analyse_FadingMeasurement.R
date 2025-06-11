@@ -59,7 +59,7 @@
 #'
 #' **Shine-down curve plots**
 #' Please note that the shine-down curve plots are for information only. As such
-#' not all pause steps are plotted to avoid graphically overloaded plots.
+#' a maximum of five pause steps are plotted to avoid graphically overloaded plots.
 #' However, *all* pause times are taken into consideration for the analysis.
 #'
 #' @param object [RLum.Analysis-class] (**required**):
@@ -111,7 +111,8 @@
 #' @param plot_singlePanels [logical] (*with default*) or [numeric] (*optional*):
 #' enable/disable single plot mode, i.e. one plot window per plot.
 #' Alternatively a vector specifying the plot to be drawn, e.g.,
-#' `plot_singlePanels = c(3,4)` draws only the last two plots
+#' `plot_singlePanels = c(3,4)` draws only the last two plots in separate
+#' windows.
 #'
 #' @param ... (*optional*) further arguments that can be passed to internally used functions. Supported arguments:
 #' `xlab`, `log`, `mtext`, `plot.trend` (enable/disable trend blue line), and `xlim` for the
@@ -263,7 +264,6 @@ analyse_FadingMeasurement <- function(
 
     ## support read_XSYG2R()
     if (length(originators) == 1 && originators == "read_XSYG2R") {
-
       ## extract irradiation times
       irradiation_times <- extract_IrradiationTimes(object)
 
@@ -388,15 +388,45 @@ analyse_FadingMeasurement <- function(
     ##overwrite TIMESINCEIRR
     TIMESINCEIRR <- pmax(t_star, 1e-6)
     rm(t_star)
-
     # Calculation ---------------------------------------------------------------------------------
     ##calculate Lx/Tx or ... just Lx, it depends on the pattern ... set IRR_TIME
     if(length(structure) == 2){
       Lx_data <- object_clean[seq(1,length(object_clean), by = 2)]
       Tx_data <- object_clean[seq(2,length(object_clean), by = 2)]
 
+      ## check whether the length of Lx is the length of Tx
+      len.Lx <- length(Lx_data)
+      len.Tx <- length(Tx_data)
+      if (len.Lx != len.Tx) {
+        .throw_error("The number of Lx curves (", len.Lx, ") differs from ",
+                     "the number of Tx curves (", len.Tx, "), ",
+                     "check your data or consider setting `structure = 'Lx'`")
+      }
+
       ##we need only every 2nd irradiation time, the one from the Tx should be the same ... all the time
       TIMESINCEIRR <- TIMESINCEIRR[seq(1,length(TIMESINCEIRR), by = 2)]
+
+      ## check that all Lx/Tx pairs have the same size
+      size.mismatch <- vapply(1:len.Lx, function(i) {
+        floor(length(Lx_data[[i]])) != floor(length(Tx_data[[i]]))
+      }, logical(1))
+
+      ## skip samples with mismatching sizes
+      if (any(size.mismatch)) {
+
+        ## terminate if all pairs have mismatching sizes
+        if (all(size.mismatch)) {
+          .throw_error("No curves left after removing those with different ",
+                       "Lx and Tx sizes")
+        }
+
+        rm.idx <- which(size.mismatch)
+        .throw_warning("Skipped the following samples because Lx and Tx have ",
+                       "different sizes: ", .collapse(rm.idx, quote = FALSE))
+        Lx_data <- Lx_data[-rm.idx]
+        Tx_data <- Tx_data[-rm.idx]
+        TIMESINCEIRR <- TIMESINCEIRR[-rm.idx]
+      }
 
     }else if(length(structure) == 1){
       Lx_data <- object_clean
@@ -406,13 +436,6 @@ analyse_FadingMeasurement <- function(
     ##calculate Lx/Tx table
     len.Tx <- length(Tx_data)
     LxTx_table <- merge_RLum(.warningCatcher(lapply(1:length(Lx_data), function(x) {
-      ## we operate only up to the shortest common length to avoid indexing
-      ## into Tx_data with an invalid index
-      if (len.Tx > 0 && x > len.Tx) {
-        .throw_warning("Lx and Tx have different sizes: skipped sample ", x,
-                       ", NULL returned")
-        return(NULL)
-      }
       calc_OSLLxTxRatio(
         Lx.data = Lx_data[[x]],
         Tx.data = Tx_data[[x]],
@@ -509,8 +532,7 @@ analyse_FadingMeasurement <- function(
     }else{
       return(fit)
     }
-
-  }, FUN.VALUE = vector("numeric", length = 2))
+  }, FUN.VALUE = numeric(2))
 
   ##calculate g-values from matrix
   g_value.MC <- -fit_matrix[2, ] * 1 / fit_matrix[1, ] * 100
@@ -612,8 +634,14 @@ analyse_FadingMeasurement <- function(
         T_0.5_PREDICTED.UPPER = NA
     )
   }else{
-    T_0.5.predict <- stats::predict.lm(fit_predict,newdata = data.frame(x = 0.5),
-                                       interval = "predict")
+    ## if the number of observations is less than 3, the number of residual
+    ## degrees of freedom is 0, and we would get this warning when computing
+    ## the prediction interval:
+    ##   In qt((1 - level)/2, df) : NaNs produced
+    ## hence, we suppress the warning (#616)
+    T_0.5.predict <- suppressWarnings(
+        stats::predict.lm(fit_predict, newdata = data.frame(x = 0.5),
+                          interval = "predict"))
     T_0.5 <- data.frame(
         T_0.5_INTERPOLATED = T_0.5.interpolated$y,
         T_0.5_PREDICTED = (10 ^ T_0.5.predict[, 1]) * tc,
@@ -633,7 +661,8 @@ analyse_FadingMeasurement <- function(
                      "instead")
     }
 
-    if (!plot_singlePanels[1]) {
+    ## split the plot area into 4 regions if plot_singlePanels = FALSE (default)
+    if (is.logical(plot_singlePanels) && !plot_singlePanels[1]) {
       par.default <- par()$mfrow
       on.exit(par(mfrow = par.default), add = TRUE)
       par(mfrow = c(2, 2))
@@ -665,12 +694,16 @@ analyse_FadingMeasurement <- function(
                                      length.out = 5)]
     }
 
+    ## convert plot_singlePanels to numeric if it was given as logical: this
+    ## helps simplifying the checks below
+    if (is.logical(plot_singlePanels))
+      plot_singlePanels <- 1:4
+
     ## plot Lx-curves -----
     if (!is.null(object)) {
       if (length(structure) == 2) {
 
-        if (is.logical(plot_singlePanels) ||
-            (is.numeric(plot_singlePanels) && 1 %in% plot_singlePanels)) {
+        if (1 %in% plot_singlePanels) {
           records <- object_clean[seq(1, length(object_clean), by = 2)]
           plot_RLum(
             set_RLum(class = "RLum.Analysis",
@@ -699,8 +732,7 @@ analyse_FadingMeasurement <- function(
         }
 
         # plot Tx-curves ----
-        if (is.logical(plot_singlePanels) ||
-            (is.numeric(plot_singlePanels) && 2 %in% plot_singlePanels)) {
+        if (2 %in% plot_singlePanels) {
           records <- object_clean[seq(2, length(object_clean), by = 2)]
           plot_RLum(
             set_RLum(class = "RLum.Analysis",
@@ -744,8 +776,7 @@ analyse_FadingMeasurement <- function(
         }
 
       } else{
-        if (is.logical(plot_singlePanels) ||
-            (is.numeric(plot_singlePanels) && 1 %in% plot_singlePanels)) {
+        if (1 %in% plot_singlePanels) {
           plot_RLum(
             set_RLum(class = "RLum.Analysis", records = object_clean),
             combine = length(object_clean) > 1,
@@ -775,8 +806,7 @@ analyse_FadingMeasurement <- function(
         }
 
         ##empty Tx plot
-        if (is.logical(plot_singlePanels) ||
-            (is.numeric(plot_singlePanels) && 2 %in% plot_singlePanels)) {
+        if (2 %in% plot_singlePanels) {
           plot(
             NA,
             NA,
@@ -793,8 +823,7 @@ analyse_FadingMeasurement <- function(
       }
 
     }else{
-      if (is.logical(plot_singlePanels) ||
-          (is.numeric(plot_singlePanels) && 1 %in% plot_singlePanels)) {
+      if (1 %in% plot_singlePanels) {
         ##empty Lx plot
         plot(
           NA,
@@ -810,8 +839,7 @@ analyse_FadingMeasurement <- function(
              labels = expression(paste("No ", L[x], " curves detected")))
       }
 
-      if (is.logical(plot_singlePanels) ||
-          (is.numeric(plot_singlePanels) && 2 %in% plot_singlePanels)) {
+      if (2 %in% plot_singlePanels) {
         ##empty Tx plot
         plot(
           NA,
@@ -829,13 +857,14 @@ analyse_FadingMeasurement <- function(
     }
 
     ## plot fading ----
-    if (is.logical(plot_singlePanels) ||
-        (is.numeric(plot_singlePanels) && 3 %in% plot_singlePanels)) {
+    if (3 %in% plot_singlePanels) {
 
       if(all(is.na(LxTx_table[["LxTx_NORM"]]))){
+        ## FIXME(mcol): this block seems unreachable since 5f63c1f1
+        # nocov start
           shape::emptyplot()
           text(x = .5, y = .5, labels = "All NA values!")
-
+        # nocov end
       }else{
         plot(
           NA,
@@ -972,8 +1001,7 @@ analyse_FadingMeasurement <- function(
       }#end if a
     }#
 
-    if (is.logical(plot_singlePanels) ||
-        (is.numeric(plot_singlePanels) && 4 %in% plot_singlePanels)) {
+    if (4 %in% plot_singlePanels) {
 
       if(all(is.na(g_value.MC))){
         shape::emptyplot()

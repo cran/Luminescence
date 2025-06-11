@@ -117,21 +117,6 @@ fit_IsothermalHolding <- function(
   ## extract data.frames for each sample with all information
   df_raw_list <- lapply(sample_id, function(x) records_ITL[records_ITL$SAMPLE == x, ])
 
-  ## initialise the progress bar
-  if (txtProgressBar) {
-    num.models <- sum(sapply(df_raw_list, function(x) length(unique(x$TEMP))))
-    pb <- txtProgressBar(min = 0, max = num.models, char = "=", style = 3)
-  }
-
-  ###### --- Perform ITL fitting --- #####
-  # Define variables --------------------------------------------------------
-  kB <- 8.6173303e-05  # Boltzmann's constant
-  DeltaE <- 1.5 # upper limit of integration (in eV), see Li&Li (2013), p.6
-
-  ## get the rhop value from the fading measurement analysis if available
-  if (inherits(rhop, "RLum.Results") && rhop@originator == "analyse_FadingMeasurement")
-    rhop <- rhop@data$rho_prime[[1]]
-
   ## allow to control how many random values for the s parameter should be
   ## generated when fitting the BTS model
   num_s_values_bts <- list(...)$num_s_values_bts
@@ -141,6 +126,25 @@ fit_IsothermalHolding <- function(
     num_s_values_bts <- 1000
   }
 
+  if (ITL_model == "GOK")
+    num_s_values_bts <- 1
+
+  ## initialise the progress bar
+  if (txtProgressBar) {
+    num.models <- sum(sapply(df_raw_list, function(x) length(unique(x$TEMP))))
+    pb <- txtProgressBar(min = 0, max = num.models * num_s_values_bts,
+                         char = "=", style = 3)
+  }
+
+  ###### --- Perform ITL fitting --- #####
+  # Define variables --------------------------------------------------------
+  kB <- .const$kB  # Boltzmann constant (eV/K)
+  DeltaE <- 1.5 # upper limit of integration (in eV), see Li&Li (2013), p.6
+
+  ## get the rhop value from the fading measurement analysis if available
+  if (inherits(rhop, "RLum.Results") && rhop@originator == "analyse_FadingMeasurement")
+    rhop <- rhop@data$rho_prime[[1]]
+
   ## Define formulas to fit -------------------------------------------------
   ##
   ## We define each model as a function that describes the right-hand side
@@ -149,24 +153,26 @@ fit_IsothermalHolding <- function(
   ## incorrectly interpreted by nlsLM().
 
   f_GOK <- function(A, b, Et, s10, isoT, x) {
-    T_K <- isoT + 273.15
+    T_K <- isoT + .const$C2K
     A * exp(-rhop * log(1.8 * 3e15 * (250 + x))^3) *
       (1 - (1 - b) * 10^s10 * exp(-Et / (kB * T_K)) * x)^(1 / (1 - b))
   }
   f_BTS <- function(A, Eu, Et, s10, isoT, x) {
-    T_K <- isoT + 273.15
-    exp(-rhop * log(1.8 * 3e15 * (250 + x))^3) *
-      vapply(x, function(t) {
-        stats::integrate(function(Eb) A * exp(-Eb / Eu) *
-                               exp(-10^s10 * t * exp(-(Et - Eb) / (kB * T_K))),
-                         0, DeltaE)$value
-      }, numeric(1))
+    T_K <- isoT + .const$C2K
+    ## call C++ calculation part; which is a lot faster than
+    ## repeated calls to stats::integrate
+    ## an even faster implementation would use pure C++ for everyting,
+    ## however, then we would use minpack.lm::nls.lm() instead ... perhaps
+    ## in the future
+    f_BTS_cpp_part(
+      x, A, Eu, s10, Et, kB, T_K, DeltaE, rhop)
+
   }
 
   ## switch the models
   start <- switch(
     ITL_model,
-    'GOK' = list(A = 1, b  = 1,   Et = 1, s10 = 5),
+    'GOK' = list(A = 1, b  = 1, Et = 1, s10 = 5),
     'BTS' = list(A = 1, Eu = 0.1, Et = 2))
 
   lower <- switch(
@@ -210,10 +216,22 @@ fit_IsothermalHolding <- function(
               ),
               trace = trace)
         }, silent = TRUE)
+
+        coefs <- if (!inherits(fit, "try-error")) {
+                   coef(fit)
+                 } else {
+                   stats::setNames(rep(NA_real_, length(start)), names(start))
+                 }
         fitted.coefs <<- rbind(fitted.coefs,
                                data.frame(SAMPLE = unique(s$SAMPLE),
                                           TEMP = isoT,
-                                          t(coef(fit))))
+                                          t(coefs)))
+
+        ## update the progress bar
+        num.fits <<- num.fits + 1  # uses <<- as we are in a nested lapply()
+        if (txtProgressBar) {
+          setTxtProgressBar(pb, num.fits)
+        }
 
       } else if (ITL_model == "BTS") {
         ## run fitting with different start parameters for s10
@@ -231,6 +249,12 @@ fit_IsothermalHolding <- function(
                        ), trace = FALSE),
                    silent = TRUE)
 
+          ## update the progress bar
+          num.fits <<- num.fits + 1  # uses <<- as we are in a nested lapply()
+          if (txtProgressBar) {
+            setTxtProgressBar(pb, num.fits)
+          }
+
           if (inherits(t, "try-error"))
             return(NULL)
           return(t)
@@ -244,12 +268,6 @@ fit_IsothermalHolding <- function(
                                data.frame(SAMPLE = unique(s$SAMPLE),
                                           TEMP = isoT,
                                           t(coef(fit)), s10))
-      }
-
-      ## update the progress bar
-      num.fits <<- num.fits + 1  # <<- required because we are in a nested lapply()
-      if (txtProgressBar) {
-        setTxtProgressBar(pb, num.fits)
       }
 
       if (inherits(fit, "try-error"))

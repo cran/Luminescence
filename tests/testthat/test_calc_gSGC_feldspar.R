@@ -10,14 +10,6 @@ test_that("test errors", {
     "[calc_gSGC_feldspar()] 'data' should be of class 'data.frame'",
     fixed = TRUE)
 
-  ##no character
-  expect_error(calc_gSGC_feldspar(
-    data = data.frame(a  = 1, b = 1, c = 1, d = 1, e = 1),
-    gSGC.type = 1,
-    plot = FALSE),
-    "[calc_gSGC_feldspar()] 'gSGC.type' should be of class 'character'",
-    fixed = TRUE)
-
   ## input is somewhat not what we expect for gSGC
   expect_error(
     calc_gSGC_feldspar(
@@ -25,7 +17,7 @@ test_that("test errors", {
       gSGC.type = "wrong",
       plot = FALSE
     ),
-    "\\[calc_gSGC_feldspar\\(\\)\\] 'gSGC.type' needs to be one of the accepted values"
+    "'gSGC.type' should be one of '50LxTx', '50Lx', '50Tx', '100LxTx', '100Lx'"
   )
 
   ## incorrect number of columns
@@ -35,7 +27,7 @@ test_that("test errors", {
       gSGC.type = "50LxTx",
       plot = FALSE
     ),
-    "Structure of 'data' does not fit the expectations"
+    "'data' should have 5 columns"
   )
 
  ##finally run with plot output
@@ -52,8 +44,16 @@ test_that("test errors", {
   results <- expect_s4_class(calc_gSGC_feldspar(
     data = data,
     gSGC.type = "50LxTx",
+    n.MC = 20,
     plot = TRUE),
     "RLum.Results")
+
+  ## more coverage
+  set.seed(733)
+  data$LnTn <- rnorm(n = n_samples, mean = 1.0, sd = 0.02)
+  results <- expect_s4_class(calc_gSGC_feldspar(
+      data = data, gSGC.type = "50LxTx", n.MC = 10, plot = TRUE),
+      "RLum.Results")
 
   ## test own curve parameters
   SW({
@@ -68,12 +68,12 @@ test_that("test errors", {
       y2_err = 0.10,
       y0 = 0.001,
       y0_err = 0.0001
-    )),
+    ),
+    plot = TRUE),
     "No solution found for dataset")
   })
 
   ##regression tests
   expect_s4_class(results, "RLum.Results")
   expect_true(all(is.na(unlist(results$m.MC))))
-
 })

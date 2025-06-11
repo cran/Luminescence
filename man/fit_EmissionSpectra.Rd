@@ -94,12 +94,13 @@ parameter estimation. The grey band in the residual plot indicates the
 10\% deviation from 0 (means no residual).
 }
 \description{
-Luminescence spectra deconvolution on \linkS4class{RLum.Data.Spectrum} and \link{matrix} objects
-on an \strong{energy scale}. The function is optimised for emission spectra typically
-obtained in the context of TL, OSL and RF measurements detected between 200 and 1000 nm.
-The function is not prepared to deconvolve TL curves (counts against temperature;
-no wavelength scale). If you are interested in such analysis, please check, e.g.,
-the package \code{'tgcd'}.
+This function performs a luminescence spectra deconvolution on
+\linkS4class{RLum.Data.Spectrum} and \link{matrix} objects on an \strong{energy scale}.
+The function is optimised for emission spectra typically obtained in the
+context of TL, OSL and RF  measurements detected between 200 and 1000 nm.
+The function is not designed to deconvolve TL curves (counts against
+temperature; no wavelength scale). If you are interested in such analysis,
+please check, e.g., package \code{'tgcd'}.
 }
 \details{
 \strong{Used equation}
@@ -153,7 +154,7 @@ of the values of all curves in the plot for each frame analysed \cr
 }
 }
 \section{Function version}{
- 0.1.2
+ 0.1.3
 }
 
 \examples{
@@ -194,7 +195,7 @@ Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2025. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2025. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

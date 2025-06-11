@@ -8,6 +8,8 @@ test_that("input validation", {
                "is missing, with no default")
   expect_error(analyse_IRSAR.RF("test"),
                "'object' should be of class 'RLum.Analysis'")
+  expect_error(analyse_IRSAR.RF(iris),
+               "'object' should be of class 'RLum.Analysis'")
   expect_error(analyse_IRSAR.RF(set_RLum("RLum.Analysis")),
                "'object' cannot be an empty RLum.Analysis")
   expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, n.MC = 0),
@@ -51,7 +53,7 @@ test_that("input validation", {
   expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = 521),
                "'RF_reg.lim' defines too short an interval and it's not")
   expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = 520),
-               "No sliding space left after limitations were applied")
+               "The range of regenerated channels should be larger than")
   suppressWarnings( # FIXME(mcol): lmdif: info = -1. Number of iterations has reached `maxiter' == 50.
   expect_warning(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = c(3, 6)),
                  "'RF_reg.lim' defines too short an interval, reset to")
@@ -108,17 +110,16 @@ test_that("input validation", {
                  "'method.control' is deprecated, use 'method_control'")
 })
 
-test_that("check class and length of output", {
+test_that("snapshot tests", {
   testthat::skip_on_cran()
 
   set.seed(1)
   expect_snapshot_RLum(
       results_fit <- analyse_IRSAR.RF(IRSAR.RF.Data, method = "FIT",
                                       plot = TRUE))
-  expect_warning(expect_snapshot_RLum(
+  expect_snapshot_RLum(
       results_slide <- analyse_IRSAR.RF(IRSAR.RF.Data, method = "SLIDE",
-                                        plot = TRUE, n.MC = NULL)),
-      "Narrow density distribution, no density distribution plotted")
+                                        plot = TRUE, n.MC = NULL))
   SW({
   expect_snapshot_RLum(
   results_slide_alt <-
@@ -151,6 +152,7 @@ test_that("check class and length of output", {
     analyse_IRSAR.RF(
       object = IRSAR.RF.Data,
       method = "None",
+      mtext = "Subtitle",
       n.MC = 10,
       txtProgressBar = FALSE
     )
@@ -183,6 +185,7 @@ test_that("test support for IR-RF data", {
   expect_warning(expect_s4_class(
       analyse_IRSAR.RF(object = temp[1:3], method = "SLIDE",
                        cex = 1.1, xlim = c(750, 9000), ylim = c(640, 655),
+                       method_control = list(show_fit = TRUE),
                        plot_reduced = TRUE, n.MC = 1),
       "RLum.Results"),
       "Narrow density distribution, no density distribution plotted")
@@ -201,6 +204,14 @@ test_that("test edge cases", {
   object <- set_RLum("RLum.Analysis", records = list(RF_nat, RF_reg))
 
   SW({
+  expect_warning(analyse_IRSAR.RF(
+    IRSAR.RF.Data,
+    method = "FIT",
+    plot = TRUE,
+    RF_reg = c(1, 400),
+    txtProgressBar = FALSE),
+    "Threshold exceeded for: 'curves_bounds'")
+
   expect_warning(expect_s4_class(analyse_IRSAR.RF(
     list(object),
     method = "SLIDE",
@@ -257,6 +268,22 @@ test_that("test edge cases", {
     txtProgressBar = FALSE
   ), "RLum.Results")
   })
+
+  ## more coverage
+  expect_s4_class(analyse_IRSAR.RF(
+      IRSAR.RF.Data,
+      method = "SLIDE",
+      RF_reg.lim = c(1, 7),
+      verbose = FALSE),
+      "RLum.Results")
+
+  tmp <- IRSAR.RF.Data
+  tmp@records[[2]]@data <- tmp@records[[2]]@data[1:460, ]
+  expect_s4_class(analyse_IRSAR.RF(
+      tmp,
+      method = "SLIDE",
+      verbose = FALSE),
+      "RLum.Results")
 })
 
 test_that("regression tests", {
@@ -268,4 +295,12 @@ test_that("regression tests", {
 
   ## issue 382
   expect_silent(analyse_IRSAR.RF(list(IRSAR.RF.Data), plot = FALSE))
+
+  ## issue 816
+  data(ExampleData.portableOSL, envir = environment())
+  expect_silent(analyse_IRSAR.RF(merge_RLum(ExampleData.portableOSL)[1:4],
+                                 plot = FALSE))
+  expect_silent(analyse_IRSAR.RF(merge_RLum(ExampleData.portableOSL)[1:9],
+                                 sequence_structure = c("NATURAL", rep("REGENERATED", 2)),
+                                 plot = FALSE))
 })

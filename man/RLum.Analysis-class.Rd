@@ -6,6 +6,7 @@
 \alias{show,RLum.Analysis-method}
 \alias{set_RLum,RLum.Analysis-method}
 \alias{get_RLum,RLum.Analysis-method}
+\alias{remove_RLum,RLum.Analysis-method}
 \alias{structure_RLum,RLum.Analysis-method}
 \alias{length_RLum,RLum.Analysis-method}
 \alias{names_RLum,RLum.Analysis-method}
@@ -45,6 +46,8 @@
   env = parent.frame(2)
 )
 
+\S4method{remove_RLum}{RLum.Analysis}(object, ...)
+
 \S4method{structure_RLum}{RLum.Analysis}(object, fullExtent = FALSE)
 
 \S4method{length_RLum}{RLum.Analysis}(object)
@@ -66,8 +69,8 @@
 \S4method{view}{RLum.Analysis}(object, ...)
 }
 \arguments{
-\item{object}{(\strong{required}):
-an object of class \linkS4class{RLum.Analysis}}
+\item{object}{\linkS4class{RLum.Analysis} (\strong{required}): object with records
+to be removed}
 
 \item{class}{\code{\link{set_RLum}} \link{character} (\strong{required}):
 name of the \code{RLum} class to be created}
@@ -126,32 +129,37 @@ undesired if this method is used within a loop.}
 name of the wanted info element}
 
 \item{subset}{\code{\link{get_RLum}}: \link{expression} (\emph{optional}):
-logical expression indicating elements or rows to keep: missing values are
-taken as false. This argument takes precedence over all other arguments,
-meaning they are not considered when subsetting the object.}
+logical or character masking a logical expression indicating elements or rows to keep:
+missing values are taken as false. This argument takes precedence over all other arguments,
+meaning they are not considered when subsetting the object. \code{subset} works slots and
+info elements.}
 
 \item{env}{\code{\link{get_RLum}}: \link{environment} (\emph{with default}):
 An environment passed to \link{eval} as the enclosure. This argument is only
 relevant when subsetting the object and should not be used manually.}
+
+\item{...}{other arguments that might be passed}
 
 \item{fullExtent}{\link{structure_RLum}; \link{logical} (\emph{with default}):
 extends the returned \code{data.frame} to its full extent, i.e. all info elements
 are part of the return as well. The default value is \code{FALSE} as the data
 frame might become rather big.}
 
-\item{info_element}{\link{character} (\emph{optional}): name of the \code{info} field
-to use in sorting.}
+\item{info_element}{\link{character} (\emph{optional}): names of the \code{info} field
+to use in sorting. The order of the names sets the sorting priority.
+Regardless of available info elements, the following
+elements always exist because they are calculated from the record
+\code{XY_LENGTH}, \code{NCOL}, \code{X_MIN}, \code{X_MAX}, \code{Y_MIN}, \code{Y_MAX}}
 
 \item{value}{(\strong{required}) The value assigned to the selected elements
 of the metadata field. If \code{NULL} the elements named in \code{info_element}
 will be removed.}
 
-\item{...}{other arguments that might be passed}
-
 \item{slot}{\link{character} (\emph{optional}): slot name to use in sorting.}
 
 \item{decreasing}{\link{logical} (\emph{with default}): whether the sort order should
-be decreasing (\code{FALSE} by default).}
+be decreasing (\code{FALSE} by default). It can be provided as a vector to control
+the ordering sequence for each sorting element.}
 }
 \value{
 \strong{\code{get_RLum}}:
@@ -162,6 +170,8 @@ Returns:
 \item Single \linkS4class{RLum.Data} object, if only one object is contained and \code{recursive = FALSE} or
 \item \linkS4class{RLum.Analysis} objects for \code{drop = FALSE}
 }
+
+\linkS4class{RLum.Analysis}; can be empty.
 
 \strong{\code{structure_RLum}}:
 
@@ -209,6 +219,8 @@ Example: curve type (e.g. \code{curveType = "predefined"} or \code{curveType ="m
 The selection of a specific RLum.type object superimposes the default selection.
 Currently supported objects are: RLum.Data.Curve and RLum.Data.Spectrum
 
+\item \code{remove_RLum(RLum.Analysis)}: Method to remove records from an \linkS4class{RLum.Analysis} object.
+
 \item \code{structure_RLum(RLum.Analysis)}: Method to show the structure of an \linkS4class{RLum.Analysis} object.
 
 \item \code{length_RLum(RLum.Analysis)}: Returns the length of the object, i.e., number of stored records.
@@ -227,7 +239,13 @@ using the internal function \code{.smoothing}.
 
 \item \code{sort_RLum(RLum.Analysis)}: Sorting of \code{RLum.Data} objects contained in this \code{RLum.Analysis} object.
 At least one of \code{slot} and \code{info_element} must be provided. If both are
-given, ordering by \code{slot} always supersedes ordering by \code{info_element}.
+given, ordering by \code{slot} always takes priority over \code{info_element}.
+Only the first element in each \code{slot} and each \code{info_element} is used
+for sorting. Example: \code{.pid} can contain multiple values, however, only the
+first is taken.
+
+Please note that the \code{show()} method does some structuring, which may
+lead to the impression that the sorting did not work.
 
 \item \code{melt_RLum(RLum.Analysis)}: Melts \linkS4class{RLum.Analysis} objects into a flat data.frame to be used
 in combination with other packages such as \code{ggplot2}.
@@ -258,12 +276,13 @@ Objects can be created by calls of the form \code{set_RLum("RLum.Analysis", ...)
 
 \examples{
 
+## show method
 showClass("RLum.Analysis")
 
-##set empty object
+##set an empty object
 set_RLum(class = "RLum.Analysis")
 
-###use example data
+## use example data
 ##load data
 data(ExampleData.RLum.Analysis, envir = environment())
 
@@ -272,6 +291,21 @@ get_RLum(IRSAR.RF.Data)
 
 ##show only the first object, but by keeping the object
 get_RLum(IRSAR.RF.Data, record.id = 1, drop = FALSE)
+
+## subsetting with SAR sample data
+data(ExampleData.BINfileData, envir = environment())
+sar <- object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)
+
+## get
+get_RLum(sar, subset = "NPOINTS == 250")
+
+## remove
+remove_RLum(sar, subset = "NPOINTS == 250")
+
+## **sort_RLum()** ##
+data(ExampleData.XSYG, envir = environment())
+sar <- OSL.SARMeasurement$Sequence.Object[1:5]
+sort_RLum(sar, solt = "recordType", info_element = c("startDate"))
 
 }
 \seealso{
@@ -283,7 +317,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. RLum.Analysis-class(): Class 'RLum.Analysis'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. RLum.Analysis-class(): Class 'RLum.Analysis'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{classes}

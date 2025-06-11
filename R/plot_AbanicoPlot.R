@@ -118,10 +118,10 @@
 #' @param rotate [logical] (*with default*):
 #' Option to turn the plot by 90 degrees.
 #'
-#' @param mtext [character] (*optional*):
+#' @param mtext [character] (*with default*):
 #' additional text below the plot title.
 #'
-#' @param summary [character] (*optional*):
+#' @param summary [character] (*with default*):
 #' add statistic measures of centrality and dispersion to the plot.
 #' Can be one or more of several keywords. See details for available keywords.
 #' Results differ depending on the log-option for the z-scale (see details).
@@ -443,9 +443,9 @@ plot_AbanicoPlot <- function(
   dispersion = "qr",
   plot.ratio = 0.75,
   rotate = FALSE,
-  mtext,
-  summary,
-  summary.pos,
+  mtext = "",
+  summary = c("n", "in.2s"),
+  summary.pos = "sub",
   summary.method = "MCM",
   legend,
   legend.pos,
@@ -560,6 +560,8 @@ plot_AbanicoPlot <- function(
 
   ## plot.ratio must be numeric and positive
   .validate_positive_scalar(plot.ratio)
+  .validate_logical_scalar(rotate)
+  .validate_logical_scalar(rug)
 
   if (!is.numeric(z.0)) {
     .validate_class(z.0, "character")
@@ -573,13 +575,24 @@ plot_AbanicoPlot <- function(
   if (!dispersion %in% main.choices && !grepl("^p[0-9][0-9]$", dispersion))
     dispersion <- .validate_args(dispersion, main.choices, extra = extra.choice)
 
+  .validate_class(summary, "character")
+  .validate_class(summary.pos, c("numeric", "character"))
+  if (is.numeric(summary.pos)) {
+    .validate_length(summary.pos, 2)
+  }
+  else {
+    .validate_args(summary.pos, c("sub", "left", "center", "right",
+                                  "topleft", "top", "topright",
+                                  "bottomleft", "bottom", "bottomright"))
+  }
+
   ## save original plot parameters and restore them upon end or stop
-  par.old.full <- par(no.readonly = TRUE)
+  par.default <- par(no.readonly = TRUE)
   cex_old <- par()$cex
 
   ## this ensures par() is respected for several plots on one page
   if(sum(par()$mfrow) == 2 & sum(par()$mfcol) == 2){
-    on.exit(par(par.old.full), add = TRUE)
+    on.exit(par(par.default), add = TRUE)
   }
 
   ## check/set layout definitions
@@ -626,15 +639,6 @@ plot_AbanicoPlot <- function(
       grid.minor <- grid.col[2]
     }
   }
-
-  if(missing(summary))
-    summary <- c("n", "in.2s")
-
-  if(missing(summary.pos))
-    summary.pos <- "sub"
-
-  if(missing(mtext))
-    mtext <- ""
 
   ## create preliminary global data set
   De.global <- data[[1]][,1]
@@ -744,22 +748,15 @@ plot_AbanicoPlot <- function(
   rm(se)
 
   ## calculate initial data statistics
-  stats.init <- list(NA)
+  stats.init <- list()
   for(i in 1:length(data)) {
-    stats.init[[length(stats.init) + 1]] <-
-      calc_Statistics(data = data[[i]][,3:4])
+    stats.init[[i]] <- calc_Statistics(data = data[[i]][,3:4])
   }
-  stats.init[[1]] <- NULL
 
   ## calculate central values
-  if(z.0 == "mean") {
+  if (z.0 %in% c("mean", "median")) {
     z.central <- lapply(1:length(data), function(x){
-      rep(stats.init[[x]]$unweighted$mean,
-          length(data[[x]][,3]))})
-
-  } else if(z.0 == "median") {
-    z.central <- lapply(1:length(data), function(x){
-      rep(stats.init[[x]]$unweighted$median,
+      rep(stats.init[[x]]$unweighted[[z.0]],
           length(data[[x]][,3]))})
 
   } else if(z.0 == "mean.weighted") {
@@ -845,10 +842,8 @@ plot_AbanicoPlot <- function(
   stats.global <- calc_Statistics(data = data.global[,3:4])
 
   ## calculate global central value
-  if(z.0 == "mean") {
-    z.central.global <- stats.global$unweighted$mean
-  } else if(z.0 == "median") {
-    z.central.global <- stats.global$unweighted$median
+  if (z.0 %in% c("mean", "median")) {
+    z.central.global <- stats.global$unweighted[[z.0]]
   } else  if(z.0 == "mean.weighted") {
     z.central.global <- stats.global$weighted$mean
   } else if(is.numeric(z.0) == TRUE) {
@@ -1056,7 +1051,7 @@ plot_AbanicoPlot <- function(
   }
 
   ## create empty plot to update plot parameters
-  if(!rotate[1]) {
+  if (!rotate) {
     plot(NA,
          xlim = c(limits.x[1], limits.x[2] * (1 / plot.ratio)),
          ylim = limits.y,
@@ -1140,18 +1135,13 @@ plot_AbanicoPlot <- function(
   ## correct for unpleasant value
   ellipse.values[ellipse.values == -Inf] <- 0
 
-  if(rotate == FALSE) {
-    ellipse.x <- r / sqrt(1 + f^2 * (ellipse.values - z.central.global)^2)
-    ellipse.y <- (ellipse.values - z.central.global) * ellipse.x
-  } else {
-    ellipse.y <- r / sqrt(1 + f^2 * (ellipse.values - z.central.global)^2)
-    ellipse.x <- (ellipse.values - z.central.global) * ellipse.y
-  }
-
+  ellipse.x <- r / sqrt(1 + f^2 * (ellipse.values - z.central.global)^2)
+  ellipse.y <- (ellipse.values - z.central.global) * ellipse.x
   ellipse <- cbind(ellipse.x, ellipse.y)
+  if (rotate)
+    ellipse <- ellipse[, 2:1]
 
   ## calculate statistical labels
-  if(length(stats == 1)) {stats <- rep(stats, 2)}
   stats.data <- matrix(nrow = 3, ncol = 3)
   data.stats <- as.numeric(data.global[,1])
 
@@ -1206,7 +1196,7 @@ plot_AbanicoPlot <- function(
   colnames(De.stats) <- c("n",
                           "mean",
                           "median",
-                          "kde.max",
+                          "kdemax",
                           "sd.abs",
                           "sd.rel",
                           "se.abs",
@@ -1245,212 +1235,75 @@ plot_AbanicoPlot <- function(
                               to = limits.z[2]),
                       silent = TRUE)
 
-    if(inherits(De.density, "try-error")) {
-      De.stats[i,4] <- NA
-
-    } else {
-    De.stats[i,4] <- De.density$x[which.max(De.density$y)]
+    De.stats[i, 4] <- NA
+    if (!inherits(De.density, "try-error")) {
+      De.stats[i, 4] <- De.density$x[which.max(De.density$y)]
     }
   }
 
-  label.text = list(NA)
+  ## helper to generate an element of the statistical summary
+  .summary_line <- function(keyword, summary, val, label = keyword,
+                            percent = FALSE, sep = FALSE, digits = 2) {
+    ifelse(keyword %in% summary,
+           paste0(label, " = ", round(val, digits),
+                  if (percent) " %" else NULL, if (sep) " | " else "\n"),
+           "")
+  }
 
-  if(summary.pos[1] != "sub") {
-    n.rows <- length(summary)
+  is.sub <- summary.pos[1] == "sub"
+  stops <- NULL
+  label.text <- list()
+  for (i in 1:length(data)) {
+    if (!is.sub)
+      stops <- paste(rep("\n", (i - 1) * length(summary)), collapse = "")
 
-    for(i in 1:length(data)) {
-      stops <- paste(rep("\n", (i - 1) * n.rows), collapse = "")
-
-      summary.text <- character(0)
-
-      for(j in 1:length(summary)) {
-        summary.text <- c(summary.text,
-                          paste(
-                            "",
-                            ifelse("n" %in% summary[j] == TRUE,
-                                   paste("n = ",
-                                         De.stats[i,1],
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("mean" %in% summary[j] == TRUE,
-                                   paste("mean = ",
-                                         round(De.stats[i,2], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("median" %in% summary[j] == TRUE,
-                                   paste("median = ",
-                                         round(De.stats[i,3], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("kde.max" %in% summary[j] == TRUE,
-                                   paste("kdemax = ",
-                                         round(De.stats[i,4], 2),
-                                         " \n ",
-                                         sep = ""),
-                                   ""),
-                            ifelse("sd.abs" %in% summary[j] == TRUE,
-                                   paste("abs. sd = ",
-                                         round(De.stats[i,5], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("sd.rel" %in% summary[j] == TRUE,
-                                   paste("rel. sd = ",
-                                         round(De.stats[i,6], 2), " %",
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("se.abs" %in% summary[j] == TRUE,
-                                   paste("se = ",
-                                         round(De.stats[i,7], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("se.rel" %in% summary[j] == TRUE,
-                                   paste("rel. se = ",
-                                         round(De.stats[i,8], 2), " %",
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("skewness" %in% summary[j] == TRUE,
-                                   paste("skewness = ",
-                                         round(De.stats[i,11], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("kurtosis" %in% summary[j] == TRUE,
-                                   paste("kurtosis = ",
-                                         round(De.stats[i,12], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("in.2s" %in% summary[j] == TRUE,
-                                   paste("in 2 sigma = ",
-                                         round(sum(data[[i]][,7] > -2 &
-                                                     data[[i]][,7] < 2) /
-                                                 nrow(data[[i]]) * 100 , 1),
-                                         " %",
-                                         sep = ""),
-                                   ""),
-                            sep = ""))
-      }
-
-      summary.text <- paste(summary.text, collapse = "")
-
-      label.text[[length(label.text) + 1]] <- paste(stops,
-                                                    summary.text,
-                                                    stops,
-                                                    sep = "")
+    summary.text <- character(0)
+    for (j in 1:length(summary)) {
+      summary.text <-
+        c(summary.text,
+          .summary_line("n", summary[j], De.stats[i, 1], sep = is.sub),
+          .summary_line("mean", summary[j], De.stats[i, 2], sep = is.sub),
+          .summary_line("median", summary[j], De.stats[i, 3], sep = is.sub),
+          .summary_line("kdemax", summary[j], De.stats[i, 4], sep = is.sub),
+          .summary_line("sd.abs", summary[j], De.stats[i, 5], sep = is.sub,
+                        label = "abs. sd"),
+          .summary_line("sd.rel", summary[j], De.stats[i, 6], sep = is.sub,
+                        label = "rel. sd"),
+          .summary_line("se.abs", summary[j], De.stats[i, 7], sep = is.sub,
+                        label = "se"),
+          .summary_line("se.rel", summary[j], De.stats[i, 8], sep = is.sub,
+                        label = "rel. se", percent = TRUE),
+          .summary_line("skewness", summary[j], De.stats[i, 11], sep = is.sub),
+          .summary_line("kurtosis", summary[j], De.stats[i, 12], sep = is.sub),
+          .summary_line("in.2s", summary[j],
+                        sum(data[[i]][,7] > -2 & data[[i]][,7] < 2) /
+                        nrow(data[[i]]) * 100, sep = is.sub,
+                        label = "in 2 sigma", percent = TRUE, digits = 1))
     }
-  } else {
-    for(i in 1:length(data)) {
-      summary.text <- character(0)
+    label.text[[i]] <- paste0(
+        if (is.sub) "" else stops,
+        paste(summary.text, collapse = ""),
+        stops)
+  }
 
-      for(j in 1:length(summary)) {
-        summary.text <- c(summary.text,
-                          ifelse("n" %in% summary[j] == TRUE,
-                                 paste("n = ",
-                                       De.stats[i,1],
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("mean" %in% summary[j] == TRUE,
-                                 paste("mean = ",
-                                       round(De.stats[i,2], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("median" %in% summary[j] == TRUE,
-                                 paste("median = ",
-                                       round(De.stats[i,3], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("kde.max" %in% summary[j] == TRUE,
-                                 paste("kdemax = ",
-                                       round(De.stats[i,4], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("sd.abs" %in% summary[j] == TRUE,
-                                 paste("abs. sd = ",
-                                       round(De.stats[i,5], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("sd.rel" %in% summary[j] == TRUE,
-                                 paste("rel. sd = ",
-                                       round(De.stats[i,6], 2), " %",
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("se.abs" %in% summary[j] == TRUE,
-                                 paste("abs. se = ",
-                                       round(De.stats[i,7], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("se.rel" %in% summary[j] == TRUE,
-                                 paste("rel. se = ",
-                                       round(De.stats[i,8], 2), " %",
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("skewness" %in% summary[j] == TRUE,
-                                 paste("skewness = ",
-                                       round(De.stats[i,11], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("kurtosis" %in% summary[j] == TRUE,
-                                 paste("kurtosis = ",
-                                       round(De.stats[i,12], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("in.2s" %in% summary[j] == TRUE,
-                                 paste("in 2 sigma = ",
-                                       round(sum(data[[i]][,7] > -2 &
-                                                   data[[i]][,7] < 2) /
-                                               nrow(data[[i]]) * 100 , 1),
-                                       " % |  ",
-                                       sep = ""),
-                                 "")
-        )
-      }
-
-      summary.text <- paste(summary.text, collapse = "")
-
-      label.text[[length(label.text) + 1]]  <- paste(
-        "  ",
-        summary.text,
-        sep = "")
-    }
-
-    ## remove outer vertical lines from string
-    for(i in 2:length(label.text)) {
+  ## remove outer vertical lines from string1
+  if (is.sub) {
+    for (i in seq_along(label.text)) {
       label.text[[i]] <- substr(x = label.text[[i]],
-                                start = 3,
+                                start = 1,
                                 stop = nchar(label.text[[i]]) - 3)
     }
   }
 
-  ## remove dummy list element
-  label.text[[1]] <- NULL
-  if(!rotate[1]) {
+  if (!rotate) {
     ## convert keywords into summary placement coordinates
     coords <- .get_keyword_coordinates(summary.pos, limits.x, limits.y)
 
     ## apply some adjustments to the y positioning
-    if (!missing(summary.pos)) {
-      if (summary.pos[1] %in% c("topleft", "top", "topright")) {
+    if (summary.pos[1] %in% c("topleft", "top", "topright")) {
         coords$pos[2] <- coords$pos[2] - par()$cxy[2] * 1.0
       } else if (summary.pos[1] %in% c("bottomleft", "bottom", "bottomright")) {
         coords$pos[2] <- coords$pos[2] + par()$cxy[2] * 3.5
-      }
     }
     summary.pos <- coords$pos
     summary.adj <- coords$adj
@@ -1465,8 +1318,7 @@ plot_AbanicoPlot <- function(
     ## this time we swap x and y limits as we are rotated, then apply some
     ## adjustments to the x positioning
     coords <- .get_keyword_coordinates(summary.pos, limits.y, limits.x)
-    if (!missing(summary.pos) &&
-        summary.pos[1] %in% c("topleft", "left", "bottomleft")) {
+    if (summary.pos[1] %in% c("topleft", "left", "bottomleft")) {
       coords$pos[1] <- coords$pos[1] + par()$cxy[1] * 7.5
     }
     summary.pos <- coords$pos
@@ -1639,7 +1491,7 @@ plot_AbanicoPlot <- function(
 
   ## calculate error bar coordinates
   if(error.bars == TRUE) {
-    arrow.coords <- list(NA)
+    arrow.coords <- list()
     for(i in 1:length(data)) {
       arrow.x1 <- data[[i]][,6]
       arrow.x2 <- data[[i]][,6]
@@ -1651,18 +1503,16 @@ plot_AbanicoPlot <- function(
         arrow.y2 <- log(arrow.y2)
       }
 
-      arrow.coords[[length(arrow.coords) + 1]] <- cbind(
+      arrow.coords[[i]] <- cbind(
         arrow.x1,
         arrow.x2,
         (arrow.y1 - z.central.global) * arrow.x1,
         (arrow.y2 - z.central.global) * arrow.x1)
     }
-    arrow.coords[[1]] <- NULL
   }
 
   ## calculate KDE
-  KDE <- list(NA)
-  KDE.ext <- 0
+  KDE <- list()
   KDE.bw <- numeric(0)
 
   for(i in 1:length(data)) {
@@ -1674,11 +1524,9 @@ plot_AbanicoPlot <- function(
                      weights = data[[i]]$weights)
     KDE.xy <- cbind(KDE.i$x, KDE.i$y)
     KDE.bw <- c(KDE.bw, KDE.i$bw)
-    KDE.ext <- ifelse(max(KDE.xy[,2]) < KDE.ext, KDE.ext, max(KDE.xy[,2]))
     KDE.xy <- rbind(c(min(KDE.xy[,1]), 0), KDE.xy, c(max(KDE.xy[,1]), 0))
-    KDE[[length(KDE) + 1]] <- cbind(KDE.xy[,1], KDE.xy[,2])
+    KDE[[i]] <- cbind(KDE.xy[, 1], KDE.xy[, 2])
   }
-  KDE[1] <- NULL
 
   ## calculate mean KDE bandwidth
   KDE.bw <- mean(KDE.bw, na.rm = TRUE)
@@ -1694,32 +1542,25 @@ plot_AbanicoPlot <- function(
                         to = limits.z[2])
     KDE.max.plot[i] <- max(KDE.plot$y)
   }
-
   KDE.max.plot <- max(KDE.max.plot, na.rm = TRUE)
 
-  ## calculate histogram data without plotting
+  ## calculate KDE width
+  KDE.max <- max(vapply(KDE, function(x) max(x[, 2]), numeric(1)))
 
-  ## create dummy list
-  hist.data <- list(NA)
-
-  for(i in 1:length(data)) {
-    hist.i <- hist(x = data[[i]][,3],
-                   plot = FALSE,
-                   breaks = breaks)
-    hist.data[[length(hist.data) + 1]] <- hist.i
+  ## optionally adjust KDE width for boxplot option
+  if (boxplot) {
+    KDE.max <- 1.3 * KDE.max
   }
 
-  ## remove dummy list object
-  hist.data[[1]] <- NULL
+  ## calculate histogram data without plotting
+  hist.data <- list()
+  for(i in 1:length(data)) {
+    hist.data[[i]] <- hist(data[[i]][,3], plot = FALSE, breaks = breaks)
+  }
 
   ## calculate maximum histogram bar height for normalisation
-  hist.max.plot <- numeric(length(data))
-  for(i in 1:length(data)) {
-    hist.max.plot <- ifelse(max(hist.data[[i]]$counts, na.rm = TRUE) >
-                              hist.max.plot, max(hist.data[[i]]$counts,
-                                                 na.rm = TRUE), hist.max.plot)
-  }
-  hist.max.plot <- max(hist.max.plot, na.rm = TRUE)
+  hist.max.plot <- max(vapply(hist.data, function(x) max(x$counts, na.rm = TRUE),
+                              numeric(1)), na.rm = TRUE)
 
   ## normalise histogram bar height to KDE dimensions
   for(i in 1:length(data)) {
@@ -1728,18 +1569,10 @@ plot_AbanicoPlot <- function(
   }
 
   ## calculate boxplot data without plotting
-
-  ## create dummy list
-  boxplot.data <- list(NA)
-
+  boxplot.data <- list()
   for(i in 1:length(data)) {
-    boxplot.i <- graphics::boxplot(x = data[[i]][, 3],
-                                   plot = FALSE)
-    boxplot.data[[length(boxplot.data) + 1]] <- boxplot.i
+    boxplot.data[[i]] <- graphics::boxplot(data[[i]][, 3], plot = FALSE)
   }
-
-  ## remove dummy list object
-  boxplot.data[[1]] <- NULL
 
   ## calculate line coordinates and further parameters
   if(missing(line) == FALSE) {
@@ -1765,30 +1598,21 @@ plot_AbanicoPlot <- function(
       line <- log(line)
     }
 
-    line.coords <- list(NA)
-
     if(rotate == FALSE) {
-      for(i in 1:length(line)) {
-        line.x <- c(limits.x[1], min(ellipse[,1]), par()$usr[2])
-        line.y <- c(0,
-                    (line[i] - z.central.global) * min(ellipse[,1]),
-                    (line[i] - z.central.global) * min(ellipse[,1]))
-        line.coords[[length(line.coords) + 1]] <- rbind(line.x, line.y)
-      }
+      line.x <- c(limits.x[1], min(ellipse[, 1]), par()$usr[2])
+      min.ellipse.x <- min(ellipse[, 1])
     } else {
-      for(i in 1:length(line)) {
-        line.x <- c(limits.x[1], min(ellipse[,2]),y.max)
-        line.y <- c(0,
-                    (line[i] - z.central.global) * min(ellipse[,2]),
-                    (line[i] - z.central.global) * min(ellipse[,2]))
-        line.coords[[length(line.coords) + 1]] <- rbind(line.x, line.y)
-      }
+      line.x <- c(limits.x[1], min(ellipse[, 2]), y.max)
+      min.ellipse.x <- min(ellipse[, 2])
+    }
+    line.coords <- list()
+    for(i in 1:length(line)) {
+      line.y <- c(0, rep((line[i] - z.central.global) * min.ellipse.x, 2))
+      line.coords[[i]] <- rbind(line.x, line.y)
     }
 
-    line.coords[1] <- NULL
-
     if(missing(line.col) == TRUE) {
-      line.col <- seq(from = 1, to = length(line.coords))
+      line.col <- seq_along(line.coords)
     }
 
     if(missing(line.lty) == TRUE) {
@@ -1801,34 +1625,19 @@ plot_AbanicoPlot <- function(
   }
 
   ## calculate rug coordinates
-  if(missing(rug) == FALSE) {
-    if(log.z == TRUE) {
+  if (log.z) {
       rug.values <- log(De.global)
-    } else {
+  } else {
       rug.values <- De.global
-    }
+  }
 
-    rug.coords <- list(NA)
-
-    if(rotate == FALSE) {
-      for(i in 1:length(rug.values)) {
-        rug.x <- c(xy.0[1] * (1 - 0.013 * (layout$abanico$dimension$rugl / 100)),
-                   xy.0[1])
-        rug.y <- c((rug.values[i] - z.central.global) * min(ellipse[,1]),
-                   (rug.values[i] - z.central.global) * min(ellipse[,1]))
-        rug.coords[[length(rug.coords) + 1]] <- rbind(rug.x, rug.y)
-      }
-    } else {
-      for(i in 1:length(rug.values)) {
-        rug.x <- c(xy.0[2] * (1 - 0.013 * (layout$abanico$dimension$rugl / 100)),
-                   xy.0[2])
-        rug.y <- c((rug.values[i] - z.central.global) * min(ellipse[,2]),
-                   (rug.values[i] - z.central.global) * min(ellipse[,2]))
-        rug.coords[[length(rug.coords) + 1]] <- rbind(rug.x, rug.y)
-      }
-    }
-
-    rug.coords[1] <- NULL
+  rug.coords <- list()
+  idx <- if (rotate) 2 else 1
+  for (i in 1:length(rug.values)) {
+    rug.x <- c(xy.0[idx] * (1 - 0.013 * (layout$abanico$dimension$rugl / 100)),
+               xy.0[idx])
+    rug.y <- rep((rug.values[i] - z.central.global) * min(ellipse[, idx]), 2)
+    rug.coords[[i]] <- rbind(rug.x, rug.y)
   }
 
   ## Generate plot ------------------------------------------------------------
@@ -1842,10 +1651,9 @@ plot_AbanicoPlot <- function(
 
   ## extract original plot parameters
   bg.original <- par()$bg
-  on.exit(par(bg = bg.original), add = TRUE)
   par(bg = layout$abanico$colour$background)
 
-  if(!rotate[1]) {
+  if (!rotate) {
     ## setup plot area
     par(mar = c(4.5, 4.5, shift.lines + 1.5, 7),
         xpd = TRUE,
@@ -1928,7 +1736,6 @@ plot_AbanicoPlot <- function(
 
     ## optionally, add minor grid lines
     if(grid.minor != "none") {
-
       for(i in 1:length(tick.values.minor)) {
         lines(x = c(limits.x[1], min(ellipse[,1])),
               y = c(0, (tick.values.minor[i] - z.central.global) *
@@ -1985,7 +1792,6 @@ plot_AbanicoPlot <- function(
       }
     } else if(lwd[1] > 0 & lty[1] > 0 & bar[1] != FALSE) {
       for(i in 1:length(data)) {
-
         z.line <- ifelse(test = is.numeric(bar[i]) == TRUE,
                          yes = bar[i],
                          no = data[[i]][1,5])
@@ -2265,25 +2071,9 @@ plot_AbanicoPlot <- function(
              cex = layout$abanico$dimension$pch / 100)
     }
 
-    ## calculate KDE width
-    KDE.max <- 0
-
-    for(i in 1:length(data)) {
-      KDE.max <- ifelse(test = KDE.max < max(KDE[[i]][,2]),
-                        yes = max(KDE[[i]][,2]),
-                        no = KDE.max)
-    }
-
-    ## optionally adjust KDE width for boxplot option
-    if(boxplot == TRUE) {
-
-      KDE.max <- 1.25 * KDE.max
-    }
-
-    KDE.scale <- (par()$usr[2] - xy.0[1]) / (KDE.max * 1.05)
-
     ## optionally add KDE plot
     if(kde == TRUE) {
+      KDE.scale <- (par()$usr[2] - xy.0[1]) / (KDE.max * 1.05)
 
       ## plot KDE lines
       for(i in 1:length(data)) {
@@ -3017,26 +2807,10 @@ plot_AbanicoPlot <- function(
              cex = layout$abanico$dimension$pch / 100)
     }
 
-    ## calculate KDE width
-    KDE.max <- 0
-
-    for(i in 1:length(data)) {
-      KDE.max <- ifelse(test = KDE.max < max(KDE[[i]][,2]),
-                        yes = max(KDE[[i]][,2]),
-                        no = KDE.max)
-    }
-
-    ## optionally adjust KDE width for boxplot option
-    if(boxplot == TRUE) {
-
-      KDE.max <- 1.3 * KDE.max
-    }
-
-    KDE.scale <- (par()$usr[4] - xy.0[2]) / (KDE.max * 1.05)
-
     ## optionally add KDE plot
     if(kde == TRUE) {
 
+      KDE.scale <- (par()$usr[4] - xy.0[2]) / (KDE.max * 1.05)
       ## plot KDE lines
       for(i in 1:length(data)) {
         polygon(y = xy.0[2] + KDE[[i]][,2] * KDE.scale,
@@ -3386,10 +3160,6 @@ plot_AbanicoPlot <- function(
   ## INTERACTIVE PLOT ----------------------------------------------------------
   if (interactive) {
     .require_suggested_package("plotly", "The interactive abanico plot")
-
-    ##cheat R check (global visible binding error)
-    x <- NA
-    y <- NA
 
     ## tidy data ----
     data <- plot.output

@@ -6,7 +6,8 @@
 #' @param file [character] (**required**):
 #' name of a CSV file (formatted according to the DRAC v1.2 CSV template) to
 #' be sent to the DRAC website for calculation. It can also be a DRAC template
-#' object obtained from [template_DRAC()].
+#' object obtained from [template_DRAC()], which supports also import from
+#' CSV-files.
 #'
 #' @param name [character] (*with default*):
 #' Optional user name submitted to DRAC. If omitted, a random name will be generated
@@ -19,7 +20,7 @@
 #' used references. Valid options are `"Bibtex"`, `"citation"`, `"html"`, `"latex"`
 #' or `"R"`. Default is `"text"`.
 #'
-#' @param ... Further arguments.
+#' @param ... further arguments:
 #'
 #' - `url` [character]: provide an alternative URL to DRAC
 #' - `ignore_version` [logical]: ignores the version check, this might come in handy
@@ -49,7 +50,9 @@
 #'
 #' The output should be accessed using the function [get_RLum].
 #'
-#' @section Function version: 0.15
+#' @seealso [template_DRAC], [.as.latex.table]
+#'
+#' @section Function version: 0.16
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
@@ -71,10 +74,7 @@
 #' use_DRAC(file = file)
 #' }
 #'
-#'
-#'
 #' ## (2) Method using an R template object
-#'
 #' # Create a template
 #' input <- template_DRAC(preset = "DRAC-example_quartz")
 #'
@@ -108,6 +108,9 @@
 #' # use DRAC
 #' \dontrun{
 #' output <- use_DRAC(input)
+#'
+#' ## export as LaTeX table
+#' .as.latex.table(output)
 #' }
 #'
 #' @md
@@ -142,8 +145,11 @@ use_DRAC <- function(
     list(...),
     keep.null = TRUE)
 
-  ## Integrity checks -------------------------------------------------------
+  ## double check URL for validity
+  if(!grepl(pattern = "?show=calculator", settings$url, fixed = TRUE))
+     .throw_warning("URL is missing '?show=calculator', please check validity!")
 
+  ## Integrity checks -------------------------------------------------------
   .validate_class(file, c("character", "DRAC.list", "DRAC.data.frame"))
   .validate_not_empty(file)
 
@@ -247,7 +253,7 @@ use_DRAC <- function(
 
   # Send data to DRAC ---------------------------------------------------------------------------
   if (settings$verbose)
-    message(paste("\t Establishing connection to", settings$url))
+    message("\t Establishing connection to ", settings$url)
 
   ## create config list
   conf_l <- list()
@@ -316,18 +322,22 @@ use_DRAC <- function(
   ## remove first two lines
   DRAC.content <- data.table::fread(as.character(DRAC.content.split[[1]][2]),
                                     sep = ",", skip = 2,
-                                    stringsAsFactors = FALSE, colClasses = c(V3 = "character"),
+                                    stringsAsFactors = FALSE,
+                                    colClasses = c(V3 = "character"),
                                     data.table = FALSE)
 
   ##Get rid of all the value we do not need anymore
   DRAC.content <-  subset(DRAC.content, DRAC.content$V1 %in% DRAC_results.id)
-  DRAC.content <- DRAC.content[with(DRAC.content, order(V1)), ]
+  DRAC.content <- DRAC.content[match(DRAC_results.id, DRAC.content$V1),]
 
   ##replace by original names
-  DRAC.content[ ,1] <- input.raw[ ,1]
+  DRAC.content[[1]] <- input.raw[[1]]
 
   ## assign column names
   colnames(DRAC.content) <- DRAC.raw[1, ]
+
+  ## reset rownames
+  rownames(DRAC.content) <- seq_len(nrow(DRAC.content))
 
   ## save column labels and use them as attributes for the I/O table columns
   DRAC.labels <- DRAC.raw[2, ]

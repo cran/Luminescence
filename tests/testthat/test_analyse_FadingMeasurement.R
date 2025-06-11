@@ -38,7 +38,7 @@ test_that("input validation", {
   })
 })
 
-test_that("general test", {
+test_that("test functionality", {
   testthat::skip_on_cran()
 
   ## run routine analysis
@@ -49,13 +49,6 @@ test_that("general test", {
     verbose = TRUE,
     n.MC = 10), class = "RLum.Results")
   })
-
-  ##no plot not verbose
-  expect_s4_class(analyse_FadingMeasurement(
-    fading_data,
-    plot = FALSE,
-    verbose = FALSE,
-    n.MC = 10), class = "RLum.Results")
 
   ## test merging of objects if combined in a list
   ## this crashed before and was fixed
@@ -122,7 +115,7 @@ test_that("test XSYG file fading data", {
       )
 
     time <- time + x + 60
-    l <- c(l, irr, lum)
+    l <- c(l, irr, lum, lum)
   }
 
   ## generate object
@@ -166,15 +159,28 @@ test_that("test XSYG file fading data", {
                  "After irradiation step removal not enough curves are left")
 
   SW({
-  expect_warning(analyse_FadingMeasurement(object, signal.integral = 1:2,
+  expect_warning(analyse_FadingMeasurement(object[-c(3,6,9)], signal.integral = 1:2,
                                            background.integral = 3,
                                            structure = "Lx"),
                  "Number of background channels for Lx < 25")
 
+  expect_error(analyse_FadingMeasurement(object[-3], signal.integral = 1:2,
+                                         background.integral = 3:40,
+                                         structure = c("Lx", "Tx")),
+               "The number of Lx curves (3) differs from the number of Tx curves (2)",
+               fixed = TRUE)
+
+  object@records[[3]]@data <- object@records[[3]]@data[1:10, ]
   expect_warning(analyse_FadingMeasurement(object, signal.integral = 1:2,
-                                           background.integral = 3),
-                 "Lx and Tx have different sizes: skipped sample 2")
+                                           background.integral = 3:40),
+                 "Skipped the following samples because Lx and Tx have different sizes: 1")
   })
+
+  object@records[[6]]@data <- object@records[[6]]@data[1:10, ]
+  object@records[[9]]@data <- object@records[[9]]@data[1:10, ]
+  expect_error(analyse_FadingMeasurement(object, signal.integral = 1:2,
+                                         background.integral = 3:40),
+                 "No curves left after removing those with different Lx and Tx sizes")
 })
 
 test_that("test BIN file while fading data", {
@@ -243,4 +249,28 @@ test_that("regression tests", {
                    timeSinceIrr = c(2516, 41353, 50357, 140342, 1040044, 2516, 41360, 50360))
   res <- analyse_FadingMeasurement(df, n.MC = 10, plot = FALSE, verbose = FALSE)
   expect_false(is.nan(res$rho_prime$MEAN))
+
+  ## issue 616
+  expect_output(analyse_FadingMeasurement(df[1:2, ]))
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+  testthat::skip_if_not(getRversion() >= "4.4.0")
+
+  SW({
+  set.seed(1)
+  vdiffr::expect_doppelganger("analyse_FM_expected",
+                              analyse_FadingMeasurement(fading_data,
+                                                        n.MC = 10))
+  vdiffr::expect_doppelganger("analyse_FM_singlePanels3",
+                              analyse_FadingMeasurement(fading_data,
+                                                        plot_singlePanels = 3,
+                                                        n.MC = 10))
+  vdiffr::expect_doppelganger("analyse_FM_singlePanels_4",
+                              analyse_FadingMeasurement(fading_data,
+                                                        plot_singlePanels = 4,
+                                                        n.MC = 10))
+  })
 })

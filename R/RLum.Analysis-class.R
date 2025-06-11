@@ -34,12 +34,13 @@
 #'
 #' @examples
 #'
+#' ## show method
 #' showClass("RLum.Analysis")
 #'
-#' ##set empty object
+#' ##set an empty object
 #' set_RLum(class = "RLum.Analysis")
 #'
-#' ###use example data
+#' ## use example data
 #' ##load data
 #' data(ExampleData.RLum.Analysis, envir = environment())
 #'
@@ -48,6 +49,16 @@
 #'
 #' ##show only the first object, but by keeping the object
 #' get_RLum(IRSAR.RF.Data, record.id = 1, drop = FALSE)
+#'
+#' ## subsetting with SAR sample data
+#' data(ExampleData.BINfileData, envir = environment())
+#' sar <- object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)
+#'
+#' ## get
+#' get_RLum(sar, subset = "NPOINTS == 250")
+#'
+#' ## remove
+#' remove_RLum(sar, subset = "NPOINTS == 250")
 #'
 #' @keywords internal
 #'
@@ -122,8 +133,7 @@ setMethod("show",
               ##get object class types
               temp <- vapply(object@records, function(x){
                 class(x)[1]
-
-              }, FUN.VALUE = vector(mode = "character", length = 1))
+              }, FUN.VALUE = character(1))
 
               ##print object class types
               lapply(1:length(table(temp)), function(x){
@@ -173,8 +183,7 @@ setMethod("show",
                     }else{
                       return("")
                     }
-
-              }, FUN.VALUE = vector(mode = "character", length = 1))
+              }, FUN.VALUE = character(1))
 
                  ##print on screen, differentiate between records with many
                  ##curves or just one
@@ -313,9 +322,10 @@ setMethod(
 #' name of the wanted info element
 #'
 #' @param subset [`get_RLum`]: [expression] (*optional*):
-#' logical expression indicating elements or rows to keep: missing values are
-#' taken as false. This argument takes precedence over all other arguments,
-#' meaning they are not considered when subsetting the object.
+#' logical or character masking a logical expression indicating elements or rows to keep:
+#' missing values are taken as false. This argument takes precedence over all other arguments,
+#' meaning they are not considered when subsetting the object. `subset` works slots and
+#' info elements.
 #'
 #' @param env [`get_RLum`]: [environment] (*with default*):
 #' An environment passed to [eval] as the enclosure. This argument is only
@@ -362,6 +372,11 @@ setMethod("get_RLum",
                  return(val)
                })), stringAsFactors = FALSE)
 
+              ## coerce subset to logical if character to make it compatible
+              ## with remove_RLum()
+              if(inherits(substitute(subset), "character"))
+                subset <- parse(text = subset[1])[[1]]
+
               ##select relevant rows
               sel <- tryCatch(eval(
                 expr = substitute(subset),
@@ -381,6 +396,9 @@ setMethod("get_RLum",
                 sel <- FALSE
 
               if (any(sel)) {
+                if(!is.null(get.index) && get.index[1])
+                  return(which(sel))
+
                 object@records <- object@records[sel]
                 return(object)
               } else {
@@ -583,6 +601,63 @@ setMethod("get_RLum",
             }
           })
 
+
+# remove_RLum() ----------------------------------------------------------------------------
+#' @describeIn RLum.Analysis
+#' Method to remove records from an [RLum.Analysis-class] object.
+#'
+#' @param object [RLum.Analysis-class] (**required**): object with records
+#' to be removed
+#'
+#' @param ... parameters to be passed to [get_RLum]. The arguments `get.index` and
+#' `drop` are preset and have no effect when provided
+#'
+#' @return
+#'
+#' [RLum.Analysis-class]; can be empty.
+#'
+#' @md
+#' @export
+setMethod("remove_RLum",
+      signature= "RLum.Analysis",
+      definition = function(object, ...) {
+
+# DO NOT TOUCH ------------------------------------------------------------
+.set_function_name("remove_RLum")
+on.exit(.unset_function_name(), add = TRUE)
+
+# Treatment of ... --------------------------------------------------------
+  ## make settings with preset
+  args_set <- list(
+    get.index = TRUE,
+    drop = FALSE
+
+  )
+  ## we do not support all arguments; therefore we make a positive list
+  args <- list(...)
+  args[!names(args) %in% c(
+    "record.id",
+    "recordType",
+    "curveType",
+    "RLum.type",
+    "protocol",
+    "info.object",
+    "subset",
+    "recursive"
+  )] <- NULL
+
+  ## construct call ... record.id always takes priority
+  if(!is.null(args$record.id))
+    rm_id <- args$record.id
+  else
+    rm_id <- suppressWarnings(do.call(get_RLum, args = c(object, args_set, args)))
+
+  ## remove objects
+  object@records[rm_id] <- NULL
+  return(object)
+
+})
+
 # structure_RLum() ----------------------------------------------------------------------------
 ###
 #' @describeIn RLum.Analysis
@@ -615,17 +690,14 @@ setMethod("structure_RLum",
             temp.object.length <- length(object@records)
 
             ##ID
-            temp.id <- seq_along(object@records)
+            temp.id <- seq_len(temp.object.length)
 
             ##recordType
             temp.recordType <-
-              vapply(object@records, function(x) {
-                x@recordType
-              }, character(1))
+              vapply(object@records, function(x) x@recordType, character(1))
 
             ##PROTOCOL STEP
-            temp.protocol.step <- c(NA)
-            length(temp.protocol.step) <- temp.object.length
+            temp.protocol.step <-rep(NA_character_, temp.object.length)
 
             ## GET LIMITS
             temp.limits <- t(vapply(object@records, function(x) {
@@ -639,22 +711,21 @@ setMethod("structure_RLum",
             temp.y.max <- temp.limits[, 5]
 
             ##.uid
-            temp.uid <- unlist(lapply(object@records, function(x){x@.uid}))
+            temp.uid <- unlist(lapply(object@records, function(x) x@.uid ))
 
             ##.pid
-            temp.pid <- unlist(lapply(object@records, function(x){x@.pid}))
-            if (length(temp.pid) > 1)
-              temp.pid <- paste(temp.pid, collapse = ", ")
+            temp.pid <- lapply(object@records, function(x) x@.pid )
 
             ##originator
-            temp.originator <- unlist(lapply(object@records, function(x){x@originator}))
+            temp.originator <- unlist(lapply(object@records, function(x) x@originator ))
 
             ##curveType
-            temp.curveType <- unlist(lapply(object@records, function(x){x@curveType}))
+            temp.curveType <- unlist(lapply(object@records, function(x) x@curveType ))
 
             ##info elements as character value
             if (fullExtent) {
-              temp.info.elements <- as.data.frame(data.table::rbindlist(lapply(object@records, function(x) {
+              temp.info.elements <- as.data.frame(
+                data.table::rbindlist(lapply(object@records, function(x) {
                 x@info
               }), fill = TRUE))
 
@@ -664,15 +735,13 @@ setMethod("structure_RLum",
                 ## we create a data frame with the expected number of rows
                 temp.info.elements <- data.frame(info = rep(NA, temp.object.length))
               }
-            } else{
-              temp.info.elements <-
-                unlist(lapply(object@records, function(x) {
-                  if (length(x@info) != 0) {
-                    paste(names(x@info), collapse = " ")
-                  } else{
-                    NA
-                  }
-                }))
+            } else {
+               temp.info.elements <- lapply(object@records, function(x) {
+                 if(is.null(names(x@info)))
+                    return(NA)
+
+                  names(x@info)
+                 })
             }
 
             ##combine output to a data.frame
@@ -689,13 +758,12 @@ setMethod("structure_RLum",
                 y.max = temp.y.max,
                 originator = temp.originator,
                 .uid = temp.uid,
-                .pid = temp.pid,
-                info = temp.info.elements,
+                .pid = I(as.list(temp.pid)),
+                info = if(fullExtent) temp.info.elements else I(temp.info.elements),
                 stringsAsFactors = FALSE
               )
             )
           })
-
 
 # length_RLum() -------------------------------------------------------------------------------
 #' @describeIn RLum.Analysis
@@ -861,21 +929,30 @@ setMethod(
   }
 )
 
-
-## sort_RLum() --------------------------------------------------------------
+# sort_RLum() -------------------------------------------------------------------
 #' @describeIn RLum.Analysis
 #'
 #' Sorting of `RLum.Data` objects contained in this `RLum.Analysis` object.
 #' At least one of `slot` and `info_element` must be provided. If both are
-#' given, ordering by `slot` always supersedes ordering by `info_element`.
+#' given, ordering by `slot` always takes priority over `info_element`.
+#' Only the first element in each `slot` and each `info_element` is used
+#' for sorting. Example: `.pid` can contain multiple values, however, only the
+#' first is taken.
+#'
+#' Please note that the `show()` method does some structuring, which may
+#' lead to the impression that the sorting did not work.
 #'
 #' @param slot [character] (*optional*): slot name to use in sorting.
 #'
-#' @param info_element [character] (*optional*): name of the `info` field
-#' to use in sorting.
+#' @param info_element [character] (*optional*): names of the `info` field
+#' to use in sorting. The order of the names sets the sorting priority.
+#' Regardless of available info elements, the following
+#' elements always exist because they are calculated from the record
+#' `XY_LENGTH`, `NCOL`, `X_MIN`, `X_MAX`, `Y_MIN`, `Y_MAX`
 #'
 #' @param decreasing [logical] (*with default*): whether the sort order should
-#' be decreasing (`FALSE` by default).
+#' be decreasing (`FALSE` by default). It can be provided as a vector to control
+#' the ordering sequence for each sorting element.
 #'
 #' @param ... further arguments passed to underlying methods
 #'
@@ -884,6 +961,12 @@ setMethod(
 #' **`sort_RLum`**
 #'
 #' Same object as input, but sorted according to the specified parameters.
+#'
+#' @examples
+#' ## **sort_RLum()** ##
+#' data(ExampleData.XSYG, envir = environment())
+#' sar <- OSL.SARMeasurement$Sequence.Object[1:5]
+#' sort_RLum(sar, solt = "recordType", info_element = c("startDate"))
 #'
 #' @md
 #' @export
@@ -896,11 +979,10 @@ setMethod(
     on.exit(.unset_function_name(), add = TRUE)
 
     ## an empty object has nothing to sort
-    if (length(object) == 0)
+    if (length(object@records) == 0)
       return(object)
 
     ## input validation
-    sort.by.slot <- FALSE
     if (!is.null(slot)) {
       .validate_class(slot, "character", extra = "NULL")
       valid.names <- slotNames(object@records[[1]])
@@ -909,44 +991,88 @@ setMethod(
                      .collapse(valid.names))
       }
       if (length(slot) > 1) {
-        message("[sort_RLum()]: Only the first field will be used in sorting")
+        message("[sort_RLum()]: Only the first 'slot' field will be used in sorting")
         slot <- slot[1]
       }
-      sort.by.slot <- TRUE
     }
+
     if (!is.null(info_element)) {
       .validate_class(info_element, "character", extra = "NULL")
-      valid.names <- names(object@records[[1]]@info)
+      valid.names <- c(
+        "XY_LENGTH", "NCOL", "X_MIN", "X_MAX", "Y_MIN", "Y_MAX",
+        names(object@records[[1]]@info))
       if (any(!info_element %in% valid.names)) {
         .throw_error("Invalid 'info_element' name, valid names are: ",
                      .collapse(valid.names))
       }
-      if (length(info_element) > 1) {
-        message("[sort_RLum()]: Only the first field will be used in sorting")
-        info_element <- info_element[1]
-      }
     }
+
     if (is.null(slot) && is.null(info_element)) {
       .throw_error("At least one of 'slot' and 'info_element' should not be NULL")
     }
-    .validate_logical_scalar(decreasing)
 
-    ## extract the values from the records according to which the sorting is
-    ## done: ordering by slot always supersedes ordering by info_element
-    vals <- if (sort.by.slot) {
-              sapply(object@records, function(x) slot(x, slot))
-            } else {
-              sapply(object@records, function(x) slot(x, "info")[[info_element]])
-            }
+    .validate_class(decreasing, classes = "logical")
+    if (anyNA(decreasing))
+      .throw_error("'decreasing' should be of class 'logical'")
+
+    ## recycle decreasing to match selection
+    decreasing <- rep(decreasing, length.out = length(info_element) + 1)
+
+    ## translate to -1 and 1 to match data.table requirements
+    decreasing[decreasing] <- -1
+    decreasing[!decreasing] <- 1
+
+    ## extract the values from the records
+    ## (1) extract slot values (should be a character; take only the first)
+    SLOT <- if(!is.null(slot)) {
+      data.table::as.data.table(
+       unlist(lapply(object@records, function(x) slot(x, slot)[[1]])))
+
+    } else {
+      data.table::data.table(V1 = NA)
+    }
+
+    ## (2) extract info elements; ensure to take only the first element
+    ## of the info element is a vector
+    INFO <- if (!is.null(info_element)) {
+      data.table::rbindlist(
+        lapply(object@records, function(x) {
+          data.table::as.data.table(lapply(x@info, function(l) l[[1]]))
+        }),
+        fill = TRUE)
+      }
+
+    ## (3) calculate general data parameters we always want to have
+    EXTRA <- t(vapply(object@records, function(x) {
+      ## ncol > 2 happens for RLum.Data.Spectrum and RLum.Data.Image
+      n_col <- ncol(x@data)
+
+      ## NA happens for RLum.Data.Image
+      if(is.na(n_col))
+        c(rep(NA_real_, 6))
+      else
+       c(nrow(x@data), n_col, min(x@data[,1]), max(x@data[,1]), min(x@data[,n_col]), max(x@data[,n_col]))
+
+    }, numeric(6)))
+
+    ## add UID and combine information
+    ## the UID is required for the ordering index
+    vals <- suppressWarnings(cbind(
+      UID = seq_len(max(c(nrow(SLOT), nrow(INFO), nrow(EXTRA)))),
+      SLOT = SLOT,
+      XY_LENGTH = EXTRA[,1],
+      NCOL = EXTRA[,2],
+      X_MIN = EXTRA[,3],
+      X_MAX = EXTRA[,4],
+      Y_MIN = EXTRA[,5],
+      Y_MAX = EXTRA[,6],
+      INFO))
 
     ## determine the new ordering if possible
-    tryCatch(ord <- order(vals, decreasing = decreasing),
-             error = function(e) {
-               .throw_error("Records could not be sorted according to ",
-                            ifelse(sort.by.slot,
-                                   paste0("slot = '", slot, "'"),
-                                   paste0("info_element = '", info_element, "'")))
-             })
+    ord <- data.table::setorderv(
+      x = vals,
+      cols = c("SLOT.V1", info_element),
+      order = decreasing)[["UID"]]
 
     ## return reordered object
     return(object[ord])

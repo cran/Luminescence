@@ -11,7 +11,6 @@ plot_GrowthCurve(
   output.plot = TRUE,
   output.plotExtended = TRUE,
   plot_singlePanels = FALSE,
-  cex.global = 1,
   verbose = TRUE,
   n.MC = 100,
   ...
@@ -22,7 +21,9 @@ plot_GrowthCurve(
 data frame with columns for \code{Dose}, \code{LxTx}, \code{LxTx.Error} and \code{TnTx}.
 The column for the test dose response is optional, but requires \code{'TnTx'} as
 column name if used. For exponential fits at least three dose points
-(including the natural) should be provided.}
+(including the natural) should be provided. If \code{fit.method = "OTORX"} you have
+to provide the test dose in the same unit as the dose in a column called \code{Test_Dose}.
+The function searches explicitly for this column name.}
 
 \item{mode}{\link{character} (\emph{with default}):
 selects calculation mode of the function.
@@ -45,7 +46,8 @@ function used for fitting. Possible options are:
 \item \code{EXP+LIN},
 \item \code{EXP+EXP},
 \item \code{GOK},
-\item \code{LambertW}
+\item \code{OTOR},
+\item \code{OTORX}
 }
 
 See details in \link{fit_DoseResponseCurve}.}
@@ -66,9 +68,6 @@ If \code{FALSE}, just the growth curve will be plotted.}
 \item{plot_singlePanels}{\link{logical} (\emph{with default}):
 single plot output (\code{TRUE/FALSE}) to allow for plotting the results in
 single plot windows. Requires \code{plotExtended = TRUE}.}
-
-\item{cex.global}{\link{numeric} (\emph{with default}):
-global scaling factor.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
 enable/disable output to the terminal.}
@@ -92,7 +91,7 @@ regenerative or additive protocol as implemented in \link{fit_DoseResponseCurve}
 and \link{plot_DoseResponseCurve}
 }
 \section{Function version}{
- 1.2.1
+ 1.2.2
 }
 
 \examples{
@@ -134,7 +133,7 @@ print(plot_GrowthCurve(LxTxData, mode = "alternate"))
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2025. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2025. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -260,10 +260,9 @@ calc_FadingCorr <- function(
   ##calculate kappa (equation [5] in Huntley and Lamothe, 2001)
   kappa <- g_value / log(10) / 100
 
-  ##transform tc in ka years
-  ##duration of the year over a long term taken from http://wikipedia.org
-  tc <- tc[1] / 60 / 60 / 24 / 365.2425  / 1000
-  tc.g_value <- tc.g_value[1] / 60 / 60 / 24 / 365.2425  / 1000
+  ## transform tc from s to ka years
+  tc <- tc / (1000 * .const$year_s)
+  tc.g_value <- tc.g_value / (1000 * .const$year_s)
 
   ##calculate mean value
   temp <-
@@ -346,7 +345,7 @@ calc_FadingCorr <- function(
       ##otherwise the automatic error value finding
       ##will never work
       res <- NA
-      if (!is(temp,"try-error") && temp$root < 1e8) {
+      if (!inherits(temp, "try-error") && temp$root < 1e8) {
         res <- temp$root
       }
       return(res)

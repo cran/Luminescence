@@ -35,6 +35,8 @@
 #'
 #' @return A  list of class `DRAC.list`.
 #'
+#' @section Function version: 0.1.1
+#'
 #' @author
 #' Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
@@ -127,7 +129,6 @@ template_DRAC <- function(
 
     ## reset rows
     nrow <- nrow(file_input)
-
   }
 
   ## throw warning
@@ -386,8 +387,6 @@ template_DRAC <- function(
   if(!is.null(file_input)) {
     for(i in seq_along(file_input))
       template[[i]] <- file_input[[i]]
-
-
   }
 
   ## return
@@ -427,5 +426,4 @@ template_DRAC <- function(
     x[[i]] <- rep(preset_list[[preset]][[i]], n)
 
   return(x)
-
 }

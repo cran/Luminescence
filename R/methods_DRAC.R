@@ -39,7 +39,6 @@ print.DRAC.highlights <- function(x, ...) {
 
 #' @export
 print.DRAC.list <- function(x, blueprint = FALSE, ...) {
-
   ## CASE 1: Pretty print the structure of the DRAC list
   if (!blueprint) {
     limit <- 80
@@ -171,13 +170,17 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
 
       } else {
       ## try coercion
-      .throw_warning(names(x)[i], ": found ", class.new, ", expected ", class.old, " -> coercing to ", class.old)
+      .throw_message(names(x)[i], ": found ", class.new, ", expected ", class.old, " -> coercing to ", class.old)
         if(class.old == "integer")
           value <- as.integer(value)
         else
           value <- as.numeric(value)
       }
     }
+
+    ## silently round all values to a maximum of 5 digits
+    if(inherits(value, "numeric"))
+      value <- round(value,5)
   }
 
   # for 'factor' and 'character' elements only 'character' input is allowed
@@ -195,9 +198,8 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
   if (class.old == "factor") {
     levels <- levels(x[[i]])
     if (any(`%in%`(value, levels) == FALSE)) {
-      .throw_warning(names(x)[i], ": Invalid option, valid options are: ",
+      .throw_error(names(x)[i], ": Invalid option, valid options are: ",
                      .collapse(levels))
-      return(x)
     } else {
       value <- factor(value, levels)
     }

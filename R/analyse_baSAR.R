@@ -170,7 +170,7 @@
 #' if a `character`, it must be the path to a CSV file with data for the
 #' analysis. Either way, data should contain 3 columns:
 #' the name of the file, the disc position and the grain position
-#' (the last being 0 for multi-grain measurements).\cr
+#' (the last being 0 for multi-grain measurements).
 #'
 #' @param aliquot_range [numeric] (*optional*):
 #' allows to limit the range of the aliquots used for the analysis.
@@ -385,7 +385,6 @@
 #'   fit.method = "LIN",
 #'   plot = FALSE,
 #'   n.MCMC = 200
-#'
 #' )
 #'
 #' print(results)
@@ -458,9 +457,7 @@ analyse_baSAR <- function(
              baSAR_model,
              verbose)
     {
-
-      ##lower and uppder De, grep from method_control ... for sure we find it here,
-      ##as it was set before the function call
+      ## lower and upper De
       lower_centralD <- method_control[["lower_centralD"]]
       upper_centralD <- method_control[["upper_centralD"]]
 
@@ -482,7 +479,6 @@ analyse_baSAR <- function(
       thin <-  if (is.null(method_control[["thin"]])) {
         if(n.MCMC >= 1e+05){
           thin <- n.MCMC/1e+05 * 250
-
         }else{
           thin <- min(10, n.MCMC / 2)
         }
@@ -501,10 +497,8 @@ analyse_baSAR <- function(
                        "', reset to ", thin)
       }
 
-      #check whether this makes sense at all, just a direty and quick test
+      ## check whether this makes sense at all, just a quick and dirty test
       stopifnot(lower_centralD >= 0)
-
-      Limited_cycles <- vector()
 
       if (fit.method == "EXP") {ExpoGC <- 1 ; LinGC <-  0 }
       if (fit.method == "LIN") {ExpoGC <- 0 ; LinGC <-  1 }
@@ -512,15 +506,8 @@ analyse_baSAR <- function(
       if (fit.force_through_origin == TRUE) {GC_Origin <- 1} else {GC_Origin <- 0}
 
       ##Include or exclude repeated dose points
-      if (fit.includingRepeatedRegPoints) {
+      if (!fit.includingRepeatedRegPoints) {
         for (i in 1:Nb_aliquots) {
-          Limited_cycles[i] <- length(stats::na.exclude(data.Dose[,i]))
-        }
-
-      }else{
-
-        for (i in 1:Nb_aliquots) {
-
           temp.logic <- !duplicated(data.Dose[,i], incomparables=c(0))  # logical excluding 0
           m <- length(which(!temp.logic))
 
@@ -530,10 +517,11 @@ analyse_baSAR <- function(
 
           rm(m, temp.logic)
         }
+      }
 
-        for (i in 1:Nb_aliquots) {
-          Limited_cycles[i] <- length(data.Dose[, i]) - length(which(is.na(data.Dose[, i])))
-        }
+      Limited_cycles <- vector()
+      for (i in 1:Nb_aliquots) {
+        Limited_cycles[i] <- length(stats::na.exclude(data.Dose[, i]))
       }
 
       ##check and correct for distribution name
@@ -717,10 +705,6 @@ analyse_baSAR <- function(
         thin = thin
       )
 
-      pt_zero <- 0
-      nb_decal <-  2
-      pt_zero <- Nb_aliquots
-
       ##standard error and mean
       output.mean <-
         round(summary(sampling_reduced)[[1]][c("central_D", "sigma_D"), 1:2], digits)
@@ -842,7 +826,7 @@ analyse_baSAR <- function(
 
   ##if the input is already of type RLum.Results, use the input and do not run
   ##all pre-calculations again
-  if(is(object, "RLum.Results")){
+  if (inherits(object, "RLum.Results")) {
     if(object@originator == "analyse_baSAR"){
 
       ##We want to use previous function arguments and recycle them
@@ -975,7 +959,6 @@ analyse_baSAR <- function(
     }
 
   }else{
-
     if(verbose){
       cat("\n[analyse_baSAR()] ---- PRE-PROCESSING ----\n")
     }
@@ -1051,7 +1034,7 @@ analyse_baSAR <- function(
     if (inherits(object, "Risoe.BINfileData")) {
       fileBIN.list <- list(object)
 
-    } else if (is(object, "list")) {
+    } else if (inherits(object, "list")) {
       ##check what the list containes ...
       object_type <- unique(sapply(object, function(x) {
         .validate_class(x, c("Risoe.BINfileData", "character"),
@@ -1076,7 +1059,7 @@ analyse_baSAR <- function(
           )
         }
 
-    } else if (is(object, "character")) {
+    } else if (is.character(object)) {
       fileBIN.list <- list(
         read_BIN2R(
           file = object,
@@ -1097,7 +1080,7 @@ analyse_baSAR <- function(
 
     if (!all(record.selected)) {
       if (verbose) {
-        message("[analyse_baSAR()] Record pre-selection in BIN-file detected,",
+        message("[analyse_baSAR()] Record pre-selection in BIN-file detected, ",
                 "record reduced to selection\n")
       }
       if (sum(record.selected) == 0) {
@@ -1140,9 +1123,10 @@ analyse_baSAR <- function(
     }
 
     ## remove duplicated entries
-    is.duplicated <- duplicated(unlist(object.file_name))
+    object.filenames <- unlist(object.file_name)
+    is.duplicated <- duplicated(object.filenames)
     if (any(is.duplicated)) {
-      msg <- paste(.collapse(object.file_name[is.duplicated]),
+      msg <- paste(.collapse(object.filenames[is.duplicated]),
                    "is a duplicate and therefore removed from the input")
       if(verbose){
         message("[analyse_baSAR()] ", msg)
@@ -1196,24 +1180,15 @@ analyse_baSAR <- function(
           )
 
         ## remove grain position 0 (this are usually TL measurements
-        ## on the cup or we are talking about multiple aliquot)
-        num.grain.pos0 <- sum(aliquot_selection$unique_pairs[["GRAIN"]] == 0,
-                              na.rm = TRUE)
+        ## on the cup or we are talking about multiple aliquots)
+        idx.pos0 <- aliquot_selection$unique_pairs[["GRAIN"]] == 0
+        datalu <- aliquot_selection$unique_pairs[!idx.pos0, ]
+        num.grain.pos0 <- sum(idx.pos0, na.rm = TRUE)
         if (sum(num.grain.pos0) > 0) {
           .throw_warning("Automatic grain selection: ", num.grain.pos0,
                          " curves with grain index 0 have been removed ",
                          "from the dataset")
         }
-
-        datalu <-
-          aliquot_selection$unique_pairs[!aliquot_selection$unique_pairs[["GRAIN"]] == 0,]
-
-        if(nrow(datalu) == 0){
-          .throw_message("Nothing left after the automatic grain selection, ",
-                         "NULL returned")
-          return(NULL)
-        }
-
       }else{
           .throw_warning("Only multiple grain data provided, ",
                          "automatic selection skipped")
@@ -1270,8 +1245,6 @@ analyse_baSAR <- function(
     } else{
 
       datalu <- CSV_file
-
-      ##check number of number of columns in data.frame
       if(ncol(datalu) < 3){
         .throw_error(err.msg)
       }
@@ -1292,7 +1265,7 @@ analyse_baSAR <- function(
     Nb_ali <-  0
     k <- NULL
 
-    for (nn in 1:length((datalu[, 1]))) {
+    for (nn in 1:nrow(datalu)) {
       if (!is.na(datalu[nn, 1]))  {
 
         ##check whether one file fits
@@ -1316,11 +1289,9 @@ analyse_baSAR <- function(
         }
 
       } else{
-
         if (Nb_ali == 0) {
           .throw_error("Number of discs/grains = 0")
         }
-
         break()
       }
     }
@@ -1396,9 +1367,6 @@ analyse_baSAR <- function(
       return(NULL)
     }
 
-    disc_pos <- as.integer(unlist(Disc[[k]]))
-    grain_pos <- as.integer(unlist(Grain[[k]]))
-
     ### Automatic Filling - Disc_Grain.list
     for (i in 1: length(Disc[[k]])) {
       disc_selected <-  as.integer(Disc[[k]][i])
@@ -1422,15 +1390,12 @@ analyse_baSAR <- function(
             return(NULL)
           }
 
-          ##if the test passed, compile index list
-          index_liste <- n_index.vector[disc_logic & grain_logic]
+      ## if the test passed, compile index list
+      index_list <- n_index.vector[disc_logic & grain_logic]
 
       if (Mono_grain == FALSE)  {grain_selected <-1}
 
-          for (kn in 1: length(index_liste)) {
-
-              t <- index_liste[kn]
-
+      for (t in index_list) {
               dose.value <- irrad_time.vector[t]
               if(!is.null(unlist(source_doserate))){
                 dose.value <- dose.value * unlist(source_doserate[[k]][1])
@@ -1462,7 +1427,7 @@ analyse_baSAR <- function(
         Ln_index <- as.numeric(Disc_Grain.list[[k]][[dd]][[gg]][[1]][1])
         Tn_index <- as.numeric(Disc_Grain.list[[k]][[dd]][[gg]][[1]][2])
         return(c(Ln_index, Tn_index))
-      }, FUN.VALUE = vector(mode = "numeric", length = 2))
+      }, FUN.VALUE = numeric(2))
 
 
       ## data.tables for Ln and Tn values
@@ -1502,19 +1467,14 @@ analyse_baSAR <- function(
       )
 
       ##add integration limits depending on the choosen value
-      if(is.null(signal.integral.Tx[[k]])){
-        abline(v = range(signal.integral[[k]]), lty = 2, col = "green")
-
-      }else{
-        abline(v = range(signal.integral.Tx[[k]]), lty = 2, col = "green")
-      }
-
-      if(is.null(background.integral.Tx[[k]])){
-        abline(v = range(background.integral[[k]]), lty = 2, col = "red")
-
-      }else{
-        abline(v = range(background.integral.Tx[[k]]), lty = 2, col = "red")
-      }
+      abline(v = if (!is.null(signal.integral.Tx[[k]]))
+                   range(signal.integral.Tx[[k]])
+                 else
+                   range(signal.integral[[k]]), lty = 2, col = "green")
+      abline(v = if (!is.null(background.integral.Tx[[k]]))
+                   range(background.integral.Tx[[k]])
+                 else
+                   range(background.integral[[k]]), lty = 2, col = "red")
 
       mtext(paste0("ALQ: ",count, ":", count + ncol(curve_index)))
 
@@ -1607,16 +1567,11 @@ analyse_baSAR <- function(
         ))
 
         ##get data.frame with De values
+        Disc_Grain.list[[k]][[dd]][[gg]][[6]][1:4] <- NA
         if(!is.null(fitcurve)){
           fitcurve_De <- get_RLum(fitcurve, data.object = "De")
-
-          Disc_Grain.list[[k]][[dd]][[gg]][[6]][1] <- fitcurve_De[["De"]]
-          Disc_Grain.list[[k]][[dd]][[gg]][[6]][2] <- fitcurve_De[["De.Error"]]
-          Disc_Grain.list[[k]][[dd]][[gg]][[6]][3] <- fitcurve_De[["D01"]]
-          Disc_Grain.list[[k]][[dd]][[gg]][[6]][4] <- fitcurve_De[["D01.ERROR"]]
-        }else{
-          ##we have to do this, otherwise the grains will be sorted out
-          Disc_Grain.list[[k]][[dd]][[gg]][[6]][1:4] <- NA
+          Disc_Grain.list[[k]][[dd]][[gg]][[6]][1:4] <-
+            fitcurve_De[, c("De", "De.Error", "D01", "D01.ERROR")]
         }
 
       ## reset `sel.disc.grain` because the data it pointed to has changed
@@ -1677,22 +1632,13 @@ analyse_baSAR <- function(
 
       comptage <- comptage + 1
       OUTPUT_results[comptage, 1] <- k
-      OUTPUT_results[comptage, 2] <- as.numeric(dd)
+      OUTPUT_results[comptage, 2] <- dd
       OUTPUT_results[comptage, 3] <- if (Mono_grain) gg else 0
 
       sel.disc.grain <- Disc_Grain.list[[k]][[dd]][[gg]]
       if (length(sel.disc.grain[[6]]) != 0) {
-        ##DE
-        OUTPUT_results[comptage, 4] <- as.numeric(sel.disc.grain[[6]][1])
-
-        ##DE.SD
-        OUTPUT_results[comptage, 5] <- as.numeric(sel.disc.grain[[6]][2])
-
-        ##D0
-        OUTPUT_results[comptage, 6] <- as.numeric(sel.disc.grain[[6]][3])
-
-        ##D0.SD
-        OUTPUT_results[comptage, 7] <- as.numeric(sel.disc.grain[[6]][4])
+        ## DE, DE.SD, D0, D0.SD
+        OUTPUT_results[comptage, 4:7] <- as.numeric(sel.disc.grain[[6]][1:4])
 
         ##CYCLES_NB
         OUTPUT_results[comptage, 8] <- length(sel.disc.grain[[2]])
@@ -1714,21 +1660,20 @@ analyse_baSAR <- function(
     }
   }
 
-
   ##Clean matrix and remove all unwanted entries
 
     ##remove all NA columns, means all NA columns in POSITION and DISC
     ##this NA values are no calculation artefacts, but coming from the data processing and have
     ##no further value
-    OUTPUT_results <- OUTPUT_results[!is.na(OUTPUT_results[,2]),]
+    OUTPUT_results <- OUTPUT_results[!is.na(OUTPUT_results[, 2]), , drop = FALSE]
 
     ##clean up NaN values in the LxTx and corresponding error values
     ##the transposition of the matrix may increase the performance for very large matrices
     OUTPUT_results_reduced <- t(OUTPUT_results)
     selection <- vapply(X = 1:ncol(OUTPUT_results_reduced), FUN = function(x){
-        !any(is.nan(OUTPUT_results_reduced[9:(8+3*max_cycles), x]) | is.infinite(OUTPUT_results_reduced[9:(8+3*max_cycles), x]))
-
-    }, FUN.VALUE = vector(mode = "logical", length = 1))
+      col <- OUTPUT_results_reduced[9:(8 + 3 * max_cycles), x]
+      !any(is.nan(col) | is.infinite(col))
+    }, FUN.VALUE = logical(1))
 
     removed_aliquots <- t(OUTPUT_results_reduced[,!selection])
     OUTPUT_results_reduced <- t(OUTPUT_results_reduced[,selection])
@@ -1755,10 +1700,9 @@ analyse_baSAR <- function(
   ##prepare data frame for output that can used as input
   input_object <- data.frame(
     BIN_FILE = unlist(object.file_name)[OUTPUT_results_reduced[[1]]],
-    OUTPUT_results_reduced[, -1],
+    OUTPUT_results_reduced[, -1, drop = FALSE],
     stringsAsFactors = FALSE
   )
-
 
   ##prepare data frame for output that shows rejected aliquots
   if (length(removed_aliquots) > 0) {
@@ -1766,7 +1710,6 @@ analyse_baSAR <- function(
       as.data.frame(removed_aliquots,  stringsAsFactors = FALSE)
     removed_aliquots <- cbind(BIN_FILE = unlist(object.file_name)[removed_aliquots[[1]]],
                               removed_aliquots[, -1])
-
   }else{
     removed_aliquots <- NULL
   }
@@ -1779,25 +1722,22 @@ analyse_baSAR <- function(
   ## that "We set the bounds for the prior on the central dose D, Dmin = 0 Gy and
   ## Dmax = 1000 Gy, to cover the likely range of possible values for D.
 
-
     ##check if something is set in method control, if not, set it
     if (is.null(method_control[["upper_centralD"]])) {
       method_control <- c(method_control, upper_centralD = 1000)
-
     }else{
-      if(distribution == "normal" | distribution == "cauchy" | distribution == "log_normal"){
+      if (distribution %in% c("normal", "cauchy", "log_normal")) {
         .throw_warning("You have modified the upper central_D boundary ",
                        "while applying a predefined model. This is ",
                        "possible but not recommended!")
       }
     }
 
-    ##we do the same for the lower_centralD, just to have everthing in one place
+    ## do the same for the lower_centralD, just to have everything in one place
     if (is.null(method_control[["lower_centralD"]])) {
       method_control <- c(method_control, lower_centralD = 0)
-
     }else{
-      if(distribution == "normal" | distribution == "cauchy" | distribution == "log_normal"){
+      if (distribution %in% c("normal", "cauchy", "log_normal")) {
         .throw_warning("You have modified the lower central_D boundary ",
                        "while applying a predefined model. This is ",
                        "possible but not recommended!")
@@ -1830,7 +1770,7 @@ analyse_baSAR <- function(
     ), outFile = stdout()) # redirect error messages so they can be silenced
 
   ##check whether this became NULL
-  if(!is(results, "try-error")){
+  if (!inherits(results, "try-error")) {
     ##how do we add the systematic error?
     ##(1) source_doserate is a list, not a vector, but the user can
     ##provide many source dose rates and he can provide only a single vector (no error)
@@ -1841,7 +1781,7 @@ analyse_baSAR <- function(
       if(!is.null(function_arguments$source_doserate)){
         source_doserate <- eval(function_arguments$source_doserate)
 
-        if(!is(source_doserate, "list")){
+        if (!inherits(source_doserate, "list")) {
           source_doserate <- list(source_doserate)
         }
       }
@@ -1853,9 +1793,8 @@ analyse_baSAR <- function(
 
     ##state are warning for very different errors
     if(mean(systematic_error) != systematic_error[1]){
-      .throw_warning("Provided source dose rate errors differ. The mean ",
-                     "was taken, but the calculated systematic error ",
-                     "might not be valid")
+      .throw_warning("Provided source dose rate errors differ: the mean was ",
+                     "taken, but the calculated systematic error may not be valid")
     }
 
     ##add to the final de
@@ -1880,7 +1819,7 @@ analyse_baSAR <- function(
     cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
     cat("\n[analyse_baSAR()] ---- RESULTS ---- \n")
     cat("------------------------------------------------------------------\n")
-    cat(paste0("Used distribution:\t\t", results[[1]][["DISTRIBUTION"]],"\n"))
+    cat("Used distribution:\t\t", results[[1]][["DISTRIBUTION"]], "\n")
     num.aliquots <- results[[1]][["NB_ALIQUOTS"]]
     tot.aliquots <- num.aliquots
     if (!is.null(removed_aliquots))
@@ -1892,19 +1831,13 @@ analyse_baSAR <- function(
       cat("\n")
     }
 
-    extra <- if (!is.null(baSAR_model)) " (user defined)" else ""
     cat("Considered fitting method:\t", results[[1]][["FIT_METHOD"]],
-        extra, "\n")
+        if (!is.null(baSAR_model)) " (user defined)", "\n")
     cat("Number of independent chains:\t", results[[1]][["N.CHAINS"]], "\n")
     cat("Number MCMC iterations/chain:\t", results[[1]][["N.MCMC"]], "\n")
     cat("------------------------------------------------------------------\n")
-    if(distribution == "log_normal"){
-      cat("\t\t\t\tmean*\tsd\tHPD\n")
-
-    }else{
-      cat("\t\t\t\tmean\tsd\tHPD\n")
-    }
-
+    cat(sprintf("\t\t\t\tmean%s\tsd\tHPD\n",
+                ifelse(distribution == "log_normal", "*", "")))
 
     cat(paste0(">> Central dose:\t\t", results[[1]][["CENTRAL"]],"\t",
                results[[1]][["CENTRAL.SD"]],"\t",
@@ -1917,10 +1850,9 @@ analyse_baSAR <- function(
     cat(paste0("\n>> Final central De:\t\t", results[[1]][["DE_FINAL"]],"\t", round(results[[1]][["DE_FINAL.ERROR"]], digits = digits), "\t",
                " - \t -"))
     cat("\n------------------------------------------------------------------\n")
-    cat(
-      paste("(systematic error contribution to final De:",
-            format((1-results[[1]][["CENTRAL.SD"]]/results[[1]][["DE_FINAL.ERROR"]])*100, scientific = TRUE), "%)\n")
-    )
+    cat("(systematic error contribution to final De:",
+        format((1 - results[[1]][["CENTRAL.SD"]] / results[[1]][["DE_FINAL.ERROR"]]) * 100,
+               scientific = TRUE), "%)\n")
     if(distribution == "log_normal"){
      cat("* mean of the central dose is the geometric mean\n")
     }
@@ -1971,8 +1903,9 @@ analyse_baSAR <- function(
 
     ##get list with D values
     ##get list out of it
-    plot_matrix <- as.matrix(results[[2]][,grep(x = varnames, pattern = "D[", fixed = TRUE)])
-    aliquot_quantiles <- t(matrixStats::colQuantiles(x = plot_matrix, probs = c(0.25,0.75)))
+    plot_matrix <- as.matrix(results[[2]][, grep(varnames, pattern = "^D")])
+    aliquot_quantiles <- t(matrixStats::colQuantiles(plot_matrix, probs = c(0.25, 0.75),
+                                                     drop = FALSE))
 
     ##define boxplot colours ... we have red and orange
     box.col <- vapply(1:ncol(aliquot_quantiles), function(x){
@@ -1986,7 +1919,7 @@ analyse_baSAR <- function(
       }else{
         "white"
       }
-    }, FUN.VALUE = vector(mode = "character", length = 1))
+    }, FUN.VALUE = character(1))
 
     ## to assure a minimum of quality not more then 15 boxes are plotted in each plot
     i <- 1
@@ -2006,7 +1939,7 @@ analyse_baSAR <- function(
         main = paste0("Individual Doses | ALQ: ", i,":",step)
       ))
 
-      if(!is(plot_check, "try-error")){
+      if (!inherits(plot_check, "try-error")) {
       if(step == ncol(plot_matrix)){
         axis(side = 2, at = 1:15, labels = as.character(c(i:step, rep(" ", length = 15 - length(i:step)))),
              cex.axis = 0.8
@@ -2085,7 +2018,6 @@ analyse_baSAR <- function(
       ##free memory
       rm(list_selection)
 
-
       ##make selection according to the model for the curve plotting
       if (fit.method == "EXP") {ExpoGC <- 1 ; LinGC <-  0 }
       if (fit.method == "LIN") {ExpoGC <- 0 ; LinGC <-  1 }
@@ -2098,20 +2030,15 @@ analyse_baSAR <- function(
         fit.method_plot <- paste(fit.method_plot, "(user defined)")
       }
 
-       ##open plot area
-        ##for the xlim and ylim we have to identify the proper ranges based on the input
-        xlim <- c(0, max(input_object[,grep(x = colnames(input_object), pattern = "DOSE")], na.rm = TRUE)*1.1)
-        ylim <- c(
-          min(input_object[,grep(x = colnames(input_object), pattern = "LxTx")], na.rm = TRUE),
-          max(input_object[,grep(x = colnames(input_object), pattern = "LxTx")], na.rm = TRUE)*1.1)
+      ## set xlim and ylim based on ranges in the input
+      xlim <- c(0, max(input_object[, grep("DOSE", colnames(input_object))],
+                       na.rm = TRUE) * 1.1)
+      ylim <- range(input_object[, grep("LxTx", colnames(input_object))],
+                    na.rm = TRUE) * c(1, 1.1)
 
-        ##check for position of the legend ... we can do better
-        if(results[[1]][["CENTRAL_Q_.975"]] < max(xlim)/2){
-          legend_pos <- "topright"
-
-        }else{
-          legend_pos <- "topleft"
-        }
+      ## check for position of the legend ... we can do better
+      legend_pos <- if (results[[1]][["CENTRAL_Q_.975"]] < max(xlim)/2)
+                      "topright" else "topleft"
 
         ##set plot area
         plot_check <- try(plot(
@@ -2124,8 +2051,7 @@ analyse_baSAR <- function(
           main = "baSAR Dose Response Curves"
         ))
 
-
-        if (!is(plot_check, "try-error")) {
+        if (!inherits(plot_check, "try-error")) {
           ##add mtext
           mtext(side = 3, text = paste("Fit:", fit.method_plot))
 
@@ -2244,7 +2170,6 @@ analyse_baSAR <- function(
             bty = "n",
             cex = par()$cex * 0.8
           )
-
         }
       }else{
         plot_check <- NULL
@@ -2264,7 +2189,7 @@ analyse_baSAR <- function(
           )
         )))
 
-        if(!is(plot_check, "try-error")) {
+        if (!inherits(plot_check, "try-error")) {
           abline(v = results[[1]]$CENTRAL, lty = 2)
           abline(
             v = results[[1]][, c("CENTRAL_Q_.16", "CENTRAL_Q_.84")],
@@ -2273,14 +2198,6 @@ analyse_baSAR <- function(
             lwd = 1.2
           )
           abline(v = results[[1]][, c("CENTRAL_Q_.025", "CENTRAL_Q_.975")], lty = 2, col = col[2])
-
-          ##check for position of the legend
-          if(results[[1]][["CENTRAL_Q_.975"]] < max(xlim)/2){
-            legend_pos <- "right"
-
-          }else{
-            legend_pos <- "topleft"
-          }
 
           legend(
             legend_pos,

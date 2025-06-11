@@ -9,6 +9,7 @@ plot_RLum.Data.Curve(
   par.local = TRUE,
   norm = FALSE,
   smooth = FALSE,
+  auto_scale = FALSE,
   ...
 )
 }
@@ -27,8 +28,11 @@ offers modes \code{"max"} (used with \code{TRUE}), \code{"last"} and \code{"huot
 \item{smooth}{\link{logical} (\emph{with default}):
 provides automatic curve smoothing based on the internal function \code{.smoothing}}
 
+\item{auto_scale}{\link{logical} (\emph{with default}): if activated, auto scales \code{xlim} or \code{ylim}
+to the extent of the other. If both are set, the auto-scaling is skipped.}
+
 \item{...}{further arguments and graphical parameters that will be passed
-to the \code{plot} function}
+to \link[graphics:plot.default]{graphics::plot.default} and \link[graphics:par]{graphics::par}}
 }
 \value{
 Returns a plot.
@@ -65,7 +69,7 @@ of a curve.
 Not all arguments of \link{plot} will be passed!
 }
 \section{Function version}{
- 0.2.6
+ 0.3.0
 }
 
 \examples{
@@ -81,7 +85,6 @@ temp <- as(ExampleData.CW_OSL_Curve, "RLum.Data.Curve")
 #plot RLum.Data.Curve object
 plot_RLum.Data.Curve(temp)
 
-
 }
 \seealso{
 \link{plot}, \link{plot_RLum}
@@ -91,7 +94,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

@@ -11,8 +11,8 @@ plot_RadialPlot(
   central.value,
   centrality = "mean.weighted",
   mtext,
-  summary,
-  summary.pos,
+  summary = c("n", "in.2s"),
+  summary.pos = "sub",
   legend,
   legend.pos,
   stats,
@@ -60,7 +60,7 @@ the central line. Can either be one out of
 \item{mtext}{\link{character}:
 additional text below the plot title.}
 
-\item{summary}{\link{character} (\emph{optional}):
+\item{summary}{\link{character} (\emph{with default}):
 add statistic measures of centrality and dispersion to the plot.
 Can be one or more of several keywords. See details for available keywords.}
 
@@ -215,7 +215,7 @@ plot_RadialPlot(
 ## now with legend, colour, different points and smaller scale
 plot_RadialPlot(
   data = ExampleData.DeValues,
-  legend.text = "Sample 1",
+  legend = "Sample 1",
   col = "tomato4",
   bar.col = "peachpuff",
   pch = "R",
@@ -276,7 +276,7 @@ plot_RadialPlot(
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2025. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2025. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -13,7 +13,7 @@ for \link{data.frame}: two columns with De \code{(data[,1])} and De error \code{
 \item{log}{\link{logical} (\emph{with default}):
 perform the homogeneity test with (un-)logged data}
 
-\item{...}{further arguments (for internal compatibility only).}
+\item{...}{further arguments (\code{verbose}).}
 }
 \value{
 Returns a terminal output. In addition an
@@ -28,7 +28,7 @@ following elements:
 The output should be accessed using the function \link{get_RLum}.
 }
 \description{
-A simple homogeneity test for De estimates
+A simple homogeneity test for De estimates.
 For details see Galbraith (2003).
 }
 \section{Function version}{
@@ -55,7 +55,7 @@ calc_HomogeneityTest(df)
 } 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2025. calc_HomogeneityTest(): Apply a simple homogeneity test after Galbraith (2003). Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2025. calc_HomogeneityTest(): Apply a simple homogeneity test after Galbraith (2003). Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

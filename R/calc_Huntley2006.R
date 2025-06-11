@@ -1,37 +1,38 @@
 #' @title Apply the Huntley (2006) model
 #'
 #' @description
-#' A function to calculate the expected sample specific fraction of saturation
-#' based on the model of Huntley (2006) using the approach as implemented
+#' The function calculates the expected sample specific fraction of saturation
+#' based on the model of Huntley (2006), using the approach as implemented
 #' in Kars et al. (2008) or Guralnik et al. (2015).
 #'
 #' @details
 #'
 #' This function applies the approach described in Kars et al. (2008) or Guralnik et al. (2015),
-#' which are both developed from the model of Huntley (2006) to calculate the expected sample
+#' which are both developed from the model of Huntley (2006), to calculate the expected sample
 #' specific fraction of saturation of a feldspar and also to calculate fading
 #' corrected age using this model. \eqn{\rho}' (`rhop`), the density of recombination
 #' centres, is a crucial parameter of this model and must be determined
 #' separately from a fading measurement. The function [analyse_FadingMeasurement]
 #' can be used to calculate the sample specific \eqn{\rho}' value.
 #'
-#' **Kars et al. (2008) - Single saturating exponential**
+#' **Kars et al. (2008) -- Single saturating exponential**
 #'
-#' To apply the approach after Kars et al. (2008) use `fit.method = "EXP"`.
+#' To apply the approach after Kars et al. (2008), use `fit.method = "EXP"`.
 #'
 #' Firstly, the unfaded \eqn{D_0} value is determined through applying equation 5 of
 #' Kars et al. (2008) to the measured \eqn{\frac{L_x}{T_x}} data as a function of irradiation
 #' time, and fitting the data with a single saturating exponential of the form:
 #'
-#' \deqn{\frac{L_x}{T_x}(t^*) = A  \phi(t^*) \{1 - exp(-\frac{t^*}{D_0}))\}}
+#' \deqn{\frac{L_x}{T_x}(t^*) = A  \phi(t^*) \{1 - \exp(-\frac{t^*}{D_0}))\}}
 #'
 #' where
 #'
-#' \deqn{\phi(t^*) = exp(-\rho' ln(1.8  \tilde{s} t^*)^3)}
+#' \deqn{\phi(t^*) = \exp(-\rho' \ln(1.8  \tilde{s} t^*)^3)}
 #'
 #' after King et al. (2016) where \eqn{A} is a pre-exponential factor,
 #' \eqn{t^*} (s) is the irradiation time, starting at the mid-point of
-#' irradiation (Auclair et al. 2003) and \eqn{\tilde{s}} (\eqn{3\times10^{15}} s\eqn{^{-1}}) is the athermal frequency factor after Huntley (2006). \cr
+#' irradiation (Auclair et al. 2003) and \eqn{\tilde{s}} (\eqn{3\times10^{15}} s\eqn{^{-1}})
+#' is the athermal frequency factor after Huntley (2006).
 #'
 #' Using fit parameters \eqn{A} and \eqn{D_0}, the function then computes a natural dose
 #' response curve using the environmental dose rate, \eqn{\dot{D}} (Gy/s) and equations
@@ -40,12 +41,12 @@
 #' be interpolated onto this curve to determine the fading corrected
 #' \eqn{D_e} value, from which the fading corrected age is calculated.
 #'
-#' **Guralnik et al. (2015) - General-order kinetics**
+#' **Guralnik et al. (2015) -- General-order kinetics**
 #'
 #' To apply the approach after Guralnik et al. (2015) use `fit.method = "GOK"`.
 #'
 #' The approach of Guralnik et al. (2015) is very similar to that of
-#' Kars et al. (2008), but instead of using a single saturating exponential
+#' Kars et al. (2008) but, instead of using a single saturating exponential,
 #' the model fits a general-order kinetics function of the form:
 #'
 #' \deqn{\frac{L_x}{T_x}(t^*) = A \phi (t^*)(1 - (1 + (\frac{1}{D_0}) t^* c)^{-1/c})}
@@ -68,9 +69,10 @@
 #' **Uncertainties**
 #'
 #' Uncertainties are reported at \eqn{1\sigma} and are assumed to be normally
-#' distributed and are estimated using Monte-Carlo re-sampling (`n.MC = 1000`)
-#' of \eqn{\rho}' and \eqn{\frac{L_x}{T_x}} during dose response curve fitting, and of \eqn{\rho}'
-#' in the derivation of (\eqn{n/N}) and (n/N)_SS.
+#' distributed and are estimated using Monte-Carlo re-sampling (`n.MC = 10000`
+#' by default) of \eqn{\rho}' and \eqn{\frac{L_x}{T_x}} during dose response
+#' curve fitting, and of \eqn{\rho}' #' in the derivation of (\eqn{n/N}) and
+#' (n/N)_SS.
 #'
 #' **Age calculated from 2D0 of the simulated natural DRC**
 #'
@@ -84,12 +86,13 @@
 #'
 #' @param data [data.frame] (**required**):
 #' A `data.frame` with one of the following structures:
-#' - A **three column** data frame with numeric values on a) dose (s), b) `LxTx` and
-#' c) `LxTx` error.
-#' - If a **two column** data frame is provided it is automatically
-#' assumed that errors on `LxTx` are missing. A third column will be attached
-#' with an arbitrary 5 % error on the provided `LxTx` values.
-#' - Can also be a **wide table**, i.e. a [data.frame] with a number of columns divisible by 3
+#' - **three columns** with numeric values for dose (s), `LxTx` and `LxTx`
+#' error, in this order.
+#' - **two columns** with numeric values for dose (s) and `LxTx`, in this order.
+#' This assumes that errors on `LxTx` are missing, and a third column will be
+#' automatically attached with an arbitrary 5 % error on the provided `LxTx`
+#' values.
+#' - **wide table**, i.e. a [data.frame] with a number of columns divisible by 3
 #' and where each triplet has the aforementioned column structure.
 #'
 #' ```
@@ -103,13 +106,12 @@
 #' [x, ]|  Rx     | LxTx | LxTx error |
 #'
 #' ```
-#' **NOTE:** The function assumes the first row of the function to be the
-#' `Ln/Tn`-value. If you want to provide more than one `Ln/Tn`-value consider
-#' using the argument `LnTn`.
+#' **NOTE:** The function assumes the first row of the data to be the
+#' `Ln/Tn`-value. If you want to provide more than one `Ln/Tn`-values, consider
+#' using argument `LnTn`.
 #'
 #' @param LnTn [data.frame] (*optional*):
-#' This argument should **only** be used to provide more than one `Ln/Tn`-value.
-#' It assumes a two column data frame with the following structure:
+#' A two column data frame with the following structure:
 #'
 #' ```
 #'      |  LnTn  |  LnTn error  |
@@ -127,33 +129,38 @@
 #' this value must be calculated beforehand and used in the first row in the
 #' data frame for argument `data`.
 #'
-#' **NOTE:** If you provide `LnTn`-values with this argument the data frame
-#' for the `data`-argument **must not** contain any `LnTn`-values!
+#' **NOTE:** This argument should **only** be used to provide more than one
+#' `Ln/Tn`-value. If you provide `LnTn`-values with this argument, the data
+#' frame for the `data`-argument **must not** contain any `LnTn`-values.
 #'
 #' @param rhop [numeric] (**required**):
-#' The density of recombination centres (\eqn{\rho}') and its error (see Huntley 2006),
-#' given as numeric vector of length two. Note that \eqn{\rho}' must **not** be
+#' A vector of length 2 for the density of recombination centres (\eqn{\rho}')
+#' and its error (see Huntley 2006). Note that \eqn{\rho}' must **not** be
 #' provided as the common logarithm. Example: `rhop = c(2.92e-06, 4.93e-07)`.
 #'
 #' @param ddot [numeric] (**required**):
-#' Environmental dose rate and its error, given as a numeric vector of length two.
+#' A vector of length 2 for the environmental dose rate and its error.
 #' Expected unit: Gy/ka. Example: `ddot = c(3.7, 0.4)`.
 #'
 #' @param readerDdot [numeric] (**required**):
-#' Dose rate of the irradiation source of the OSL reader and its error,
-#' given as a numeric vector of length two.
+#' A vector of length 2 for the dose rate of the irradiation source of the OSL
+#' reader and its error.
 #' Expected unit: Gy/s. Example: `readerDdot = c(0.08, 0.01)`.
 #'
+#' @param normalise [logical] (*with default*): If `TRUE` (the default) all
+#' measured and computed \eqn{\frac{L_x}{T_x}} values are normalised by the
+#' pre-exponential factor `A` (see details).
+#'
 #' @param fit.method [character] (*with default*):
-#' Fit function of the dose response curve. Can either be `EXP` (the default)
-#' or `GOK`. Note that `EXP` (single saturating exponential) is the original
+#' Fit function of the dose response curve. Can either be `"EXP"` (default) or
+#' `"GOK"`. Note that `"EXP"` (single saturating exponential) is the original
 #' function the model after Huntley (2006) and Kars et al. (2008) was
-#' designed to use. The use of a general-order kinetics function (`GOK`)
+#' designed to use. The use of a general-order kinetics function (`"GOK"`)
 #' is an experimental adaptation of the model and should be used
 #' with great care.
 #'
 #' @param lower.bounds [numeric] (*with default*):
-#' A vector of length 4 that contains the lower bound values to be applied
+#' A vector of length 4 for the values of the lower bounds to be applied
 #' when fitting the models with [minpack.lm::nlsLM]. In most cases, the
 #' default values (`c(-Inf, -Inf, -Inf, -Inf)`) are appropriate for finding
 #' a best fit, but sometimes it may be useful to restrict the lower bounds to
@@ -162,7 +169,9 @@
 #' when `fit.method = "EXP"`). More details can be found in
 #' [fit_DoseResponseCurve].
 #'
-#' @param normalise [logical] (*with default*): If `TRUE` (the default) all measured and computed \eqn{\frac{L_x}{T_x}} values are normalised by the pre-exponential factor `A` (see details).
+#' @param cores [integer] (*with default*):
+#' The number of cores to use. This will be capped to the number of available
+#' cores if set to too high.
 #'
 #' @param summary [logical] (*with default*):
 #' If `TRUE` (the default) various parameters provided by the user
@@ -174,14 +183,18 @@
 #'
 #' @param ...
 #' Further parameters:
-#' - `verbose` [logical]: Show or hide console output
-#' - `n.MC` [numeric]: Number of Monte Carlo iterations (default = `10000`).
+#' - `verbose` [logical]: Enable/disable output to the terminal (default = `TRUE`)
+#' - `n.MC` [numeric]: Number of Monte Carlo iterations (default = 10000)
+#' - `cex` [numeric]: Scaling of the plot (default = 1)
+#' - `maxiter` [numeric]: Number of iteration limits for nls fitting
+#' - `trace` [logical]: Enable/disable value tracing the terminal during fitting
 #' **Note** that it is generally advised to have a large number of Monte Carlo
 #' iterations for the results to converge. Decreasing the number of iterations
 #' will often result in unstable estimates.
 #'
-#' All other arguments are passed to [plot] and [fit_DoseResponseCurve] (in particular
-#' `mode` for the fit mode and `fit.force_through_origin`)
+#' All other arguments are passed to [plot] and [fit_DoseResponseCurve] (in
+#' particular `mode` for the De calculation mode, `fit.force_through_origin`,
+#' and `fit.bounds`).
 #'
 #' @return An [RLum.Results-class] object is returned:
 #'
@@ -194,7 +207,7 @@
 #' `Ln` \tab [numeric] \tab Ln and its error \cr
 #' `LxTx_tables` \tab `list` \tab A `list` of `data.frames` containing data on dose,
 #'  LxTx and LxTx error for each of the dose response curves.
-#'  Note that these **do not** contain the natural Ln signal, which is provided separately. \cr
+#'  Note that these **do not** contain the natural `Ln` signal, which is provided separately. \cr
 #' `fits` \tab `list` \tab A `list` of `nls` objects produced by [minpack.lm::nlsLM] when fitting the dose response curves \cr
 #' }
 #'
@@ -206,17 +219,18 @@
 #' `args` \tab `list` \tab arguments of the original function call \cr
 #' }
 #'
-#' @section Function version: 0.4.5
+#' @section Function version: 0.4.6
 #'
 #' @author
 #' Georgina E. King, University of Lausanne (Switzerland) \cr
 #' Christoph Burow, University of Cologne (Germany) \cr
-#' Sebastian Kreutzer, Ruprecht-Karl University of Heidelberg (Germany)
+#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
 #' @keywords datagen
 #'
 #' @note This function has BETA status, in particular for the GOK implementation. Please verify
-#' your results carefully
+#' your results carefully.
 #'
 #' @references
 #'
@@ -298,6 +312,7 @@ calc_Huntley2006 <- function(
     normalise = TRUE,
     fit.method = c("EXP", "GOK"),
     lower.bounds = c(-Inf, -Inf, -Inf, -Inf),
+    cores = 1,
     summary = TRUE,
     plot = TRUE,
     ...
@@ -311,6 +326,8 @@ calc_Huntley2006 <- function(
   .validate_not_empty(data)
   fit.method <- .validate_args(fit.method, c("EXP", "GOK"))
   .validate_length(lower.bounds, 4)
+  .validate_logical_scalar(summary)
+  .validate_logical_scalar(plot)
 
   ## Check 'data'
   if (ncol(data) == 2) {
@@ -379,23 +396,19 @@ calc_Huntley2006 <- function(
   # check if numeric
   if (is.numeric(rhop)) {
     .validate_length(rhop, 2)
-
-    # alternatively, an RLum.Results object produced by analyse_FadingMeasurement()
-    # can be provided
-  } else if (inherits(rhop, "RLum.Results")) {
-
-    if (rhop@originator == "analyse_FadingMeasurement")
-      rhop <- c(rhop@data$rho_prime$MEAN,
-                rhop@data$rho_prime$SD)
-    else
+  } else {
+    ## alternatively, an RLum.Results object produced by
+    ## analyse_FadingMeasurement() can be provided
+    if (is.na(rhop@originator) || rhop@originator != "analyse_FadingMeasurement")
       .throw_error("'rhop' accepts only RLum.Results objects produced ",
                    "by 'analyse_FadingMeasurement()'")
+    rhop <- c(rhop@data$rho_prime$MEAN, rhop@data$rho_prime$SD)
   }
 
   # check if 'rhop' is actually a positive value
   if (anyNA(rhop) || !rhop[1] > 0 || any(is.infinite(rhop))) {
-    .throw_error("'rhop' must be a positive number. Provided value ",
-                 "was: ", signif(rhop[1], 3), " \u2213 ", signif(rhop[2], 3))
+    .throw_error("'rhop' must be a positive number, the provided value ",
+                 "was ", signif(rhop[1], 3), " \u00B1 ", signif(rhop[2], 3))
   }
 
   ## Check ddot & readerDdot
@@ -404,19 +417,34 @@ calc_Huntley2006 <- function(
   .validate_class(readerDdot, "numeric")
   .validate_length(readerDdot, 2)
 
+  ## set up the parallel cluster
+  .validate_positive_scalar(cores, int = TRUE)
+  available.cores <- parallel::detectCores()
+  cores <- min(cores, available.cores)
+  cl <- parallel::makeCluster(cores)
+  on.exit(parallel::stopCluster(cl), add = TRUE)
+
   ## Settings ------------------------------------------------------------------
+  extraArgs <- list(...)
   settings <- modifyList(
     list(
       verbose = TRUE,
-      n.MC = 10000),
-    list(...))
+      n.MC = 10000,
+      plot_all_DRC = plot,
+      maxiter = 500,
+      trace = FALSE),
+    extraArgs)
+
+  .validate_positive_scalar(settings$n.MC, int = TRUE, name = "'n.MC'")
+  if (settings$n.MC == 1) {
+    settings$n.MC <- max(settings$n.MC, 2)
+    extraArgs$n.MC <- settings$n.MC
+  }
 
   ## Define Constants ----------------------------------------------------------
-  kb <- 8.617343 * 1e-5
-  alpha <- 1
+
   Hs <- 3e15 # s value after Huntley (2006)
-  Ma <- 1e6 * 365.25 * 24 * 3600 #in seconds
-  ka <- Ma / 1000 #in seconds
+  ka <- 1e3 * .const$year_s # in seconds
 
   ## Define Functions ----------------------------------------------------------
   # fit data using using Eq 5. from Kars et al (2008) employing
@@ -446,13 +474,12 @@ calc_Huntley2006 <- function(
   ## around 2.2, so setting it to 3 should be enough in general, and 1000
   ## points seem also enough; in any case, we let the user override it
   rprime <- seq(0.01, 3, length.out = 1000)
-  if ("rprime" %in% names(list(...))) {
-    rprime <- list(...)$rprime
+  if ("rprime" %in% names(extraArgs)) {
+    rprime <- extraArgs$rprime
     .validate_class(rprime, "numeric")
   }
 
   ## (1) MEASURED ----------------------------------------------------
-
   data.tmp <- data
   data.tmp[ ,1] <- data.tmp[ ,1] * readerDdot
 
@@ -463,23 +490,24 @@ calc_Huntley2006 <- function(
     fit.force_through_origin = FALSE,
     verbose = FALSE)
 
-  GC.settings <- modifyList(GC.settings, list(...))
+  GC.settings <- modifyList(GC.settings, extraArgs)
   GC.settings$object <- data.tmp
   GC.settings$verbose <- FALSE
 
-  ## take of force_through origin settings
+  fit.bounds <- GC.settings$fit.bounds
   force_through_origin <- GC.settings$fit.force_through_origin
   mode_is_extrapolation <- GC.settings$mode == "extrapolation"
 
   ## call the fitting
   GC.measured <- try(do.call(fit_DoseResponseCurve, GC.settings))
 
-  if (inherits(GC.measured$Fit, "try-error"))
-    .throw_error("Unable to fit growth curve to measured data, try setting ",
-                 "'fit.bounds = FALSE'")
-  if (plot) {
+  if (inherits(GC.measured$Fit, "try-error")) {
+    .throw_error("Unable to fit growth curve to measured data",
+                 ifelse(fit.bounds, ", try setting 'fit.bounds = FALSE'", ""))
+  }
+  if (settings$plot_all_DRC) {
     plot_DoseResponseCurve(GC.measured, main = "Measured dose response curve",
-                           xlab = "Dose (Gy)", verbose = FALSE)
+                           xlab = "Dose [Gy]", verbose = FALSE)
   }
 
   # extract results and calculate age
@@ -523,29 +551,74 @@ calc_Huntley2006 <- function(
   }
 
   ## do the fitting
-  fitcoef <- do.call(rbind, sapply(rhop_MC, function(rhop_i) {
+  fitcoef <- do.call(rbind, parallel::parLapply(cl, rhop_MC, function(rhop_i) {
     fit_sim <- try({
       minpack.lm::nlsLM(
        formula = model,
        start = start,
        lower = lower.bounds,
        upper = upper.bounds,
+       trace = settings$trace,
        control = list(maxiter = settings$maxiter))
     }, silent = TRUE)
 
     if (!inherits(fit_sim, "try-error"))
       coefs <- coef(fit_sim)
-    else
-      .throw_error("Could not fit simulated curve, check suitability of ",
-                   "model and parameters")
+    else {
+      ## As the fit from the given starting values failed, try again by fixing
+      ## D0 at different values to make the fitting a bit easier. Values are
+      ## spaced logarithmically so that the ratio between consecutive values
+      ## is constant.
+      # all.D0 <- c(start$D0, exp(seq(log(start$D0 / 10), log(start$D0 * 10),
+      #                               length.out = 99)))
+      ## ALTERNATIVE: sample from a gamma distribution; with only 10, this should
+      ## be enough based on tests RLumSK (2025-03-29)
+      all.D0 <- stats::rgamma(10, shape = start$D0)
+      fit.D0 <- lapply(1:length(all.D0), function(idx) {
+        D0 <- all.D0[idx]
+        t <- try(minpack.lm::nlsLM(
+                  formula = model,
+                  start = start[-2],
+                  lower = lower.bounds[-2],
+                  upper = upper.bounds[-2],
+                  control = list(maxiter = settings$maxiter)),
+                 silent = TRUE)
+
+        if (inherits(t, "try-error"))
+          return(NULL)
+        return(t)
+      })
+
+      ## pick the one with the best fit after removing those that didn't fit
+      fit.D0 <- .rm_NULL_elements(fit.D0)
+
+      ## if also this fails, we should throw an error, but as we are inside
+      ## a parallel region, we cannot do that cleanly, so we return NA and
+      ## only afterwards we'll throw the error
+      if (length(fit.D0) == 0)
+        return(NA)
+
+      ## extract the coefficients from the one with the best fit
+      fit.D0 <- fit.D0[[which.min(vapply(fit.D0, stats::deviance, numeric(1)))]]
+      coefs <- coef(fit.D0)
+
+      ## add back the coefficient for D0
+      D0 <- environment(fit.D0$m$predict)$env$D0
+      coefs <- c(coefs[1], D0 = D0, coefs[2:length(coefs)])
+    }
 
     return(coefs)
-  }, simplify = FALSE))
+  }))
+
+  ## check if errors had occurred during model fitting
+  if (anyNA(fitcoef)) {
+    .throw_error("Could not fit simulated curve, check suitability of ",
+                 "model and parameters")
+  }
 
   # final fit for export
   # fit_simulated <- minpack.lm::nlsLM(LxTx.measured ~ a * theta(dosetime, rhop[1]) * (1 - exp(-dosetime / D0)),
   #                      start = list(a = max(LxTx.measured), D0 = D0.measured / readerDdot))
-
   # scaling factor
   A <- mean(fitcoef[, "a"], na.rm = TRUE)
   A.error <- sd(fitcoef[ ,"a"], na.rm = TRUE)
@@ -598,12 +671,16 @@ calc_Huntley2006 <- function(
     }
   }
 
-
   LxTx.sim <- colSums(TermA) / sum(pr)
   # warning("LxTx Curve (new): ", round(max(LxTx.sim) / A, 3), call. = FALSE)
 
   # calculate Age
   positive <- which(diff(LxTx.sim) > 0)
+  if (length(positive) == 0) {
+    .throw_error("All simulated Lx/Tx values are identical and approximately ",
+                 "zero. Please verify the accuracy of your rho' value, as this ",
+                 "is likely too large and may not be realistic")
+  }
 
   data.unfaded <- data.frame(
     dose = c(0, natdosetimeGray[positive]),
@@ -623,7 +700,7 @@ calc_Huntley2006 <- function(
   De.sim <- De.error.sim <- D0.sim.Gy <- D0.sim.Gy.error <- NA
   Age.sim <- Age.sim.error <- Age.sim.2D0 <- Age.sim.2D0.error <- NA
   if (!inherits(GC.simulated, "try-error")) {
-    if (plot) {
+    if (settings$plot_all_DRC) {
       plot_DoseResponseCurve(GC.simulated, main = "Simulated dose response curve",
                              xlab = "Dose (Gy)", verbose = FALSE)
     }
@@ -649,8 +726,8 @@ calc_Huntley2006 <- function(
   }
 
   if (Ln > max(LxTx.sim) * 1.1)
-    .throw_warning("Ln is >10 % larger than the maximum computed LxTx value.",
-                   " The De and age should be regarded as infinite estimates.")
+    .throw_warning("Ln is >10 % larger than the maximum computed LxTx value, ",
+                   "the De and age should be regarded as infinite estimates")
 
   if (Ln < min(LxTx.sim) * 0.95 && !mode_is_extrapolation)
     .throw_warning("Ln/Tn is smaller than the minimum computed LxTx value: ",
@@ -680,16 +757,16 @@ calc_Huntley2006 <- function(
   ##
   ## Now, substituting (2') into (3) we get:
   ##
-  ##  (3') tau <- ((1 / Hs) * exp(1)^(rprime / (rhop_MC[i]^(1 / 3))) / ka
+  ##  (3') tau <- (1 / Hs) * exp(rprime / (rhop_MC[i]^(1 / 3))) / ka
   ##
   ## The current formulation then follows:
   ##
   ##  rho_i <- rhop_MC[i]^(1 / 3)
-  ##  tau <- ((1 / Hs) * exp(1)^(rprime / rho_i)) / ka
+  ##  tau <- (1 / Hs) * exp(rprime / rho_i) / ka
 
   rho_MC <- rhop_MC^(1 / 3)
   nN_SS_MC <- mapply(function(rho_i, ddot_i, UFD0_i) {
-    tau <- ((1 / Hs) * exp(1)^(rprime / rho_i)) / ka
+    tau <- (1 / Hs) * exp(rprime / rho_i) / ka
     Ls <- 1 / (1 + UFD0_i / (ddot_i * tau))
     Lstrap <- (pr * Ls) / sum(pr)
 
@@ -729,6 +806,7 @@ calc_Huntley2006 <- function(
            c(Inf, max(dosetimeGray), Inf)
           },
         lower = lower.bounds[1:3],
+        trace = settings$trace,
       control = list(maxiter = settings$maxiter)), silent = TRUE)
   }
 
@@ -749,7 +827,7 @@ calc_Huntley2006 <- function(
       start = list(
         a = coef(fit_start)[["a"]],
         D0 = coef(fit_start)[["D0"]],
-        c = coef(fit_start)[["c"]],
+        c = max(coef(fit_start)[["c"]], 1),
         d = coef(fit_simulated)[["d"]]),
       upper = if(force_through_origin) {
         c(a = Inf, D0 = max(dosetimeGray), c = Inf, d = 1)
@@ -769,16 +847,14 @@ calc_Huntley2006 <- function(
   ## Create LxTx tables --------------------------------------------------------
   # normalise by A (saturation point of the un-faded curve)
   if (normalise) {
-    LxTx.measured.relErr <- (LxTx.measured.error / LxTx.measured)
     LxTx.measured <- LxTx.measured / A
-    LxTx.measured.error <- LxTx.measured * LxTx.measured.relErr
+    LxTx.measured.error <- LxTx.measured.error / A
 
     LxTx.sim <- LxTx.sim / A
     LxTx.unfaded <- LxTx.unfaded / A
 
-    Ln.relErr <- Ln.error / Ln
     Ln <- Ln / A
-    Ln.error <- Ln * Ln.relErr
+    Ln.error <- Ln.error / A
   }
 
   # combine all computed LxTx values
@@ -800,21 +876,20 @@ calc_Huntley2006 <- function(
   ## Plot settings -------------------------------------------------------------
   plot.settings <- modifyList(list(
     main = "Dose response curves",
-    xlab = "Dose (Gy)",
-    ylab = ifelse(normalise, "normalised LxTx (a.u.)", "LxTx (a.u.)")
-  ), list(...))
+    cex = 1,
+    xlab = "Dose [Gy]",
+    ylab = ifelse(normalise, "normalised LxTx [a.u.]", "LxTx [a.u.]")
+  ), extraArgs)
 
   ## Plotting ------------------------------------------------------------------
   if (plot) {
     ### par settings ---------
-    # set plot parameters
-    par.old.full <- par(no.readonly = TRUE)
+    par.default <- par(no.readonly = TRUE)
+    on.exit(par(par.default), add = TRUE)
 
     # set graphical parameters
-    par(mfrow = c(1,1), mar = c(4.5, 4, 4, 4), cex = 0.8,
-        oma = c(0, 9, 0, 9))
-    if (summary)
-      par(oma = c(0, 3, 0, 9))
+    par(mfrow = c(1,1), mar = c(4.5, 4, 4, 4), cex = 0.8 * plot.settings$cex,
+        oma = c(0, 0, 0, if (summary) 12 / plot.settings$cex else 0))
 
     # Find a good estimate of the x-axis limits
     if (mode_is_extrapolation && !force_through_origin) {
@@ -822,9 +897,9 @@ calc_Huntley2006 <- function(
       De.measured <- -De.measured
     }
 
-    xlim <- range(pretty(dosetimeGray))
+    xlim <- range(pretty(dosetimeGray, n = 15))
     if (!is.na(De.sim) & De.sim > xlim[2])
-      xlim <- range(pretty(c(min(dosetimeGray), De.sim)))
+      xlim <- range(pretty(c(min(dosetimeGray), De.sim), n = 15))
 
     # Create figure after Kars et al. (2008) contrasting the dose response curves
     ## open plot window ------------
@@ -839,9 +914,8 @@ calc_Huntley2006 <- function(
       xlim = xlim
     )
 
-    ##add ablines for extrapolation
-    if (mode_is_extrapolation)
-      abline(v = 0, h = 0, col = "gray")
+    ## add horizontal line at zero
+    abline(v = 0, h = 0, col = "gray")
 
     # LxTx error bars
     segments(x0 = dosetimeGray[dosetimeGray >= 0],
@@ -879,7 +953,7 @@ calc_Huntley2006 <- function(
 
     # Ln and DE as points
     points(x = if (mode_is_extrapolation)
-                rep(De.measured, 2)
+                 rep(De.measured, 2)
                else
                  c(0, De.measured),
            y = if (mode_is_extrapolation)
@@ -898,7 +972,7 @@ calc_Huntley2006 <- function(
     lines(x = if (mode_is_extrapolation)
                 c(0, min(c(De.measured, De.sim), na.rm = TRUE))
               else
-                c(par()$usr[1], max(c(De.measured, De.sim), na.rm = TRUE)),
+                c(par()$usr[1], max(c(De.measured, De.sim, 0), na.rm = TRUE)),
           y = c(Ln, Ln),
           col = "red ", lty = 3)
 
@@ -914,6 +988,7 @@ calc_Huntley2006 <- function(
              "Unfaded DRC",
              "Measured DRC",
              "Simulated natural DRC"),
+           inset = c(0, 0.04),
            lty = c(5, 1, 3),
            bty = "n",
            cex = 0.8)
@@ -969,22 +1044,11 @@ calc_Huntley2006 <- function(
       )
 
       # each of the labels is positioned at 1/10 of the available y-axis space
-      ypos <- seq(range(axTicks(2))[2], range(axTicks(2))[1], length.out = 10)[1:length(labels.text)]
-
-      # allow overprinting
-      par(xpd = NA)
-
-      # add labels iteratively
-      mapply(function(label, pos) {
-        text(x = par("usr")[2] * 1.05,
-             y = pos,
-             labels = label,
-             pos = 4)
-      }, labels.text, ypos)
+      ypos <- seq(range(axTicks(2))[2], range(axTicks(2))[1], length.out = 10)
+      for (i in seq_along(labels.text))
+        mtext(labels.text[[i]], at = ypos[i],
+              side = 4, line = 1, las = 1, padj = 1)
     }
-
-    # recover plot parameters
-    on.exit(par(par.old.full), add = TRUE)
   }
 
   ## Results -------------------------------------------------------------------

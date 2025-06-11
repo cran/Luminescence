@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_SAR.CWOSL.R
 \name{analyse_SAR.CWOSL}
 \alias{analyse_SAR.CWOSL}
-\title{Analyse SAR CW-OSL measurements}
+\title{Analyse SAR CW-OSL Measurements}
 \usage{
 analyse_SAR.CWOSL(
   object,
@@ -13,6 +13,7 @@ analyse_SAR.CWOSL(
   OSL.component = NULL,
   rejection.criteria = list(),
   dose.points = NULL,
+  dose.points.test = NULL,
   trim_channels = FALSE,
   mtext.outer = "",
   plot = TRUE,
@@ -82,6 +83,10 @@ a numeric vector containing the dose points values. Using this argument
 overwrites dose point values extracted from other data. Can be a \link{list} of
 \link{numeric} vectors, if \code{object} is of type \link{list}}
 
+\item{dose.points.test}{\link{numeric} (\emph{optional}): a numeric vector containing
+with the test dose in the same units as \code{dose.points}. If length = 1, the numbers
+will be recycled. Has only an effect for \code{fit.method = 'OTORX'}}
+
 \item{trim_channels}{\link{logical} (\emph{with default}): trim channels per record category
 to the lowest number of channels in the category by using \link{trim_RLum.Data}.
 Applies only to \code{OSL} and \code{IRSL} curves. For a more granular control use \link{trim_RLum.Data}
@@ -109,8 +114,8 @@ curve fitting and plotting is skipped.
 This allows to get hands on the \code{Lx/Tx} table for large datasets
 without the need for a curve fitting.}
 
-\item{...}{further arguments that will be passed to the function
-\link{plot_GrowthCurve} or \link{calc_OSLLxTxRatio}
+\item{...}{further arguments that will be passed to the functions
+\link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve} or \link{calc_OSLLxTxRatio}
 (supported: \code{background.count.distribution}, \code{sigmab}, \code{sig0}).
 \strong{Please note} that if you consider to use the early light subtraction
 method you should provide your own \code{sigmab} value!}
@@ -219,7 +224,7 @@ This function must not be mixed up with the function
 \strong{The function currently does support only 'OSL', 'IRSL' and 'POSL' data!}
 }
 \section{Function version}{
- 0.10.5
+ 0.11.0
 }
 
 \examples{
@@ -256,10 +261,24 @@ get_RLum(results)
 ##show LnTnLxTx table
 get_RLum(results, data.object = "LnLxTnTx.table")
 
+## Run example with special case for
+## the OTORX fit
+\dontrun{
+results <- analyse_SAR.CWOSL(
+ object = object,
+ signal.integral.min = 1,
+ signal.integral.max = 2,
+ dose.points.test = 15,
+ background.integral.min = 900,
+ background.integral.max = 1000,
+ n.MC = 10,
+ fit.method = "OTORX")
+}
+
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_SAR.CWOSL(): Analyse SAR CW-OSL measurements. Function version 0.10.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_SAR.CWOSL(): Analyse SAR CW-OSL Measurements. Function version 0.11.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -280,7 +299,7 @@ doi:10.1016/j.radmeas.2008.06.002
 }
 \seealso{
 \link{calc_OSLLxTxRatio}, \link{plot_GrowthCurve}, \linkS4class{RLum.Analysis},
-\linkS4class{RLum.Results}, \link{get_RLum}
+\linkS4class{RLum.Results}, \link{get_RLum}, \link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve}
 }
 \author{
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)

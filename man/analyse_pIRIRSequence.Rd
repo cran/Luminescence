@@ -113,11 +113,10 @@ with the following options:
 \code{pdf(file = "<YOUR FILENAME>", height = 18, width = 18)}
 }
 \section{Function version}{
- 0.2.5
+ 0.2.6
 }
 
 \examples{
-
 
 ### NOTE: For this example existing example data are used. These data are non pIRIR data.
 ###
@@ -174,7 +173,7 @@ pdf(file = tempfile, height = 18, width = 18)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

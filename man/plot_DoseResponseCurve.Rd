@@ -8,7 +8,6 @@ plot_DoseResponseCurve(
   object,
   plot_extended = TRUE,
   plot_singlePanels = FALSE,
-  cex.global = 1,
   verbose = TRUE,
   ...
 )
@@ -31,9 +30,6 @@ If \code{FALSE}, just the growth curve will be plotted.}
 single plot output (\code{TRUE/FALSE}) to allow for plotting the results in
 single plot windows. Ignored if \code{plot_extended = FALSE}.}
 
-\item{cex.global}{\link{numeric} (\emph{with default}):
-global scaling factor.}
-
 \item{verbose}{\link{logical} (\emph{with default}):
 enable/disable output to the terminal.}
 
@@ -50,7 +46,7 @@ A dose-response curve is produced for luminescence measurements using a
 regenerative or additive protocol as implemented in \link{fit_DoseResponseCurve}.
 }
 \section{Function version}{
- 1.0.2
+ 1.0.4
 }
 
 \examples{
@@ -85,7 +81,7 @@ plot(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2025. plot_DoseResponseCurve(): Plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.0.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2025. plot_DoseResponseCurve(): Plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.0.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

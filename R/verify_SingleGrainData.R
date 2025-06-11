@@ -1,7 +1,8 @@
 #' @title Verify single grain data sets and check for invalid grains, i.e.
 #' zero-light level grains
 #'
-#' @description This function tries to identify automatically zero-light level curves (grains)
+#' @description
+#' This function tries to identify automatically zero-light level curves (grains)
 #' from single grain data measurements.
 #'
 #' @details
@@ -171,7 +172,7 @@ verify_SingleGrainData <- function(
       verify_SingleGrainData(
         object = object[[x]],
         threshold = threshold,
-        use_fft = use_fft[1],
+        use_fft = use_fft,
         cleanup = cleanup,
         cleanup_level = cleanup_level,
         verbose = verbose,
@@ -181,7 +182,7 @@ verify_SingleGrainData <- function(
     }))
 
     ##account for cleanup
-    if(cleanup[1]){
+    if (cleanup) {
       results <- .rm_NULL_elements(.rm_nonRLum(results))
       if(length(results) == 0)
         return(NULL)
@@ -195,7 +196,12 @@ verify_SingleGrainData <- function(
 
   ## ------------------------------------------------------------------------
   ## input validation
-  .validate_class(object, c("Risoe.BINfileData", "RLum.Analysis"))
+
+  .validate_class(object, c("Risoe.BINfileData", "RLum.Analysis"),
+                  extra = "a 'list' of such objects")
+  .validate_class(threshold, c("numeric", "integer"))
+  .validate_logical_scalar(use_fft)
+  .validate_logical_scalar(cleanup)
   cleanup_level <- .validate_args(cleanup_level, c("aliquot", "curve"))
 
   ## implement Fourier Transform for Frequency Analysis
@@ -206,8 +212,7 @@ verify_SingleGrainData <- function(
       tmp_power_spectrum <- Mod(stats::fft(x)^2)
       tmp_mean_power <- mean(tmp_power_spectrum[-1])
       tmp_dominant_power <- max(tmp_power_spectrum[2:(length(tmp_power_spectrum)/2)])
-      tmp_sel <- tmp_dominant_power > tmp_threshold * tmp_mean_power
-      tmp_sel
+      tmp_dominant_power > tmp_threshold * tmp_mean_power
     }, logical(1))
   }
 
@@ -227,7 +232,7 @@ verify_SingleGrainData <- function(
     ##SEL
     temp.results_matrix_VALID <-
       temp.results_matrix_RATIO > threshold &
-      if(use_fft[1]) .calc_FFT_selection(object@DATA) else TRUE
+      if (use_fft) .calc_FFT_selection(object@DATA) else TRUE
 
     ##combine everything to in a data.frame
     selection <- data.frame(
@@ -261,7 +266,6 @@ verify_SingleGrainData <- function(
     if(cleanup){
       ##selected wanted elements
       object@DATA <- object@DATA[selection_id]
-
       if(length(object@DATA) > 0) {
         object@METADATA <- object@METADATA[selection_id,]
         object@METADATA$ID <- 1:length(object@DATA)
@@ -269,9 +273,9 @@ verify_SingleGrainData <- function(
         ##print message
         selection_id <- .collapse(selection_id, quote = FALSE)
         if(verbose){
-          cat(paste0("\n[verify_SingleGrainData()] Risoe.BINfileData object reduced to records: \n", selection_id))
+          cat("\n[verify_SingleGrainData()] Risoe.BINfileData object reduced to records:\n",
+              selection_id)
           cat("\n\n[verify_SingleGrainData()] Risoe.BINfileData object record index reset.\n")
-
         }
       } else {
         object <- NULL
@@ -314,7 +318,7 @@ verify_SingleGrainData <- function(
 
     ##SEL
     temp.results_matrix_VALID <- temp.results_matrix_RATIO > threshold &
-      if(use_fft[1]) .calc_FFT_selection(object_list) else TRUE
+      if (use_fft) .calc_FFT_selection(object_list) else TRUE
 
     ##get structure for the RLum.Analysis object
     temp_structure <- structure_RLum(object, fullExtent = TRUE)
@@ -331,10 +335,7 @@ verify_SingleGrainData <- function(
         THRESHOLD = rep_len(threshold, length(object_list)),
         VALID = temp.results_matrix_VALID
       )
-
-      ##get unique pairs for POSITION and GRAIN for VALID == TRUE
-      unique_pairs <- unique(
-        selection[selection[["VALID"]], c("POSITION", "GRAIN")])
+      sel.cols <- c("POSITION", "GRAIN")
 
     } else if (object@originator == "read_XSYG2R") {
       ##combine everything to in a data.frame
@@ -350,21 +351,20 @@ verify_SingleGrainData <- function(
         THRESHOLD = rep_len(threshold, length(object_list)),
         VALID = temp.results_matrix_VALID
       )
-
-      ##get unique pairs for POSITION for VALID == TRUE
-      unique_pairs <- unique(
-        selection[["POSITION"]][selection[["VALID"]]])
+      sel.cols <- "POSITION"
 
     } else{
       .throw_error("Object originator '", object@originator, "' not supported")
     }
 
+    ## get unique POSITION and GRAIN pairs where VALID == TRUE
+    unique_pairs <- unique(selection[selection[["VALID"]], sel.cols, drop = FALSE])
 
     ##set up cleanup
     if(cleanup_level == "aliquot") {
       if (object@originator == "read_XSYG2R") {
 
-        if(!is.na(unique_pairs)){
+        if (!all(is.na(unique_pairs))) {
           selection_id <-
             sort(unlist(lapply(1:nrow(unique_pairs), function(x) {
               which(.subset2(selection, 1) == .subset2(unique_pairs, 1)[x])
@@ -373,7 +373,6 @@ verify_SingleGrainData <- function(
         }else{
           selection_id <- NA
         }
-
 
       } else if (object@originator == "Risoe.BINfileData2RLum.Analysis") {
         selection_id <-
@@ -395,15 +394,15 @@ verify_SingleGrainData <- function(
 
     ##return value
     ##select output on the chosen input
-    if (cleanup[1] && !anyNA(selection_id)) {
+    if (cleanup && !anyNA(selection_id)) {
       ##print message
       if(verbose && cleanup_level == "curve"){
         selection_id_text <- .collapse(selection_id, quote = FALSE)
         if(selection_id_text == "")
           selection_id_text <- "<none>"
 
-        cat(paste0("[verify_SingleGrainData()] RLum.Analysis object reduced to records: ",
-                   selection_id_text), "\n")
+        message("[verify_SingleGrainData()] RLum.Analysis object reduced to records: ",
+                selection_id_text)
       }
 
       ##selected wanted elements
@@ -430,7 +429,6 @@ verify_SingleGrainData <- function(
         )
       }
 
-
       ##return
       return_object <- object
 
@@ -448,7 +446,7 @@ verify_SingleGrainData <- function(
       )
 
       ## cleanup means cleanup
-      if(cleanup[1])
+      if (cleanup)
         return_object <- NULL
     }
   }
@@ -494,7 +492,7 @@ verify_SingleGrainData <- function(
 
   # Return --------------------------------------------------------------------------------------
   if(is.null(return_object))
-    .throw_warning("Verification and cleanup removed all records. NULL returned!")
+    .throw_warning("Verification and cleanup removed all records, NULL returned")
 
   return(return_object)
 }

@@ -8,7 +8,7 @@ plot_ViolinPlot(
   data,
   boxplot = TRUE,
   rug = TRUE,
-  summary = NULL,
+  summary = c("n", "median"),
   summary.pos = "sub",
   na.rm = TRUE,
   ...
@@ -26,7 +26,7 @@ enable/disable boxplot}
 \item{rug}{\link{logical} (\emph{with default}):
 enable/disable rug}
 
-\item{summary}{\link{character} (\emph{optional}):
+\item{summary}{\link{character} (\emph{with default}):
 add statistic measures of centrality and dispersion to the plot.
 Can be one or more of several keywords. See details for available keywords.}
 
@@ -85,7 +85,7 @@ plot_ViolinPlot(data = ExampleData.DeValues)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_ViolinPlot(): Create a violin plot. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_ViolinPlot(): Create a violin plot. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

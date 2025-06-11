@@ -2,9 +2,12 @@
 % Please edit documentation in R/Luminescence-generics.R
 \name{sort_RLum}
 \alias{sort_RLum}
+\alias{sort_RLum,list-method}
 \title{Sort data for RLum S4-class objects}
 \usage{
 sort_RLum(object, ...)
+
+\S4method{sort_RLum}{list}(object, ...)
 }
 \arguments{
 \item{object}{\linkS4class{RLum} or \linkS4class{Risoe.BINfileData} (\strong{required}):
@@ -22,6 +25,11 @@ function will be selected.
 Allowed arguments can be found in the documentations of the corresponding
 \linkS4class{RLum} class.
 }
+\section{Functions}{
+\itemize{
+\item \code{sort_RLum(list)}: Returns a list of \linkS4class{RLum} objects that had been passed to \link{sort_RLum}
+
+}}
 \section{Function version}{
  0.1.0
 }
@@ -44,7 +52,7 @@ Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Colombo, M., 2025. sort_RLum(): Sort data for RLum S4-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Colombo, M., 2025. sort_RLum(): Sort data for RLum S4-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

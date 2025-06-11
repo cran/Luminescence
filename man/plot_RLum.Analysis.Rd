@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_RLum.Analysis.R
 \name{plot_RLum.Analysis}
 \alias{plot_RLum.Analysis}
-\title{Plot function for an RLum.Analysis S4 class object}
+\title{Plot function for an \code{RLum.Analysis} S4 class object}
 \usage{
 plot_RLum.Analysis(
   object,
@@ -76,7 +76,7 @@ Returns multiple plots.
 }
 \description{
 The function provides a standardised plot output for curve data of an
-RLum.Analysis S4 class object
+\linkS4class{RLum.Analysis} object
 
 The function produces a multiple plot output. A file output is recommended
 (e.g., \link{pdf}).
@@ -140,7 +140,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

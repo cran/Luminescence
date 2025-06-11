@@ -1,5 +1,6 @@
-#' Plot kernel density estimate with statistics
+#' @title Plot kernel density estimate with statistics
 #'
+#' @description
 #' Plot a kernel density estimate of measurement values in combination with the
 #' actual values and associated error bars in ascending order. If enabled, the
 #' boxplot will show the usual distribution parameters (median as
@@ -31,17 +32,16 @@
 #' - `"skewness"` (skewness)
 #'
 #'
-#' **Note** that the input data for the statistic summary is sent to the function
-#' `calc_Statistics()` depending on the log-option for the z-scale. If
+#' **Note** that the input data for the statistic summary is sent to function
+#' [calc_Statistics] depending on the log-option for the z-scale. If
 #' `"log.z = TRUE"`, the summary is based on the logarithms of the input
-#' data. If `"log.z = FALSE"` the linearly scaled data is used.
+#' data. If `"log.z = FALSE"` the linearly-scaled data is used.
 #'
 #' **Note** as well, that `"calc_Statistics()"` calculates these statistic
 #' measures in three different ways: `unweighted`, `weighted` and
 #' `MCM-based` (i.e., based on Monte Carlo Methods). By default, the
-#' MCM-based version is used. If you wish to use another method, indicate this
-#' with the appropriate keyword using the argument `summary.method`.
-#'
+#' MCM-based version is used. This can be controlled via the `summary.method`
+#' argument.
 #'
 #' @param data [data.frame], [vector] or [RLum.Results-class] object (**required**):
 #' for `data.frame`: either two columns: De (`values[,1]`) and De error
@@ -68,11 +68,11 @@
 #' @param rug [logical] (*with default*):
 #' optionally add rug.
 #'
-#' @param summary [character] (*optional*):
+#' @param summary [character] (*with default*):
 #' add statistic measures of centrality and dispersion to the plot. Can be one
 #' or more of several keywords. See details for available keywords.
 #'
-#' @param summary.pos [numeric] or [character] (*optional*):
+#' @param summary.pos [numeric] or [character] (*with default*):
 #' optional position coordinates or keyword (e.g. `"topright"`)
 #' for the statistical summary. Alternatively, the keyword `"sub"` may be
 #' specified to place the summary below the plot header. However, this latter
@@ -81,15 +81,11 @@
 #'
 #' @param summary.method [character] (*with default*):
 #' keyword indicating the method used to calculate the statistic summary.
-#' One out of `"unweighted"`, `"weighted"` and `"MCM"`.
+#' One out of `"MCM"` (default), `"weighted"` or `"unweighted"`.
 #' See [calc_Statistics] for details.
 #'
 #' @param bw [character] (*with default*):
 #' bin-width, chose a numeric value for manual setting.
-#'
-#' @param output [logical] (*with default*):
-#' Optional output of numerical plot parameters. These can be useful to
-#' reproduce similar plots. Default is `TRUE`.
 #'
 #' @param ... further arguments and graphical parameters passed to [plot].
 #'
@@ -101,7 +97,7 @@
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
-#' Geography & Earth Sciences, Aberystwyth University (United Kingdom)
+#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
 #' @seealso [density], [plot]
 #'
@@ -156,8 +152,7 @@
 #'
 #' ## example of how to use the numerical output of the function
 #' ## return plot output to draw a thicker KDE line
-#' KDE_out <- plot_KDE(data = ExampleData.DeValues,
-#' output = TRUE)
+#' KDE_out <- plot_KDE(data = ExampleData.DeValues)
 #'
 #' @md
 #' @export
@@ -168,17 +163,16 @@ plot_KDE <- function(
   order = TRUE,
   boxplot = TRUE,
   rug = TRUE,
-  summary,
-  summary.pos,
+  summary = "",
+  summary.pos = "sub",
   summary.method = "MCM",
   bw = "nrd0",
-  output = TRUE,
   ...
 ) {
   .set_function_name("plot_KDE")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## check data and parameter consistency -------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
   if (is(data, "list") && length(data) == 0) {
     .throw_error("'data' is an empty list")
@@ -237,13 +231,20 @@ plot_KDE <- function(
   if(length(data) == 0)
     .throw_error("Your input is empty due to Inf removal")
 
-  ## check/set function parameters
-  if(missing(summary) == TRUE) {
-    summary <- ""
+  .validate_logical_scalar(values.cumulative)
+  .validate_logical_scalar(order)
+  .validate_logical_scalar(boxplot)
+  .validate_logical_scalar(rug)
+  .validate_args(summary.method, c("MCM", "weighted", "unweighted"))
+  .validate_class(summary, "character")
+  .validate_class(summary.pos, c("numeric", "character"))
+  if (is.numeric(summary.pos)) {
+    .validate_length(summary.pos, 2)
   }
-
-  if(missing(summary.pos) == TRUE) {
-    summary.pos <- "sub"
+  else {
+    .validate_args(summary.pos, c("sub", "left", "center", "right",
+                                  "topleft", "top", "topright",
+                                  "bottomleft", "bottom", "bottomright"))
   }
 
   ## set mtext output
@@ -267,12 +268,9 @@ plot_KDE <- function(
     for(i in 1:length(data)) {
       na.idx <- which(is.na(data[[i]][, 1]))
       n.NA <- length(na.idx)
-      if(n.NA == 1) {
-        message(paste("1 NA value excluded from data set", i, "."))
-      } else if(n.NA > 1) {
-        message(paste(n.NA, "NA values excluded from data set", i, "."))
-      }
       if (n.NA > 0) {
+        message(sprintf("%d NA value%s excluded from data set %d\n",
+                        n.NA, ifelse(n.NA > 1, "s", ""), i))
         data[[i]] <- data[[i]][-na.idx, ]
       }
     }
@@ -290,7 +288,7 @@ plot_KDE <- function(
   colnames(De.stats) <- c("n",
                           "mean",
                           "median",
-                          "kde.max",
+                          "kdemax",
                           "sd.abs",
                           "sd.rel",
                           "se.abs",
@@ -363,202 +361,68 @@ plot_KDE <- function(
                         min(De.density.range[,3]),
                         max(De.density.range[,4]))
 
-  label.text = list(NA)
+  ## helper to generate an element of the statistical summary
+  .summary_line <- function(keyword, summary, val, label = keyword,
+                            percent = FALSE, sep = FALSE, digits = 2) {
+    ifelse(keyword %in% summary,
+           paste0(label, " = ", round(val, digits),
+                  if (percent) " %" else NULL, if (sep) " | " else  "\n"),
+           "")
+  }
 
-  if(summary.pos[1] != "sub") {
-    n.rows <- length(summary)
+  ## initialize list with a dummy element, it will be removed afterwards
+  label.text <- list(NA)
 
-    for(i in 1:length(data)) {
-      stops <- paste(rep("\n", (i - 1) * n.rows), collapse = "")
+  is.sub <- summary.pos[1] == "sub"
+  stops <- NULL
+  for (i in 1:length(data)) {
+    if (!is.sub)
+      stops <- paste(rep("\n", (i - 1) * length(summary)), collapse = "")
 
-      summary.text <- character(0)
-
-      for(j in 1:length(summary)) {
-        summary.text <- c(summary.text,
-                          paste(
-                            "",
-                            ifelse("n" %in% summary[j] == TRUE,
-                                   paste("n = ",
-                                         De.stats[i,1],
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("mean" %in% summary[j] == TRUE,
-                                   paste("mean = ",
-                                         round(De.stats[i,2], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("median" %in% summary[j] == TRUE,
-                                   paste("median = ",
-                                         round(De.stats[i,3], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("kde.max" %in% summary[j] == TRUE,
-                                   paste("kdemax = ",
-                                         round(De.stats[i,4], 2),
-                                         " \n ",
-                                         sep = ""),
-                                   ""),
-                            ifelse("sd.abs" %in% summary[j] == TRUE,
-                                   paste("sd = ",
-                                         round(De.stats[i,5], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("sd.rel" %in% summary[j] == TRUE,
-                                   paste("rel. sd = ",
-                                         round(De.stats[i,6], 2), " %",
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("se.abs" %in% summary[j] == TRUE,
-                                   paste("se = ",
-                                         round(De.stats[i,7], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("se.rel" %in% summary[j] == TRUE,
-                                   paste("rel. se = ",
-                                         round(De.stats[i,8], 2), " %",
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("skewness" %in% summary[j] == TRUE,
-                                   paste("skewness = ",
-                                         round(De.stats[i,11], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("kurtosis" %in% summary[j] == TRUE,
-                                   paste("kurtosis = ",
-                                         round(De.stats[i,12], 2),
-                                         "\n",
-                                         sep = ""),
-                                   ""),
-                            ifelse("in.2s" %in% summary[j] == TRUE,
-                                   paste("in 2 sigma = ",
-                                         round(sum(data[[i]][,1] >
-                                                     (De.stats[i,2] - 2 *
-                                                        De.stats[i,5]) &
-                                                     data[[i]][,1] <
-                                                     (De.stats[i,2] + 2 *
-                                                        De.stats[i,5])) /
-                                                 nrow(data[[i]]) * 100 , 1),
-                                         " %",
-                                         sep = ""),
-                                   ""),
-                            sep = ""))
-      }
-
-      summary.text <- paste(summary.text, collapse = "")
-
-      label.text[[length(label.text) + 1]] <- paste(stops,
-                                                    summary.text,
-                                                    stops,
-                                                    sep = "")
-    }
-  } else {
-    for(i in 1:length(data)) {
-
-      summary.text <- character(0)
-
-      for(j in 1:length(summary)) {
-        summary.text <- c(summary.text,
-                          ifelse("n" %in% summary[j] == TRUE,
-                                 paste("n = ",
-                                       De.stats[i,1],
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("mean" %in% summary[j] == TRUE,
-                                 paste("mean = ",
-                                       round(De.stats[i,2], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("median" %in% summary[j] == TRUE,
-                                 paste("median = ",
-                                       round(De.stats[i,3], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("kde.max" %in% summary[j] == TRUE,
-                                 paste("kdemax = ",
-                                       round(De.stats[i,4], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("sd.rel" %in% summary[j] == TRUE,
-                                 paste("rel. sd = ",
-                                       round(De.stats[i,6], 2), " %",
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("sd.abs" %in% summary[j] == TRUE,
-                                 paste("abs. sd = ",
-                                       round(De.stats[i,5], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("se.rel" %in% summary[j] == TRUE,
-                                 paste("rel. se = ",
-                                       round(De.stats[i,8], 2), " %",
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("se.abs" %in% summary[j] == TRUE,
-                                 paste("abs. se = ",
-                                       round(De.stats[i,7], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("skewness" %in% summary[j] == TRUE,
-                                 paste("skewness = ",
-                                       round(De.stats[i,11], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("kurtosis" %in% summary[j] == TRUE,
-                                 paste("kurtosis = ",
-                                       round(De.stats[i,12], 2),
-                                       " | ",
-                                       sep = ""),
-                                 ""),
-                          ifelse("in.2s" %in% summary[j] == TRUE,
-                                 paste("in 2 sigma = ",
-                                       round(sum(data[[i]][,1] >
-                                                   (De.stats[i,2] - 2 *
-                                                      De.stats[i,5]) &
-                                                   data[[i]][,1] <
-                                                   (De.stats[i,2] + 2 *
-                                                      De.stats[i,5])) /
-                                               nrow(data[[i]]) * 100 , 1),
-                                       " %   ",
-                                       sep = ""),
-                                 "")
-        )
-      }
-
-      summary.text <- paste(summary.text, collapse = "")
-
-      label.text[[length(label.text) + 1]]  <- paste(
-        "  ",
-        summary.text,
-        sep = "")
+    summary.text <- character(0)
+    for (j in 1:length(summary)) {
+      summary.text <-
+        c(summary.text,
+          .summary_line("n", summary[j], De.stats[i, 1], sep = is.sub),
+          .summary_line("mean", summary[j], De.stats[i, 2], sep = is.sub),
+          .summary_line("median", summary[j], De.stats[i, 3], sep = is.sub),
+          .summary_line("kdemax", summary[j], De.stats[i, 4], sep = is.sub),
+          .summary_line("sd.abs", summary[j], De.stats[i, 5], sep = is.sub,
+                        label = "sd"),
+          .summary_line("sd.rel", summary[j], De.stats[i, 6], sep = is.sub,
+                        label = "rel. sd", percent = TRUE),
+          .summary_line("se.abs", summary[j], De.stats[i, 7], sep = is.sub,
+                        label = "se"),
+          .summary_line("se.rel", summary[j], De.stats[i, 8], sep = is.sub,
+                        label = "rel. se", percent = TRUE),
+          .summary_line("skewness", summary[j], De.stats[i, 11], sep = is.sub),
+          .summary_line("kurtosis", summary[j], De.stats[i, 12], sep = is.sub),
+          .summary_line("in.2s", summary[j],
+                        sum(data[[i]][, 1] > (De.stats[i, 2] - 2 *
+                                              De.stats[i, 5]) &
+                            data[[i]][, 1] < (De.stats[i, 2] + 2 *
+                                              De.stats[i, 5])) /
+                        nrow(data[[i]]) * 100, sep = is.sub,
+                        label = "in 2 sigma", percent = TRUE, digits = 1))
     }
 
-    ## remove outer vertical lines from string
-    for(i in 2:length(label.text)) {
-      label.text[[i]] <- substr(x = label.text[[i]],
-                                start = 3,
-                                stop = nchar(label.text[[i]]) - 3)
-    }
+    label.text[[length(label.text) + 1]] <- paste0(
+        if (is.sub) "" else stops,
+        paste(summary.text, collapse = ""),
+        stops)
   }
 
   ## remove dummy list element
   label.text[[1]] <- NULL
+
+  ## remove outer vertical lines from string
+  if (is.sub) {
+    for (i in seq_along(label.text)) {
+      label.text[[i]] <- substr(x = label.text[[i]],
+                                start = 1,
+                                stop = nchar(label.text[[i]]) - 3)
+    }
+  }
 
   ## read out additional parameters -------------------------------------------
   if("main" %in% names(list(...))) {
@@ -700,19 +564,16 @@ plot_KDE <- function(
   }
 
   ## convert keywords into summary placement coordinates
-  coords <- .get_keyword_coordinates(summary.pos, xlim.plot, ylim.plot)
+  coords <- .get_keyword_coordinates(summary.pos, xlim.plot, ylim.plot[1:2])
   summary.pos <- coords$pos
   summary.adj <- coords$adj
 
   ## plot data sets -----------------------------------------------------------
 
   ## setup plot area
-  if(length(summary) >= 1 & summary.pos[1] == "sub") {
-
+  toplines <- 1
+  if (length(summary) >= 1 && is.sub) {
     toplines <- length(data)
-  } else {
-
-    toplines <- 1
   }
 
   ## extract original plot parameters
@@ -723,15 +584,11 @@ plot_KDE <- function(
       xpd = FALSE,
       cex = cex)
 
-  if(layout$kde$dimension$figure.width != "auto" |
-     layout$kde$dimension$figure.height != "auto") {
-    par(mai = layout$kde$dimension$margin / 25.4,
-        pin = c(layout$kde$dimension$figure.width / 25.4 -
-                  layout$kde$dimension$margin[2] / 25.4 -
-                  layout$kde$dimension$margin[4] / 25.4,
-                layout$kde$dimension$figure.height / 25.4 -
-                  layout$kde$dimension$margin[1] / 25.4 -
-                  layout$kde$dimension$margin[3]/25.4))
+  dim <- layout$kde$dimension
+  if (dim$figure.width != "auto" || dim$figure.height != "auto") {
+    par(mai = dim$margin / 25.4,
+        pin = c(dim$figure.width - dim$margin[2] - dim$margin[4],
+                dim$figure.height - dim$margin[1] - dim$margin[3]) / 25.4)
   }
 
   ## create empty plot to get plot dimensions
@@ -860,8 +717,7 @@ plot_KDE <- function(
   ## add summary content
   for(i in 1:length(data)) {
 
-    if(summary.pos[1] != "sub") {
-
+    if (!is.sub) {
       text(x = summary.pos[1],
            y = summary.pos[2],
            adj = summary.adj,
@@ -871,7 +727,6 @@ plot_KDE <- function(
     } else {
 
       if(mtext == "") {
-
         mtext(side = 3,
               line = (toplines + 0.3 - i) * layout$kde$dimension$stats.line / 100,
               text = label.text[[i]],
@@ -958,8 +813,7 @@ plot_KDE <- function(
         ## draw median line
         lines(x = c(boxplot.data[[i]]$stats[3,1],
                     boxplot.data[[i]]$stats[3,1]),
-              y = c(-11/8 * l_height,
-                    -7/8 * l_height),
+              y = c(-11/8, -7/8) * l_height,
               lwd = 2,
               col = col.boxplot.line[i])
 
@@ -968,36 +822,29 @@ plot_KDE <- function(
                       boxplot.data[[i]]$stats[2,1],
                       boxplot.data[[i]]$stats[4,1],
                       boxplot.data[[i]]$stats[4,1]),
-                y = c(-11/8 * l_height,
-                      -7/8 * l_height,
-                      -7/8 * l_height,
-                      -11/8 * l_height),
+                y = c(-11/8, -7/8, -7/8, -11/8) * l_height,
                 col = col.boxplot.fill[i],
                 border = col.boxplot.line[i])
 
         ## draw whiskers
         lines(x = c(boxplot.data[[i]]$stats[2,1],
                     boxplot.data[[i]]$stats[1,1]),
-              y = c(-9/8 * l_height,
-                    -9/8 * l_height),
+              y = c(-9/8, -9/8) * l_height,
               col = col.boxplot.line[i])
 
         lines(x = c(boxplot.data[[i]]$stats[1,1],
                     boxplot.data[[i]]$stats[1,1]),
-              y = c(-10/8 * l_height,
-                    -8/8 * l_height),
+              y = c(-10/8, -8/8) * l_height,
               col = col.boxplot.line[i])
 
         lines(x = c(boxplot.data[[i]]$stats[4,1],
                     boxplot.data[[i]]$stats[5,1]),
-              y = c(-9/8 * l_height,
-                    -9/8 * l_height),
+              y = c(-9/8, -9/8) * l_height,
               col = col.boxplot.line[i])
 
         lines(x = c(boxplot.data[[i]]$stats[5,1],
                     boxplot.data[[i]]$stats[5,1]),
-              y = c(-10/8 * l_height,
-                    -8/8 * l_height),
+              y = c(-10/8, -8/8) * l_height,
               col = col.boxplot.line[i])
 
         ## draw outliers
@@ -1095,9 +942,7 @@ plot_KDE <- function(
   ## FUN by R Luminescence Team
   if (fun == TRUE) sTeve() # nocov
 
-  if(output == TRUE) {
-    return(invisible(list(De.stats = De.stats,
-                          summary.pos = summary.pos,
-                          De.density = De.density)))
-  }
+  invisible(list(De.stats = De.stats,
+                 summary.pos = summary.pos,
+                 De.density = De.density))
 }

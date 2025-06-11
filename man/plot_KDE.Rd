@@ -11,11 +11,10 @@ plot_KDE(
   order = TRUE,
   boxplot = TRUE,
   rug = TRUE,
-  summary,
-  summary.pos,
+  summary = "",
+  summary.pos = "sub",
   summary.method = "MCM",
   bw = "nrd0",
-  output = TRUE,
   ...
 )
 }
@@ -45,11 +44,11 @@ interquartile ranges and dots further outliers).}
 \item{rug}{\link{logical} (\emph{with default}):
 optionally add rug.}
 
-\item{summary}{\link{character} (\emph{optional}):
+\item{summary}{\link{character} (\emph{with default}):
 add statistic measures of centrality and dispersion to the plot. Can be one
 or more of several keywords. See details for available keywords.}
 
-\item{summary.pos}{\link{numeric} or \link{character} (\emph{optional}):
+\item{summary.pos}{\link{numeric} or \link{character} (\emph{with default}):
 optional position coordinates or keyword (e.g. \code{"topright"})
 for the statistical summary. Alternatively, the keyword \code{"sub"} may be
 specified to place the summary below the plot header. However, this latter
@@ -58,15 +57,11 @@ specification, y-coordinate refers to the right y-axis.}
 
 \item{summary.method}{\link{character} (\emph{with default}):
 keyword indicating the method used to calculate the statistic summary.
-One out of \code{"unweighted"}, \code{"weighted"} and \code{"MCM"}.
+One out of \code{"MCM"} (default), \code{"weighted"} or \code{"unweighted"}.
 See \link{calc_Statistics} for details.}
 
 \item{bw}{\link{character} (\emph{with default}):
 bin-width, chose a numeric value for manual setting.}
-
-\item{output}{\link{logical} (\emph{with default}):
-Optional output of numerical plot parameters. These can be useful to
-reproduce similar plots. Default is \code{TRUE}.}
 
 \item{...}{further arguments and graphical parameters passed to \link{plot}.}
 }
@@ -77,8 +72,7 @@ boxplot will show the usual distribution parameters (median as
 bold line, box delimited by the first and third quartile, whiskers defined
 by the extremes and outliers shown as points) and also the mean and
 standard deviation as pale bold line and pale polygon, respectively.
-}
-\details{
+
 The function allows passing several plot arguments, such as \code{main},
 \code{xlab}, \code{cex}. However, as the figure is an overlay of two
 separate plots, \code{ylim} must be specified in the order: c(ymin_axis1,
@@ -103,16 +97,16 @@ one or more of the following keywords:
 \item \code{"skewness"} (skewness)
 }
 
-\strong{Note} that the input data for the statistic summary is sent to the function
-\code{calc_Statistics()} depending on the log-option for the z-scale. If
+\strong{Note} that the input data for the statistic summary is sent to function
+\link{calc_Statistics} depending on the log-option for the z-scale. If
 \code{"log.z = TRUE"}, the summary is based on the logarithms of the input
-data. If \code{"log.z = FALSE"} the linearly scaled data is used.
+data. If \code{"log.z = FALSE"} the linearly-scaled data is used.
 
 \strong{Note} as well, that \code{"calc_Statistics()"} calculates these statistic
 measures in three different ways: \code{unweighted}, \code{weighted} and
 \code{MCM-based} (i.e., based on Monte Carlo Methods). By default, the
-MCM-based version is used. If you wish to use another method, indicate this
-with the appropriate keyword using the argument \code{summary.method}.
+MCM-based version is used. This can be controlled via the \code{summary.method}
+argument.
 }
 \note{
 The plot output is no 'probability density' plot (cf. the discussion
@@ -173,8 +167,7 @@ plot_KDE(data = data.3,
 
 ## example of how to use the numerical output of the function
 ## return plot output to draw a thicker KDE line
-KDE_out <- plot_KDE(data = ExampleData.DeValues,
-output = TRUE)
+KDE_out <- plot_KDE(data = ExampleData.DeValues)
 
 }
 \seealso{
@@ -182,10 +175,10 @@ output = TRUE)
 }
 \author{
 Michael Dietze, GFZ Potsdam (Germany)\cr
-Geography & Earth Sciences, Aberystwyth University (United Kingdom)
+Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., 2025. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2025. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 

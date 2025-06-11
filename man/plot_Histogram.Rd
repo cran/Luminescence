@@ -7,21 +7,23 @@
 plot_Histogram(
   data,
   na.rm = TRUE,
-  mtext,
-  cex.global,
-  se,
-  rug,
-  normal_curve,
-  summary,
-  summary.pos,
-  colour,
+  mtext = "",
+  cex.global = 1,
+  se = TRUE,
+  rug = TRUE,
+  normal_curve = FALSE,
+  summary = "",
+  summary.pos = "sub",
+  colour = c("white", "black", "red", "black"),
   interactive = FALSE,
   ...
 )
 }
 \arguments{
 \item{data}{\link{data.frame} or \linkS4class{RLum.Results} object (\strong{required}):
-for \code{data.frame}: two columns: De (\code{data[,1]}) and De error (\code{data[,2]})}
+for \code{data.frame}: two columns: De (\code{data[,1]}) and De error (\code{data[,2]}).
+If the error column is missing or only contains \code{NA} values, then the error
+at each measurement is assumed to be 10^-9.}
 
 \item{na.rm}{\link{logical} (\emph{with default}):
 excludes \code{NA} values from the data set prior to any further operations.}
@@ -32,17 +34,18 @@ further sample information (\link{mtext}).}
 \item{cex.global}{\link{numeric} (\emph{with default}):
 global scaling factor.}
 
-\item{se}{\link{logical} (\emph{optional}):
-plots standard error points over the histogram, default is \code{FALSE}.}
+\item{se}{\link{logical} (\emph{with default}):
+plots standard error points over the histogram, default is \code{TRUE}.}
 
-\item{rug}{\link{logical} (\emph{optional}):
+\item{rug}{\link{logical} (\emph{with default}):
 adds rugs to the histogram, default is \code{TRUE}.}
 
 \item{normal_curve}{\link{logical} (\emph{with default}):
-adds a normal curve to the histogram. Mean and standard deviation are calculated from the
-input data. More see details section.}
+adds a normal curve to the histogram. Mean and standard deviation are
+calculated from the input data. If \code{TRUE}, the y-axis in the histogram
+will show the probability density.}
 
-\item{summary}{\link{character} (\emph{optional}):
+\item{summary}{\link{character} (\emph{with default}):
 add statistic measures of centrality and dispersion to the plot.
 Can be one or more of several keywords. See details for available keywords.}
 
@@ -55,8 +58,8 @@ specification, y-coordinate refers to the right y-axis.}
 
 \item{colour}{\link{numeric} or \link{character} (\emph{with default}):
 optional vector of length 4 which specifies the colours of the following
-plot items in exactly this order: histogram bars, rug lines, normal
-distribution curve and standard error points
+plot items in exactly this order: histogram bars, rug lines and summary
+text, normal distribution curve, standard error points
 (e.g., \code{c("grey", "black", "red", "grey")}).}
 
 \item{interactive}{\link{logical} (\emph{with default}):
@@ -73,8 +76,7 @@ the right axis limits.}
 \description{
 Function plots a predefined histogram with an accompanying error plot as
 suggested by Rex Galbraith at the UK LED in Oxford 2010.
-}
-\details{
+
 If the normal curve is added, the y-axis in the histogram will show the
 probability density.
 
@@ -142,6 +144,6 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2025. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2025. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 

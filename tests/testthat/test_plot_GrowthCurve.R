@@ -24,9 +24,6 @@ test_that("input validation", {
   expect_error(
       plot_GrowthCurve(LxTxData, verbose = "error"),
       "'verbose' should be a single logical value")
-  expect_error(
-      plot_GrowthCurve(LxTxData, cex.global = 0),
-      "'cex.global' should be a positive scalar")
 
   ## Weird LxTx values
   LxTx <- structure(list(
@@ -106,7 +103,7 @@ test_that("main tests", {
                                  fit.method = "GOK",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "LambertW",
+                                 fit.method = "OTOR",
                                  n.MC = 10))
 
   ## force through the origin
@@ -146,7 +143,7 @@ test_that("additional tests", {
                                  mode = "extrapolation",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "LambertW",
+                                 fit.method = "OTOR",
                                  mode = "extrapolation",
                                  n.MC = 10))
 
@@ -181,7 +178,7 @@ test_that("additional tests", {
                                  mode = "alternate",
                                  n.MC = 10))
   expect_silent(plot_GrowthCurve(LxTxData,
-                                 fit.method = "LambertW",
+                                 fit.method = "OTOR",
                                  mode = "alternate",
                                  n.MC = 10))
 

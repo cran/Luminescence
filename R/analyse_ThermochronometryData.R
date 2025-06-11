@@ -122,15 +122,18 @@ analyse_ThermochronometryData <- function(
     }
 
     ## DRC fitting
-    results_DRC <- suppressWarnings(plot_GrowthCurve(
-      sample = df_DRC,
-      mode = "alternate",
+    results_DRC <- suppressWarnings(
+        fit_DoseResponseCurve(
+        object = df_DRC,
+        mode = "alternate"))
+
+    ## DRC plotting
+    plot_DoseResponseCurve(
+      object = results_DRC,
       xlab = if (any("DOSE" %in% colnames(df_DRC))) "Dose [Gy]" else "Dose [s]",
       cex.global = 0.65,
-      output.plot = plot,
-      main = sample_names[i],
-      output.plotExtended = FALSE
-    ))
+      plot_extended = FALSE,
+      main = sample_names[i])
 
     ## return single lists
     return(list(results_FAD, results_ITL, results_DRC))

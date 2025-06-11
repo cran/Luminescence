@@ -35,6 +35,14 @@ test_that("input validation", {
                "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, dispersion = "p500"),
                "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary = 5),
+               "'summary' should be of class 'character'")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = list()),
+               "'summary.pos' should be of class 'numeric' or 'character'")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = 5),
+               "'summary.pos' should have length 2")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = "error"),
+               "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
 
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, xlim = NA),
                "'xlim' should be of class 'numeric'")
@@ -68,17 +76,10 @@ test_that("Test examples from the example page", {
                                  xlim = NULL, ylim = NULL, zlim = NULL,
                                  log.z = FALSE))
 
-  ## now with output of the plot parameters
-  expect_type(plot_AbanicoPlot(data = ExampleData.DeValues,
-                            output = TRUE), "list")
-
-  ## now with adjusted z-scale limits
+  ## now with adjusted scale limits
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
-                   zlim = c(10, 200)))
-
-  ## now with adjusted x-scale limits
-  expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
-                   xlim = c(0, 20)))
+                                 zlim = c(10, 200),
+                                 xlim = c(0, 20)))
 
   ## now with rug to indicate individual values in KDE part
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
@@ -124,7 +125,7 @@ test_that("Test examples from the example page", {
                           plot = FALSE, verbose = FALSE)
 
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
-                   line = CAM,
+                   line = list(CAM),
                    line.col = "darkgreen",
                    line.label = "CAM"))
 
@@ -134,6 +135,7 @@ test_that("Test examples from the example page", {
                    col = "tomato4",
                    bar.col = "peachpuff",
                    pch = "R",
+                   line = CAM,
                    cex = 0.8))
 
   ## now without 2-sigma bar, polygon, grid lines and central value line
@@ -161,10 +163,6 @@ test_that("Test examples from the example page", {
   ## now with minimum, maximum and median value indicated
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
                    stats = c("min", "max", "median")))
-
-  ## now with a brief statistical summary as subheader
-  expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
-                   summary = c("n", "in.2s")))
 
   ## now with another statistical summary
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
@@ -200,6 +198,7 @@ test_that("Test examples from the example page", {
   ## trigger a few test cases related to layout
   layout$abanico$colour$centrality <- 1:2
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
+                                 rotate = TRUE,
                                  layout = "journal"))
 
   ## now with predefined layout definition and further modifications
@@ -233,6 +232,7 @@ test_that("more coverage", {
   suppressWarnings( # additional warning on weights not summing to 1
   expect_warning(plot_AbanicoPlot(ExampleData.DeValues, weights = TRUE,
                                   rotate = TRUE, line = 1,
+                                  dispersion = "sd", log.z = FALSE,
                                   grid.col = c(1, 2)),
                  "Selecting bandwidth *not* using 'weights'",
                  fixed = TRUE)
@@ -242,8 +242,10 @@ test_that("more coverage", {
   data.neg <- ExampleData.DeValues
   data.neg[1, 1] <- -1
   expect_silent(plot_AbanicoPlot(data.neg, z.0 = "mean", dispersion = "sd",
-                                 boxplot = TRUE, frame = 3,
+                                 boxplot = TRUE, frame = 3, zlim = c(200, 400),
                                  main = "Title", sub = "Subtitle"))
+  data.neg[2, 1] <- -120
+  expect_silent(plot_AbanicoPlot(data.neg, log.z = FALSE))
 
   ## missing values
   data.na <- ExampleData.DeValues
@@ -252,7 +254,7 @@ test_that("more coverage", {
                                   hist = TRUE, error.bars = TRUE, dots = TRUE,
                                   rug = TRUE, y.axis = FALSE, stats = "min",
                                   legend = "legend", legend.pos = "bottomleft",
-                                  summary.pos = "bottomright", log.z = FALSE,
+                                  summary.pos = "bottomleft", log.z = FALSE,
                                   xlab = c("x1", "x2", "x3"), lty = 2,
                                   dispersion = "2sd",
                                   at = seq(20, 120, nrow(data.na) - 1)),
@@ -260,6 +262,7 @@ test_that("more coverage", {
                  fixed = TRUE)
   expect_message(plot_AbanicoPlot(data.na, y.axis = TRUE,
                                   yaxt = "y", ylim = c(2, 3),
+                                  summary.pos = "bottomright",
                                   dispersion = "2sd"),
                  "Data set (1): 1 NA value excluded",
                  fixed = TRUE)
@@ -286,7 +289,6 @@ test_that("more coverage", {
  expect_silent(plot_AbanicoPlot(data = data.frame(
     x = c(-1,10),
     y = c(0.1,3)
-
   ), log.z = TRUE, summary = c("mean", "sd.abs")))
 
  ## handling of negative values; but with zlim
@@ -294,7 +296,6 @@ test_that("more coverage", {
    x = c(-1,10),
    y = c(0.1,3),
    zlim = c(2,10)
-
  ), log.z = TRUE, summary = c("mean", "sd.abs")))
 
  ## test lines 2144 onwards
@@ -302,7 +303,6 @@ test_that("more coverage", {
  expect_silent(plot_AbanicoPlot(data = data.frame(
    x = c(-1,10),
    y = c(0.1,3)
-
  ), log.z = TRUE, summary = c("mean", "sd.abs")))
  par(mfrow = c(1,1))
 
@@ -311,7 +311,6 @@ test_that("more coverage", {
  expect_silent(plot_AbanicoPlot(data = data.frame(
    x = c(-1,10),
    y = c(0.1,3)
-
  ), log.z = TRUE, rotate = TRUE))
  par(mfrow = c(1,1))
 
@@ -334,5 +333,14 @@ test_that("Test graphical snapshot", {
     vdiffr::expect_doppelganger(
       title = "Abanico expected",
       fig = plot_AbanicoPlot(data = ExampleData.DeValues))
+    vdiffr::expect_doppelganger("summary sub",
+                                plot_AbanicoPlot(ExampleData.DeValues,
+                                                 summary.pos = "sub",
+                                                 summary = c("n", "se.rel", "kurtosis")))
+    vdiffr::expect_doppelganger("rotated",
+                                plot_AbanicoPlot(ExampleData.DeValues,
+                                                 rotate = TRUE, rug = TRUE,
+                                                 summary.pos = "bottomleft",
+                                                 summary = c("mean", "in.2s", "skewness")))
   })
 })

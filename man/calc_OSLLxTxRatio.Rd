@@ -153,7 +153,7 @@ The results of this function have been cross-checked with the Analyst
 own \code{sigmab} value or use \code{background.count.distribution = "poisson"}.
 }
 \section{Function version}{
- 0.8.0
+ 0.8.1
 }
 
 \examples{
@@ -174,7 +174,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.8.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.8.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -182,10 +182,10 @@ Duller, G., 2018. Analyst v4.57 - User Manual.
 \verb{https://users.aber.ac.uk/ggd}\cr
 
 Galbraith, R.F., 2002. A note on the variance of a background-corrected OSL
-count. Ancient TL, 20 (2), 49-51.
+count. Ancient TL, 20 (2), 49-51. \doi{10.26034/la.atl.2002.348}
 
 Galbraith, R.F., 2014. A further note on the variance of a
-background-corrected OSL count. Ancient TL, 31 (2), 1-3.
+background-corrected OSL count. Ancient TL, 31 (2), 1-3. \doi{10.26034/la.atl.2014.477}
 }
 \seealso{
 \linkS4class{RLum.Data.Curve}, \link{Analyse_SAR.OSLdata}, \link{fit_DoseResponseCurve},

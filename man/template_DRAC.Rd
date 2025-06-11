@@ -46,6 +46,10 @@ A  list of class \code{DRAC.list}.
 This function returns a DRAC input template (v1.2) to be used in conjunction
 with the \link{use_DRAC} function
 }
+\section{Function version}{
+ 0.1.1
+}
+
 \examples{
 
 # create a new DRAC input input
@@ -94,7 +98,7 @@ output <- use_DRAC(input)
 } 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2025. template_DRAC(): Create a DRAC input data template (v1.2). In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2025. template_DRAC(): Create a DRAC input data template (v1.2). Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

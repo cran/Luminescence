@@ -99,6 +99,17 @@ test_that("check functionality", {
     abline = list(v = c(110))
   ))
 
+  ## test norm = "autoscale"
+  expect_silent(plot_RLum.Analysis(
+    temp[1:4],
+    subset = list(recordType = "OSL"),
+    combine = TRUE,
+    auto_scale = TRUE,
+    xlim = c(10, 20),
+    norm = "last",
+    abline = list(v = c(110))
+  ))
+
   ## test norm = "huot
   expect_silent(plot_RLum.Analysis(
     temp,
@@ -149,15 +160,36 @@ test_that("check functionality", {
 
   plot_RLum.Analysis(temp,
                      subset = list(recordType = "OSL"),
+                     combine = TRUE,
                      curve.transformation = "CW2pHMi")
 
   plot_RLum.Analysis(temp,
                      subset = list(recordType = "TL"),
-                     combine = TRUE,
                      curve.transformation = "CW2pPMi")
 
   ## empty object
   expect_silent(plot_RLum.Analysis(set_RLum("RLum.Analysis")))
   expect_warning(plot_RLum.Analysis(set_RLum("RLum.Analysis"), combine = TRUE),
                  "'combine' can't be used with fewer than two curves")
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+  testthat::skip_if_not(getRversion() >= "4.4.0")
+
+  SW({
+  vdiffr::expect_doppelganger("plot_RLum.Analysis",
+                              plot_RLum.Analysis(
+                                  temp,
+                                  subset = list(recordType = "TL"),
+                                  combine = TRUE,
+                                  norm = TRUE,
+                                  abline = list(v = 110)))
+  vdiffr::expect_doppelganger("plot_RLum.Analysis persp",
+                              plot_RLum.Analysis(
+                                  set_RLum(class = "RLum.Analysis",
+                                           records = list(TL.Spectrum, temp[[1]])),
+                                  plot.type = "persp"))
+  })
 })

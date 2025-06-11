@@ -13,6 +13,7 @@ calc_Huntley2006(
   normalise = TRUE,
   fit.method = c("EXP", "GOK"),
   lower.bounds = c(-Inf, -Inf, -Inf, -Inf),
+  cores = 1,
   summary = TRUE,
   plot = TRUE,
   ...
@@ -22,12 +23,13 @@ calc_Huntley2006(
 \item{data}{\link{data.frame} (\strong{required}):
 A \code{data.frame} with one of the following structures:
 \itemize{
-\item A \strong{three column} data frame with numeric values on a) dose (s), b) \code{LxTx} and
-c) \code{LxTx} error.
-\item If a \strong{two column} data frame is provided it is automatically
-assumed that errors on \code{LxTx} are missing. A third column will be attached
-with an arbitrary 5 \% error on the provided \code{LxTx} values.
-\item Can also be a \strong{wide table}, i.e. a \link{data.frame} with a number of columns divisible by 3
+\item \strong{three columns} with numeric values for dose (s), \code{LxTx} and \code{LxTx}
+error, in this order.
+\item \strong{two columns} with numeric values for dose (s) and \code{LxTx}, in this order.
+This assumes that errors on \code{LxTx} are missing, and a third column will be
+automatically attached with an arbitrary 5 \% error on the provided \code{LxTx}
+values.
+\item \strong{wide table}, i.e. a \link{data.frame} with a number of columns divisible by 3
 and where each triplet has the aforementioned column structure.
 }
 
@@ -42,13 +44,12 @@ and where each triplet has the aforementioned column structure.
 
 }\if{html}{\out{</div>}}
 
-\strong{NOTE:} The function assumes the first row of the function to be the
-\code{Ln/Tn}-value. If you want to provide more than one \code{Ln/Tn}-value consider
-using the argument \code{LnTn}.}
+\strong{NOTE:} The function assumes the first row of the data to be the
+\code{Ln/Tn}-value. If you want to provide more than one \code{Ln/Tn}-values, consider
+using argument \code{LnTn}.}
 
 \item{LnTn}{\link{data.frame} (\emph{optional}):
-This argument should \strong{only} be used to provide more than one \code{Ln/Tn}-value.
-It assumes a two column data frame with the following structure:
+A two column data frame with the following structure:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{     |  LnTn  |  LnTn error  |
      |  [ ,1] |      [ ,2]   |
@@ -65,35 +66,38 @@ another mean value (e.g. a weighted mean or median) or error is preferred,
 this value must be calculated beforehand and used in the first row in the
 data frame for argument \code{data}.
 
-\strong{NOTE:} If you provide \code{LnTn}-values with this argument the data frame
-for the \code{data}-argument \strong{must not} contain any \code{LnTn}-values!}
+\strong{NOTE:} This argument should \strong{only} be used to provide more than one
+\code{Ln/Tn}-value. If you provide \code{LnTn}-values with this argument, the data
+frame for the \code{data}-argument \strong{must not} contain any \code{LnTn}-values.}
 
 \item{rhop}{\link{numeric} (\strong{required}):
-The density of recombination centres (\eqn{\rho}') and its error (see Huntley 2006),
-given as numeric vector of length two. Note that \eqn{\rho}' must \strong{not} be
+A vector of length 2 for the density of recombination centres (\eqn{\rho}')
+and its error (see Huntley 2006). Note that \eqn{\rho}' must \strong{not} be
 provided as the common logarithm. Example: \code{rhop = c(2.92e-06, 4.93e-07)}.}
 
 \item{ddot}{\link{numeric} (\strong{required}):
-Environmental dose rate and its error, given as a numeric vector of length two.
+A vector of length 2 for the environmental dose rate and its error.
 Expected unit: Gy/ka. Example: \code{ddot = c(3.7, 0.4)}.}
 
 \item{readerDdot}{\link{numeric} (\strong{required}):
-Dose rate of the irradiation source of the OSL reader and its error,
-given as a numeric vector of length two.
+A vector of length 2 for the dose rate of the irradiation source of the OSL
+reader and its error.
 Expected unit: Gy/s. Example: \code{readerDdot = c(0.08, 0.01)}.}
 
-\item{normalise}{\link{logical} (\emph{with default}): If \code{TRUE} (the default) all measured and computed \eqn{\frac{L_x}{T_x}} values are normalised by the pre-exponential factor \code{A} (see details).}
+\item{normalise}{\link{logical} (\emph{with default}): If \code{TRUE} (the default) all
+measured and computed \eqn{\frac{L_x}{T_x}} values are normalised by the
+pre-exponential factor \code{A} (see details).}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-Fit function of the dose response curve. Can either be \code{EXP} (the default)
-or \code{GOK}. Note that \code{EXP} (single saturating exponential) is the original
+Fit function of the dose response curve. Can either be \code{"EXP"} (default) or
+\code{"GOK"}. Note that \code{"EXP"} (single saturating exponential) is the original
 function the model after Huntley (2006) and Kars et al. (2008) was
-designed to use. The use of a general-order kinetics function (\code{GOK})
+designed to use. The use of a general-order kinetics function (\code{"GOK"})
 is an experimental adaptation of the model and should be used
 with great care.}
 
 \item{lower.bounds}{\link{numeric} (\emph{with default}):
-A vector of length 4 that contains the lower bound values to be applied
+A vector of length 4 for the values of the lower bounds to be applied
 when fitting the models with \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}. In most cases, the
 default values (\code{c(-Inf, -Inf, -Inf, -Inf)}) are appropriate for finding
 a best fit, but sometimes it may be useful to restrict the lower bounds to
@@ -101,6 +105,10 @@ e.g. \code{c(0, 0, 0, 0)}. The values of the vectors are, respectively, for
 parameters \code{a}, \code{D0}, \code{c} and \code{d} in that order (parameter \code{d} is ignored
 when \code{fit.method = "EXP"}). More details can be found in
 \link{fit_DoseResponseCurve}.}
+
+\item{cores}{\link{integer} (\emph{with default}):
+The number of cores to use. This will be capped to the number of available
+cores if set to too high.}
 
 \item{summary}{\link{logical} (\emph{with default}):
 If \code{TRUE} (the default) various parameters provided by the user
@@ -112,15 +120,19 @@ enable/disable the plot output.}
 
 \item{...}{Further parameters:
 \itemize{
-\item \code{verbose} \link{logical}: Show or hide console output
-\item \code{n.MC} \link{numeric}: Number of Monte Carlo iterations (default = \code{10000}).
+\item \code{verbose} \link{logical}: Enable/disable output to the terminal (default = \code{TRUE})
+\item \code{n.MC} \link{numeric}: Number of Monte Carlo iterations (default = 10000)
+\item \code{cex} \link{numeric}: Scaling of the plot (default = 1)
+\item \code{maxiter} \link{numeric}: Number of iteration limits for nls fitting
+\item \code{trace} \link{logical}: Enable/disable value tracing the terminal during fitting
 \strong{Note} that it is generally advised to have a large number of Monte Carlo
 iterations for the results to converge. Decreasing the number of iterations
 will often result in unstable estimates.
 }
 
-All other arguments are passed to \link{plot} and \link{fit_DoseResponseCurve} (in particular
-\code{mode} for the fit mode and \code{fit.force_through_origin})}
+All other arguments are passed to \link{plot} and \link{fit_DoseResponseCurve} (in
+particular \code{mode} for the De calculation mode, \code{fit.force_through_origin},
+and \code{fit.bounds}).}
 }
 \value{
 An \linkS4class{RLum.Results} object is returned:
@@ -134,7 +146,7 @@ Slot: \strong{@data}\cr
 \code{Ln} \tab \link{numeric} \tab Ln and its error \cr
 \code{LxTx_tables} \tab \code{list} \tab A \code{list} of \code{data.frames} containing data on dose,
 LxTx and LxTx error for each of the dose response curves.
-Note that these \strong{do not} contain the natural Ln signal, which is provided separately. \cr
+Note that these \strong{do not} contain the natural \code{Ln} signal, which is provided separately. \cr
 \code{fits} \tab \code{list} \tab A \code{list} of \code{nls} objects produced by \link[minpack.lm:nlsLM]{minpack.lm::nlsLM} when fitting the dose response curves \cr
 }
 
@@ -147,36 +159,37 @@ Slot: \strong{@info}\cr
 }
 }
 \description{
-A function to calculate the expected sample specific fraction of saturation
-based on the model of Huntley (2006) using the approach as implemented
+The function calculates the expected sample specific fraction of saturation
+based on the model of Huntley (2006), using the approach as implemented
 in Kars et al. (2008) or Guralnik et al. (2015).
 }
 \details{
 This function applies the approach described in Kars et al. (2008) or Guralnik et al. (2015),
-which are both developed from the model of Huntley (2006) to calculate the expected sample
+which are both developed from the model of Huntley (2006), to calculate the expected sample
 specific fraction of saturation of a feldspar and also to calculate fading
 corrected age using this model. \eqn{\rho}' (\code{rhop}), the density of recombination
 centres, is a crucial parameter of this model and must be determined
 separately from a fading measurement. The function \link{analyse_FadingMeasurement}
 can be used to calculate the sample specific \eqn{\rho}' value.
 
-\strong{Kars et al. (2008) - Single saturating exponential}
+\strong{Kars et al. (2008) -- Single saturating exponential}
 
-To apply the approach after Kars et al. (2008) use \code{fit.method = "EXP"}.
+To apply the approach after Kars et al. (2008), use \code{fit.method = "EXP"}.
 
 Firstly, the unfaded \eqn{D_0} value is determined through applying equation 5 of
 Kars et al. (2008) to the measured \eqn{\frac{L_x}{T_x}} data as a function of irradiation
 time, and fitting the data with a single saturating exponential of the form:
 
-\deqn{\frac{L_x}{T_x}(t^*) = A  \phi(t^*) \{1 - exp(-\frac{t^*}{D_0}))\}}
+\deqn{\frac{L_x}{T_x}(t^*) = A  \phi(t^*) \{1 - \exp(-\frac{t^*}{D_0}))\}}
 
 where
 
-\deqn{\phi(t^*) = exp(-\rho' ln(1.8  \tilde{s} t^*)^3)}
+\deqn{\phi(t^*) = \exp(-\rho' \ln(1.8  \tilde{s} t^*)^3)}
 
 after King et al. (2016) where \eqn{A} is a pre-exponential factor,
 \eqn{t^*} (s) is the irradiation time, starting at the mid-point of
-irradiation (Auclair et al. 2003) and \eqn{\tilde{s}} (\eqn{3\times10^{15}} s\eqn{^{-1}}) is the athermal frequency factor after Huntley (2006). \cr
+irradiation (Auclair et al. 2003) and \eqn{\tilde{s}} (\eqn{3\times10^{15}} s\eqn{^{-1}})
+is the athermal frequency factor after Huntley (2006).
 
 Using fit parameters \eqn{A} and \eqn{D_0}, the function then computes a natural dose
 response curve using the environmental dose rate, \eqn{\dot{D}} (Gy/s) and equations
@@ -185,12 +198,12 @@ response curve using the environmental dose rate, \eqn{\dot{D}} (Gy/s) and equat
 be interpolated onto this curve to determine the fading corrected
 \eqn{D_e} value, from which the fading corrected age is calculated.
 
-\strong{Guralnik et al. (2015) - General-order kinetics}
+\strong{Guralnik et al. (2015) -- General-order kinetics}
 
 To apply the approach after Guralnik et al. (2015) use \code{fit.method = "GOK"}.
 
 The approach of Guralnik et al. (2015) is very similar to that of
-Kars et al. (2008), but instead of using a single saturating exponential
+Kars et al. (2008) but, instead of using a single saturating exponential,
 the model fits a general-order kinetics function of the form:
 
 \deqn{\frac{L_x}{T_x}(t^*) = A \phi (t^*)(1 - (1 + (\frac{1}{D_0}) t^* c)^{-1/c})}
@@ -213,9 +226,10 @@ in \code{rprime = seq(0.01, 3, length.out = 1000)} (the default).
 \strong{Uncertainties}
 
 Uncertainties are reported at \eqn{1\sigma} and are assumed to be normally
-distributed and are estimated using Monte-Carlo re-sampling (\code{n.MC = 1000})
-of \eqn{\rho}' and \eqn{\frac{L_x}{T_x}} during dose response curve fitting, and of \eqn{\rho}'
-in the derivation of (\eqn{n/N}) and (n/N)_SS.
+distributed and are estimated using Monte-Carlo re-sampling (\code{n.MC = 10000}
+by default) of \eqn{\rho}' and \eqn{\frac{L_x}{T_x}} during dose response
+curve fitting, and of \eqn{\rho}' #' in the derivation of (\eqn{n/N}) and
+(n/N)_SS.
 
 \strong{Age calculated from 2D0 of the simulated natural DRC}
 
@@ -229,10 +243,10 @@ output this value is denoted by \emph{"Age @2D0 (ka):"}.
 }
 \note{
 This function has BETA status, in particular for the GOK implementation. Please verify
-your results carefully
+your results carefully.
 }
 \section{Function version}{
- 0.4.5
+ 0.4.6
 }
 
 \examples{
@@ -286,7 +300,7 @@ kars <- calc_Huntley2006(
 } 
 
 \section{How to cite}{
-King, G.E., Burow, C., Kreutzer, S., 2025. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2025. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -311,6 +325,7 @@ for the fading in million year old basaltic rocks. Geochronometria 38(3), 223-23
 \author{
 Georgina E. King, University of Lausanne (Switzerland) \cr
 Christoph Burow, University of Cologne (Germany) \cr
-Sebastian Kreutzer, Ruprecht-Karl University of Heidelberg (Germany)
+Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}
 \keyword{datagen}

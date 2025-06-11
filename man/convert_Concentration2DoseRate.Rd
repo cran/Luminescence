@@ -7,12 +7,14 @@
 convert_Concentration2DoseRate(input, conversion = "Guerinetal2011")
 }
 \arguments{
-\item{input}{\link{data.frame} (\emph{optional}): a table containing all relevant information
-for each individual layer if nothing is provided, the function returns a template \link{data.frame}
-Please note that until one dataset per input is supported!}
+\item{input}{\link{data.frame} (\emph{optional}): a table containing all relevant
+information for each individual layer. If nothing is provided, the function
+returns a template data frame, the values of which need to be filled in by
+the user. Please note that only one dataset per input is supported.}
 
-\item{conversion}{\link{character} (\emph{with default}): which dose rate conversion factors to use,
-defaults uses Guérin et al. (2011). For accepted values see \link{BaseDataSet.ConversionFactors}}
+\item{conversion}{\link{character} (\emph{with default}):
+dose rate conversion factors to use, by default those by Guérin et al. (2011).
+For accepted values see \link{BaseDataSet.ConversionFactors}.}
 }
 \value{
 The function returns an \linkS4class{RLum.Results} object for which the first
@@ -87,7 +89,7 @@ convert_Concentration2DoseRate(input)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., 2025. convert_Concentration2DoseRate(): Dose-rate conversion function. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.0.1. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., 2025. convert_Concentration2DoseRate(): Dose-rate conversion function. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -65,7 +65,7 @@ test_that("get_RLum", {
   testthat::skip_on_cran()
 
   ## input validation
-  expect_error(get_RLum(obj, subset = "error"),
+  expect_error(get_RLum(obj, subset = 1),
                "[get_RLum()] 'subset' must contain a logical expression",
                fixed = TRUE)
   expect_error(get_RLum(obj, subset = (error == "OSL")),
@@ -84,6 +84,7 @@ test_that("get_RLum", {
 
   ## check functionality
   expect_length(get_RLum(obj, subset = (recordType == "RF")), 2)
+  expect_length(get_RLum(obj, subset = "recordType == 'RF'"), 2)
   expect_length(get_RLum(tmp, subset = (el == "2")), 1)
   expect_s4_class(get_RLum(tmp, subset = (el == "2")), "RLum.Analysis")
   expect_type(get_RLum(tmp, info.object = "el"), "character")
@@ -143,25 +144,58 @@ test_that("sort_RLum", {
   expect_error(sort_RLum(sar, slot = NULL, info_element = NULL),
                "At least one of 'slot' and 'info_element' should not be NULL")
   expect_error(sort_RLum(sar, slot = "recordType", decreasing = "error"),
-               "'decreasing' should be a single logical value")
-  expect_error(sort_RLum(sar, slot = "data"),
-               "Records could not be sorted according to slot = 'data'")
-  expect_error(sort_RLum(sar, info_element = "offset"),
-               "Records could not be sorted according to info_element = 'offset'")
+               "'decreasing' should be of class 'logical'")
+  expect_error(sort_RLum(sar, slot = "recordType", decreasing = NA),
+               "'decreasing' should be of class 'logical'")
+
+  ## check empty object
+  expect_s4_class(sort_RLum(set_RLum("RLum.Analysis")), class = "RLum.Analysis")
+
+  ## check one curve object
+  expect_s4_class(
+    sort_RLum(set_RLum("RLum.Analysis", records = list(set_RLum("RLum.Data.Curve"))),
+              slot = "recordType"),
+                  class = "RLum.Analysis")
 
   ## sort only using the first field until #605 is done
   expect_message(sort_RLum(sar, slot = c("curveType", "recordType")),
-                 "Only the first field will be used in sorting")
-  expect_message(sort_RLum(sar, info_element = c("state", "offset")),
-                 "Only the first field will be used in sorting")
+                 "Only the first 'slot' field will be used in sorting")
 
   ## check functionality
   expect_snapshot_RLum(sort_RLum(sar, slot = "recordType"))
   expect_snapshot_RLum(sort_RLum(sar, info_element = "curveDescripter"))
 
+  ## present a list of those objects
+  expect_type(sort_RLum(list(sar, sar), info_element = "X_MIN"), "list")
+  expect_type(sort_RLum(list(iris, mtcars), info_element = "X_MIN"), "list")
+  expect_snapshot(sort_RLum(list(sar, sar), info_element = "X_MIN"))
+
+  ## sort after three columns
+  expect_s4_class(sort_RLum(sar, info_element = c("XY_LENGTH", "NCOL", "X_MIN")), "RLum.Analysis")
+
+  ## now add spectra
+  sar_a <- sar
+  sar_a@records <- c(sar_a@records, set_RLum("RLum.Data.Spectrum"))
+  expect_s4_class(sort_RLum(sar_a, info_element = "X_MIN"), "RLum.Analysis")
+
+  ## try with image
+  sar_a <- sar
+  sar_a@records <- c(sar_a@records, set_RLum("RLum.Data.Image"))
+  expect_s4_class(sort_RLum(sar_a, info_element = "X_MIN"), "RLum.Analysis")
+
+  ## use slot sorting with more than one element in the slot
+  ## it should not break
+  sar_a <- sar
+  sar_a@records[[1]]@.pid <- c("a", "b")
+  sort_RLum(sar_a, slot = ".pid")
+
   empty <- as(list(), "RLum.Analysis")
   expect_equal(sort_RLum(empty, slot = "curveType"),
                empty)
+
+  ## check a special case where individual info elements have a length > 1
+  sar@records[[1]]@info <- c(sar@records[[1]]@info, test = list(x = 1:10))
+  expect_s4_class(sort_RLum(sar, info_element = "startDate"), class = "RLum.Analysis")
 })
 
 test_that("structure_RLum", {
@@ -182,12 +216,17 @@ test_that("structure_RLum", {
   expect_equal(ncol(res), 13)
   expect_equal(res$n.channels, c(5, 524))
   expect_equal(res$recordType, c("RF", "RF"))
-  expect_equal(res$info, c(NA, NA))
+  expect_equal(unlist(res$info), c(NA, NA))
 
   expect_s3_class(res2 <- structure_RLum(obj, fullExtent = TRUE),
                   "data.frame")
   expect_equal(names(res2), names(res))
   expect_equal(res2$info, c(NA, NA))
+
+  ## special case with longer .pid
+  obj_a <- obj
+  obj_a@records[[1]]@.pid <- c(obj_a@records[[1]]@.pid, obj_a@records[[1]]@.pid)
+  expect_s3_class(structure_RLum(obj_a), "data.frame")
 
   ## object with some info
   data(ExampleData.BINfileData, envir = environment())
@@ -226,7 +265,7 @@ test_that("structure_RLum", {
   expect_equal(nrow(res), length(empty@records))
   expect_equal(ncol(res), 13)
   expect_equal(res$n.channels, 1)
-  expect_equal(res$info, NA)
+  expect_equal(unlist(res$info), NA)
 
   res2 <- structure_RLum(empty, fullExtent = TRUE)
   expect_equal(nrow(res2), length(empty@records))
@@ -237,4 +276,42 @@ test_that("structure_RLum", {
   ## melt
   t <- melt_RLum(tmp)
   expect_type(t, "list")
+})
+
+test_that("remove_RLum", {
+  testthat::skip_on_cran()
+
+  ## remove all OSL curves
+  t <- expect_s4_class(remove_RLum(sar, recordType = "OSL"), "RLum.Analysis")
+  expect_length(t@records, n = 4)
+
+  ## provide arguments that are overwritten
+  t <- expect_s4_class(remove_RLum(sar, recordType = "OSL", drop = TRUE), "RLum.Analysis")
+  expect_length(t@records, n = 4)
+
+  t <- expect_s4_class(remove_RLum(sar, record.id = 8:20), "RLum.Analysis")
+  expect_length(t@records, n = 7)
+
+  ## provide as list
+  t <- expect_type(remove_RLum(list(sar, sar), recordType = "OSL"), "list")
+  expect_length(t, n = 2)
+
+  ## odd wrong element
+  t <- expect_type(remove_RLum(list(sar, "error"), recordType = "OSL"), "list")
+  expect_length(t, n = 2)
+
+  ## use subset
+  ## this produces and error because of the logical expression
+  expect_error(remove_RLum(list(sar, sar), subset = recordType == "OSL"))
+
+  ## simple check for info element
+  expect_s4_class(remove_RLum(sar, subset = "duration== 118"), "RLum.Analysis")
+
+  ## this works with terminal output
+  SW({
+  t <- expect_type(remove_RLum(list(sar, sar), subset = "recordType == 'TL'"), "list")
+  })
+
+  expect_length(t, n = 2)
+
 })
