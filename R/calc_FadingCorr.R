@@ -195,7 +195,6 @@
 #' ##access the last output
 #' get_RLum(results)
 #'
-#' @md
 #' @export
 calc_FadingCorr <- function(
   age.faded,
@@ -300,10 +299,8 @@ calc_FadingCorr <- function(
       cat(paste0("   ",paste0("(",0:9,")", collapse = "   "), "\n"))
     }
   }else{
-    .validate_positive_scalar(n.MC, int = TRUE)
-    n.MC.i <- n.MC
+    n.MC.i <- .validate_positive_scalar(n.MC, int = TRUE)
   }
-
 
   # Start loop  ---------------------------------------------------------------------------------
 
@@ -405,7 +402,7 @@ calc_FadingCorr <- function(
     TC.G_VALUE = tc.g_value,
     n.MC = n.MC,
     OBSERVATIONS = length(tempMC),
-    SEED = ifelse(is.null(seed), NA, seed)
+    SEED = seed %||% NA
   )
 
   ##============================================================================##
@@ -440,7 +437,7 @@ calc_FadingCorr <- function(
       round(kappa[2], digits = 4)
     ))
     cat("\n ----------------------------------------------")
-    cat(paste0("\n seed: \t\t\t", ifelse(is.null(seed), NA, seed)))
+    cat("\n seed: \t\t\t", seed %||% NA)
     cat(paste0("\n n.MC: \t\t\t", n.MC))
     cat(paste0(
       "\n observations: \t\t",

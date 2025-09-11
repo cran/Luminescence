@@ -11,6 +11,8 @@ test_that("input validation", {
                "'values' should be of class 'data.frame' or 'RLum.Results'")
   expect_error(plot_DRTResults(list("error")),
                "'values' should be of class 'data.frame' or 'RLum.Results'")
+  expect_error(plot_DRTResults(iris[, 1, drop = FALSE]),
+               "'values' should have 2 columns")
   expect_error(plot_DRTResults(df, preheat = c(200, 240, 240)),
                "'preheat' should have length equal to the number of De values")
   expect_error(plot_DRTResults(df, given.dose = "error"),
@@ -92,9 +94,12 @@ test_that("graphical snapshot tests", {
   SW({
   vdiffr::expect_doppelganger("defaults",
                               plot_DRTResults(df))
+  vdiffr::expect_doppelganger("cex",
+                              plot_DRTResults(df, cex = 2))
   vdiffr::expect_doppelganger("summary sub",
                               plot_DRTResults(df, summary.pos = "sub",
-                                              summary = c("n", "se.rel")))
+                                              summary = c("n", "se.rel", "median",
+                                                          "weighted$median")))
   vdiffr::expect_doppelganger("summary left",
                               plot_DRTResults(df, summary.pos = "left",
                                               summary = c("mean", "sd.abs")))

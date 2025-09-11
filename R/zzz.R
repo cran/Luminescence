@@ -17,7 +17,7 @@ assign("col",
 ## `fn_stack` is used to keep a stack of function names, managed by
 ## `.[set|unset]_function_name()`, that reflects the call stack for correct
 ## error/warning reporting from `.throw_error()` and `.throw_warning()`
-assign("fn_stack", list(),
+assign("fn_stack", list("<>"),
        pos = ".LuminescenceEnv",
        envir = .LuminescenceEnv)
 
@@ -52,6 +52,9 @@ assign("fn_stack", list(),
     ## year (s)
     year_s = 365.2425 * 24 * 60 * 60
 )
+
+## binding to allow us to mock readline() during tests (see test_use_DRAC.R)
+readline <- NULL
 
 ##==============================================================================
 ##on Attach
@@ -101,15 +104,14 @@ assign("fn_stack", list(),
 #'
 #' ##no example available
 #'
-#' @md
 #' @export
 sTeve<- function(n_frames = 10, t_animation = 2, n.tree = 7, type) {
   .set_function_name("sTeve")
   on.exit(.unset_function_name(), add = TRUE)
 
-  .validate_class(n_frames, c("integer", "numeric"))
-  .validate_class(t_animation, c("integer", "numeric"))
-  .validate_class(n.tree, c("integer", "numeric"))
+  .validate_positive_scalar(n_frames, int = TRUE)
+  .validate_positive_scalar(t_animation, int = TRUE)
+  .validate_positive_scalar(n.tree, int = TRUE)
 
   ## allow new overlay plot
   par(new = TRUE)

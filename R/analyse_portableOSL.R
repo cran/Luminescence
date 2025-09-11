@@ -123,7 +123,6 @@
 #'   normalise = TRUE)
 #' get_RLum(results)
 #'
-#' @md
 #' @export
 analyse_portableOSL <- function(
   object,
@@ -201,13 +200,8 @@ analyse_portableOSL <- function(
   .validate_logical_scalar(plot)
 
   ## set SAMPLE --------
-  if("run" %in% names(list(...)))
-    run <- list(...)$run
-  else if (!is.null(object@info$Run_Name))
-    run <- object@info$Run_Name
-  else
-    run <- "Run #1"
-
+  run <- if ("run" %in% ...names()) list(...)$run
+         else object@info$Run_Name %||% "Run #1"
 
   ## CALCULATIONS ----
   ## Note: the list ... unlist construction is used make sure that get_RLum() always
@@ -303,8 +297,8 @@ analyse_portableOSL <- function(
 
   if (mode == "surface" && plot && all(range(summary$COORD_X) == c(0, 0))) {
     plot <- FALSE
-    message("[analyse_portableOSL()] Surface plot is not available when ",
-            "all x-coordinates are 0, plot reset to FALSE")
+    .throw_message("Surface plot is not available when all x-coordinates ",
+                   "are 0, plot reset to FALSE", error = FALSE)
   }
 
   # PLOTTING -------------------------------------------------------------------
@@ -424,10 +418,7 @@ analyse_portableOSL <- function(
          ## add background image if available -------
          if (!is.null(plot_settings$bg_img)) {
            ## get corner positions
-           positions <- plot_settings$bg_img_positions[1:4]
-           if (is.null(positions))
-             positions <- par()$usr
-
+           positions <- plot_settings$bg_img_positions[1:4] %||% par()$usr
            graphics::rasterImage(
              image = plot_settings$bg_img,
              xleft = positions[1],

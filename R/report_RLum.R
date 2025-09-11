@@ -176,7 +176,6 @@
 #' report_RLum(object = x, file = "~/arbitray_list")
 #' }
 #'
-#' @md
 #' @export
 report_RLum <- function(
   object,
@@ -369,17 +368,17 @@ report_RLum <- function(
       if (i == 1)
         hlevel <- "#"
       else
-        hlevel <- paste(rep("#", elements$depth[i]), collapse = "")
+        hlevel <- strrep("#", elements$depth[i])
 
       # write header; number of dots represents depth in the object. because there
       # may be duplicate header names, for each further occurrence of a name
       # Zero-width non-joiner entities are added to the name (non visible)
       writeLines(paste0(hlevel, " ",
                         "<span style='color:#74a9d8'>",
-                        paste(rep("..", elements$depth[i]), collapse = ""),
+                        strrep("..", elements$depth[i]),
                         type,
                         "</span>",
-                        paste(rep("&zwnj;", elements$bud.freq[i]), collapse = ""),
+                        strrep("&zwnj;", elements$bud.freq[i]),
                         short.name[length(short.name)],
                         ifelse(elements$endpoint[i], "", paste0("{#root",i,"}")),
                         ##ifelse(elements$endpoint[i], "", "{#root}"),
@@ -456,7 +455,7 @@ report_RLum <- function(
     elements.html <- elements
     elements.html$branch <- gsub("\\$", "&#36;", elements$branch)
     writeLines(pander::pander_return(elements.html,
-                                     justify = paste(rep("l", ncol(elements)), collapse = "")),
+                                     justify = strrep("l", ncol(elements))),
                tmp)
     writeLines("\n\n", tmp)
   }#EndOf::Structure
@@ -492,14 +491,8 @@ report_RLum <- function(
 
   # PLOTTING ----
   if (structure$plot) {
-    isRLumObject <- length(grep("RLum", class(object)))
-
-    if (is.list(object))
-      isRLumList <- all(sapply(object, function(x) inherits(x, "RLum.Data.Curve")))
-    else
-      isRLumList <- FALSE
-
-    if (isRLumObject | isRLumList) {
+    isRLumList <- is.list(object) && all(sapply(object, is.RLum.Data.Curve))
+    if (inherits(object, "RLum") || isRLumList) {
 
       # mutual exclusivity: it is either a list or an RLum-Object
       if (isRLumList)
@@ -606,7 +599,6 @@ report_RLum <- function(
       s4.root <- paste0(root, "@", slot)
       .tree_RLum(slot(x, slot), root = s4.root)
     }
-    invisible()
 
     ## List objects -----
   }  else if (inherits(x, "list") | typeof(x) == "list" & !inherits(x, "data.frame")) {
@@ -616,7 +608,7 @@ report_RLum <- function(
           .dimension(x), "\n"), sep = "|")
 
     if (length(x) > 0) {
-      element <- if (!is.null(names(x))) names(x) else paste0("[[", seq_along(x), "]]")
+      element <- names(x) %||% paste0("[[", seq_along(x), "]]")
 
       for (i in 1:length(x)) {
         if (grepl(" ", element[i]))
@@ -632,7 +624,6 @@ report_RLum <- function(
         .tree_RLum(x[[i]], root = list.root)
       }
     }
-    invisible()
 
     ## Data frames -----
   } else if (inherits(x, "data.frame")) {
@@ -652,15 +643,12 @@ report_RLum <- function(
       # print ----
       cat(c(root, .class(x), base::length(x), .depth(root), TRUE, .dimension(x), "\n"), sep = "|")
     }
-    invisible()
 
     ## Last elements -----
   }  else {
 
     # print ----
     cat(c(root, .class(x), base::length(x), .depth(root), TRUE, .dimension(x), "\n"), sep = "|")
-
-    invisible()
   }
 }
 
@@ -674,10 +662,10 @@ report_RLum <- function(
   length(strsplit(x, split = "\\$|@|\\[\\[")[[1]]) - 1
 }
 .dimension <- function(x) {
-  if (!is.null(dim(x)))
-    dim <- paste(dim(x), collapse = "|")
-  else
-    dim <- c(0, 0)
+  ## ensure `dim` is padded with zeros if its length is shorter than 2
+  dim <- numeric(2)
+  dim[seq_along(dim(x))] <- dim(x)
+  dim
 }
 .class <- function(x) {
   paste(class(x), collapse = "/")
@@ -716,5 +704,5 @@ report_RLum <- function(
     df[is.na(df$bud.freq), ][match(unique.bud, df[is.na(df$bud.freq), ]$bud), ]$bud.freq <- i - 1
   }
 
-  invisible(df)
+  df
 }

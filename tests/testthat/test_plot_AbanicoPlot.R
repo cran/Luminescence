@@ -277,7 +277,7 @@ test_that("more coverage", {
   df[,1] <- -df[,1]
   expect_message(
     object = plot_AbanicoPlot(data = df),
-    regexp = "Attention, small standardised estimate scatter. Toggle off y.axis?")
+    regexp = "Small standardised estimate scatter, toggle off y.axis?")
 
   ## test boundaries
   expect_warning(
@@ -330,17 +330,69 @@ test_that("Test graphical snapshot", {
   testthat::skip_if_not(getRversion() >= "4.4.0")
 
   SW({
-    vdiffr::expect_doppelganger(
-      title = "Abanico expected",
-      fig = plot_AbanicoPlot(data = ExampleData.DeValues))
-    vdiffr::expect_doppelganger("summary sub",
+    vdiffr::expect_doppelganger("default",
+                                plot_AbanicoPlot(ExampleData.DeValues))
+    vdiffr::expect_doppelganger("dispersion error bars",
                                 plot_AbanicoPlot(ExampleData.DeValues,
-                                                 summary.pos = "sub",
+                                                 dispersion = "sd",
+                                                 error.bars = TRUE,
+                                                 hist = TRUE,
+                                                 boxplot = TRUE,
+                                                 summary.pos = "topleft",
                                                  summary = c("n", "se.rel", "kurtosis")))
     vdiffr::expect_doppelganger("rotated",
                                 plot_AbanicoPlot(ExampleData.DeValues,
                                                  rotate = TRUE, rug = TRUE,
+                                                 hist = TRUE,
+                                                 boxplot = TRUE,
+                                                 grid.col = "grey",
                                                  summary.pos = "bottomleft",
                                                  summary = c("mean", "in.2s", "skewness")))
+    vdiffr::expect_doppelganger("dots cex",
+                                plot_AbanicoPlot(ExampleData.DeValues,
+                                                 dots = TRUE, cex = 2,
+                                                 boxplot = TRUE,
+                                                 grid.col = "grey80",
+                                                 summary.pos = "left",
+                                                 summary.method = "weighted",
+                                                 summary = c("sd.abs", "se.abs",
+                                                             "median")))
+
+    data.list <- list(ExampleData.DeValues[1:30,],
+                      ExampleData.DeValues[31:62,] * 1.3)
+    vdiffr::expect_doppelganger("line frame legend",
+                                plot_AbanicoPlot(data = data.list,
+                                                 line = 75.7,
+                                                 line.lty = 3,
+                                                 line.label = "CAM",
+                                                 frame = 3,
+                                                 legend = c("data 1", "data 2"),
+                                                 cex = 1.2,
+                                                 log.z = FALSE,
+                                                 z.0 = "median",
+                                                 col = c("steelblue4", "orange4"),
+                                                 bar.col = c("steelblue3", "orange3"),
+                                                 polygon.col = c("steelblue1", "orange1"),
+                                                 pch = c(2, 6),
+                                                 angle = c(30, 50),
+                                                 summary = c("n", "in.2s", "median")))
+
+    vdiffr::expect_doppelganger("line frame legend rotated",
+                                plot_AbanicoPlot(data = data.list,
+                                                 rotate = TRUE,
+                                                 line = 75.7,
+                                                 line.lty = 3,
+                                                 line.label = "CAM",
+                                                 frame = 2,
+                                                 legend = c("data 1", "data 2"),
+                                                 cex = 1.2,
+                                                 log.z = FALSE,
+                                                 z.0 = "mean",
+                                                 col = c("steelblue4", "orange4"),
+                                                 bar.col = c("steelblue3", "orange3"),
+                                                 polygon.col = c("steelblue1", "orange1"),
+                                                 pch = c(2, 6),
+                                                 angle = c(30, 50),
+                                                 summary = c("n", "in.2s", "median")))
   })
 })

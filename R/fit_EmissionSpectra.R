@@ -175,7 +175,6 @@
 #'
 #'}
 #'
-#'@md
 #'@export
 fit_EmissionSpectra <- function(
   object,
@@ -197,9 +196,8 @@ fit_EmissionSpectra <- function(
   ## create a list of data treat, frame controls the number of frames analysed
 
   .validate_class(object, c("RLum.Data.Spectrum", "matrix", "list"))
-  if (!is.null(n_components)) {
-    .validate_positive_scalar(n_components, int = TRUE)
-  }
+  .validate_class(frame, c("integer", "numeric"), null.ok = TRUE)
+  .validate_positive_scalar(n_components, int = TRUE, null.ok = TRUE)
   input_scale <- .validate_args(input_scale, c("wavelength", "energy"),
                                 null.ok = TRUE)
   .validate_class(method_control, "list")
@@ -230,7 +228,6 @@ fit_EmissionSpectra <- function(
         frame <- 1:ncol(o@data)
 
       }else{
-        .validate_class(frame, c("integer", "numeric"), extra = "NULL")
         if(max(frame) > ncol(o@data)|| min(frame) < 1){
           .throw_error("Invalid 'frame', allowed values range from 1 to ",
                        ncol(o@data))
@@ -259,9 +256,7 @@ fit_EmissionSpectra <- function(
     ##set frame
     if(is.null(frame)){
       frame <- 1:(ncol(object) - 1)
-
     }else{
-      .validate_class(frame, c("integer", "numeric"), extra = "NULL")
       if(max(frame) > (ncol(object)-1) || min(frame) < 1){
         .throw_error("Invalid 'frame', allowed values range from 1 to ",
                      ncol(object) - 1)
@@ -320,7 +315,7 @@ fit_EmissionSpectra <- function(
   }
 
   ##extract matrix for everything below
-  m <- object[,1:2]
+  m <- object[, 1:2, drop = FALSE]
 
   ##replace all negative values
   if(!is.null(sub_negative))
@@ -494,7 +489,7 @@ fit_EmissionSpectra <- function(
 
   ## Extract values of components -------------------------------------------
   m_coef <- NA
-  if(!is.na(fit[1]) && is(fit, "nls")){
+  if (!is.na(fit[1]) && inherits(fit, "nls")) {
     ##extract values we need only
     m_coef <- summary(fit)$coefficients
     m_coef <- matrix(

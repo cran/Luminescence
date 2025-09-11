@@ -33,7 +33,7 @@ test_that("input validation", {
                               Ch_L3 = c(40, 50, 60)),
                "'Ch_L3' should have length 2")
   expect_error(calc_FastRatio(obj, Ch_L3 = list(4, 5)),
-               "'Ch_L3' should be of class 'integer' or 'numeric'")
+               "'Ch_L3' should be of class 'integer', 'numeric' or NULL")
   expect_error(calc_FastRatio(obj, Ch_L3 = c(0, 2)),
                "'Ch_L3[1]' should be a positive integer scalar",
                fixed = TRUE)
@@ -60,6 +60,10 @@ test_that("input validation", {
                "'dead.channels' should have length 2")
   expect_error(calc_FastRatio(ExampleData.CW_OSL_Curve, dead.channels = c(-1, 1)),
                "All elements of 'dead.channels' should be non-negative")
+  expect_error(calc_FastRatio(data.frame(NA, 1:4, 1:4)),
+               "After NA removal, nothing is left from the data set")
+  expect_error(calc_FastRatio(data.frame(1:4, NA)),
+               "After NA removal, nothing is left from the data set")
 
   expect_warning(expect_null(calc_FastRatio(ExampleData.CW_OSL_Curve,
                                             Ch_L2 = 1)),
@@ -171,4 +175,8 @@ test_that("regression tests", {
       "Error: Fitting failed, please call 'fit_CWCurve()' manually",
       fixed = TRUE)
   })
+
+  ## issue 932
+  expect_warning(expect_null(calc_FastRatio(matrix(rnorm(5), 1, 5))),
+                 "Calculated time/channel for L2 is too small")
 })

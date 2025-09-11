@@ -77,7 +77,6 @@
 #' ## calculate De according to Fuchs & Lang (2001)
 #' temp<- calc_FuchsLang2001(ExampleData.DeValues$BT998, cvThreshold = 5)
 #'
-#' @md
 #' @export
 calc_FuchsLang2001 <- function(
   data,
@@ -96,11 +95,14 @@ calc_FuchsLang2001 <- function(
   if (inherits(data, "RLum.Results")) {
     data <- get_RLum(data, "data")
   }
+  if (ncol(data) < 2) {
+    .throw_error("'data' should have 2 columns")
+  }
 
   # Deal with extra arguments -----------------------------------------------
   ##deal with addition arguments
   extraArgs <- list(...)
-  verbose <- if("verbose" %in% names(extraArgs)) {extraArgs$verbose} else {TRUE}
+  verbose <- extraArgs$verbose %||% TRUE
 
   ##============================================================================##
   ##PREPARE DATA
@@ -136,7 +138,7 @@ calc_FuchsLang2001 <- function(
     cv <- round(sd / mean * 100, digits = 2) #calculate coefficient of variation
 
     ## avoid crashes if the both mean and sd are zero
-    if (is.nan(cv))
+    if (is.na(cv))
       cv <- 0
 
     # break if cv > cvThreshold
@@ -165,13 +167,8 @@ calc_FuchsLang2001 <- function(
       # write used D[e] values in data.frame
       usedDeValues[endDeValue,1]<-data_ordered[endDeValue,1]
       usedDeValues[endDeValue,2]<-data_ordered[endDeValue,2]
+      usedDeValues[endDeValue,3] <- paste(cv, "%")
 
-      # first cv values alway contains NA to ensure that NA% is not printed test
-      if(is.na(cv)==TRUE) {
-        usedDeValues[endDeValue,3]<-cv
-      } else {
-        usedDeValues[endDeValue,3]<-paste(cv," %",sep="")
-      }
     }#EndElse
 
     # go the next D[e] value until the maximum number is reached
@@ -234,7 +231,8 @@ calc_FuchsLang2001 <- function(
   ##=========##
   ## PLOTTING
   if(plot) {
-    try(plot_RLum.Results(newRLumResults.calc_FuchsLang2001, ...))
+    try(plot_RLum.Results(newRLumResults.calc_FuchsLang2001, ...),
+        outFile = stdout()) # redirect error messages so they can be silenced
   }#endif::plot
 
   invisible(newRLumResults.calc_FuchsLang2001)

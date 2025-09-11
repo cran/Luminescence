@@ -9,6 +9,10 @@ test_that("input validation", {
                "'values' should be of class 'RLum.Data.Curve' or 'data.frame'")
   expect_error(fit_CWCurve(data.frame()),
                "'values' cannot be an empty data.frame")
+  expect_error(fit_CWCurve(iris[, 1, drop = FALSE]),
+               "'values' should have 2 columns")
+  expect_error(fit_CWCurve(data.frame(a = 1:10, b = NA)),
+               "'values' contains no positive counts")
   expect_error(fit_CWCurve(set_RLum("RLum.Data.Curve")),
                "'values' contains no positive counts")
   expect_error(fit_CWCurve(ExampleData.CW_OSL_Curve, fit.method = "error"),
@@ -86,6 +90,8 @@ test_that("check functionality", {
   pdf(tempfile(), width = 1, height = 1)
   expect_message(fit_CWCurve(ExampleData.CW_OSL_Curve, verbose = FALSE),
                  "Figure margins too large or plot area too small")
+  expect_error(fit_CWCurve(data.frame(NA, 1:5)),
+               "0 (non-NA) cases", fixed = TRUE)
 })
 
 test_that("regression tests", {
@@ -96,5 +102,10 @@ test_that("regression tests", {
   expect_message(fit_CWCurve(ExampleData.CW_OSL_Curve[1:20, ],
                              fit.method = "LM", fit.calcError = TRUE),
                  "Error: Computation of confidence interval failed")
+  })
+
+  ## issue 953
+  SW({
+  fit_CWCurve(ExampleData.CW_OSL_Curve[1:2, ], fit.trace = TRUE)
   })
 })

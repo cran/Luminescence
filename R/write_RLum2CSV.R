@@ -73,7 +73,6 @@
 #'
 #' }
 #'
-#' @md
 #' @export
 write_RLum2CSV <- function(
   object,
@@ -132,7 +131,7 @@ write_RLum2CSV <- function(
   if (export == TRUE) {
     if (is.null(path)) {
       path <- getwd()
-      message("[write_RLum2CSV()] Path automatically set to: ", path)
+      .throw_message("Path automatically set to: ", path, error = FALSE)
     } else if (!dir.exists(path)) {
       .throw_error("Directory provided via the argument 'path' does not exist")
     }
@@ -200,8 +199,7 @@ write_RLum2CSV <- function(
 
   } else if (inherits(object, "data.frame")) {
     object_list <- list(object)
-    if(!is.null(attr(object, "filename"))) filename <- attr(object, "filename") else  filename <- ""
-
+    filename <- attr(object, "filename") %||% ""
     names(object_list) <- paste0("conv_", attr(object, "list_name"), filename)
   }
 

@@ -13,7 +13,6 @@ test_that("Test internals", {
   ##might be a list of RLum.Analysis objects is might be super large
   f <- function(object, a, b = 1, c = list(), d = NULL) {
     Luminescence:::.expand_parameters(len = 3)
-
   }
 
   ##test some functions
@@ -34,19 +33,55 @@ test_that("Test internals", {
   ##create a case where the value cannot be calculated
   expect_type(.calc_HPDI(rlnorm(n = 100, meanlog = 10, sdlog = 100)), type = "logical")
 
-  # .warningCatcher() ---------------------------------------------------------------------------
-  expect_warning(Luminescence:::.warningCatcher(for(i in 1:5) warning("test")),
-                 regexp = "\\(1\\) test\\: This warning occurred 5 times\\!")
+  ## .warningCatcher() ------------------------------------------------------
+  expect_warning(Luminescence:::.warningCatcher(for(i in 1:5) {
+                                                  warning("message 1")
+                                                  if (i %% 2 == 0)
+                                                    warning("message 2")
+                                                  if (i %% 3 == 0)
+                                                    warning("message 3")
+                                                }),
+                 paste(c("(1) message 1 [5 times]",
+                         "(2) message 2 [2 times]",
+                         "(3) message 3"), collapse = "\n"),
+                 fixed = TRUE)
+  expect_warning(Luminescence:::.warningCatcher(warning("single message")),
+                 "single message")
 
   # .smoothing ----------------------------------------------------------------------------------
   expect_silent(Luminescence:::.smoothing(runif(100), k = 5, method = "median"))
   expect_silent(.smoothing(runif(200), method = "median"))
   expect_silent(.smoothing(runif(100), k = 4, method = "mean"))
   expect_silent(.smoothing(runif(100), k = 4, method = "median"))
+  expect_equal(.smoothing(c(1, 1, 2, 50, 0, 2, 1, 2, 0, 1, 50),
+                          method = "Carter"),
+               c(1, 1, 2, 1, 0, 2, 1, 2, 0, 1, NA))
+  expect_equal(.smoothing(c(1, 1, 2, 50, 0, 2, 1, 2, 0, 1, 50),
+                          method = "Carter", fill = 0),
+               c(1, 1, 2, 1, 0, 2, 1, 2, 0, 1, 0))
+  expect_equal(.smoothing(c(1, 1, 2, 50, 0, 2, 1, 2, 0, 1, 50) * 10,
+                          method = "Carter", p_acceptance = 1e-30),
+               c(10, 10, 20, 17, 17, 20, 10, 20, 13, 10, NA))
+  expect_error(.smoothing(c(1, 1, 2, 50, 0, 2, 1, 2, 0, 1, 50),
+                          method = "Carter", p_acceptance = 0.5),
+               "'p_acceptance' rejects all counts, set it to a smaller value")
   expect_error(.smoothing(runif(100), method = "error"),
-               "'method' should be one of 'mean' or 'median'")
+               "'method' should be one of 'mean', 'median' or")
   expect_error(.smoothing(runif(100), align = "error"),
                "'align' should be one of 'right', 'center' or 'left'")
+  expect_error(.smoothing(runif(100), p_acceptance = "error"),
+               "'p_acceptance' should be a positive scalar")
+
+  ## .weighted.median() -----------------------------------------------------
+  expect_equal(.weighted.median(1:10, w = rep(1, 10)),
+               median(1:10))
+  expect_equal(.weighted.median(1:5, w = c(0.15, 0.1, 0.2, 0.3, 0.25)),
+               4)
+  expect_equal(.weighted.median(c(1:5, NA), w = c(0.15, 0.1, 0.2, 0.3, 0.25, 1)),
+               NA_real_)
+  expect_equal(.weighted.median(c(1:5, NA), w = c(0.15, 0.1, 0.2, 0.3, 0.25, 1),
+                                na.rm = TRUE),
+               4)
 
   ## .normalise_curve() -----------------------------------------------------
   data <- runif(100)
@@ -101,7 +136,12 @@ test_that("Test internals", {
 
   # .create_StatisticalSummaryText() ------------------------------------------------------------
   stats <- calc_Statistics(data.frame(1:10,1:10))
-  expect_silent(Luminescence:::.create_StatisticalSummaryText())
+  expect_equal(Luminescence:::.create_StatisticalSummaryText(),
+               "")
+  expect_equal(.create_StatisticalSummaryText(stats, keywords = ""),
+               "")
+  expect_equal(.create_StatisticalSummaryText(stats, keywords = "nonexisting"),
+               "")
   expect_equal(.create_StatisticalSummaryText(stats,
                                               keywords = "mean"),
                "mean = 5.5")
@@ -124,6 +164,10 @@ test_that("Test internals", {
     Luminescence:::.rm_nonRLum(
       c(list(set_RLum("RLum.Analysis"), set_RLum("RLum.Analysis")), 2), class = "RLum.Analysis"),
     "list")
+
+  ## regression test for issue 907
+  expect_length(Luminescence:::.rm_nonRLum(list(matrix(iris)), "RLum.Analysis"),
+                0)
 
   # .rm_NULL_elements() -----------------------------------------------------------
   expect_type(.rm_NULL_elements(list("a", NULL)),
@@ -180,16 +224,6 @@ test_that("Test internals", {
                      "OK")
   )
 
-  # .get_named_list_element  ------------------------------------------------
-  ## create random named list element
-  l <- list(
-    a = list(x = 1:10),
-    b = list(x = 1:10)
-
-  )
-  t <- expect_type(.get_named_list_element(l, element = "x"), type = "list")
-  expect_equal(sum(unlist(t)), expected = 110)
-
   ## .throw_error() ---------------------------------------------------------
   fun.int <- function() {
     .set_function_name("fun.int")
@@ -225,6 +259,32 @@ test_that("Test internals", {
                  "[fun.int()] Warning message", fixed = TRUE)
   expect_warning(fun.docall_do(),
                  "[fun.int()] Warning message", fixed = TRUE)
+
+  ## .throw_message() -------------------------------------------------------
+  fun.int <- function(error = TRUE) {
+    .set_function_name("fun.int")
+    on.exit(.unset_function_name(), add = TRUE)
+    .throw_message("Simple message", error = error)
+  }
+  fun.ext <- function(error = TRUE) fun.int(error)
+  fun.docall <- function(error = TRUE) do.call(fun.ext, args = list(error = error))
+  fun.docall_do <- function(error = TRUE) fun.docall(error)
+  expect_message(fun.int(),
+                 "[fun.int()] Error: Simple message", fixed = TRUE)
+  expect_message(fun.ext(),
+                 "[fun.int()] Error: Simple message", fixed = TRUE)
+  expect_message(fun.docall(),
+                 "[fun.int()] Error: Simple message", fixed = TRUE)
+  expect_message(fun.docall_do(),
+                 "[fun.int()] Error: Simple message", fixed = TRUE)
+  expect_message(fun.int(error = FALSE),
+                 "[fun.int()] Simple message", fixed = TRUE)
+  expect_message(fun.ext(error = FALSE),
+                 "[fun.int()] Simple message", fixed = TRUE)
+  expect_message(fun.docall(error = FALSE),
+                 "[fun.int()] Simple message", fixed = TRUE)
+  expect_message(fun.docall_do(error = FALSE),
+                 "[fun.int()] Simple message", fixed = TRUE)
 
   ## SW() ------------------------------------------------------------------
   expect_silent(SW(cat("silenced message")))
@@ -289,9 +349,13 @@ test_that("Test internals", {
     .validate_class(arg, "data.frame")
   }
   fun2 <- function(arg) {
+    .validate_class(arg, "data.frame", null.ok = TRUE)
+  }
+  fun3 <- function(arg) {
     .validate_class(arg, "data.frame", throw.error = FALSE)
   }
   expect_true(fun1(iris))
+  expect_true(fun2(NULL))
   expect_true(.validate_class(iris, c("data.frame", "integer")))
   expect_true(.validate_class(iris, c("data.frame", "integer"),
                               throw.error = FALSE))
@@ -300,6 +364,8 @@ test_that("Test internals", {
       "'arg' should be of class 'data.frame'")
   expect_error(fun1(),
                "'arg' should be of class 'data.frame'")
+  expect_error(fun2(),
+               "'arg' should be of class 'data.frame' or NULL")
   expect_error(fun1(NULL),
                "'arg' should be of class 'data.frame'")
   expect_error(.validate_class(test <- 1:5),
@@ -316,7 +382,7 @@ test_that("Test internals", {
   expect_error(.validate_class(test <- 1:5, c("list", "data.frame"),
                                name = "'other_name'"),
                "'other_name' should be of class 'list' or 'data.frame'")
-  expect_warning(fun2(),
+  expect_warning(fun3(),
                  "'arg' should be of class 'data.frame'")
 
   ## .validate_not_empty() --------------------------------------------------
@@ -359,9 +425,11 @@ test_that("Test internals", {
 
   ## .validate_positive_scalar() --------------------------------------------
   expect_silent(.validate_positive_scalar(int = TRUE))
-  expect_silent(.validate_positive_scalar(1.3))
-  expect_silent(.validate_positive_scalar(2, int = TRUE))
-  expect_silent(.validate_positive_scalar(NULL, int = TRUE, null.ok = TRUE))
+  expect_equal(.validate_positive_scalar(1.3),
+               1.3)
+  expect_equal(.validate_positive_scalar(2, int = TRUE),
+               2)
+  expect_null(.validate_positive_scalar(NULL, int = TRUE, null.ok = TRUE))
 
   expect_error(.validate_positive_scalar(test <- "a"),
                "'test' should be a positive scalar")
@@ -377,6 +445,8 @@ test_that("Test internals", {
                "'var' should be a positive scalar")
   expect_error(.validate_positive_scalar(-1, name = "'var'"),
                "'var' should be a positive scalar")
+  expect_error(.validate_positive_scalar(Inf, int = TRUE, name = "'var'"),
+               "'var' should be a positive integer")
   expect_error(.validate_positive_scalar(1.5, int = TRUE, name = "'var'"),
                "'var' should be a positive integer")
   expect_error(.validate_positive_scalar(NA, int = TRUE, name = "The variable"),
@@ -384,9 +454,11 @@ test_that("Test internals", {
 
   ## .validate_logical_scalar() ---------------------------------------------
   expect_silent(.validate_logical_scalar())
-  expect_silent(.validate_logical_scalar(TRUE))
-  expect_silent(.validate_logical_scalar(FALSE))
-  expect_silent(.validate_logical_scalar(NULL, null.ok = TRUE))
+  expect_equal(.validate_logical_scalar(TRUE),
+               TRUE)
+  expect_equal(.validate_logical_scalar(FALSE),
+               FALSE)
+  expect_null(.validate_logical_scalar(NULL, null.ok = TRUE))
 
   expect_error(.validate_logical_scalar(test <- "a"),
                "'test' should be a single logical value")
@@ -413,6 +485,18 @@ test_that("Test internals", {
   expect_warning(
       expect_false(.require_suggested_package("error", throw.error = FALSE),
                    "This function requires the 'error' package: to install it"))
+
+  ## %||% -------------------------------------------------------------------
+  expect_equal(letters %||% LETTERS,
+               letters)
+  expect_equal(NULL %||% LETTERS,
+               LETTERS)
+  expect_equal(NA %||% LETTERS,
+               NA)
+  expect_equal(character(0) %||% LETTERS,
+               character(0))
+  expect_equal("" %||% LETTERS,
+               "")
 
   ## .listify() -------------------------------------------------------------
   expect_equal(.listify(1, length = 3),

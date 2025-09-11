@@ -244,7 +244,6 @@
 #'             log = "x",
 #'             start_values = data.frame(Im = c(170,25,400), xm = c(56,200,1500)))
 #'
-#' @md
 #' @export
 fit_LMCurve<- function(
   values,
@@ -287,6 +286,9 @@ fit_LMCurve<- function(
 
     values <- as(values,"data.frame")
   }
+  if (ncol(values) < 2) {
+    .throw_error("'values' should have 2 columns")
+  }
 
   ##(2) data.frame or RLum.Data.Curve object?
   if (!missing(values.bg)) {
@@ -301,6 +303,9 @@ fit_LMCurve<- function(
     ## check if length of bg and signal is consistent
     if (nrow(values) != nrow(values.bg))
       .throw_error("'values' and 'values.bg' have different lengths")
+
+    ## silently limit columns of values.bg to prevent problems
+    values.bg <- values.bg[,1:2]
   }
 
   .validate_positive_scalar(n.components, int = TRUE)
@@ -327,6 +332,9 @@ fit_LMCurve<- function(
     values <- values[-na.idx, ]
     values.bg <- values.bg[-na.idx, ]
   }
+
+  if (nrow(values) == 0)
+    .throw_error("After NA removal, nothing is left from the data set")
 
   ## Set plot format parameters -----------------------------------------------
   extraArgs <- list(...) # read out additional arguments list
@@ -403,8 +411,8 @@ fit_LMCurve<- function(
     }
 
     if (verbose) {
-      message("[fit_LMCurve()] >> Background subtracted (method = '",
-              bg.subtraction, "')")
+      .throw_message(">> Background subtracted (method = '",
+                     bg.subtraction, "')", error = FALSE)
     }
   }
 
@@ -453,8 +461,8 @@ fit_LMCurve<- function(
     xm.pseudo<-sqrt(max(values[,1])/b.pseudo)
 
     ##the Im values obtaind by calculating residuals
-    Im.pseudo <- sapply(1:length(b.pseudo), function(x) {
-      xm.residual <- abs(values[, 1] - xm.pseudo[x])
+    Im.pseudo <- sapply(xm.pseudo, function(x) {
+      xm.residual <- abs(values[, 1] - x)
       values[which.min(xm.residual), 1] # time value of minimum residual
     })
 
@@ -673,7 +681,7 @@ fit_LMCurve<- function(
 
     ##change names of matrix to make more easy to understand
     component.contribution.matrix.names <- c("x", "rev.x",
-                                             paste(c("y.c","rev.y.c"),rep(1:n.components,each=2), sep=""))
+                                             paste0(c("y.c", "rev.y.c"), rep(1:n.components, each = 2)))
 
     ##calculate area for each component, for each time interval
     component.contribution.matrix.area <- sapply(
@@ -693,7 +701,7 @@ fit_LMCurve<- function(
     ##set final column names
     colnames(component.contribution.matrix) <- c(
       component.contribution.matrix.names,
-      paste(c("cont.c"),rep(1:n.components,each=1), sep=""),
+      paste0("cont.c", 1:n.components),
       "cont.sum")
 
     ##============================================================================##
@@ -785,7 +793,8 @@ fit_LMCurve<- function(
     ## change xlim/ylim values in case of log plot to avoid problems
     if (settings$log %in% c("x", "xy") && settings$xlim[1] == 0) {
       .throw_warning("'xlim' changed to avoid 0 values for log-scale")
-      xlim <- c(2^0.5 / 2 * max(values[, 1]) / nrow(values), settings$xlim[2])
+      settings$xlim <- c(2^0.5 / 2 * max(values[, 1]) / nrow(values), settings$xlim[2])
+
     }
     if (settings$log %in% c("y", "xy") && settings$ylim[1] == 0) {
       settings$ylim[1] <- 0.01

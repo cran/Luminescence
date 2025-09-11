@@ -324,7 +324,6 @@
 #' summary(bs$poly.fits$poly.three$fitted.values)
 #' }
 #'
-#' @md
 #' @export
 calc_MinDose <- function(
   data,
@@ -346,14 +345,19 @@ calc_MinDose <- function(
 
   .validate_class(data, c("data.frame", "RLum.Results"))
   .validate_not_empty(data)
-  if (is(data, "RLum.Results")) {
+  if (inherits(data, "RLum.Results")) {
     data <- get_RLum(data, "data")
+  }
+  if (ncol(data) < 2) {
+    .throw_error("'data' should have 2 columns")
   }
 
   if (any(!stats::complete.cases(data))) {
-    message("\n[calc_MinDose] Warning: Input data contained NA/NaN values, ",
-            "which were removed prior to calculations!")
+    .throw_message("Warning: Input data contained NA/NaN values, ",
+                   "which were removed prior to calculations", error = FALSE)
     data <- data[stats::complete.cases(data), ]
+    if (nrow(data) == 0)
+      .throw_error("After NA removal, nothing is left from the data set")
   }
 
   if (!missing(init.values)) {
@@ -383,9 +387,8 @@ calc_MinDose <- function(
 
   ## check if this function is called by calc_MaxDose()
   if ("invert" %in% names(extraArgs)) {
-    invert <- extraArgs$invert
-    .validate_logical_scalar(invert)
-    if (!log) {
+    invert <- .validate_logical_scalar(extraArgs$invert, name = "'invert'")
+    if (invert && !log) {
       log <- TRUE # overwrite user choice as max dose model currently only supports the logged version
       .throw_warning("The maximum dose model only supports the logged version, ",
                      "'log' reset to TRUE\n")
@@ -395,56 +398,51 @@ calc_MinDose <- function(
   }
 
   ## console output
-  if ("verbose" %in% names(extraArgs)) {
-    verbose <- extraArgs$verbose
-    .validate_logical_scalar(verbose)
-  } else {
-    verbose <- TRUE
-  }
+  verbose <- extraArgs$verbose %||% TRUE
+  .validate_logical_scalar(verbose)
 
   ## bootstrap replications
   # first level bootstrap
   if ("bs.M" %in% names(extraArgs)) {
-    M <- as.integer(extraArgs$bs.M)
-    .validate_positive_scalar(M, int = TRUE, name = "'bs.M'")
+    M <- .validate_positive_scalar(as.integer(extraArgs$bs.M),
+                                   int = TRUE, name = "'bs.M'")
+    M <- max(M, 2) # issue 900
   } else {
     M <- 1000
   }
 
   # second level bootstrap
   if ("bs.N" %in% names(extraArgs)) {
-    N <- as.integer(extraArgs$bs.N)
-    .validate_positive_scalar(N, int = TRUE, name= "'bs.N'")
+    N <- .validate_positive_scalar(as.integer(extraArgs$bs.N),
+                                   int = TRUE, name= "'bs.N'")
   } else {
     N <- 3*M
   }
 
   # KDE bandwith
   if ("bs.h" %in% names(extraArgs)) {
-    h <- extraArgs$bs.h
-    .validate_positive_scalar(h, name = "'bs.h'")
+    h <- .validate_positive_scalar(extraArgs$bs.h, name = "'bs.h'")
   } else {
-    h <- (sd(data[ ,1])/sqrt(length(data[ ,1])))*2
+    h <- sd(data[, 1]) / sqrt(nrow(data)) * 2
   }
 
   # standard deviation of sigmab
   if ("sigmab.sd" %in% names(extraArgs)) {
-    sigmab.sd <- extraArgs$sigmab.sd
-    .validate_positive_scalar(sigmab.sd)
+    sigmab.sd <- .validate_positive_scalar(extraArgs$sigmab.sd,
+                                           name = "'sigmab.sd'")
   } else {
     sigmab.sd <- 0.04
   }
 
   if ("debug" %in% names(extraArgs)) {
-    debug <- extraArgs$debug
-    .validate_logical_scalar(debug)
+    debug <- .validate_logical_scalar(extraArgs$debug, name = "'debug'")
   } else {
     debug <- FALSE
   }
 
   if ("cores" %in% names(extraArgs)) {
-    cores <- extraArgs$cores
-    .validate_positive_scalar(cores, int = TRUE)
+    cores <- .validate_positive_scalar(extraArgs$cores,
+                                       int = TRUE, name = "'cores'")
   } else {
     cores <- parallel::detectCores()
     if (multicore)
@@ -528,7 +526,7 @@ calc_MinDose <- function(
   }
 
   ##============================================================================##
-  ## AUXILLARY FUNCTIONS
+  ## AUXILIARY FUNCTIONS
   ##============================================================================##
 
   # THIS FUNCTION CALCULATES THE NEGATIVE LOG LIKELIHOOD OF THE DATA
@@ -670,13 +668,16 @@ calc_MinDose <- function(
     cnt <- cnt + 1
   }
 
-  ## DELETE rows where z = -Inf/Inf
-  prof@profile$gamma <- prof@profile$gamma[!is.infinite(prof@profile$gamma[["z"]]), ]
-  prof@profile$sigma <- prof@profile$sigma[!is.infinite(prof@profile$sigma[["z"]]), ]
-  prof@profile$p0 <- prof@profile$p0[!is.infinite(prof@profile$p0[["z"]]), ]
+  ## delete rows where z = -Inf/Inf or NaN
+  prof@profile$gamma <- prof@profile$gamma[is.finite(prof@profile$gamma$z), ]
+  prof@profile$sigma <- prof@profile$sigma[is.finite(prof@profile$sigma$z), ]
+  prof@profile$p0 <- prof@profile$p0[is.finite(prof@profile$p0$z), ]
   if (par == 4) {
-    prof@profile$mu <- prof@profile$mu[!is.infinite(prof@profile$mu[["z"]]), ]
+    prof@profile$mu <- prof@profile$mu[is.finite(prof@profile$mu$z), ]
   }
+
+  ## workaround for #967 FIXME(mcol)
+  logLik <- bbmle::logLik
 
   # calculate Bayesian Information Criterion (BIC)
   BIC <- BIC(ests)
@@ -835,7 +836,7 @@ calc_MinDose <- function(
       message(msg)
 
     n <- length(data[ ,1])
-    # Draw N+M samples of a normale distributed sigmab
+    # Draw N+M samples from a normally distributed sigmab
     sigmab <- rnorm(N + M, sigmab, sigmab.sd)
     # Draw N+M random indices and their frequencies
     b2Pmatrix <- draw_Freq()

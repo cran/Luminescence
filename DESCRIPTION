@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 1.1.0
-Date: 2025-06-11
+Version: 1.1.1
+Date: 2025-09-11
 Authors@R: c(
     person("Sebastian", "Kreutzer", role = c("aut", "trl", "cre", "dtc"), email = "maintainer_luminescence@r-luminescence.org", comment = c(ORCID = "0000-0002-0734-2199")),
     person("Christoph", "Burow", role = c("aut", "trl", "dtc"), comment = c(ORCID = "0000-0002-5023-4046")),
@@ -56,7 +56,7 @@ Language: en-US
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 NeedsCompilation: yes
-Packaged: 2025-06-11 16:03:39 UTC; marco
+Packaged: 2025-09-11 09:28:45 UTC; marco
 Author: Sebastian Kreutzer [aut, trl, cre, dtc] (ORCID:
     <https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc] (ORCID:
@@ -92,4 +92,4 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc] (ORCID:
     <https://orcid.org/0000-0002-7359-6939>),
   Markus Fuchs [ths] (ORCID: <https://orcid.org/0000-0003-4669-6528>)
 Repository: CRAN
-Date/Publication: 2025-06-11 23:50:02 UTC
+Date/Publication: 2025-09-11 10:50:26 UTC

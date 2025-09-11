@@ -3,52 +3,10 @@
 \docType{class}
 \name{RLum.Data-class}
 \alias{RLum.Data-class}
-\alias{add_metadata<-,RLum.Data-method}
-\alias{rename_metadata<-,RLum.Data-method}
-\alias{replace_metadata<-,RLum.Data-method}
-\alias{view,RLum.Data-method}
 \title{Class \code{"RLum.Data"}}
-\usage{
-\S4method{add_metadata}{RLum.Data}(object, info_element) <- value
-
-\S4method{rename_metadata}{RLum.Data}(object, info_element) <- value
-
-\S4method{replace_metadata}{RLum.Data}(object, info_element, subset = NULL, verbose = TRUE) <- value
-
-\S4method{view}{RLum.Data}(object, ...)
-}
-\arguments{
-\item{object}{(\strong{required}) an object of class \linkS4class{RLum.Data}}
-
-\item{info_element}{\link{character} (\strong{required}) name of the metadata field
-to replace or remove}
-
-\item{value}{(\strong{required}) The value assigned to the selected elements
-of the metadata field. If \code{NULL} the elements named in \code{info_element}
-will be removed.}
-
-\item{subset}{\link{expression} (\emph{optional}) logical expression to limit the
-substitution only to the selected subset of elements}
-
-\item{verbose}{\link{logical} (\emph{with default}) enable/disable output to the
-terminal.}
-
-\item{...}{other arguments that might be passed}
-}
 \description{
 Generalized virtual data class for luminescence data.
 }
-\section{Methods (by generic)}{
-\itemize{
-\item \code{add_metadata(RLum.Data) <- value}: Add metadata entries to \linkS4class{RLum.Data} objects
-
-\item \code{rename_metadata(RLum.Data) <- value}: Rename a metadata entry of \linkS4class{RLum.Data} objects
-
-\item \code{replace_metadata(RLum.Data) <- value}: Replaces or removes metadata of \linkS4class{RLum.Data} objects
-
-\item \code{view(RLum.Data)}: View method for \linkS4class{RLum.Data} objects
-
-}}
 \section{Objects from the Class}{
 
 A virtual class: no objects can be created from it.
@@ -69,11 +27,6 @@ showClass("RLum.Data")
 }
 \author{
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
-, RLum Developer Team} 
-
-\section{How to cite}{
-Kreutzer, S., 2025. RLum.Data-class(): Class 'RLum.Data'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
-}
-
+, RLum Developer Team}
 \keyword{classes}
 \keyword{internal}

@@ -36,8 +36,7 @@ one (comparable) sample. If you have to treat independent samples, you have use 
 in a loop.}}
 
 \item{structure}{\link{character} (\emph{with default}):
-sets the structure of the measurement data. Allowed are \code{'Lx'} or \code{c('Lx','Tx')}.
-Other input is ignored}
+the structure of the measurement data, one of \code{'Lx'} or \code{c('Lx','Tx')}.}
 
 \item{signal.integral}{\link{vector} (\strong{required}): vector with channels for the signal integral
 (e.g., \code{c(1:10)}). Not required if a \code{data.frame} with \code{LxTx} values is provided.}
@@ -188,7 +187,7 @@ n.MC = 10)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2025. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.23. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Burow, C., 2025. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.23. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

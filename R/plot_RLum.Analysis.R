@@ -116,7 +116,6 @@
 #' abline = list(v = c(110))
 #' )
 #'
-#' @md
 #' @export
 plot_RLum.Analysis <- function(
   object,
@@ -157,7 +156,7 @@ plot_RLum.Analysis <- function(
     ylab = NULL,
     xlim = NULL,
     ylim = NULL,
-    pch = 1,
+    pch = NULL,
     col = "auto",
     norm = FALSE,
     sub_title = NULL,
@@ -183,8 +182,8 @@ plot_RLum.Analysis <- function(
   .validate_logical_scalar(combine)
   if (combine && length(object@records) <= 1) {
     combine <- FALSE
-    .throw_warning("'combine' can't be used with fewer than two curves, ",
-                   "reset to FALSE")
+    .throw_message("'combine' can't be used with fewer than two curves, ",
+                   "reset to FALSE", error = FALSE)
   }
   if (combine) {
     sapply(object@records, function(x) {
@@ -231,12 +230,8 @@ plot_RLum.Analysis <- function(
   }
 
   # Plotting ------------------------------------------------------------------
-  ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ##(1) NORMAL (combine == FALSE)
-  ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+  ## (1) NORMAL (combine == FALSE) -------------------------------------------
   if (!combine) {
-
     ##grep RLum.Data.Curve or RLum.Data.Spectrum objects
     temp <- lapply(object@records, function(x) {
       if (inherits(x, "RLum.Data.Curve") ||
@@ -260,25 +255,13 @@ plot_RLum.Analysis <- function(
     }
 
     ##expand plot settings list
-    plot.settings <- lapply(setNames(1:length(plot.settings), names(plot.settings)),
-                            function(x) {
-                              if (!is.null(plot.settings[[x]])) {
-                                if(length(plot.settings[[x]]) > 1){
-
-                                  if(is(plot.settings[[x]], "list")){
-                                    rep_len(plot.settings[[x]], length.out = length(temp))
-                                  }else{
-                                   rep_len(list(plot.settings[[x]]), length.out = length(temp))
-                                  }
-
-                                }else{
-                                  rep_len(plot.settings[[x]], length.out = length(temp))
-                                }
-
-                              } else{
-                                plot.settings[[x]]
-                              }
-                            })
+    plot.settings <- lapply(plot.settings, function(setting) {
+      if (is.null(setting))
+        return(NULL)
+      if (length(setting) == 1 || inherits(setting, "list"))
+        return(rep(setting, length.out = length(temp)))
+      rep(list(setting), length.out = length(temp))
+    })
 
     ##expand abline
     if(!is.null(abline)){
@@ -289,9 +272,7 @@ plot_RLum.Analysis <- function(
 
     ##apply curve transformation
     for (i in seq_along(temp)) {
-
       if (inherits(temp[[i]], "RLum.Data.Curve")) {
-
         ##set curve transformation if wanted
         if (grepl("IRSL|OSL", temp[[i]]@recordType) &&
             curve.transformation != "None") {
@@ -351,15 +332,11 @@ plot_RLum.Analysis <- function(
         }
 
         ##main
-        main <- if (is.null(plot.settings$main[[i]])) {
-          temp[[i]]@recordType
-        } else{
-          plot.settings$main[[i]]
-        }
+        main <- plot.settings$main[[i]] %||% temp[[i]]@recordType
 
-        ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         ##PLOT
-        ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         ##plot RLum.Data.Curve curve
           ##we have to do this via this way, otherwise we run into a duplicated arguments
           ##problem
@@ -368,11 +345,7 @@ plot_RLum.Analysis <- function(
             list(
               object = temp[[i]],
               col = col,
-              mtext = if (!is.null(plot.settings$mtext[[i]])) {
-                plot.settings$mtext[[i]]
-              } else{
-                paste("#", i, sep = "")
-              },
+              mtext = plot.settings$mtext[[i]] %||% paste("#", i, sep = ""),
               par.local = FALSE,
               main = main,
               log = plot.settings$log[[i]],
@@ -407,9 +380,9 @@ plot_RLum.Analysis <- function(
 
         do.call(what = "plot_RLum.Data.Spectrum", args = c(list(
             object = temp[[i]],
-            mtext =  if(!is.null(plot.settings$mtext[[i]])) plot.settings$mtext[[i]] else paste("#", i, sep = ""),
+            mtext = plot.settings$mtext[[i]] %||% paste("#", i, sep = ""),
             par.local = FALSE,
-            main = if(!is.null(plot.settings$main)) plot.settings$main else temp[[i]]@recordType
+            main = plot.settings$main %||% temp[[i]]@recordType
         ), args))
       }
 
@@ -417,9 +390,7 @@ plot_RLum.Analysis <- function(
 
   }else{
 
-    ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ##(2) NORMAL (combine == TRUE)
-    ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ## (2) NORMAL (combine == TRUE)----------------------------------------------
     ##(1) check RLum objects in the set
 
     ##account for different curve types, combine similar
@@ -441,18 +412,12 @@ plot_RLum.Analysis <- function(
 
     ##expand plot settings list
     ##expand list
-    plot.settings <- lapply(setNames(1:length(plot.settings), names(plot.settings)), function(x) {
-      if (!is.null(plot.settings[[x]])) {
-        if(is.list(plot.settings[[x]])){
-          rep_len(plot.settings[[x]], length.out = length(temp.recordType))
-
-        }else{
-          rep_len(list(plot.settings[[x]]), length.out = length(temp.recordType))
-        }
-
-      } else{
-        plot.settings[[x]]
-      }
+    plot.settings <- lapply(plot.settings, function(setting) {
+      if (is.null(setting))
+        return(NULL)
+      if (is.list(setting))
+        return(rep(setting, length.out = length(temp.recordType)))
+      rep(list(setting), length.out = length(temp.recordType))
     })
 
     ##expand abline
@@ -509,11 +474,7 @@ plot_RLum.Analysis <- function(
 
       ##set plot parameters
       ##main
-      main <- if (!is.null(plot.settings$main[[k]])) {
-        plot.settings$main[[k]]
-      } else{
-        paste0(temp.recordType[[k]], " combined")
-      }
+      main <- plot.settings$main[[k]] %||% paste0(temp.recordType[[k]], " combined")
 
       ##xlab
       xlab <- if(!is.null(plot.settings$xlab[[k]])){
@@ -526,11 +487,7 @@ plot_RLum.Analysis <- function(
       }
 
       ##ylab
-      ylab <- if(!is.null(plot.settings$ylab[[k]])){
-        plot.settings$ylab[[k]]
-      }else{
-        paste0(temp.recordType[[k]], " [a.u.]")
-      }
+      ylab <- plot.settings$ylab[[k]] %||% paste0(temp.recordType[[k]], " [a.u.]")
 
       ##xlim
       xlim <- if (!is.null(plot.settings$xlim[[k]]) & length(plot.settings$xlim[[k]]) >1) {
@@ -581,11 +538,9 @@ plot_RLum.Analysis <- function(
       ##legend.text
       legend.text <- if(!is.null(plot.settings$legend.text[[k]])){
         plot.settings$legend.text[[k]]
-
       }else{
         if(!is.null(records_max) && records_max[1] > 2) {
           paste("Curve", records_show)
-
         } else {
           paste("Curve", 1:length(object.list))
         }
@@ -595,12 +550,7 @@ plot_RLum.Analysis <- function(
       legend.col <- plot.settings$legend.col[[k]]
 
       ##legend.pos
-      legend.pos <- if(!is.null(plot.settings$legend.pos[[k]])){
-        plot.settings$legend.pos[[k]]
-
-      }else{
-        "topright"
-      }
+      legend.pos <- plot.settings$legend.pos[[k]] %||% "topright"
 
       if (legend.pos == "outside") {
         par.default.outside <- par()[c("mar", "xpd")]
@@ -692,14 +642,10 @@ plot_RLum.Analysis <- function(
           legend = legend.text,
           lwd = plot.settings$lwd[[k]],
           lty = plot.settings$lty[[k]],
-          col = if (is.null(legend.col)) {
-            col[1:length(object.list)]
-          } else{
-            legend.col
-          },
+          col = legend.col %||% col[1:length(object.list)],
           bty = "n",
           xpd = legend.pos == "outside",
-          cex = 0.8 * plot.settings$cex[[k]]
+          cex = 0.8
         )
       }
     }

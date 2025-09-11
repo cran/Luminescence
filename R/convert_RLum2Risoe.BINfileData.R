@@ -32,7 +32,6 @@
 #'
 #'@return The function returns a [Risoe.BINfileData-class] object.
 #'
-#'@md
 #'@export
 convert_RLum2Risoe.BINfileData <- function(
   object,
@@ -42,7 +41,7 @@ convert_RLum2Risoe.BINfileData <- function(
   on.exit(.unset_function_name(), add = TRUE)
 
   # Self call -----------------------------------------------------------------------------------
-  if(is(object, "list")){
+  if (inherits(object, "list")) {
     object_list <-
       lapply(object, function(x) {
         convert_RLum2Risoe.BINfileData(x)

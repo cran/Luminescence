@@ -139,7 +139,6 @@
 #'   output_unit = "Ma"
 #')
 #'
-#' @md
 #' @export
 calc_ThermalLifetime <- function(
   E,
@@ -251,8 +250,8 @@ calc_ThermalLifetime <- function(
       FUN.VALUE = matrix(numeric(), ncol = length(E), nrow = length(s))
     )
 
-    ##transform to an arry in either case to have the same output
-    if (!is(lifetimes, "array")) {
+    ##transform to an array in either case to have the same output
+    if (!inherits(lifetimes, "array")) {
       lifetimes <-
         array(lifetimes, dim = c(length(s), length(E), length(T)))
     }
@@ -282,15 +281,12 @@ calc_ThermalLifetime <- function(
     rm(temp.lifetimes)
   }
 
-
   # Terminal output -----------------------------------------------------------------------------
 
   if(verbose){
     cat("\n[calc_ThermalLifetime()]\n\n")
 
     if(profiling){
-
-
     cat("\tprofiling = TRUE")
     cat("\n\t--------------------------\n")
     }

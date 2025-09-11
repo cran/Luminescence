@@ -10,7 +10,7 @@ plot_RadialPlot(
   log.z = TRUE,
   central.value,
   centrality = "mean.weighted",
-  mtext,
+  mtext = "",
   summary = c("n", "in.2s"),
   summary.pos = "sub",
   legend,
@@ -57,7 +57,7 @@ the central line. Can either be one out of
 \item numeric value used for the standardisation.
 }}
 
-\item{mtext}{\link{character}:
+\item{mtext}{\link{character} (\emph{with default}):
 additional text below the plot title.}
 
 \item{summary}{\link{character} (\emph{with default}):
@@ -152,6 +152,7 @@ one or more of the following keywords:
 \item \code{"mean"} (mean De value),
 \item \code{"mean.weighted"} (error-weighted mean),
 \item \code{"median"} (median of the De values),
+\item \code{"median.weighted"} (error-weighted median),
 \item \code{"sdrel"} (relative standard deviation in percent),
 \item \code{"sdrel.weighted"} (error-weighted relative standard deviation in percent),
 \item \code{"sdabs"} (absolute standard deviation),
@@ -276,7 +277,7 @@ plot_RadialPlot(
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2025. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2025. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

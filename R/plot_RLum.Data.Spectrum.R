@@ -80,7 +80,9 @@
 #' `xlab`, `ylab`, `zlab`, `xlim`, `ylim`, `box`,
 #' `zlim`, `main`, `mtext`, `pch`, `type` (`"single"`, `"multiple.lines"`, `"interactive"`),
 #' `col`, `border`, `lwd`, `bty`, `showscale` (`"interactive"`, `"image"`)
-#' `contour`, `contour.col` (`"image"`)
+#' `contour`, `contour.col` (`"image"`), `labcex` (`"image"`, `"contour"`),
+#' `n_breaks` (`"image`), `legend` (`TRUE`/`FALSE`),
+#' `legend.pos` (`"image"`), `legend.horiz` (`TRUE`/`FALSE` | `"image"`)
 #'
 #' @param object [RLum.Data.Spectrum-class] or [matrix] (**required**):
 #' S4 object of class `RLum.Data.Spectrum` or a `matrix` containing count
@@ -167,7 +169,7 @@
 #'
 #' @note Not all additional arguments (`...`) will be passed similarly!
 #'
-#' @section Function version: 0.6.10
+#' @section Function version: 0.6.11
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -240,7 +242,6 @@
 #'
 #' }
 #'
-#' @md
 #' @export
 plot_RLum.Data.Spectrum <- function(
   object,
@@ -262,26 +263,26 @@ plot_RLum.Data.Spectrum <- function(
   .set_function_name("plot_RLum.Data.Spectrum")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## Integrity tests  -------------------------------------------------------
-
+  ## Integrity checks -------------------------------------------------------
   .validate_class(object, c("RLum.Data.Spectrum", "matrix"))
 
   if (inherits(object, "matrix")) {
     if (is.null(colnames(object))) {
-        colnames(object) <- 1:ncol(object)
+      colnames(object) <- seq_len(ncol(object))
     }
     if (is.null(rownames(object))) {
-        rownames(object) <- 1:nrow(object)
+      rownames(object) <- seq_len(nrow(object))
     }
 
     object <- set_RLum(class = "RLum.Data.Spectrum", data = object)
-    message("[plot_RLum.Data.Spectrum()] Input has been converted to a ",
-            "'RLum.Data.Spectrum' object using set_RLum()")
+    .throw_message("Input has been converted to an 'RLum.Data.Spectrum' ",
+                   "object using set_RLum()", error = FALSE)
   }
 
   if (length(object@data) < 2) {
     .throw_error("'object' contains no data")
   }
+  .validate_class(bg.spectrum, c("RLum.Data.Spectrum", "matrix"), null.ok = TRUE)
   .validate_args(norm, c("min", "max"), null.ok = TRUE)
   .validate_args(plot.type, c("contour", "persp", "single", "multiple.lines",
                               "image", "transect", "interactive"))
@@ -323,97 +324,48 @@ plot_RLum.Data.Spectrum <- function(
   ##deal with addition arguments
   extraArgs <- list(...)
 
-  main <- if("main" %in% names(extraArgs)) {extraArgs$main} else
-  {"RLum.Data.Spectrum"}
-
-  zlab <- if("zlab" %in% names(extraArgs)) {extraArgs$zlab} else
-  {ifelse(plot.type == "multiple.lines", ylab, zlab)}
-
-  xlab <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} else
-  {xlab}
-
-  ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} else
-  {ifelse(plot.type == "single" | plot.type == "multiple.lines",
-          "Luminescence [cts/channel]", ylab)}
-
-  xlim <- if("xlim" %in% names(extraArgs)) {extraArgs$xlim} else
-  {c(min(as.numeric(rownames(object@data))),
-     max(as.numeric(rownames(object@data))))}
-
-  ylim <- if("ylim" %in% names(extraArgs)) {extraArgs$ylim} else
-  {c(min(as.numeric(colnames(object@data))),
-     max(as.numeric(colnames(object@data))))}
-
+  main <- extraArgs$main %||% "RLum.Data.Spectrum"
+  zlab <- extraArgs$zlab %||% ifelse(plot.type == "multiple.lines", ylab, zlab)
+  xlab <- extraArgs$xlab %||% xlab
+  ylab <- extraArgs$ylab %||% ifelse(plot.type %in% c("single", "multiple.lines"),
+                                     "Luminescence [cts/channel]", ylab)
+  xlim <- extraArgs$xlim %||% range(as.numeric(rownames(object@data)))
+  ylim <- extraArgs$ylim %||% range(as.numeric(colnames(object@data)))
   #for zlim see below
 
-  mtext <- if("mtext" %in% names(extraArgs)) {extraArgs$mtext} else
-  {""}
-
-  cex <- if("cex" %in% names(extraArgs)) {extraArgs$cex} else
-  {1}
-
-  phi <- if("phi" %in% names(extraArgs)) {extraArgs$phi} else
-  {15}
-
-  theta <- if("theta" %in% names(extraArgs)) {extraArgs$theta} else
-  {-30}
-
-  lphi <- if("lphi" %in% names(extraArgs)) {extraArgs$lphi} else
-  {15}
-
-  ltheta <- if("ltheta" %in% names(extraArgs)) {extraArgs$ltheta} else
-  {-30}
-
-  r <- if("r" %in% names(extraArgs)) {extraArgs$r} else
-  {10}
-
-  shade <- if("shade" %in% names(extraArgs)) {extraArgs$shade} else
-  {0.4}
-
-  expand <- if("expand" %in% names(extraArgs)) {extraArgs$expand} else
-  {0.6}
-
-  border <- if("border" %in% names(extraArgs)) {extraArgs$border} else
-  {NULL}
-
-  box <- if("box" %in% names(extraArgs)) {extraArgs$box} else
-  {TRUE}
-
-  axes <- if("axes" %in% names(extraArgs)) {extraArgs$axes} else
-  {TRUE}
-
-  ticktype <- if("ticktype" %in% names(extraArgs)) {extraArgs$ticktype} else
-  {"detailed"}
-
-  log<- if("log" %in% names(extraArgs)) {extraArgs$log} else
-  {""}
-
-  type<- if("type" %in% names(extraArgs)) {extraArgs$type} else
-  {
-    if (plot.type == "interactive") {
-      "surface"
-
-    } else{
-      "l"
-    }
-  }
-
-  pch<- if("pch" %in% names(extraArgs)) {extraArgs$pch} else
-  {1}
-
-  lwd<- if("lwd" %in% names(extraArgs)) {extraArgs$lwd} else
-  {1}
-
-  bty <- if("bty" %in% names(extraArgs)) {extraArgs$bty} else
-  {NULL}
-
-  sub<- if("sub" %in% names(extraArgs)) {extraArgs$sub} else
-  {""}
-
+  mtext <- extraArgs$mtext %||% ""
+  cex <- extraArgs$cex %||% 1
+  phi <- extraArgs$phi %||% 15
+  theta <- extraArgs$theta %||% -30
+  lphi <- extraArgs$lphi %||% 15
+  ltheta <- extraArgs$ltheta %||% -30
+  r <- extraArgs$r %||% 10
+  shade <- extraArgs$shade %||% 0.4
+  expand <- extraArgs$expand %||% 0.6
+  border <- extraArgs$border
+  box <- extraArgs$box %||% TRUE
+  axes <- extraArgs$axes %||% TRUE
+  ticktype <- extraArgs$ticktype %||% "detailed"
+  log <- extraArgs$log %||% ""
+  labcex <- extraArgs$labcex %||% 0.6
+  type <- extraArgs$type %||% ifelse(plot.type == "interactive", "surface", "l")
+  pch <- extraArgs$pch %||% 1
+  lwd <- extraArgs$lwd %||% 1
+  bty <- extraArgs$bty
+  sub <- extraArgs$sub %||% ""
   #for plotly::plot_ly
-  showscale<- if("showscale" %in% names(extraArgs)) {extraArgs$showscale} else
-  {FALSE}
+  showscale <- extraArgs$showscale %||% FALSE
 
+  ## further plot settings
+  plot_settings <- modifyList(
+    x = list(
+      legend = TRUE,
+      legend.pos = "topright",
+      legend.horiz = FALSE,
+      n_breaks = 50
+
+    ),
+    val = extraArgs)
 
   # prepare values for plot ---------------------------------------------------
   ##copy data
@@ -449,7 +401,6 @@ plot_RLum.Data.Spectrum <- function(
 
   # Background spectrum -------------------------------------------------------------------------
   if(!is.null(bg.spectrum)){
-    .validate_class(bg.spectrum, c("RLum.Data.Spectrum", "matrix"))
     if (inherits(bg.spectrum, "RLum.Data.Spectrum"))
       bg.xyz <- bg.spectrum@data
     else
@@ -575,8 +526,7 @@ plot_RLum.Data.Spectrum <- function(
   }
 
   ##check for zlim
-  zlim <- if("zlim" %in% names(extraArgs)) {extraArgs$zlim} else
-  {range(temp.xyz)}
+  zlim <- extraArgs$zlim %||% range(temp.xyz)
 
   # set colour values --------------------------------------------------------
   if("col" %in% names(extraArgs) == FALSE | plot.type == "single" | plot.type == "multiple.lines"){
@@ -664,7 +614,7 @@ pmat <- NA
 
 if(plot){
   ##par setting for possible combination with plot method for RLum.Analysis objects
-  if(par.local) par(mfrow=c(1,1), cex = cex)
+  if(par.local) par(mfrow = c(1,1), cex = cex)
 
   ##rest plot type for 1 column matrix
   if(ncol(temp.xyz) == 1 && plot.type != "single"){
@@ -855,7 +805,7 @@ if(plot){
             xlab = xlab,
             ylab = ylab,
             main = main,
-            labcex = 0.6 * cex,
+            labcex = labcex * cex,
             col = "black"
     )
 
@@ -865,19 +815,45 @@ if(plot){
   } else if (plot.type == "image") {
     ## Plot: image plot ----
     ## ==========================================================================#
-    graphics::image(x,y,temp.xyz,
-            xlab = xlab,
-            ylab = ylab,
-            main = main,
-            col = if(is.null(extraArgs$col)) grDevices::hcl.colors(50, palette = "Inferno") else
-              extraArgs$col
+
+    ## set breaks
+    n_breaks <- plot_settings$n_breaks
+
+    ## get colours
+    col <- extraArgs$col %||% grDevices::hcl.colors(n_breaks, palette = "Inferno")
+
+    ## set break vector
+    breaks <- seq(min(temp.xyz), max(temp.xyz), length.out = length(col) + 1)
+
+    ## render graphic
+    graphics::image(
+      x,y,temp.xyz,
+      xlab = xlab,
+      ylab = ylab,
+      main = main,
+      breaks = breaks,
+      col = col
     )
 
     if (is.null(extraArgs$contour) || extraArgs$contour != FALSE) {
       graphics::contour(x, y, temp.xyz,
-              col = if(is.null(extraArgs$contour.col)) rgb(1,1,1,0.8) else extraArgs$contour.col,
-              labcex = 0.6 * cex,
+              col = extraArgs$contour.col %||% rgb(1, 1, 1, 0.8),
+              labcex = labcex * cex,
               add = TRUE)
+    }
+
+    if(plot_settings$legend[1]) {
+      ## add legend
+      legend_scale_id <- seq(1,length(breaks),length.out = c(min(c(length(breaks), 6))))
+
+      legend(
+          plot_settings$legend.pos,
+          legend = ceiling(breaks[legend_scale_id]/10) * 10,
+          fill = col[legend_scale_id],
+          bg = grDevices::rgb(1,1,1,0.7),
+          title = "Intensity",
+          cex = cex * 0.9,
+          horiz = plot_settings$legend.horiz)
     }
 
     ##plot additional mtext
@@ -889,9 +865,9 @@ if(plot){
 
     ## set colour rug
     col.rug <- col
-    col <- if("col" %in% names(extraArgs)) {extraArgs$col} else {"black"}
-    box <- if("box" %in% names(extraArgs)) extraArgs$box[1] else TRUE
-    frames <- if("frames" %in% names(extraArgs)) extraArgs$frames else 1:length(y)
+    col <- extraArgs$col %||% "black"
+    box <- extraArgs$box[1] %||% TRUE
+    frames <- extraArgs$frames %||% 1:length(y)
 
     for(i in frames) {
       if("zlim" %in% names(extraArgs) == FALSE){zlim <- range(temp.xyz[,i])}
@@ -964,9 +940,9 @@ if(plot){
     ## Plot: multiple.lines ----
     ## ========================================================================#
     col.rug <- col
-    col<- if("col" %in% names(extraArgs)) {extraArgs$col} else  {"black"}
-    box <- if("box" %in% names(extraArgs)) extraArgs$box else TRUE
-    frames <- if("frames" %in% names(extraArgs)) extraArgs$frames else 1:length(y)
+    col <- extraArgs$col %||% "black"
+    box <- extraArgs$box[1] %||% TRUE
+    frames <- extraArgs$frames %||% 1:length(y)
 
     ##change graphic settings
     par.default <- par()[c("mfrow", "mar", "xpd")]
@@ -1044,13 +1020,15 @@ if(plot){
       legend.text <- as.character(paste(round(y[frames],digits=1), zlab))
 
     ##legend
-    legend(x = par()$usr[2],
-           y = par()$usr[4],
-           legend = legend.text,
-           lwd= lwd,
-           lty = frames,
-           bty = "n",
-           cex = 0.6*cex)
+    if(plot_settings$legend) {
+      legend(x = par()$usr[2],
+             y = par()$usr[4],
+             legend = legend.text,
+             lwd= lwd,
+             lty = frames,
+             bty = "n",
+             cex = 0.6 * cex)
+    }
 
     ##plot additional mtext
     mtext(mtext, side = 3, cex = cex*0.8)

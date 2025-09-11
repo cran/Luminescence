@@ -10,12 +10,15 @@ test_that("input validation", {
                "'object' should be of class 'RLum.Data.Spectrum' or 'matrix'")
   expect_error(plot_RLum.Data.Spectrum(set_RLum("RLum.Data.Spectrum")),
                "'object' contains no data")
+  expect_error(expect_message(plot_RLum.Data.Spectrum(matrix(0, 0, 0)),
+                              "Input has been converted"),
+               "'object' contains no data")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "error"),
                "'plot.type' should be one of 'contour', 'persp', 'single'")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, norm = "error"),
                "'norm' should be one of 'min', 'max' or NULL")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bg.spectrum = "error"),
-               "'bg.spectrum' should be of class 'RLum.Data.Spectrum' or 'matrix'")
+               "'bg.spectrum' should be of class 'RLum.Data.Spectrum', 'matrix' or")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bin.rows = 1.7),
                "'bin.rows' should be a positive integer scalar")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bin.cols = 0),
@@ -38,13 +41,13 @@ test_that("check functionality", {
 
     ##try a matrix as input
     expect_message(plot_RLum.Data.Spectrum(object = m, xaxis.energy = TRUE),
-                   "Input has been converted to a 'RLum.Data.Spectrum' object")
+                   "Input has been converted to an 'RLum.Data.Spectrum' object")
 
     ##remove rownames and column names
     rownames(m) <- NULL
     colnames(m) <- NULL
     expect_message(plot_RLum.Data.Spectrum(object = m),
-        regexp = "Input has been converted to a 'RLum.Data.Spectrum' object")
+                   "Input has been converted to an 'RLum.Data.Spectrum' object")
 
     ## test duplicated column names
     t <- TL.Spectrum
@@ -191,6 +194,22 @@ test_that("check functionality", {
         bin.cols = 1
       )
     ))
+    ## image labelling scaler
+    expect_silent(suppressWarnings(
+      plot_RLum.Data.Spectrum(
+        TL.Spectrum,
+        plot.type = "image",
+        xlim = c(310, 750),
+        ylim = c(0, 300),
+        bin.rows = 10,
+        labcex = 2,
+        n_breaks = 10,
+        legend.pos = "bottom",
+        legend.horiz = TRUE,
+        bin.cols = 1
+      )
+    ))
+
 
   ### plot_image: no contour -------
    expect_silent(suppressWarnings(
@@ -310,6 +329,7 @@ test_that("check functionality", {
   plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "multiple.lines",
                           phi = 15, theta = -30, r = 10, log = "xyz",
                           shade = 0.4, expand = 0.5, border = 1,
+                          optical.wavelength.colours = FALSE, rug = FALSE,
                           axes = FALSE, norm = "min", col = 2, zlim = c(0, 2))
 
   expect_message(expect_null(

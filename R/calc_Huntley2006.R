@@ -301,7 +301,6 @@
 #'  readerDdot = readerDdot,
 #'  n.MC = 25)
 #' }
-#' @md
 #' @export
 calc_Huntley2006 <- function(
     data,
@@ -324,6 +323,7 @@ calc_Huntley2006 <- function(
 
   .validate_class(data, "data.frame")
   .validate_not_empty(data)
+  .validate_class(LnTn, "data.frame", null.ok = TRUE)
   fit.method <- .validate_args(fit.method, c("EXP", "GOK"))
   .validate_length(lower.bounds, 4)
   .validate_logical_scalar(summary)
@@ -340,7 +340,6 @@ calc_Huntley2006 <- function(
 
   ## Check if 'LnTn' is used and overwrite 'data'
   if (!is.null(LnTn)) {
-    .validate_class(LnTn, "data.frame")
     if (ncol(LnTn) != 2)
       .throw_error("'LnTn' should be a data frame with 2 columns")
     if (ncol(data) > 3)
@@ -493,6 +492,10 @@ calc_Huntley2006 <- function(
   GC.settings <- modifyList(GC.settings, extraArgs)
   GC.settings$object <- data.tmp
   GC.settings$verbose <- FALSE
+
+  ## unset the n.MC argument so that fit_DoseResponseCurve() won't use it,
+  ## which would result in a large performance slowdown (#867)
+  GC.settings$n.MC <- NULL
 
   fit.bounds <- GC.settings$fit.bounds
   force_through_origin <- GC.settings$fit.force_through_origin
@@ -897,9 +900,7 @@ calc_Huntley2006 <- function(
       De.measured <- -De.measured
     }
 
-    xlim <- range(pretty(dosetimeGray, n = 15))
-    if (!is.na(De.sim) & De.sim > xlim[2])
-      xlim <- range(pretty(c(min(dosetimeGray), De.sim), n = 15))
+    xlim <- range(pretty(c(dosetimeGray, De.sim), n = 15))
 
     # Create figure after Kars et al. (2008) contrasting the dose response curves
     ## open plot window ------------

@@ -24,14 +24,15 @@
 #' enable/disable output to the terminal.
 #'
 #' @param ... Further graphical parameters to be passed (supported:
-#' `main`, `mtext`, `xlim`, `ylim`, `xlab`, `ylab`, `legend`, `reg_points_pch`,
-#' `density_polygon` (`TRUE/FALSE`), `density_polygon_col`, `density_rug` (`TRUE`/`FALSE`)),
-#'  `box` (`TRUE`/`FALSE`)
+#' `main`, `mtext`, `xlim`, `ylim`, `xlab`, `ylab`, `log` (not valid for objects
+#' fitted with `mode = "extrapolation"`), `legend` (`TRUE/FALSE`), `leged.pos`,
+#' `reg_points_pch`, `density_polygon` (`TRUE/FALSE`), `density_polygon_col`,
+#' `density_rug` (`TRUE`/`FALSE`), `box` (`TRUE`/`FALSE`).
 #'
 #' @return
 #' A plot (or a series of plots) is produced.
 #'
-#' @section Function version: 1.0.4
+#' @section Function version: 1.0.7
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
@@ -80,7 +81,6 @@
 #'  type = "l"
 #' )
 #'
-#' @md
 #' @export
 plot_DoseResponseCurve <- function(
   object,
@@ -113,7 +113,7 @@ plot_DoseResponseCurve <- function(
   colnames(xy) <- c("x", "y")
   y.Error <- sample[first.idx:last.idx, 3]
 
-  De <- object@data$De$De.plot
+  De <- object@data$De$.De.plot
   x.natural <- na.exclude(object@data$De.MC)
   De.MonteCarlo <- mean(na.exclude(x.natural))
   De.Error <- sd(na.exclude(x.natural))
@@ -133,6 +133,15 @@ plot_DoseResponseCurve <- function(
           } else {
             c(0, xmax)
           }
+
+  ## pch lookup table
+  reg_points_pch <- rep(19, nrow(xy))
+
+    ## correct repeated an zero
+    if(mode == "interpolation") {
+      reg_points_pch[duplicated(xy[[1]])] <- 2
+      reg_points_pch[xy[[1]] == 0] <-  1
+    }
 
   ## set plot settings
   plot_settings <- modifyList(
@@ -154,8 +163,10 @@ plot_DoseResponseCurve <- function(
         } else {
           ""
         },
+      log = "",
       legend = TRUE,
-      reg_points_pch = c(19,2, 1),
+      legend.pos = if (mode == "interpolation") "topleft" else "bottomright",
+      reg_points_pch = reg_points_pch,
       density_polygon = TRUE,
       density_polygon_col = rgb(1,0,0,0.2),
       density_rug = TRUE,
@@ -164,10 +175,26 @@ plot_DoseResponseCurve <- function(
     keep.null = TRUE
   )
 
-  ## Main plots -------------------------------------------------------------
+  if (plot_settings$log != "") {
+    if (mode == "extrapolation") {
+      .throw_message("[plot_DoseResponseCurve] No logarithmic transformation ",
+                     "allowed on a fit obtained with mode = 'extrapolation', ",
+                     "'log' reset to ''")
+      plot_settings$log <- ""
+    } else {
+      ## if we want to apply a log-transform on x and the first time point
+      ## is 0, we shift the curves by one channel
+      if (grepl("x", plot_settings$log) && min(xy$x) == 0) {
+        xy$x[xy$x == 0] <- 1
+        plot_settings$xlim[1] <- min(xy$x)
+      }
+      if (grepl("y", plot_settings$log)) {
+        plot_settings$ylim[1] <- min(xy$y)
+      }
+    }
+  }
 
-  ## set plot check
-  plot_check <- NULL
+  ## Main plots -------------------------------------------------------------
 
   ## open plot area
   par.default <- par("cex", "mar", "mgp")
@@ -186,12 +213,19 @@ plot_DoseResponseCurve <- function(
       xy[1:fit.args$fit.NumberRegPointsReal, ],
       ylim = plot_settings$ylim,
       xlim = plot_settings$xlim,
+      log = plot_settings$log,
       pch = plot_settings$reg_points_pch,
       xlab = plot_settings$xlab,
       ylab = plot_settings$ylab,
       frame.plot = plot_settings$box[1]
   ),
   silent = TRUE)
+
+  ## now that we have opened the plot, we can work out the coordinates of
+  ## the extremes, applying a log-transformation if necessary
+  par.usr <- par("usr")
+  if (grepl("x", plot_settings$log)) par.usr[1:2] <- 10^par.usr[1:2]
+  if (grepl("y", plot_settings$log)) par.usr[3:4] <- 10^par.usr[3:4]
 
   if (!inherits(plot_check, "try-error")) {
     if (mode == "extrapolation") {
@@ -204,8 +238,13 @@ plot_DoseResponseCurve <- function(
 
     ## add curve
     if (inherits(object$Formula, "expression")) {
-      ## make sure that we always have a zero
-      x <- sort(c(0, seq(par()$usr[1], par()$usr[2], length.out = 100)))
+      ## make sure that we always have a zero: here we operate with the
+      ## original par("usr") values, so that in case of log-transformation
+      ## the points are still uniformly spaced (#845)
+      x <- sort(c(0, seq(par("usr")[1], par("usr")[2], length.out = 100)))
+      if (grepl("x", plot_settings$log))
+        x <- 10^x
+
       lines(x, eval(object$Formula))
     }
 
@@ -230,9 +269,10 @@ plot_DoseResponseCurve <- function(
     }
 
     ## repeated Point
+    idx.rep <- which(duplicated(xy[, 1]))
     points(
-        x = xy[which(duplicated(xy[, 1])), 1],
-        y = xy[which(duplicated(xy[, 1])), 2],
+        x = xy[idx.rep, 1],
+        y = xy[idx.rep, 2],
         pch = if(is.na(plot_settings$reg_points_pch[2]))
                 plot_settings$reg_points_pch[1]
               else
@@ -242,7 +282,7 @@ plot_DoseResponseCurve <- function(
     if (mode == "interpolation") {
       xmax <- if (is.na(De)) max(sample[, 1]) * 2 else De
       try(lines(
-          c(par()$usr[1], xmax),
+          c(par.usr[1], xmax),
           c(sample[1, 2], sample[1, 2]),
           col = col[2],
           lty = 2,
@@ -250,7 +290,7 @@ plot_DoseResponseCurve <- function(
       ), silent = TRUE)
       try(lines(
           c(De, De),
-          c(par()$usr[3], sample[1, 2]),
+          c(par.usr[3], sample[1, 2]),
           col = col[2],
           lty = 2,
           lwd = 1.25), silent = TRUE)
@@ -274,12 +314,13 @@ plot_DoseResponseCurve <- function(
           density_De$y <- .rescale(
             x = density_De$y,
             range_old = c(max(density_De$y), min(density_De$y)),
-            range_new = c(sample[1, 2]/2, par("usr")[3]))
+            range_new = c(sample[1, 2] / 2, par.usr[3]))
 
           ## for De
+          ## we add two extra points to ensure that the base is not wonky (#847)
           polygon(
-            x = density_De$x,
-            y = density_De$y,
+            x = c(density_De$x, tail(density_De$x, 1), density_De$x[1]),
+            y = c(density_De$y, min(density_De$y), min(density_De$y)),
             col = plot_settings$density_polygon_col)
 
           ## for LxTx
@@ -293,7 +334,7 @@ plot_DoseResponseCurve <- function(
           tmp_x <-  .rescale(
             x = tmp_x,
             range_old = c(max(tmp_x), min(tmp_x)),
-            range_new = c(sample[[2]][1], par("usr")[1]))
+            range_new = c(sample[[2]][1], par.usr[1]))
 
           # draw polygon
           polygon(
@@ -305,18 +346,19 @@ plot_DoseResponseCurve <- function(
       }
 
 
-    ## reg Point 0
-    points(
-        x = xy[which(xy == 0), 1],
-        y = xy[which(xy == 0), 2],
+      ## reg Point 0
+      idx.0 <- which(xy == 0)
+      points(
+        x = xy[idx.0, 1],
+        y = xy[idx.0, 2],
         pch = if(is.na(plot_settings$reg_points_pch[3]))
                plot_settings$reg_points_pch[1]
               else
                plot_settings$reg_points_pch[3],
         cex = 1.5)
 
-    ## ARROWS	#y-error Bar
-    segments(xy$x, xy$y - y.Error, xy$x, xy$y + y.Error)
+      ## y-error bar
+      segments(xy$x, xy$y - y.Error, xy$x, xy$y + y.Error)
 
       if(plot_settings$density_rug[1])
         suppressWarnings(graphics::rug(x = x.natural, side = 3))
@@ -347,21 +389,15 @@ plot_DoseResponseCurve <- function(
 
     ## plot legend
     if(plot_settings$legend) {
-      if (mode == "interpolation") {
-        legend(
-            "topleft",
-            c("REG point", "REG point repeated", "REG point 0"),
-            pch = plot_settings$reg_points_pch,
-            cex = 0.7,
-            bty = "n")
-      } else {
-        legend(
-            "bottomright",
-            c("Dose point", "Dose point rep.", "Dose point 0"),
-            pch = plot_settings$reg_points_pch,
-            cex = 0.7,
-            bty = "n")
-      }
+      legend(
+          plot_settings$legend.pos,
+          legend = if (mode == "interpolation")
+                     c("REG point", "REG point 0", "REG point repeated")
+                   else
+                     c("Dose point", "Dose point 0", "Dose point rep."),
+          pch = unique(plot_settings$reg_points_pch),
+          cex = 0.7,
+          bty = "n")
     }
 
     if (plot_extended) {
@@ -408,6 +444,7 @@ plot_DoseResponseCurve <- function(
                  digits = 0))
 
           ## add norm curve
+          x <- seq(par("usr")[1], par("usr")[2], length.out = 100)
           y_curve <- stats::dnorm(x,
             mean = mean(x.natural, na.rm = TRUE),
             sd = sd(x.natural, na.rm = TRUE))
@@ -452,9 +489,6 @@ plot_DoseResponseCurve <- function(
               text = De.expr,
               cex = 0.6 * par("cex")),
             silent = TRUE)
-
-        } else {
-          plot_check <- histogram
         }
 
       } else {

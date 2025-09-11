@@ -143,7 +143,6 @@
 #' write_R2BIN(object, paste0(dirname(file),"/", basename(file), "_CLEANED.BIN"))
 #' }
 #'
-#' @md
 #' @export
 verify_SingleGrainData <- function(
     object,
@@ -164,7 +163,7 @@ verify_SingleGrainData <- function(
   ##(3) List of RLum.Analysis
 
   # Self Call -----------------------------------------------------------------------------------
-  if(is(object, "list")){
+  if (inherits(object, "list")) {
     if (length(object) == 0)
       return(set_RLum(class = if (cleanup) "RLum.Analysis" else "RLum.Results"))
 
@@ -299,7 +298,7 @@ verify_SingleGrainData <- function(
     ##++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ##RLum.Analysis and list with RLum.Analysis objects
     ## ... and yes it make sense not to mix that up with the code above
-  }else if(is(object,"RLum.Analysis")){
+  } else if (inherits(object,"RLum.Analysis")) {
     ##first extract all count values from all curves
     object_list <- lapply(object@records, function(x){
       ##yes, would work differently, but it is faster
@@ -401,8 +400,8 @@ verify_SingleGrainData <- function(
         if(selection_id_text == "")
           selection_id_text <- "<none>"
 
-        message("[verify_SingleGrainData()] RLum.Analysis object reduced to records: ",
-                selection_id_text)
+        .throw_message("RLum.Analysis object reduced to records: ",
+                       selection_id_text, error = FALSE)
       }
 
       ##selected wanted elements

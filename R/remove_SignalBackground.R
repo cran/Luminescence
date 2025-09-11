@@ -71,16 +71,13 @@
 #'  object = xsyg_v1,
 #'  recordType = "TL (UVVIS)")
 #'
-#'@md
 #'@export
 remove_SignalBackground <- function(
   object,
   object_bg = NULL,
   recordType = NULL,
   clean_up = TRUE
-
-){
-    # Internals (DO NOT TOUCH THIS PART) --------------------------------------
+) {
   .set_function_name("remove_SignalBackground")
   on.exit(.unset_function_name(), add = TRUE)
 
@@ -94,15 +91,15 @@ remove_SignalBackground <- function(
         object_bg = object_bg,
         recordType = recordType,
         clean_up = clean_up)
-
     })
-
   }
 
-  # Integrity tests ---------------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
   .validate_class(object, "RLum.Analysis")
-  if(!is.null(object_bg)) .validate_class(object_bg, c("RLum.Data.Curve","list", "matrix", "numeric", "integer"))
-  if(!is.null(recordType)) .validate_class(recordType, "character")
+  .validate_not_empty(object)
+  .validate_class(object_bg, null.ok = TRUE,
+                  c("RLum.Data.Curve","list", "matrix", "numeric", "integer"))
+  .validate_class(recordType, "character", null.ok = TRUE)
   .validate_class(clean_up, "logical")
 
   # Find curves for removal -------------------------------------------------
@@ -135,7 +132,6 @@ remove_SignalBackground <- function(
           c(m_ref[,1],
             rep(object_bg[,max(ncol(object_bg))], length.out = nrow(m_ref))),
           ncol = 2))
-
     }
 
     ## check for list
@@ -164,7 +160,6 @@ remove_SignalBackground <- function(
     ## set object_bg to have it consistent
     ## this creates an empty list elements, which we will keep for the index
     object_bg[id_bg] <- object@records[id_bg]
-
   }
 
   # Subtract ----------------------------------------------------------------
@@ -180,8 +175,6 @@ remove_SignalBackground <- function(
   if (clean_up[1] && !all(id_signal == id_bg))
     object@records[id_bg] <- NULL
 
-
   ## return whatever is left
   return(object)
 }
-

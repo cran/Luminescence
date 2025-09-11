@@ -11,6 +11,8 @@ test_that("input validation", {
                "'data' cannot be an empty data.frame")
   expect_error(plot_Histogram(data.frame()),
                "'data' cannot be an empty data.frame")
+  expect_error(plot_Histogram(data.frame(a = letters)),
+               "All columns of 'data' should be of class 'numeric'")
   expect_error(plot_Histogram(set_RLum("RLum.Results")),
                "'data' cannot be an empty RLum.Results")
   expect_error(plot_Histogram(df, summary = 5),
@@ -70,7 +72,8 @@ test_that("graphical snapshot tests", {
                                              summary = c("n", "serel", "kurtosis")))
   vdiffr::expect_doppelganger("Histogram summary left",
                               plot_Histogram(df, summary.pos = "left",
-                                             summary = c("mean", "skewness")))
+                                             summary = c("mean", "skewness",
+                                                         "median.weighted")))
   })
 })
 

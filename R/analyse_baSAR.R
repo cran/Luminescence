@@ -175,8 +175,8 @@
 #' @param aliquot_range [numeric] (*optional*):
 #' allows to limit the range of the aliquots used for the analysis.
 #' This argument has only an effect if the argument `CSV_file` is used or
-#' the input is the previous output (i.e. is [RLum.Results-class]). In this case the
-#' new selection will add the aliquots to the removed aliquots table.
+#' `object` is a previous output (i.e. is [RLum.Results-class]). In this case,
+#' the new selection will add the aliquots to the removed aliquots table.
 #'
 #' @param source_doserate [numeric] (**required**):
 #' source dose rate of beta-source used for the measurement and its uncertainty
@@ -329,7 +329,6 @@
 #' [data.table::fread], [verify_SingleGrainData],
 #' [rjags::jags.model], [rjags::coda.samples], [boxplot.default]
 #'
-#'
 #' @references
 #'
 #' Combès, B., Philippe, A., Lanos, P., Mercier, N., Tribolo, C., Guerin, G., Guibert, P., Lahaye, C., 2015.
@@ -407,7 +406,6 @@
 #'
 #' }
 #'
-#' @md
 #' @export
 analyse_baSAR <- function(
   object,
@@ -462,18 +460,10 @@ analyse_baSAR <- function(
       upper_centralD <- method_control[["upper_centralD"]]
 
       ##number of MCMC
-      n.chains <-  if (is.null(method_control[["n.chains"]])) {
-        3
-      } else{
-        method_control[["n.chains"]]
-      }
+      n.chains <- method_control[["n.chains"]] %||% 3
 
       ##inits
-      inits <-  if (is.null(method_control[["inits"]])) {
-        NULL
-      } else{
-        method_control[["inits"]]
-      }
+      inits <- method_control[["inits"]]
 
       ##thin
       thin <-  if (is.null(method_control[["thin"]])) {
@@ -485,7 +475,6 @@ analyse_baSAR <- function(
       } else{
         .validate_positive_scalar(method_control[["thin"]], int = TRUE,
                                   name = "'thin' in 'method_control'")
-        method_control[["thin"]]
       }
 
       ## jags reports ugly errors if thin exceeds n.MCMC / 2, as that
@@ -527,8 +516,8 @@ analyse_baSAR <- function(
       ##check and correct for distribution name
       if (!is.null(baSAR_model) && distribution != "user_defined") {
         distribution <- "user_defined"
-        message("[analyse_basAR()] 'baSAR_model' provided, setting ",
-                "distribution to 'user_defined'")
+        .throw_message("'baSAR_model' provided, setting distribution to ",
+                       "'user_defined'", error = FALSE)
       }
 
       # Bayesian Models ----------------------------------------------------------------------------
@@ -730,7 +719,7 @@ analyse_baSAR <- function(
         N.CHAINS = n.chains,
         N.MCMC = n.MCMC,
         FIT_METHOD = fit.method,
-        CENTRAL = if(is.null(gm)){output.mean[1,1]}else{gm},
+        CENTRAL = gm %||% output.mean[1, 1],
         CENTRAL.SD = output.mean[1,2],
         SIGMA = output.mean[2,1],
         SIGMA.SD = output.mean[2,2],
@@ -762,17 +751,15 @@ analyse_baSAR <- function(
 
 
   ## Integrity checks -------------------------------------------------------
-
   .require_suggested_package("rjags")
   .require_suggested_package("coda")
   .validate_class(object, c("Risoe.BINfileData", "RLum.Results", "character", "list"))
   .validate_not_empty(object)
+  .validate_class(CSV_file, c("data.frame", "character"), null.ok = TRUE)
   .validate_positive_scalar(n.MCMC, int = TRUE)
   fit.method <- .validate_args(fit.method, c("EXP", "EXP+LIN", "LIN"))
   distribution_plot <- .validate_args(distribution_plot, c("kde", "abanico"),
-                                      null.ok = TRUE)
-  if (is.null(distribution_plot))
-    distribution_plot <- ""
+                                      null.ok = TRUE) %||% ""
 
   #capture additional piped arguments
   additional_arguments <- list(
@@ -988,7 +975,7 @@ analyse_baSAR <- function(
 
       ##extract wanted curves
       if(verbose)
-        cat(paste0("\t\t  .. extract '", additional_arguments$recordType ,"'\n"))
+        cat("\t\t  .. extract '", additional_arguments$recordType , "'\n", sep = "")
       object <- get_RLum(object, recordType = additional_arguments$recordType, drop = FALSE)
 
       ## check that we are not left with empty records
@@ -1010,7 +997,7 @@ analyse_baSAR <- function(
                     outFile = stdout()) # redirect error messages so they can be silenced
 
       ##create fallback
-       if(inherits(object, "try-error")){
+      if (inherits(object, "try-error")) {
          .throw_message("Object conversion failed, NULL returned")
          return(NULL)
        }
@@ -1080,8 +1067,8 @@ analyse_baSAR <- function(
 
     if (!all(record.selected)) {
       if (verbose) {
-        message("[analyse_baSAR()] Record pre-selection in BIN-file detected, ",
-                "record reduced to selection\n")
+        .throw_message("Record pre-selection in BIN-file detected, ",
+                       "record reduced to selection\n", error = FALSE)
       }
       if (sum(record.selected) == 0) {
         .throw_warning("No records selected, NULL returned")
@@ -1129,7 +1116,7 @@ analyse_baSAR <- function(
       msg <- paste(.collapse(object.filenames[is.duplicated]),
                    "is a duplicate and therefore removed from the input")
       if(verbose){
-        message("[analyse_baSAR()] ", msg)
+        .throw_message(msg, error = FALSE)
       }
       .throw_warning(msg)
 
@@ -1210,11 +1197,7 @@ analyse_baSAR <- function(
       rm(datalu, aliquot_selection)
     }
     rm(k)
-
   } else {
-
-    .validate_class(CSV_file, c("data.frame", "character"), extra = "NULL")
-
     ## error message used multiple times
     err.msg <- paste("'CSV_file' should have at least 3 columns for the name",
                      "of the file, the disc position and the grain position")
@@ -1467,14 +1450,10 @@ analyse_baSAR <- function(
       )
 
       ##add integration limits depending on the choosen value
-      abline(v = if (!is.null(signal.integral.Tx[[k]]))
-                   range(signal.integral.Tx[[k]])
-                 else
-                   range(signal.integral[[k]]), lty = 2, col = "green")
-      abline(v = if (!is.null(background.integral.Tx[[k]]))
-                   range(background.integral.Tx[[k]])
-                 else
-                   range(background.integral[[k]]), lty = 2, col = "red")
+      abline(v = range(signal.integral.Tx[[k]] %||% signal.integral[[k]]),
+             lty = 2, col = "green")
+      abline(v = range(background.integral.Tx[[k]] %||% background.integral[[k]]),
+             lty = 2, col = "red")
 
       mtext(paste0("ALQ: ",count, ":", count + ncol(curve_index)))
 
@@ -1678,42 +1657,41 @@ analyse_baSAR <- function(
     removed_aliquots <- t(OUTPUT_results_reduced[,!selection])
     OUTPUT_results_reduced <- t(OUTPUT_results_reduced[,selection])
 
-    ##finally, check for difference in the number of dose points ... they should be the same
-    if(length(unique(OUTPUT_results_reduced[,"CYCLES_NB"])) > 1){
-      .throw_warning("The number of dose points differs across ",
-                     "your data set. Check your data!")
+    ## check for difference in the number of dose points, they should be the same
+    if (length(unique(OUTPUT_results_reduced[, "CYCLES_NB"])) > 1) {
+      .throw_warning("The number of dose points differs across your data set")
     }
 
-  ##correct number of aliquots if necessary
-  if(Nb_aliquots > nrow(OUTPUT_results_reduced)) {
-    Nb_aliquots <- nrow(OUTPUT_results_reduced)
-    .throw_warning("'Nb_aliquots' corrected due to NaN or Inf values ",
-                   "in Lx and/or Tx to ", Nb_aliquots, ". You might want ",
-                   "to check 'removed_aliquots' in the function output.")
+    ## correct number of aliquots if necessary
+    if (Nb_aliquots > nrow(OUTPUT_results_reduced)) {
+      Nb_aliquots <- nrow(OUTPUT_results_reduced)
+      .throw_warning("'Nb_aliquots' corrected due to NaN or Inf values ",
+                     "in Lx and/or Tx to ", Nb_aliquots, ", you might want ",
+                     "to check 'removed_aliquots' in the function output")
+    }
+
+    ## prepare for Bayesian analysis
+    Doses <- t(OUTPUT_results_reduced[,9:(8 + max_cycles)])
+    LxTx <- t(OUTPUT_results_reduced[, (9 + max_cycles):(8 + 2 * max_cycles)])
+    LxTx.error <- t(OUTPUT_results_reduced[, (9 + 2 * max_cycles):(8 + 3 * max_cycles)])
+
+    ## prepare data frame for output that can used as input
+    BIN_FILE <- character(0)
+    if (length(OUTPUT_results_reduced) > 0)
+      BIN_FILE <- unlist(object.file_name)[OUTPUT_results_reduced[[1]]]
+    input_object <- data.frame(
+        BIN_FILE = BIN_FILE,
+        OUTPUT_results_reduced[, -1, drop = FALSE],
+        stringsAsFactors = FALSE
+    )
+
+    ## prepare data frame for output that shows rejected aliquots
+    if (NROW(removed_aliquots) > 0) {
+      removed_aliquots <- cbind(BIN_FILE = BIN_FILE, removed_aliquots[, -1])
+    } else {
+      removed_aliquots <- NULL
+    }
   }
-
-  ##Prepare for Bayesian analysis
-  Doses <- t(OUTPUT_results_reduced[,9:(8 + max_cycles)])
-  LxTx <- t(OUTPUT_results_reduced[, (9 + max_cycles):(8 + 2 * max_cycles)])
-  LxTx.error <- t(OUTPUT_results_reduced[, (9 + 2 * max_cycles):(8 + 3 * max_cycles)])
-
-  ##prepare data frame for output that can used as input
-  input_object <- data.frame(
-    BIN_FILE = unlist(object.file_name)[OUTPUT_results_reduced[[1]]],
-    OUTPUT_results_reduced[, -1, drop = FALSE],
-    stringsAsFactors = FALSE
-  )
-
-  ##prepare data frame for output that shows rejected aliquots
-  if (length(removed_aliquots) > 0) {
-    removed_aliquots <-
-      as.data.frame(removed_aliquots,  stringsAsFactors = FALSE)
-    removed_aliquots <- cbind(BIN_FILE = unlist(object.file_name)[removed_aliquots[[1]]],
-                              removed_aliquots[, -1])
-  }else{
-    removed_aliquots <- NULL
-  }
-}
 
   # Call baSAR-function -------------------------------------------------------------------------
 
@@ -1826,7 +1804,7 @@ analyse_baSAR <- function(
       tot.aliquots <- tot.aliquots + nrow(removed_aliquots)
     cat(paste0("Number of aliquots used:\t", num.aliquots, "/", tot.aliquots))
     if (!is.null(aliquot_range)) {
-      cat(" (manually removed: ", length(aliquot_range), ")\n")
+      cat(" (manually removed: ", length(aliquot_range), ")\n", sep = "")
     } else {
       cat("\n")
     }

@@ -3,18 +3,7 @@
 \docType{class}
 \name{RLum-class}
 \alias{RLum-class}
-\alias{replicate_RLum,RLum-method}
 \title{Class \code{"RLum"}}
-\usage{
-\S4method{replicate_RLum}{RLum}(object, times = NULL)
-}
-\arguments{
-\item{object}{\linkS4class{RLum} (\strong{required}):
-an object of class \linkS4class{RLum}}
-
-\item{times}{\link{integer} (\emph{optional}):
-number for times each element is repeated element}
-}
 \description{
 Abstract class for data in the package Luminescence
 Subclasses are:
@@ -29,11 +18,6 @@ Subclasses are:
 |----\linkS4class{RLum.Analysis}\cr
 |----\linkS4class{RLum.Results}
 }
-\section{Methods (by generic)}{
-\itemize{
-\item \code{replicate_RLum(RLum)}: Replication method RLum-objects
-
-}}
 \section{Slots}{
 
 \describe{
@@ -73,10 +57,5 @@ showClass("RLum")
 }
 \author{
 Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
-, RLum Developer Team} 
-
-\section{How to cite}{
-Kreutzer, S., 2025. RLum-class(): Class 'RLum'. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
-}
-
+, RLum Developer Team}
 \keyword{classes}

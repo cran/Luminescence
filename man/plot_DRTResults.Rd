@@ -58,6 +58,7 @@ adds numerical output to the plot.  Can be one or more out of:
 \item \code{"mean"} (mean De value),
 \item \code{"weighted$mean"} (error-weighted mean),
 \item \code{"median"} (median of the De values),
+\item \code{"weighted$median"} (error-weighted median),
 \item \code{"sd.rel"} (relative standard deviation in percent),
 \item \code{"sd.abs"} (absolute standard deviation),
 \item \code{"se.rel"} (relative standard error) and
@@ -194,7 +195,7 @@ plot_DRTResults(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., 2025. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., 2025. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

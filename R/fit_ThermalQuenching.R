@@ -127,7 +127,6 @@
 #'  data = data,
 #'  n.MC = NULL)
 #'
-#' @md
 #' @export
 fit_ThermalQuenching <- function(
   data,
@@ -175,13 +174,13 @@ fit_ThermalQuenching <- function(
   if (anyNA(data)) {
     .throw_warning("NA values in 'data' automatically removed")
     data <- na.exclude(data)
+    if (nrow(data) == 0)
+      .throw_error("After NA removal, nothing is left from the data set")
   }
 
   .validate_class(start_param, "list")
   .validate_class(method_control, "list")
-  .validate_positive_scalar(n.MC, int = TRUE, null.ok = TRUE)
-  if (is.null(n.MC))
-    n.MC <- 1
+  n.MC <- max(.validate_positive_scalar(n.MC, int = TRUE, null.ok = TRUE), 1)
 
   ## Prepare data -----------------------------------------------------------
   ##
@@ -229,9 +228,7 @@ fit_ThermalQuenching <- function(
     ),
     val = method_control)
 
-  weights <- method_control$weights
-  if (is.null(weights))
-    weights <- rep(1, nrow(data))
+  weights <- method_control$weights %||% rep(1, nrow(data))
 
   # Fitting -------------------------------------------------------------------------------------
   ##guine fitting

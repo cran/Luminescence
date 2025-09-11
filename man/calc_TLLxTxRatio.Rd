@@ -15,14 +15,14 @@ calc_TLLxTxRatio(
 }
 \arguments{
 \item{Lx.data.signal}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-TL data (x = temperature, y = counts) (TL signal)}
+TL data (x = temperature, y = counts) (TL signal).}
 
 \item{Lx.data.background}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
 TL data (x = temperature, y = counts).
 If no data are provided no background subtraction is performed.}
 
 \item{Tx.data.signal}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-TL data (x = temperature, y = counts) (TL test signal)}
+TL data (x = temperature, y = counts) (TL test signal).}
 
 \item{Tx.data.background}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
 TL data (x = temperature, y = counts).
@@ -30,11 +30,11 @@ If no data are provided no background subtraction is performed.}
 
 \item{signal.integral.min}{\link{integer} (\strong{required}):
 channel number for the lower signal integral bound
-(e.g. \code{signal.integral.min = 100})}
+(e.g. \code{signal.integral.min = 100}).}
 
 \item{signal.integral.max}{\link{integer} (\strong{required}):
 channel number for the upper signal integral bound
-(e.g. \code{signal.integral.max = 200})}
+(e.g. \code{signal.integral.max = 200}).}
 }
 \value{
 Returns an S4 object of type \linkS4class{RLum.Results}.
@@ -106,7 +106,7 @@ Christoph Schmidt, University of Bayreuth (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Schmidt, C., 2025. calc_TLLxTxRatio(): Calculate the Lx/Tx ratio for a given set of TL curves -beta version-. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Schmidt, C., 2025. calc_TLLxTxRatio(): Calculate the Lx/Tx ratio for a given set of TL curves -beta version-. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

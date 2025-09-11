@@ -50,7 +50,6 @@
 #' roi <- matrix(c(2.,4,2,5,6,7,3,1,1), ncol = 3)
 #' extract_ROI(object = m, roi = roi, plot = TRUE)
 #'
-#'@md
 #'@export
 extract_ROI <- function(
   object,
@@ -62,7 +61,7 @@ extract_ROI <- function(
   on.exit(.unset_function_name(), add = TRUE)
 
 # Self call ---------------------------------------------------------------
-  if (is(object, "list"))
+  if (inherits(object, "list"))
     return(merge_RLum(lapply(object, extract_ROI, roi = roi, plot = plot)))
 
   ## Integrity tests --------------------------------------------------------
@@ -86,10 +85,10 @@ extract_ROI <- function(
   a <- object
 
   ## try to convert into something meaningful
-  if (is(object, "RLum.Data.Image"))
+  if (inherits(object, "RLum.Data.Image"))
     a <- object@data
 
-  if (is(object, "matrix"))
+  if (is.matrix(object))
     a <- array(data = object, dim = c(nrow(object), ncol(object), 1))
 
 # Helper function ---------------------------------------------------------

@@ -83,7 +83,6 @@
 #'##plot only DRC
 #'plot_DRCSummary(results)
 #'
-#'@md
 #'@export
 plot_DRCSummary <- function(
   object,
@@ -166,7 +165,8 @@ if(inherits(object, "list")){
   ## get limits for each set
   idx.natural <- which(object@data$LnLxTnTx.table[["Name"]] == "Natural")
   dataset_limits <- cbind(idx.natural,
-                          c(idx.natural[-1] - 1, length(idx.natural)))
+                          idx.natural[-1] - 1,
+                          nrow(object@data$LnLxTnTx.table))
 
    ##create list
    LxTx <- lapply(1:nrow(dataset_limits), function(x){

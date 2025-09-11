@@ -34,9 +34,10 @@ single plot windows. Ignored if \code{plot_extended = FALSE}.}
 enable/disable output to the terminal.}
 
 \item{...}{Further graphical parameters to be passed (supported:
-\code{main}, \code{mtext}, \code{xlim}, \code{ylim}, \code{xlab}, \code{ylab}, \code{legend}, \code{reg_points_pch},
-\code{density_polygon} (\code{TRUE/FALSE}), \code{density_polygon_col}, \code{density_rug} (\code{TRUE}/\code{FALSE})),
-\code{box} (\code{TRUE}/\code{FALSE})}
+\code{main}, \code{mtext}, \code{xlim}, \code{ylim}, \code{xlab}, \code{ylab}, \code{log} (not valid for objects
+fitted with \code{mode = "extrapolation"}), \code{legend} (\code{TRUE/FALSE}), \code{leged.pos},
+\code{reg_points_pch}, \code{density_polygon} (\code{TRUE/FALSE}), \code{density_polygon_col},
+\code{density_rug} (\code{TRUE}/\code{FALSE}), \code{box} (\code{TRUE}/\code{FALSE}).}
 }
 \value{
 A plot (or a series of plots) is produced.
@@ -46,7 +47,7 @@ A dose-response curve is produced for luminescence measurements using a
 regenerative or additive protocol as implemented in \link{fit_DoseResponseCurve}.
 }
 \section{Function version}{
- 1.0.4
+ 1.0.7
 }
 
 \examples{
@@ -81,7 +82,7 @@ plot(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2025. plot_DoseResponseCurve(): Plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.0.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2025. plot_DoseResponseCurve(): Plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.0.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

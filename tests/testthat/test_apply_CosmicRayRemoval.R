@@ -9,9 +9,17 @@ test_that("input validation", {
   expect_error(apply_CosmicRayRemoval(TL.Spectrum, method = "error"),
                "'method' should be one of 'smooth', 'smooth.spline', 'smooth_RLum' or 'Pych'",
                fixed = TRUE)
-
   expect_error(apply_CosmicRayRemoval(set_RLum("RLum.Data.Spectrum"),
                                       "'object' contains no data"))
+
+  expect_error(apply_CosmicRayRemoval(TL.Spectrum,
+                                      method.Pych.smoothing = iris),
+               "'method.Pych.smoothing' should be a positive integer scalar")
+  expect_error(apply_CosmicRayRemoval(TL.Spectrum,
+                                      method.Pych.threshold_factor = -2),
+               "'method.Pych.threshold_factor' should be a positive scalar")
+  expect_error(apply_CosmicRayRemoval(TL.Spectrum, MARGIN = 3),
+               "'MARGIN' should be one of '1' or '2'")
 })
 
 test_that("check function", {
@@ -26,10 +34,17 @@ test_that("check function", {
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 1, k = 10000))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 2, k = 0))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 2, k = 4))
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 2, k = 4, method_smooth_RLum = "mean"))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", MARGIN = 2, k = 10000))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum", k = 10))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth", MARGIN = 1))
-  expect_output(apply_CosmicRayRemoval(TL.Spectrum, method = "Pych", MARGIN = 2, verbose = TRUE, plot = TRUE))
+  SW({
+  expect_message(expect_message(
+      apply_CosmicRayRemoval(TL.Spectrum, method = "Pych", MARGIN = 2,
+                             verbose = TRUE, plot = TRUE),
+      "1024 channels corrected in frame 4"),
+      "0 channels corrected in frame 24")
+  })
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "Pych",
                                        method.Pych.smoothing = 2, method.Pych.threshold_factor = 2))
   expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth.spline",
@@ -51,4 +66,16 @@ test_that("check function", {
   expect_error(apply_CosmicRayRemoval(RLum_list_mixed))
   expect_s4_class(apply_CosmicRayRemoval(RLum.Analysis_mixed), class = "RLum.Analysis")
   expect_type(apply_CosmicRayRemoval(RLum.Analysis_mixed_list), "list")
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 985
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "smooth_RLum",
+                                       method_smooth_RLum = "Carter_etal_2018"))
+
+  ## issue 987
+  expect_silent(apply_CosmicRayRemoval(TL.Spectrum, method = "Pych",
+                                       MARGIN = 1))
 })

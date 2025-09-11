@@ -434,7 +434,6 @@
 #'  method_control = list(trace = TRUE))
 #' }
 #'
-#' @md
 #' @export
 analyse_IRSAR.RF<- function(
   object,
@@ -476,7 +475,10 @@ analyse_IRSAR.RF<- function(
     if ("main" %in% names(extraArgs)) {
       temp_main <- .listify(extraArgs$main, rep.length)
     }else{
-      originator <- if (length(object) > 0) object[[1]]@originator else NA
+      originator <- if (length(object) > 0) {
+                      .validate_class(object[[1]], "RLum.Analysis",
+                                      name = "All elements of 'object'")
+                      object[[1]]@originator } else NA
       if (!is.na(originator) && originator == "read_RF2R") {
         temp_main <- lapply(object, function(x) x@info$ROI)
       } else {
@@ -513,10 +515,8 @@ analyse_IRSAR.RF<- function(
     return(results)
   }
 
-
   ## Integrity checks -------------------------------------------------------
-
-  .validate_class(object, "RLum.Analysis")
+  .validate_class(object, "RLum.Analysis", extra = "a 'list' of such objects")
   .validate_class(sequence_structure, "character")
   .validate_not_empty(object)
   if (length(sequence_structure) < 2) {
@@ -526,11 +526,10 @@ analyse_IRSAR.RF<- function(
     .throw_error("'sequence_structure' must contain one each of 'NATURAL' ",
                  "and 'REGENERATED'")
   }
-  if (!is.null(RF_nat.lim))
-    .validate_class(RF_nat.lim, c("numeric", "integer"))
-  if (!is.null(RF_reg.lim))
-    .validate_class(RF_reg.lim, c("numeric", "integer"))
+  .validate_class(RF_nat.lim, c("numeric", "integer"), null.ok = TRUE)
+  .validate_class(RF_reg.lim, c("numeric", "integer"), null.ok = TRUE)
   method <- .validate_args(toupper(method), c("FIT", "SLIDE", "VSLIDE", "NONE"))
+  .validate_class(method_control, "list", null.ok = TRUE)
   .validate_positive_scalar(n.MC, int = TRUE, null.ok = TRUE)
 
   ##SELECT ONLY MEASURED CURVES
@@ -557,17 +556,11 @@ analyse_IRSAR.RF<- function(
   ##name
   record1 <- get_RLum(object, record.id = 1)
   aliquot.sequence_name <- suppressWarnings(get_RLum(record1,
-                                                     info.object = "name"))
-  if (is.null(aliquot.sequence_name)) {
-    aliquot.sequence_name <- NA
-  }
+                                                     info.object = "name")) %||% NA
 
   ##position
   aliquot.position <- suppressWarnings(get_RLum(record1,
-                                                info.object = "position"))
-  if (is.null(aliquot.position)) {
-    aliquot.position <- NA
-  }
+                                                info.object = "position")) %||% NA
 
   ##date
   aliquot.date <- suppressWarnings(get_RLum(record1,
@@ -693,7 +686,6 @@ analyse_IRSAR.RF<- function(
 
   ##modify list if necessary
   if (!is.null(method_control)) {
-    .validate_class(method_control, "list")
 
     ##check whether this arguments are supported at all
     unsupported.idx <- which(!names(method_control) %in%
@@ -740,8 +732,7 @@ analyse_IRSAR.RF<- function(
   }
 
   ## control terminal output
-  verbose <- if ("verbose" %in% names(extraArgs))
-               extraArgs$verbose else TRUE
+  verbose <- extraArgs$verbose %||% TRUE
 
   ## don't show the progress bar if not verbose
   if (!verbose)
@@ -1004,11 +995,11 @@ analyse_IRSAR.RF<- function(
         ##the algorithm finds sufficiently the global minimum.
         ##now run it in a loop and expand the range from the inner to the outer part
         ##at least this is considered for the final error range ...
-        temp_minimum_list <- lapply(1:num_slide_windows, function(x) {
+        temp_minimum_list <- lapply(vslide_range.list, function(range) {
           src_analyse_IRSARRF_SRS(
             values_regenerated_limited =  RF_reg.limited[,2],
             values_natural_limited = RF_nat.limited[,2],
-            vslide_range = vslide_range[vslide_range.list[[x]][1]:vslide_range.list[[x]][2]],
+            vslide_range = vslide_range[range[1]:range[2]],
             n_MC = 0, #we don't need MC runs here, so make it quick
             trace = trace)[c("sliding_vector_min_index","vslide_minimum", "vslide_index")]
         })
@@ -1034,8 +1025,8 @@ analyse_IRSAR.RF<- function(
         ##is considered, otherwise it is too biased by the user's choice
         ##ToDo: So far the algorithm error is not sufficiently documented
         if (compute_algorithm_error) {
-          algorithm_error <- sd(vapply(1:length(temp_vslide_indices), function(k){
-            temp.sliding.step <- RF_reg.limited[temp_hslide_indices[k]] - t_min
+          algorithm_error <- sd(vapply(temp_hslide_indices, function(k) {
+            temp.sliding.step <- RF_reg.limited[k] - t_min
             ## return the offset of the t_n values
             RF_nat[1, 1] + temp.sliding.step
           }, FUN.VALUE = numeric(1)))
@@ -1048,7 +1039,7 @@ analyse_IRSAR.RF<- function(
           values_regenerated_limited =  RF_reg.limited[,2],
           values_natural_limited = RF_nat.limited[,2],
           vslide_range = vslide_range,
-          n_MC = if(is.null(n.MC)) 0 else n.MC,
+          n_MC = n.MC %||% 0,
           trace = trace
       )
 
@@ -1056,11 +1047,7 @@ analyse_IRSAR.RF<- function(
       index_min <- which.min(temp.sum.residuals$sliding_vector)
       if(length(index_min) == 0) t_n.id <- 1 else t_n.id <- index_min
 
-      I_n <- 0
-      if (!is.null(vslide_range)) {
-        I_n <- vslide_range[temp.sum.residuals$vslide_index]
-      }
-
+      I_n <- vslide_range[temp.sum.residuals$vslide_index] %||% 0
       temp.sliding.step <- RF_reg.limited[t_n.id] - t_min
 
       ##(3) slide curve graphically ... full data set we need this for the plotting later
@@ -1144,7 +1131,7 @@ analyse_IRSAR.RF<- function(
     ##(i.e., bootstrap from the natural curve distribution)
 
     if(!is.null(n.MC)){
-      slide.MC.list <- lapply(1:n.MC,function(x) {
+      slide.MC.list <- lapply(1:n.MC, function(dummy) {
         reg.limited.idx <- slide$t_n.id:nrow(RF_reg.limited)
         len.shorter <- min(nrow(RF_nat.limited), length(reg.limited.idx))
         cbind(RF_nat.limited[1:len.shorter, 1],
@@ -1183,8 +1170,8 @@ analyse_IRSAR.RF<- function(
         }
 
         if (verbose)
-          message("[analyse_IRSAR.RF()] Using ", cores,
-                  ifelse(cores == 1, " core", " cores"), " ...")
+          .throw_message("Using ", cores, ifelse(cores == 1, " core", " cores"),
+                         " ...", error = FALSE)
       }
 
       ## SINGLE CORE -----
@@ -1435,15 +1422,11 @@ analyse_IRSAR.RF<- function(
     par(cex = plot.settings[["cex"]])
 
     ##here control xlim and ylim behaviour
-    ##xlim
-    xlim <- if ("xlim" %in% names(extraArgs)) extraArgs$xlim else {
-      c(if (grepl("x", plot.settings$log)) min(temp.sequence_structure$x.min) else 0,
-        max(temp.sequence_structure$x.max))
-    }
-
-    ##ylim
-    ylim <- if ("ylim" %in% names(extraArgs)) extraArgs$ylim else
-    {c(min(temp.sequence_structure$y.min), max(temp.sequence_structure$y.max))}
+    xlim <- extraArgs$xlim %||% c(if (grepl("x", plot.settings$log))
+                                    min(temp.sequence_structure$x.min) else 0,
+                                  max(temp.sequence_structure$x.max))
+    ylim <- extraArgs$ylim %||% c(min(temp.sequence_structure$y.min),
+                                  max(temp.sequence_structure$y.max))
 
     ##open plot area
     plot(

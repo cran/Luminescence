@@ -56,7 +56,6 @@
 #' [http://luminescence.de/OSLdecomp_talk.pdf]()\cr
 #'
 #' @keywords datagen
-#' @md
 #' @export
 calc_OSLLxTxDecomposed <- function(
   Lx.data,
@@ -84,8 +83,8 @@ calc_OSLLxTxDecomposed <- function(
   if (!all(c("n", "n.error") %in% colnames(Lx.data)))
     .throw_error("'Lx.data' should contain the following columns: 'n', 'n.error'")
 
+  .validate_class(Tx.data, "data.frame", null.ok = TRUE)
   if (!is.null(Tx.data)) {
-    .validate_class(Tx.data, "data.frame")
     if (nrow(Tx.data) < 2)
       .throw_error("No valid component data.frame for Tx value")
     if (!all(c("n", "n.error") %in% colnames(Tx.data)))

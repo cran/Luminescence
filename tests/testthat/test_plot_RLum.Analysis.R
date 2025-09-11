@@ -48,7 +48,7 @@ test_that("input validation", {
                          norm = TRUE, log = "y")),
       "12 y values <= 0 omitted from logarithmic plot")
 
-  expect_warning(plot_RLum.Analysis(c1, combine = TRUE, main = "Curve"),
+  expect_message(plot_RLum.Analysis(c1, combine = TRUE, main = "Curve"),
                  "'combine' can't be used with fewer than two curves")
   expect_warning(plot_RLum.Analysis(c1, plot.single = TRUE),
                   "'plot.single' is deprecated, use 'plot_singlePanels'")
@@ -106,6 +106,7 @@ test_that("check functionality", {
     combine = TRUE,
     auto_scale = TRUE,
     xlim = c(10, 20),
+    legend.text = paste("Curve", 1:2),
     norm = "last",
     abline = list(v = c(110))
   ))
@@ -136,7 +137,6 @@ test_that("check functionality", {
     col = get("col", pos = .LuminescenceEnv)[1:4],
     xlab = "Temperature recorded [log \u00B0C]", ylab = "log TL [a.u.]",
     xlim = c(0, 200), ylim = c(0, 1), lty = c(1, 2),
-    legend.text = paste("Curve", 1:4),
     legend.col = get("col", pos = .LuminescenceEnv)[1:4],
     legend.pos = "outside",
   ))
@@ -169,7 +169,7 @@ test_that("check functionality", {
 
   ## empty object
   expect_silent(plot_RLum.Analysis(set_RLum("RLum.Analysis")))
-  expect_warning(plot_RLum.Analysis(set_RLum("RLum.Analysis"), combine = TRUE),
+  expect_message(plot_RLum.Analysis(set_RLum("RLum.Analysis"), combine = TRUE),
                  "'combine' can't be used with fewer than two curves")
 })
 
@@ -186,6 +186,18 @@ test_that("graphical snapshot tests", {
                                   combine = TRUE,
                                   norm = TRUE,
                                   abline = list(v = 110)))
+  vdiffr::expect_doppelganger("combine-cex",
+                              plot_RLum.Analysis(
+                                  temp,
+                                  subset = list(recordType = "TL"),
+                                  combine = TRUE,
+                                  cex = 2))
+  vdiffr::expect_doppelganger("smooth-type-cex",
+                              plot_RLum.Analysis(
+                                  temp[1:6],
+                                  smooth = TRUE,
+                                  type = "b",
+                                  cex = 2))
   vdiffr::expect_doppelganger("plot_RLum.Analysis persp",
                               plot_RLum.Analysis(
                                   set_RLum(class = "RLum.Analysis",

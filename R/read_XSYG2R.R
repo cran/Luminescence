@@ -65,6 +65,29 @@
 #' multiple count values exists for each temperature value and temperature
 #' values may also decrease during heating, not only increase.
 #'
+#' **Count linearity correction**
+#'
+#' If the argument `auto_linearity_correction = TRUE`, the function offers a,
+#' theoretically, automated linearity correction of the PMT signal using
+#' the internal function [correct_PMTLinearity]. The critical parameter
+#' is the count-pair resolution, which is provided to the function
+#' automatically depending on the detector. Currently, the following
+#' settings are used:
+#'
+#' \tabular{ll}{
+#' DETECTOR \tab COUNT-PAIR-RESOLUTION\cr
+#' UVVIS \tab 18 ns\cr
+#' NIR50 \tab 70 ns\cr
+#' NIR40 \tab 70 ns \cr
+#' ETPMT \tab 25 ns
+#' }
+#'
+#' Unfortunately, not all XSYG files provide correct information on
+#' the used detector, depending on software version. Hence, in case
+#' of doubt, please verify the settings and conduct a manual correction
+#' if required.
+#'
+#'
 #' **Advanced file import**
 #'
 #' To allow for a more efficient usage of the function, instead of single path
@@ -102,6 +125,11 @@
 #' optional regular expression if `file` is a link to a folder, to select just
 #' specific XSYG-files
 #'
+#' @param auto_linearity_correction [logical] (*with default*): enable/disable
+#' automatic count linearity correction. Because the information on the detectors
+#' are not consistent and are not consistently stored, this option should be used
+#' with caution.
+#'
 #' @param verbose [logical] (*with default*): enable/disable output to the
 #' terminal. If verbose is `FALSE` the `txtProgressBar` is also switched off
 #'
@@ -131,14 +159,15 @@
 #' Corresponding values in the XSXG file are skipped.
 #'
 #'
-#' @section Function version: 0.6.15
+#' @section Function version: 0.7.0
 #'
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 #'
 #'
-#' @seealso `'XML'`, [RLum.Analysis-class], [RLum.Data.Curve-class], [approx]
+#' @seealso `'XML'`, [RLum.Analysis-class], [RLum.Data.Curve-class],
+#' [approx], [correct_PMTLinearity]
 #'
 #'
 #' @references
@@ -177,7 +206,6 @@
 #' ##(3) How to see the structure of an object?
 #' structure_RLum(OSL.SARMeasurement$Sequence.Object)
 #'
-#' @md
 #' @export
 read_XSYG2R <- function(
   file,
@@ -186,6 +214,7 @@ read_XSYG2R <- function(
   fastForward = FALSE,
   import = TRUE,
   pattern = ".xsyg",
+  auto_linearity_correction = FALSE,
   verbose = TRUE,
   txtProgressBar = TRUE
 ) {
@@ -200,8 +229,7 @@ read_XSYG2R <- function(
   ##  - xlum should be general, xsyg should take care about subsequent details
 
   .validate_class(file, c("character", "list"))
-  if (!is.null(n_records))
-    .validate_class(n_records, c("numeric", "integer"))
+  .validate_class(n_records, c("numeric", "integer"), null.ok = TRUE)
 
   # Self Call -----------------------------------------------------------------------------------
   # Option (a): Input is a list, every element in the list will be treated as file connection
@@ -214,8 +242,8 @@ read_XSYG2R <- function(
     ##If this is not really a path we skip this here
     if (dir.exists(file) & length(dir(file)) > 0) {
       if (verbose)
-        message("\n[read_XSYG2R()] Directory detected, trying to extract ",
-                "'*.xsyg' files ...\n")
+        .throw_message("Directory detected, trying to extract ",
+                       "'*.xsyg' files ...\n", error = FALSE)
       file <- as.list(dir(file, recursive = TRUE, pattern = pattern, full.names = TRUE))
       if (length(file) == 0) {
         if (verbose)
@@ -226,7 +254,7 @@ read_XSYG2R <- function(
     }
   }
 
-  if (is(file, "list")) {
+  if (inherits(file, "list")) {
     temp.return <- lapply(seq_along(file), function(x) {
       read_XSYG2R(
         file = file[[x]],
@@ -254,6 +282,8 @@ read_XSYG2R <- function(
 
   ## Integrity checks -------------------------------------------------------
 
+  .validate_logical_scalar(auto_linearity_correction)
+
   ## check for URL and attempt download
   url_file <- .download_file(file, tempfile("read_XSYG2R_FILE"),
                              verbose = verbose)
@@ -269,7 +299,6 @@ read_XSYG2R <- function(
     if(verbose)
       .throw_message("File does not exist, nothing imported, NULL returned")
     return(NULL)
-
   }
 
   # (0) config --------------------------------------------------------------
@@ -293,10 +322,7 @@ read_XSYG2R <- function(
 
     ##3rd grep count values
     curve.node.count <- vapply(curve.node, function(x) {
-      if(length(x) == 2)
-        x[2]
-      else
-        x[3]
+      x[length(x)]
     }, character(1))
 
     ## remove last bracket
@@ -414,7 +440,7 @@ read_XSYG2R <- function(
         ##the XSYG file might be broken due to a machine error during the measurement, this
         ##control flow helps; if a try-error is observed NULL is returned
         if (inherits(temp.sequence.object.recordType, "try-error"))
-          return(NULL)
+          return(NULL) # nocov
 
          ##create a fallback, the function should not fail
          if(is.null(temp.sequence.object.recordType) || is.na(temp.sequence.object.recordType)){
@@ -627,7 +653,6 @@ read_XSYG2R <- function(
               data = temp.sequence.object.curveValue,
               info = temp.sequence.object.info)
         })
-
       }),
        use.names = FALSE)
 
@@ -653,15 +678,10 @@ read_XSYG2R <- function(
         ##merge output and return values
         if(fastForward){
           return(temp.sequence.object)
-
         }else{
           return(list(Sequence.Header = temp.sequence.header, Sequence.Object = temp.sequence.object))
         }
-
-      }else{
-        return(temp.sequence.object)
       }
-
   }) ##end loop for sequence list
 
   ## close ProgressBar
@@ -679,5 +699,30 @@ read_XSYG2R <- function(
   }
 
   ##get rid of the NULL elements (as stated before ... invalid files)
-  return(.rm_NULL_elements(output))
+  output <- .rm_NULL_elements(output)
+
+  ## account for linearity
+  if (auto_linearity_correction) {
+    ## set look-up table for common FI PMTs
+    count_pair_res <- c(
+      "UVVIS" = 18,
+      "NIR50" = 70,
+      "NIR40" = 70,
+      "ETPMT" = 25)
+
+    ## correct only curves that can be corrected
+    output <- lapply(output, \(x) {
+      x@records <- lapply(x@records, \(y) {
+        detector <- y@info$detector
+        if (!is.null(detector) && any(detector %in% names(count_pair_res))) {
+          y <- correct_PMTLinearity(y, PMT_pulse_pair_resolution = count_pair_res[detector])
+        }
+        return(y)
+      })
+      return(x)
+    })
+  }
+
+  ## return object
+  return(output)
 }

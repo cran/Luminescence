@@ -52,7 +52,6 @@
 #' calc_HomogeneityTest(df)
 #'
 #'
-#' @md
 #' @export
 calc_HomogeneityTest <- function(
   data,
@@ -69,6 +68,9 @@ calc_HomogeneityTest <- function(
   if (inherits(data, "RLum.Results")) {
     data <- get_RLum(data, "data")
   }
+  if (ncol(data) < 2) {
+    .throw_error("'data' should have 2 columns")
+  }
   .validate_logical_scalar(log)
 
   ##==========================================================================##
@@ -77,19 +79,17 @@ calc_HomogeneityTest <- function(
   extraArgs <- list(...)
 
   ## set plot main title
-  if("verbose" %in% names(extraArgs)) {
-    verbose<- extraArgs$verbose
-  } else {
-    verbose<- TRUE
-  }
+  verbose<- extraArgs$verbose %||% TRUE
 
   ##============================================================================##
   ## CALCULATIONS
   ##============================================================================##
   if(log) {
+    if (any(data[, 1:2] < 0, na.rm = TRUE))
+      .throw_warning("'data' contains negative values and 'log = TRUE', ",
+                     "check your input")
     dat <- log(data)
     dat[[2]] <- data[[2]]/data[[1]]
-
   } else {
     dat <- data
   }

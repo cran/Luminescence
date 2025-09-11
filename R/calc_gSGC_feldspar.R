@@ -65,7 +65,6 @@
 #'
 #' plot_AbanicoPlot(results)
 #'
-#'@md
 #'@export
 calc_gSGC_feldspar <- function (
   data,
@@ -79,6 +78,7 @@ calc_gSGC_feldspar <- function (
 
   ## Integrity checks -------------------------------------------------------
   .validate_class(data, "data.frame")
+  .validate_not_empty(data)
   if (ncol(data) != 5) {
     .throw_error("'data' should have 5 columns")
   }

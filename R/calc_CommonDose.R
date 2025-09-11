@@ -94,7 +94,6 @@
 #' ## apply the common dose model
 #' calc_CommonDose(ExampleData.DeValues$CA1)
 #'
-#' @md
 #' @export
 calc_CommonDose <- function(
   data,
@@ -110,7 +109,7 @@ calc_CommonDose <- function(
   ##============================================================================##
 
   .validate_class(data, c("data.frame", "RLum.Results"))
-  if (is(data, "RLum.Results")) {
+  if (inherits(data, "RLum.Results")) {
     data <- get_RLum(data, "data")
   }
   if (ncol(data) < 2) {

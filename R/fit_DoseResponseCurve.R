@@ -1,7 +1,6 @@
 #' @title Fit a dose-response curve for luminescence data (Lx/Tx against dose)
 #'
 #' @description
-#'
 #' A dose-response curve is produced for luminescence measurements using a
 #' regenerative or additive protocol. The function supports interpolation and
 #' extrapolation to calculate the equivalent dose.
@@ -67,7 +66,7 @@
 #' where \eqn{c > 0} is a kinetic order modifier
 #' (not to be confused with **c** in `EXP` or `EXP+LIN`!).
 #'
-#'**Keyword: `OTOR`** (former `LambertW`)
+#' **Keyword: `OTOR`** (former `LambertW`)
 #'
 #' This tries to fit a dose-response curve based on the Lambert W function
 #' and the one trap one recombination centre (OTOR)
@@ -232,24 +231,25 @@
 #' \tabular{lll}{
 #' `De` \tab [numeric] \tab equivalent dose \cr
 #' `De.Error` \tab [numeric] \tab standard error the equivalent dose \cr
-#' `D01` \tab [numeric] \tab D-naught value, curvature parameter of the exponential \cr
-#' `D01.ERROR` \tab [numeric] \tab standard error of the D-naught value\cr
-#' `D02` \tab [numeric] \tab 2nd D-naught value, only for `EXP+EXP`\cr
-#' `D02.ERROR` \tab [numeric] \tab standard error for 2nd D-naught; only for `EXP+EXP`\cr
+#' `D01` \tab [numeric] \tab D-nought value, curvature parameter of the exponential \cr
+#' `D01.ERROR` \tab [numeric] \tab standard error of the D-nought value\cr
+#' `D02` \tab [numeric] \tab 2nd D-nought value, only for `EXP+EXP`\cr
+#' `D02.ERROR` \tab [numeric] \tab standard error for 2nd D-nought; only for `EXP+EXP`\cr
 #' `Dc` \tab [numeric] \tab value indicating saturation level; only for `OTOR` \cr
 #' `D63` \tab [numeric] \tab the specific saturation level; only for `OTORX` \cr
 #' `n_N` \tab [numeric] \tab saturation level of dose-response curve derived via integration from the used function; it compares the full integral of the curves (`N`) to the integral until `De` (`n`) (e.g.,  Guralnik et al., 2015)\cr
 #' `De.MC` \tab [numeric] \tab equivalent dose derived by Monte-Carlo simulation; ideally identical to `De`\cr
-#' `De.plot` \tab [numeric] \tab equivalent dose use for plotting \cr
-#' `Fig` \tab [character] \tab applied fit function \cr
+#' `Fit` \tab [character] \tab applied fit function \cr
+#' `Mode` \tab [character] \tab mode used in fitting \cr
 #' `HPDI68_L` \tab [numeric] \tab highest probability density of approximated equivalent dose probability curve representing the lower boundary of 68% probability \cr
 #' `HPDI68_U` \tab [numeric] \tab same as `HPDI68_L` for the upper bound \cr
 #' `HPDI95_L` \tab [numeric] \tab same as `HPDI68_L` but for 95% probability \cr
 #' `HPDI95_U` \tab [numeric] \tab same as `HPDI95_L` but for the upper bound \cr
-#'
+#' `.De.plot` \tab [numeric] \tab equivalent dose used internally for plotting \cr
+#' `.De.raw` \tab [numeric] \tab equivalent dose reported 'as is', that is containing infinities and negative values if they could be calculated. Bear in mind that negative values are meaningless and may be arbitrary.\cr
 #' }
 #'
-#' @section Function version: 1.4.0
+#' @section Function version: 1.4.3
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
@@ -335,7 +335,6 @@
 #'  verbose = FALSE)$Fit)
 #'  }
 #'
-#' @md
 #' @export
 fit_DoseResponseCurve <- function(
   object,
@@ -382,6 +381,8 @@ fit_DoseResponseCurve <- function(
     return(results)
   }
   ## Self-call end ----------------------------------------------------------
+
+  ## Integrity checks -------------------------------------------------------
   .validate_class(object, c("data.frame", "matrix", "list"))
   .validate_not_empty(object)
   mode <- .validate_args(mode, c("interpolation", "extrapolation", "alternate"))
@@ -405,6 +406,9 @@ fit_DoseResponseCurve <- function(
 
   ##2.1 check column numbers; we assume that in this particular case no error value
   ##was provided, e.g., set all errors to 0
+  if (ncol(object) < 2) {
+    .throw_error("'object' should have at least 2 columns")
+  }
   if (ncol(object) == 2)
     object <- cbind(object, 0)
 
@@ -574,7 +578,7 @@ fit_DoseResponseCurve <- function(
                  num.params, "dose points, 'fit.method' changed to 'LIN'")
     .throw_warning(msg)
     if (verbose)
-      message("[fit_DoseResponseCurve()] ", msg)
+      .throw_message(msg, error = FALSE)
   }
 
   ## helper to report the fit
@@ -639,7 +643,6 @@ fit_DoseResponseCurve <- function(
 
     ##set start vector (to avoid errors within the loop)
     a.start <-   b.start <- c.start <- g.start <- NA
-
   }
 
   ## QDR --------------------------------------------------------------------
@@ -662,7 +665,7 @@ fit_DoseResponseCurve <- function(
       fit <- stats::lm(model, data = data, weights = fit.weights)
 
       ## solve and get De
-      De <- NA
+      success <- TRUE
       if (mode != "alternate") {
         De.fs <- function(fit, x, y) {
           predict(fit, newdata = data.frame(x)) - y
@@ -671,17 +674,18 @@ fit_DoseResponseCurve <- function(
                                   lower = lower, upper = upper),
                           silent = TRUE)
 
-        if (!inherits(De.uniroot, "try-error")) {
+        success <- !inherits(De.uniroot, "try-error")
+        if (success) {
           De <- De.uniroot$root
         }
       }
-      return(list(fit = fit, De = De))
+      return(list(fit = fit, De = De, success = success))
     }
 
     res <- .fit_qdr_model(model.qdr, data, y)
     fit <- res$fit
     De <- res$De
-    if (!inherits(fit, "try-error"))
+    if (res$success)
       .report_fit(De)
     else
       .report_fit_failure(fit.method, mode)
@@ -693,18 +697,19 @@ fit_DoseResponseCurve <- function(
     }
 
     ## Monte Carlo Error estimation
-    x.natural <- abs(vapply(1:n.MC, function(i) {
+    x.natural <- vapply(1:n.MC, function(i) {
       if (txtProgressBar) setTxtProgressBar(pb, i)
       .fit_qdr_model(
         model = model.qdr,
         data = list(x = xy$x, y = data.MC[, i]),
         y = data.MC.De[i])$De
-    }, numeric(1)))
+    }, numeric(1))
 
     if(txtProgressBar) close(pb)
   }
+
   ## EXP --------------------------------------------------------------------
-  if (any(fit.method %in% c("EXP", "EXP OR LIN", "LIN"))){
+  if (fit.method %in% c("EXP", "EXP OR LIN", "LIN")) {
     if(fit.method != "LIN"){
       if (anyNA(c(a, b, c))) {
         .throw_message("Fit ", fit.method, " (", mode,
@@ -717,12 +722,12 @@ fit_DoseResponseCurve <- function(
       ## the fitting more stable
 
       ## prepare what we can outside the loop
-      a.start <-  b.start <- c.start <- numeric(50)
+      a.start <-  b.start <- c.start <- numeric(length(a.MC))
       lower_bounds <- c(a = 0, b = 1e-6, c = 0)
       control_settings <-  minpack.lm::nls.lm.control(maxiter = 500)
 
       ## loop for better attempt
-      for(i in 1:50){
+      for (i in seq_along(a.MC)) {
         ## get start list
         start_list <- list(a = a.MC[i], b = b.MC[i], c = c.MC[i])
 
@@ -794,12 +799,6 @@ fit_DoseResponseCurve <- function(
         De <- NA
         if(mode == "interpolation"){
           De <- suppressWarnings(-c - b * log(1 - object[1, 2] / a))
-
-          ## account for the fact that we can still calculate a De that is negative
-          ## even it does not make sense
-          if(!is.na(De) && De < 0)
-            De <- NA
-
         }else if (mode == "extrapolation"){
           De <- suppressWarnings(-c-b*log(1-0/a))
         }
@@ -842,7 +841,7 @@ fit_DoseResponseCurve <- function(
 
             #calculate x.natural for error calculation
             x.natural[i] <- suppressWarnings(
-                abs(-var.c - var.b[i] * log(1 - data.MC.De[i] / var.a)))
+                -var.c - var.b[i] * log(1 - data.MC.De[i] / var.a))
           }
 
         }#end for loop
@@ -854,7 +853,6 @@ fit_DoseResponseCurve <- function(
         rm(var.b)
 
       }#endif::try-error fit
-
     }#endif:fit.method!="LIN"
 
     ## LIN ------------------------------------------------------------------
@@ -896,12 +894,12 @@ fit_DoseResponseCurve <- function(
       .report_fit(De)
 
       ## Monte Carlo Error estimation
-      x.natural <- abs(vapply(1:n.MC, function(i) {
+      x.natural <- vapply(1:n.MC, function(i) {
         .fit_lin_model(
           model = model.lin,
           data = list(x = xy$x, y = data.MC[, i]),
           y = data.MC.De[i])$De
-      }, numeric(1)))
+      }, numeric(1))
 
       #correct for fit.method
       fit.method <- "LIN"
@@ -914,8 +912,12 @@ fit_DoseResponseCurve <- function(
 
   ## EXP+LIN ----------------------------------------------------------------
   else if (fit.method=="EXP+LIN") {
+    ## set boundaries
+    lower <- if (fit.bounds) c(0, 10, 0, 0) else rep(-Inf, 4)
+    upper <- if (fit.force_through_origin) c(Inf, Inf, 0, Inf) else rep(Inf, 4)
+
     ##try some start parameters from the input values to makes the fitting more stable
-    for(i in 1:length(a.MC)){
+    for (i in seq_along(a.MC)) {
       a <- a.MC[i]
       b <- b.MC[i]
       c <- c.MC[i]
@@ -951,11 +953,7 @@ fit_DoseResponseCurve <- function(
           start = c(a=a,b=b,c=c,g=g),
           trace = FALSE,
           algorithm = "LM",
-          lower = if(fit.bounds){
-            c(a = 0, b = 10, c = 0, g = 0)
-          } else {
-            c(a = -Inf, b = -Inf,c = -Inf,g = -Inf)
-          },
+          lower = lower,
           control = minpack.lm::nls.lm.control(
             maxiter = 500) #increase max. iterations
           ))
@@ -976,10 +974,6 @@ fit_DoseResponseCurve <- function(
     b <- median(b.start, na.rm = TRUE)
     c <- median(c.start, na.rm = TRUE)
     g <- median(g.start, na.rm = TRUE)
-
-    ## set boundaries
-    lower <- if (fit.bounds) c(0, 10, 0, 0) else rep(-Inf, 4)
-    upper <- if (fit.force_through_origin) c(Inf, Inf, 0, Inf) else rep(Inf, 4)
 
     ##perform final fitting
     fit <- try(suppressWarnings(minpack.lm::nlsLM(
@@ -1059,11 +1053,7 @@ fit_DoseResponseCurve <- function(
           weights = fit.weights,
           trace = FALSE,
           algorithm = "LM",
-          lower = if (fit.bounds) {
-            c(0,10,0,0)
-          }else{
-            c(-Inf,-Inf,-Inf, -Inf)
-          },
+          lower = lower,
           control = minpack.lm::nls.lm.control(maxiter = 500)
         )), silent = TRUE)
 
@@ -1104,17 +1094,17 @@ fit_DoseResponseCurve <- function(
     }else{
       .report_fit_failure(fit.method, mode)
     } #end if "try-error" Fit Method
-
   } #End if EXP+LIN
+
   ## EXP+EXP ----------------------------------------------------------------
   else if (fit.method == "EXP+EXP") {
     ## initialise objects
     a1.start <-  a2.start <- b1.start <- b2.start <- NA
 
     ## try to create some start parameters from the input values to make the fitting more stable
-    for(i in 1:50) {
-      a1 <- a.MC[i];b1 <- b.MC[i];
-      a2 <- a.MC[i] / 2; b2 <- b.MC[i] / 2
+    for (i in seq_along(a.MC)) {
+      a1 <- a.MC[i]; a2 <- a1 / 2
+      b1 <- b.MC[i]; b2 <- b1 / 2
 
       fit.start <- try({
         minpack.lm::nlsLM(
@@ -1352,9 +1342,7 @@ fit_DoseResponseCurve <- function(
           # calculate x.natural for error calculation
           ## note that data.MC.De contains only 0s for extrapolation
           temp <- (var.a * var.d - data.MC.De[i]) / var.a
-          x.natural[i] <- suppressWarnings(
-              abs(-(var.b[i] * (temp^var.c - 1) * (temp^-var.c)) / var.c)
-          )
+          x.natural[i] <- suppressWarnings(-var.b[i] * (1 - temp^-var.c) / var.c)
         }
 
       }#end for loop
@@ -1516,9 +1504,6 @@ fit_DoseResponseCurve <- function(
             }
 
           }#end for loop
-
-          ##we need absolute numbers
-          x.natural <- abs(x.natural)
 
           ##write Dc.ERROR
           Dc.ERROR <- sd(var.Dc, na.rm = TRUE)
@@ -1687,11 +1672,7 @@ fit_DoseResponseCurve <- function(
           if(!inherits(try, "try-error") && !inherits(try, "function"))
             x.natural[i] <- try
         }
-
       }#end for loop
-
-      ##we need absolute numbers
-      x.natural <- abs(x.natural)
 
       ##write Dc.ERROR
       D63.ERROR <- sd(var.D63, na.rm = TRUE)
@@ -1702,13 +1683,22 @@ fit_DoseResponseCurve <- function(
     }#endif::try-error fit
   }#End if fit.method selection (for all)
 
-  #Get De values from Monte Carlo simulation
+  ## get De values from Monte Carlo simulation
+  De.MC <- De.MC.NA <- x.natural
+  if (mode == "interpolation") {
+    ## censor negative values
+    De.MC <- pmax(x.natural, 0)
+    De.MC.NA[x.natural < 0] <- NA
+  } else if (mode == "extrapolation") {
+    ## always return positive values
+    De.MC <- De.MC.NA <- x.natural <- abs(x.natural)
+  }
 
-  #calculate mean and sd (ignore NaN values)
-  De.MonteCarlo <- mean(x.natural, na.rm = TRUE)
+  ## calculate mean and sd (ignore NaN values)
+  De.MonteCarlo <- mean(De.MC, na.rm = TRUE)
 
   #De.Error is Error of the whole De (ignore NaN values)
-  De.Error <- sd(x.natural, na.rm = TRUE)
+  De.Error <- sd(De.MC.NA, na.rm = TRUE)
 
   # Formula creation --------------------------------------------------------
   ## This information is part of the fit object output anyway, but
@@ -1720,10 +1710,12 @@ fit_DoseResponseCurve <- function(
 # Output ------------------------------------------------------------------
   ##calculate HPDI
   HPDI <- matrix(c(NA,NA,NA,NA), ncol = 4)
-  if (!anyNA(x.natural)) {
+  ## here we use the original x.natural because we need the entire
+  ## distribution of De values, not a censored one
+  if (sum(!is.na(x.natural)) >= 5) {
     HPDI <- cbind(
-      .calc_HPDI(x.natural, prob = 0.68)[1, ,drop = FALSE],
-      .calc_HPDI(x.natural, prob = 0.95)[1, ,drop = FALSE])
+        .calc_HPDI(x.natural, prob = 0.68, na.rm = TRUE)[1, , drop = FALSE],
+        .calc_HPDI(x.natural, prob = 0.95, na.rm = TRUE)[1, , drop = FALSE])
   }
 
   ## calculate the n/N value (the relative saturation level)
@@ -1746,6 +1738,15 @@ fit_DoseResponseCurve <- function(
       else
         n_N <- n/N
 
+  ## account for the fact that we can still calculate a De that is negative
+  ## even it does not make sense for interpolation
+  De.raw <- De
+  if (mode == "interpolation" && !is.na(De) && De < 0) {
+    De <- NA
+  }
+
+  ## if fields in this objects are changed, update also `temp.GC.all.na`
+  ## in analyse_SAR.CWOSL()
   output <- try(data.frame(
     De = abs(De),
     De.Error = De.Error,
@@ -1757,12 +1758,14 @@ fit_DoseResponseCurve <- function(
     D63 = D63,
     n_N = n_N,
     De.MC = De.MonteCarlo,
-    De.plot = De, # no absolute value, used for plotting
     Fit = fit.method,
+    Mode = mode,
     HPDI68_L = HPDI[1,1],
     HPDI68_U = HPDI[1,2],
     HPDI95_L = HPDI[1,3],
     HPDI95_U = HPDI[1,4],
+    .De.plot = De,    # no absolute value, needed for plot_DoseResposeCurve()
+    .De.raw = De.raw, # negative values not set to NA for interpolation
     row.names = NULL
   ), silent = TRUE)
 
@@ -1771,7 +1774,7 @@ fit_DoseResponseCurve <- function(
     class = "RLum.Results",
     data = list(
       De = output,
-      De.MC = x.natural,
+      De.MC = De.MC,
       Fit = fit,
       Fit.Args = list(
           object = object,
@@ -1808,7 +1811,6 @@ fit_DoseResponseCurve <- function(
 #'
 #'@returns New objects into the parent environment
 #'
-#'@md
 #'@noRd
 .get_coef <- function(x, pre = "", sufx = "") {
   ## get coefficients and set their names
@@ -1831,7 +1833,6 @@ fit_DoseResponseCurve <- function(
 #'
 #'@returns Returns an [expression]
 #'
-#'@md
 #'@noRd
 .replace_coef <- function(f) {
   ## get formula as character string
@@ -1879,7 +1880,6 @@ fit_DoseResponseCurve <- function(
 #'very complicated to-track-down errors when R tries to access the function
 #'stack
 #'
-#'@md
 #'@noRd
 .toFormula <- function(f, env) {
   ## deparse
@@ -1910,7 +1910,6 @@ fit_DoseResponseCurve <- function(
 #'
 #'@note Not used here, however, part of the reference implementation.
 #'
-#'@md
 #'@noRd
 .nN2D <- function(nN, Q, D63) D63 * ((-log(1-nN) - Q*nN)/(1 - Q*(1-exp(-1)))) # nocov
 
@@ -1930,7 +1929,6 @@ fit_DoseResponseCurve <- function(
 #'
 #'@references https://github.com/jll2/LumDRC/blob/main/otorx.py
 #'
-#'@md
 #'@noRd
 .D2nN <- function(D, Q, D63, a) {
   if(all(abs(Q) < 1e-06))

@@ -1,22 +1,23 @@
-#' @title Al2O3:C Reader Cross Talk Analysis
+#' @title Al2O3:C Reader Cross-Talk Analysis
 #'
-#' @description The function provides the analysis of cross-talk measurements on a
-#' FI lexsyg SMART reader using Al2O3:C chips
+#' @description The function provides the analysis of cross-talk measurements
+#' on a FI lexsyg SMART reader using Al2O3:C chips.
 #'
 #' @param object [RLum.Analysis-class] or [list] (**required**):
 #' measurement input
 #'
 #' @param signal_integral [numeric] (*optional*):
 #' signal integral, used for the signal and the background.
-#' If nothing is provided the full range is used
+#' If nothing is provided, the full range is used.
 #'
 #' @param dose_points [numeric] (*with default*):
 #' vector with dose points, if dose points are repeated, only the general
 #' pattern needs to be provided. Default values follow the suggestions
-#' made by Kreutzer et al., 2018
+#' made by Kreutzer et al., 2018.
 #'
-#' @param recordType [character] (*with default*): input curve selection, which is passed to
-#' function [get_RLum]. To deactivate the automatic selection set the argument to `NULL`
+#' @param recordType [character] (*with default*):
+#' input curve selection, which is passed to [get_RLum]. To deactivate the
+#' automatic selection set the argument to `NULL`.
 #'
 #' @param irradiation_time_correction [numeric] or [RLum.Results-class] (*optional*):
 #' information on the used irradiation time correction obtained by another
@@ -24,7 +25,7 @@
 #'
 #' @param method_control [list] (*optional*):
 #' optional parameters to control the calculation.
-#' See details for further explanations
+#' See details for further explanations.
 #'
 #' @param plot [logical] (*with default*):
 #' enable/disable the plot output.
@@ -82,7 +83,6 @@
 #' ##run analysis
 #' analyse_Al2O3C_CrossTalk(data_CrossTalk)
 #'
-#' @md
 #' @export
 analyse_Al2O3C_CrossTalk <- function(
   object,
@@ -107,6 +107,9 @@ analyse_Al2O3C_CrossTalk <- function(
                                        name = "All elements of 'object'"))
   }
   .validate_class(recordType, "character")
+  .validate_class(irradiation_time_correction, c("numeric", "RLum.Results"),
+                  null.ok = TRUE)
+  .validate_class(method_control, "list", null.ok = TRUE)
 
   ##TODO ... do more, push harder
   ##Accept the entire sequence ... including TL and extract
@@ -130,7 +133,6 @@ analyse_Al2O3C_CrossTalk <- function(
 
   ##modify on request
   if(!is.null(method_control)){
-    .validate_class(method_control, "list")
     method_control_settings <- modifyList(x = method_control_settings, val = method_control)
   }
 
@@ -149,10 +151,8 @@ analyse_Al2O3C_CrossTalk <- function(
 
   ##check irradiation time correction
   if (!is.null(irradiation_time_correction)) {
-    .validate_class(irradiation_time_correction, c("numeric", "RLum.Results"))
-
-    if (is(irradiation_time_correction, "RLum.Results")) {
-      if (irradiation_time_correction@originator == "analyse_Al2O3C_ITC") {
+    if (inherits(irradiation_time_correction, "RLum.Results")) {
+      if (irradiation_time_correction@originator %in% "analyse_Al2O3C_ITC") {
         irradiation_time_correction <- get_RLum(irradiation_time_correction)
 
         ##insert case for more than one observation ...
@@ -173,14 +173,14 @@ analyse_Al2O3C_CrossTalk <- function(
   ##we have two dose points, and one background curve, we do know only the 2nd dose
 
   ##create signal table list
-  signal_table_list <- lapply(1:length(object), function(i) {
+  signal_table_list <- lapply(object, function(x) {
     ##calculate all the three signals needed
-    BACKGROUND <- sum(object[[i]][[3]][, 2])
-    NATURAL <- sum(object[[i]][[1]][, 2])
-    REGENERATED <- sum(object[[i]][[2]][, 2])
+    BACKGROUND <- sum(x[[3]][, 2])
+    NATURAL <- sum(x[[1]][, 2])
+    REGENERATED <- sum(x[[2]][, 2])
 
     temp_df <- data.frame(
-      POSITION = get_RLum(object[[i]][[1]], info.object = "position"),
+      POSITION = get_RLum(x[[1]], info.object = "position"),
       DOSE = if(!is.null(irradiation_time_correction)){
         dose_points + irradiation_time_correction[1]
       }else{
@@ -206,21 +206,20 @@ analyse_Al2O3C_CrossTalk <- function(
     return(temp_df)
   })
 
-  APPARENT_DOSE <- as.data.frame(data.table::rbindlist(lapply(1:length(object), function(x){
+  APPARENT_DOSE <- as.data.frame(data.table::rbindlist(lapply(signal_table_list, function(x) {
 
     ##run in MC run
-    if(!is.null(irradiation_time_correction)){
-    DOSE <- rnorm(1000, mean = signal_table_list[[x]]$DOSE[2], sd = signal_table_list[[x]]$DOSE_ERROR[2])
-
-    }else{
-      DOSE <- signal_table_list[[x]]$DOSE[2]
-    }
+    DOSE <- if (!is.null(irradiation_time_correction)) {
+              rnorm(1000, mean = x$DOSE[2], sd = x$DOSE_ERROR[2])
+            } else {
+              x$DOSE[2]
+            }
 
     ##calculation
-    temp <- (DOSE * signal_table_list[[x]]$NET_INTEGRAL[1])/signal_table_list[[x]]$NET_INTEGRAL[2]
+    temp <- (DOSE * x$NET_INTEGRAL[1]) / x$NET_INTEGRAL[2]
 
     data.frame(
-      POSITION = signal_table_list[[x]]$POSITION[1],
+      POSITION = x$POSITION[1],
       AD = mean(temp),
       AD_ERROR = sd(temp))
   })))

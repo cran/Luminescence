@@ -52,18 +52,8 @@ test_that("check class and length of output", {
   expect_equal(results$proportion[1], 0.1096)
   expect_equal(results$proportion[2], 0.8904)
 
-  ## test plot
-  SW({
-  expect_s4_class(calc_FiniteMixture(
-    ExampleData.DeValues$CA1,
-    sigmab = 0.2,
-    n.components = 2:3,
-    grain.probability = TRUE,
-    trace = TRUE,
-    main = "Plot title",
-    verbose = TRUE), "RLum.Results")
-
   ## more coverage
+  SW({
   expect_warning(calc_FiniteMixture(
     ExampleData.DeValues$CA1[2:9, ],
     sigmab = 0.1,
@@ -81,17 +71,56 @@ test_that("check class and length of output", {
     verbose = TRUE),
     "No significant increase in maximum log-likelihood estimates")
 
+  ## TODO(mcol): redundant with graphical snapshot tests, remove when
+  ## coverage is no longer run on R 4.3
+  calc_FiniteMixture(temp, pdf.colors = "none")
+  expect_silent(calc_FiniteMixture(ExampleData.DeValues$CA1,
+                                   sigmab = 0.2, n.components = 2:3,
+                                   pdf.colors = "none", verbose = FALSE))
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+  testthat::skip_if_not(getRversion() >= "4.4.0")
+
+  SW({
+  vdiffr::expect_doppelganger("default",
+                              calc_FiniteMixture(
+                                  ExampleData.DeValues$CA1,
+                                  sigmab = 0.2,
+                                  n.components = 2:3,
+                                  grain.probability = TRUE,
+                                  trace = TRUE,
+                                  main = "Plot title",
+                                  verbose = TRUE))
+
+  vdiffr::expect_doppelganger("cex pdf.weights",
+                              calc_FiniteMixture(
+                                  ExampleData.DeValues$CA1,
+                                  sigmab = 0.2,
+                                  n.components = 2:3,
+                                  grain.probability = TRUE,
+                                  pdf.weights = FALSE,
+                                  pdf.colors = "none",
+                                  cex = 2))
+
   ## plot with plot_RLum.Results
-  t <- expect_s4_class(calc_FiniteMixture(
-    ExampleData.DeValues$CA1,
-    sigmab = 0.2,
-    n.components = 2:3,
-    grain.probability = FALSE,
-    trace = FALSE,
-    plot = FALSE,
-    main = "Plot title",
-    verbose = FALSE), "RLum.Results")
-  plot_RLum.Results(t, pdf.colors = "none")
+  res <- calc_FiniteMixture(ExampleData.DeValues$CA1,
+                            sigmab = 0.2,
+                            n.components = 3:4,
+                            grain.probability = FALSE,
+                            trace = FALSE,
+                            plot = FALSE,
+                            main = "From RLum.Results",
+                            verbose = FALSE)
+  vdiffr::expect_doppelganger("from RLum.Results",
+                              calc_FiniteMixture(res,
+                                                 pdf.colors = "colors"))
+  vdiffr::expect_doppelganger("from RLum.Results none",
+                              calc_FiniteMixture(res,
+                                                 pdf.colors = "none"))
+  })
 })
 
 test_that("regression tests", {

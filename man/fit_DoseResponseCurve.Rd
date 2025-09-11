@@ -121,21 +121,22 @@ This object is a \link{data.frame} with the following columns
 \tabular{lll}{
 \code{De} \tab \link{numeric} \tab equivalent dose \cr
 \code{De.Error} \tab \link{numeric} \tab standard error the equivalent dose \cr
-\code{D01} \tab \link{numeric} \tab D-naught value, curvature parameter of the exponential \cr
-\code{D01.ERROR} \tab \link{numeric} \tab standard error of the D-naught value\cr
-\code{D02} \tab \link{numeric} \tab 2nd D-naught value, only for \code{EXP+EXP}\cr
-\code{D02.ERROR} \tab \link{numeric} \tab standard error for 2nd D-naught; only for \code{EXP+EXP}\cr
+\code{D01} \tab \link{numeric} \tab D-nought value, curvature parameter of the exponential \cr
+\code{D01.ERROR} \tab \link{numeric} \tab standard error of the D-nought value\cr
+\code{D02} \tab \link{numeric} \tab 2nd D-nought value, only for \code{EXP+EXP}\cr
+\code{D02.ERROR} \tab \link{numeric} \tab standard error for 2nd D-nought; only for \code{EXP+EXP}\cr
 \code{Dc} \tab \link{numeric} \tab value indicating saturation level; only for \code{OTOR} \cr
 \code{D63} \tab \link{numeric} \tab the specific saturation level; only for \code{OTORX} \cr
 \code{n_N} \tab \link{numeric} \tab saturation level of dose-response curve derived via integration from the used function; it compares the full integral of the curves (\code{N}) to the integral until \code{De} (\code{n}) (e.g.,  Guralnik et al., 2015)\cr
 \code{De.MC} \tab \link{numeric} \tab equivalent dose derived by Monte-Carlo simulation; ideally identical to \code{De}\cr
-\code{De.plot} \tab \link{numeric} \tab equivalent dose use for plotting \cr
-\code{Fig} \tab \link{character} \tab applied fit function \cr
+\code{Fit} \tab \link{character} \tab applied fit function \cr
+\code{Mode} \tab \link{character} \tab mode used in fitting \cr
 \code{HPDI68_L} \tab \link{numeric} \tab highest probability density of approximated equivalent dose probability curve representing the lower boundary of 68\% probability \cr
 \code{HPDI68_U} \tab \link{numeric} \tab same as \code{HPDI68_L} for the upper bound \cr
 \code{HPDI95_L} \tab \link{numeric} \tab same as \code{HPDI68_L} but for 95\% probability \cr
 \code{HPDI95_U} \tab \link{numeric} \tab same as \code{HPDI95_L} but for the upper bound \cr
-
+\code{.De.plot} \tab \link{numeric} \tab equivalent dose used internally for plotting \cr
+\code{.De.raw} \tab \link{numeric} \tab equivalent dose reported 'as is', that is containing infinities and negative values if they could be calculated. Bear in mind that negative values are meaningless and may be arbitrary.\cr
 }
 }
 \description{
@@ -273,7 +274,7 @@ Each error estimation is done with the function of the chosen fitting method.
 }
 }
 \section{Function version}{
- 1.4.0
+ 1.4.3
 }
 
 \examples{
@@ -342,7 +343,7 @@ print(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2025. fit_DoseResponseCurve(): Fit a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2025. fit_DoseResponseCurve(): Fit a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.4.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

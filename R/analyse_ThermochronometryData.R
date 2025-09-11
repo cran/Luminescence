@@ -124,14 +124,15 @@ analyse_ThermochronometryData <- function(
     ## DRC fitting
     results_DRC <- suppressWarnings(
         fit_DoseResponseCurve(
-        object = df_DRC,
-        mode = "alternate"))
+            object = df_DRC,
+            mode = "alternate",
+            verbose = verbose))
 
     ## DRC plotting
     plot_DoseResponseCurve(
       object = results_DRC,
       xlab = if (any("DOSE" %in% colnames(df_DRC))) "Dose [Gy]" else "Dose [s]",
-      cex.global = 0.65,
+      log = "x",
       plot_extended = FALSE,
       main = sample_names[i])
 

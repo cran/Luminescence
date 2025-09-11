@@ -49,6 +49,7 @@
 #' - `"mean"` (mean De value),
 #' - `"weighted$mean"` (error-weighted mean),
 #' - `"median"` (median of the De values),
+#' - `"weighted$median"` (error-weighted median),
 #' - `"sd.rel"` (relative standard deviation in percent),
 #' - `"sd.abs"` (absolute standard deviation),
 #' - `"se.rel"` (relative standard error) and
@@ -179,7 +180,6 @@
 #'   preheat = c(200, 200, 200, 240, 240),
 #'   boxplot = TRUE)
 #'
-#' @md
 #' @export
 plot_DRTResults <- function(
   values,
@@ -202,6 +202,7 @@ plot_DRTResults <- function(
   ## Integrity checks -------------------------------------------------------
 
   .validate_not_empty(values)
+  .validate_class(given.dose, "numeric", null.ok = TRUE)
 
   ##avoid crash for wrongly set boxlot argument
   if(missing(preheat) & boxplot == TRUE){
@@ -229,10 +230,10 @@ plot_DRTResults <- function(
     .validate_class(values[[i]], c("data.frame", "RLum.Results"),
                     name = "'values'")
     if (inherits(values[[i]], "RLum.Results")) {
-      val <- get_RLum(values[[i]])[, 1:2]
-      if (is.null(val))
-        val <- NA
+      val <- get_RLum(values[[i]])[, 1:2] %||% NA
       values[[i]] <- val
+    } else if (ncol(values[[i]]) < 2) {
+      .throw_error("'values' should have 2 columns")
     }
   }
 
@@ -278,39 +279,27 @@ plot_DRTResults <- function(
   ## Set plot format parameters -----------------------------------------------
   extraArgs <- list(...) # read out additional arguments list
 
-  main <- if("main" %in% names(extraArgs)) {extraArgs$main} else
-  {"Dose recovery test"}
+  main <- extraArgs$main %||% "Dose recovery test"
+  xlab <- extraArgs$xlab %||% ifelse(missing(preheat) == TRUE,
+                                     "# Aliquot", "Preheat temperature [\u00B0C]")
 
-  xlab <- if("xlab" %in% names(extraArgs)) {extraArgs$xlab} else {
-    ifelse(missing(preheat) == TRUE, "# Aliquot", "Preheat temperature [\u00B0C]")
+  ylab <- extraArgs$ylab %||% {
+    if (!is.null(given.dose) && length(given.dose) > 0 && given.dose[1] > 0)
+      expression(paste("Normalised ", D[e], sep = ""))
+    else expression(paste(D[e], " [s]", sep = ""))
   }
 
-  ylab <- if("ylab" %in% names(extraArgs)) {extraArgs$ylab} else
-  { if (!is.null(given.dose) && length(given.dose) > 0 && given.dose[1] > 0) expression(paste("Normalised ", D[e], sep = ""))
-    else expression(paste(D[e], " [s]", sep = "")) }
-
-  xlim <- if("xlim" %in% names(extraArgs)) {extraArgs$xlim} else
-  { c(0, max(n.values)) + 0.5 }
-
-  ylim <- if("ylim" %in% names(extraArgs)) {extraArgs$ylim} else
-  {c(0.75, 1.25)} #check below for further corrections if boundaries exceed set range
-
-  cex <- if("cex" %in% names(extraArgs)) {extraArgs$cex} else {1}
-
-  pch <- if("pch" %in% names(extraArgs)) {extraArgs$pch} else {
-    abs(seq(from = 20, to = -100))
-  }
-
-  ##axis labels
-  las <- if("las" %in% names(extraArgs)) extraArgs$las else 0
-
-  fun <- if ("fun" %in% names(extraArgs)) extraArgs$fun else FALSE # nocov
+  xlim <- extraArgs$xlim %||% (c(0, max(n.values)) + 0.5)
+  ylim <- extraArgs$ylim %||% c(0.75, 1.25) # check below for further corrections if boundaries exceed set range
+  cex <- extraArgs$cex %||% 1
+  pch <- extraArgs$pch %||% abs(seq(from = 20, to = -100))
+  las <- extraArgs$las %||% 0
+  fun <- isTRUE(extraArgs$fun)
 
   ## calculations and settings-------------------------------------------------
 
   ## normalise data if given.dose is given
   if (!is.null(given.dose)) {
-    .validate_class(given.dose, "numeric")
     .validate_not_empty(given.dose)
     if (length(given.dose) == 1) {
       given.dose <- rep(given.dose, length(values))
@@ -330,15 +319,12 @@ plot_DRTResults <- function(
   }
 
   ##correct ylim for data set which exceed boundaries
-  if((max(sapply(1:length(values), function(x){max(values[[x]][,1], na.rm = TRUE)}))>1.25 |
-        min(sapply(1:length(values), function(x){min(values[[x]][,1], na.rm = TRUE)}))<0.75) &
+  if ((max(sapply(values, function(x) max(x[, 1], na.rm = TRUE))) > 1.25 ||
+       min(sapply(values, function(x) min(x[, 1], na.rm = TRUE))) < 0.75) &&
        ("ylim" %in% names(extraArgs)) == FALSE){
-
     ylim <- c(
-      min(sapply(1:length(values), function(x){
-        min(values[[x]][,1], na.rm = TRUE) - max(values[[x]][,2], na.rm = TRUE)})),
-      max(sapply(1:length(values), function(x){
-        max(values[[x]][,1], na.rm = TRUE) + max(values[[x]][,2], na.rm = TRUE)})))
+      min(sapply(values, function(x) min(x[, 1], na.rm = TRUE) - max(x[, 2], na.rm = TRUE))),
+      max(sapply(values, function(x) max(x[, 1], na.rm = TRUE) + max(x[, 2], na.rm = TRUE))))
   }
 
   ## optionally group data by preheat temperature
@@ -377,17 +363,17 @@ plot_DRTResults <- function(
   if(summary.pos[1] != "sub") {
     label.text <- lapply(1:length(values), function(i) {
       .create_StatisticalSummaryText(
-        x = calc_Statistics(values[[i]]),
+        calc_Statistics(values[[i]]),
         keywords = summary,
         digits = 2,
         sep = " \n",
-        prefix = paste(rep("\n", (i - 1) * length(summary)), collapse = "")
+        prefix = strrep("\n", (i - 1) * length(summary))
       )
     })
   }else{
-    label.text <- lapply(1:length(values), function(i) {
+    label.text <- lapply(values, function(x) {
       .create_StatisticalSummaryText(
-        x = calc_Statistics(values[[i]]),
+        calc_Statistics(x),
         keywords = summary,
         digits = 2,
         sep = " | "
@@ -481,7 +467,7 @@ plot_DRTResults <- function(
                y = values[[i]][,1],
                pch = if (oneinput && nrow(values[[i]]) == length(pch)) pch else pch[i],
                col = if (multicol) col else col[i],
-               cex = 1.2 * cex)
+               cex = 1.2)
 
         graphics::arrows(c(1:nrow(values[[i]])),
                values[[i]][,1] + values[[i]][,2],
@@ -572,7 +558,7 @@ plot_DRTResults <- function(
                y = values.preheat[[i]][,1],
                pch = pch[i],
                col = col[i],
-               cex = 1.2 * cex)
+               cex = 1.2)
 
         graphics::arrows(values.preheat[[i]][,3],
                values.preheat[[i]][,1] + values.preheat[[i]][,2],

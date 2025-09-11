@@ -33,7 +33,6 @@
 #'## import image
 #'image <- read_TIFF2R(file)
 #'
-#'@md
 #'@export
 read_TIFF2R <- function(
   file,
@@ -87,7 +86,7 @@ read_TIFF2R <- function(
   ## import
   temp <- tiff::readTIFF(file, all = TRUE, as.is = TRUE)
 
-  if(is(temp, "list"))
+  if (inherits(temp, "list"))
     temp <- as(temp, "RLum.Data.Image")
 
 # Return ------------------------------------------------------------------

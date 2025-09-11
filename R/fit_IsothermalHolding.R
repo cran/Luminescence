@@ -59,7 +59,7 @@
 #' @noRd
 fit_IsothermalHolding <- function(
     data,
-    ITL_model = 'GOK',
+    ITL_model = "GOK",
     rhop,
     plot = TRUE,
     verbose = TRUE,
@@ -119,9 +119,10 @@ fit_IsothermalHolding <- function(
 
   ## allow to control how many random values for the s parameter should be
   ## generated when fitting the BTS model
-  num_s_values_bts <- list(...)$num_s_values_bts
-  if (!is.null(num_s_values_bts)) {
-    .validate_positive_scalar(num_s_values_bts, int = TRUE)
+  extraArgs <- list(...)
+  if (!is.null(extraArgs$num_s_values_bts)) {
+    num_s_values_bts <- .validate_positive_scalar(extraArgs$num_s_values_bts,
+                                                  int = TRUE, name = "'num_s_values_bts'")
   } else {
     num_s_values_bts <- 1000
   }
@@ -166,18 +167,17 @@ fit_IsothermalHolding <- function(
     ## in the future
     f_BTS_cpp_part(
       x, A, Eu, s10, Et, kB, T_K, DeltaE, rhop)
-
   }
 
   ## switch the models
   start <- switch(
     ITL_model,
-    'GOK' = list(A = 1, b  = 1, Et = 1, s10 = 5),
+    'GOK' = list(A = 1, b = 1, Et = 1, s10 = 5),
     'BTS' = list(A = 1, Eu = 0.1, Et = 2))
 
   lower <- switch(
     ITL_model,
-    'GOK' = c(0, 0,   0, 0),
+    'GOK' = c(0, 0, 0, 0),
     'BTS' = c(1, 0.3, 1))
 
   upper <- switch(
@@ -190,7 +190,7 @@ fit_IsothermalHolding <- function(
   ## each sample has n temperature steps
   num.fits <- 0
   fitted.coefs <- NULL
-  fit_list <- lapply(df_raw_list, function(s){
+  fit_list <- lapply(df_raw_list, function(s) {
 
     ## extract temperatures
     isoT <- unique(s$TEMP)
@@ -206,7 +206,7 @@ fit_IsothermalHolding <- function(
       if (ITL_model == "GOK") {
         fit <- try({
           minpack.lm::nlsLM(
-              formula = y ~ f_GOK(A, b,  Et, s10, isoT, x),
+              formula = y ~ f_GOK(A, b, Et, s10, isoT, x),
               data = df,
               start = start,
               lower = lower,
@@ -256,7 +256,7 @@ fit_IsothermalHolding <- function(
           }
 
           if (inherits(t, "try-error"))
-            return(NULL)
+            return(NULL) # nocov
           return(t)
         })
 
@@ -289,7 +289,46 @@ fit_IsothermalHolding <- function(
     close(pb)
   }
 
-# Plotting ----------------------------------------------------------------
+  ## summarize the parameters of interest (Et, s10) in terms of median and
+  ## interquartile range
+  ITL_params <- tapply(fitted.coefs, sample_id, function(coefs) {
+    data.frame(t(c(Et = quantile(coefs$Et, c(0.5, 0.25, 0.75), na.rm = TRUE),
+                   s10 = quantile(coefs$s10, c(0.5, 0.25, 0.75), na.rm = TRUE))))
+  })
+
+  ## sort the ITL_params list, as tapply() may have put the results in a
+  ## different order when converting internally the sample names to a factor
+  ITL_params <- ITL_params[sample_id]
+
+  ## convert to a data table
+  ITL_params <- rbindlist(ITL_params[sample_id], idcol = "SAMPLE")
+  colnames(ITL_params)[-1] <- c("Et_median", "Et_Q_0.25", "Et_Q_0.75",
+                                  "s10_median", "s10_Q_0.25", "s10_Q_0.75")
+
+  if (verbose) {
+    ## silence notes raised by R CMD check
+    Et <- Et_Q_0.25 <- Et_Q_0.75 <- Et_median <- NULL
+    s10 <- s10_Q_0.25 <- s10_Q_0.75 <- s10_median <- NULL
+
+    ## report as median (IQR)
+    format.iqr <- function(x1, x2, x3, n = 3) sprintf("%.*f (%.*f, %.*f)",
+                                             n, x1, n, x2, n, x3)
+    ITL_params[, Et := format.iqr(Et_median, Et_Q_0.25, Et_Q_0.75)]
+    ITL_params[, s10 := format.iqr(s10_median, s10_Q_0.25, s10_Q_0.75)]
+
+
+    fmt <- "%20s | %22s | %22s |\n"
+    cat("\n---- Isothermal holding parameters [median (IQR)] ----\n\n")
+    cat(sprintf(fmt, "SAMPLE", "Et", "log10(s)"))
+    for (i in seq(nrow(ITL_params))) {
+      row <- ITL_params[i, ]
+      cat(sprintf(fmt, row$SAMPLE, row$Et, row$s10))
+    }
+
+    ITL_params[, c("Et", "s10") := NULL]
+  }
+
+  ## Plotting ---------------------------------------------------------------
   if (plot) {
     ## define plot settings
     plot_settings <- modifyList(
@@ -302,7 +341,7 @@ fit_IsothermalHolding <- function(
         xlab = "Isothermal holding time [s]",
         ylab = expression(paste("Norm. lumin. [", L[x]/T[x], "]")),
         pch = 21,
-        col =  grDevices::palette("Okabe-Ito"),
+        col = grDevices::palette.colors(),
         col.border = "black",
         main = sample_id,
         mtext = paste("Fitted with the", ITL_model, "model"),
@@ -390,6 +429,7 @@ fit_IsothermalHolding <- function(
   output <- set_RLum(
     class = "RLum.Results",
     data = list(
+     ITL_params = data.frame(ITL_params),
      fit = fit_list,
      coefs = fitted.coefs,
      data = records_ITL),

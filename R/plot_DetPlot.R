@@ -142,7 +142,6 @@
 #'   n.channels = 5)
 #' }
 #'
-#' @md
 #' @export
 plot_DetPlot <- function(
   object,
@@ -194,8 +193,8 @@ plot_DetPlot <- function(
       on.exit(parallel::stopCluster(cl), add = TRUE)
 
       if (verbose)
-        message("\n[plot_DetPlot()] Running multicore session using ", cores,
-                " cores ...")
+        .throw_message("Running multicore session using ", cores,
+                       " cores ...", error = FALSE)
       res_list <- parallel::parLapply(cl = cl, X = object, fun = nested.fun)
     } else {
       ## run in serial
@@ -242,7 +241,8 @@ plot_DetPlot <- function(
       (background.integral.min - 1 - signal.integral.max) / (signal.integral.max - signal.integral.min)
     )
     if (verbose) {
-      message("'n.channels' not specified, set to ", n.channels)
+      .throw_message("'n.channels' not specified, set to ", n.channels,
+                     error = FALSE)
     }
   }
 
@@ -285,10 +285,8 @@ plot_DetPlot <- function(
         verbose = verbose
       )
     }))
-
-  }
-  else if(analyse_function  == "analyse_pIRIRSequence"){
-    result.temp.list <- lapply(1:n.channels, function(x) {
+  } else if (analyse_function == "analyse_pIRIRSequence") {
+    results <- lapply(1:n.channels, function(x) {
       analyse_pIRIRSequence(
         object = object,
         signal.integral.min = if(method == "shift"){signal_integral.seq[x]}else{signal_integral.seq[1]},
@@ -306,30 +304,23 @@ plot_DetPlot <- function(
 
     ## as the analyse_pIRIRSequence() may fail, we see how many results
     ## we've actually managed to produce
-    num.valid.results <- sum(!sapply(result.temp.list, is.null))
+    num.valid.results <- sum(!sapply(results, is.null))
     if (num.valid.results == 0) {
       .throw_error("No valid results produced")
     }
-    if (num.valid.results == 1) {
-      results <- result.temp.list
-    } else {
-      results <- merge_RLum(result.temp.list)
+    if (num.valid.results > 1) {
+      results <- merge_RLum(results)
     }
-    rm(result.temp.list)
   }
 
+  ## Plot -------------------------------------------------------------------
 
-# Plot ----------------------------------------------------------------------------------------
-    ##get De results
-    if(analyse_function == "analyse_pIRIRSequence"){
-      pIRIR_signals <- unique(get_RLum(results)$Signal)
+  pIRIR_signals <- if (analyse_function == "analyse_pIRIRSequence") {
+                     unique(get_RLum(results)$Signal)
+                   } else NA
 
-    }else{
-      pIRIR_signals <- NA
-    }
-
-    ##run this in a loop to account for pIRIR data
-    df_final <- lapply(1:length(pIRIR_signals), function(i){
+  ## run this in a loop to account for pIRIR data
+  df_final <- lapply(1:length(pIRIR_signals), function(i) {
       ##get data.frame
       df <- get_RLum(results)
 
@@ -345,23 +336,19 @@ plot_DetPlot <- function(
       ##limit to what we see
       OSL_curve <- OSL_curve[1:signal_integral.seq[n.channels + 1],]
 
-      m <-
-        ((min(df$De - df$De.Error, na.rm = TRUE)) -
-           (max(df$De, na.rm = TRUE) +
-              max(df$De.Error, na.rm = TRUE))) /
+      min.de <- min(df$De - df$De.Error, na.rm = TRUE)
+      max.de <- max(df$De, na.rm = TRUE) + max(df$De.Error, na.rm = TRUE)
+      m <- (min.de - max.de) /
         (min(OSL_curve[, 2], na.rm = TRUE) -
            max(OSL_curve[, 2], na.rm = TRUE))
-      n <- (max(df$De, na.rm = TRUE) +
-              max(df$De.Error, na.rm = TRUE)) - m * max(OSL_curve[, 2])
+      n <- max.de - m * max(OSL_curve[, 2])
 
       OSL_curve[, 2] <- m * OSL_curve[, 2] + n
       rm(n, m)
 
         ##set plot setting
         plot.settings <- modifyList(list(
-          ylim = c(
-            min(df$De - df$De.Error, na.rm = TRUE),
-            (max(df$De, na.rm = TRUE) + max(df$De.Error, na.rm = TRUE))),
+          ylim = c(min.de, max.de),
           xlim = c(min(OSL_curve[, 1]), max(OSL_curve[, 1])),
           ylab = if(show_ShineDownCurve[1])
                   expression(paste(D[e], " [s] and ", L[n], " [a.u.]"))
@@ -435,8 +422,7 @@ plot_DetPlot <- function(
       } ## end plot
       ##set return
       return(df_final)
-    })
-
+  })
 
 # Return ------------------------------------------------------------------
   ##merge results

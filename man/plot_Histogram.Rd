@@ -88,6 +88,7 @@ one or more of the following keywords:
 \item \code{"mean"} (mean De value),
 \item \code{"mean.weighted"} (error-weighted mean),
 \item \code{"median"} (median of the De values),
+\item \code{"median.weighted"} (error-weighted median),
 \item \code{"sdrel"} (relative standard deviation in percent),
 \item \code{"sdrel.weighted"} (error-weighted relative standard deviation in percent),
 \item \code{"sdabs"} (absolute standard deviation),
@@ -144,6 +145,6 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2025. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2025. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 

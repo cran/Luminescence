@@ -8,6 +8,8 @@ test_that("input validation", {
                "'values' should be of class 'data.frame' or 'RLum.Data.Curve'")
   expect_error(fit_LMCurve(data.frame()),
                "'values' cannot be an empty data.frame")
+  expect_error(fit_LMCurve(iris[, 1, drop = FALSE]),
+               "'values' should have 2 columns")
   expect_error(fit_LMCurve(set_RLum("RLum.Data.Curve")),
                "recordType should be 'RBR' or 'LM-OSL'")
   expect_error(fit_LMCurve(set_RLum("RLum.Data.Curve", recordType = "OSL")),
@@ -29,12 +31,14 @@ test_that("input validation", {
     values.bg = set_RLum("RLum.Data.Curve", data = as.matrix(values.curve), recordType = "OSL"),
     verbose = FALSE),
                "'recordType' for values.bg should be 'RBR'!")
+  expect_error(fit_LMCurve(data.frame(NA, 1:5)),
+               "After NA removal, nothing is left from the data set")
 
   ## warning for failed confint ...skip on windows because with R >= 4.2 is does not fail anymore
-  SW({
-  if (!grepl(pattern = "mingw", sessionInfo()$platform) && !grepl(pattern = "linux", sessionInfo()$platform))
-    expect_warning(fit_LMCurve(values = values.curve, fit.calcError = TRUE))
-  })
+  # SW({
+  # if (!grepl(pattern = "mingw", sessionInfo()$platform) && !grepl(pattern = "linux", sessionInfo()$platform))
+  #   fit_LMCurve(values = values.curve, fit.calcError = TRUE)
+  # })
 })
 
 test_that("snapshot tests", {

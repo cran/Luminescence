@@ -47,7 +47,6 @@
 #' write_R2BIN(bin, "~/portableOSL.binx")
 #' }
 #'
-#' @md
 #' @export
 convert_PSL2Risoe.BINfileData <- function(object, ...) {
   .set_function_name("convert_PSL2Risoe.BINfileData")
@@ -189,17 +188,4 @@ convert_PSL2Risoe.BINfileData <- function(object, ...) {
 
   ## RETURN VALUE ----
   return(bin)
-}
-
-#' Convert portable OSL data to a Risoe.BINfileData object
-#'
-#' @description
-#' This function is defunct, use [convert_PSL2Risoe.BINfileData] instead.
-#'
-#' @param ... Unused.
-#'
-#' @md
-#' @export
-PSL2Risoe.BINfileData <- function(...) {
-  .Defunct("convert_PSL2Risoe.BINfileData")
 }

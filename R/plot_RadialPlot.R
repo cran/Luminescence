@@ -25,6 +25,7 @@
 #' - `"mean"` (mean De value),
 #' - `"mean.weighted"` (error-weighted mean),
 #' - `"median"` (median of the De values),
+#' - `"median.weighted"` (error-weighted median),
 #' - `"sdrel"` (relative standard deviation in percent),
 #' - `"sdrel.weighted"` (error-weighted relative standard deviation in percent),
 #' - `"sdabs"` (absolute standard deviation),
@@ -63,7 +64,7 @@
 #' - `"median.weighted"` or a
 #' - numeric value used for the standardisation.
 #'
-#' @param mtext [character]:
+#' @param mtext [character] (*with default*):
 #' additional text below the plot title.
 #'
 #' @param summary [character] (*with default*):
@@ -266,7 +267,6 @@
 #'   summary.pos = "sub",
 #'   legend = c("Sample 1", "Sample 2"))
 #'
-#' @md
 #' @export
 plot_RadialPlot <- function(
   data,
@@ -274,7 +274,7 @@ plot_RadialPlot <- function(
   log.z = TRUE,
   central.value,
   centrality = "mean.weighted",
-  mtext,
+  mtext = "",
   summary = c("n", "in.2s"),
   summary.pos = "sub",
   legend,
@@ -304,7 +304,8 @@ plot_RadialPlot <- function(
   }
 
   ## Homogenise input data format
-  if(is(data, "list") == FALSE) {data <- list(data)}
+  if (!inherits(data, "list"))
+      data <- list(data)
 
   ## Check input data
   for(i in 1:length(data)) {
@@ -343,51 +344,34 @@ plot_RadialPlot <- function(
 
   if(missing(stats) == TRUE) {stats <- numeric(0)}
 
-  if(missing(bar.col) == TRUE) {
+  if (missing(bar.col)) {
     bar.col <- rep("grey80", length(data))
   }
 
-  if(missing(grid.col) == TRUE) {
+  if (missing(grid.col)) {
     grid.col <- rep("grey70", length(data))
   }
 
-  if(missing(mtext) == TRUE) {
-    mtext <- ""
-  }
-
   ## check z-axis log-option for grouped data sets
-  if(is(data, "list") == TRUE & length(data) > 1 & log.z == FALSE) {
+  if (inherits(data, "list") && length(data) > 1 && log.z == FALSE) {
     .throw_warning("Option 'log.z' is not set to 'TRUE' altough ",
                    "more than one data set (group) is provided.")
   }
 
   ## optionally, remove NA-values
-  if(na.rm == TRUE) {
+  if (na.rm) {
     for(i in 1:length(data)) {
       data[[i]] <- na.exclude(data[[i]])
+      if (nrow(data[[i]]) == 0)
+        .throw_error("After NA removal, nothing is left from data set ", i)
     }
   }
 
   ## create preliminary global data set
-  De.global <- data[[1]][,1]
-  if(length(data) > 1) {
-    for(i in 2:length(data)) {
-      De.global <- c(De.global, data[[i]][,1])
-    }
-  }
+  De.global <- unlist(lapply(data, function(x) x[, 1]))
 
   ## calculate major preliminary tick values and tick difference
   extraArgs <- list(...)
-  if("zlim" %in% names(extraArgs)) {
-    limits.z <- extraArgs$zlim
-  } else {
-    z.span <- (mean(De.global) * 0.5) / (sd(De.global) * 100)
-    z.span <- ifelse(z.span > 1, 0.9, z.span)
-    limits.z <- c((ifelse(test = min(De.global) <= 0,
-                          yes = 1.1,
-                          no =  0.9) - z.span) * min(De.global),
-                  (1.1 + z.span) * max(De.global))
-  }
 
   ## calculate correction dose to shift non-positive values
   De.add <- 0
@@ -415,144 +399,74 @@ plot_RadialPlot <- function(
   }
 
   ## calculate major preliminary tick values and tick difference
-  if("zlim" %in% names(extraArgs)) {
-    limits.z <- extraArgs$zlim
-  } else {
+  limits.z <- extraArgs$zlim %||% {
     z.span <- (mean(De.global) * 0.5) / (sd(De.global) * 100)
     z.span <- ifelse(z.span > 1, 0.9, z.span)
-    limits.z <- c((ifelse(min(De.global) <= 0, 1.1, 0.9) - z.span) * min(De.global),
-                  (1.1 + z.span) * max(De.global))
-
+    c((ifelse(min(De.global) <= 0, 1.1, 0.9) - z.span) * min(De.global),
+      (1.1 + z.span) * max(De.global))
   }
   ticks <- round(pretty(limits.z, n = 5), 3)
   De.delta <- ticks[2] - ticks[1]
 
   ## calculate and append statistical measures --------------------------------
-  ## z-values based on log-option
-  z <- lapply(1:length(data), function(x){
-    if(log.z == TRUE) {log(data[[x]][,1])} else {data[[x]][,1]}})
 
-  data <- lapply(1:length(data), function(x) {
-     cbind(data[[x]], z[[x]])})
-  rm(z)
-
-  ## calculate se-values based on log-option
-  se <- lapply(1:length(data), function(x, De.add){
-    if(log.z == TRUE) {
-      data[[x]][,2] <- data[[x]][,2] / (data[[x]][,1] + De.add)
-    } else {
-      data[[x]][,2]
-    }}, De.add = De.add)
-
-  data <- lapply(1:length(data), function(x) {
-    cbind(data[[x]], se[[x]])})
-  rm(se)
-
-  ## define function after isotone::weighted.mean
-  median.w <- function (y, w) {
-    ox <- order(y)
-    y <- y[ox]
-    w <- w[ox]
-    k <- 1
-    low <- cumsum(c(0, w))
-    up <- sum(w) - low
-    df <- low - up
-    repeat {
-      if (df[k] < 0)
-        k <- k + 1
-      else if (df[k] == 0)
-        return((w[k] * y[k] + w[k - 1] * y[k - 1]) / (w[k] + w[k - 1]))
-      else return(y[k - 1])
-    }
-  }
+  ## z-values and se based on log-option
+  data <- lapply(data, function(x, De.add) {
+    cbind(x,
+          z = if (log.z) log(x[, 1]) else x[, 1],
+          se = if (log.z) x[, 2] / (x[, 1] + De.add) else x[, 2])
+  }, De.add = De.add)
 
   ## calculate central values
-  if(centrality[1] == "mean") {
-    z.central <- lapply(1:length(data), function(x){
-      rep(mean(data[[x]][,3], na.rm = TRUE), length(data[[x]][,3]))})
-  } else if(centrality[1] == "median") {
-    z.central <- lapply(1:length(data), function(x){
-      rep(median(data[[x]][,3], na.rm = TRUE), length(data[[x]][,3]))})
-  } else  if(centrality[1] == "mean.weighted") {
-    z.central <- lapply(1:length(data), function(x){
-      sum(data[[x]][,3] / data[[x]][,4]^2) /
-        sum(1 / data[[x]][,4]^2)})
-  } else if(centrality[1] == "median.weighted") {
-    z.central <- lapply(1:length(data), function(x){
-      rep(median.w(y = data[[x]][,3],
-                   w = data[[x]][,4]), length(data[[x]][,3]))})
-  } else if(is.numeric(centrality) & length(centrality) == length(data)) {
-    z.central.raw <- if(log.z == TRUE) {
-      log(centrality + De.add)
-    } else {
-      centrality + De.add
-    }
-    z.central <- lapply(1:length(data), function(x){
-      rep(z.central.raw[x], length(data[[x]][,3]))})
-  } else if(is.numeric(centrality) == TRUE &
-              length(centrality) > length(data)) {
-    z.central <- lapply(1:length(data), function(x){
-      rep(median(data[[x]][,3], na.rm = TRUE), length(data[[x]][,3]))})
+  data <- lapply(data, function(x) {
+    cbind(x,
+          z.central = if (centrality[1] == "mean") {
+                        rep(mean(x[, 3], na.rm = TRUE), nrow(x))
+                      } else if (centrality[1] == "median") {
+                        rep(median(x[, 3], na.rm = TRUE), nrow(x))
+                      } else if (centrality[1] == "mean.weighted") {
+                        sum(x[, 3] / x[, 4]^2) / sum(1 / x[, 4]^2)
+                      } else if (centrality[1] == "median.weighted") {
+                        rep(.weighted.median(x[, 3], w = x[, 4]), nrow(x))
+                      } else if (is.numeric(centrality) && length(centrality) > length(data)) {
+                        rep(median(x[, 3], na.rm = TRUE), nrow(x))
+                      } else NA)
+  })
+
+  if (is.numeric(centrality) && length(centrality) == length(data)) {
+    ## compute z.central, as this could not be done in the lapply before
+    z.central.raw <- if (log.z) log(centrality + De.add) else centrality + De.add
+    lapply(1:length(data), function(x) data[[x]][, 5] <<- rep(z.central.raw[x], nrow(data[[x]])))
   }
 
-  data <- lapply(1:length(data), function(x) {
-    cbind(data[[x]], z.central[[x]])})
-  rm(z.central)
-
-  ## calculate precision
-  precision <- lapply(1:length(data), function(x){
-    1 / data[[x]][,4]})
-  data <- lapply(1:length(data), function(x) {
-    cbind(data[[x]], precision[[x]])})
-  rm(precision)
-
-  ## calculate standard estimate
-  std.estimate <- lapply(1:length(data), function(x){
-    (data[[x]][,3] - data[[x]][,5]) / data[[x]][,4]})
-  data <- lapply(1:length(data), function(x) {
-    cbind(data[[x]], std.estimate[[x]])})
-
-  ## append empty standard estimate for plotting
-  data <- lapply(1:length(data), function(x) {
-    cbind(data[[x]], std.estimate[[x]])})
-  rm(std.estimate)
+  ## calculate precision and standard estimate
+  idx <- 0
+  data <- lapply(data, function(x) {
+    idx <<- idx + 1
+    colnames(x) <- c("De", "error", "z", "se", "z.central")
+    cbind(x,
+          precision = 1 / x[, 4],
+          std.estimate = (x[, 3] - x[, 5]) / x[, 4],
+          std.estimate.plot = NA,
+          .id = idx)
+  })
 
   ## generate global data set
-  data.global <- cbind(data[[1]],
-                       rep(x = 1,
-                           times = nrow(data[[1]])))
+  data.global <- if (length(data) > 1) as.data.frame(rbindlist(data)) else data[[1]]
 
-  colnames(data.global) <- rep("", 9)
-
-  if(length(data) > 1) {
-    for(i in 2:length(data)) {
-      data.add <- cbind(data[[i]],
-                        rep(x = i, times = nrow(data[[i]])))
-      colnames(data.add) <- rep("", 9)
-      data.global <- rbind(data.global,
-                           data.add)
+  ## calculate global central value
+  z.central.global <-
+    if (centrality[1] == "mean") {
+      mean(data.global[, 3], na.rm = TRUE)
+    } else if (centrality[1] == "median") {
+      median(data.global[, 3], na.rm = TRUE)
+    } else if (centrality[1] == "mean.weighted") {
+      sum(data.global[, 3] / data.global[, 4]^2) / sum(1 / data.global[, 4]^2)
+    } else if (centrality[1] == "median.weighted") {
+      .weighted.median(data.global[, 3], w = data.global[, 4])
+    } else if (is.numeric(centrality) && length(centrality == length(data))) {
+      mean(data.global[, 3], na.rm = TRUE)
     }
-  }
-
-  ## create column names
-  colnames(data.global) <- c(
-    "De", "error", "z", "se", "z.central", "precision", "std.estimate",
-    "std.estimate.plot")
-
-## calculate global central value
-if(centrality[1] == "mean") {
-  z.central.global <- mean(data.global[,3], na.rm = TRUE)
-} else if(centrality[1] == "median") {
-  z.central.global <- median(data.global[,3], na.rm = TRUE)
-} else  if(centrality[1] == "mean.weighted") {
-  z.central.global <- sum(data.global[,3] / data.global[,4]^2) /
-    sum(1 / data.global[,4]^2)
-} else if(centrality[1] == "median.weighted") {
-  z.central.global <- median.w(y = data.global[,3], w = data.global[,4])
-} else if(is.numeric(centrality) == TRUE &
-            length(centrality == length(data))) {
-  z.central.global <- mean(data.global[,3], na.rm = TRUE)
-}
 
   ## optionally adjust central value by user-defined value
   if(missing(central.value) == FALSE) {
@@ -564,33 +478,13 @@ if(centrality[1] == "mean") {
                                central.value)
   }
 
-  ## create column names
-  for(i in 1:length(data)) {
-    colnames(data[[i]]) <- c("De",
-                             "error",
-                             "z",
-                             "se",
-                             "z.central",
-                             "precision",
-                             "std.estimate",
-                             "std.estimate.plot")
-  }
-
   ## re-calculate standardised estimate for plotting
   for(i in 1:length(data)) {
     data[[i]][,8] <- (data[[i]][,3] - z.central.global) / data[[i]][,4]
   }
 
-  data.global.plot <- data[[1]][,8]
-  if(length(data) > 1) {
-    for(i in 2:length(data)) {
-      data.global.plot <- c(data.global.plot, data[[i]][,8])
-    }
-  }
-  data.global[,8] <- data.global.plot
-
   ## print warning for too small scatter
-  if(max(abs(1 / data.global[6])) < 0.02) {
+  if (max(abs(1 / data.global[, 6])) < 0.02) {
     small.sigma <- TRUE
     message("Attention, small standardised estimate scatter. ",
             "Toggle off y.ticks?")
@@ -598,10 +492,8 @@ if(centrality[1] == "mean") {
 
   ## read out additional arguments---------------------------------------------
 
-  main <- if("main" %in% names(extraArgs)) {extraArgs$main} else
-    {expression(paste(D[e], " distribution"))}
-
-  sub <- if("sub" %in% names(extraArgs)) {extraArgs$sub} else {""}
+  main <- extraArgs$main %||% expression(paste(D[e], " distribution"))
+  sub <- extraArgs$sub %||% ""
 
   if("xlab" %in% names(extraArgs)) {
     xlab <- extraArgs$xlab
@@ -615,81 +507,39 @@ if(centrality[1] == "mean") {
       "Precision")
   }
 
-  ylab <- if("ylab" %in% names(extraArgs)) {
-    extraArgs$ylab
-    } else {
-      "Standardised estimate"
-    }
+  ylab <- extraArgs$ylab %||% "Standardised estimate"
+  zlab <- extraArgs$zlab %||% expression(paste(D[e], " [Gy]"))
 
-  zlab <- if("zlab" %in% names(extraArgs)) {
-    extraArgs$zlab
-    } else {
-      expression(paste(D[e], " [Gy]"))
-    }
-
-  if("zlim" %in% names(extraArgs)) {
-    limits.z <- extraArgs$zlim
-  } else {
+  limits.z <- extraArgs$zlim %||% {
     z.span <- (mean(data.global[,1]) * 0.5) / (sd(data.global[,1]) * 100)
     z.span <- ifelse(z.span > 1, 0.9, z.span)
-    limits.z <- c((0.9 - z.span) * min(data.global[[1]]),
-                  (1.1 + z.span) * max(data.global[[1]]))
+    c((0.9 - z.span) * min(data.global[[1]]),
+      (1.1 + z.span) * max(data.global[[1]]))
   }
 
-  if("xlim" %in% names(extraArgs)) {
-    limits.x <- extraArgs$xlim
-  } else {
-    limits.x <- c(0, max(data.global[,6]))
-  }
-
+  limits.x <- extraArgs$xlim %||% c(0, max(data.global[,6]))
   if(limits.x[1] != 0) {
     limits.x[1] <- 0
     .throw_warning("Lower x-axis limit not set to zero, corrected")
   }
 
-  if("ylim" %in% names(extraArgs)) {
-    limits.y <- extraArgs$ylim
-  } else {
+  limits.y <- extraArgs$ylim %||% {
     y.span <- (mean(data.global[,1]) * 10) / (sd(data.global[,1]) * 100)
     y.span <- ifelse(y.span > 1, 0.98, y.span)
-    limits.y <- c(-(1 + y.span) * max(abs(data.global[,7])),
-                   (0.8 + y.span) * max(abs(data.global[,7])))
+    c(-(1 + y.span) * max(abs(data.global[, 7])),
+      (0.8 + y.span) * max(abs(data.global[, 7])))
   }
 
-  cex <- if("cex" %in% names(extraArgs)) {
-    .validate_length(extraArgs$cex, 1, name = "'cex'")
-    extraArgs$cex
-  } else {
-    1
-  }
-
-  lty <- if("lty" %in% names(extraArgs)) {
-    .validate_length(extraArgs$lty, length(data), name = "'lty'")
-    extraArgs$lty
-    } else {
-      rep(2, length(data))
-    }
-
-  lwd <- if("lwd" %in% names(extraArgs)) {
-    .validate_length(extraArgs$lwd, length(data), name = "'lwd'")
-    extraArgs$lwd
-    } else {
-      rep(1, length(data))
-    }
-
-  pch <- if("pch" %in% names(extraArgs)) {
-    .validate_length(extraArgs$pch, length(data), name = "'pch'")
-    extraArgs$pch
-    } else {
-      rep(1, length(data))
-    }
-
-  col <- if("col" %in% names(extraArgs)) {
-    .validate_length(extraArgs$col, length(data), name = "'col'")
-    extraArgs$col
-    } else {
-      1:length(data)
-    }
+  cex <- extraArgs$cex %||% 1
+  lty <- extraArgs$lty %||% rep(2, length(data))
+  lwd <- extraArgs$lwd %||% rep(1, length(data))
+  pch <- extraArgs$pch %||% rep(1, length(data))
+  col <- extraArgs$col %||% 1:length(data)
+  .validate_length(cex, 1)
+  .validate_length(lty, length(data))
+  .validate_length(lwd, length(data))
+  .validate_length(pch, length(data))
+  .validate_length(col, length(data))
 
   tck <- if("tck" %in% names(extraArgs)) {
     .validate_length(extraArgs$tck, length(data), name = "'tck'")
@@ -698,16 +548,9 @@ if(centrality[1] == "mean") {
     NA
   }
 
-  tcl <- if("tcl" %in% names(extraArgs)) {
-    extraArgs$tcl
-  } else {
-    -0.5
-  }
-
-  show <- if("show" %in% names(extraArgs)) {extraArgs$show} else {TRUE}
-  if(show != TRUE) {show <- FALSE}
-
-  fun <- if ("fun" %in% names(extraArgs)) extraArgs$fun else FALSE # nocov
+  tcl <- extraArgs$tcl %||% -0.5
+  show <- extraArgs$show %||% TRUE
+  fun <- isTRUE(extraArgs$fun)
 
   ## define auxiliary plot parameters -----------------------------------------
 
@@ -732,18 +575,13 @@ if(centrality[1] == "mean") {
   tick.values.major <- signif(c(limits.z, pretty(limits.z, n = 5)))
   tick.values.minor <- signif(pretty(limits.z, n = 25), 3)
 
-  tick.values.major <- tick.values.major[tick.values.major >=
-    min(tick.values.minor)]
-  tick.values.major <- tick.values.major[tick.values.major <=
-    max(tick.values.minor)]
-  tick.values.major <- tick.values.major[tick.values.major >=
-    limits.z[1]]
-  tick.values.major <- tick.values.major[tick.values.major <=
-    limits.z[2]]
-  tick.values.minor <- tick.values.minor[tick.values.minor >=
-    limits.z[1]]
-  tick.values.minor <- tick.values.minor[tick.values.minor <=
-    limits.z[2]]
+  tick.values.major <- tick.values.major[between(tick.values.major,
+                                                 min(tick.values.minor),
+                                                 max(tick.values.minor))]
+  tick.values.major <- tick.values.major[between(tick.values.major,
+                                                 limits.z[1], limits.z[2])]
+  tick.values.minor <- tick.values.minor[between(tick.values.minor,
+                                                 limits.z[1], limits.z[2])]
 
   if(log.z == TRUE) {
     tick.values.major <- log(tick.values.major)
@@ -783,12 +621,10 @@ if(centrality[1] == "mean") {
   label.y <- (tick.values.major - z.central.global) * tick.x2.major
 
   ## create z-axes labels
-  if(log.z) {
-    label.z.text <- signif(exp(tick.values.major), 3)
-
-  } else {
-    label.z.text <- signif(tick.values.major, 3)
-  }
+  label.z.text <- if (log.z)
+                    signif(exp(tick.values.major), 3)
+                  else
+                    signif(tick.values.major, 3)
 
   ## subtract De.add from label values
   if(De.add != 0)
@@ -896,7 +732,7 @@ if(centrality[1] == "mean") {
     De.stats[i,2] <- statistics$unweighted$mean
     De.stats[i,3] <- statistics$weighted$mean
     De.stats[i,4] <- statistics$unweighted$median
-    De.stats[i,5] <- statistics$unweighted$median
+    De.stats[i,5] <- statistics$weighted$median
     De.stats[i,7] <- statistics$unweighted$sd.abs
     De.stats[i,8] <- statistics$unweighted$sd.rel
     De.stats[i,9] <- statistics$unweighted$se.abs
@@ -1274,8 +1110,7 @@ if(centrality[1] == "mean") {
       tick.space <- grDevices::axisTicks(usr = limits.y, log = FALSE)
       tick.space <- (max(tick.space) - min(tick.space)) / length(tick.space)
       if(tick.space < char.height * 1.5) {
-        axis(side = 2, at = c(-2, 2), labels = c("", ""), las = 1)
-        axis(side = 2, at = 0, tcl = 0, labels = paste("\u00B1", "2"), las = 1)
+        axis(side = 2, at = 0, tcl = 0, labels = "\u00B1 2", las = 1)
       } else {
         axis(side = 2, at = seq(-2, 2, by = 2), las = 2)
       }

@@ -8,19 +8,19 @@ merge_Risoe.BINfileData(
   input.objects,
   output.file,
   keep.position.number = FALSE,
-  position.number.append.gap = 0
+  position.number.append.gap = 0,
+  verbose = TRUE
 )
 }
 \arguments{
-\item{input.objects}{\link{character} with \linkS4class{Risoe.BINfileData} objects (\strong{required}):
-Character vector with path and files names
-(e.g. \code{input.objects = c("path/file1.bin", "path/file2.bin")} or
-\linkS4class{Risoe.BINfileData} objects (e.g. \code{input.objects = c(object1, object2)}).
-Alternatively a \code{list} is supported.}
+\item{input.objects}{\link{character} or \linkS4class{Risoe.BINfileData} objects (\strong{required}):
+Character vector with path and files names with ".bin" or ".binx" extension
+(e.g. \code{input.objects = c("path/file1.bin", "path/file2.bin")} or a list of
+\linkS4class{Risoe.BINfileData} objects (e.g. \code{input.objects = c(object1, object2)}).}
 
 \item{output.file}{\link{character} (\emph{optional}):
-File output path and name. If no value is given, a \linkS4class{Risoe.BINfileData} is
-returned instead of a file.}
+File output path and name. If no value is given, a \linkS4class{Risoe.BINfileData}
+object returned instead of a file.}
 
 \item{keep.position.number}{\link{logical} (\emph{with default}):
 Allows keeping the original position numbers of the input objects.
@@ -30,12 +30,17 @@ Otherwise the position numbers are recalculated.}
 Set the position number gap between merged BIN-file sets, if the option
 \code{keep.position.number = FALSE} is used. See details for further
 information.}
+
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 }
 \value{
-Returns a \code{file} or a \linkS4class{Risoe.BINfileData} object.
+Returns a \linkS4class{Risoe.BINfileData} object or writes to the BIN-file
+specified by \code{output.file}.
 }
 \description{
-Function allows merging Risoe BIN/BINX files or \linkS4class{Risoe.BINfileData} objects.
+The function allows merging Risoe BIN/BINX files or \linkS4class{Risoe.BINfileData}
+objects.
 }
 \details{
 The function allows merging different measurements to one file or one
@@ -67,7 +72,7 @@ With no additional summand the new position numbers would be:
 The validity of the output objects is not further checked.
 }
 \section{Function version}{
- 0.2.9
+ 0.2.10
 }
 
 \examples{
@@ -83,7 +88,7 @@ object.new <- merge_Risoe.BINfileData(c(object1, object2))
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. merge_Risoe.BINfileData(): Merge Risoe.BINfileData objects or Risoe BIN-files. Function version 0.2.9. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. merge_Risoe.BINfileData(): Merge Risoe.BINfileData objects or Risoe BIN-files. Function version 0.2.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

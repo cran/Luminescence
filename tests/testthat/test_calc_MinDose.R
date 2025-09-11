@@ -14,6 +14,8 @@ test_that("input validation", {
                "'data' should be of class 'data.frame' or 'RLum.Results'")
   expect_error(calc_MinDose(data.frame()),
                "'data' cannot be an empty data.frame")
+  expect_error(calc_MinDose(iris[, 1, drop = FALSE]),
+               "'data' should have 2 columns")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1),
                "is missing, with no default")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, init.values = 1:4),
@@ -78,6 +80,10 @@ test_that("check functionality", {
   data.na[1, 1] <- NA
   expect_message(calc_MinDose(data.na, sigmab = 0.1, verbose = FALSE),
                  "Input data contained NA/NaN values, which were removed")
+  expect_message(expect_error(
+      calc_MinDose(data.frame(data.na[, 1], NA)),
+      "After NA removal, nothing is left from the data set"),
+      "Input data contained NA/NaN values, which were removed")
 
   ## no converging fit
   skip_on_os("windows")
@@ -132,7 +138,29 @@ test_that("graphical snapshot tests", {
   testthat::skip_if_not(getRversion() >= "4.4.0")
 
   SW({
-  vdiffr::expect_doppelganger("calc_MinDose expected",
-                              fig = calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1))
+  vdiffr::expect_doppelganger("default",
+                              calc_MinDose(ExampleData.DeValues$CA1,
+                                           sigmab = 0.1))
+  vdiffr::expect_doppelganger("invert",
+                              calc_MinDose(ExampleData.DeValues$CA1,
+                                           sigmab = 0.1,
+                                           invert = TRUE))
+  vdiffr::expect_doppelganger("small sigmab",
+                              calc_MinDose(ExampleData.DeValues$CA1,
+                                           sigmab = 0.009))
   })
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 898
+  expect_silent(calc_MinDose(ExampleData.DeValues$CA1,
+                             sigmab = 0.009, invert = TRUE,
+                             verbose = FALSE, plot = FALSE))
+
+  ## issue 900
+  expect_warning(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
+                              bootstrap = TRUE, bs.M = 1,
+                              verbose = FALSE, plot = FALSE))
 })

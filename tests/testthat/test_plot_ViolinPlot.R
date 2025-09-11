@@ -18,6 +18,8 @@ test_that("input validation", {
   expect_error(plot_ViolinPlot(df, summary.pos = "error"),
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
 
+  expect_error(plot_ViolinPlot(data.frame(a = letters)),
+               "All elements of 'data' should be of class 'numeric'")
   expect_error(plot_ViolinPlot(data.frame()),
                "'data' cannot be an empty data.frame")
   expect_error(plot_ViolinPlot(df[0, ]),
@@ -25,11 +27,11 @@ test_that("input validation", {
   expect_warning(plot_ViolinPlot(df[1, ]),
                  "Single data point found, no density calculated")
   expect_warning(plot_ViolinPlot(df, summary = "error"),
-                 "Only keywords for weighted statistical measures are supported")
+                 "Only keywords for unweighted statistical measures are supported")
 
   ## missing values
   df.na <- df
-  df.na[, 1] <- NA
+  df.na[, 1] <- NA_real_
   expect_warning(expect_warning(
       plot_ViolinPlot(df.na),
       "62 NA values removed"),

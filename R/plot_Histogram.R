@@ -14,6 +14,7 @@
 #' - `"mean"` (mean De value),
 #' - `"mean.weighted"` (error-weighted mean),
 #' - `"median"` (median of the De values),
+#' - `"median.weighted"` (error-weighted median),
 #' - `"sdrel"` (relative standard deviation in percent),
 #' - `"sdrel.weighted"` (error-weighted relative standard deviation in percent),
 #' - `"sdabs"` (absolute standard deviation),
@@ -115,7 +116,6 @@
 #'                ylim = c(0, 0.1, 5, 20))
 #'
 #'
-#' @md
 #' @export
 plot_Histogram <- function(
   data,
@@ -141,6 +141,9 @@ plot_Histogram <- function(
   if (inherits(data, "RLum.Results")) {
     data <- get_RLum(data)[,1:2]
   }
+
+  ## we don't check the second column, as that can be NA
+  .validate_class(data[, 1], "numeric", name = "All columns of 'data'")
 
   .validate_class(cex.global, "numeric")
   .validate_class(summary, "character")
@@ -280,7 +283,7 @@ plot_Histogram <- function(
     De.stats[i,2] <- statistics$unweighted$mean
     De.stats[i,3] <- statistics$weighted$mean
     De.stats[i,4] <- statistics$unweighted$median
-    De.stats[i,5] <- statistics$unweighted$median
+    De.stats[i,5] <- statistics$weighted$median
     De.stats[i,7] <- statistics$unweighted$sd.abs
     De.stats[i,8] <- statistics$unweighted$sd.rel
     De.stats[i,9] <- statistics$unweighted$se.abs
@@ -295,7 +298,7 @@ plot_Histogram <- function(
     De.stats[i,18] <- statistics$weighted$se.rel
 
     ##kdemax - here a little doubled as it appears below again
-    De.denisty <- NA
+    De.density <- NA
     De.stats[i,6] <- NA
     if(nrow(data) >= 2){
       De.density <-density(x = data[,1],

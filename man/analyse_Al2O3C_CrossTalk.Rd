@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_Al2O3C_CrossTalk.R
 \name{analyse_Al2O3C_CrossTalk}
 \alias{analyse_Al2O3C_CrossTalk}
-\title{Al2O3:C Reader Cross Talk Analysis}
+\title{Al2O3:C Reader Cross-Talk Analysis}
 \usage{
 analyse_Al2O3C_CrossTalk(
   object,
@@ -21,15 +21,16 @@ measurement input}
 
 \item{signal_integral}{\link{numeric} (\emph{optional}):
 signal integral, used for the signal and the background.
-If nothing is provided the full range is used}
+If nothing is provided, the full range is used.}
 
 \item{dose_points}{\link{numeric} (\emph{with default}):
 vector with dose points, if dose points are repeated, only the general
 pattern needs to be provided. Default values follow the suggestions
-made by Kreutzer et al., 2018}
+made by Kreutzer et al., 2018.}
 
-\item{recordType}{\link{character} (\emph{with default}): input curve selection, which is passed to
-function \link{get_RLum}. To deactivate the automatic selection set the argument to \code{NULL}}
+\item{recordType}{\link{character} (\emph{with default}):
+input curve selection, which is passed to \link{get_RLum}. To deactivate the
+automatic selection set the argument to \code{NULL}.}
 
 \item{irradiation_time_correction}{\link{numeric} or \linkS4class{RLum.Results} (\emph{optional}):
 information on the used irradiation time correction obtained by another
@@ -37,7 +38,7 @@ experiment.}
 
 \item{method_control}{\link{list} (\emph{optional}):
 optional parameters to control the calculation.
-See details for further explanations}
+See details for further explanations.}
 
 \item{plot}{\link{logical} (\emph{with default}):
 enable/disable the plot output.}
@@ -75,8 +76,8 @@ The original function call
 }
 }
 \description{
-The function provides the analysis of cross-talk measurements on a
-FI lexsyg SMART reader using Al2O3:C chips
+The function provides the analysis of cross-talk measurements
+on a FI lexsyg SMART reader using Al2O3:C chips.
 }
 \section{Function version}{
  0.1.3
@@ -93,7 +94,7 @@ analyse_Al2O3C_CrossTalk(data_CrossTalk)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_Al2O3C_CrossTalk(): Al2O3:C Reader Cross Talk Analysis. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_Al2O3C_CrossTalk(): Al2O3:C Reader Cross-Talk Analysis. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

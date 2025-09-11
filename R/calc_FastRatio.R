@@ -107,7 +107,6 @@
 #' # show the summary table
 #' get_RLum(res)
 #'
-#' @md
 #' @export
 calc_FastRatio <- function(object,
                            stimulation.power = 30.6,
@@ -127,15 +126,15 @@ calc_FastRatio <- function(object,
   .set_function_name("calc_FastRatio")
   on.exit(.unset_function_name(), add = TRUE)
 
-  ## Integrity checks - -----------------------------------------------------
+  ## Integrity checks -------------------------------------------------------
 
   .validate_class(object, c("RLum.Analysis", "RLum.Results", "RLum.Data.Curve",
                             "data.frame", "matrix"))
   .validate_not_empty(object)
   .validate_positive_scalar(Ch_L1, int = TRUE)
   .validate_positive_scalar(Ch_L2, int = TRUE, null.ok = TRUE)
+  .validate_class(Ch_L3, c("integer", "numeric"), null.ok = TRUE)
   if (!is.null(Ch_L3)) {
-    .validate_class(Ch_L3, c("integer", "numeric"))
     .validate_length(Ch_L3, 2)
     .validate_positive_scalar(Ch_L3[1], int = TRUE, name = "'Ch_L3[1]'")
     .validate_positive_scalar(Ch_L3[2], int = TRUE, name = "'Ch_L3[2]'")
@@ -201,10 +200,16 @@ calc_FastRatio <- function(object,
     Ch_width <- max(A[ ,1]) / length(A[ ,1])
 
     # remove dead channels
-    A <- as.data.frame(A[(dead.channels[1] + 1):(nrow(A)-dead.channels[2]), ])
+    A <- as.data.frame(A[(dead.channels[1] + 1):(nrow(A)-dead.channels[2]), ,
+                         drop = FALSE])
     A[ ,1] <- A[ ,1] - A[1,1]
 
-    # estimate the photo-ionisation crossections of the fast and medium
+    ## remove missing values
+    A <- na.exclude(A[, 1:2])
+    if (nrow(A) == 0)
+      .throw_error("After NA removal, nothing is left from the data set")
+
+    # estimate the photo-ionisation cross-sections of the fast and medium
     # component using the fit_CWCurve function
     if (fitCW.sigma | fitCW.curve) {
       fitCW.res <- try(fit_CWCurve(A, n.components.max = settings$n.components.max,
@@ -296,7 +301,6 @@ calc_FastRatio <- function(object,
         Cts_L2 <- predict(nls, list(x = t_L2))
       }
     }
-
 
     # L3 ----
     if (Ch_L3st >= nrow(A) | Ch_L3end > nrow(A)) {

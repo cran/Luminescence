@@ -47,7 +47,6 @@
 #'    xlab = expression(paste(D[e], " [Gy]"))
 #'  )
 #'
-#' @md
 #' @export
 calc_WodaFuchs2008 <- function(
   data,
@@ -70,10 +69,15 @@ calc_WodaFuchs2008 <- function(
     return(NULL)
   }
   .validate_not_empty(data)
+  .validate_positive_scalar(breaks, null.ok = TRUE)
 
   if (inherits(data, "RLum.Results")) {
         data <- tryCatch(get_RLum(data, "data"),
                          error = function(e) get_RLum(data))
+  }
+
+  if (!is.numeric(data[[1]])) {
+    .throw_error("'data' should have only numeric fields")
   }
 
       ## if data is a numeric vector or a single-column data frame,
@@ -87,13 +91,17 @@ calc_WodaFuchs2008 <- function(
         .throw_error("Insufficient number of data points")
       }
 
+  if (any(is.infinite(unlist(data)))) {
+    .throw_warning("Inf values found in 'data', replaced by NA")
+    data[is.infinite(data[, 1]), 1] <- NA
+    data[is.infinite(data[, 2]), 2] <- NA
+  }
+
   ## read additional arguments
 
   if("trace" %in% names(list(...))) {
-
     trace <- list(...)$trace
   } else {
-
     trace <- FALSE
   }
 
@@ -101,22 +109,20 @@ calc_WodaFuchs2008 <- function(
 
   ## estimate bin width based on Woda and Fuchs (2008)
   if (all(is.na(data[, 2]))) {
-    message("[calc_WodaFuchs2008()] No errors provided, bin width set ",
-            "by 10 percent of input data")
+    .throw_message("No errors provided, bin width set by 10 percent ",
+                   "of input data", error = FALSE)
     bin_width <- median(data[,1] / 10,
                         na.rm = TRUE)
   } else {
-
     bin_width <- median(data[,2],
                         na.rm = TRUE)
   }
 
+  if (bin_width <= 0)
+    .throw_error("The estimated bin width is not positive, check your data")
+
   ## optionally estimate class breaks based on bin width
-  if(is.null(breaks)) {
-    n_breaks <- diff(range(data[, 1], na.rm = TRUE)) / bin_width
-  } else {
-    n_breaks <- breaks
-  }
+  n_breaks <- breaks %||% (diff(range(data[, 1], na.rm = TRUE)) / bin_width)
 
   if (n_breaks <= 3) {
     .throw_warning("Fewer than 4 bins produced, 'breaks' set to 4")
