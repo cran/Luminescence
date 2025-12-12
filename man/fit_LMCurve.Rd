@@ -8,7 +8,7 @@ fit_LMCurve(
   values,
   values.bg,
   n.components = 3,
-  start_values,
+  start_values = NULL,
   input.dataType = "LM",
   sample_code = "",
   sample_ID = "",
@@ -40,7 +40,7 @@ fixed number of components that are to be recognised during fitting
 (min = 1, max = 7).}
 
 \item{start_values}{\link{data.frame} (\emph{optional}):
-start parameters for \code{lm} and \code{xm} data for the fit. If no start values are given,
+starting values for \code{Im} and \code{xm} parameters in the fit. If set to \code{NULL},
 an automatic start value estimation is attempted (see details).}
 
 \item{input.dataType}{\link{character} (\emph{with default}):
@@ -141,7 +141,8 @@ from package \code{minpack.lm}.
 The function for the fitting has the general
 form:
 
-\deqn{y = (exp(0.5)*Im_1*x/xm_1)*exp(-x^2/(2*xm_1^2)) + ,\ldots, + exp(0.5)*Im_i*x/xm_i)*exp(-x^2/(2*xm_i^2))}
+\deqn{y = (exp(0.5) * Im_1 * x / xm_1) * exp(-x^2 / (2 * xm_1^2)) + \ldots +
+           exp(0.5) * Im_i * x / xm_i) * exp(-x^2 / (2 * xm_i^2))}
 
 where \eqn{1 < i < 8}
 
@@ -221,7 +222,7 @@ global minimum rather than a local minimum! In any case of doubt, the use of
 manual start values is highly recommended.
 }
 \section{Function version}{
- 0.3.6
+ 0.3.7
 }
 
 \examples{
@@ -250,7 +251,7 @@ fit_LMCurve(values = values.curve,
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. fit_LMCurve(): Non-linear Least Squares Fit for LM-OSL curves. Function version 0.3.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. fit_LMCurve(): Non-linear Least Squares Fit for LM-OSL curves. Function version 0.3.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

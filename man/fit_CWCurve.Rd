@@ -6,7 +6,7 @@
 \usage{
 fit_CWCurve(
   values,
-  n.components.max,
+  n.components.max = 7,
   fit.failure_threshold = 5,
   fit.method = "port",
   fit.trace = FALSE,
@@ -163,7 +163,7 @@ The function \strong{does not} ensure that the fitting procedure has reached a
 global minimum rather than a local minimum!
 }
 \section{Function version}{
- 0.5.4
+ 0.5.5
 }
 
 \examples{
@@ -180,7 +180,7 @@ fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. fit_CWCurve(): Nonlinear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. fit_CWCurve(): Nonlinear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

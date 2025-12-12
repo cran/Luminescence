@@ -2,13 +2,10 @@
 % Please edit documentation in R/convert_CW2pLMi.R
 \name{convert_CW2pLMi}
 \alias{convert_CW2pLMi}
-\alias{CW2pLMi}
 \title{Transform a CW-OSL curve into a pLM-OSL curve via interpolation under linear
 modulation conditions}
 \usage{
 convert_CW2pLMi(values, P)
-
-CW2pLMi(values, P)
 }
 \arguments{
 \item{values}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
@@ -139,7 +136,7 @@ text(0.5,6500,"PM", col = "blue", cex = .8)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. convert_CW2pLMi(): Transform a CW-OSL curve into a pLM-OSL curve via interpolation under linear modulation conditions. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. convert_CW2pLMi(): Transform a CW-OSL curve into a pLM-OSL curve via interpolation under linear modulation conditions. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_XSYG2R.R
 \name{read_XSYG2R}
 \alias{read_XSYG2R}
-\title{Import XSYG files to R}
+\title{Import XSYG files into R}
 \usage{
 read_XSYG2R(
   file,
@@ -10,7 +10,7 @@ read_XSYG2R(
   n_records = NULL,
   fastForward = FALSE,
   import = TRUE,
-  pattern = ".xsyg",
+  pattern = "\\\\.xsyg",
   auto_linearity_correction = FALSE,
   verbose = TRUE,
   txtProgressBar = TRUE
@@ -41,17 +41,17 @@ objects is returned.}
 \item{import}{\link{logical} (\emph{with default}):
 if set to \code{FALSE}, only the XSYG file structure is shown.}
 
-\item{pattern}{\link{regex} (\emph{with default}):
-optional regular expression if \code{file} is a link to a folder, to select just
-specific XSYG-files}
+\item{pattern}{\link{character} (\emph{with default}):
+regular expression pattern passed to \link{list.files} to construct a list of
+files to read (used only when a path is provided).}
 
 \item{auto_linearity_correction}{\link{logical} (\emph{with default}): enable/disable
 automatic count linearity correction. Because the information on the detectors
 are not consistent and are not consistently stored, this option should be used
 with caution.}
 
-\item{verbose}{\link{logical} (\emph{with default}): enable/disable output to the
-terminal. If verbose is \code{FALSE} the \code{txtProgressBar} is also switched off}
+\item{verbose}{\link{logical} (\emph{with default}):
+enable/disable output to the terminal.}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
 enable/disable the progress bar during import. Ignored if \code{verbose = FALSE}.}
@@ -178,7 +178,7 @@ be done using the functions provided with the package \code{'XML'}.
 Corresponding values in the XSXG file are skipped.
 }
 \section{Function version}{
- 0.7.0
+ 0.7.1
 }
 
 \examples{
@@ -210,7 +210,7 @@ structure_RLum(OSL.SARMeasurement$Sequence.Object)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. read_XSYG2R(): Import XSYG files to R. Function version 0.7.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2025. read_XSYG2R(): Import XSYG files into R. Function version 0.7.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -226,6 +226,7 @@ XML: \url{https://en.wikipedia.org/wiki/XML}
 \link{approx}, \link{correct_PMTLinearity}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}
 \keyword{IO}

@@ -7,9 +7,9 @@
 calc_Huntley2006(
   data,
   LnTn = NULL,
-  rhop,
-  ddot,
-  readerDdot,
+  rhop = NULL,
+  ddot = NULL,
+  readerDdot = NULL,
   normalise = TRUE,
   fit.method = c("EXP", "GOK"),
   lower.bounds = c(-Inf, -Inf, -Inf, -Inf),
@@ -246,7 +246,7 @@ This function has BETA status, in particular for the GOK implementation. Please 
 your results carefully.
 }
 \section{Function version}{
- 0.4.6
+ 0.4.7
 }
 
 \examples{
@@ -278,7 +278,6 @@ kars <- calc_Huntley2006(
  readerDdot = readerDdot,
  n.MC = 25)
 
-
 \dontrun{
 # You can also provide LnTn values separately via the 'LnTn' argument.
 # Note, however, that the data frame for 'data' must then NOT contain
@@ -300,7 +299,7 @@ kars <- calc_Huntley2006(
 } 
 
 \section{How to cite}{
-King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2025. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2025. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

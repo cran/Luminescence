@@ -88,7 +88,7 @@ analyse_Al2O3C_CrossTalk <- function(
   object,
   signal_integral = NULL,
   dose_points = c(0,4),
-  recordType = c("OSL (UVVIS)"),
+  recordType = "OSL (UVVIS)",
   irradiation_time_correction = NULL,
   method_control = NULL,
   plot = TRUE,
@@ -102,11 +102,18 @@ analyse_Al2O3C_CrossTalk <- function(
   .validate_class(object, c("RLum.Analysis", "list"))
   .validate_not_empty(object, class(object)[1])
   if (is.list(object)) {
-    lapply(object,
-           function(x) .validate_class(x, "RLum.Analysis",
-                                       name = "All elements of 'object'"))
+    lapply(object, .validate_class, class = "RLum.Analysis",
+           name = "All elements of 'object'")
+  } else {
+    object <- list(object)
   }
-  .validate_class(recordType, "character")
+  .validate_class(signal_integral, c("numeric", "integer"), null.ok = TRUE)
+  .validate_class(dose_points, c("numeric", "integer"))
+  .validate_not_empty(dose_points)
+  if (length(dose_points) != 1 && length(dose_points) %% 2 != 0) {
+    .throw_error("'dose_points' should have length 1 or divisible by 2")
+  }
+  .validate_class(recordType, "character", null.ok = TRUE)
   .validate_class(irradiation_time_correction, c("numeric", "RLum.Results"),
                   null.ok = TRUE)
   .validate_class(method_control, "list", null.ok = TRUE)
@@ -140,20 +147,16 @@ analyse_Al2O3C_CrossTalk <- function(
   max.signal_integral <- nrow(object[[1]][[1]][])
   if(is.null(signal_integral)){
     signal_integral <- 1:max.signal_integral
-
-  }else{
-    ##check whether the input is valid, otherwise make it valid
-    if (min(signal_integral) < 1 || max(signal_integral) > max.signal_integral) {
+  } else if (min(signal_integral) < 1 || max(signal_integral) > max.signal_integral) {
+    ## check whether the input is valid, otherwise make it valid
       signal_integral <- 1:max.signal_integral
       .throw_warning("'signal_integral' corrected to 1:", max.signal_integral)
-    }
   }
 
   ##check irradiation time correction
-  if (!is.null(irradiation_time_correction)) {
     if (inherits(irradiation_time_correction, "RLum.Results")) {
-      if (irradiation_time_correction@originator %in% "analyse_Al2O3C_ITC") {
-        irradiation_time_correction <- get_RLum(irradiation_time_correction)
+      .validate_originator(irradiation_time_correction, "analyse_Al2O3C_ITC")
+      irradiation_time_correction <- get_RLum(irradiation_time_correction)
 
         ##insert case for more than one observation ...
         if(nrow(irradiation_time_correction)>1){
@@ -162,12 +165,7 @@ analyse_Al2O3C_CrossTalk <- function(
         }else{
           irradiation_time_correction <- c(irradiation_time_correction[[1]], irradiation_time_correction[[2]])
         }
-      } else{
-        .throw_error("The object provided for 'irradiation_time_correction' ",
-                     "was created by an unsupported function")
-      }
     }
-  }
 
   # Calculation ---------------------------------------------------------------------------------
   ##we have two dose points, and one background curve, we do know only the 2nd dose
@@ -194,7 +192,7 @@ analyse_Al2O3C_CrossTalk <- function(
       STEP = c("NATURAL", "REGENERATED"),
       INTEGRAL = c(NATURAL, REGENERATED),
       BACKGROUND = c(BACKGROUND, BACKGROUND),
-      NET_INTEGRAL = c(NATURAL - BACKGROUND, REGENERATED - BACKGROUND),
+      NET_INTEGRAL = c(NATURAL, REGENERATED) - BACKGROUND,
       row.names = NULL
     )
 
@@ -206,8 +204,7 @@ analyse_Al2O3C_CrossTalk <- function(
     return(temp_df)
   })
 
-  APPARENT_DOSE <- as.data.frame(data.table::rbindlist(lapply(signal_table_list, function(x) {
-
+  APPARENT_DOSE <- data.table::rbindlist(lapply(signal_table_list, function(x) {
     ##run in MC run
     DOSE <- if (!is.null(irradiation_time_correction)) {
               rnorm(1000, mean = x$DOSE[2], sd = x$DOSE_ERROR[2])
@@ -222,23 +219,18 @@ analyse_Al2O3C_CrossTalk <- function(
       POSITION = x$POSITION[1],
       AD = mean(temp),
       AD_ERROR = sd(temp))
-  })))
-
-  ##add apparent dose to the information
-  signal_table_list <- lapply(1:length(signal_table_list), function(x){
-      cbind(signal_table_list[[x]], rep(APPARENT_DOSE[x,2:3], 2))
-  })
+  }))
 
   ##combine
-  data_full <- as.data.frame(data.table::rbindlist(signal_table_list), stringsAsFactors = FALSE)
+  data_full <- as.data.frame(cbind(data.table::rbindlist(signal_table_list),
+                                   APPARENT_DOSE[rep(1:.N, each = 2), 2:3]))
 
   # Plotting ------------------------------------------------------------------------------------
+  par.default <- .par_defaults()
+  on.exit(par(par.default), add = TRUE)
+
     ## set colours
     col_pal <- grDevices::hcl.colors(100, palette = "RdYlGn", rev = TRUE)
-
-    ##get plot settings
-    par.default <- par(no.readonly = TRUE)
-    on.exit(par(par.default), add = TRUE)
 
     ##settings
     plot_settings <- list(
@@ -255,11 +247,10 @@ analyse_Al2O3C_CrossTalk <- function(
     arc.step <- (2 * pi) / n.positions
     step <- 0
 
-    ##condense data.frame, by calculating the mean for similar positions
-    AD_matrix <- t(vapply(sort(unique(APPARENT_DOSE$POSITION)), function(x){
-        c(x,mean(APPARENT_DOSE[["AD"]][APPARENT_DOSE[["POSITION"]] == x]),
-          sd(APPARENT_DOSE[["AD"]][APPARENT_DOSE[["POSITION"]] == x]))
-    }, FUN.VALUE = numeric(3)))
+  ## calculate mean and standard deviation for similar positions
+  AD <- POSITION <- NULL  # silence notes raised by R CMD check
+  AD_matrix <- APPARENT_DOSE[, list(AD = mean(AD), AD_ERROR = sd(AD)),
+                             by = POSITION]
 
     ##create colour ramp
     col.seq <- data.frame(
@@ -317,7 +308,7 @@ analyse_Al2O3C_CrossTalk <- function(
           col = col.seq[i]
         )
         text(x = cos(step) * 0.85,
-             y = sin(step) * .85,
+             y = sin(step) * 0.85,
              labels = i)
         step <- step + arc.step
       }
@@ -372,14 +363,10 @@ analyse_Al2O3C_CrossTalk <- function(
     }
 
   # Output --------------------------------------------------------------------------------------
-  output <- set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(
-      data = data.frame(
-        POSITION = AD_matrix[,1],
-        AD = AD_matrix[,2],
-        AD_ERROR = AD_matrix[,3]
-        ),
+      data = as.data.frame(AD_matrix),
       data_full = data_full,
       fit = fit,
       col.seq = col.seq

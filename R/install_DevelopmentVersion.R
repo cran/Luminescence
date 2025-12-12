@@ -1,21 +1,13 @@
 #' @title Attempts to install the development version of the 'Luminescence' package
 #'
-#' @description This function is a convenient method for installing the development
+#' @description
+#' This function provides a convenient method for installing the development
 #' version of the R package 'Luminescence' directly from GitHub.
 #'
 #' @details
-#' This function uses [Luminescence::github_branches][Luminescence::GitHub-API] to check
-#' which development branches of the R package 'Luminescence' are currently
-#' available on GitHub. The user is then prompted to choose one of the branches
-#' to be installed. It further checks whether the R package 'devtools' is
-#' currently installed and available on the system. Finally, it prints R code
-#' to the console that the user can copy and paste to the R console in order
-#' to install the desired development version of the package.
-#'
-#'
-#' If `force_install = TRUE` the functions checks if 'devtools' is available
-#' and then attempts to install the chosen development branch via
-#' [devtools::install_github].
+#' This function checks whether the 'devtools' package is currently installed
+#' on the system. If `force_install = TRUE` the functions attempts to install
+#' the chosen development branch via [devtools::install_github].
 #'
 #' @param force_install [logical] (*optional*):
 #' If `FALSE` (the default) the function produces and prints the required
@@ -23,82 +15,65 @@
 #' and all requirements are fulfilled (see details) this function attempts to install
 #' the package itself.
 #'
+#' @param branch [character] (*with default*):
+#' Name of the branch to install. The default value ("master") corresponds to
+#' the main development branch.
+#'
 #' @return
 #' This function requires user input at the command prompt to choose the
 #' desired development branch to be installed. The required R code to install
 #' the package is then printed to the console.
 #'
 #' @examples
-#'
 #' \dontrun{
 #' install_DevelopmentVersion()
 #' }
 #'
 #' @export
-install_DevelopmentVersion <- function(force_install = FALSE) {
-  # nocov start
+install_DevelopmentVersion <- function(force_install = FALSE, branch = "master") {
+  .set_function_name("install_DevelopmentVersion")
+  on.exit(.unset_function_name(), add = TRUE)
+
+  ## input validation
+  .validate_logical_scalar(force_install)
+  .validate_class(branch, "character", length = 1)
+
   message("\n[install_DevelopmentVersion]\n")
+  message("----\n",
+          "For package prerequisites, make sure to have read the following:\n",
+          "https://github.com/R-Lum/Luminescence/blob/master/README.md\n",
+          "----\n")
 
-  # check which branches are currently available
-  # see ?github_branches for GitHub API implementation
-  branches <- github_branches()
-
-  index <-  NULL
-
-  # let user pick which branch he wants to install
-  while(is.null(index)) {
-    message("Which development branch would you like to install?\n",
-            paste0(" [", 1:nrow(branches), "]: ", branches$BRANCH, collapse = "\n"))
-    message("\n [0]: <Exit>")
-
-    index <- readline()
-
-    if (index == 0)
-      return(NULL)
-    if (!index %in% seq_len(length(branches$BRANCH)))
-      index <- NULL
-
-    cat("\n")
+  ## check if 'devtools' is available and install if not
+  if (!requireNamespace("devtools", quietly = TRUE)) {
+    # nocov start
+    message("Please install the 'devtools' package first by running ",
+            "the following command:\n\n install.packages('devtools')\n")
+    return(invisible())
+    # nocov end
   }
 
-  # select the correct branch
-  branch <- branches$BRANCH[as.numeric(index)]
-
   if (!force_install) {
+    message("Please copy and run the following code in your R terminal:\n",
+            "devtools::install_github('R-Lum/luminescence@", branch, "')\n")
+    return(invisible())
+  }
 
-    message("----\n",
-            "Are all prerequisites installed? Make sure to have read\n",
-            "https://github.com/R-Lum/Luminescence/blob/master/README.md\n",
-            "----\n")
-
-    message("Please copy and run the following code in your R command-line:\n")
-    if (!requireNamespace("devtools", quietly = TRUE))
-      message("install.packages('devtools')") # nocov
-
-    message(branches$INSTALL[as.numeric(index)], "\n")
-
-  } else {
-
-    reply <- NULL
-    while(is.null(reply)) {
-      message("Are all prerequisites installed?",
-              " (https://github.com/R-Lum/Luminescence/blob/master/README.md)\n",
+  # nocov start
+  reply <- NULL
+  while (is.null(reply)) {
+    message("Proceed with the installation?\n",
               " [n/N]: No\n",
               " [y/Y]: Yes\n")
-      reply <- readline()
+    reply <- tolower(readline())
 
-      if (reply == "n" || reply == "N")
-        return(NULL)
-      if (reply != "y" && reply != "Y")
+    if (reply == "n") {
+      message("Nothing done")
+      return(invisible())
+    }
+    if (reply != "y")
         reply <- NULL
-    }
-
-    # check if 'devtools' is available and install if not
-    if (!requireNamespace("devtools", quietly = TRUE)) {
-      message("Please install the 'devtools' package first by running the following command:\n",
-              "install.packages('devtools')")
-      return(NULL)
-    }
+  }
 
     # detach the 'Luminescence' package
     try(detach(name = "package:Luminescence", unload = TRUE, force = TRUE),
@@ -106,10 +81,10 @@ install_DevelopmentVersion <- function(force_install = FALSE) {
 
     # try to unload the dynamic library
     dynLibs <- sapply(.dynLibs(), function(x) x[["path"]] )
-    try(dyn.unload(dynLibs[grep("Luminescence", dynLibs)]), silent = TRUE)
+    try(dyn.unload(grep("Luminescence", dynLibs, value = TRUE, fixed = TRUE)),
+        silent = TRUE)
 
     # install the development version
     devtools::install_github(paste0("r-lum/luminescence@", branch))
-  }
   # nocov end
 }

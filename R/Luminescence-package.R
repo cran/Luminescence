@@ -9,7 +9,6 @@
 #' plotting of equivalent dose distributions.
 #'
 #' @name Luminescence-package
-#'
 #' @aliases Luminescence-package Luminescence
 #'
 #' @details
@@ -66,6 +65,12 @@
 #' * since 03/2023: Sebastian Kreutzer as maintainer of the package receives funding from the
 #' DFG Heisenberg programme No 505822867.
 #'
+#' * since 08/2024: The future and sustainable development of 'Luminescence'
+#' towards better reproducibility and usability is supported through the DFG
+#' programme "REPLAY: REProducible Luminescence Data AnalYses" No 528704761,
+#' led by Dr Sebastian Kreutzer (PI at Heidelberg University, DE) and Dr Thomas
+#' Kolb (PI at Justus-Liebig-University Giessen, DE).
+#'
 #' * All other authors gratefully received additional funding from various public funding bodies.
 #'
 #' @references
@@ -88,7 +93,7 @@
 #'
 #' Mercier, N., Kreutzer, S., Christophe, C., Guérin, G., Guibert, P., Lahaye, C., Lanos, P., Philippe, A.,
 #' Tribolo, C., 2016. Bayesian statistics in luminescence dating: The 'baSAR'-model and its
-#' implementation in the R package ’Luminescence’. Ancient TL 34 (2), 14-21.
+#' implementation in the R package 'Luminescence'. Ancient TL 34 (2), 14-21.
 #'
 #' Mercier, N., Galharret, J.-M., Tribolo, C., Kreutzer, S., Philippe, A., 2022.
 #' Luminescence age calculation through Bayesian convolution of equivalent dose
@@ -115,12 +120,37 @@
 #'
 "_PACKAGE"
 
-#' Base data set of dose-rate conversion factors
+#' @title Base datasets
 #'
-#' Collection of published dose-rate conversion factors to convert concentrations
-#' of radioactive isotopes to dose rate values.
+#' @description
+#' Collection of datasets with published and unpublished data used within the
+#' package.
 #'
+#' \describe{
+#' \item{BaseData.ConversionFactors}{Collection of published dose-rate
+#' conversion factors to convert concentrations of radioactive isotopes to
+#' dose rate values}
+#' \item{BaseData.GrainSizeAttenuation}{Grain size attenuation data by Guérin
+#' et al. (2012)}
+#' \item{BaseData.FractionalGammaDose}{Collection of (un-)published fractional
+#' gamma dose-rate values to scale the gamma-dose rate considering layer-to-layer
+#' variations in soil radioactivity}
+#' }
+#'
+#' @section Version: 0.2.0
+#'
+#' @keywords datasets
+#'
+#' @aliases
+#' BaseDataSet.ConversionFactors
+#' BaseDataSet.GrainSizeAttenuation
+#' BaseDataSet.FractionalGammaDose
+#'
+#' @name BaseDataSet
+NULL
+
 #' @format
+#' **Dose-rate conversion factors**
 #'
 #' A [`list`] with three elements with dose-rate conversion factors
 #' sorted by article and radiation type (alpha, beta, gamma):
@@ -140,9 +170,10 @@
 #' Conversion factors from Tables 1, 2 and 3 \cr
 #' }
 #'
-#' @section Version: 0.2.0
+#' @source
+#' **Dose-rate conversion factors**
 #'
-#' @references
+#' All gamma conversion factors were carefully read from the tables given in:
 #'
 #' Adamiec, G., Aitken, M.J., 1998. Dose-rate conversion factors: update.
 #' Ancient TL 16, 37-46.
@@ -151,64 +182,45 @@
 #' Dose rate conversion parameters: Assessment of nuclear data.
 #' Radiation Measurements 120, 195-201.
 #'
-#' Guerin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
+#' Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
 #' factors: update. Ancient TL, 29, 5-8.
 #'
 #' Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
 #' A re-evaluation of radiation dose-rate conversion factors. Mediterranean
 #' Archaeology and Archaeometry 13, 1-15.
 #'
-#'
-#' @source
-#' All gamma conversion factors were carefully read from the tables given in the
-#' references above.
-#'
-#' @keywords datasets
-#'
 #' @examples
-#'
-#' ## Load data
+#' ## conversion factors
 #' data("BaseDataSet.ConversionFactors", envir = environment())
 #'
-#' @name BaseDataSet.ConversionFactors
+#' @name BaseDataSet
 NULL
 
-#' @title Base dataset for grain size attenuation data by Guérin et al. (2012)
-#'
-#' @description Grain size correction data for beta-dose rates
-#' published by Guérin et al. (2012).
-#'
 #' @format
+#' **Grain size attenuation data**
 #'
 #' A [`data.frame`] seven columns and sixteen rows. Column headers
 #' are `GrainSize`, `Q_K`, `FS_K`, `Q_Th`, `FS_Th`, `Q_U`, `FS_U`.
 #' Grain sizes are quoted in µm (e.g., 20, 40, 60 etc.)
 #'
-#' @section Version: 0.1.0
+#' @source
+#' **Grain size attenuation data**
 #'
-#' @source Guérin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012.
+#' Guérin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012.
 #' On the use of the infinite matrix assumption and associated concepts:
 #' A critical review. Radiation Measurements, 47, 778-785.
 #'
-#' @keywords datasets
-#'
 #' @examples
-#'
-#' ## load data
+#' ## grain size attenuation
 #' data("BaseDataSet.GrainSizeAttenuation", envir = environment())
 #'
-#' @name BaseDataSet.GrainSizeAttenuation
+#' @name BaseDataSet
 NULL
 
-#' Base data set of fractional gamma-dose values
-#'
-#' Collection of (un-)published fractional gamma dose-rate values to scale the
-#' gamma-dose rate considering layer-to-layer variations in soil radioactivity.
-#'
 #' @format
+#' **Fractional gamma dose-rate values**
 #'
-#' A [`list`] with fractional gamma dose-rate values
-#' sorted by article:
+#' A [`list`] with fractional gamma dose-rate values sorted by article:
 #'
 #' \tabular{ll}{
 #'
@@ -216,24 +228,18 @@ NULL
 #' Fractional gamma-dose values from table H.1
 #' }
 #'
+#' @source
+#' **Fractional gamma dose-rate values**
 #'
-#' @section Version: 0.1
+#' Fractional gamma dose values were carefully read from the tables given in:
 #'
-#' @references
 #' Aitken, M.J., 1985. Thermoluminescence Dating. Academic Press, London.
 #'
-#' @source
-#' Fractional gamma dose values were carefully read from the tables given in the
-#' references above.
-#'
-#' @keywords datasets
-#'
 #' @examples
-#'
-#' ## Load data
+#' ## fractional gamma dose
 #' data("BaseDataSet.FractionalGammaDose", envir = environment())
 #'
-#' @name BaseDataSet.FractionalGammaDose
+#' @name BaseDataSet
 NULL
 
 #' Example data for scale_GammaDose()
@@ -246,7 +252,6 @@ NULL
 #'
 #' A [`data.frame`]. Please see `?scale_GammaDose()` for a detailed description
 #' of its structure.
-#'
 #'
 #' @section Version: 0.1
 #'
@@ -286,7 +291,6 @@ NULL
 #'
 #' Collection of data from various sources needed for cosmic dose rate
 #' calculation
-#'
 #'
 #' @format
 #'
@@ -399,7 +403,43 @@ NULL
 #' @docType data
 #' @name BaseDataSet.CosmicDoseRate
 #' @aliases values.cosmic.Softcomp values.factor.Altitude values.par.FJH
+NULL
+
+#' @title All examples
+#' @description
+#' These examples are fully documented:
 #'
+#' \itemize{
+#' \item [ExampleData.CobbleData]
+#' \item [ExampleData.DeValues]
+#' \item [ExampleData.Fading]
+#' \item [ExampleData.portableOSL]
+#' \item [ExampleData.RLum.Data.Image]
+#' \item [ExampleData.ScaleGammaDose]
+#' \item [ExampleData.SurfaceExposure]
+#' \item [ExampleData.TR_OSL]
+#' }
+#'
+#' The following ones are also available, but are visible only via the
+#' internal documentation, as they correspond to unpublished or synthetic data:
+#'
+#' \itemize{
+#' \item [ExampleData.Al2O3C]
+#' \item [ExampleData.BINfileData]
+#' \item [ExampleData.CW_OSL_Curve]
+#' \item [ExampleData.FittingLM]
+#' \item [ExampleData.LxTxData]
+#' \item [ExampleData.LxTxOSLData]
+#' \item [ExampleData.MortarData]
+#' \item [ExampleData.RF70Curves]
+#' \item [ExampleData.RLum.Analysis]
+#' \item [ExampleData.XSYG]
+#' }
+#'
+#' @keywords datasets
+#'
+#' @docType data
+#' @name ExampleData
 NULL
 
 #' @title Example data from a SAR OSL and SAR TL measurement for the package
@@ -408,7 +448,7 @@ NULL
 #' @description Example data from a SAR OSL and TL measurement for package Luminescence
 #' directly extracted from a Risoe BIN-file and provided in an object of type
 #' [Risoe.BINfileData-class]
-
+#'
 #' @format
 #'
 #' `CWOSL.SAR.Data`: SAR OSL measurement data
@@ -468,21 +508,16 @@ NULL
 #' @aliases CWOSL.SAR.Data TL.SAR.Data
 NULL
 
-
 #' Example CW-OSL curve data for the package Luminescence
 #'
 #' `data.frame` containing CW-OSL curve data (time, counts)
-#'
-#' @name ExampleData.CW_OSL_Curve
 #'
 #' @docType data
 #'
 #' @format Data frame with 1000 observations on the following 2 variables:
 #'
-#'
 #' - `list("x")`: a numeric vector, time
 #' - `list("y")`: a numeric vector, counts
-#'
 #'
 #' @references
 #' Baartman, J.E.M., Veldkamp, A., Schoorl, J.M., Wallinga, J.,
@@ -519,10 +554,9 @@ NULL
 #' data(ExampleData.CW_OSL_Curve, envir = environment())
 #' plot(ExampleData.CW_OSL_Curve)
 #'
+#' @name ExampleData.CW_OSL_Curve
 #' @aliases CW_Curve.BosWallinga2012 ExampleData.CW_OSL_Curve
 NULL
-
-
 
 #' Example portable OSL curve data for the package Luminescence
 #'
@@ -555,8 +589,6 @@ NULL
 #'
 NULL
 
-
-
 #' Example data for fit_LMCurve() in the package Luminescence
 #'
 #' Linearly modulated (LM) measurement data from a quartz sample from Norway
@@ -579,7 +611,6 @@ NULL
 #' Material: \tab Beach deposit, coarse grain quartz measured on aluminium discs on a Risø TL/OSL DA-15 reader\cr
 #' }
 #'
-#'
 #' @keywords datasets internal
 #'
 #' @examples
@@ -591,7 +622,6 @@ NULL
 #' @name ExampleData.FittingLM
 #' @aliases values.curve values.curveBG
 NULL
-
 
 #' Example Lx/Tx data from CW-OSL SAR measurement
 #'
@@ -621,7 +651,6 @@ NULL
 #' @name ExampleData.LxTxData
 #' @aliases LxTxData
 NULL
-
 
 #' Example Lx and Tx curve data from an artificial OSL measurement
 #'
@@ -772,7 +801,6 @@ NULL
 #' [read_SPE2R] to R to produce an
 #' [RLum.Data.Image-class] object.
 #'
-#'
 #' @format Object of class [RLum.Data.Image-class]
 #'
 #' @section Version: 0.1
@@ -805,7 +833,6 @@ NULL
 #'
 #' @name ExampleData.RLum.Data.Image
 NULL
-
 
 #' Example data for a SAR OSL measurement and a TL spectrum using a lexsyg
 #' reader
@@ -907,14 +934,12 @@ NULL
 #' @aliases OSL.SARMeasurement TL.Spectrum
 NULL
 
-
 #' Example De data sets for the package Luminescence
 #'
 #' Equivalent dose (De) values measured for a fine grain quartz sample from a
 #' loess section in Rottewitz (Saxony/Germany) and for a coarse grain quartz
 #' sample from a fluvial deposit in the rock shelter of Cueva Anton
 #' (Murcia/Spain).
-#'
 #'
 #' @format A [list] with two elements, each containing a two column [data.frame]:
 #'
@@ -975,12 +1000,10 @@ NULL
 #' De.values <- convert_Second2Gray(ExampleData.DeValues$BT998,
 #'                          dose.rate = c(0.0438, 0.0019))
 #'
-#'
 #' plot_Histogram(De.values, xlab = "De [Gy]")
 #'
 #' @name ExampleData.DeValues
 NULL
-
 
 #' Example data for feldspar fading measurements
 #'
@@ -988,7 +1011,6 @@ NULL
 #' IR225 feldspar signals of sample UNIL/NB123. It further contains regular equivalent dose
 #' measurement data of the same sample, which can be used to apply a
 #' fading correction to.
-#'
 #'
 #' @format A [list] with two elements, each containing a further [list] of
 #' [data.frame]s containing the data on the fading and equivalent dose measurements:
@@ -1000,7 +1022,6 @@ NULL
 #' `..$IR100`: Fading data of the IR100 signal.\cr
 #' `..$IR150`: Fading data of the IR150 signal.\cr
 #' `..$IR225`: Fading data of the IR225 signal.\cr
-#'
 #'
 #' `$equivalentDose.data`: A named of [data.frame]s,
 #' each having three named columns (`dose, LxTx, LxTx.error`).\cr
@@ -1033,7 +1054,6 @@ NULL
 #' Lab Dose Rate: \tab Dose rate of the beta-source at measurement ca. 0.1335 +/- 0.004 Gy/s \cr
 #' Environmental Dose Rate: \tab 7.00 +/- 0.92 Gy/ka (includes internal dose rate)
 #' }
-#'
 #'
 #' @keywords datasets
 #'
@@ -1072,10 +1092,8 @@ NULL
 #' IR50_Age <- De / 7.00
 #' IR50_Age.corr <- calc_FadingCorr(IR50_Age, g_value = IR50_fading.res)
 #'
-#'
 #' @name ExampleData.Fading
 NULL
-
 
 #' Example OSL surface exposure dating data
 #'
@@ -1147,8 +1165,6 @@ NULL
 #' fit_SurfaceExposure(synth_1, mu = mu, sigmaphi = sigmaphi)
 #'
 #'
-#'
-#'
 #' ## ExampleData.SurfaceExposure$sample_2
 #' sigmaphi <- 5e-10
 #' age <- 10000
@@ -1170,7 +1186,6 @@ NULL
 #' fit_SurfaceExposure(synth_2, mu = mu, sigmaphi = sigmaphi, Ddot = 2.5, D0 = D0)
 #'
 #'
-#'
 #' ## ExampleData.SurfaceExposure$set_1
 #' sigmaphi <- 5e-10
 #' mu <- 0.9
@@ -1189,7 +1204,6 @@ NULL
 #'
 #' ## VALIDATE set_1
 #' fit_SurfaceExposure(synth_3, age = age, sigmaphi = sigmaphi)
-#'
 #'
 #'
 #' ## ExampleData.SurfaceExposure$set_2
@@ -1272,22 +1286,20 @@ NULL
 
 #' Example TR-OSL data
 #'
-#' Single TR-OSL curve obtained by Schmidt et al. (under review) for quartz sample BT729
+#' Single TR-OSL curve obtained by Schmidt et al. (2019) for quartz sample BT729
 #' (origin: Trebgast Valley, Germany, quartz, 90-200 µm, unpublished data).
 #'
 #' @format One [RLum.Data.Curve-class] dataset imported using the function [read_XSYG2R]
 #'
 #' \describe{
 #' `ExampleData.TR_OSL`: A single [RLum.Data.Curve-class] object with the TR-OSL data
-#'
 #' }
-#'
 #'
 #' @seealso [fit_OSLLifeTimes]
 #'
-#' @references Schmidt, C., Simmank, O., Kreutzer, S., under review.
-#' Time-Resolved Optically Stimulated Luminescence of Quartz in the Nanosecond Time Domain. Journal
-#' of Luminescence, 1-90
+#' @references Schmidt, C., Simmank, O., Kreutzer, S., 2019.
+#' Time-Resolved Optically Stimulated Luminescence of Quartz in the Nanosecond Time Domain.
+#' Journal of Luminescence 213, 376-387.
 #'
 #' @keywords datasets
 #'
@@ -1357,7 +1369,6 @@ NULL
 #' **Type:** XSYG-file stump \cr
 #' **Info:** XSYG-file with some basic curves to test functions \cr
 #' **Reference:** no reference available
-#'
 #'
 #' @keywords datasets
 #' @name extdata

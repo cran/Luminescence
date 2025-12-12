@@ -31,7 +31,7 @@ test_that("input validation", {
 
   SW({
   expect_warning(analyse_Al2O3C_ITC(data_ITC, signal_integral = 0),
-                 "Input for 'signal_integral' corrected to 1:99")
+                 "'signal_integral' corrected to 1:99")
   })
 })
 
@@ -59,5 +59,17 @@ test_that("snapshot tests", {
                                           signal_integral = 2,
                                           method_control = list(fit.method = "EXP")),
                        tolerance = snapshot.tolerance)
+  })
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+
+  set.seed(1)
+
+  SW({
+    vdiffr::expect_doppelganger("default",
+                                analyse_Al2O3C_ITC(data_ITC))
   })
 })

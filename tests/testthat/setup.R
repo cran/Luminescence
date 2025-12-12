@@ -4,9 +4,14 @@
 
 ## the ... can be used to set the tolerance
 expect_snapshot_RLum <- function(object, ...) {
+  if (inherits(object, "list")) {
+    for (idx in seq_along(object))
+      expect_snapshot_RLum(object[[idx]])
+    return()
+  }
   object@.uid <- NA_character_
   object@.pid <- NA_character_
-  object@info$call <- NULL
+  object@info[names(object@info) == "call"] <- NULL # may be multiple "call"
   if ("data" %in% slotNames(object)) {
     if ("fit" %in% names(object@data))
       object@data$fit <- NULL
@@ -40,25 +45,13 @@ expect_snapshot_RLum <- function(object, ...) {
       object@data$rejection.criteria$UID <- NULL
     if ("test_parameters" %in% names(object@data))
       object@data$test_parameters$UID <- NULL
-
-    ## This should be removed once we do not run coverage
-    ## anymore on R 4.3 (issue #312)
-    if ("De" %in% names(object@data)) {
-      object@data$De$HPDI95_L <- NULL
-      object@data$De$HPDI95_U <- NULL
-    }
-
-    ## This should be removed once we do not run coverage
-    ## anymore on R 4.3 (pull #420)
-    if ("MC" %in% names(object@data) && "kde" %in% names(object@data$MC)) {
-      if (!is.null(object@data$MC$kde$old.coords))
-        object@data$MC$kde$old.coords <- NULL
-    }
-
   }
   if ("info" %in% slotNames(object)) {
     if ("call" %in% names(object@info)) {
       object@info$call <- NULL
+    }
+    if ("file" %in% names(object@info)) {
+      object@info$file <- NULL
     }
   }
   if ("records" %in% slotNames(object)) {

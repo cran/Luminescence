@@ -2,19 +2,24 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(calc_AliquotSize(),
-               "Please provide the mean grain size or the range of grain sizes")
+               "grain.size' should be of class 'numeric' or 'integer'")
   expect_error(calc_AliquotSize(grain.size = 1:3),
                "Please provide the mean grain size or the range of grain sizes")
+  expect_error(calc_AliquotSize(grain.size = 0),
+               "'grain.size' should contain positive values")
+  expect_error(calc_AliquotSize(grain.size = NA_real_),
+               "'grain.size' should contain positive values")
   expect_error(calc_AliquotSize(grain.size = 100, packing.density = "inf"),
-               "'packing.density' should be a positive scalar")
+               "'packing.density' should be a single positive value")
   expect_error(calc_AliquotSize(grain.size = 100, packing.density = 2),
                "'packing.density' should be a value between 0 and 1")
 
   expect_error(calc_AliquotSize(grain.size = 100, packing.density = 1, sample.diameter = -1),
-               "'sample.diameter' should be a positive scalar")
+               "'sample.diameter' should be a single positive value")
   expect_error(calc_AliquotSize(grain.size = 100, packing.density = 1,
+                                sample.diameter = 1,
                                 sample_carrier.diameter = -1),
-               "'sample_carrier.diameter' should be a positive scalar")
+               "'sample_carrier.diameter' should be a single positive value")
   expect_error(calc_AliquotSize(grain.size = 100, sample.diameter = 9.8,
                                 MC = TRUE),
                "'grain.size' must be a vector containing the min and max")
@@ -24,6 +29,9 @@ test_that("input validation", {
                                   MC = TRUE),
                  "Monte Carlo simulation is only available for estimating the")
   })
+  expect_error(calc_AliquotSize(grain.size = c(100, 200),
+                                sample.diameter = 3.6, MC.iter = 0),
+               "'MC.iter' should be a single positive integer value or NULL")
 })
 
 test_that("check functionality", {
@@ -91,7 +99,7 @@ test_that("snapshot tests", {
 
   expect_message(
   expect_snapshot_RLum(calc_AliquotSize(
-      grain.size = c(100, 200),
+      grain.size = c(200, 100),
       sample.diameter = 8,
       grains.counted = c(2525, 2312, 2880),
       MC.iter = 20,
@@ -108,13 +116,20 @@ test_that("snapshot tests", {
       plot = FALSE,
       verbose = TRUE),
       tolerance = snapshot.tolerance)
+
+  ## regression test - issue 1114
+  expect_snapshot_RLum(calc_AliquotSize(
+      grain.size = c(0.001, 0.001),
+      sample.diameter = 7,
+      MC.iter = 10,
+      plot = FALSE),
+      tolerance = snapshot.tolerance)
   })
 })
 
 test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
-  testthat::skip_if_not(getRversion() >= "4.4.0")
 
   set.seed(1)
 

@@ -99,16 +99,15 @@
           }"
 
   data1 <- list(
-    'theta' = theta,
-    'mu' = mu,
-    'sigma' = sigma,
-    'N' = nobs ,
-    'De' = De,
-    's2' = s ^ 2,
-    's02' = sig0[1] ^ 2,
-    'Amin' = Age_range[1],
-    'Amax' = Age_range[2]
-  )
+    theta = theta,
+    mu = mu,
+    sigma = sigma,
+    N = nobs,
+    De = De,
+    s2 = s^2,
+    s02 = sig0[1]^2,
+    Amin = Age_range[1],
+    Amax = Age_range[2])
 
   # Run Bayesian model ------------------------------------------------------
   method_control <- modifyList(
@@ -119,8 +118,8 @@
       n.iter = 5000,
       thin = 1,
       progress.bar = if(verbose) "text" else "none",
-      quiet = if(verbose) FALSE else TRUE,
-      diag = if(verbose) TRUE else FALSE,
+      quiet = !verbose,
+      diag = verbose,
       return_mcmc = FALSE
     ),
     val = method_control)
@@ -130,10 +129,8 @@
   if(length(theta) == 1) {
     data1$theta <- NULL
     model <- textConnection(event1)
-
   } else {
     model <- textConnection(event2)
-
   }
 
   ## run model
@@ -142,6 +139,7 @@
   jags <- rjags::jags.model(
     file = model,
     data = data1,
+    inits = method_control$inits,
     n.chains = method_control$n.chains,
     n.adapt = method_control$n.adapt,
     quiet = method_control$quiet
@@ -167,7 +165,6 @@
   if(method_control$diag) {
     cat("\n[.calc_IndividualAgeModel()]\n")
     print(coda::gelman.diag(samp))
-
   }
 
   # Return ------------------------------------------------------------------
@@ -262,33 +259,28 @@
       n.iter = 5000,
       thin = 1,
       progress.bar = if(verbose) "text" else "none",
-      quiet = if(verbose) FALSE else TRUE,
-      diag = if(verbose) TRUE else FALSE,
+      quiet = !verbose,
+      diag = verbose,
       return_mcmc = FALSE
     ),
     val = method_control)
 
   on.exit(close(model), add = TRUE)
-  data <-
-    list(
-      'theta' = theta,
-      'mu' = mu,
-      'sigma' = sigma,
-      'De' = De,
-      'J' =  length(De),
-      's2' = s ^ 2,
-      'Amin' = Age_range[1],
-      'Amax' = Age_range[2]
-    )
+  data <- list(theta = theta,
+               mu = mu,
+               sigma = sigma,
+               De = De,
+               J =  length(De),
+               s2 = s^2,
+               Amin = Age_range[1],
+               Amax = Age_range[2])
 
   ## select model
   if(length(theta) == 1) {
     data$theta <- NULL
     model <- textConnection(central_age_model1)
-
   } else {
     model <- textConnection(central_age_model2)
-
   }
 
   ## run modelling
@@ -297,6 +289,7 @@
   jags2 <- rjags::jags.model(
     file = model,
     data = data,
+    inits = method_control$inits,
     n.chains = method_control$n.chains,
     n.adapt = method_control$n.adapt,
     quiet = method_control$quiet
@@ -322,7 +315,6 @@
   if(method_control$diag) {
     cat("\n[.calc_BayesianCentralAgeModel()]\n")
     print(coda::gelman.diag(samp2))
-
   }
 
   # Return ------------------------------------------------------------------
@@ -335,7 +327,6 @@
       mcmc_BCAM = if(method_control$return_mcmc) samp2 else NULL),
     info = list(call = sys.call())
   ))
-
 }
 
 #'@title Combine Dose Rate and Equivalent Dose Distribution
@@ -407,8 +398,17 @@
 #' outlier analysis plot. Note: the outlier analysis will happen independently
 #' of the plot output.
 #'
-#'@param method_control [list] (*with default*): named [list] of further parameters passed down
-#' to the [rjags::rjags] modelling
+#' @param method_control [list] (*with default*):
+#' named [list] of parameters to control [rjags::jags.model]. This can be
+#' used to set the random seed for the MCMC chains (four by default):
+#' ```
+#' method_control = list(inits = list(
+#'   list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 1),
+#'   list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 2),
+#'   list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 3),
+#'   list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 4))
+#' )
+#' ```
 #'
 #'@param par_local [logical] (*with default*): if set to `TRUE` the function uses its
 #'own [graphics::par] settings (which will end in two plots next to each other)
@@ -500,7 +500,7 @@ combine_De_Dr <- function(
   Dr,
   int_OD,
   Age_range = c(1,300),
-  outlier_threshold = .05,
+  outlier_threshold = 0.05,
   outlier_method = "default",
   outlier_analysis_plot = FALSE,
   method_control = list(),
@@ -576,6 +576,7 @@ fit_IAM <- .calc_IndividualAgeModel(
           n.chains = method_control$n.chains,
           n.adapt = method_control$n.adapt,
           n.iter = method_control$n.iter,
+          inits = method_control$inits,
           thin = method_control$thin,
           progress.bar = method_control$progress.bar,
           quiet = method_control$quiet,
@@ -596,33 +597,24 @@ fit_IAM <- .calc_IndividualAgeModel(
     out <- sort(which(test > alpha))
 
   } else {
-    sig_max <- sig0 * ((1 - alpha) / alpha) ^ .5
+    sig_max <- sig0 * ((1 - alpha) / alpha) ^ 0.5
     test <- vapply(1:length(De), function(j){
       mean(fit_IAM$sig_a[, j] >= sig_max)
-
     }, numeric(1))
 
     out <- sort(which(test > alpha))
   }
 
   ##some terminal output
-  if(verbose){
-    if (length(out) > 0) {
-      cat(
-        paste0(
-          "\n    >> Outliers detected: ",
-          length(out), "/", length(De),
-          " (", round(length(out) / length(De) * 100, 1), "%)"
-        )
-      )
-    }
+  if (verbose && length(out) > 0) {
+    cat("\n    >> Outliers detected: ", length(out), "/", length(De),
+        " (", round(length(out) / length(De) * 100, 1), "%)", sep = "")
   }
 
   ## apply the removal
   if (length(out) == 0) {
       De1 <- De
       s1 <- s
-
    } else {
       De1 <- De[-out]
       s1 <- s[-out]
@@ -642,6 +634,7 @@ fit_IAM <- .calc_IndividualAgeModel(
         n.chains = method_control$n.chains,
         n.adapt = method_control$n.adapt,
         n.iter = method_control$n.iter,
+        inits = method_control$inits,
         thin = method_control$thin,
         progress.bar = method_control$progress.bar,
         quiet = method_control$quiet,
@@ -680,7 +673,7 @@ fit_IAM <- .calc_IndividualAgeModel(
 
   ## calculate mean value and quantiles for the ecdf A * Dr
   cdf_ADr_mean <- matrixStats::colMeans2(cdf_ADr)
-  cdf_ADr_quantiles <- matrixStats::colQuantiles(cdf_ADr, probs = c(.025,.975))
+  cdf_ADr_quantiles <- matrixStats::colQuantiles(cdf_ADr, probs = c(0.025, 0.975))
 
   ## further values to ease the interpretation
   d <- density(fit_BCAM$A)
@@ -693,10 +686,9 @@ if(verbose){
   cat("(3) Age results (presumably in ka) \n")
   cat("    -----------------------------------\n")
   cat("    Age (HPD)   :\t", format(round(HPD,2), nsmall = 2), "\n")
-  cat("    Age (CI 68%):\t", paste(format(round(range(CI_68),2), nsmall =2), collapse = " : "), "\n")
-  cat("    Age (CI 95%):\t", paste(format(round(range(CI_95),2), nsmall =2), collapse = " : "), "\n")
+  cat("    Age (CI 68%):\t", .format_range(round(CI_68, 2), sep = " : ", nsmall = 2), "\n")
+  cat("    Age (CI 95%):\t", .format_range(round(CI_95, 2), sep = " : ", nsmall = 2), "\n")
   cat("    -----------------------------------\n")
-
 }
 
 # Plotting ----------------------------------------------------------------
@@ -709,11 +701,8 @@ if(plot){
   ), list(...))
 
   ##make sure we reset plots
-  if(par_local) {
-    old.par <- par(mfrow = c(1, 2))
-    on.exit(par(old.par), add = TRUE)
-
-  }
+  par.default <- .par_defaults()
+  on.exit(par(par.default), add = TRUE)
 
   if(outlier_analysis_plot){
     N <- length(De)
@@ -728,7 +717,7 @@ if(plot){
     xlab = expression(paste("Index of ", sigma[a])))
 
     ## add axis
-    axis(side = 1, at = 1:length(De), labels = 1:length(De), )
+    axis(side = 1, at = 1:length(De))
     mtext(
       text = paste0(length(out), "/", N, " (", round(length(out) / N * 100, 1), "%)"),
       side = 3,
@@ -746,11 +735,9 @@ if(plot){
 
     abline(h = sig0, col = "violet")
 
-
     } else {
       shape::emptyplot()
       text(0.5, 0.5, "No outlier detected!")
-
     }
   }
 
@@ -799,7 +786,7 @@ if(plot){
 }
 
 # Return results ----------------------------------------------------------
-  return(set_RLum(
+  set_RLum(
     "RLum.Results",
     data = list(
       Ages = fit_BCAM$A,
@@ -821,6 +808,5 @@ if(plot){
       call = sys.call(),
       model_IAM = fit_IAM$model,
       model_BCAM = fit_BCAM$model)
-  ))
-
+  )
 }

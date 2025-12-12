@@ -174,8 +174,7 @@ plot_DetPlot <- function(
    args_default <- as.list(f_def)[-(1:2)]
 
     ## detect cores
-    .validate_class(multicore, c("logical", "numeric", "integer"))
-    .validate_length(multicore, 1)
+    .validate_class(multicore, c("logical", "numeric", "integer"), length = 1)
     cores <- if (is.logical(multicore) && multicore) {
                parallel::detectCores() # nocov
              } else {
@@ -209,9 +208,6 @@ plot_DetPlot <- function(
   .validate_class(object, "RLum.Analysis")
   .validate_not_empty(object)
 
-  ##get structure
-  object.structure <- structure_RLum(object)
-
   ## signal.integral
   .validate_positive_scalar(signal.integral.min, int = TRUE)
   .validate_positive_scalar(signal.integral.max, int = TRUE)
@@ -228,7 +224,7 @@ plot_DetPlot <- function(
                                      c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"))
 
   ## deprecated argument
-  if ("plot.single" %in% names(list(...))) {
+  if ("plot.single" %in% ...names()) {
     plot_singlePanels <- list(...)$plot.single
     .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
                    "instead")
@@ -379,9 +375,9 @@ plot_DetPlot <- function(
 
        if(plot[1]) {
         ##general settings
-        old_par <- par(no.readonly = TRUE)
+        par.default <- .par_defaults()
+        on.exit(par(par.default), add = TRUE)
         par(cex = plot.settings$cex)
-        on.exit(par(old_par), add = TRUE)
 
         ##open plot area
         plot(
@@ -426,7 +422,7 @@ plot_DetPlot <- function(
 
 # Return ------------------------------------------------------------------
   ##merge results
-  return(set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(
       De.values = as.data.frame(data.table::rbindlist(df_final)),
@@ -434,5 +430,5 @@ plot_DetPlot <- function(
       ),
     info = list(
       call = sys.call())
-  ))
+  )
 }

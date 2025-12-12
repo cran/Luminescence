@@ -12,7 +12,7 @@ analyse_SAR.TL(
   integral_input = "channel",
   sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"),
   rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
-  dose.points,
+  dose.points = NULL,
   log = "",
   ...
 )
@@ -89,11 +89,10 @@ background see Aitken and Smith (1988)
 \note{
 \strong{THIS IS A BETA VERSION}
 
-None TL curves will be removed
-from the input object without further warning.
+No TL curves will be removed from the input object without further warning.
 }
 \section{Function version}{
- 0.3.0
+ 0.3.1
 }
 
 \examples{
@@ -115,7 +114,7 @@ analyse_SAR.TL(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

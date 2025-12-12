@@ -1,4 +1,4 @@
-#' @title Import XSYG files to R
+#' @title Import XSYG files into R
 #'
 #' @description Imports XSYG-files produced by a Freiberg Instruments lexsyg reader into R.
 #'
@@ -87,7 +87,6 @@
 #' of doubt, please verify the settings and conduct a manual correction
 #' if required.
 #'
-#'
 #' **Advanced file import**
 #'
 #' To allow for a more efficient usage of the function, instead of single path
@@ -121,17 +120,17 @@
 #' @param import [logical] (*with default*):
 #' if set to `FALSE`, only the XSYG file structure is shown.
 #'
-#' @param pattern [regex] (*with default*):
-#' optional regular expression if `file` is a link to a folder, to select just
-#' specific XSYG-files
+#' @param pattern [character] (*with default*):
+#' regular expression pattern passed to [list.files] to construct a list of
+#' files to read (used only when a path is provided).
 #'
 #' @param auto_linearity_correction [logical] (*with default*): enable/disable
 #' automatic count linearity correction. Because the information on the detectors
 #' are not consistent and are not consistently stored, this option should be used
 #' with caution.
 #'
-#' @param verbose [logical] (*with default*): enable/disable output to the
-#' terminal. If verbose is `FALSE` the `txtProgressBar` is also switched off
+#' @param verbose [logical] (*with default*):
+#' enable/disable output to the terminal.
 #'
 #' @param txtProgressBar [logical] (*with default*):
 #' enable/disable the progress bar during import. Ignored if `verbose = FALSE`.
@@ -158,17 +157,14 @@
 #' **So far, no image data import is provided!** \cr
 #' Corresponding values in the XSXG file are skipped.
 #'
-#'
-#' @section Function version: 0.7.0
-#'
+#' @section Function version: 0.7.1
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
-#'
+#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
 #' @seealso `'XML'`, [RLum.Analysis-class], [RLum.Data.Curve-class],
 #' [approx], [correct_PMTLinearity]
-#'
 #'
 #' @references
 #' Grehl, S., Kreutzer, S., Hoehne, M., 2013. Documentation of the
@@ -213,7 +209,7 @@ read_XSYG2R <- function(
   n_records = NULL,
   fastForward = FALSE,
   import = TRUE,
-  pattern = ".xsyg",
+  pattern = "\\.xsyg",
   auto_linearity_correction = FALSE,
   verbose = TRUE,
   txtProgressBar = TRUE
@@ -229,7 +225,8 @@ read_XSYG2R <- function(
   ##  - xlum should be general, xsyg should take care about subsequent details
 
   .validate_class(file, c("character", "list"))
-  .validate_class(n_records, c("numeric", "integer"), null.ok = TRUE)
+  .validate_positive_scalar(n_records, int = TRUE, null.ok = TRUE)
+  .validate_class(pattern, "character")
 
   # Self Call -----------------------------------------------------------------------------------
   # Option (a): Input is a list, every element in the list will be treated as file connection
@@ -268,13 +265,9 @@ read_XSYG2R <- function(
 
     ##return
     if (fastForward) {
-      if(import){
+      if (import)
         return(unlist(temp.return, recursive = FALSE))
-
-      } else{
-        return(as.data.frame(data.table::rbindlist(temp.return)))
-      }
-
+      return(as.data.frame(data.table::rbindlist(temp.return)))
     } else{
       return(temp.return)
     }
@@ -282,7 +275,11 @@ read_XSYG2R <- function(
 
   ## Integrity checks -------------------------------------------------------
 
+  .validate_logical_scalar(fastForward)
+  .validate_logical_scalar(import)
   .validate_logical_scalar(auto_linearity_correction)
+  .validate_logical_scalar(verbose)
+  .validate_logical_scalar(txtProgressBar)
 
   ## check for URL and attempt download
   url_file <- .download_file(file, tempfile("read_XSYG2R_FILE"),
@@ -300,6 +297,10 @@ read_XSYG2R <- function(
       .throw_message("File does not exist, nothing imported, NULL returned")
     return(NULL)
   }
+
+  ## don't show the progress bar if not verbose
+  if (!verbose)
+    txtProgressBar <- FALSE
 
   # (0) config --------------------------------------------------------------
   #version.supported <- c("1.0")
@@ -350,7 +351,7 @@ read_XSYG2R <- function(
     return(spectrum.matrix)
   }
 
-  # (1) Integrity tests -----------------------------------------------------
+  # (1) Integrity checks ----------------------------------------------------
   ##set HUGE for larger nodes
   HUGE <- 524288
 
@@ -388,7 +389,6 @@ read_XSYG2R <- function(
 
       ##additional option for fastForward == TRUE
       if(fastForward){
-
         ##change column header
         temp.sample <- t(temp.sample)
         colnames(temp.sample) <- paste0("sample::", colnames(temp.sample))
@@ -404,7 +404,7 @@ read_XSYG2R <- function(
   ## ========================================================================
   ## IMPORT XSYG FILE
 
-    if (verbose) {
+  if (verbose) {
       cat("\n[read_XSYG2R()] Importing ...")
       cat("\n path: ", dirname(file))
       cat("\n file: ", .shorten_filename(basename(file)))
@@ -412,55 +412,51 @@ read_XSYG2R <- function(
     }
 
   ## set n_records
-  n_records <- min(XML::xmlSize(temp), n_records[1])
+  n_records <- min(XML::xmlSize(temp), n_records)
 
   ## initialize the progress bar
-  if (verbose && txtProgressBar) {
+  if (txtProgressBar) {
     pb <- txtProgressBar(min = 0, max = n_records, char = "=", style = 3)
   }
 
   ## loop over the entire sequence up to the number of records to be read
   output <- lapply(1:n_records, function(x) {
-      ##read sequence header
-      temp.sequence.header <- as.data.frame(XML::xmlAttrs(temp[[x]]), stringsAsFactors = FALSE)
+    sequence <- temp[[x]]
+    sequence.header <- as.data.frame(XML::xmlAttrs(sequence),
+                                     stringsAsFactors = FALSE)
 
-      ##account for non set value
-      if(length(temp.sequence.header)!= 0)
-        colnames(temp.sequence.header) <- ""
+    ## account for non set value
+    if (length(sequence.header) != 0)
+        colnames(sequence.header) <- ""
 
-      ###-----------------------------------------------------------------------
-      ##LOOP
-      ##read records >> records are combined to one RLum.Analysis object
-      temp.sequence.object <- unlist(lapply(1:XML::xmlSize(temp[[x]]), function(i){
-        ##get recordType
-        temp.sequence.object.recordType <- try(XML::xmlAttrs(temp[[x]][[i]])["recordType"],
-                                               silent = TRUE)
+    ###----------------------------------------------------------------------
+    ##LOOP
+    ##read records >> records are combined to one RLum.Analysis object
+    sequence.object <- unlist(lapply(1:XML::xmlSize(sequence), function(i) {
+      record <- sequence[[i]]
 
-
-        ##the XSYG file might be broken due to a machine error during the measurement, this
-        ##control flow helps; if a try-error is observed NULL is returned
-        if (inherits(temp.sequence.object.recordType, "try-error"))
+      ## the XSYG file might be broken due to a machine error during the measurement
+      recordType <- try(XML::xmlAttrs(record)["recordType"], silent = TRUE)
+      if (inherits(recordType, "try-error"))
           return(NULL) # nocov
 
-         ##create a fallback, the function should not fail
-         if(is.null(temp.sequence.object.recordType) || is.na(temp.sequence.object.recordType)){
-           temp.sequence.object.recordType <- "not_set"
-         }
+      ## create a fallback, the function should not fail
+      if (is.null(recordType) || is.na(recordType)) {
+        recordType <- "not_set"
+      }
 
-        ##correct record type in depending on the stimulator
-        xml.size <- XML::xmlSize(temp[[x]][[i]])
-        if(temp.sequence.object.recordType == "OSL"){
-          if (XML::xmlAttrs(temp[[x]][[i]][[xml.size]])["stimulator"] %in%
+      ## correct record type in depending on the stimulator
+      xml.size <- XML::xmlSize(record)
+      if (recordType == "OSL" &&
+          XML::xmlAttrs(record[[xml.size]])["stimulator"] %in%
               c("ir_LED_850", "ir_LD_850")) {
-            temp.sequence.object.recordType  <- "IRSL"
-          }
-        }
+          recordType  <- "IRSL"
+      }
 
-        ##loop 3rd level
-        lapply(1:xml.size, function(j) {
-          ##get values
-          temp.sequence.object.curveValue <- temp[[x]][[i]][[j]]
-          attrs <- XML::xmlAttrs(temp.sequence.object.curveValue)
+      ## loop 3rd level
+      lapply(1:xml.size, function(j) {
+        curve <- record[[j]]
+        attrs <- XML::xmlAttrs(curve)
 
           ##get curveType
           temp.sequence.object.curveType <- as.character(attrs["curveType"])
@@ -468,26 +464,24 @@ read_XSYG2R <- function(
           ##get detector
           temp.sequence.object.detector <- as.character(attrs["detector"])
 
-          ##get stimulator
-          temp.sequence.object.stimulator <- as.character(attrs["stimulator"])
-
           ##get additional information
           temp.sequence.object.info <- c(as.list(attrs),
-                                         position = as.integer(as.character(temp.sequence.header["position",])),
-                                         name = as.character(temp.sequence.header["name",]))
+                                         position = as.integer(as.character(sequence.header["position", ])),
+                                         name = as.character(sequence.header["name", ]))
+
           ## TL curve recalculation ============================================
           if(recalculate.TL.curves){
             ##TL curve heating values is stored in the 3rd curve of every set
-            if(temp.sequence.object.recordType == "TL" && j == 1){
+            if (recordType == "TL" && j == 1) {
               #grep values from PMT measurement or spectrometer
               if(!"Spectrometer" %in% temp.sequence.object.detector){
                 temp.sequence.object.curveValue.PMT <- src_get_XSYG_curve_values(XML::xmlValue(
-                  temp[[x]][[i]][[j]]))
+                  record[[j]]))
 
                 time.values <- temp.sequence.object.curveValue.PMT[, 1]
               }else{
-                temp.sequence.object.curveValue.spectrum <- get_XSYG.spectrum.values(
-                  temp.sequence.object.curveValue)
+                temp.sequence.object.curveValue.spectrum <-
+                  get_XSYG.spectrum.values(curve)
 
                 ##get time values which are stored in the row labels
                 time.values <- as.numeric(
@@ -498,8 +492,8 @@ read_XSYG2R <- function(
               time.values <- round(time.values, digits = 1)
 
               #grep values from heating element
-              temp.sequence.object.curveValue.heating.element <- src_get_XSYG_curve_values(XML::xmlValue(
-                temp[[x]][[i]][[3]]))
+              temp.sequence.object.curveValue.heating.element <-
+                src_get_XSYG_curve_values(XML::xmlValue(record[[3]]))
 
               temp.element <- temp.sequence.object.curveValue.heating.element[, 1]
 
@@ -511,7 +505,7 @@ read_XSYG2R <- function(
                       drop = FALSE]
 
               ## calculate corresponding heating rate, this makes only sense
-              ## for linear heating, therefore is has to be the maximum value
+              ## for linear heating, therefore it has to be the maximum value
 
               ##remove 0 values (not measured) and limit to peak
               heating.rate.values <- temp.sequence.object.curveValue.heating.element[
@@ -572,9 +566,7 @@ read_XSYG2R <- function(
                 }
 
                 ##combine as matrix
-                temp.sequence.object.curveValue <- as.matrix(cbind(
-                  temperature.values,
-                  count.values))
+                curve <- cbind(temperature.values, count.values)
 
                 ##set curve identifier
                 temp.sequence.object.info$curveDescripter <- "Temperature [\u00B0C]; Counts [a.u.]"
@@ -614,12 +606,11 @@ read_XSYG2R <- function(
 
                 ##reset values of the matrix
                 colnames(temp.sequence.object.curveValue.spectrum) <- temperature.values
-                temp.sequence.object.curveValue <- temp.sequence.object.curveValue.spectrum
+                curve <- temp.sequence.object.curveValue.spectrum
 
                 ##change curve descriptor
                 temp.sequence.object.info$curveDescripter <- "Temperature [\u00B0C]; Wavelength [nm]; Counts [1/ch]"
               }
-
             }##endif
           }##endif recalculate.TL.curves == TRUE
 
@@ -631,61 +622,57 @@ read_XSYG2R <- function(
           ## Set RLum.Data-objects ------------------------------------------
           if (!"Spectrometer" %in% temp.sequence.object.detector) {
             out.class <- "RLum.Data.Curve"
-            if (!inherits(temp.sequence.object.curveValue, "matrix")) {
-              temp.sequence.object.curveValue <-
-                src_get_XSYG_curve_values(XML::xmlValue(temp.sequence.object.curveValue))
+            if (!inherits(curve, "matrix")) {
+              curve <- src_get_XSYG_curve_values(XML::xmlValue(curve))
             }
-
           } else {
             out.class <- "RLum.Data.Spectrum"
-            if (!inherits(temp.sequence.object.curveValue, "matrix")) {
-              temp.sequence.object.curveValue <-
-                get_XSYG.spectrum.values(temp.sequence.object.curveValue)
+            if (!inherits(curve, "matrix")) {
+              curve <- get_XSYG.spectrum.values(curve)
             }
           }
 
           set_RLum(
               class = out.class,
               originator = "read_XSYG2R",
-              recordType = paste0(temp.sequence.object.recordType,
+              recordType = paste0(recordType,
                                   " (", temp.sequence.object.detector,")"),
               curveType = temp.sequence.object.curveType,
-              data = temp.sequence.object.curveValue,
+              data = curve,
               info = temp.sequence.object.info)
         })
-      }),
-       use.names = FALSE)
+    }), use.names = FALSE)
 
       ##if the XSYG file is broken we get NULL as list element
-      if (!is.null(temp.sequence.object)) {
+      if (!is.null(sequence.object)) {
         ##set RLum.Analysis object
-        temp.sequence.object <-  set_RLum(
+        sequence.object <- set_RLum(
           originator = "read_XSYG2R",
           class = "RLum.Analysis",
-          records = temp.sequence.object,
-          protocol = as.character(temp.sequence.header["protocol",1]),
+          records = sequence.object,
+          protocol = as.character(sequence.header["protocol", 1]),
           info = list(file = file)
         )
 
         ##set parent uid of RLum.Anlaysis as parent ID of the records
-        temp.sequence.object <- .set_pid(temp.sequence.object)
+        sequence.object <- .set_pid(sequence.object)
 
         ##update progress bar
-        if (verbose && txtProgressBar) {
+        if (txtProgressBar) {
           setTxtProgressBar(pb, x)
         }
 
         ##merge output and return values
         if(fastForward){
-          return(temp.sequence.object)
-        }else{
-          return(list(Sequence.Header = temp.sequence.header, Sequence.Object = temp.sequence.object))
+          return(sequence.object)
         }
+        return(list(Sequence.Header = sequence.header,
+                    Sequence.Object = sequence.object))
       }
   }) ##end loop for sequence list
 
   ## close ProgressBar
-  if (verbose && txtProgressBar)
+  if (txtProgressBar)
     close(pb)
 
   ## show output information
@@ -705,10 +692,10 @@ read_XSYG2R <- function(
   if (auto_linearity_correction) {
     ## set look-up table for common FI PMTs
     count_pair_res <- c(
-      "UVVIS" = 18,
-      "NIR50" = 70,
-      "NIR40" = 70,
-      "ETPMT" = 25)
+      UVVIS = 18,
+      NIR50 = 70,
+      NIR40 = 70,
+      ETPMT = 25)
 
     ## correct only curves that can be corrected
     output <- lapply(output, \(x) {

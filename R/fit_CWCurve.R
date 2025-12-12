@@ -34,7 +34,6 @@
 #' where \eqn{RSS = Residual~Sum~of~Squares} \cr
 #' and \eqn{TSS = Total~Sum~of~Squares}
 #'
-#'
 #' **Error of fitted component parameters**
 #'
 #' The 1-sigma error for the
@@ -141,7 +140,7 @@
 #' The function **does not** ensure that the fitting procedure has reached a
 #' global minimum rather than a local minimum!
 #'
-#' @section Function version: 0.5.4
+#' @section Function version: 0.5.5
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -175,7 +174,7 @@
 #' @export
 fit_CWCurve<- function(
   values,
-  n.components.max,
+  n.components.max = 7,
   fit.failure_threshold = 5,
   fit.method = "port",
   fit.trace = FALSE,
@@ -208,7 +207,7 @@ fit_CWCurve<- function(
   x <- values[, 1]
   y <- values[, 2]
 
-  if (sum(y > 0, na.rm = TRUE) == 0) {
+  if (all(y <= 0, na.rm = TRUE)) {
     .throw_error("'values' contains no positive counts")
   }
   if (any(order(x) != seq_along(x))) {
@@ -233,9 +232,6 @@ fit_CWCurve<- function(
   ylab <- extraArgs$ylab %||% paste0("OSL [cts/", round(max(x) / length(x), digits = 2), " s]")
   method_control <- modifyList(x = list(export.comp.contrib.matrix = FALSE),
                                val = method_control)
-
-  if ("output.path" %in% names(extraArgs))
-    .throw_warning("Argument 'output.path' no longer supported, ignored")
 
   ##============================================================================##
   ## FITTING
@@ -270,17 +266,16 @@ fit_CWCurve<- function(
   ##////equation used for fitting///(end)
 
   ##set variables
+  fit <- NULL
   keep.fitting <- TRUE # set to FALSE if the fitting should be stopped early
   n.components <- 1 #number of components used for fitting - start with 1
   fit.failure_counter <- 0 #counts the failed fitting attempts
 
-  ## if n.components.max is missing, set it to the maximum value that can be
+  ## set n.components.max it to the maximum value that can be
   ## fitted given the data size (issue #953), up to a maximum of 7 components
-  if (missing(n.components.max))
-    n.components.max <- max(nrow(values) - 3, 1)
-  n.components.max <- min(n.components.max, 7)
+  n.fittable <- max(nrow(values) - 3, 1)
+  n.components.max <- min(n.components.max, n.fittable, 7)
 
-  ##
   ##++++Fitting loop++++(start)
   while(keep.fitting && n.components <= n.components.max) {
     ##(0) START PARAMETER ESTIMATION
@@ -395,20 +390,15 @@ fit_CWCurve<- function(
     }
     n.components <- n.components + 1
 
-    ##count failed attempts for fitting
-    if (!inherits(fit.try, "try-error")) {
+    if (!inherits(fit.try, "try-error") || is.null(fit)) {
       fit <- fit.try
-
-    }else{
-      fit.failure_counter <- fit.failure_counter+1
-      if (!exists("fit")) {
-        fit <- fit.try
-      }
     }
 
-    ##stop fitting after a given number of wrong attempts
-    if(fit.failure_counter>=fit.failure_threshold){
-      keep.fitting <- FALSE
+    ## count failed fitting attempts and stop after a given number of attempts
+    if (inherits(fit.try, "try-error")) {
+      fit.failure_counter <- fit.failure_counter + 1
+      if (fit.failure_counter >= fit.failure_threshold)
+        keep.fitting <- FALSE
     }
 
   }##end while
@@ -536,47 +526,19 @@ fit_CWCurve<- function(
     ##============================================================================##
 
     ##write output table if values exists
-    if (exists("fit")){
-      ##set data.frame for a max value of 7 components
-      output.table<-data.frame(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
-                               NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
-                               NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)
-      output.tableColNames<-c("I01","I01.error","lambda1", "lambda1.error",
-                              "cs1","cs1.rel",
-                              "I02","I02.error","lambda2", "lambda2.error",
-                              "cs2","cs2.rel",
-                              "I03","I03.error","lambda3", "lambda3.error",
-                              "cs3","cs3.rel",
-                              "I04","I04.error","lambda4", "lambda4.error",
-                              "cs4","cs4.rel",
-                              "I05","I05.error","lambda5", "lambda5.error",
-                              "cs5","cs5.rel",
-                              "I06","I06.error","lambda6", "lambda6.error",
-                              "cs6","cs6.rel",
-                              "I07","I07.error","lambda7", "lambda7.error",
-                              "cs7","cs7.rel"
-      )
-
-      ##write components in output table
-      i<-0
-      k<-1
-      while(i<=n.components*6){
-        output.table[1,i+1]<-I0[k]
-        output.table[1,i+2]<-I0.error[k]
-        output.table[1,i+3]<-lambda[k]
-        output.table[1,i+4]<-lambda.error[k]
-        output.table[1,i+5]<-cs[k]
-        output.table[1,i+6]<-cs.rel[k]
-        i<-i+6
-        k<-k+1
-      }
-
-      ##add pR and n.components
-      output.table<-cbind(sample_code,n.components,output.table,pR)
-
-      ##alter column names
-      colnames(output.table)<-c("sample_code","n.components",
-                                output.tableColNames,"pseudo-R^2")
+    ## set data.frame for a max value of 7 components
+    output.table <- data.frame(matrix(rbind(I0, I0.error, lambda, lambda.error,
+                                            cs, cs.rel),
+                                      nrow = 1))
+    ncols.table <- ncol(output.table) / 6
+    colnames(output.table) <-  c(rbind(paste0("I0", 1:ncols.table),
+                                       paste0("I0", 1:ncols.table, ".error"),
+                                       paste0("lambda", 1:ncols.table),
+                                       paste0("lambda", 1:ncols.table, ".error"),
+                                       paste0("cs", 1:ncols.table),
+                                       paste0("cs", 1:ncols.table, ".rel")))
+    output.table <- cbind(sample_code, n.components, output.table,
+                          "pseudo-R^2"=pR)
 
       ##============================================================================##
       ## COMPONENT TO SUM CONTRIBUTION PLOT
@@ -599,7 +561,7 @@ fit_CWCurve<- function(
       y.contribution_first<-(I0[1]*lambda[1]*exp(-lambda[1]*x))/(eval(fit.function))*100
 
       ##avoid NaN values (might happen with synthetic curves)
-      y.contribution_first[is.nan(y.contribution_first)==TRUE] <- 0
+      y.contribution_first[is.nan(y.contribution_first)] <- 0
 
       ##set values in matrix
       component.contribution.matrix[,3] <- 100
@@ -620,7 +582,7 @@ fit_CWCurve<- function(
           y.contribution_next<-I0[i]*lambda[i]*exp(-lambda[i]*x)/(eval(fit.function))*100
 
           ##avoid NaN values
-          y.contribution_next[is.nan(y.contribution_next)==TRUE] <- 0
+          y.contribution_next[is.nan(y.contribution_next)] <- 0
 
           ##set values in matrix
           component.contribution.matrix[,k[i]] <- 100 - y.contribution_prev
@@ -641,7 +603,7 @@ fit_CWCurve<- function(
         (eval(fit.function))*100
 
       ##avoid NaN values
-      y.contribution_last[is.nan(y.contribution_last)==TRUE]<-0
+      y.contribution_last[is.nan(y.contribution_last)] <- 0
 
       component.contribution.matrix[,((2*length(I0))+1)] <- y.contribution_last
       component.contribution.matrix[,((2*length(I0))+2)] <- 0
@@ -655,7 +617,6 @@ fit_CWCurve<- function(
       component.contribution.matrix.area <- sapply(
         seq(3,ncol(component.contribution.matrix),by=2),
         function(x){
-
           matrixStats::rowDiffs(cbind(rev(component.contribution.matrix[,(x+1)]),
                          component.contribution.matrix[,x]))
         })
@@ -672,16 +633,13 @@ fit_CWCurve<- function(
         component.contribution.matrix.names,
         paste0("cont.c", 1:n.components),
         "cont.sum")
-    }#endif :: (exists("fit"))
   }
 
   ##============================================================================##
   ## PLOTTING
   ##============================================================================##
-  if(plot==TRUE){
-
-    ##grep par parameters
-    par.default <- par()[c("mfrow", "cex", "mar", "omi", "oma")]
+  if (plot) {
+    par.default <- .par_defaults()
     on.exit(par(par.default), add = TRUE)
 
     ##set colors gallery to provide more colors
@@ -698,7 +656,7 @@ fit_CWCurve<- function(
     ##open plot area
     plot_check <- try(plot(NA, NA,
          xlim=c(min(x),max(x)),
-         ylim = c(ifelse(log == "xy", 1, 0), max(y)),
+         ylim = c(as.integer(log == "xy"), max(y)),
          xlab = ifelse(inherits(fit, "try-error"), xlab, ""),
          xaxt = ifelse(inherits(fit, "try-error"), "s", "n"),
          ylab=ylab,
@@ -727,19 +685,17 @@ fit_CWCurve<- function(
       ##plot signal curves
 
       ##plot curve for additional parameters
-      if(length(I0)>1){
-
-        for (i in 1:length(I0)) {
+      for (i in seq_along(I0)) {
           curve(I0[i]*lambda[i]*exp(-lambda[i]*x),col=col[i+1],
                 lwd = 2,
                 add = TRUE)
           legend.caption<- c(legend.caption, paste("component", i))
           curve.col<-c(curve.col,i+1)
-        }
-      }#end if
+      }
       ##plot legend
       #legend(y=max(y)*1,"measured values",pch=20, col="gray", bty="n")
-      legend("topright",legend.caption,lty=rep(1,n.components+1,NA),lwd=2,col=col[curve.col], bty="n")
+      legend("topright", legend.caption, lty = rep_len(1, n.components + 1),
+             lwd = 2, col = col[curve.col], bty = "n")
 
       ##==lower plot==##
       ##plot residuals
@@ -751,7 +707,7 @@ fit_CWCurve<- function(
            col="grey",
            ylab="Residual [a.u.]",
            lwd=2,
-           log=if(log=="x" | log=="xy"){log="x"}else{""}
+           log = gsub("y", "", log)
       ), silent = TRUE)
 
       if (inherits(plot_check2, "try-error")) {
@@ -777,12 +733,11 @@ fit_CWCurve<- function(
            ylab="Contribution [%]",
            xlab=xlab,
            main="Component contribution to sum curve",
-           log=if(log=="x" | log=="xy"){log="x"}else{""})
+           log = gsub("y", "", log))
 
       stepping <- seq(3,length(component.contribution.matrix[1,]),2)
 
       for(i in 1:length(I0)){
-
         polygon(c(component.contribution.matrix[,1],
                   component.contribution.matrix[,2]),
                 c(component.contribution.matrix[,stepping[i]],
@@ -792,11 +747,9 @@ fit_CWCurve<- function(
       rm(stepping)
       } # end if (plot_check2)
 
-    } else {
-      if (verbose)
+    } else if (verbose) {
         .throw_message("Fitting failed, plot without fit produced")
     }#end if try-error for fit
-
     } # end if (plot_check)
   }
 
@@ -807,7 +760,7 @@ fit_CWCurve<- function(
   if (!method_control$export.comp.contrib.matrix) {
     component.contribution.matrix <- NA
   }
-  newRLumResults.fit_CWCurve <- set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(
       data = output.table,
@@ -816,10 +769,4 @@ fit_CWCurve<- function(
     ),
     info = list(call = sys.call())
   )
-
-  rm(fit)
-  rm(output.table)
-  rm(component.contribution.matrix)
-
-  invisible(newRLumResults.fit_CWCurve)
 }

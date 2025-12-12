@@ -34,9 +34,10 @@
 #' Supported types are `plot.raster`, `contour`
 #'
 #' @param ... further arguments and graphical parameters that will be passed
-#' to the specific plot functions. Standard supported parameters are `xlim`, `ylim`, `zlim`,
-#' `xlab`, `ylab`, `main`, `legend` (`TRUE` or `FALSE`), `col`, `cex`, `axes` (`TRUE` or `FALSE`),
-#' `zlim_image` (adjust the z-scale over different images), `stretch`
+#' to the specific plot functions. Standard supported parameters are `xlim`,
+#' `ylim`, `zlim`, `xlab`, `ylab`, `main`, `mtext`, `legend` (`TRUE` or `FALSE`),
+#' `col`, `cex`, `axes` (`TRUE` or `FALSE`), `zlim_image` (adjust the z-scale
+#' over different images), `stretch`, `digits`, scientific (`TRUE` or `FALSE`).
 #'
 #' @return Returns a plot
 #'
@@ -46,7 +47,7 @@
 #' wanted, please use `zlim_image` to maintain a particular value range over a
 #' series of images.
 #'
-#' @section Function version: 0.2.1
+#' @section Function version: 0.2.2
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -75,8 +76,8 @@ plot_RLum.Data.Image <- function(
   on.exit(.unset_function_name(), add = TRUE)
 
   ## Integrity checks -------------------------------------------------------
-
   .validate_class(object, "RLum.Data.Image")
+  plot.type <- .validate_args(plot.type, c("plot.raster", "contour"))
 
   ## extract object
   object <- object@data
@@ -108,7 +109,21 @@ plot_RLum.Data.Image <- function(
   return(x)
 }
 
- plot.type <- .validate_args(plot.type, c("plot.raster", "contour"))
+  .ticks.lab.at <- function(max.size) {
+    if (max.size < 13) {
+      lab <- 1:max.size
+    } else {
+      lab <- pretty(1:max.size, n = min(5, max.size))
+      lab[lab == 0] <- 1
+      lab <- lab[lab <= max.size]
+      if (max.size - max(lab) > 2)
+        lab <- c(lab, max.size)
+    }
+    ## the centre of the first and last squares are respectively at 0
+    ## and 1, all others are spread linearly between these two
+    at <- lab / max.size
+    list(lab = lab, at = (at - at[1]) / (1 - at[1]))
+  }
 
 # Plot settings -----------------------------------------------------------
 plot_settings <- modifyList(x = list(
@@ -120,11 +135,14 @@ plot_settings <- modifyList(x = list(
     ylim = c(1,dim(object)[2]),
     zlim = range(object),
     zlim_image = NULL,
+    mtext = "",
     legend = TRUE,
     useRaster = TRUE,
     stretch = "hist",
     col = c(grDevices::hcl.colors(50, palette = "Inferno")),
-    cex = 1
+    cex = 1,
+    digits = 1,
+    scientific = TRUE
   ), val = list(...), keep.null = TRUE)
 
   ## set frames
@@ -145,101 +163,77 @@ plot_settings <- modifyList(x = list(
   object[object <= plot_settings$zlim[1]] <- max(0,plot_settings$zlim[1])
   object[object >= plot_settings$zlim[2]] <- min(max(object),plot_settings$zlim[2])
 
+  par.default <- .par_defaults()
+  on.exit(par(par.default), add = TRUE)
+
   ##par setting for possible combination with plot method for RLum.Analysis objects
   if(par.local) par(mfrow=c(1,1), cex = plot_settings$cex)
 
-  if (plot.type == "plot.raster") {
-# plot.raster -------------------------------------------------------------
-    for(i in 1:dim(object)[3]) {
-      par.default <- par(mar = c(4.5,4.5,4,3))
-      on.exit(par(par.default), add = TRUE)
-      x <- object[, , i, drop = FALSE]
-      image <-.stretch(x, type = plot_settings$stretch)
+  for (i in 1:dim(object)[3]) {
+    x <- object[, , i, drop = FALSE]
+    range_x <- range(x)
+    main <- ifelse(length(plot_settings$main) == 1,
+                   paste0(plot_settings$main, " #", i),
+                   paste0(plot_settings$main[i]))
 
-      graphics::image(
-        x = image,
-        useRaster = plot_settings$useRaster,
-        axes = FALSE,
-        zlim = plot_settings$zlim_image %||% range(image),
-        xlab = plot_settings$xlab,
-        ylab = plot_settings$ylab,
-        main = paste0(plot_settings$main, " #",i),
-        col = plot_settings$col)
-      graphics::box()
-
-      ## axes
-      if(plot_settings$axes) {
-        xlab <- pretty(1:dim(x)[1])
-        xlab[c(1,length(xlab))] <- c(0,dim(x)[1])
-        xat <- seq(0,1,length.out = length(xlab))
-        graphics::axis(side = 1, at = xat, labels = xlab)
-
-        ylab <- pretty(1:dim(x)[2])
-        ylab[c(1,length(ylab))] <- c(0,dim(x)[2])
-        yat <- seq(0,1,length.out = length(ylab))
-        graphics::axis(side = 2, at = yat, labels = ylab)
-      }
-
-      ## add legend
-      if(plot_settings$legend) {
-        par.default <- c(par.default, par(xpd = TRUE))
-        on.exit(par(par.default), add = TRUE)
-        col_grad <- plot_settings$col[seq(1, length(plot_settings$col), length.out = 14)]
-        slices <- seq(0,1,length.out = 15)
-        for(s in 1:(length(slices) - 1)){
-          graphics::rect(
-            xleft = par()$usr[4] * 1.01,
-            xright = par()$usr[4] * 1.03,
-            ybottom = slices[s],
-            ytop =  slices[s + 1],
-            col = col_grad[s],
-            border = TRUE)
-        }
-
-        text(
-          x = par()$usr[4] * 1.04,
-          y = par()$usr[2],
-          labels = format(plot_settings$zlim_image[2] %||% max(x),
-                          digits = 1, scientific = TRUE),
-          cex = 0.7,
-          srt = 270,
-          pos = 3)
-        text(
-          x = par()$usr[4] * 1.04,
-          y = par()$usr[3],
-          labels = format(plot_settings$zlim_image[1] %||% min(x),
-                          digits = 1, scientific = TRUE),
-          cex = 0.7,
-          pos = 3,
-          srt = 270)
-      }
+    if (plot.type == "plot.raster") {
+      par(mar = c(4.5, 4.5, 4, 3))
+      plot.fun <- graphics::image
+      x <-.stretch(x, type = plot_settings$stretch)
+      useRaster <- plot_settings$useRaster
+    } else if (plot.type == "contour") {
+      plot.fun <- graphics::contour
+      x <- x[, , 1]
+      useRaster <- NULL
     }
-
-  }else if(plot.type == "contour"){
-     for(i in 1:dim(object)[3]) {
-      x <- object[, , i, drop = FALSE]
-      graphics::contour(
-        x = x[,,1],
+    do.call(plot.fun, list(
+        x = x,
+        useRaster = useRaster,
+        main = main,
         axes = FALSE,
         zlim = plot_settings$zlim_image %||% range(x),
         xlab = plot_settings$xlab,
         ylab = plot_settings$ylab,
-        main = paste0(plot_settings$main, " #",i),
-        col = plot_settings$col)
-      graphics::box()
-     }
+        col = plot_settings$col))
+    graphics::box()
 
     ## axes
-    if(plot_settings$axes) {
-      xlab <- pretty(1:dim(x)[1])
-      xlab[c(1,length(xlab))] <- c(0,dim(x)[1])
-      xat <- seq(0,1,length.out = length(xlab))
-      graphics::axis(side = 1, at = xat, labels = xlab)
-
-      ylab <- pretty(1:dim(x)[2])
-      ylab[c(1,length(ylab))] <- c(0,dim(x)[1])
-      yat <- seq(0,1,length.out = length(ylab))
-      graphics::axis(side = 2, at = yat, labels = ylab)
+    if (plot_settings$axes) {
+        xticks <- .ticks.lab.at(nrow(x))
+        graphics::axis(side = 1, at = xticks$at, labels = xticks$lab)
+        yticks <- .ticks.lab.at(ncol(x))
+        graphics::axis(side = 2, at = yticks$at, labels = yticks$lab)
     }
+
+    ## add legend
+    if (plot.type == "plot.raster" && plot_settings$legend) {
+        col_grad <- plot_settings$col[seq(1, length(plot_settings$col), length.out = 14)]
+        slices <- seq(0,1,length.out = 15)
+        par.usr <- par("usr")
+        for(s in 1:(length(slices) - 1)){
+          graphics::rect(
+            xleft = par.usr[4] * 1.01,
+            xright = par.usr[4] * 1.03,
+            ybottom = slices[s],
+            ytop =  slices[s + 1],
+            col = col_grad[s],
+            xpd = TRUE,
+            border = TRUE)
+        }
+
+        text(
+          x = c(par.usr[4], par.usr[4]) * 1.04,
+          y = c(par.usr[3], par.usr[2]),
+          labels = format(plot_settings$zlim_image %||% range_x,
+                          digits = plot_settings$digits,
+                          scientific = plot_settings$scientific),
+          xpd = TRUE,
+          cex = 0.7,
+          srt = 270,
+          pos = 3)
+    }
+
+    ## add mtext
+    mtext(side = 3, plot_settings$mtext)
   }
 }

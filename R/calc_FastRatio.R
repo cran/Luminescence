@@ -133,9 +133,8 @@ calc_FastRatio <- function(object,
   .validate_not_empty(object)
   .validate_positive_scalar(Ch_L1, int = TRUE)
   .validate_positive_scalar(Ch_L2, int = TRUE, null.ok = TRUE)
-  .validate_class(Ch_L3, c("integer", "numeric"), null.ok = TRUE)
+  .validate_class(Ch_L3, c("integer", "numeric"), null.ok = TRUE, length = 2)
   if (!is.null(Ch_L3)) {
-    .validate_length(Ch_L3, 2)
     .validate_positive_scalar(Ch_L3[1], int = TRUE, name = "'Ch_L3[1]'")
     .validate_positive_scalar(Ch_L3[2], int = TRUE, name = "'Ch_L3[2]'")
     if (Ch_L3[1] > Ch_L3[2]) {
@@ -147,11 +146,13 @@ calc_FastRatio <- function(object,
   .validate_positive_scalar(sigmaM)
   .validate_positive_scalar(x)
   .validate_positive_scalar(x2)
-  .validate_class(dead.channels, c("integer", "numeric"))
-  .validate_length(dead.channels, 2)
+  .validate_class(dead.channels, c("integer", "numeric"), length = 2)
   if (any(dead.channels < 0)) {
     .throw_error("All elements of 'dead.channels' should be non-negative")
   }
+  .validate_logical_scalar(fitCW.sigma)
+  .validate_logical_scalar(fitCW.curve)
+  .validate_logical_scalar(plot)
 
   ## Input object handling -----------------------------------------------------
   if (inherits(object, "RLum.Analysis"))
@@ -160,7 +161,7 @@ calc_FastRatio <- function(object,
   if (inherits(object, "RLum.Results"))
     object <- get_RLum(object, "data")
 
-  if ((is.data.frame(object) || is.matrix (object)) && ncol(object) < 2) {
+  if ((is.data.frame(object) || is.matrix(object)) && ncol(object) < 2) {
     .throw_error("'object' should have at least two columns")
   }
 
@@ -295,11 +296,9 @@ calc_FastRatio <- function(object,
     Cts_L2 <- A[Ch_L2, 2]
 
     # optional: predict the counts from the fitted curve
-    if (fitCW.curve) {
-      if (!inherits(fitCW.res, "try-error")) {
+    if (fitCW.curve && !inherits(fitCW.res, "try-error")) {
         nls <- get_RLum(fitCW.res, "fit")
         Cts_L2 <- predict(nls, list(x = t_L2))
-      }
     }
 
     # L3 ----
@@ -318,11 +317,9 @@ calc_FastRatio <- function(object,
     Cts_L3 <- mean(A[Ch_L3st:Ch_L3end, 2])
 
     # optional: predict the counts from the fitted curve
-    if (fitCW.curve) {
-      if (!inherits(fitCW.res, "try-error")) {
+    if (fitCW.curve && !inherits(fitCW.res, "try-error")) {
         nls <- get_RLum(fitCW.res, "fit")
         Cts_L3 <- mean(predict(nls, list(x = c(t_L3_start, t_L3_end))))
-      }
     }
 
     # Warn if counts are not in decreasing order

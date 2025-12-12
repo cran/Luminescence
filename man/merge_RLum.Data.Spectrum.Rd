@@ -7,7 +7,7 @@
 merge_RLum.Data.Spectrum(
   object,
   merge.method = "mean",
-  method.info,
+  method.info = NULL,
   max.temp.diff = 0.1
 )
 }
@@ -25,7 +25,7 @@ be taken from the first object in the list.}
 allows to specify how info elements of the input objects are combined,
 e.g. \code{1} means that just the elements from the first object are kept,
 \code{2} keeps only the info elements from the 2 object etc.
-If nothing is provided all elements are combined.}
+If set to \code{NULL}, all elements are combined.}
 
 \item{max.temp.diff}{\link{numeric} (\emph{with default}):
 maximum difference in the time/temperature values between the spectra to
@@ -107,7 +107,7 @@ This function is fully operational via S3-generics:
 }
 
 \section{Function version}{
- 0.1.1
+ 0.1.2
 }
 
 \examples{
@@ -133,7 +133,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Colombo, M., Kreutzer, S., 2025. merge_RLum.Data.Spectrum(): Merge function for RLum.Data.Spectrum S4 class objects. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Colombo, M., Kreutzer, S., 2025. merge_RLum.Data.Spectrum(): Merge function for RLum.Data.Spectrum S4 class objects. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{internal}

@@ -193,8 +193,15 @@ test_that("check functionality", {
         recuperation_reference = "stop",
         test = "new",
         exceed.max.regpoint = FALSE),
-      plot = TRUE,
+      plot = TRUE
     ),
+    "Recuperation reference invalid, valid values are: 'Natural', 'R1', 'R2'")
+  expect_error(analyse_SAR.CWOSL(object[[1]],
+                                 signal.integral.min = 1,
+                                 signal.integral.max = 2,
+                                 background.integral.min = 900,
+                                 background.integral.max = 1000,
+                                 rejection.criteria = list(recuperation_reference = NULL)),
     "Recuperation reference invalid, valid values are: 'Natural', 'R1', 'R2'")
 
    # Trigger stops -----------------------------------------------------------
@@ -389,7 +396,7 @@ test_that("advance tests run", {
           "RLum.Data.Curve",
           recordType = "irradiation",
           data = no_irr_object[[1]]@records[[1]]@data,
-          info = no_irr_object[[1]]@records[[1]]@info,
+          info = no_irr_object[[1]]@records[[1]]@info
           ),
           no_irr_object[[2]][[1]], no_irr_object[[2]][[2]]),
       originator = "read_XSYG2R"
@@ -458,7 +465,8 @@ test_that("advance tests run", {
       fit.method = "LIN",
       plot = FALSE,
       verbose = FALSE),
-     regexp = "\\[analyse\\_SAR\\.CWOSL\\(\\)\\] 'dose.points' contains NA values or have not been set")
+     regexp = "[analyse_SAR.CWOSL()] 'dose.points' contains NA values or was not set",
+     fixed = TRUE)
 
    ##get null for single list element
    unsuitable_type <- object[1]
@@ -604,7 +612,6 @@ test_that("advance tests run", {
 test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
-  testthat::skip_if_not(getRversion() >= "4.4.0")
 
   set.seed(1)
 
@@ -646,6 +653,16 @@ test_that("graphical snapshot tests", {
                                   background.integral.min = 600,
                                   background.integral.max = 900,
                                   log = "xy",
+                                  plot_onePage = TRUE))
+
+  vdiffr::expect_doppelganger("onlyLxTxTable",
+                              analyse_SAR.CWOSL(
+                                  object = object,
+                                  signal.integral.min = 1,
+                                  signal.integral.max = 2,
+                                  background.integral.min = 900,
+                                  background.integral.max = 1000,
+                                  onlyLxTxTable = TRUE,
                                   plot_onePage = TRUE))
   })
 })

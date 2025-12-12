@@ -12,9 +12,8 @@ calc_CommonDose(data, sigmab, log = TRUE, ...)
 for \link{data.frame}: two columns with De \code{(data[,1])} and De error \code{(data[,2])}}
 
 \item{sigmab}{\link{numeric} (\emph{with default}):
-additional spread in De values.
-This value represents the expected overdispersion in the data should the sample be
-well-bleached (Cunningham & Walling 2012, p. 100).
+additional spread in De values, representing the expected overdispersion in
+the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
 \strong{NOTE}: For the logged model (\code{log = TRUE}) this value must be
 a fraction, e.g. 0.2 (= 20\%). If the un-logged model is used (\code{log = FALSE}),
 \code{sigmab} must be provided in the same absolute units of the De values
@@ -70,7 +69,7 @@ calc_CommonDose(ExampleData.DeValues$CA1)
 } 
 
 \section{How to cite}{
-Burow, C., 2025. calc_CommonDose(): Apply the (un-)logged common age model after Galbraith et al. (1999) to a given De distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. calc_CommonDose(): Apply the (un-)logged common age model after Galbraith et al. (1999) to a given De distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

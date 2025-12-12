@@ -219,7 +219,7 @@
 #' `args` \tab `list` \tab arguments of the original function call \cr
 #' }
 #'
-#' @section Function version: 0.4.6
+#' @section Function version: 0.4.7
 #'
 #' @author
 #' Georgina E. King, University of Lausanne (Switzerland) \cr
@@ -282,7 +282,6 @@
 #'  readerDdot = readerDdot,
 #'  n.MC = 25)
 #'
-#'
 #' \dontrun{
 #' # You can also provide LnTn values separately via the 'LnTn' argument.
 #' # Note, however, that the data frame for 'data' must then NOT contain
@@ -305,9 +304,9 @@
 calc_Huntley2006 <- function(
     data,
     LnTn = NULL,
-    rhop,
-    ddot,
-    readerDdot,
+    rhop = NULL,
+    ddot = NULL,
+    readerDdot = NULL,
     normalise = TRUE,
     fit.method = c("EXP", "GOK"),
     lower.bounds = c(-Inf, -Inf, -Inf, -Inf),
@@ -325,7 +324,7 @@ calc_Huntley2006 <- function(
   .validate_not_empty(data)
   .validate_class(LnTn, "data.frame", null.ok = TRUE)
   fit.method <- .validate_args(fit.method, c("EXP", "GOK"))
-  .validate_length(lower.bounds, 4)
+  .validate_class(lower.bounds, "numeric", length = 4)
   .validate_logical_scalar(summary)
   .validate_logical_scalar(plot)
 
@@ -398,23 +397,19 @@ calc_Huntley2006 <- function(
   } else {
     ## alternatively, an RLum.Results object produced by
     ## analyse_FadingMeasurement() can be provided
-    if (is.na(rhop@originator) || rhop@originator != "analyse_FadingMeasurement")
-      .throw_error("'rhop' accepts only RLum.Results objects produced ",
-                   "by 'analyse_FadingMeasurement()'")
+    .validate_originator(rhop, "analyse_FadingMeasurement")
     rhop <- c(rhop@data$rho_prime$MEAN, rhop@data$rho_prime$SD)
   }
 
   # check if 'rhop' is actually a positive value
-  if (anyNA(rhop) || !rhop[1] > 0 || any(is.infinite(rhop))) {
+  if (anyNA(rhop) || rhop[1] <= 0 || any(is.infinite(rhop))) {
     .throw_error("'rhop' must be a positive number, the provided value ",
                  "was ", signif(rhop[1], 3), " \u00B1 ", signif(rhop[2], 3))
   }
 
   ## Check ddot & readerDdot
-  .validate_class(ddot, "numeric")
-  .validate_length(ddot, 2)
-  .validate_class(readerDdot, "numeric")
-  .validate_length(readerDdot, 2)
+  .validate_class(ddot, "numeric", length = 2)
+  .validate_class(readerDdot, "numeric", length = 2)
 
   ## set up the parallel cluster
   .validate_positive_scalar(cores, int = TRUE)
@@ -635,10 +630,10 @@ calc_Huntley2006 <- function(
   # natdosetime <- seq(0, 1e14, length.out = settings$n.MC)
   # natdosetimeGray <- natdosetime * ddot / ka
 
-  # calculate D0 dose in seconds
-  computedD0 <- (fitcoef[ ,"D0"] * readerDdot) / (ddot / ka)
-
   # Legacy code:
+  # calculate D0 dose in seconds
+  # computedD0 <- (fitcoef[ ,"D0"] * readerDdot) / (ddot / ka)
+  #
   # This is an older approximation to calculate the natural dose response curve,
   # which sometimes tended to slightly underestimate nN_ss. This is now replaced
   # with the newer approach below.
@@ -652,7 +647,6 @@ calc_Huntley2006 <- function(
   natdosetime <- natdosetimeGray
   pr <- 3 * rprime^2 * exp(-rprime^3) # Huntley 2006, eq. 3
   K <- Hs * exp(-rhop[1]^-(1/3) * rprime)
-  TermA <- matrix(NA, nrow = length(rprime), ncol = length(natdosetime))
   UFD0 <- mean(fitcoef[ ,"D0"], na.rm = TRUE) * readerDdot
 
   c_val <- mean(fitcoef[, "c"], na.rm = TRUE)
@@ -663,16 +657,24 @@ calc_Huntley2006 <- function(
     d_gok <- mean(fitcoef[ ,"d"], na.rm = TRUE)
   }
 
-  for (k in 1:length(rprime)) {
-    if (fit.method[1] == "EXP") {
-      TermA[k, ] <- A * pr[k] *
-        ((ddots / UFD0) / (ddots / UFD0 + K[k]) *
-         (1 - exp(-(natdosetime + c_val) * (1 / UFD0 + K[k] / ddots))))
-    } else if (fit.method[1] == "GOK") {
-      TermA[k, ] <- A * pr[k] * (ddots / UFD0) / (ddots / UFD0 + K[k]) *
-        (d_gok-(1+(1 / UFD0 + K[k] / ddots) * natdosetime * c_val)^(-1 / c_val))
-    }
+  ## the original formulation used:
+  ##  (1) (ddots / UFD0) / (ddots / UFD0 + K[k])
+  ##  (2) 1 / UFD0 + K[k] / ddots
+  ## which are algebraically equivalent to:
+  ##  (1) ddots / (ddots + UFD0 * K[k]) -> scaled.ddots
+  ##  (2) 1 / scaled.dots / UFD0
+  scaled.ddots <- ddots / (ddots + UFD0 * K)
+  A.pr.ddots <- A * pr * scaled.ddots
+  inv.UFD0.K <- 1 / scaled.ddots / UFD0
+  if (fit.method == "EXP") {
+    fun <- function(k) A.pr.ddots[k] *
+        (1 - exp(-(natdosetime + c_val) * inv.UFD0.K[k]))
+  } else if (fit.method == "GOK") {
+    fun <- function(k) A.pr.ddots[k] *
+        (d_gok - (1 + inv.UFD0.K[k] * natdosetime * c_val)^(-1 / c_val))
   }
+  TermA <- t(vapply(seq_along(rprime), fun, USE.NAMES = FALSE,
+                    FUN.VALUE = numeric(length(natdosetime))))
 
   LxTx.sim <- colSums(TermA) / sum(pr)
   # warning("LxTx Curve (new): ", round(max(LxTx.sim) / A, 3), call. = FALSE)
@@ -695,9 +697,7 @@ calc_Huntley2006 <- function(
   GC.settings$object <- data.unfaded
 
   ## calculate simulated DE
-  suppressWarnings(
-    GC.simulated <- try(do.call(fit_DoseResponseCurve, GC.settings))
-  )
+  GC.simulated <- suppressWarnings(try(do.call(fit_DoseResponseCurve, GC.settings)))
 
   fit_simulated <- NA
   De.sim <- De.error.sim <- D0.sim.Gy <- D0.sim.Gy.error <- NA
@@ -790,14 +790,14 @@ calc_Huntley2006 <- function(
 
   ## (3) UNFADED ---------------------------------------------------------------
   LxTx.unfaded <- LxTx.measured / theta(dosetime, rhop[1])
-  LxTx.unfaded[is.nan((LxTx.unfaded))] <- 0
-  LxTx.unfaded[is.infinite(LxTx.unfaded)] <- 0
+
+  ## set Inf and NaN values to 0
+  LxTx.unfaded[!is.finite(LxTx.unfaded)] <- 0
   dosetimeGray <- dosetime * readerDdot
 
   ## run this first model also for GOK as in general it provides more
   ## stable estimates that can be used as starting point for GOK
-  if (fit.method[1] == "EXP" || fit.method[1] == "GOK") {
-    fit_unfaded <- try(minpack.lm::nlsLM(
+  fit_unfaded <- try(minpack.lm::nlsLM(
       LxTx.unfaded ~ a * (1 - exp(-(dosetimeGray + c) / D0)),
       start = list(
         a = coef(fit_simulated)[["a"]],
@@ -811,7 +811,6 @@ calc_Huntley2006 <- function(
         lower = lower.bounds[1:3],
         trace = settings$trace,
       control = list(maxiter = settings$maxiter)), silent = TRUE)
-  }
 
   ## if this fit has failed, what we do depends on fit.method:
   ## - for EXP, this error is irrecoverable
@@ -887,7 +886,7 @@ calc_Huntley2006 <- function(
   ## Plotting ------------------------------------------------------------------
   if (plot) {
     ### par settings ---------
-    par.default <- par(no.readonly = TRUE)
+    par.default <- .par_defaults()
     on.exit(par(par.default), add = TRUE)
 
     # set graphical parameters
@@ -1038,7 +1037,7 @@ calc_Huntley2006 <- function(
         bquote(dot(D)["Reader"] == .(format(readerDdot, digits = 2, nsmall = 2)) %+-% .(round(as.numeric(format(readerDdot.error, digits = 3, nsmall = 3)), 3)) ~ frac(Gy, s)),
         bquote(log[10]~(rho~"'") == .(format(log10(rhop[1]), digits = 2, nsmall = 2)) %+-% .(round(as.numeric(format(rhop[2] / (rhop[1] * log(10, base = exp(1))), digits = 2, nsmall = 2)), 2)) ),
         bquote(bgroup("(", frac(n, N), ")") == .(format(nN, digits = 2, nsmall = 2)) %+-% .(round(as.numeric(format(nN.error, digits = 2, nsmall = 2)), 2)) ),
-        bquote(bgroup("(", frac(n, N), ")")[SS] == .(format(nN_SS, digits = 2, nsmall = 2)) %+-% .(round(as.numeric(format(nN_SS.error, digits = 2, nsmall = 2)), 2)) ),
+        bquote(bgroup("(", frac(n, N), ")")[SS] == .(format(nN_SS, digits = 2, nsmall = 2)) %+-% .(round(nN_SS.error, 2))),
         bquote(D["E,sim"] == .(format(De.sim, digits = 1, nsmall = 0)) %+-% .(format(De.error.sim, digits = 1, nsmall = 0)) ~ Gy),
         bquote(D["0,sim"] == .(format(D0.sim.Gy, digits = 1, nsmall = 0)) %+-% .(format(D0.sim.Gy.error, digits = 1, nsmall = 0)) ~ Gy),
         bquote(Age["sim"] == .(format(Age.sim, digits = 1, nsmall = 0)) %+-% .(format(Age.sim.error, digits = 1, nsmall = 0)) ~ ka)
@@ -1057,26 +1056,26 @@ calc_Huntley2006 <- function(
     class = "RLum.Results",
     data = list(
       results = data.frame(
-        "nN" = nN,
-        "nN.error" = nN.error,
-        "nN_SS" = nN_SS,
-        "nN_SS.error" = nN_SS.error,
-        "Meas_De" = abs(De.measured),
-        "Meas_De.error" = De.measured.error,
-        "Meas_D0" =  D0.measured,
-        "Meas_D0.error" = D0.measured.error,
-        "Meas_Age" = Age.measured,
-        "Meas_Age.error" = Age.measured.error,
-        "Sim_De" = De.sim,
-        "Sim_De.error" = De.error.sim,
-        "Sim_D0" = D0.sim.Gy,
-        "Sim_D0.error" = D0.sim.Gy.error,
-        "Sim_Age" = Age.sim,
-        "Sim_Age.error" = Age.sim.error,
-        "Sim_Age_2D0" = Age.sim.2D0,
-        "Sim_Age_2D0.error" = Age.sim.2D0.error,
-        "Unfaded_D0" = D0.unfaded,
-        "Unfaded_D0.error" = D0.error.unfaded,
+        nN = nN,
+        nN.error = nN.error,
+        nN_SS = nN_SS,
+        nN_SS.error = nN_SS.error,
+        Meas_De = abs(De.measured),
+        Meas_De.error = De.measured.error,
+        Meas_D0 =  D0.measured,
+        Meas_D0.error = D0.measured.error,
+        Meas_Age = Age.measured,
+        Meas_Age.error = Age.measured.error,
+        Sim_De = De.sim,
+        Sim_De.error = De.error.sim,
+        Sim_D0 = D0.sim.Gy,
+        Sim_D0.error = D0.sim.Gy.error,
+        Sim_Age = Age.sim,
+        Sim_Age.error = Age.sim.error,
+        Sim_Age_2D0 = Age.sim.2D0,
+        Sim_Age_2D0.error = Age.sim.2D0.error,
+        Unfaded_D0 = D0.unfaded,
+        Unfaded_D0.error = D0.error.unfaded,
         row.names = NULL),
       data = data,
       Ln = c(Ln, Ln.error),

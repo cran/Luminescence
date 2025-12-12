@@ -5,7 +5,7 @@
 \alias{github_commits}
 \alias{github_branches}
 \alias{github_issues}
-\title{GitHub API}
+\title{GitHub API - Deprecated}
 \usage{
 github_commits(user = "r-lum", repo = "luminescence", branch = "master", n = 5)
 
@@ -90,7 +90,7 @@ github_commits(user = "r-lum", repo = "luminescence", branch = "master", n = 10)
 } 
 
 \section{How to cite}{
-Burow, C., 2025. GitHub-API(): GitHub API. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. GitHub-API(): GitHub API - Deprecated. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

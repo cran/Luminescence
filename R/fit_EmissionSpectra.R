@@ -226,12 +226,9 @@ fit_EmissionSpectra <- function(
       ##set frame
       if(is.null(frame)){
         frame <- 1:ncol(o@data)
-
-      }else{
-        if(max(frame) > ncol(o@data)|| min(frame) < 1){
+      } else if (max(frame) > ncol(o@data)|| min(frame) < 1) {
           .throw_error("Invalid 'frame', allowed values range from 1 to ",
                        ncol(o@data))
-        }
       }
 
       ##get frame
@@ -256,11 +253,9 @@ fit_EmissionSpectra <- function(
     ##set frame
     if(is.null(frame)){
       frame <- 1:(ncol(object) - 1)
-    }else{
-      if(max(frame) > (ncol(object)-1) || min(frame) < 1){
+    } else if(max(frame) > (ncol(object)-1) || min(frame) < 1) {
         .throw_error("Invalid 'frame', allowed values range from 1 to ",
                      ncol(object) - 1)
-      }
     }
 
     temp <- lapply(frame +1 , function(x) cbind(object[,1],object[,x]))
@@ -415,7 +410,7 @@ fit_EmissionSpectra <- function(
     mu <- m[id_peaks,1]
 
     if(!is.null(start_parameters))
-      mu <- c(sort(start_parameters), mu[-c(1:length(start_parameters))])
+      mu <- c(sort(start_parameters), mu[-(1:length(start_parameters))])
 
     ## limit the number of components
     if(!is.null(n_components[1]))
@@ -447,8 +442,8 @@ fit_EmissionSpectra <- function(
       success_counter <- success_counter + 1
       fit[[success_counter]] <- fit_try
       if (verbose) cat("\r>> Searching components ... \t\t\t[/]")
-    } else{
-      if (verbose) cat("\r>> Searching components ... \t\t\t[\\]")
+    } else if (verbose) {
+      cat("\r>> Searching components ... \t\t\t[\\]")
     }
 
     ##update run counter
@@ -533,6 +528,8 @@ fit_EmissionSpectra <- function(
   if(plot){
     ##get colour values
     col <- get("col", pos = .LuminescenceEnv)[-1]
+    par.default <- .par_defaults()
+    on.exit(par(par.default), add = TRUE)
 
     ##plot settings
     plot_settings <- modifyList(x = list(
@@ -546,21 +543,13 @@ fit_EmissionSpectra <- function(
       legend = TRUE,
       legend.pos = "topright",
       legend.text = c("sum", paste0("c",1:length(mu),": ", round(mu,2), " eV"))
-
     ), val = list(...))
 
     if (!is.na(fit[1]) && !inherits(fit, "try-error")) {
-    ##make sure that the screen closes if something is wrong
-    on.exit(graphics::close.screen(n = c(1,2)), add = TRUE)
-
-    ##set split screen settings
-    graphics::split.screen(rbind(
-      c(0.1,1,0.32, 0.98),
-      c(0.1,1,0.1, 0.315)))
+      graphics::layout(matrix(c(1, 2), 2, 1), height = c(0.7, 0.3))
 
     ##SCREEN 1 ----------
-    graphics::screen(1)
-    par(mar = c(0, 4, 3, 4))
+    par(mar = c(0, 4.5, 3, 2))
     plot(
       df,
       pch = 20,
@@ -569,7 +558,7 @@ fit_EmissionSpectra <- function(
       xlim = plot_settings$xlim,
       ylim = plot_settings$ylim,
       main = plot_settings$main,
-      col = rgb(0, 0, 0, .6),
+      col = rgb(0, 0, 0, 0.6),
       xaxt = "n",
       yaxt = "n",
       log = plot_settings$log
@@ -620,8 +609,7 @@ fit_EmissionSpectra <- function(
     }
 
     ## SCREEN 2 -----
-    graphics::screen(2)
-    par(mar = c(4, 4, 0, 4))
+    par(mar = c(5, 4.5, 0, 2))
     plot(NA, NA,
       ylim = range(residuals(fit)),
       xlab = plot_settings$xlab,
@@ -630,7 +618,8 @@ fit_EmissionSpectra <- function(
       yaxt = "n",
       xlim = plot_settings$xlim,
       ylab = "",
-      col = rgb(0,0,0,.6),
+      xpd = NA,
+      col = rgb(0, 0, 0, 0.6),
       log = ifelse(grepl(plot_settings$log[1], pattern = "x", fixed = TRUE), "x", "")
     )
 
@@ -655,8 +644,8 @@ fit_EmissionSpectra <- function(
       side = 1,
       labels = paste0("(",round((h * c) / axTicks(side = 3), 0), " nm)"),
       at = axTicks(side = 3),
-      cex.axis = .7,
-      line = .8,
+      cex.axis = 0.7,
+      line = 0.8,
       tick = FALSE
     )
 
@@ -686,7 +675,7 @@ fit_EmissionSpectra <- function(
   if (!method_control$export.plot.data) {
     df_plot <- NA
   }
-  results <- set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(data = m_coef,
                 fit = fit,
@@ -699,7 +688,4 @@ fit_EmissionSpectra <- function(
                 ),
     info = list(call = sys.call())
   )
-
-  ##return
-  return(results)
 }

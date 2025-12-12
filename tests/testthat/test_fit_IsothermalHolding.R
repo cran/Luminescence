@@ -11,10 +11,10 @@ test_that("input validation", {
                "File 'error' does not exist")
   expect_error(fit_IsothermalHolding(set_RLum("RLum.Results", data = list(1)),
                                      rhop = 1e-7),
-               "'data' has unsupported originator")
+               "'data' has an unsupported originator")
   expect_error(fit_IsothermalHolding(iris, rhop = 1e-7),
                "'data' has the wrong column headers")
-  expect_error(fit_IsothermalHolding(input.csv[1], ITL_model = "error"),
+  expect_error(fit_IsothermalHolding(input.csv[1], rhop = 1e-4, ITL_model = "error"),
                "'ITL_model' should be one of 'GOK' or 'BTS'")
   expect_error(fit_IsothermalHolding(input.csv[1], rhop = "error"),
                "'rhop' should be of class 'numeric' or 'RLum.Results'")
@@ -24,9 +24,9 @@ test_that("input validation", {
                "'verbose' should be a single logical value")
   expect_error(fit_IsothermalHolding(test_path("_data/CLBR.xlsx"), rhop = 1e-7),
                "XLS/XLSX format is not supported, use CSV instead")
-  expect_error(fit_IsothermalHolding(input.csv[1], rhop = 1e-7,
+  expect_error(fit_IsothermalHolding(input.csv[1], rhop = 1e-7, ITL_model = "BTS",
                                      num_s_values_bts = 0),
-               "'num_s_values_bts' should be a positive integer scalar")
+               "'num_s_values_bts' should be a single positive integer value")
 })
 
 test_that("check functionality", {
@@ -43,6 +43,11 @@ test_that("check functionality", {
   data <- .import_ThermochronometryData(input.csv[1])
   expect_s4_class(fit_IsothermalHolding(data, rhop = 1e-7, mfrow = c(2, 2)),
                   "RLum.Results")
+
+  expect_warning(expect_null(fit_IsothermalHolding(input.csv[1], rhop = 1e-1,
+                                                   ITL_model = "BTS",
+                                                   num_s_values_bts = 2)),
+                 "No ITL model could be fitted")
   })
 })
 
@@ -59,4 +64,11 @@ test_that("regression tests", {
   expect_equal(res@data$coefs,
                data.frame(SAMPLE = "S1", TEMP = 150, A = NA_real_,
                           b = NA_real_, Et = NA_real_, s10 = NA_real_))
+
+  ## issue 1003
+  set.seed(5)
+  expect_s4_class(fit_IsothermalHolding(input.csv[2], rhop = 1e-5,
+                                        ITL_model = "BTS", verbose = FALSE,
+                                        num_s_values_bts = 2),
+                  "RLum.Results")
 })

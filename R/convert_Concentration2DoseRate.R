@@ -7,8 +7,8 @@
 #'(Gy/ka) and corrects for grain size attenuation and water content
 #'
 #'Dose rate conversion factors can be chosen from Adamiec and Aitken (1998),
-#'Guerin et al. (2011), Liritzis et al. (201) and Cresswell et al. (2018).
-#'Default is Guerin et al. (2011).
+#'Guérin et al. (2011), Liritzis et al. (201) and Cresswell et al. (2018).
+#'Default is Guérin et al. (2011).
 #'
 #'Grain size correction for beta dose rates is achieved using the correction
 #'factors published by Guérin et al. (2012).
@@ -26,8 +26,8 @@
 #'`K` \tab `numeric` \tab K nuclide content in %\cr
 #'`K_SE` \tab `numeric` \tab error on K nuclide content in %\cr
 #'`Th` \tab `numeric` \tab Th nuclide content in ppm\cr
-#'`Th_SE` \tab `numeric` error on Th nuclide content in ppm\cr
-#'`U` \tab `numeric` U nuclide content in ppm\cr
+#'`Th_SE` \tab `numeric` \tab error on Th nuclide content in ppm\cr
+#'`U` \tab `numeric` \tab U nuclide content in ppm\cr
 #'`U_SE` \tab `numeric` \tab error on U nuclide content in ppm\cr
 #'`GrainSize` \tab `numeric` \tab average grain size in µm\cr
 #'`WaterContent` \tab `numeric` \tab mean water content in %\cr
@@ -66,10 +66,10 @@
 #'Cresswell., A.J., Carter, J., Sanderson, D.C.W., 2018. Dose rate conversion parameters:
 #'Assessment of nuclear data. Radiation Measurements 120, 195-201.
 #'
-#'Guerin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion factors: update.
+#'Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion factors: update.
 #'Ancient TL, 29, 5-8.
 #'
-#'Guerin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012. On the use
+#'Guérin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012. On the use
 #'of the infinite matrix assumption and associated concepts: A critical review.
 #'Radiation Measurements, 47, 778-785.
 #'
@@ -159,8 +159,7 @@ convert_Concentration2DoseRate <- function(
   ## in first position, as that is our default value
   valid_conversion_factors <- c("Guerinetal2011", "Cresswelletal2018",
                                 "AdamiecAitken1998", "Liritzisetal2013")
-  stopifnot(all(names(BaseDataSet.ConversionFactors) %in%
-                valid_conversion_factors))
+  stopifnot(names(BaseDataSet.ConversionFactors) %in% valid_conversion_factors)
   conversion <- .validate_args(conversion, valid_conversion_factors)
 
   if(!any(input[,1] %in% c("FS","Q")))
@@ -183,11 +182,7 @@ convert_Concentration2DoseRate <- function(
       }
 
       for (j in 1:2){
-        if (j== 1){
-          Temp = "beta"
-        } else {
-          Temp = "gamma"
-        }
+        Temp <- if (j == 1) "beta" else "gamma"
 
         ConvFactor <- BaseDataSet.ConversionFactors[[conversion]][[Temp]][[Col]]
         Nuclide <- i * 2
@@ -237,9 +232,9 @@ convert_Concentration2DoseRate <- function(
     for (i in 1:6){
       for (j in 1:2){
         if (j == 1){
-          k = 1.25 #Water content correction for beta
+          k <- 1.25 #Water content correction for beta
         } else {
-          k = 1.14 #Water content correction for gamma
+          k <- 1.14 #Water content correction for gamma
         }
 
         Remain <- i %% 2
@@ -255,8 +250,7 @@ convert_Concentration2DoseRate <- function(
     InfDRG <- round(InfDRG, digits = 3)
 
 # Return ------------------------------------------------------------------
-  return(
-    set_RLum(
+  set_RLum(
       class = "RLum.Results",
       data = list(
         InfDRG = InfDRG,
@@ -264,5 +258,5 @@ convert_Concentration2DoseRate <- function(
       ),
       info = list(
         call = sys.call()
-      )))
+      ))
 }

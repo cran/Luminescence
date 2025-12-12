@@ -37,9 +37,9 @@ test_that("input validation", {
   expect_error(calc_Statistics(data = df, weight.calc = "error"),
                "'weight.calc' should be one of 'square' or 'reciprocal'")
   expect_error(calc_Statistics(df, digits = 2.4),
-               "'digits' should be a positive integer scalar")
+               "'digits' should be a single positive integer value")
   expect_error(calc_Statistics(df, n.MCM = "error"),
-               "'n.MCM' should be a positive integer scalar")
+               "'n.MCM' should be a single positive integer value")
 })
 
 test_that("snapshot tests", {
@@ -55,4 +55,7 @@ test_that("snapshot tests", {
   expect_snapshot_plain(calc_Statistics(
       ExampleData.DeValues$BT998, n.MCM = 1000, digits = 2),
       tolerance = snapshot.tolerance)
+
+  expect_snapshot_plain(calc_Statistics(data.frame(1:10, 0:9)),
+                        tolerance = snapshot.tolerance)
 })

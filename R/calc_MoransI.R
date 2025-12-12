@@ -110,10 +110,7 @@ calc_MoransI <- function(object,
   .validate_logical_scalar(spatial_autocorrelation)
   .validate_logical_scalar(compute_pseudo_p)
   .validate_class(df_neighbours, "data.frame", null.ok = TRUE)
-  .validate_class(tested_moransI, "numeric", null.ok = TRUE)
-  if (!is.null(tested_moransI)) {
-    .validate_length(tested_moransI, 1)
-  }
+  .validate_scalar(tested_moransI, null.ok = TRUE)
   .validate_positive_scalar(n_permutations, int = TRUE)
   .validate_logical_scalar(ignore_borders, null.ok = TRUE)
   .validate_logical_scalar(return_intermediate_values)
@@ -219,7 +216,7 @@ calc_MoransI <- function(object,
     ## Local helper function: reshuffle (=permutate) observations, an test if Moran's I
     ## from reshuffled observations if equal or above the calculated Moran's I
     reshuffle_and_test <- function(vn_values, n_moransI, df_neighbours) {
-      vn_values_reshuffled <- rep(NA, length.out = length(vn_values))
+      vn_values_reshuffled <- rep_len(NA_real_, length(vn_values))
       vn_values_reshuffled[vb_contains_observation] <- sample(vn_values[vb_contains_observation])
       (calc_MoransI(object = vn_values_reshuffled,
                     df_neighbours = df_neighbours) >= n_moransI)

@@ -10,7 +10,7 @@ calc_MaxDose(
   log = TRUE,
   par = 3,
   bootstrap = FALSE,
-  init.values,
+  init.values = NULL,
   plot = TRUE,
   ...
 )
@@ -20,9 +20,8 @@ calc_MaxDose(
 for \link{data.frame}: two columns with De \code{(data[ ,1])} and De error \code{(data[ ,2])}.}
 
 \item{sigmab}{\link{numeric} (\strong{required}):
-additional spread in De values.
-This value represents the expected overdispersion in the data should the sample be
-well-bleached (Cunningham & Walling 2012, p. 100).
+additional spread in De values, representing the expected overdispersion in
+the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
 \strong{NOTE}: For the logged model (\code{log = TRUE}) this value must be
 a fraction, e.g. 0.2 (= 20 \%). If the un-logged model is used (\code{log = FALSE}),
 sigmab must be provided in the same absolute units of the De values (seconds or Gray).
@@ -82,7 +81,7 @@ When all calculations are done the results are then converted as follows
 Please see \link{calc_MinDose}.
 }
 \section{Function version}{
- 0.3.1
+ 0.3.2
 }
 
 \examples{
@@ -96,7 +95,7 @@ calc_MaxDose(ExampleData.DeValues$CA1, sigmab = 0.2, par = 3)
 } 
 
 \section{How to cite}{
-Burow, C., 2025. calc_MaxDose(): Apply the maximum age model to a given De distribution. Function version 0.3.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Burow, C., 2025. calc_MaxDose(): Apply the maximum age model to a given De distribution. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -70,7 +70,7 @@ test_that("Test internals", {
   expect_error(.smoothing(runif(100), align = "error"),
                "'align' should be one of 'right', 'center' or 'left'")
   expect_error(.smoothing(runif(100), p_acceptance = "error"),
-               "'p_acceptance' should be a positive scalar")
+               "'p_acceptance' should be a single positive value")
 
   ## .weighted.median() -----------------------------------------------------
   expect_equal(.weighted.median(1:10, w = rep(1, 10)),
@@ -372,6 +372,8 @@ test_that("Test internals", {
                "is missing, with no default")
   expect_error(.validate_class(test <- 1:5, "data.frame"),
                "'test' should be of class 'data.frame'")
+  expect_error(.validate_class(test <- 1:5, "data.frame", length = 2),
+               "'test' should be of class 'data.frame' and have length 2")
   expect_error(.validate_class(test <- 1:5, c("list", "data.frame", "numeric")),
                "'test' should be of class 'list', 'data.frame' or 'numeric'")
   expect_error(.validate_class(test <- 1:5, c("list", "data.frame")),
@@ -423,43 +425,81 @@ test_that("Test internals", {
   expect_warning(expect_false(.validate_length(letters, 25, throw.error = FALSE)),
                  "'letters' should have length 25")
 
+  ## .validate_scalar() -----------------------------------------------------
+  expect_equal(.validate_scalar(1.3),
+               1.3)
+  expect_equal(.validate_scalar(-2, int = TRUE),
+               -2)
+  expect_null(.validate_scalar(NULL, int = TRUE, null.ok = TRUE))
+
+  expect_error(.validate_scalar(int = TRUE),
+               "'NA' should be a single integer value")
+  expect_error(.validate_scalar(test <- "a"),
+               "'test' should be a single value")
+  expect_error(.validate_scalar(test <- NULL),
+               "'test' should be a single value")
+  expect_error(.validate_scalar(iris),
+               "'iris' should be a single value")
+  expect_error(.validate_scalar(iris[, 1, drop = FALSE]),
+               "'iris' should be a single value")
+  expect_error(.validate_scalar(iris[1, 0, drop = FALSE]),
+               "'iris' should be a single value")
+  expect_error(.validate_scalar(iris, null.ok = TRUE),
+               "'iris' should be a single value or NULL")
+  expect_error(.validate_scalar(array(1, c(1, 1, 0))),
+               "'NA' should be a single value")
+  expect_error(.validate_scalar(-1:2, name = "'var'"),
+               "'var' should be a single value")
+  expect_error(.validate_scalar(Inf, int = TRUE, name = "'var'"),
+               "'var' should be a single integer value")
+  expect_error(.validate_scalar(1.5, int = TRUE, name = "'var'"),
+               "'var' should be a single integer value")
+  expect_error(.validate_scalar(NA, int = TRUE, name = "The variable"),
+               "The variable should be a single integer value")
+  expect_error(.validate_scalar(-1:2, pos = TRUE, name = "'var'"),
+               "'var' should be a single positive value")
+  expect_error(.validate_scalar(-1:2, int = TRUE, pos = TRUE, name = "'var'"),
+               "'var' should be a single positive integer value")
+
   ## .validate_positive_scalar() --------------------------------------------
-  expect_silent(.validate_positive_scalar(int = TRUE))
   expect_equal(.validate_positive_scalar(1.3),
                1.3)
   expect_equal(.validate_positive_scalar(2, int = TRUE),
                2)
   expect_null(.validate_positive_scalar(NULL, int = TRUE, null.ok = TRUE))
 
+  expect_error(.validate_positive_scalar(int = TRUE),
+               "'NA' should be a single positive integer value")
   expect_error(.validate_positive_scalar(test <- "a"),
-               "'test' should be a positive scalar")
+               "'test' should be a single positive value")
   expect_error(.validate_positive_scalar(test <- NULL),
-               "'test' should be a positive scalar")
+               "'test' should be a single positive value")
   expect_error(.validate_positive_scalar(iris),
-               "'iris' should be a positive scalar")
+               "'iris' should be a single positive value")
   expect_error(.validate_positive_scalar(iris, null.ok = TRUE),
-               "'iris' should be a positive scalar or NULL")
+               "'iris' should be a single positive value or NULL")
   expect_error(.validate_positive_scalar(1:2, name = "'var'"),
-               "'var' should be a positive scalar")
+               "'var' should be a single positive value")
   expect_error(.validate_positive_scalar(0, name = "'var'"),
-               "'var' should be a positive scalar")
+               "'var' should be a single positive value")
   expect_error(.validate_positive_scalar(-1, name = "'var'"),
-               "'var' should be a positive scalar")
+               "'var' should be a single positive value")
   expect_error(.validate_positive_scalar(Inf, int = TRUE, name = "'var'"),
-               "'var' should be a positive integer")
+               "'var' should be a single positive integer value")
   expect_error(.validate_positive_scalar(1.5, int = TRUE, name = "'var'"),
-               "'var' should be a positive integer")
+               "'var' should be a single positive integer value")
   expect_error(.validate_positive_scalar(NA, int = TRUE, name = "The variable"),
-               "The variable should be a positive integer")
+               "The variable should be a single positive integer value")
 
   ## .validate_logical_scalar() ---------------------------------------------
-  expect_silent(.validate_logical_scalar())
   expect_equal(.validate_logical_scalar(TRUE),
                TRUE)
   expect_equal(.validate_logical_scalar(FALSE),
                FALSE)
   expect_null(.validate_logical_scalar(NULL, null.ok = TRUE))
 
+  expect_error(.validate_logical_scalar(),
+               "'NA' should be a single logical value")
   expect_error(.validate_logical_scalar(test <- "a"),
                "'test' should be a single logical value")
   expect_error(.validate_logical_scalar(test <- NULL),
@@ -475,6 +515,23 @@ test_that("Test internals", {
   expect_error(.validate_logical_scalar(NA, name = "The variable"),
                "The variable should be a single logical value")
 
+  ## .validate_originator() ----------------------------------------------------
+  expect_error(.validate_originator(set_RLum("RLum.Analysis"), "orig"),
+               "'NA' has an unsupported originator (expected 'orig', but found",
+               fixed = TRUE)
+  expect_equal(.validate_originator(set_RLum("RLum.Analysis", originator = "orig"),
+                                    "orig"),
+               "orig")
+
+  ## .check_originator() ----------------------------------------------------
+  expect_true(.check_originator(set_RLum("RLum.Analysis", originator = "orig"),
+                                "orig"))
+  expect_false(.check_originator(set_RLum("RLum.Analysis", originator = "orig"),
+                                 c("orig1", "orig2")))
+  expect_false(.check_originator(set_RLum("RLum.Analysis"), "orig"))
+  expect_false(.check_originator(NULL, "orig"))
+  expect_false(.check_originator(iris, "orig"))
+
   ## .require_suggested_package() -------------------------------------------
   expect_true(.require_suggested_package("utils"))
   expect_error(.require_suggested_package("error"),
@@ -485,18 +542,6 @@ test_that("Test internals", {
   expect_warning(
       expect_false(.require_suggested_package("error", throw.error = FALSE),
                    "This function requires the 'error' package: to install it"))
-
-  ## %||% -------------------------------------------------------------------
-  expect_equal(letters %||% LETTERS,
-               letters)
-  expect_equal(NULL %||% LETTERS,
-               LETTERS)
-  expect_equal(NA %||% LETTERS,
-               NA)
-  expect_equal(character(0) %||% LETTERS,
-               character(0))
-  expect_equal("" %||% LETTERS,
-               "")
 
   ## .listify() -------------------------------------------------------------
   expect_equal(.listify(1, length = 3),
@@ -510,7 +555,32 @@ test_that("Test internals", {
                "'1', '2', '3'")
   expect_equal(.collapse(1:3, quote = FALSE),
                "1, 2, 3")
+  expect_equal(.collapse(1:2, quote = FALSE, last_sep = " or "),
+               "1 or 2")
+  expect_equal(.collapse(1:3, quote = FALSE, last_sep = " or "),
+               "1, 2 or 3")
+  expect_equal(.collapse(as.factor(c("060920", "070920", "080920", "090920")),
+                         quote = FALSE),
+               "060920, 070920, 080920, 090920")
   expect_equal(.collapse(NULL), "")
+
+  ## .format_range() ________________________________________________________
+  expect_equal(.format_range(1:10),
+               "1:10")
+  expect_equal(.format_range(c(1, 10, NA, 8)),
+               "1:10")
+  expect_equal(.format_range(c(-1, -10, NA, -8)),
+               "-10:-1")
+  expect_equal(.format_range(NULL),
+               "NA:NA")
+  expect_equal(.format_range(c(NA, NA, NA)),
+               "NA:NA")
+  expect_equal(.format_range(c(0, 1, -1), sep = ", "),
+               "-1, 1")
+  expect_equal(.format_range(c(0.53, 1.39, 1.14)),
+               "0.53:1.39")
+  expect_equal(.format_range(c(0.53, 1.39, 1.14), nsmall = 3),
+               "0.530:1.390")
 
   ## .shorten_filename() ----------------------------------------------------
   expect_equal(.shorten_filename("/path/to/filename"),

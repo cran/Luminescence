@@ -8,14 +8,17 @@ write_R2TIFF(object, file = tempfile(), norm = 65535, ...)
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Data.Image} or \linkS4class{RLum.Data.Spectrum} object (\strong{required}):
-input object, can be a \link{list} of such objects}
+input object, can be a \link{list} of such objects.}
 
-\item{file}{\link{character} (\strong{required}): the file name and path}
+\item{file}{\link{character} (\strong{required}):
+name of the output file.}
 
-\item{norm}{\link{numeric} (\emph{with default}): normalisation values. Values in TIFF files must range between 0-1, however, usually
-in imaging applications the pixel values are real integer count values. The normalisation to the
-to the highest 16-bit integer values -1 ensures that the numerical values are retained in the exported
-image. If \code{1} nothing is normalised.}
+\item{norm}{\link{numeric} (\emph{with default}):
+normalisation value. Usually, in imaging applications the pixel values are
+integer count values, but values in TIFF files must be in the 0-1 range.
+Normalising to the to the highest 16-bit integer values - 1 ensures that
+the numerical values are retained in the exported image. If \code{1} nothing is
+normalised.}
 
 \item{...}{further arguments to be passed to \link[tiff:writeTIFF]{tiff::writeTIFF}.}
 }
@@ -23,16 +26,16 @@ image. If \code{1} nothing is normalised.}
 A TIFF file
 }
 \description{
-Simple wrapper around \link[tiff:writeTIFF]{tiff::writeTIFF} to export suitable
-RLum-class objects to TIFF images. Per default 16-bit TIFF files are exported.
+Simple wrapper around \link[tiff:writeTIFF]{tiff::writeTIFF} to export suitable \linkS4class{RLum}
+objects to TIFF images. Per default 16-bit TIFF files are exported.
 }
 \section{Function version}{
- 0.1.1
+ 0.1.2
 }
 
 \examples{
 data(ExampleData.RLum.Data.Image, envir = environment())
-write_R2TIFF(ExampleData.RLum.Data.Image, file = tempfile())
+write_R2TIFF(ExampleData.RLum.Data.Image, file = tempfile(fileext = ".tiff"))
 
 }
 \seealso{
@@ -43,7 +46,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. write_R2TIFF(): Export RLum.Data.Image and RLum.Data.Spectrum objects to TIFF Images. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. write_R2TIFF(): Export RLum.Data.Image and RLum.Data.Spectrum objects to TIFF Images. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

@@ -40,7 +40,7 @@
 #' The options are:
 #' - `"Cresswelletal2018"` (Cresswell et al., 2018)
 #' - `"Liritzisetal2013"` (Liritzis et al., 2013)
-#' - `"Guerinetal2011"` (Guerin et al., 2011)
+#' - `"Guerinetal2011"` (Guérin et al., 2011)
 #' - `"AdamiecAitken1998"` (Adamiec and Aitken, 1998)
 #'
 #'
@@ -208,7 +208,7 @@
 #' Dose rate conversion parameters: Assessment of nuclear data.
 #' Radiation Measurements 120, 195-201.
 #'
-#' Guerin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
+#' Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
 #' factors: update. Ancient TL, 29, 5-8.
 #'
 #' Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
@@ -240,7 +240,7 @@
 scale_GammaDose <- function(
   data,
   conversion_factors = c("Cresswelletal2018", "Guerinetal2011", "AdamiecAitken1998", "Liritzisetal2013")[1],
-  fractional_gamma_dose = c("Aitken1985")[1],
+  fractional_gamma_dose = "Aitken1985",
   verbose = TRUE,
   plot = TRUE,
   plot_singlePanels = FALSE,
@@ -316,8 +316,7 @@ scale_GammaDose <- function(
   ## in first position, as that is our default value
   valid_conversion_factors <- c("Cresswelletal2018", "Guerinetal2011",
                                 "AdamiecAitken1998", "Liritzisetal2013")
-  stopifnot(all(names(BaseDataSet.ConversionFactors) %in%
-                valid_conversion_factors))
+  stopifnot(names(BaseDataSet.ConversionFactors) %in% valid_conversion_factors)
   conversion_factors <- .validate_args(conversion_factors,
                                        valid_conversion_factors)
   fractional_gamma_dose <- .validate_args(fractional_gamma_dose,
@@ -381,20 +380,18 @@ scale_GammaDose <- function(
       approx(z, x, n = 1000, method = "linear")
     }, frac_dose[, c("K", "Th", "U")])
 
-    x1 = data$thickness[n]
-    x2 = 0
-    C1 = which.min(abs(interpol$K$x - x1))
-    C2 = which.min(abs(interpol$K$x - x2))
+    x1 <- data$thickness[n]
+    x2 <- 0
+    C1 <- which.min(abs(interpol$K$x - x1))
+    C2 <- which.min(abs(interpol$K$x - x2))
 
     ## MAP: iterate over NUCLIDE
     do.call(cbind, Map(function(x) {
-
-      y1 = interpol[[x]]$y[C1]
-      y2 = interpol[[x]]$y[C2]
+      y1 <- interpol[[x]]$y[C1]
+      y2 <- interpol[[x]]$y[C2]
 
       ### ----
       if (n != target) {
-
         if (n < target) {
           k <-  n + 1
           seq <- k:target
@@ -535,8 +532,8 @@ scale_GammaDose <- function(
   if (plot) {
 
     # save and recover plot parameters
-    par.old <- par(no.readonly = TRUE)
-    on.exit(par(par.old), add = TRUE)
+    par.default <- .par_defaults()
+    on.exit(par(par.default), add = TRUE)
 
     if (!plot_singlePanels)
       graphics::layout(matrix(
@@ -606,7 +603,7 @@ scale_GammaDose <- function(
         # oma = c(1, 1, 1, 1) + 0.1,
         pch = 16)
     } else {
-      par(par.old)
+      par(par.default)
       par(
         mfrow = c(1, 4),
         mar = c(4, 5, 0, 0) + 0.1,
@@ -666,7 +663,7 @@ scale_GammaDose <- function(
       par(mar = c(5, 5, 1, 6) + 0.1,
           cex = 0.7)
     } else {
-      par(par.old)
+      par(par.default)
       par(mar = c(5, 8, 4, 4) + 0.1,
           cex = settings$cex)
     }
@@ -709,9 +706,6 @@ scale_GammaDose <- function(
           col = "#b22222", las = 1,
           line = ifelse(plot_singlePanels, -1, -0.5),
           cex = ifelse(plot_singlePanels, 0.8, 0.7))
-
-    # recover old plot parameters
-    par(par.old)
   }
 
   ## ------------------------------------------------------------------------ ##
@@ -756,7 +750,7 @@ scale_GammaDose <- function(
   )
 
   ## Create RLum.Results object (return object)
-  results <- set_RLum(class = "RLum.Results",
+  set_RLum(class = "RLum.Results",
                       originator = "scale_GammaDose",
                       data = list(summary = summary,
                                   data = data,
@@ -776,6 +770,4 @@ scale_GammaDose <- function(
                                   call = sys.call()),
                       info = settings$info
   )
-
-  return(results)
 }

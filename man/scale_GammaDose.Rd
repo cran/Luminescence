@@ -9,7 +9,7 @@ scale_GammaDose(
   data,
   conversion_factors = c("Cresswelletal2018", "Guerinetal2011", "AdamiecAitken1998",
     "Liritzisetal2013")[1],
-  fractional_gamma_dose = c("Aitken1985")[1],
+  fractional_gamma_dose = "Aitken1985",
   verbose = TRUE,
   plot = TRUE,
   plot_singlePanels = FALSE,
@@ -160,7 +160,7 @@ The options are:
 \itemize{
 \item \code{"Cresswelletal2018"} (Cresswell et al., 2018)
 \item \code{"Liritzisetal2013"} (Liritzis et al., 2013)
-\item \code{"Guerinetal2011"} (Guerin et al., 2011)
+\item \code{"Guerinetal2011"} (Guérin et al., 2011)
 \item \code{"AdamiecAitken1998"} (Adamiec and Aitken, 1998)
 }
 
@@ -236,7 +236,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., Burow, C., 2025. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., Burow, C., 2025. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -249,7 +249,7 @@ Cresswell., A.J., Carter, J., Sanderson, D.C.W., 2018.
 Dose rate conversion parameters: Assessment of nuclear data.
 Radiation Measurements 120, 195-201.
 
-Guerin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
+Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
 factors: update. Ancient TL, 29, 5-8.
 
 Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.

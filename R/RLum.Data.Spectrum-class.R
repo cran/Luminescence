@@ -63,7 +63,7 @@ setClass(
     info = "list"
   ),
   contains = "RLum.Data",
-  prototype = list (
+  prototype = list(
     recordType = NA_character_,
     curveType = NA_character_,
     data = matrix(),
@@ -81,10 +81,10 @@ setClass(
 #'
 #' **[RLum.Data.Spectrum-class]**
 #'
-#' \tabular{lll}{
+#' \tabular{ll}{
 #'   **from** \tab **to**\cr
 #'   `data.frame` \tab `data.frame`\cr
-#'   `matrix` \tab `matrix`
+#'   `matrix` \tab `matrix` \cr
 #'   `list` \tab `list`
 #' }
 #'
@@ -198,40 +198,27 @@ setMethod(
       if (missing(recordType))
         recordType <- data@recordType
 
-      ##check for missing data ... not possible as data is the object itself
-
       ##check for missing info
       if (missing(info))
         info <- data@info
 
-      ##check for missing .uid and .pid >> this are always taken from the
-      ##original dataset
-
-      ##set empty clas form object
-      newRLumDataSpectrum <- new("RLum.Data.Spectrum")
-
-      ##fill - this is the faster way, filling in new() costs ...
-      newRLumDataSpectrum@originator = data@originator
-      newRLumDataSpectrum@recordType = recordType
-      newRLumDataSpectrum@curveType = curveType
-      newRLumDataSpectrum@data = data@data
-      newRLumDataSpectrum@info = info
-      newRLumDataSpectrum@.uid = data@.uid
-      newRLumDataSpectrum@.pid = data@.pid
-
-    } else {
-      ##set empty class from object
-      newRLumDataSpectrum <- new("RLum.Data.Spectrum")
-
-      ##fill - this is the faster way, filling in new() costs ...
-      newRLumDataSpectrum@originator = originator
-      newRLumDataSpectrum@recordType = recordType
-      newRLumDataSpectrum@curveType = curveType
-      newRLumDataSpectrum@data = data
-      newRLumDataSpectrum@info = info
-      newRLumDataSpectrum@.uid = .uid
-      newRLumDataSpectrum@.pid = .pid
+      originator <- data@originator
+      .uid <- data@.uid
+      .pid <- data@.pid
+      data <- data@data
     }
+
+    ## set empty class from object
+    newRLumDataSpectrum <- new("RLum.Data.Spectrum")
+
+    ## fill - this is the faster way, filling in new() costs ...
+    newRLumDataSpectrum@originator <- originator
+    newRLumDataSpectrum@recordType <- recordType
+    newRLumDataSpectrum@curveType <- curveType
+    newRLumDataSpectrum@data <- data
+    newRLumDataSpectrum@info <- info
+    newRLumDataSpectrum@.uid <- .uid
+    newRLumDataSpectrum@.pid <- .pid
 
     return(newRLumDataSpectrum)
   }
@@ -301,12 +288,11 @@ setMethod(f = "bin_RLum.Data",
             on.exit(.unset_function_name(), add = TRUE)
 
             ## Integrity checks ---------------------------------------------
-
             if (length(object@data) < 2) {
               .throw_error("'object' contains no data")
             }
-            .validate_class(bin_size.row, c("numeric", "integer"))
-            .validate_class(bin_size.col, c("numeric", "integer"))
+            .validate_positive_scalar(bin_size.row, int = TRUE)
+            .validate_positive_scalar(bin_size.col, int = TRUE)
 
             ##make sure that we do not get in trouble with negative values
             bin_size.col <- abs(bin_size.col)

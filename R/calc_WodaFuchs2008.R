@@ -98,12 +98,7 @@ calc_WodaFuchs2008 <- function(
   }
 
   ## read additional arguments
-
-  if("trace" %in% names(list(...))) {
-    trace <- list(...)$trace
-  } else {
-    trace <- FALSE
-  }
+  trace <- isTRUE(list(...)$trace)
 
   ## calculations -------------------------------------------------------------
 
@@ -126,7 +121,7 @@ calc_WodaFuchs2008 <- function(
 
   if (n_breaks <= 3) {
     .throw_warning("Fewer than 4 bins produced, 'breaks' set to 4")
-    n_breaks = 4
+    n_breaks <- 4
   }
 
   ## calculate histogram
@@ -182,6 +177,8 @@ calc_WodaFuchs2008 <- function(
 
   ## plot output --------------------------------------------------------------
   if(plot) {
+    par.default <- .par_defaults()
+    on.exit(par(par.default), add = TRUE)
 
     ##define plot settings
     plot_settings <- list(
@@ -216,7 +213,7 @@ calc_WodaFuchs2008 <- function(
   }
 
   ## return output ------------------------------------------------------------
-  return(set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(
       D_estimate = data.frame(
@@ -231,5 +228,5 @@ calc_WodaFuchs2008 <- function(
       breaks = H$breaks
     ),
     info = list(call = sys.call())
-  ))
+  )
 }

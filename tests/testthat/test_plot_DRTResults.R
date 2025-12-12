@@ -22,13 +22,13 @@ test_that("input validation", {
   expect_error(plot_DRTResults(df, given.dose = c(2800, 3000)),
                "'given.dose' should have length equal to the number of input")
   expect_warning(plot_DRTResults(df, boxplot = TRUE),
-                 "Option 'boxplot' requires a value in 'preheat'")
+                 "'boxplot' requires a value in 'preheat', reset to FALSE")
   expect_error(plot_DRTResults(df, summary = 5),
                "'summary' should be of class 'character'")
-  expect_error(plot_DRTResults(df, summary.pos = list()),
-               "'summary.pos' should be of class 'numeric' or 'character'")
   expect_error(plot_DRTResults(df, summary.pos = 5),
                "'summary.pos' should have length 2")
+  expect_error(plot_DRTResults(df, summary.pos = list()),
+               "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
   expect_error(plot_DRTResults(df, summary.pos = "error"),
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
 
@@ -89,7 +89,6 @@ test_that("check functionality", {
 test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
-  testthat::skip_if_not(getRversion() >= "4.4.0")
 
   SW({
   vdiffr::expect_doppelganger("defaults",
@@ -112,4 +111,9 @@ test_that("regression tests", {
   ## issue 769
   expect_silent(plot_DRTResults(list(df, df * 2), preheat = rep(200, 5),
                                 boxplot = TRUE))
+
+  ## issue 1184
+  expect_silent(plot_DRTResults(list(df, df), given.dose = c(10, 10000)))
+  expect_silent(plot_DRTResults(list(df, df), given.dose = c(10, 10000),
+                                preheat = rep(200, 5)))
 })

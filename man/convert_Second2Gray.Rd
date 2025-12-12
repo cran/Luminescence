@@ -9,15 +9,15 @@ convert_Second2Gray(data, dose.rate, error.propagation = "omit")
 \arguments{
 \item{data}{\link{data.frame} (\strong{required}):
 input values, structure: data (\code{values[,1]}) and data error (\code{values [,2]})
-are required}
+are required.}
 
 \item{dose.rate}{\linkS4class{RLum.Results}, \link{data.frame} or \link{numeric} (\strong{required}):
 \code{RLum.Results} needs to be originated from the function \link{calc_SourceDoseRate},
-for \code{vector} dose rate in Gy/s and dose rate error in Gy/s}
+for \code{vector} dose rate in Gy/s and dose rate error in Gy/s.}
 
 \item{error.propagation}{\link{character} (\emph{with default}):
 error propagation method used for error calculation (\code{omit}, \code{gaussian} or
-\code{absolute}), see details for further information}
+\code{absolute}), see details for further information.}
 }
 \value{
 Returns a \link{data.frame} with converted values.
@@ -38,8 +38,8 @@ Provided calculation error propagation methods for error calculation
 \deqn{se(De) [Gy] = se(De) [s] * DR [Gy/s]}
 
 In this case the standard error of the dose rate of the beta-source is
-treated as systematic (i.e. non-random), it error propagation is omitted.
-However, the error must be considered during calculation of the final age.
+treated as systematic (i.e. non-random), and error propagation is omitted.
+However, the error must be considered during calculation of the final age
 (cf. Aitken, 1985, pp. 242). This approach can be seen as method (2) (gaussian)
 for the case the (random) standard error of the beta-source calibration is
 0. Which particular method is requested depends on the situation and cannot
@@ -90,7 +90,7 @@ convert_Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Fuchs, M.C., 2025. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Fuchs, M.C., 2025. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -24,7 +24,7 @@ read_BIN2R(
 \arguments{
 \item{file}{\link{character} or \link{list} (\strong{required}): path and file name of the
 BIN/BINX file (URLs are supported). If input is a \code{list} it should comprise
-only \code{character}s representing each valid path and BIN/BINX-file names.
+only \code{character}s representing valid path and BIN/BINX-file names.
 Alternatively, the input character can be just a directory (path), in which
 case the function tries to detect and import all BIN/BINX files found in
 the directory.}
@@ -81,9 +81,8 @@ If the setting is \link{numeric} (e.g., \code{ignore.RECTYPE = 128}), records of
 for import.}
 
 \item{pattern}{\link{character} (\emph{optional}):
-argument that is used if only a path is provided. The argument will than be
-passed to the function \link{list.files} used internally to construct a \code{list}
-of wanted files}
+regular expression pattern passed to \link{list.files} to construct a list of
+files to read (used only when a path is provided).}
 
 \item{verbose}{\link{logical} (\emph{with default}):
 enable/disable output to the terminal.}
@@ -131,7 +130,7 @@ temp
 } 
 
 \section{How to cite}{
-Kreutzer, S., Fuchs, M.C., Colombo, M., 2025. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Fuchs, M.C., Colombo, M., 2025. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

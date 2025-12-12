@@ -58,15 +58,15 @@ test_that("input validation", {
                "'fit.includingRepeatedRegPoints' should be a single logical")
   expect_error(fit_DoseResponseCurve(LxTxData,
                                      fit.NumberRegPoints = "error"),
-               "'fit.NumberRegPoints' should be a positive integer scalar")
+               "'fit.NumberRegPoints' should be a single positive integer value")
   expect_error(fit_DoseResponseCurve(LxTxData, fit.NumberRegPointsReal = "error"),
-               "'fit.NumberRegPointsReal' should be a positive integer scalar")
+               "'fit.NumberRegPointsReal' should be a single positive integer value")
   expect_error(fit_DoseResponseCurve(LxTxData,
                                      fit.bounds = "error"),
                "'fit.bounds' should be a single logical value")
   expect_error(fit_DoseResponseCurve(LxTxData,
                                      n.MC = "error"),
-               "'n.MC' should be a positive integer scalar")
+               "'n.MC' should be a single positive integer value")
 
   ## shorten dataframe
   expect_warning(fit_DoseResponseCurve(LxTxData[1:2, ], verbose = FALSE),
@@ -385,18 +385,6 @@ temp_OTORX_alt <-
       fit.force_through_origin = FALSE,
       verbose = FALSE,
       n.MC = 10)
-
-
-  ## FIXME(mcol): duplicate of a test in the snapshot block, we need it
-  ##              here too as coverage currently runs on 4.3
-  temp_QDR2 <- fit_DoseResponseCurve(
-      LxTxData,
-      fit.method = "QDR",
-      mode = "extrapolation",
-      fit.force_through_origin = TRUE,
-      verbose = TRUE,
-      n.MC = 10
-  )
   })
 
   expect_s3_class(temp_EXP$Fit, class = "nls")
@@ -431,7 +419,6 @@ temp_OTORX_alt <-
      } else {
        expect_equal(round(sum(temp_GOK$De.MC, na.rm = TRUE), digits = 1), 17828.9,
                     tolerance = 0.1)
-
      }
    }
 
@@ -439,8 +426,8 @@ temp_OTORX_alt <-
    expect_equal(round(temp_OTORX$De[[1]], digits = 2),  1785.43)
    expect_equal(round(temp_OTORX_alt$De[[1]], digits = 2),  758.280)
    expect_equal(round(temp_OTORX_alt2$De[[1]], digits = 2),  793.21, tolerance = 0.2)
-   expect_equal(round(sum(temp_OTOR$De.MC, na.rm = TRUE), digits = 0), 17422)
-   expect_equal(round(sum(temp_OTORX$De.MC, na.rm = TRUE), digits = 0), 14477, tolerance = 0.2)
+   expect_equal(round(sum(temp_OTOR$De.MC, na.rm = TRUE), digits = 0), 17748)
+   expect_equal(round(sum(temp_OTORX$De.MC, na.rm = TRUE), digits = 0), 17851, tolerance = 0.2)
 
 # Check extrapolation -----------------------------------------------------
   ## load data

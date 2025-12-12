@@ -118,61 +118,38 @@ plot_SingleGrainDisc <- function(object,
 
   ## Scaling from value to point size -----------------------
 
-  if(sum(!is.na(vn_values_to_show)) == 1)
-  {
+  if (sum(!is.na(vn_values_to_show)) == 1) {
     ## Scale if there is one observation
     vn_range_values <- range(c(vn_values_to_show, 0), na.rm = TRUE)
     n_mean_value <- mean(vn_range_values)
     vn_values_to_show[101] <- n_mean_value  ## Temporarily add mean value to vector for scaling
     vn_values_to_show <- (vn_values_to_show-vn_range_values[1]) / diff(vn_range_values)
 
-  } else
-  {
+  } else {
     vn_range_values <- range(vn_values_to_show, na.rm = TRUE)
     n_mean_value <- mean(vn_range_values)
     vn_values_to_show[101] <- n_mean_value ## Temporarily add mean value to vector for scaling
-    if(str_transform == "lin") # No transformation, just rescaling
-    {
-      ## Scale to from 0 to inf
-      vn_values_to_show <- vn_values_to_show - min(vn_values_to_show , na.rm = TRUE)
-
-      ## Scale to from n_ub_cex to n_lb_cex)
-      vn_values_to_show <- (vn_values_to_show)/
-        (max(vn_values_to_show , na.rm = TRUE) / (n_ub_cex - n_lb_cex) ) +
-        n_lb_cex
-    }
-    else if (str_transform == "log") {
+    ## Scale to from 0 to inf
+    vn_values_to_show <- vn_values_to_show - min(vn_values_to_show, na.rm = TRUE)
+    if (str_transform == "log") {
       ## Scale to from 1 to inf, also to avoid problems with non-positive values
-      vn_values_to_show <- vn_values_to_show - min(vn_values_to_show , na.rm = TRUE) + 1
-
-      ## Transform
-      vn_values_to_show <- log(vn_values_to_show)
-
-      ## Scale to from n_ub_cex to n_lb_cex
-      vn_values_to_show <- (vn_values_to_show)/
-        (max(vn_values_to_show , na.rm = TRUE) / (n_ub_cex - n_lb_cex) ) +
-        n_lb_cex
+      vn_values_to_show <- log(vn_values_to_show + 1)
     }
     else if (str_transform == "sqrt") {
-      ## Scale to from 0 to inf
-      vn_values_to_show <- vn_values_to_show - min(vn_values_to_show , na.rm = TRUE)
-
       ## Transform
       vn_values_to_show <- sqrt(vn_values_to_show)
-
-      ## Scale to from n_ub_cex to n_lb_cex)
-      vn_values_to_show <- (vn_values_to_show)/
-        (max(vn_values_to_show , na.rm = TRUE) / (n_ub_cex - n_lb_cex) ) +
-        n_lb_cex
     }
-  }
 
+    ## Scale to from n_ub_cex to n_lb_cex)
+    vn_values_to_show <- n_lb_cex + vn_values_to_show /
+      (max(vn_values_to_show, na.rm = TRUE) / (n_ub_cex - n_lb_cex))
+  }
 
   n_mv_cex <- vn_values_to_show[101] ## Extract mean value point size
   vn_values_to_show <- vn_values_to_show[-101]
 
   ## Plotting  -----------------------
-  df_disc <- data.frame(x = rep(1:10, length.out=100),
+  df_disc <- data.frame(x = rep_len(1:10, 100),
                         y = rep(1:10, each=10)
   )
 
@@ -201,14 +178,12 @@ plot_SingleGrainDisc <- function(object,
   if (show_positioning_holes || show_coordinates) {
     ## move title up
     mtext(str_title, side = 3, line = 2.5, adj = 0.5, cex=1.3)
-  } else
-  {
+  } else {
     mtext(str_title, side = 3, line = 1, adj = 0.5, cex=1.5)
   }
 
   ## Show NA values
-  if(any(is.na(vn_values_to_show)))
-  {
+  if (anyNA(vn_values_to_show)) {
     points(x = df_disc$x,
            y = df_disc$y,
            cex = 0.5,
@@ -261,7 +236,7 @@ plot_SingleGrainDisc <- function(object,
     li_weight <- split((2 * df_neighbours$weight / max(df_neighbours$weight)),
                        1:n_lines)
 
-    mapply(lines, x = list_x, y = list_y, col = c("purple"), lwd = li_weight, lty = 'dotted')
+    mapply(lines, x = list_x, y = list_y, col = "purple", lwd = li_weight, lty = "dotted")
   }
 
   if (plot_settings$legend) {
@@ -278,8 +253,7 @@ plot_SingleGrainDisc <- function(object,
     vn_pt_cex <- c( n_lb_cex, n_mv_cex,  n_ub_cex)
 
     ## if also NA values
-    if(any(is.na(vn_values_to_show)))
-    {
+    if (anyNA(vn_values_to_show)) {
       vs_legend <- c(vs_legend, "No obs.")
       vn_pch    <- c(vn_pch,     4 )
       vs_lty    <- c(vs_lty,    NA)

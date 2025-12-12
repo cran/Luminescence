@@ -63,7 +63,6 @@
 #' The function returns the same data type as the input data type with
 #' the transformed curve values.
 #'
-#'
 #' **`RLum.Data.Curve`**
 #'
 #' \tabular{ll}{
@@ -241,7 +240,7 @@ convert_CW2pHMi<- function(
   ##set delta
   ##if no values for delta is set selected a delta value for a maximum of
   ##two extrapolation points
-  if(missing(delta)==TRUE){
+  if (missing(delta)) {
     i<-10
     delta<-i
     t.transformed<-t-(1/delta)*log(1+delta*t)
@@ -253,7 +252,6 @@ convert_CW2pHMi<- function(
       i<-i+10
     }
   }else{
-
     t.transformed<-t-(1/delta)*log(1+delta*t)
   }
 
@@ -261,7 +259,6 @@ convert_CW2pHMi<- function(
 
   ##interpolate values, values beyond the range return NA values
   CW_OSL.interpolated <- approx(t,CW_OSL.log, xout=t.transformed, rule=1)
-
 
   ##combine t.transformed and CW_OSL.interpolated in a data.frame
   temp <- data.frame(x=t.transformed, y=unlist(CW_OSL.interpolated$y))
@@ -289,7 +286,7 @@ convert_CW2pHMi<- function(
   # (3) Extrapolate first values of the curve ---------------------------------
 
   ##(a) - find index of first rows which contain NA values (needed for extrapolation)
-  temp.sel.id<-min(which(is.na(temp[,2])==FALSE))
+  temp.sel.id <- min(which(!is.na(temp[, 2])))
 
   ##(b) - fit linear function
   fit.lm <- stats::lm(y ~ x, data.frame(x = t[1:2], y = CW_OSL.log[1:2]))
@@ -347,11 +344,4 @@ convert_CW2pHMi<- function(
       recordType = values@recordType,
       data = as.matrix(temp.values[,1:2]),
       info = temp.info)
-}
-
-#' @rdname convert_CW2pHMi
-#' @export
-CW2pHMi <- function(values, delta) {
-  .Deprecated("convert_CW2pHMi", old = "CW2pHMi")
-  convert_CW2pHMi(values, delta)
 }

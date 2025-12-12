@@ -45,7 +45,6 @@ read_HeliosOSL2R <- function(
         return(NULL)
       }
       tmp
-
     })
 
     ## remove NULL
@@ -62,6 +61,9 @@ read_HeliosOSL2R <- function(
 
   .validate_class(file, c("character", "list"))
   .validate_length(file, 1)
+  if (is.na(file)) {
+    .throw_error("'file' is not valid")
+  }
 
   ## check file format
   if (tolower(ext <- tools::file_ext(file)) != "osl")
@@ -120,7 +122,6 @@ read_HeliosOSL2R <- function(
         x[2]
       else
         x[1]
-
     })
     names(info) <- info_names
 
@@ -145,10 +146,8 @@ read_HeliosOSL2R <- function(
   })
 
   ## create RLum.Analysis as output
-  object <- set_RLum(
+  set_RLum(
     class = "RLum.Analysis",
     originator = "read_HeliosOSL2R",
     records = records)
-
-  return(object)
 }

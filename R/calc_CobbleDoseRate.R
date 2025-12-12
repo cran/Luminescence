@@ -111,8 +111,7 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
                    package = "Luminescence"))
   valid_conversion_factors <- c("Guerinetal2011", "Cresswelletal2018",
                                 "AdamiecAitken1998", "Liritzisetal2013")
-  stopifnot(all(names(BaseDataSet.ConversionFactors) %in%
-                valid_conversion_factors))
+  stopifnot(names(BaseDataSet.ConversionFactors) %in% valid_conversion_factors)
   conversion <- .validate_args(conversion, valid_conversion_factors)
 
   # Calculate Dose Rate -----------------------------------------------------
@@ -155,8 +154,6 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
   ThicknessError <- matrix(data = NA, nrow = N, ncol = 8)
   DataIndividual <- matrix(data = NA, nrow = N, ncol = 25)
   DataComponent <- matrix(data = NA, nrow = N, ncol = 9)
-  DoseRates <- matrix(data = NA, nrow = 1, ncol = 24)
-  output <- matrix(list(), nrow = 2, ncol = 1)
 
   ### Calculate dose rate profiles through the rock ----
   t <- Diameter * 10 - DiameterSeq
@@ -403,8 +400,7 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
   DataComponent[is.na(DataComponent)] <- 0
 
   # Return ------------------------------------------------------------------
-  return(
-    set_RLum(
+  set_RLum(
       class = "RLum.Results",
       data = list(
         DataIndividual = DataIndividual,
@@ -413,6 +409,5 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
       ),
       info = list(
         call = sys.call()
-      )))
-
+      ))
 }

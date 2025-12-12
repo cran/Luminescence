@@ -208,9 +208,7 @@ calc_Lamothe2003 <- function(
     }
 
   }else if(inherits(object, "RLum.Results")){
-    if (!object@originator %in% c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"))
-      .throw_error("Input for 'object' created by function ",
-                   object@originator, "() not supported")
+    .validate_originator(object, c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"))
 
     ## get number of datasets; we have to search for the word "Natural",
     ## everything else is not safe enough
@@ -220,7 +218,7 @@ calc_Lamothe2003 <- function(
 
     ## columns of interest
     cols <- c("Dose", "LxTx", "LxTx.Error",
-              if (object@originator == "analyse_pIRIRSequence") "Signal")
+              if (.check_originator(object, "analyse_pIRIRSequence")) "Signal")
     object <- full_table[, cols]
 
     ## we make a self-call here since this file can contain a lot of information
@@ -287,8 +285,9 @@ calc_Lamothe2003 <- function(
   ), val = list(...))
 
   ##run plot function
+  par.default <- .par_defaults()
+  on.exit(par(par.default), add = TRUE)
   fit_results <- do.call(what = plot_GrowthCurve, args = argument_list)
-
 
   # Age calculation -----------------------------------------------------------------------------
   res <- get_RLum(fit_results)
@@ -313,8 +312,7 @@ calc_Lamothe2003 <- function(
   }
 
   # Compile output ------------------------------------------------------------------------------
-  return(
-    set_RLum(
+  set_RLum(
       class = "RLum.Results",
       data = list(
         data = data.frame(
@@ -339,6 +337,5 @@ calc_Lamothe2003 <- function(
       info = list(
         call = sys.call()
       )
-    )
   )
 }

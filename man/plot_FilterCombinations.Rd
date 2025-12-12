@@ -41,7 +41,7 @@ Returns an S4 object of type \linkS4class{RLum.Results}.
 \strong{@data}
 
 \tabular{lll}{
-\strong{\code{Object}} \tab \strong{\code{Type}} \strong{\code{Description}} \cr
+\strong{\code{Object}} \tab \strong{\code{Type}} \tab \strong{\code{Description}} \cr
 \code{net_transmission_window} \tab \code{matrix} \tab the resulting net transmission window \cr
 \code{OD_total} \tab \code{matrix} \tab the total optical density\cr
 \code{filter_matrix} \tab \code{matrix} \tab the filter matrix used for plotting
@@ -50,7 +50,7 @@ Returns an S4 object of type \linkS4class{RLum.Results}.
 \strong{@info}
 
 \tabular{lll}{
-\strong{Object} \tab \strong{Type} \strong{Description} \cr
+\strong{Object} \tab \strong{Type}\tab  \strong{Description} \cr
 \code{call} \tab \link{call} \tab the original function call
 }
 }
@@ -169,7 +169,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

@@ -95,7 +95,7 @@ NULL
 #' @method plot list
 #' @export
 plot.list <- function(x, y, ...) {
-  if (all(sapply(x, function(x) inherits(x, "RLum")))) {
+  if (all(sapply(x, inherits, "RLum"))) {
     plot_RLum(object = x, ...)
   }
   else {
@@ -184,15 +184,16 @@ summary.RLum.Data.Curve <- function(object, ...) summary(object@data, ...)
 #' @method subset Risoe.BINfileData
 #'
 #' @param records.rm [subset] [logical] (*with default*):
-#' remove records from data set, can be disabled, to just set the column `SET` to `TRUE` or `FALSE`
+#' whether records should be removed from the data set. If `FALSE`, the `SEL`
+#' column marks the selected records.
 #'
 #' @export
 subset.Risoe.BINfileData <- function(x, subset, records.rm = TRUE, ...) {
   .set_function_name("subset.Risoe.BINfileData")
   on.exit(.unset_function_name(), add = TRUE)
 
-  if(length(list(...)))
-    .throw_warning("Argument not supported and skipped:", names(list(...)))
+  if (...length())
+    .throw_warning("Argument not supported and skipped: ", ...names())
 
   ##select relevant rows
   sel <- tryCatch(eval(
@@ -201,8 +202,8 @@ subset.Risoe.BINfileData <- function(x, subset, records.rm = TRUE, ...) {
     enclos = parent.frame()
   ),
   error = function(e) {
-    .throw_error("\nInvalid subset options, valid terms are: ",
-                 .collapse(names(x@METADATA)))
+    .throw_error("Invalid subset options, valid terms are: ",
+                 .collapse(names(x@METADATA), quote = FALSE))
   })
 
   ##probably everything is FALSE now?
@@ -211,6 +212,11 @@ subset.Risoe.BINfileData <- function(x, subset, records.rm = TRUE, ...) {
       x@METADATA <- x@METADATA[sel, ]
       x@DATA <- x@DATA[sel]
       x@METADATA[["ID"]] <- 1:length(x@METADATA[["ID"]])
+      ## the .RESERVED slot may not be there, in which case we don't subset it,
+      ## otherwise we generate a list of NULLs which can't be written out by
+      ## write_R2BIN()
+      if (length(x@.RESERVED) > 0)
+        x@.RESERVED <- x@.RESERVED[sel]
       return(x)
 
     } else{
@@ -389,31 +395,54 @@ as.matrix.RLum.Data.Image <- function(x, ...) as(x, "matrix")
 
 #' @rdname methods_RLum
 #' @export
-is.RLum <- function(x, ...) is(x, "RLum")
+# nocov start
+is.RLum <- function(x, ...) {
+  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
+  is(x, "RLum")
+}
 
 #' @rdname methods_RLum
 #' @export
-is.RLum.Data <- function(x, ...) is(x, "RLum.Data")
+is.RLum.Data <- function(x, ...) {
+  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
+  is(x, "RLum.Data")
+}
 
 #' @rdname methods_RLum
 #' @export
-is.RLum.Data.Curve <- function(x, ...) is(x, "RLum.Data.Curve")
+is.RLum.Data.Curve <- function(x, ...) {
+  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
+  is(x, "RLum.Data.Curve")
+}
 
 #' @rdname methods_RLum
 #' @export
-is.RLum.Data.Spectrum <- function(x, ...) is(x, "RLum.Data.Spectrum")
+is.RLum.Data.Spectrum <- function(x, ...) {
+  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
+  is(x, "RLum.Data.Spectrum")
+}
 
 #' @rdname methods_RLum
 #' @export
-is.RLum.Data.Image <- function(x, ...) is(x, "RLum.Data.Image")
+is.RLum.Data.Image <- function(x, ...) {
+  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
+  is(x, "RLum.Data.Image")
+}
 
 #' @rdname methods_RLum
 #' @export
-is.RLum.Analysis <- function(x, ...) is(x, "RLum.Analysis")
+is.RLum.Analysis <- function(x, ...) {
+  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
+  is(x, "RLum.Analysis")
+}
 
 #' @rdname methods_RLum
 #' @export
-is.RLum.Results <- function(x, ...) is(x, "RLum.Results")
+is.RLum.Results <- function(x, ...) {
+  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
+  is(x, "RLum.Results")
+}
+# nocov end
 
 # merge() -----------------------------------------------------------------
 
@@ -428,16 +457,12 @@ merge.RLum <- function(x, y, ...) merge_RLum(append(list(...), values = c(x, y))
 #' @method unlist RLum.Analysis
 #' @export
 unlist.RLum.Analysis <- function(x, recursive = TRUE, ...){
-
   temp <- get_RLum(object = x, recursive = recursive, ... )
-  if(recursive){
-    unlist(lapply(1:length(temp), function(x){
+  if (!recursive)
+    return(temp)
+  unlist(lapply(1:length(temp), function(x){
       get_RLum(temp)
     }), recursive = FALSE)
-
-  }else{
-    return(temp)
-  }
 }
 
 

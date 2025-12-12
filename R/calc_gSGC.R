@@ -9,7 +9,6 @@
 #' Solving of the equation is realised using [uniroot].
 #' Large values for `n.MC` will significantly increase the computation time.
 #'
-#'
 #' @param data [data.frame] (**required**):
 #' input data  the following columns five columns in the given order:
 #' `LnTn`, `LnTn.error`, `Lr1Tr1`, `Lr1Tr1.error`, `Dr1`. Column names are
@@ -51,7 +50,7 @@
 #' **`@info`**\cr
 #' `$ call`` ([call]) the original function call
 #'
-#' @section Function version: 0.1.2
+#' @section Function version: 0.1.3
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -78,7 +77,7 @@
 calc_gSGC<- function(
   data,
   gSGC.type = "0-250",
-  gSGC.parameters,
+  gSGC.parameters = NULL,
   n.MC = 100,
   verbose = TRUE,
   plot = TRUE,
@@ -94,6 +93,7 @@ calc_gSGC<- function(
   if (ncol(data) != 5)
     .throw_error("'data' is expected to have 5 columns")
   gSGC.type <- .validate_args(gSGC.type, c("0-250", "0-450"))
+  .validate_class(gSGC.parameters, "list", null.ok = TRUE)
 
   ##rename columns for consistency reasons
   colnames(data) <- c('LnTn', 'LnTn.error', 'Lr1Tr1', 'Lr1Tr1.error', 'Dr1')
@@ -114,7 +114,7 @@ calc_gSGC<- function(
     }
 
     ##set general parameters
-    if (!missing(gSGC.parameters)) {
+    if (!is.null(gSGC.parameters)) {
       A <- gSGC.parameters$A
       A.error <- gSGC.parameters$A.error
       D0 <- gSGC.parameters$D0
@@ -173,8 +173,6 @@ for(i in 1:nrow(data)){
     Lr1Tr1 <- data[i, "Lr1Tr1"]
     Lr1Tr1.error <- data[i,"Lr1Tr1.error"]
     Dr1 <- data[i,"Dr1"]
-    Dr1.error <- data[i,"Dr1.error"]
-
     LnTn <- data[i,"LnTn"]
     LnTn.error <- data[i,"LnTn.error"]
 
@@ -356,7 +354,7 @@ for(i in 1:nrow(data)){
 ##============================================================================##
 
     ##replace values in the data.table with values
-    output.data[i, `:=` (DE = De,
+    output.data[i, `:=`(DE = De,
                          DE.ERROR = De.error,
                          ETA = Eta)]
 
@@ -384,7 +382,7 @@ for(i in 1:nrow(data)){
 ##OUTPUT RLUM
 ##============================================================================##
 
-    temp.RLum.Results <- set_RLum(
+  set_RLum(
       class = "RLum.Results",
       data = list(
         De = as.data.frame(output.data),
@@ -393,6 +391,4 @@ for(i in 1:nrow(data)){
       ),
       info = list( call = sys.call())
     )
-
-  return(temp.RLum.Results)
 }

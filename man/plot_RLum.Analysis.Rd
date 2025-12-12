@@ -7,8 +7,8 @@
 plot_RLum.Analysis(
   object,
   subset = NULL,
-  nrows,
-  ncols,
+  nrows = NULL,
+  ncols = NULL,
   abline = NULL,
   combine = FALSE,
   records_max = NULL,
@@ -27,12 +27,12 @@ directly passed to the function \link{get_RLum}
 (e.g., \code{subset = list(curveType = "measured")})}
 
 \item{nrows}{\link{integer} (\emph{optional}):
-sets number of rows for plot output, if nothing is set the function
-tries to find a value.}
+number of rows in the plot output. If set to \code{NULL} the function tries to
+find a reasonable value.}
 
 \item{ncols}{\link{integer} (\emph{optional}):
-sets number of columns for plot output, if nothing is set the function
-tries to find a value.}
+number of columns in the plot output. If set to \code{NULL} the function tries to
+find a reasonable value.}
 
 \item{abline}{\link{list} (\emph{optional}):
 allows to add ab-lines to the plot. Argument are provided
@@ -44,11 +44,11 @@ the first and a vertical line at 100 to the 2nd plot.}
 \item{combine}{\link{logical} (\emph{with default}):
 allows to combine all \linkS4class{RLum.Data.Curve} objects in one single plot.}
 
-\item{records_max}{\link{numeric} (\emph{optional}): limits number of records
-shown if \code{combine = TRUE}. Shown are always the first and the last curve,
-the other number of curves to be shown a distributed evenly, this may result
-in fewer curves plotted as specified. This parameter has only
-an effect for  n > 2.}
+\item{records_max}{\link{integer} (\emph{optional}):
+limits number of records shown when \code{combine = TRUE} is used. The first and
+last curves are always shown, the other curves shown are distributed evenly;
+this may result in fewer curves plotted than specified. This argument must
+be at least 2 to have an effect.}
 
 \item{curve.transformation}{\link{character} (\emph{with default}):
 allows transforming CW-OSL and CW-IRSL curves to pseudo-LM curves via
@@ -76,7 +76,7 @@ Returns multiple plots.
 }
 \description{
 The function provides a standardised plot output for curve data of an
-\linkS4class{RLum.Analysis} object
+\linkS4class{RLum.Analysis} object.
 
 The function produces a multiple plot output. A file output is recommended
 (e.g., \link{pdf}).
@@ -140,7 +140,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

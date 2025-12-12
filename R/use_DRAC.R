@@ -10,7 +10,8 @@
 #' CSV-files.
 #'
 #' @param name [character] (*with default*):
-#' Optional user name submitted to DRAC. If omitted, a random name will be generated
+#' Optional user name submitted to DRAC. If `NULL`, a random name will be
+#' generated.
 #'
 #' @param print_references (*with default*):
 #' Print all references used in the input data table to the console.
@@ -52,7 +53,7 @@
 #'
 #' @seealso [template_DRAC], [.as.latex.table]
 #'
-#' @section Function version: 0.16
+#' @section Function version: 0.17
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
@@ -116,7 +117,7 @@
 #' @export
 use_DRAC <- function(
   file,
-  name,
+  name = NULL,
   print_references = TRUE,
   citation_style = "text",
   ...
@@ -133,9 +134,8 @@ use_DRAC <- function(
   ##
  # Settings ------------------------------------------------------------------------------------
   settings <- modifyList(list(
-    name = ifelse(missing(name),
-                  paste0(sample(c(LETTERS, letters), runif(1, 2, 4)), collapse = ""),
-                  name),
+    name = name %||% paste(sample(c(LETTERS, letters), runif(1, 2, 4)),
+                           collapse = ""),
     verbose = TRUE,
     url = "https://www.aber.ac.uk/en/dges/research/quaternary/luminescence-research-laboratory/dose-rate-calculator/?show=calculator",
     ignore_version = FALSE,
@@ -189,6 +189,7 @@ use_DRAC <- function(
   if (nrow(input.raw) > 5000)
     .throw_error("The limit of allowed datasets is 5000!")
 
+  .validate_class(name, "character", null.ok = TRUE)
   .validate_logical_scalar(print_references)
   citation_style <- .validate_args(citation_style,
                                    c("text", "Bibtex", "citation", "html",
@@ -246,8 +247,7 @@ use_DRAC <- function(
   DRAC_submission.df[] <- lapply(DRAC_submission.df, as.character)
 
   ##paste everything together to get the format we want
-  DRAC_input <- paste0(apply(DRAC_submission.df, 1,
-                             function(x) paste(x, collapse = " ")),
+  DRAC_input <- paste0(apply(DRAC_submission.df, 1, paste, collapse = " "),
                        "\n", collapse = "")
 
   # Send data to DRAC ---------------------------------------------------------------------------
@@ -282,7 +282,6 @@ use_DRAC <- function(
     message("\t The request was successful, processing the reply...")
 
   ## assign DRAC response data to variables
-  http.header <- DRAC.response$header
   DRAC.content <- httr::content(x = DRAC.response, as = "text")
 
   ## if the input was valid from a technical standpoint, but not with regard
@@ -293,8 +292,11 @@ use_DRAC <- function(
       if (reply %in% c("Y", "y", "1")) {
         ## convert to html and extract the error fields
         html <- XML::htmlParse(DRAC.content, asText = TRUE)
-        error <- XML::xpathSApply(html, "//div[@class='drac_field_error']",
-                                  XML::xmlValue)
+        node <- XML::getNodeSet(html, "//div[@class='drac_field_error']")
+        error <- sapply(node, function(x) {
+          line <- paste0(sapply(XML::xmlChildren(x), XML::saveXML), collapse = "")
+          trimws(gsub("\\s*<br/>", "\n", line))
+        })
 
         ## extract the fragment we are given if no drac_field_error is found
         if (length(error) == 0)
@@ -406,7 +408,7 @@ use_DRAC <- function(
   }
 
   ## return output
-  DRAC.return <- set_RLum(
+  invisible(set_RLum(
     "RLum.Results",
     data = list(
     DRAC = list(highlights = DRAC.highlights,
@@ -419,6 +421,5 @@ use_DRAC <- function(
         data = file,
         call = sys.call(),
         args = as.list(sys.call()[-1])))
-
-  invisible(DRAC.return)
+    )
 }

@@ -47,14 +47,11 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
       # for pretty printing we insert newlines and tabs at specified lengths
       ls <- attributes(x[[i]])$description
       ls.n <- nchar(ls)
-      ls.block <- floor(ls.n / limit)
       strStarts <- seq(0, ls.n, limit)
       strEnds <- seq(limit-1, ls.n + limit, limit)
       blockString <- paste(mapply(function(start, end) {
         trimmedString <- paste(substr(ls, start, end), "\n\t\t\t")
-        if (substr(trimmedString, 1, 1) == " ")
-          trimmedString <- gsub("^[ ]*", "", trimmedString)
-        return(trimmedString)
+        trimws(trimmedString, "left", whitespace = " ")
       }, strStarts, strEnds), collapse="")
 
       msg <- paste(attributes(x[[i]])$key, "=>",names(x)[i], "\n",
@@ -122,7 +119,6 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
 
   ## CHECK INPUT CLASS ----
   class.old <- attr(x[[i]], "default_class")
-
   class.new <- class(value)
 
   ## CHECK INPUT FIELDS THAT ALLOW 'X' -----
@@ -143,8 +139,8 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
 
     # where the input field is already "X" we have to check whether the new
     # non-character input is allowed
-    if (!all(is.na(x[[i]]))) {
-      if (any(x[[i]] == "X") && attributes(x[[i]])$allowsX) {
+    if (!all(is.na(x[[i]])) &&
+        any(x[[i]] == "X") && attributes(x[[i]])$allowsX) {
         if (anyNA(as.numeric(value[which(value != "X")]))) {
           .throw_warning("Cannot coerce '", value[which(value != "X")],
                          "' to a numeric value, input must be numeric or 'X'\n")
@@ -152,7 +148,6 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
         }
         class.new <- "character"
         value <- as.character(value)
-      }
     }
   }
 
@@ -163,18 +158,12 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
       ## check if coercion is possible
       if (anyNA(suppressWarnings(as.numeric(value)))) {
         .throw_warning(names(x)[i], ": found ", class.new, ", expected ", class.old, " -> cannot coerce, set NAs")
-         if(class.old == "integer")
-           value <- NA_integer_
-         else
-           value <- NA_real_
+         value <- if (class.old == "integer") NA_integer_ else NA_real_
 
       } else {
       ## try coercion
       .throw_message(names(x)[i], ": found ", class.new, ", expected ", class.old, " -> coercing to ", class.old)
-        if(class.old == "integer")
-          value <- as.integer(value)
-        else
-          value <- as.numeric(value)
+        value <- if (class.old == "integer") as.integer(value) else as.numeric(value)
       }
     }
 
@@ -184,11 +173,9 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
   }
 
   # for 'factor' and 'character' elements only 'character' input is allowed
-  if (class.old == "factor" || class.old == "character") {
-    if (class.new != "character") {
+  if (class.old %in% c("factor", "character") && class.new != "character") {
       .throw_warning(names(x)[i], ": Input must be of class 'character'")
       return(x)
-    }
   }
 
   ## CHECK IF VALID OPTION ----
@@ -197,12 +184,11 @@ print.DRAC.list <- function(x, blueprint = FALSE, ...) {
   # the input is converted to a factor to keep the information.
   if (class.old == "factor") {
     levels <- levels(x[[i]])
-    if (any(`%in%`(value, levels) == FALSE)) {
+    if (!all(value %in% levels)) {
       .throw_error(names(x)[i], ": Invalid option, valid options are: ",
                      .collapse(levels))
-    } else {
-      value <- factor(value, levels)
     }
+    value <- factor(value, levels)
   }
 
   ## WRITE NEW VALUES ----

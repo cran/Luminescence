@@ -4,7 +4,13 @@
 \alias{use_DRAC}
 \title{Use DRAC to calculate dose rate data}
 \usage{
-use_DRAC(file, name, print_references = TRUE, citation_style = "text", ...)
+use_DRAC(
+  file,
+  name = NULL,
+  print_references = TRUE,
+  citation_style = "text",
+  ...
+)
 }
 \arguments{
 \item{file}{\link{character} (\strong{required}):
@@ -14,7 +20,8 @@ object obtained from \code{\link[=template_DRAC]{template_DRAC()}}, which suppor
 CSV-files.}
 
 \item{name}{\link{character} (\emph{with default}):
-Optional user name submitted to DRAC. If omitted, a random name will be generated}
+Optional user name submitted to DRAC. If \code{NULL}, a random name will be
+generated.}
 
 \item{print_references}{(\emph{with default}):
 Print all references used in the input data table to the console.}
@@ -61,7 +68,7 @@ The function provides an interface from R to DRAC. An R-object or a
 CSV file is passed to the DRAC website and results are re-imported into R.
 }
 \section{Function version}{
- 0.16
+ 0.17
 }
 
 \examples{
@@ -117,7 +124,7 @@ output <- use_DRAC(input)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Burow, C., 2025. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Burow, C., 2025. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

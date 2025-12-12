@@ -12,7 +12,6 @@
 
 #include <sstream>
 #include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
 
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp;
@@ -80,24 +79,21 @@ RcppExport SEXP analyse_IRSARRF_SRS(arma::vec values_regenerated_limited,
   do {
 
     for (size_t t = 0; t < two_size; ++t) {
-
-      //HORIZONTAL SLIDING CORE -------------------------------------------------------------(start)
-
-      results.zeros();
+      // HORIZONTAL SLIDING CORE --------------------------------------------
       auto curr_vslide_range = vslide_range[t_leftright[t]];
 
-      //slide the curves against each other
+      // slide the curves against each other and compute the sum of squared residuals
       for (unsigned int i = 0u; i < res_size; ++i) {
-        // calculate the sum of squared residuals along one curve
-
+        const double *reg = values_regenerated_limited.memptr() + i;
+        const double *nat = values_natural_limited.memptr();
+        double sum = 0.0;
         for (unsigned int j = 0u; j < nat_size; ++j) {
-          double residual = values_regenerated_limited[j + i] -
-            (values_natural_limited[j] + curr_vslide_range);
-          results[i] += residual * residual;
+          double residual = reg[j] - (nat[j] + curr_vslide_range);
+          sum += residual * residual;
         }
+        results[i] = sum;
       }
 
-      //HORIZONTAL SLIDING CORE ---------------------------------------------------------------(end)
       c_leftright[t] = min(results);
     }
 
@@ -147,21 +143,21 @@ RcppExport SEXP analyse_IRSARRF_SRS(arma::vec values_regenerated_limited,
   //use this values to bootstrap and find minimum values and to account for the variation
   //that may result from this method itself (the minimum lays within a valley of minima)
   //
-  //using the obtained sliding vector and the function RcppArmadillo::sample() (which equals the
-  //function sample() in R, but faster)
-  //http://gallery.rcpp.org/articles/using-the-Rcpp-based-sample-implementation
-
   //this follows the way described in Frouin et al., 2017 ... still ...
+  // to find the bootstrap minima, we draw one index at a time and compare the
+  // value at that index to the current smallest value; this corresponds to
+  // extracting a sample with replacement
   arma::vec results_vector_min_MC(n_MC);
   for (int i = 0; i < n_MC; ++i) {
-    results_vector_min_MC[i] = min(
-      RcppArmadillo::sample(
-        results,
-        results.size(),
-        TRUE,
-        NumericVector::create()
-      )
-    );
+    double min = std::numeric_limits<double>::max();
+    for (size_t j = 0; j < res_size; ++j) {
+      // generate a random index between 0 and res_size - 1
+      double val = results[static_cast<size_t>(unif_rand() * res_size)];
+      if (val < min) {
+        min = val;
+      }
+    }
+    results_vector_min_MC[i] = min;
   }
 
   //build list with four elements

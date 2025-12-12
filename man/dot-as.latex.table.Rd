@@ -12,7 +12,7 @@
   pos = "c",
   digits = 3,
   rm.zero = TRUE,
-  select,
+  select = NULL,
   split = NULL,
   tabular_only = FALSE,
   ...
@@ -55,7 +55,7 @@ This function takes a \link{data.frame} and returns a table in LaTeX code that
 can be copied into any TeX document.
 }
 \section{Function version}{
- 0.2.0
+ 0.2.1
 }
 
 \examples{
@@ -66,11 +66,12 @@ can be copied into any TeX document.
 
 }
 \author{
-Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Christoph Burow, University of Cologne (Germany) \cr
+Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2025. .as.latex.table(): Create LaTeX tables from data.frames and RLum objects. Function version 0.2.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2025. .as.latex.table(): Create LaTeX tables from data.frames and RLum objects. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{internal}

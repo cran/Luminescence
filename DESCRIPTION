@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 1.1.1
-Date: 2025-09-11
+Version: 1.1.2
+Date: 2025-12-11
 Authors@R: c(
     person("Sebastian", "Kreutzer", role = c("aut", "trl", "cre", "dtc"), email = "maintainer_luminescence@r-luminescence.org", comment = c(ORCID = "0000-0002-0734-2199")),
     person("Christoph", "Burow", role = c("aut", "trl", "dtc"), comment = c(ORCID = "0000-0002-5023-4046")),
@@ -18,7 +18,7 @@ Authors@R: c(
     person("Julie", "Durcan", role = c("ctb"), comment = c(ORCID = "0000-0001-8724-8022")),
     person("Georgina E.", "King", role = c("ctb", "dtc"), comment = c(ORCID = "0000-0003-1059-8192")),
     person("Anne", "Philippe", role = c("aut"), comment = c(ORCID = "0000-0002-5331-5087")),
-    person("Guillaume", "Guerin", role = c("ctb"), comment = c(ORCID = "0000-0001-6298-5579")),
+    person("Guillaume", "Guérin", role = c("ctb"), comment = c(ORCID = "0000-0001-6298-5579")),
     person("Svenja", "Riedesel", role = c("aut"), comment = c(ORCID = "0000-0003-2936-8776")),
     person("Martin", "Autzen", role = c("aut"), comment = c(ORCID = "0000-0001-6249-426X")),
     person("Pierre", "Guibert", role = c("ctb"), comment = c(ORCID = "0000-0001-8969-8684")),
@@ -38,7 +38,7 @@ Contact: Package Developers <developers@r-luminescence.org>
 License: GPL-3
 URL: https://r-lum.github.io/Luminescence/
 BugReports: https://github.com/R-Lum/Luminescence/issues
-Depends: R (>= 4.3), utils
+Depends: R (>= 4.4), utils
 LinkingTo: Rcpp (>= 1.0.12), RcppArmadillo (>= 0.12.8.4.0)
 Imports: bbmle (>= 1.0.25.1), data.table (>= 1.15.4), DEoptim (>=
         2.2-8), httr (>= 1.4.7), interp (>= 1.1-6), lamW (>= 2.2.3),
@@ -53,10 +53,11 @@ Suggests: spelling (>= 2.3.0), plotly (>= 4.10.4), rmarkdown (>= 2.27),
 VignetteBuilder: R.rsp, knitr
 Encoding: UTF-8
 Language: en-US
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/testthat/edition: 3
+Config/testthat/parallel: TRUE
 NeedsCompilation: yes
-Packaged: 2025-09-11 09:28:45 UTC; marco
+Packaged: 2025-12-11 20:09:52 UTC; marco
 Author: Sebastian Kreutzer [aut, trl, cre, dtc] (ORCID:
     <https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc] (ORCID:
@@ -77,7 +78,7 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc] (ORCID:
   Georgina E. King [ctb, dtc] (ORCID:
     <https://orcid.org/0000-0003-1059-8192>),
   Anne Philippe [aut] (ORCID: <https://orcid.org/0000-0002-5331-5087>),
-  Guillaume Guerin [ctb] (ORCID: <https://orcid.org/0000-0001-6298-5579>),
+  Guillaume Guérin [ctb] (ORCID: <https://orcid.org/0000-0001-6298-5579>),
   Svenja Riedesel [aut] (ORCID: <https://orcid.org/0000-0003-2936-8776>),
   Martin Autzen [aut] (ORCID: <https://orcid.org/0000-0001-6249-426X>),
   Pierre Guibert [ctb] (ORCID: <https://orcid.org/0000-0001-8969-8684>),
@@ -92,4 +93,4 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc] (ORCID:
     <https://orcid.org/0000-0002-7359-6939>),
   Markus Fuchs [ths] (ORCID: <https://orcid.org/0000-0003-4669-6528>)
 Repository: CRAN
-Date/Publication: 2025-09-11 10:50:26 UTC
+Date/Publication: 2025-12-12 07:11:10 UTC

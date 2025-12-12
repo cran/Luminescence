@@ -51,7 +51,7 @@
 #' @param log.z [logical] (*with default*):
 #' Option to display the z-axis in logarithmic scale. Default is `TRUE`.
 #'
-#' @param central.value [numeric]:
+#' @param central.value [numeric] (*optional*):
 #' User-defined central value, primarily used for horizontal centring
 #' of the z-axis.
 #'
@@ -80,15 +80,13 @@
 #' @param legend [character] vector (*optional*):
 #' legend content to be added to the plot.
 #'
-#' @param legend.pos [numeric] or [character] (with
-#' default): optional position coordinates or keyword (e.g. `"topright"`)
-#' for the legend to be plotted.
+#' @param legend.pos [numeric] or [character] (*with default*):
+#' optional legend position coordinates or keyword (e.g. `"topright"`).
 #'
-#' @param stats [character]: additional labels of statistically
-#' important values in the plot. One or more out of the following:
-#' - `"min"`,
-#' - `"max"`,
-#' - `"median"`.
+#' @param stats [character] (*optional*):
+#' additional labels of statistically important values in the plot. It can be
+#' one or more of `"min"`, `"max"` and `"median"`; any other values will be
+#' ignored.
 #'
 #' @param rug [logical]:
 #' Option to add a rug to the z-scale, to indicate the location of individual values
@@ -101,14 +99,14 @@
 #'
 #' @param bar.col [character] or [numeric] (*with default*):
 #' colour of the bar showing the 2-sigma range around the central
-#' value. To disable the bar, use `"none"`. Default is `"grey"`.
+#' value. To disable the bar, use `"none"`. Default is `"grey80"`.
 #'
 #' @param y.ticks [logical]:
 #' Option to hide y-axis labels. Useful for data with small scatter.
 #'
 #' @param grid.col [character] or [numeric] (*with default*):
 #' colour of the grid lines (originating at `[0,0]` and stretching to
-#' the z-scale). To disable grid lines, use `"none"`. Default is `"grey"`.
+#' the z-scale). To disable grid lines, use `"none"`. Default is `"grey70"`.
 #'
 #' @param line [numeric]:
 #' numeric values of the additional lines to be added.
@@ -119,16 +117,12 @@
 #' @param line.label [character]:
 #' labels for the additional lines.
 #'
-#' @param output [logical]:
-#' Optional output of numerical plot parameters. These can be useful to
-#' reproduce similar plots. Default is `FALSE`.
-#'
 #' @param ... Further plot arguments to pass. `xlab` must be a vector of
 #' length 2, specifying the upper and lower x-axes labels.
 #'
 #' @return Returns a plot object.
 #'
-#' @section Function version: 0.5.9
+#' @section Function version: 0.5.11
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
@@ -178,11 +172,10 @@
 #'   data = ExampleData.DeValues,
 #'   log.z = FALSE)
 #'
-#' ## now with output of the plot parameters
+#' ## store the the plot parameters
 #' plot1 <- plot_RadialPlot(
 #'   data = ExampleData.DeValues,
-#'   log.z = FALSE,
-#'   output = TRUE)
+#'   log.z = FALSE)
 #' plot1
 #' plot1$zlim
 #'
@@ -272,23 +265,22 @@ plot_RadialPlot <- function(
   data,
   na.rm = TRUE,
   log.z = TRUE,
-  central.value,
+  central.value = NULL,
   centrality = "mean.weighted",
   mtext = "",
   summary = c("n", "in.2s"),
   summary.pos = "sub",
-  legend,
-  legend.pos,
-  stats,
+  legend = NULL,
+  legend.pos = "topright",
+  stats = "none",
   rug = FALSE,
-  plot.ratio,
-  bar.col,
+  plot.ratio = NULL,
+  bar.col = NULL,
   y.ticks = TRUE,
-  grid.col,
-  line,
-  line.col,
-  line.label,
-  output = FALSE,
+  grid.col = NULL,
+  line = NULL,
+  line.col = NULL,
+  line.label = NULL,
   ...
 ) {
   .set_function_name("plot_RadialPlot")
@@ -297,6 +289,7 @@ plot_RadialPlot <- function(
   ## Integrity checks -------------------------------------------------------
 
   .validate_not_empty(data)
+  .validate_logical_scalar(log.z)
   .validate_class(centrality, c("character", "numeric"))
   if (is.character(centrality)) {
     centrality <- .validate_args(centrality, c("mean", "mean.weighted",
@@ -331,31 +324,37 @@ plot_RadialPlot <- function(
       }
   }
 
+  valid.pos <- c("left", "center", "right", "topleft", "top", "topright",
+                 "bottomleft", "bottom", "bottomright")
   .validate_class(summary, "character")
-  .validate_class(summary.pos, c("numeric", "character"))
   if (is.numeric(summary.pos)) {
     .validate_length(summary.pos, 2)
   }
   else {
-    .validate_args(summary.pos, c("sub", "left", "center", "right",
-                                  "topleft", "top", "topright",
-                                  "bottomleft", "bottom", "bottomright"))
+    summary.pos <- .validate_args(summary.pos, c("sub", valid.pos))
+  }
+  .validate_class(legend, "character", null.ok = TRUE)
+  if (is.numeric(legend.pos)) {
+    .validate_length(legend.pos, 2)
+  } else {
+    legend.pos <- .validate_args(legend.pos, valid.pos)
   }
 
-  if(missing(stats) == TRUE) {stats <- numeric(0)}
+  .validate_class(stats, "character")
+  .validate_logical_scalar(rug)
+  .validate_class(line, c("numeric", "integer"), null.ok = TRUE)
 
-  if (missing(bar.col)) {
+  if (is.null(bar.col)) {
     bar.col <- rep("grey80", length(data))
   }
-
-  if (missing(grid.col)) {
+  if (is.null(grid.col)) {
     grid.col <- rep("grey70", length(data))
   }
 
   ## check z-axis log-option for grouped data sets
-  if (inherits(data, "list") && length(data) > 1 && log.z == FALSE) {
-    .throw_warning("Option 'log.z' is not set to 'TRUE' altough ",
-                   "more than one data set (group) is provided.")
+  if (inherits(data, "list") && length(data) > 1 && !log.z) {
+    .throw_warning("'log.z' is set to 'FALSE' altough ",
+                   "more than one data set (group) is provided")
   }
 
   ## optionally, remove NA-values
@@ -369,6 +368,9 @@ plot_RadialPlot <- function(
 
   ## create preliminary global data set
   De.global <- unlist(lapply(data, function(x) x[, 1]))
+  if (length(De.global) < 2) {
+    .throw_error("At least two data points are required")
+  }
 
   ## calculate major preliminary tick values and tick difference
   extraArgs <- list(...)
@@ -398,16 +400,6 @@ plot_RadialPlot <- function(
     De.global <- De.global + De.add
   }
 
-  ## calculate major preliminary tick values and tick difference
-  limits.z <- extraArgs$zlim %||% {
-    z.span <- (mean(De.global) * 0.5) / (sd(De.global) * 100)
-    z.span <- ifelse(z.span > 1, 0.9, z.span)
-    c((ifelse(min(De.global) <= 0, 1.1, 0.9) - z.span) * min(De.global),
-      (1.1 + z.span) * max(De.global))
-  }
-  ticks <- round(pretty(limits.z, n = 5), 3)
-  De.delta <- ticks[2] - ticks[1]
-
   ## calculate and append statistical measures --------------------------------
 
   ## z-values and se based on log-option
@@ -420,17 +412,15 @@ plot_RadialPlot <- function(
   ## calculate central values
   data <- lapply(data, function(x) {
     cbind(x,
-          z.central = if (centrality[1] == "mean") {
-                        rep(mean(x[, 3], na.rm = TRUE), nrow(x))
-                      } else if (centrality[1] == "median") {
-                        rep(median(x[, 3], na.rm = TRUE), nrow(x))
-                      } else if (centrality[1] == "mean.weighted") {
-                        sum(x[, 3] / x[, 4]^2) / sum(1 / x[, 4]^2)
-                      } else if (centrality[1] == "median.weighted") {
-                        rep(.weighted.median(x[, 3], w = x[, 4]), nrow(x))
-                      } else if (is.numeric(centrality) && length(centrality) > length(data)) {
-                        rep(median(x[, 3], na.rm = TRUE), nrow(x))
-                      } else NA)
+          z.central = switch(as.character(centrality[1]),
+                             mean = rep(mean(x[, 3], na.rm = TRUE), nrow(x)),
+                             median = rep(median(x[, 3], na.rm = TRUE), nrow(x)),
+                             mean.weighted = sum(x[, 3] / x[, 4]^2) / sum(1 / x[, 4]^2),
+                             median.weighted = rep(.weighted.median(x[, 3], w = x[, 4]), nrow(x)),
+                             if (is.numeric(centrality) && length(centrality) >= length(data)) {
+                               rep(median(x[, 3], na.rm = TRUE), nrow(x))
+                             } else NA)
+          )
   })
 
   if (is.numeric(centrality) && length(centrality) == length(data)) {
@@ -447,7 +437,7 @@ plot_RadialPlot <- function(
     cbind(x,
           precision = 1 / x[, 4],
           std.estimate = (x[, 3] - x[, 5]) / x[, 4],
-          std.estimate.plot = NA,
+          std.estimate.plot = NA, # will be filled in further down
           .id = idx)
   })
 
@@ -455,25 +445,22 @@ plot_RadialPlot <- function(
   data.global <- if (length(data) > 1) as.data.frame(rbindlist(data)) else data[[1]]
 
   ## calculate global central value
-  z.central.global <-
-    if (centrality[1] == "mean") {
-      mean(data.global[, 3], na.rm = TRUE)
-    } else if (centrality[1] == "median") {
-      median(data.global[, 3], na.rm = TRUE)
-    } else if (centrality[1] == "mean.weighted") {
-      sum(data.global[, 3] / data.global[, 4]^2) / sum(1 / data.global[, 4]^2)
-    } else if (centrality[1] == "median.weighted") {
-      .weighted.median(data.global[, 3], w = data.global[, 4])
-    } else if (is.numeric(centrality) && length(centrality == length(data))) {
-      mean(data.global[, 3], na.rm = TRUE)
-    }
+  z.central.global <- switch(as.character(centrality[1]),
+                             mean = mean(data.global[, 3], na.rm = TRUE),
+                             median = median(data.global[, 3], na.rm = TRUE),
+                             mean.weighted = sum(data.global[, 3] / data.global[, 4]^2) / sum(1 / data.global[, 4]^2),
+                             median.weighted = .weighted.median(data.global[, 3], w = data.global[, 4]),
+                             if (is.numeric(centrality) && length(centrality) >= length(data)) {
+                               mean(data.global[, 3], na.rm = TRUE)
+                             } else NA)
 
   ## optionally adjust central value by user-defined value
-  if(missing(central.value) == FALSE) {
+  if (!is.null(central.value)) {
     # ## adjust central value for De.add
     central.value <- central.value + De.add
-
-    z.central.global <- ifelse(log.z == TRUE,
+    if (log.z)
+      .validate_positive_scalar(central.value)
+    z.central.global <- ifelse(log.z,
                                log(central.value),
                                central.value)
   }
@@ -482,10 +469,10 @@ plot_RadialPlot <- function(
   for(i in 1:length(data)) {
     data[[i]][,8] <- (data[[i]][,3] - z.central.global) / data[[i]][,4]
   }
+  data.global$std.estimate.plot <- unlist(lapply(data, function(x) x[, 8]))
 
   ## print warning for too small scatter
   if (max(abs(1 / data.global[, 6])) < 0.02) {
-    small.sigma <- TRUE
     message("Attention, small standardised estimate scatter. ",
             "Toggle off y.ticks?")
   }
@@ -497,14 +484,10 @@ plot_RadialPlot <- function(
 
   if("xlab" %in% names(extraArgs)) {
     xlab <- extraArgs$xlab
-    .validate_length(xlab,  2)
+    .validate_class(xlab, "character", length = 2)
   } else {
-    xlab <- c(if(log.z == TRUE) {
-        "Relative standard error [%]"
-      } else {
-        "Standard error"
-      },
-      "Precision")
+    xlab <- c(ifelse(log.z, "Relative standard error [%]", "Standard error"),
+              "Precision")
   }
 
   ylab <- extraArgs$ylab %||% "Standardised estimate"
@@ -512,9 +495,14 @@ plot_RadialPlot <- function(
 
   limits.z <- extraArgs$zlim %||% {
     z.span <- (mean(data.global[,1]) * 0.5) / (sd(data.global[,1]) * 100)
-    z.span <- ifelse(z.span > 1, 0.9, z.span)
+    z.span <- min(z.span, 0.89)
     c((0.9 - z.span) * min(data.global[[1]]),
       (1.1 + z.span) * max(data.global[[1]]))
+  }
+  .validate_class(limits.z, "numeric", length = 2, name = "'zlim'")
+  limits.z <- sort(limits.z)
+  if (log.z && limits.z[1] <= 0) {
+    limits.z[1] <- 0.01
   }
 
   limits.x <- extraArgs$xlim %||% c(0, max(data.global[,6]))
@@ -535,18 +523,11 @@ plot_RadialPlot <- function(
   lwd <- extraArgs$lwd %||% rep(1, length(data))
   pch <- extraArgs$pch %||% rep(1, length(data))
   col <- extraArgs$col %||% 1:length(data)
-  .validate_length(cex, 1)
+  .validate_positive_scalar(cex)
   .validate_length(lty, length(data))
   .validate_length(lwd, length(data))
   .validate_length(pch, length(data))
   .validate_length(col, length(data))
-
-  tck <- if("tck" %in% names(extraArgs)) {
-    .validate_length(extraArgs$tck, length(data), name = "'tck'")
-    extraArgs$tck
-  } else {
-    NA
-  }
 
   tcl <- extraArgs$tcl %||% -0.5
   show <- extraArgs$show %||% TRUE
@@ -555,7 +536,7 @@ plot_RadialPlot <- function(
   ## define auxiliary plot parameters -----------------------------------------
 
   ## optionally adjust plot ratio
-  if(missing(plot.ratio)) {
+  if (is.null(plot.ratio)) {
     if(log.z) {
       plot.ratio <- 1 /  (1 * ((max(data.global[,6]) - min(data.global[,6])) /
         (max(data.global[,7]) - min(data.global[,7]))))
@@ -572,63 +553,84 @@ plot_RadialPlot <- function(
        (max(data.global[,7]) - min(data.global[,7])) * plot.ratio
 
   ## calculate major and minor z-tick values
-  tick.values.major <- signif(c(limits.z, pretty(limits.z, n = 5)))
+  tick.values.major <- signif(pretty(limits.z, n = 5))
   tick.values.minor <- signif(pretty(limits.z, n = 25), 3)
-
   tick.values.major <- tick.values.major[between(tick.values.major,
                                                  min(tick.values.minor),
                                                  max(tick.values.minor))]
-  tick.values.major <- tick.values.major[between(tick.values.major,
-                                                 limits.z[1], limits.z[2])]
   tick.values.minor <- tick.values.minor[between(tick.values.minor,
                                                  limits.z[1], limits.z[2])]
 
-  if(log.z == TRUE) {
+  ## add ticks corresponding to the extremes of the z-axis but only if they
+  ## fall outside of the major ticks
+  tick.add <- signif(limits.z[!between(limits.z,
+                                       min(tick.values.major),
+                                       max(tick.values.major))])
+  tick.values.major <- c(tick.add, tick.values.major)
+
+  user.limits <- limits.z
+
+  if (log.z) {
+    tick.values.major[tick.values.major == 0] <- 1
+    tick.values.minor[tick.values.minor == 0] <- 1
     tick.values.major <- log(tick.values.major)
     tick.values.minor <- log(tick.values.minor)
+    user.limits <- log(user.limits)
   }
 
   ## calculate z-axis radius
   r.x <- limits.x[2] / max(data.global[,6]) + 0.05
   r <- max(sqrt((data.global[,6])^2+(data.global[,7] * f)^2)) * r.x
 
-  ## calculate major z-tick coordinates
-  tick.x1.major <- r / sqrt(1 + f^2 * (
-    tick.values.major - z.central.global)^2)
+  ## compute the coordinates for points on the z-axis
+  x.coord <- function(x) r / sqrt(1 + f^2 * (x - z.central.global)^2)
+  y.coord <- function(x, x.coord) (x - z.central.global) * x.coord
 
-  tick.y1.major <- (tick.values.major - z.central.global) * tick.x1.major
-  tick.x2.major <- (1 + 0.015 * cex) * r / sqrt(
-    1 + f^2 * (tick.values.major - z.central.global)^2)
-  tick.y2.major <- (tick.values.major - z.central.global) * tick.x2.major
-  ticks.major <- cbind(0,
-    tick.x1.major, tick.x2.major, tick.y1.major, tick.y2.major)
+  ## calculate major z-tick coordinates
+  tick.x1.major <- x.coord(tick.values.major)
+  tick.y1.major <- y.coord(tick.values.major, tick.x1.major)
+  tick.x2.major <- (1 + 0.015 * cex) * tick.x1.major
+  tick.y2.major <- y.coord(tick.values.major, tick.x2.major)
+  ticks.major <- cbind(tick.x1.major, tick.x2.major,
+                       tick.y1.major, tick.y2.major)
 
   ## calculate minor z-tick coordinates
-  tick.x1.minor <- r / sqrt(1 + f^2 * (
-    tick.values.minor - z.central.global)^2)
-  tick.y1.minor <- (tick.values.minor - z.central.global) * tick.x1.minor
-  tick.x2.minor <- (1 + 0.007 * cex) * r / sqrt(
-    1 + f^2 * (tick.values.minor - z.central.global)^2)
-  tick.y2.minor <- (tick.values.minor - z.central.global) * tick.x2.minor
+  tick.x1.minor <- x.coord(tick.values.minor)
+  tick.y1.minor <- y.coord(tick.values.minor, tick.x1.minor)
+  tick.x2.minor <- (1 + 0.007 * cex) * tick.x1.minor
+  tick.y2.minor <- y.coord(tick.values.minor, tick.x2.minor)
   ticks.minor <- cbind(tick.x1.minor,
                        tick.x2.minor,
                        tick.y1.minor,
                        tick.y2.minor)
 
   ## calculate z-label positions
-  label.x <- 1.03 * r / sqrt(1 + f^2 *
-    (tick.values.major - z.central.global)^2)
-  label.y <- (tick.values.major - z.central.global) * tick.x2.major
+  label.x <- 1.03 * x.coord(tick.values.major)
+  label.y <- y.coord(tick.values.major, label.x)
 
-  ## create z-axes labels
+  ## create z-axis labels
   label.z.text <- if (log.z)
                     signif(exp(tick.values.major), 3)
                   else
                     signif(tick.values.major, 3)
 
+  ## to avoid overprinting we remove the z-axis labels at the extremes if
+  ## they are too close to a major tick label (#1013)
+  rm.idx <- NULL
+  for (idx in seq_along(tick.add)) {
+    dist <- sqrt((label.x[-idx] - label.x[idx])^2 +
+                 (label.y[-idx] - label.y[idx])^2)
+    if (any(dist < 1))
+      rm.idx <- c(rm.idx, idx)
+  }
+  if (!is.null(rm.idx)) {
+    label.x <- label.x[-rm.idx]
+    label.y <- label.y[-rm.idx]
+    label.z.text <- label.z.text[-rm.idx]
+  }
+
   ## subtract De.add from label values
-  if(De.add != 0)
-    label.z.text <- label.z.text - De.add
+  label.z.text <- label.z.text - De.add
 
   labels <- cbind(label.x, label.y, label.z.text)
 
@@ -649,16 +651,16 @@ plot_RadialPlot <- function(
   }
 
   ## calculate node coordinates for semi-circle
-  user.limits <- if(log.z) log(limits.z) else limits.z
-
+  num.values <- 500
   ellipse.values <- seq(
     from = min(c(tick.values.major, tick.values.minor, user.limits[1])),
     to = max(c(tick.values.major,tick.values.minor, user.limits[2])),
-    length.out = 500)
-  ellipse.x <- r / sqrt(1 + f^2 * (ellipse.values - z.central.global)^2)
-  ellipse.y <- (ellipse.values - z.central.global) * ellipse.x
+    length.out = num.values)
+  ellipse.x <- x.coord(ellipse.values)
+  ellipse.y <- y.coord(ellipse.values, ellipse.x)
   ellipse <- cbind(ellipse.x, ellipse.y)
-  ellipse.lims <- rbind(range(ellipse[,1]), range(ellipse[,2]))
+  ellipse.lims <- rbind(ellipse[c(1, num.values), 1],
+                        ellipse[c(1, num.values), 2])
 
   ## check if z-axis overlaps with 2s-polygon
   polygon_y_max <- max(polygons[,7])
@@ -670,28 +672,28 @@ plot_RadialPlot <- function(
   z_2s_lower <- ellipse.x[abs(ellipse.y - polygon_y_min) ==
                             min(abs(ellipse.y - polygon_y_min))]
 
-  if(max(polygons[,3]) >= z_2s_upper | max(polygons[,3]) >= z_2s_lower) {
-    .throw_warning("z-scale touches 2s-polygon. Decrease plot ratio.")
+  if ((max(polygons[, 3]) >= z_2s_upper || max(polygons[, 3]) >= z_2s_lower) &&
+      bar.col[1] != "none") {
+    .throw_warning("z-scale touches 2s-polygon, decrease plot ratio")
   }
 
   ## calculate statistical labels
-  if(length(stats == 1)) {stats <- rep(stats, 2)}
   stats.data <- matrix(nrow = 3, ncol = 3)
   data.stats <- as.numeric(data.global[,1])
 
-  if("min" %in% stats == TRUE) {
+  if ("min" %in% stats) {
     stats.data[1, 3] <- data.stats[data.stats == min(data.stats)][1]
     stats.data[1, 1] <- data.global[data.stats == stats.data[1, 3], 6][1]
     stats.data[1, 2] <- data.global[data.stats == stats.data[1, 3], 8][1]
   }
 
-  if("max" %in% stats == TRUE) {
+  if ("max" %in% stats) {
     stats.data[2, 3] <- data.stats[data.stats == max(data.stats)][1]
     stats.data[2, 1] <- data.global[data.stats == stats.data[2, 3], 6][1]
     stats.data[2, 2] <- data.global[data.stats == stats.data[2, 3], 8][1]
   }
 
-  if("median" %in% stats == TRUE) {
+  if ("median" %in% stats) {
     stats.data[3, 3] <- data.stats[data.stats == quantile(data.stats, 0.5, type = 3)]
     stats.data[3, 1] <- data.global[data.stats == stats.data[3, 3], 6][1]
     stats.data[3, 2] <- data.global[data.stats == stats.data[3, 3], 8][1]
@@ -708,10 +710,8 @@ plot_RadialPlot <- function(
       limits.y[2] <- 1.3 * limits.z.y[2]
     }
   }
-  if(!("xlim" %in% names(extraArgs))) {
-    if(limits.z.x[2] > 1.1 * limits.x[2]) {
+  if (!("xlim" %in% names(extraArgs)) && limits.z.x[2] > 1.1 * limits.x[2]) {
       limits.x[2] <- limits.z.x[2]
-    }
   }
 
   ## calculate and paste statistical summary
@@ -775,7 +775,7 @@ plot_RadialPlot <- function(
   stops <- NULL
   for (i in 1:length(data)) {
     if (!is.sub)
-      stops <- paste(rep("\n", (i - 1) * length(summary)), collapse = "")
+      stops <- strrep("\n", (i - 1) * length(summary))
 
     summary.text <- character(0)
     for (j in 1:length(summary)) {
@@ -834,56 +834,33 @@ plot_RadialPlot <- function(
   coords <- .get_keyword_coordinates(summary.pos, limits.x, limits.y)
   summary.pos <- coords$pos
   summary.adj <- coords$adj
-  coords <- .get_keyword_coordinates(legend.pos, limits.x, limits.y)
-  legend.pos <- coords$pos
-  legend.adj <- coords$adj
 
   ## calculate line coordinates and further parameters
-  if(!missing(line)) {
+  if (!is.null(line)) {
     #line = line + De.add
 
-    if(log.z == TRUE) {line <- log(line)}
-
-    line.coords <- list(NA)
-
-    for(i in 1:length(line)) {
-      line.x <- c(limits.x[1],
-                  r / sqrt(1 + f^2 * (line[i] - z.central.global)^2))
-      line.y <- c(0, (line[i] - z.central.global) * line.x[2])
-
-      line.coords[[length(line.coords) + 1]] <- rbind(line.x, line.y)
+    if (log.z) {
+      if (any(line < 0)) {
+        line <- line[line >= 0]
+        .throw_message("Lines with negative value skipped due to 'log.z = TRUE'")
+      }
+      line <- log(line)
     }
 
-    line.coords[1] <- NULL
-
-    if(missing(line.col) == TRUE) {
-      line.col <- seq(from = 1, to = length(line.coords))
+    line.coords <- NULL
+    for (i in seq_along(line)) {
+      line.x <- c(limits.x[1], x.coord(line[i]))
+      line.y <- c(0, y.coord(line[i], line.x[2]))
+      line.coords[[i]] <- rbind(line.x, line.y)
     }
 
-    if(missing(line.label) == TRUE) {
+    if (is.null(line.col)) {
+      line.col <- seq_along(line.coords)
+    }
+
+    if (is.null(line.label)) {
       line.label <- rep("", length(line.coords))
     }
-  }
-
-  ## calculate rug coordinates
-  if(missing(rug) == FALSE) {
-    if(log.z == TRUE) {
-      rug.values <- log(De.global)
-    } else {
-      rug.values <- De.global
-    }
-
-    rug.coords <- list(NA)
-
-    for(i in 1:length(rug.values)) {
-      rug.x <- c(r / sqrt(1 + f^2 * (rug.values[i] - z.central.global)^2) * 0.988,
-                 r / sqrt(1 + f^2 * (rug.values[i] - z.central.global)^2) * 0.995)
-      rug.y <- c((rug.values[i] - z.central.global) * rug.x[1],
-                 (rug.values[i] - z.central.global) * rug.x[2])
-      rug.coords[[length(rug.coords) + 1]] <- rbind(rug.x, rug.y)
-    }
-
-    rug.coords[1] <- NULL
   }
 
   ## Generate plot ------------------------------------------------------------
@@ -926,7 +903,7 @@ plot_RadialPlot <- function(
           text = ylab)
 
     ## calculate upper x-axis label values
-    label.x.upper <- if(log.z == TRUE) {
+    label.x.upper <- if (log.z) {
       as.character(round(1/axTicks(side = 1)[-1] * 100, 1))
     } else {
       as.character(round(1/axTicks(side = 1)[-1], 1))
@@ -937,6 +914,7 @@ plot_RadialPlot <- function(
       for(i in 1:length(data)) {
         polygon(x = polygons[i,1:4],
                 y = polygons[i,5:8],
+                xpd = FALSE,
                 lty = "blank",
                 col = bar.col[i])
       }
@@ -954,9 +932,8 @@ plot_RadialPlot <- function(
     ## optionally, plot central value lines
     if(lwd[1] > 0 & lty[1] > 0) {
       for(i in 1:length(data)) {
-        x2 <- r / sqrt(1 + f^2 * (
-          data[[i]][1,5] - z.central.global)^2)
-        y2 <- (data[[i]][1,5] - z.central.global) * x2
+        x2 <- x.coord(data[[i]][1, 5])
+        y2 <- y.coord(data[[i]][1, 5], x2)
         lines(x = c(limits.x[1], x2),
               y = c(0, y2),
               lty = lty[i],
@@ -966,8 +943,7 @@ plot_RadialPlot <- function(
     }
 
     ## optionally add further lines
-    if(missing(line) == FALSE) {
-      for(i in 1:length(line)) {
+    for (i in seq_along(line)) {
         lines(x = line.coords[[i]][1,],
               y = line.coords[[i]][2,],
               col = line.col[i])
@@ -976,13 +952,20 @@ plot_RadialPlot <- function(
              labels = line.label[i],
              pos = 2,
              col = line.col[i],
-             cex = cex * 0.9)
-      }
+             cex = 0.9)
     }
 
     ## overplot unwanted parts
-    polygon(x = c(ellipse[,1], limits.x[2] * 2, limits.x[2] * 2),
-            y = c(ellipse[,2], max(ellipse[,2]), min(ellipse[,2])),
+    bex <- ellipse[1, 1]                    # start of ellipse (x)
+    bey <- min(ellipse[1, 2], -2)           # start of ellipse (y)
+    eex <- ellipse[num.values, 1]           # end of ellipse (x)
+    par.usr <- par("usr")
+    x1 <- min(par.usr[1], ellipse[, 1])     # left
+    x2 <- max(par.usr[2], ellipse[, 1])     # right
+    y1 <- min(par.usr[3], ellipse[, 2], -2) # bottom
+    y2 <- max(par.usr[4], ellipse[, 2], 2)  # top
+    polygon(x = c(ellipse[, 1], eex, x2, x2, x1, x1,  bex),
+            y = c(ellipse[, 2], y2,  y2, y1, y1, bey, bey),
             col = "white",
             lty = 0)
 
@@ -994,7 +977,7 @@ plot_RadialPlot <- function(
     x.axis.ticks <- x.axis.ticks[c(TRUE, x.axis.ticks <= limits.x[2])]
     x.axis.ticks <- x.axis.ticks[x.axis.ticks <= limits.x[2]]
 
-    ## axis with lables and ticks
+    ## axis with labels and ticks
     axis(side = 1,
          at = x.axis.ticks,
          lwd = 1,
@@ -1065,10 +1048,14 @@ plot_RadialPlot <- function(
           text = zlab)
 
     ## optionally add rug
-    if(rug == TRUE) {
-      for(i in 1:length(rug.coords)) {
-        lines(x = rug.coords[[i]][1,],
-              y = rug.coords[[i]][2,],
+    if (rug) {
+      rug.values <- if (log.z) log(De.global) else De.global
+
+      for (i in 1:length(rug.values)) {
+        rug.x <- x.coord(rug.values[i]) * c(0.988, 0.995)
+        rug.y <- y.coord(rug.values[i], rug.x)
+        lines(x = rug.x,
+              y = rug.y,
               col = col[data.global[i,9]])
       }
     }
@@ -1091,7 +1078,10 @@ plot_RadialPlot <- function(
     }
 
     ## optionally add legend content
-    if(missing(legend) == FALSE) {
+    if (!is.null(legend)) {
+      coords <- .get_keyword_coordinates(legend.pos, limits.x, limits.y)
+      legend.pos <- coords$pos
+      legend.adj <- coords$adj
       legend(x = legend.pos[1],
              y = 0.8 * legend.pos[2],
              xjust = legend.adj[1],
@@ -1105,14 +1095,12 @@ plot_RadialPlot <- function(
     }
 
     ## plot y-axis
-    if(y.ticks == TRUE) {
+    if (y.ticks) {
       char.height <- par()$cxy[2]
-      tick.space <- grDevices::axisTicks(usr = limits.y, log = FALSE)
-      tick.space <- (max(tick.space) - min(tick.space)) / length(tick.space)
-      if(tick.space < char.height * 1.5) {
-        axis(side = 2, at = 0, tcl = 0, labels = "\u00B1 2", las = 1)
+      if (char.height > 4.5 / cex) {
+        axis(side = 2, las = 2, at = 0, labels = "\uB1 2", tcl = 0, hadj = 0.5)
       } else {
-        axis(side = 2, at = seq(-2, 2, by = 2), las = 2)
+        axis(side = 2, las = 2, at = c(-2, 0, 2))
       }
     } else {
       axis(side = 2, at = 0)
@@ -1131,25 +1119,22 @@ plot_RadialPlot <- function(
              y = 0.8 * summary.pos[2],
              adj = summary.adj,
              labels = label.text[[i]],
-             cex = 0.8 * cex,
+             cex = 0.8,
              col = col[i])
-      } else {
-        if(mtext == "") {
+      } else if (mtext == "") {
           mtext(side = 3,
                 line = shift.lines - 1 - i,
                 text = label.text[[i]],
                 col = col[i],
                 cex = 0.8 * cex)
-        }
       }
     }
 
     ##FUN by R Luminescence Team
-    if (fun == TRUE) sTeve() # nocov
+    if (fun) sTeve() # nocov
   }
 
-  if(output) {
-    return(list(data = data,
+  invisible(list(data = data,
                 data.global = data.global,
                 xlim = limits.x,
                 ylim = limits.y,
@@ -1161,5 +1146,4 @@ plot_RadialPlot <- function(
                 labels = labels,
                 polygons = polygons,
                 ellipse.lims = ellipse.lims))
-  }
 }

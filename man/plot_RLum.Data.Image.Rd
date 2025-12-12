@@ -27,9 +27,10 @@ If \code{par.local = FALSE} global parameters are inherited.}
 Supported types are \code{plot.raster}, \code{contour}}
 
 \item{...}{further arguments and graphical parameters that will be passed
-to the specific plot functions. Standard supported parameters are \code{xlim}, \code{ylim}, \code{zlim},
-\code{xlab}, \code{ylab}, \code{main}, \code{legend} (\code{TRUE} or \code{FALSE}), \code{col}, \code{cex}, \code{axes} (\code{TRUE} or \code{FALSE}),
-\code{zlim_image} (adjust the z-scale over different images), \code{stretch}}
+to the specific plot functions. Standard supported parameters are \code{xlim},
+\code{ylim}, \code{zlim}, \code{xlab}, \code{ylab}, \code{main}, \code{mtext}, \code{legend} (\code{TRUE} or \code{FALSE}),
+\code{col}, \code{cex}, \code{axes} (\code{TRUE} or \code{FALSE}), \code{zlim_image} (adjust the z-scale
+over different images), \code{stretch}, \code{digits}, scientific (\code{TRUE} or \code{FALSE}).}
 }
 \value{
 Returns a plot
@@ -62,7 +63,7 @@ wanted, please use \code{zlim_image} to maintain a particular value range over a
 series of images.
 }
 \section{Function version}{
- 0.2.1
+ 0.2.2
 }
 
 \examples{
@@ -82,7 +83,7 @@ Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Data.Image(): Plot function for an RLum.Data.Image S4 class object. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. plot_RLum.Data.Image(): Plot function for an RLum.Data.Image S4 class object. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

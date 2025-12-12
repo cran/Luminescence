@@ -8,12 +8,12 @@ plot_DRTResults(
   values,
   given.dose = NULL,
   error.range = 10,
-  preheat,
+  preheat = NULL,
   boxplot = FALSE,
   mtext = "",
   summary = "",
   summary.pos = "topleft",
-  legend,
+  legend = NULL,
   legend.pos = "topright",
   par.local = TRUE,
   na.rm = FALSE,
@@ -113,7 +113,7 @@ Further data and plot arguments can be added by using the appropriate R
 commands.
 }
 \section{Function version}{
- 0.1.14
+ 0.1.17
 }
 
 \examples{
@@ -195,7 +195,7 @@ plot_DRTResults(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., 2025. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.14. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., 2025. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

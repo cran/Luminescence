@@ -69,10 +69,9 @@
 #' @note
 #' **THIS IS A BETA VERSION**
 #'
-#' None TL curves will be removed
-#' from the input object without further warning.
+#' No TL curves will be removed from the input object without further warning.
 #'
-#' @section Function version: 0.3.0
+#' @section Function version: 0.3.1
 #'
 #' @author
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -115,7 +114,7 @@ analyse_SAR.TL <- function(
   integral_input = "channel",
   sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"),
   rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
-  dose.points,
+  dose.points = NULL,
   log = "",
   ...
 ) {
@@ -124,9 +123,8 @@ analyse_SAR.TL <- function(
 
   # Self-call -----------------------------------------------------------------------------------
   if(inherits(object, "list")){
-    lapply(object,
-           function(x) .validate_class(x, "RLum.Analysis",
-                                       name = "All elements of 'object'"))
+    lapply(object, .validate_class, "RLum.Analysis",
+           name = "All elements of 'object'")
 
     ##run sequence
     results <- lapply(object, function(o){
@@ -204,7 +202,6 @@ analyse_SAR.TL <- function(
 
   # # Calculate LnLxTnTx values  --------------------------------------------------
   ##grep IDs for signal and background curves
-  TL.preheat.ID <- temp.sequence.structure[protocol.step == "PREHEAT", id]
   TL.signal.ID <- temp.sequence.structure[protocol.step == "SIGNAL", id]
   TL.background.ID <- temp.sequence.structure[protocol.step == "BACKGROUND", id]
 
@@ -213,11 +210,10 @@ analyse_SAR.TL <- function(
   ## to calc_TLLxTxRatio()), `dose.points` must divide `length(TL.signal.ID)`
   ## in order for vector recycling to work when further down we do
   ## `LnLxTnTx$Dose <- dose.points`
-  if (!missing(dose.points)) {
-    if ((length(TL.signal.ID) / 2) %% length(dose.points) != 0) {
+  if (!is.null(dose.points) &&
+      (length(TL.signal.ID) / 2) %% length(dose.points) != 0) {
       .throw_error("Length of 'dose.points' not compatible with number ",
                    "of signals")
-    }
   }
 
   ##comfort ... translate integral limits from temperature to channel
@@ -259,14 +255,14 @@ analyse_SAR.TL <- function(
   }
 
   ##set dose.points manually if argument was set
-  if(!missing(dose.points)){
+  if (!is.null(dose.points)) {
     temp.Dose <- dose.points
     LnLxTnTx$Dose <- dose.points
   }
 
   # Set regeneration points -------------------------------------------------
   #generate unique dose id - this are also the # for the generated points
-  temp.DoseName <- data.frame(Name = paste0("R", seq(nrow(LnLxTnTx)) - 1),
+  temp.DoseName <- data.frame(Name = paste0("R", seq_len(nrow(LnLxTnTx)) - 1),
                               Dose = LnLxTnTx[["Dose"]])
 
   ##set natural
@@ -313,7 +309,7 @@ analyse_SAR.TL <- function(
     temp[, status := fifelse(abs(1 - value) > rej.thresh, "FAILED", "OK")]
 
     ## keep only the repeated doses
-    RecyclingRatio <- temp[Repeated == TRUE,
+    RecyclingRatio <- temp[(Repeated),
                            list(criterion, value, threshold, status)]
   }
 
@@ -340,7 +336,7 @@ analyse_SAR.TL <- function(
 
   # Plotting - Config -------------------------------------------------------
   ##grep plot parameter
-  par.default <- par(no.readonly = TRUE)
+  par.default <- .par_defaults()
   on.exit(par(par.default), add = TRUE)
 
   ##grep colours
@@ -401,20 +397,18 @@ analyse_SAR.TL <- function(
   TnTx_matrix <- cbind(object@records[[TL.signal.ID[1]]]@data[,1], TnTx_matrix)
 
   ##catch log-scale problem
-  if(log != ""){
-    if(min(LnLx_matrix) <= 0 || min(TnTx_matrix) <= 0){
-      .throw_warning("Non-positive values detected, log-scale disabled")
+  if (log != "" && (min(LnLx_matrix) <= 0 || min(TnTx_matrix) <= 0)) {
+    .throw_warning("Non-positive values detected, log-scale disabled")
     log <- ""
-    }
   }
 
   #open plot area LnLx
   plot(NA,NA,
        xlab = "Temp. [\u00B0C]",
-       ylab = paste0("TL [a.u.]"),
+       ylab = "TL [a.u.]",
        xlim = range(LnLx_matrix[, 1]),
        ylim = range(LnLx_matrix[, -1]),
-       main = expression(paste(L[n], ",", L[x], " curves", sep = "")),
+       main = expression(paste(L[n], ",", L[x], " curves")),
        log = log
   )
 
@@ -433,7 +427,7 @@ analyse_SAR.TL <- function(
     ylab = paste0("TL [a.u.]"),
     xlim = range(TnTx_matrix[, 1]),
     ylim = range(TnTx_matrix[, -1]),
-    main = expression(paste(T[n], ",", T[x], " curves", sep = "")),
+    main = expression(paste(T[n], ",", T[x], " curves")),
     log = log
   )
 
@@ -476,10 +470,8 @@ analyse_SAR.TL <- function(
         max(signal.integral.temperature) * 1.1
       ),
       ylim = c(0, max(NTL.net.LnLx[, 2])),
-      main = expression(paste("Plateau test ", L[n], ",", L[x], " curves", sep =
-                                ""))
+      main = expression(paste("Plateau test ", L[n], ",", L[x], " curves"))
     )
-
 
     ##plot single curves
     lines(NTL.net.LnLx, col = col[1])
@@ -534,10 +526,8 @@ analyse_SAR.TL <- function(
         max(signal.integral.temperature) * 1.1
       ),
       ylim = c(0, max(NTL.net.TnTx[, 2])),
-      main = expression(paste("plateau Test ", T[n], ",", T[x], " curves", sep =
-                                ""))
+      main = expression(paste("plateau Test ", T[n], ",", T[x], " curves"))
     )
-
 
     ##plot single curves
     lines(NTL.net.TnTx, col = col[1])
@@ -553,7 +543,7 @@ analyse_SAR.TL <- function(
       ylim = c(0,
                quantile(
                  TL.Plateau.TnTx[c(signal.integral.min:signal.integral.max), 2],
-                 probs = c(0.90), na.rm = TRUE
+                 probs = 0.90, na.rm = TRUE
                ) + 3),
       col = "darkgreen"
     )
@@ -561,7 +551,7 @@ analyse_SAR.TL <- function(
 
     # Plotting Legend ----------------------------------------
     plot(
-      c(1:(length(TL.signal.ID) / 2)),
+      1:(length(TL.signal.ID) / 2),
       rep(8, length(TL.signal.ID) / 2),
       type = "p",
       axes = FALSE,
@@ -574,22 +564,20 @@ analyse_SAR.TL <- function(
     )
 
     ##add text
-    text(c(1:(length(TL.signal.ID) / 2)),
+    text(1:(length(TL.signal.ID) / 2),
          rep(4, length(TL.signal.ID) / 2),
-         paste(LnLxTnTx$Name, "\n(", LnLxTnTx$Dose, ")", sep = ""))
+         paste0(LnLxTnTx$Name, "\n(", LnLxTnTx$Dose, ")"))
 
     ##add line
     abline(h = 10, lwd = 0.5)
 
     ##set failed text and mark De as failed
-    if (length(grep("FAILED", RejectionCriteria$status)) > 0) {
+    if (any(grepl("FAILED", RejectionCriteria$status, fixed = TRUE))) {
       mtext("[FAILED]", col = "red")
     }
   }
 
   # Plotting  GC  ----------------------------------------
-  #reset par
-  par(par.default)
 
   ##create data.frame
   temp.sample <- data.frame(
@@ -621,14 +609,12 @@ analyse_SAR.TL <- function(
   temp.GC <- get_RLum(temp.GC)[, c("De", "De.Error")] %||% NA
 
   ##add rejection status
-  if(length(grep("FAILED",RejectionCriteria$status))>0){
-    temp.GC <- data.frame(temp.GC, RC.Status="FAILED")
-  }else{
-    temp.GC <- data.frame(temp.GC, RC.Status="OK")
-  }
+  RC.status <- if (any(grepl("FAILED", RejectionCriteria$status, fixed = TRUE)))
+                 "FAILED" else "OK"
+  temp.GC <- data.frame(temp.GC, RC.Status = RC.status)
 
   # Return Values -----------------------------------------------------------
-  newRLumResults.analyse_SAR.TL <- set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(
       data = temp.GC,
@@ -637,6 +623,4 @@ analyse_SAR.TL <- function(
     ),
     info = list(info = sys.call())
   )
-
-  return(newRLumResults.analyse_SAR.TL)
 }

@@ -56,7 +56,9 @@ usually a profile photo), \code{bg_img_positions} (a vector with the four corner
 positions, see \link[graphics:rasterImage]{graphics::rasterImage}), \code{zlab} (here x-axis labelling).
 Additional parameters for \code{mode = "surface"} are \code{surface_value}
 (\link{character} with names of the surfaces to plot), \code{col_ramp}, \code{legend}
-(\code{TRUE}/\code{FALSE}), \code{contour} (\code{TRUE}/\code{FALSE}),\verb{ }contour_nlevels\verb{, }contour_col\verb{, ' zlim}.}
+(\code{TRUE}/\code{FALSE}), \code{contour} (\code{TRUE}/\code{FALSE}), \code{contour_nlevels},
+\code{contour_col}, \code{nx} and \code{ny} (size of the interpolation grid),
+\code{labcex} (scaling of the contour labels), \code{zlim}.}
 }
 \value{
 Returns an S4 \linkS4class{RLum.Results} object with the following elements:
@@ -143,7 +145,7 @@ Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., Colombo, M., 2025. analyse_portableOSL(): Analyse portable CW-OSL measurements. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., Colombo, M., 2025. analyse_portableOSL(): Analyse portable CW-OSL measurements. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

@@ -67,20 +67,18 @@ as \link{list}.
 
 \examples{
 
-##transform values to a list (and do not write)
+## transform values to a list (and do not write)
 data(ExampleData.BINfileData, envir = environment())
 object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data)[[1]]
 write_RLum2CSV(object, export = FALSE)
 
 \dontrun{
-
-##create temporary filepath
-##(for usage replace by own path)
+## write to a temporary file
 temp_file <- tempfile(pattern = "output", fileext = ".csv")
+write_RLum2CSV(object, temp_file)
 
-##write CSV-file to working directory
-write_RLum2CSV(temp_file)
-
+## write to the working directory
+write_RLum2CSV(object)
 }
 
 }
@@ -93,7 +91,7 @@ Sebastian Kreutzer, Geography & Earth Science, Aberystwyth University (United Ki
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. write_RLum2CSV(): Export RLum-objects to CSV. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. write_RLum2CSV(): Export RLum-objects to CSV. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

@@ -142,8 +142,6 @@ fit_ThermalQuenching <- function(
 
   # Self-call -----------------------------------------------------------------------------------
   if(inherits(data, "list")){
-
-    ##get arguments
     args <- as.list(match.call())
     args[[1]] <- NULL
     args$data <- NULL
@@ -157,9 +155,7 @@ fit_ThermalQuenching <- function(
     return(merge_RLum(results_list))
   }
 
-
   ## Integrity checks -------------------------------------------------------
-
   .validate_class(data, "data.frame",
                   extra = "a 'list' of such objects")
 
@@ -205,7 +201,6 @@ fit_ThermalQuenching <- function(
   f <- y ~ A / (1 + exp(C - W / (kB * x))) + c
 
   ##set translate values in data.frame to absolute temperature
-  data_raw <- data
   data[[1]] <- data[[1]] + .const$C2K
 
   ##start parameter
@@ -275,11 +270,9 @@ fit_ThermalQuenching <- function(
       ), silent = TRUE)
 
       ##return value
-      if(inherits(temp, 'try-error')) {
+      if (inherits(temp, "try-error"))
         return(NULL) # nocov
-      } else{
-        temp
-      }
+      temp
   })
 
   ## remove NULL (the fit was not successful)
@@ -367,7 +360,7 @@ fit_ThermalQuenching <- function(
         c <- fit_coef_MC_full[4,i]
         x <- 0
         curve(A / (1 + exp(C - W / (kB * x))) + c,
-              col = rgb(0, 0, 0, .1), add = TRUE)
+              col = rgb(0, 0, 0, 0.1), add = TRUE)
       }
     }
 
@@ -400,28 +393,24 @@ fit_ThermalQuenching <- function(
   }
 
   ## Return -----------------------------------------------------------------
-  output_df <- data.frame(
-    A = A,
-    A_X = A_MC_X,
-    C = exp(C),
-    C_X = C_MC_X,
-    W = W,
-    W_X = W_MC_X,
-    c = c,
-    c_X = c_MC_X,
-    n.MC = n.MC
-  )
-
-  output <- set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(
-      data = output_df,
+      data = data.frame(
+          A = A,
+          A_X = A_MC_X,
+          C = exp(C),
+          C_X = C_MC_X,
+          W = W,
+          W_X = W_MC_X,
+          c = c,
+          c_X = c_MC_X,
+          n.MC = n.MC
+      ),
       fit = fit
     ),
     info = list(
       call = sys.call()
     )
   )
-
-  return(output)
 }

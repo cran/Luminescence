@@ -1,6 +1,7 @@
 #' @title Apply the model after Fuchs & Lang (2001) to a given De distribution
 #'
-#' @description This function applies the method according to Fuchs & Lang (2001) for
+#' @description
+#' This function applies the method according to Fuchs & Lang (2001) for
 #' heterogeneously bleached samples with a given coefficient of variation
 #' threshold.
 #'
@@ -156,7 +157,7 @@ calc_FuchsLang2001 <- function(
       } else {
         usedDeValues[endDeValue, 1] <- data_ordered[endDeValue, 1]
         usedDeValues[endDeValue, 2] <- data_ordered[endDeValue, 2]
-        usedDeValues[endDeValue, 3] <- paste("# ", cv, " %", sep = "")
+        usedDeValues[endDeValue, 3] <- paste("#", cv, "%")
 
         break #break loop
       }
@@ -202,6 +203,7 @@ calc_FuchsLang2001 <- function(
     cat("\n sd:                     ", sd)
     cat("\n weighted mean:          ", weighted_mean)
     cat("\n weighted sd:            ", weighted_sd)
+    cat("\n se:                     ", se)
     cat("\n------------------------------------\n\n")
   }
 
@@ -213,6 +215,7 @@ calc_FuchsLang2001 <- function(
     de_err = sd,
     de_weighted = weighted_mean,
     de_weighted_err = weighted_sd,
+    se = se,
     n.usedDeValues = n.usedDeValues
   )
 

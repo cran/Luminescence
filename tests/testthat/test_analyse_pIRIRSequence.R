@@ -162,8 +162,9 @@ test_that("input validation", {
                                      signal.integral.max = 2,
                                      background.integral.min = 900,
                                      background.integral.max = 1000,
-                                     sequence.structure = c("IR50", "error")),
-               "'error' not allowed in 'sequence.structure'")
+                                     sequence.structure = c("IR50", "error",
+                                                            "error2", "error2")),
+               "'error' and 'error2' not allowed in 'sequence.structure'")
 
   SW({
   expect_warning(expect_error(analyse_pIRIRSequence(list(object)),
@@ -258,7 +259,6 @@ test_that("regression tests", {
 test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
-  testthat::skip_if_not(getRversion() >= "4.4.0")
 
   set.seed(1)
   SW({

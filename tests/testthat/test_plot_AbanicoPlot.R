@@ -8,7 +8,7 @@ test_that("input validation", {
   expect_error(plot_AbanicoPlot(data = "error"),
                "All elements of 'data' should be of class 'data.frame'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues[, 1, drop = FALSE]),
-               "Data set (1) has fewer than 2 columns: data without errors",
+               "Data set 1 has fewer than 2 columns: data without errors",
                fixed = TRUE)
 
   expect_message(expect_null(plot_AbanicoPlot(list())),
@@ -19,10 +19,10 @@ test_that("input validation", {
   expect_warning(expect_message(
       expect_null(plot_AbanicoPlot(ExampleData.DeValues[1, ])),
       "Error: After removing invalid entries, nothing is plotted"),
-      "Data sets 1 are found to be empty or consisting of only 1 row")
+      "Data set 1 empty or consisting of only 1 row, removed")
 
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, plot = FALSE),
-               "'plot.ratio' should be a positive scalar")
+               "'plot.ratio' should be a single positive value")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, xlab = "x"),
                "'xlab' must have length 2")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, z.0 = "error"),
@@ -37,12 +37,18 @@ test_that("input validation", {
                "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary = 5),
                "'summary' should be of class 'character'")
-  expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = list()),
-               "'summary.pos' should be of class 'numeric' or 'character'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = 5),
                "'summary.pos' should have length 2")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = list()),
+               "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = "error"),
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, legend = 5),
+               "'legend' should be of class 'character'")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, legend.pos = 5),
+               "'legend.pos' should have length 2")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, frame = NULL),
+               "'frame' should be one of '0', '1', '2' or '3'")
 
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, xlim = NA),
                "'xlim' should be of class 'numeric'")
@@ -50,6 +56,8 @@ test_that("input validation", {
                "'ylim' should be of class 'numeric'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, zlim = NA),
                "'zlim' should be of class 'numeric'")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, zlim = c(-10, 10)),
+               "'zlim' should only contain positive values when 'log.z = TRUE'")
 
   ## zero-error values
   data.zeros <- ExampleData.DeValues
@@ -258,13 +266,13 @@ test_that("more coverage", {
                                   xlab = c("x1", "x2", "x3"), lty = 2,
                                   dispersion = "2sd",
                                   at = seq(20, 120, nrow(data.na) - 1)),
-                 "Data set (1): 1 NA value excluded",
+                 "Data set 1: 1 NA value excluded",
                  fixed = TRUE)
   expect_message(plot_AbanicoPlot(data.na, y.axis = TRUE,
-                                  yaxt = "y", ylim = c(2, 3),
+                                  yaxt = "y",
                                   summary.pos = "bottomright",
                                   dispersion = "2sd"),
-                 "Data set (1): 1 NA value excluded",
+                 "Data set 1: 1 NA value excluded",
                  fixed = TRUE)
 
   ## further edge tests ... check for wrong bw parameter
@@ -282,8 +290,8 @@ test_that("more coverage", {
   ## test boundaries
   expect_warning(
     object = plot_AbanicoPlot(
-    data = data.frame(x = c(0,1), y = c(0.1,01))),
-    regexp = "Found zero values in x-column of dataset 1: set log.z = FALSE")
+    data = data.frame(x = c(0,1), y = c(0.1, 0.1))),
+    "Found zero values in x-column of dataset 1, 'log.z' set to FALSE")
 
   ## handling of negative values; before it produced wrong plots
  expect_silent(plot_AbanicoPlot(data = data.frame(
@@ -298,21 +306,14 @@ test_that("more coverage", {
    zlim = c(2,10)
  ), log.z = TRUE, summary = c("mean", "sd.abs")))
 
- ## test lines 2144 onwards
- par(mfrow = c(4,4))
+ ## test panel plots
+ par.defaults <- .par_defaults()
+ par(mfrow = c(4, 4))
  expect_silent(plot_AbanicoPlot(data = data.frame(
    x = c(-1,10),
    y = c(0.1,3)
  ), log.z = TRUE, summary = c("mean", "sd.abs")))
- par(mfrow = c(1,1))
-
- ## test lines 2888 onwards (same was above, just with the rotated plot)
- par(mfrow = c(3,3))
- expect_silent(plot_AbanicoPlot(data = data.frame(
-   x = c(-1,10),
-   y = c(0.1,3)
- ), log.z = TRUE, rotate = TRUE))
- par(mfrow = c(1,1))
+ par(par.defaults)
 
  ## test centrality from layout
  layout <- get_Layout("default")
@@ -327,7 +328,6 @@ test_that("more coverage", {
 test_that("Test graphical snapshot", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
-  testthat::skip_if_not(getRversion() >= "4.4.0")
 
   SW({
     vdiffr::expect_doppelganger("default",
@@ -353,10 +353,14 @@ test_that("Test graphical snapshot", {
                                                  dots = TRUE, cex = 2,
                                                  boxplot = TRUE,
                                                  grid.col = "grey80",
+                                                 legend = "primary data",
                                                  summary.pos = "left",
                                                  summary.method = "weighted",
                                                  summary = c("sd.abs", "se.abs",
                                                              "median")))
+    vdiffr::expect_doppelganger("plot ratio",
+                                plot_AbanicoPlot(ExampleData.DeValues,
+                                                 plot.ratio = 0.1))
 
     data.list <- list(ExampleData.DeValues[1:30,],
                       ExampleData.DeValues[31:62,] * 1.3)

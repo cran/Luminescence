@@ -35,7 +35,7 @@
 #' **`@info`**\cr
 #' `$ call`` ([call]) the original function call
 #'
-#' @section Function version: 0.1.0
+#' @section Function version: 0.1.1
 #'
 #' @author Harrison Gray, USGS (United States),
 #' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
@@ -66,10 +66,10 @@
 #' plot_AbanicoPlot(results)
 #'
 #'@export
-calc_gSGC_feldspar <- function (
+calc_gSGC_feldspar <- function(
   data,
   gSGC.type = "50LxTx",
-  gSGC.parameters,
+  gSGC.parameters = NULL,
   n.MC = 100,
   plot = FALSE
 ) {
@@ -102,9 +102,10 @@ calc_gSGC_feldspar <- function (
     D0_3 = c( 2780, 3280, 2520, 1950, 3100, 4960, 2060, 3130, 4760, 1780, 2800, 5120, 1380, 2360, 4060)
   )
   .validate_args(gSGC.type, params$Type)
+  .validate_class(gSGC.parameters, "data.frame", null.ok = TRUE)
 
   # these are user specified parameters if they so desire
-  if (!missing(gSGC.parameters)){
+  if (!is.null(gSGC.parameters)) {
     y1 <- gSGC.parameters$y1
     y1_err <- gSGC.parameters$y1_err
     D1 <- gSGC.parameters$D1
@@ -216,10 +217,6 @@ calc_gSGC_feldspar <- function (
 
           if (!inherits(temp2, "try-error")){
             temp.MC.matrix[j,8] <- temp2$root
-
-          } else {
-            # give an NA if uniroot cannot find a root (usually due to bad random values)
-            temp.MC.matrix[j,8] <- NA
           }
         }
 
@@ -234,12 +231,12 @@ calc_gSGC_feldspar <- function (
 
 # Plotting ----------------------------------------------------------------
   if(plot){
-    old.par <- par(no.readonly = TRUE)
-    on.exit(par(old.par), add = TRUE)
+    par.defaults <- .par_defaults()
+    on.exit(par(par.defaults), add = TRUE)
 
     par(mfrow = c(mfrow = c(3,3)))
     for (i in 1:length(l)) {
-      if(is.na(l[[i]][1])) next();
+      if (is.na(l[[i]][1])) next
 
       y_max <- max(l[[i]]$m.MC[, 1:2])
       plot(NA, NA,
@@ -287,7 +284,7 @@ calc_gSGC_feldspar <- function (
 
   ##calculate a few useful parameters
   for(i in 1:nrow(m)){
-    if(is.na(l[[i]][1])) next();
+    if (is.na(l[[i]][1])) next
 
     m[i,1] <- l[[i]]$DE
     m[i,2] <- l[[i]]$DE.ERROR
@@ -304,14 +301,15 @@ calc_gSGC_feldspar <- function (
     HPD95_UPPER = m[, 4]
   )
 
-  return(
-    set_RLum("RLum.Results",
+  set_RLum("RLum.Results",
       data = list(
         data = df,
-        m.MC = lapply(l, function(x) {if(is.na(x[[1]])) {return(x)} else {x$m.MC} })
+        m.MC = lapply(l, function(x) {
+          if (is.na(x[[1]])) return(x)
+          x$m.MC
+        })
       ),
       info = list(
         call = sys.call()
-      )
-    ))
+      ))
 }

@@ -79,8 +79,9 @@
 #' positions, see [graphics::rasterImage]), `zlab` (here x-axis labelling).
 #' Additional parameters for `mode = "surface"` are `surface_value`
 #' ([character] with names of the surfaces to plot), `col_ramp`, `legend`
-#' (`TRUE`/`FALSE`), `contour` (`TRUE`/`FALSE`),` `contour_nlevels`,
-#' `contour_col`, ' zlim`.
+#' (`TRUE`/`FALSE`), `contour` (`TRUE`/`FALSE`), `contour_nlevels`,
+#' `contour_col`, `nx` and `ny` (size of the interpolation grid),
+#' `labcex` (scaling of the contour labels), `zlim`.
 #'
 #' @return
 #' Returns an S4 [RLum.Results-class] object with the following elements:
@@ -165,8 +166,8 @@ analyse_portableOSL <- function(
                  "of class 'RLum.Data.Curve'")
 
   ## check originator
-  if (!all(sapply(object, function(x) x@originator) == "read_PSL2R"))
-    .throw_error("Only objects originating from 'read_PSL2R()' are allowed")
+  lapply(object, .validate_originator, "read_PSL2R",
+         name = "At least one element of 'object'")
 
   ## check length and start of the sequence pattern, we check it further below
   if (length(object) %% 5 != 0 ||
@@ -183,8 +184,7 @@ analyse_portableOSL <- function(
 
   ## set the maximum signal_integral allowed: as this must be valid across all
   ## records, we cap it to the minimum number of points
-  num.points <- min(sapply(get_RLum(object, recordType = c("OSL", "IRSL")),
-                             length))
+  num.points <- min(lengths(get_RLum(object, recordType = c("OSL", "IRSL"))))
   if (max(signal.integral) > num.points || min(signal.integral) < 1) {
     orig.signal.int <- signal.integral
     signal.integral <- pmin(pmax(signal.integral, 1), num.points)
@@ -208,15 +208,11 @@ analyse_portableOSL <- function(
   ## returns a list
   ### get OSL -------
   OSL <- .unlist_RLum(list(get_RLum(object, recordType = "OSL")))
-  OSL <- do.call(rbind, lapply(OSL, function(x) {
-    .posl_get_signal(x, signal.integral)
-  }))
+  OSL <- do.call(rbind, lapply(OSL, .posl_get_signal, signal.integral))
 
   ### get IRSL -------
   IRSL <- .unlist_RLum(list(get_RLum(object, recordType = "IRSL")))
-  IRSL <- do.call(rbind, lapply(IRSL, function(x) {
-    .posl_get_signal(x, signal.integral)
-  }))
+  IRSL <- do.call(rbind, lapply(IRSL, .posl_get_signal, signal.integral))
 
   if (nrow(OSL) != nrow(IRSL)) {
     .throw_error("Sequence pattern not supported: the number of OSL records ",
@@ -235,9 +231,7 @@ analyse_portableOSL <- function(
   }
 
   DARK_COUNT <- lapply(seq(1, num.dark.count, 3), function(x) DARK_COUNT[x:(x+2)])
-  DARK_COUNT <- do.call(rbind, lapply(DARK_COUNT, function(x) {
-    .posl_get_dark_count(x)
-  }))
+  DARK_COUNT <- do.call(rbind, lapply(DARK_COUNT, .posl_get_dark_count))
 
   ### NORMALISE ----
   if (normalise) {
@@ -255,7 +249,7 @@ analyse_portableOSL <- function(
     num.names <- length(settings_sample)
     if (num.names != length(RATIO)) {
       .throw_error("'object' references ", num.names, " sample names, but ",
-                   "only ", length(RATIO), " IRSL/OSL pairs found")
+                   length(RATIO), " IRSL/OSL pairs found")
     }
     coord <- .extract_PSL_coord(settings_sample)
 
@@ -268,6 +262,8 @@ analyse_portableOSL <- function(
     if(nrow(coord) != length(OSL$sum_signal))
       .throw_error("The number of coordinates in 'coord' should match the ",
                    "number of samples (", length(OSL$sum_signal), ")")
+    if (ncol(coord) != 2)
+      .throw_error("'coord' should specify two coordinates per sample")
   }
 
   ### GENERATE SUMMARY data.frame -----
@@ -336,6 +332,7 @@ analyse_portableOSL <- function(
        legend = TRUE,
        type = "b",
        cex = 1,
+       labcex = 0.6,
        col = c("blue", "red", "blue", "red", "black", "grey"),
        pch = rep(16, length(m_list)),
        xlim = attr(m_list, "xlim"),
@@ -343,6 +340,8 @@ analyse_portableOSL <- function(
        zlim = if(mode == "surface") NA else attr(m_list, "zlim"),
        ylab = if (!anyNA(summary$COORD_Y)) "Depth [m]" else "Index",
        xlab = "x [m]",
+       nx = 200,
+       ny = 200,
        grid = TRUE,
        contour = FALSE,
        contour_nlevels = 10,
@@ -352,7 +351,7 @@ analyse_portableOSL <- function(
      ),
      val = list(...), keep.null = TRUE)
 
-    par.default <- par(no.readonly = TRUE)
+    par.default <- .par_defaults()
     on.exit(par(par.default), add = TRUE)
 
     ## mode == "surface" ---------
@@ -389,8 +388,8 @@ analyse_portableOSL <- function(
            x = m[, 1],
            y = m[, 2],
            z = m[, 3],
-           nx = 200,
-           ny = 200,
+           nx = plot_settings$nx,
+           ny = plot_settings$ny
          ), silent = TRUE)
 
        ## show only warning
@@ -442,6 +441,7 @@ analyse_portableOSL <- function(
              y = s$y,
              z = s$z,
              add = TRUE,
+             labcex = plot_settings$labcex * plot_settings$cex,
              nlevels = plot_settings$contour_nlevels,
              col = plot_settings$contour_col)
 
@@ -598,7 +598,7 @@ analyse_portableOSL <- function(
   call<- sys.call()
   args <- as.list(call)[2:length(call)]
 
-  newRLumResults <- set_RLum(
+  set_RLum(
     class = "RLum.Results",
     data = list(
       summary=summary,
@@ -606,8 +606,6 @@ analyse_portableOSL <- function(
       args=args
     ),
     info = list(call = call))
-
-  return(newRLumResults)
 }
 
 # HELPER FUNCTIONS ----------

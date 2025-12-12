@@ -7,9 +7,9 @@
 calc_OSLLxTxRatio(
   Lx.data,
   Tx.data = NULL,
-  signal.integral,
+  signal.integral = NULL,
   signal.integral.Tx = NULL,
-  background.integral,
+  background.integral = NULL,
   background.integral.Tx = NULL,
   background.count.distribution = "non-poisson",
   use_previousBG = FALSE,
@@ -154,7 +154,7 @@ The results of this function have been cross-checked with the Analyst
 own \code{sigmab} value or use \code{background.count.distribution = "poisson"}.
 }
 \section{Function version}{
- 0.8.1
+ 0.8.2
 }
 
 \examples{
@@ -175,7 +175,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.8.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2025. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.8.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -13,7 +13,7 @@
 #'
 #' @param file [character] or [list] (**required**): path and file name of the
 #' BIN/BINX file (URLs are supported). If input is a `list` it should comprise
-#' only `character`s representing each valid path and BIN/BINX-file names.
+#' only `character`s representing valid path and BIN/BINX-file names.
 #' Alternatively, the input character can be just a directory (path), in which
 #' case the function tries to detect and import all BIN/BINX files found in
 #' the directory.
@@ -70,9 +70,8 @@
 #' for import.
 #'
 #' @param pattern [character] (*optional*):
-#' argument that is used if only a path is provided. The argument will than be
-#' passed to the function [list.files] used internally to construct a `list`
-#' of wanted files
+#' regular expression pattern passed to [list.files] to construct a list of
+#' files to read (used only when a path is provided).
 #'
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
@@ -548,13 +547,11 @@ read_BIN2R <- function(
     }
 
     ##print record ID for debugging purposes
-    if(verbose){
-      if(show.record.number == TRUE){
+    if (show.record.number && verbose) {
         cat(temp.ID,",", sep = "")
         if(temp.ID%%10==0){
           cat("\n")
         }
-      }
     }
 
     #empty byte position
@@ -1102,7 +1099,7 @@ read_BIN2R <- function(
     ##check whether the position is valid at all
     if (results.METADATA[, all(position %in% POSITION)]) {
       keep.positions <- results.METADATA[, POSITION %in% position]
-      results.METADATA <- results.METADATA[keep.positions == TRUE, ]
+      results.METADATA <- results.METADATA[(keep.positions), ]
       results.DATA <- results.DATA[keep.positions]
       results.RESERVED <- results.RESERVED[keep.positions]
 
@@ -1210,7 +1207,7 @@ read_BIN2R <- function(
 
   ## check for empty BIN-files names ... if so, set the name of the file as BIN-file name
   ## This can happen if the user uses different equipment
-  if (results.METADATA[, all(FNAME == "")]) {
+  if (results.METADATA[, !any(nzchar(FNAME))]) {
     results.METADATA[, FNAME := tools::file_path_sans_ext(basename(file))]
   }
 
@@ -1225,7 +1222,7 @@ read_BIN2R <- function(
   ## set fastForward to TRUE if arguments to Risoe.BINfileData2RLum.Analysis
   ## were specified
   if (!fastForward) {
-    dots <- names(list(...))
+    dots <- ...names()
     args <- dots[dots %in% names(formals(Risoe.BINfileData2RLum.Analysis))[-1]]
     if (length(args) > 0) {
       fastForward <- TRUE

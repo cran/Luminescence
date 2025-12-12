@@ -2,7 +2,7 @@
 % Please edit documentation in R/correct_PMTLinearity.R
 \name{correct_PMTLinearity}
 \alias{correct_PMTLinearity}
-\title{Linearity Correction for Photomultiplier tubes (PMT)}
+\title{Dead-time (linearity) Correction for Photomultiplier tubes (PMT)}
 \usage{
 correct_PMTLinearity(object, PMT_pulse_pair_resolution = NULL)
 }
@@ -17,7 +17,7 @@ in ns. Values can be found on the PMT datasheets. If \code{NULL} nothing is done
 Returns the same type of object type as \code{object}.
 }
 \description{
-Correct linearity of PMT counts to avoid saturation effects, depending
+Correct dead-time (also linearity) of PMT counts to avoid saturation effects, depending
 on pulse-pair-resolution of individual PMTs.
 }
 \details{
@@ -41,7 +41,7 @@ correct_PMTLinearity(o, PMT_pulse_pair_resolution = 10)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Mittelstrass, D., 2025. correct_PMTLinearity(): Linearity Correction for Photomultiplier tubes (PMT). In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Mittelstrass, D., 2025. correct_PMTLinearity(): Dead-time (linearity) Correction for Photomultiplier tubes (PMT). In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
 }
 
 \references{

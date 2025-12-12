@@ -14,18 +14,26 @@ test_that("input validation", {
   expect_error(expect_warning(plot_KDE(data.frame(a = Inf, b = 1)),
                               "Inf values removed in rows: 1 in data.frame 1"),
                "Your input is empty due to Inf removal")
+  expect_error(plot_KDE(df, df),
+               "'na.rm' should be a single logical value")
   expect_error(plot_KDE(df, summary.method = "error"),
                "'summary.method' should be one of 'MCM', 'weighted' or 'unweighted'")
   expect_error(plot_KDE(df, summary = 5),
                "'summary' should be of class 'character'")
-  expect_error(plot_KDE(df, summary.pos = list()),
-               "'summary.pos' should be of class 'numeric' or 'character'")
   expect_error(plot_KDE(df, summary.pos = 5),
                "'summary.pos' should have length 2")
+  expect_error(plot_KDE(df, summary.pos = list()),
+               "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
   expect_error(plot_KDE(df, summary.pos = "error"),
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
+  expect_error(plot_KDE(df, bw = df),
+               "'bw' should be of class 'character' or 'numeric' and have length 1")
+  expect_error(plot_KDE(df, bw = c(0, 1)),
+               "'bw' should be of class 'character' or 'numeric' and have length 1")
+  expect_error(plot_KDE(df, bw = -1),
+               "'bw' should be a single positive value")
   expect_error(plot_KDE(df, ylim = c(0, 1)),
-               "'ylim' should have length 4")
+               "'ylim' should be of class 'numeric' and have length 4")
 
   expect_warning(plot_KDE(df[1, ]),
                  "Single data point found, no density calculated")
@@ -83,13 +91,14 @@ test_that("check functionality", {
 test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
-  testthat::skip_if_not(getRversion() >= "4.4.0")
 
   SW({
   vdiffr::expect_doppelganger("KDE expected",
                               plot_KDE(data = df))
   vdiffr::expect_doppelganger("cex",
-                              plot_KDE(data = df, cex = 2))
+                              plot_KDE(data = df,
+                                       mtext = "Subtitle",
+                                       cex = 2))
   vdiffr::expect_doppelganger("KDE summary sub",
                               plot_KDE(data = df, summary.pos = "sub",
                                        summary = c("n", "se.rel", "kurtosis")))
@@ -98,5 +107,8 @@ test_that("graphical snapshot tests", {
                                        summary.method = "weighted",
                                        summary = c("mean", "in.2s", "skewness",
                                                    "median")))
+  vdiffr::expect_doppelganger("not values.cumulative",
+                              plot_KDE(data = df,
+                                       values.cumulative = FALSE))
   })
 })

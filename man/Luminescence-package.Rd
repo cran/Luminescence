@@ -67,6 +67,11 @@ the Marie Skłodowska-Curie grant agreement No 844457 (CREDit), and could contin
 maintaining the package.
 \item since 03/2023: Sebastian Kreutzer as maintainer of the package receives funding from the
 DFG Heisenberg programme No 505822867.
+\item since 08/2024: The future and sustainable development of 'Luminescence'
+towards better reproducibility and usability is supported through the DFG
+programme "REPLAY: REProducible Luminescence Data AnalYses" No 528704761,
+led by Dr Sebastian Kreutzer (PI at Heidelberg University, DE) and Dr Thomas
+Kolb (PI at Justus-Liebig-University Giessen, DE).
 \item All other authors gratefully received additional funding from various public funding bodies.
 }
 }
@@ -90,7 +95,7 @@ Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M.,
 
 Mercier, N., Kreutzer, S., Christophe, C., Guérin, G., Guibert, P., Lahaye, C., Lanos, P., Philippe, A.,
 Tribolo, C., 2016. Bayesian statistics in luminescence dating: The 'baSAR'-model and its
-implementation in the R package ’Luminescence’. Ancient TL 34 (2), 14-21.
+implementation in the R package 'Luminescence'. Ancient TL 34 (2), 14-21.
 
 Mercier, N., Galharret, J.-M., Tribolo, C., Kreutzer, S., Philippe, A., 2022.
 Luminescence age calculation through Bayesian convolution of equivalent dose
@@ -142,7 +147,7 @@ Other contributors:
   \item Antoine Zink (\href{https://orcid.org/0000-0001-7146-1101}{ORCID}) [contributor]
   \item Julie Durcan (\href{https://orcid.org/0000-0001-8724-8022}{ORCID}) [contributor]
   \item Georgina E. King (\href{https://orcid.org/0000-0003-1059-8192}{ORCID}) [contributor, data contributor]
-  \item Guillaume Guerin (\href{https://orcid.org/0000-0001-6298-5579}{ORCID}) [contributor]
+  \item Guillaume Guérin (\href{https://orcid.org/0000-0001-6298-5579}{ORCID}) [contributor]
   \item Pierre Guibert (\href{https://orcid.org/0000-0001-8969-8684}{ORCID}) [contributor]
   \item Markus Fuchs (\href{https://orcid.org/0000-0003-4669-6528}{ORCID}) [thesis advisor]
 }
