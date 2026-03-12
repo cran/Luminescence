@@ -1,23 +1,23 @@
 #' @title Merge function for RLum.Results S4-class objects
 #'
-#' @description Function merges objects of class [RLum.Results-class]. The slots in the objects
+#' @description Function merges objects of class [Luminescence::RLum.Results-class]. The slots in the objects
 #' are combined depending on the object type, e.g., for [data.frame] and [matrix]
 #' rows are appended.
 #'
 #' @details Elements are appended where possible and attributes are preserved if
 #' not of similar name as the default attributes of, e.g., a [data.frame]
 #'
-#' @note The `originator` is taken from the first element and not reset to `merge_RLum`
+#' @note The `originator` is taken from the first element and not reset to [Luminescence::merge_RLum]
 #'
 #' @param objects [list] (**required**):
-#' a list of [RLum.Results-class] objects
+#' a list of [Luminescence::RLum.Results-class] objects
 #'
 #' @section Function version: 0.2.1
 #'
 #' @keywords internal
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @export
 merge_RLum.Results <- function(
@@ -30,20 +30,22 @@ merge_RLum.Results <- function(
 
   .validate_class(objects, "list")
 
-  ## check if objects in the list are of type RLum.Results
-  temp.originator <- sapply(objects, function(x) {
-    .validate_class(x, "RLum.Results", name = "All elements of 'object'")
-    x@originator
-  })
   if (length(objects) == 0) {
     .throw_message("'objects' contains no data, NULL returned")
     return(NULL)
   }
 
-            ##check if originator is different
-            if(length(unique(temp.originator))>1){
-              .throw_error("Objects cannot be merged, different 'RLum.Results' originators found")
-            }
+  ## check if objects in the list are of type RLum.Results
+  temp.originator <- sapply(objects, function(x) {
+    .validate_class(x, "RLum.Results", name = "All elements of 'object'")
+    x@originator
+  })
+
+  ## check if there are multiple originators
+  if (length(unique(temp.originator)) > 1) {
+    .throw_error("Objects cannot be merged, different originators found: ",
+                 .collapse(temp.originator))
+  }
 
             ##-------------------------------------------------------------
             ##merge objects depending on the data structure
@@ -110,18 +112,13 @@ merge_RLum.Results <- function(
 
             }##end loop
 
-            #return by setting a new RLum.Results (for the .uid)
-            #the originator is not reset
-            objects_merged <- set_RLum(
-              class = "RLum.Results",
-              originator = objects[[1]]@originator,
-              data = objects[[1]]@data,
-              info = unlist(lapply(objects, function(x) {
-                x@info
-              }), recursive = FALSE),
-              .pid = unlist(lapply(objects, function(x) {
-                x@.uid
-              })))
-
-            return(objects_merged)
+  ## return by setting a new RLum.Results (for the .uid)
+  ## the originator is not reset
+  set_RLum(
+      class = "RLum.Results",
+      originator = objects[[1]]@originator,
+      data = objects[[1]]@data,
+      info = unlist(lapply(objects, function(x) x@info), recursive = FALSE),
+      .pid = unlist(lapply(objects, function(x) x@.uid))
+  )
 }

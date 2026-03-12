@@ -69,7 +69,7 @@ test_that("input validation", {
   ## do not include reg point
   expect_s4_class(
     plot_GrowthCurve(
-      sample = LxTxData,
+      LxTxData,
       verbose = FALSE,
       fit.includingRepeatedRegPoints = FALSE),
     class = "RLum.Results")
@@ -78,7 +78,10 @@ test_that("input validation", {
   expect_warning(
       plot_GrowthCurve(LxTxData, verbose = FALSE,
                        output.plotExtended.single = TRUE),
-      "'output.plotExtended.single' is deprecated, use 'plot_singlePanels'")
+      "'output.plotExtended.single' was deprecated in v1.0.0, use 'plot_singlePanels'")
+  expect_warning(
+      plot_GrowthCurve(sample = LxTxData, verbose = FALSE),
+      "'sample' was deprecated in v1.2.0, use 'object' instead")
 })
 
 test_that("main tests", {
@@ -160,11 +163,11 @@ test_that("additional tests", {
                                  mode = "alternate",
                                  verbose = FALSE,
                                  n.MC = 10))
-  expect_silent(plot_GrowthCurve(LxTxData,
+  expect_output(plot_GrowthCurve(LxTxData,
                                  fit.method = "LIN",
                                  mode = "alternate",
                                  n.MC = 10))
-  expect_silent(plot_GrowthCurve(LxTxData,
+  expect_output(plot_GrowthCurve(LxTxData,
                                  fit.method = "EXP",
                                  mode = "alternate",
                                  n.MC = 10))
@@ -173,11 +176,11 @@ test_that("additional tests", {
                                  mode = "alternate",
                                  verbose = FALSE,
                                  n.MC = 10))
-  expect_silent(plot_GrowthCurve(LxTxData,
+  expect_output(plot_GrowthCurve(LxTxData,
                                  fit.method = "GOK",
                                  mode = "alternate",
                                  n.MC = 10))
-  expect_silent(plot_GrowthCurve(LxTxData,
+  expect_output(plot_GrowthCurve(LxTxData,
                                  fit.method = "OTOR",
                                  mode = "alternate",
                                  n.MC = 10))
@@ -196,6 +199,6 @@ test_that("additional tests", {
                all = FALSE, fixed = TRUE)
   expect_match(warnings, "Fitting a non-linear least-squares model requires",
                all = FALSE, fixed = TRUE)
-  expect_match(warnings, "'NumberIterations.MC' is deprecated, use 'n.MC' instead",
+  expect_match(warnings, "'NumberIterations.MC' was deprecated in v1.0.0, use 'n.MC'",
                all = FALSE, fixed = TRUE)
 })

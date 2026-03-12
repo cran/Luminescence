@@ -2,31 +2,28 @@
 #'
 #' @description
 #' The function imports Princeton Instruments (TM) SPE-files into R and
-#' provides [RLum.Data.Image-class] objects as output. The import
+#' provides [Luminescence::RLum.Data.Image-class] objects as output. The import
 #' functionality is based on the file format description provided by
 #' Princeton Instruments and a MatLab script written by Carl Hall (see
 #' references).
 #'
 #' @param file [character] (**required**):
-#' SPE-file name (including path), e.g.
-#' - `[WIN]`: `read_SPE2R("C:/Desktop/test.spe")`
-#' - `[MAC/LINUX]`: `read_SPE2R("/User/test/Desktop/test.spe")`.
-#' Additionally, it can be a URL starting with `http://` or `https://`.
+#' name of the SPE file to read (URLs are supported).
 #'
 #' @param output.object [character] (*with default*):
-#' set the output object type. Allowed types are `"RLum.Data.Spectrum"`,
-#' `"RLum.Data.Image"` or `"matrix"`.
+#' set the output object type. Allowed types are [Luminescence::RLum.Data.Spectrum-class],
+#' [Luminescence::RLum.Data.Image-class] or `"matrix"`.
 #'
 #' @param frame.range [vector], [integer] (*optional*):
 #' range of frames to read. For example, `frame.range = c(1, 10)` selects only
-#' the first 10 frames. If not specifie, all available frames (up to a maximum
+#' the first 10 frames. If not specified, all available frames (up to a maximum
 #' of 100 if `output.object = "RLum.Data.Image"`) are read.
 #'
 #' @param txtProgressBar [logical] (*with default*):
 #' enable/disable the progress bar. Ignored if `verbose = FALSE`.
 #'
-#' @param verbose [logical] (*with default*): enable/disable output to the
-#' terminal.
+#' @param verbose [logical] (*with default*):
+#' enable/disable output to the terminal.
 #'
 #' @param ... not used, for compatibility reasons only.
 #'
@@ -38,12 +35,12 @@
 #'
 #' `RLum.Data.Spectrum`
 #'
-#' An object of type [RLum.Data.Spectrum-class] is returned.  Row
+#' An object of type [Luminescence::RLum.Data.Spectrum-class] is returned.  Row
 #' sums are used to integrate all counts over one channel.
 #'
 #' `RLum.Data.Image`
 #'
-#' An object of type [RLum.Data.Image-class] is returned.  Due to
+#' An object of type [Luminescence::RLum.Data.Image-class] is returned.  Due to
 #' performance reasons the import is aborted for files containing more than 100
 #' frames. This limitation can be overwritten manually by using the argument
 #' `frame.range`.
@@ -51,9 +48,10 @@
 #' `matrix`
 #'
 #' Returns a matrix of the form: Rows = Channels, columns = Frames. For the
-#' transformation the function [get_RLum] is used,
+#' transformation the function [Luminescence::get_RLum] is used,
 #' meaning that the same results can be obtained by using the function
-#' [get_RLum] on an `RLum.Data.Spectrum` or `RLum.Data.Image` object.
+#' [Luminescence::get_RLum] on an [Luminescence::RLum.Data.Spectrum-class] or
+#' [Luminescence::RLum.Data.Image-class] object.
 #'
 #' @note
 #' **The function does not test whether the input data are spectra or pictures for spatial resolved analysis!**
@@ -62,12 +60,12 @@
 #'
 #' *Currently not all information provided by the SPE format are supported.*
 #'
-#' @section Function version: 0.1.5
+#' @section Function version: 0.1.6
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [readBin], [RLum.Data.Spectrum-class]
+#' @seealso [readBin], [Luminescence::RLum.Data.Spectrum-class]
 #'
 #' @references
 #' Princeton Instruments, 2014. Princeton Instruments SPE 3.0 File
@@ -105,7 +103,7 @@
 #' @export
 read_SPE2R <- function(
   file,
-  output.object = "RLum.Data.Image",
+  output.object = c("RLum.Data.Image", "RLum.Data.Spectrum", "matrix"),
   frame.range = NULL,
   txtProgressBar = TRUE,
   verbose = TRUE,
@@ -117,53 +115,21 @@ read_SPE2R <- function(
   ## Integrity checks -------------------------------------------------------
   .validate_class(file, "character")
   .validate_length(file, 1)
-  .validate_args(output.object,
-                 c("RLum.Data.Image", "RLum.Data.Spectrum", "matrix"))
+  output.object <- .validate_args(output.object,
+                                  c("RLum.Data.Image", "RLum.Data.Spectrum", "matrix"))
   .validate_class(frame.range, c("integer", "numeric"), null.ok = TRUE)
   if (anyNA(frame.range) || any(frame.range <= 0))
     .throw_error("'frame.range' should contain positive values")
-
-  ##check if file exists
-  if(!file.exists(file)){
-    failed <- TRUE
-
-    ## check if the file is an URL ... you never know
-    if (grepl(pattern = "^https?://", x = file)) {
-      if(verbose){
-        cat("[read_SPE2R()] URL detected, checking connection ... ")
-      }
-
-      ##check URL
-      if(!httr::http_error(file)){
-        if (verbose) cat("OK\n")
-
-        ##download file
-        file_link <- tempfile("read_SPE2R_FILE", fileext = ".SPE")
-        download.file(file, destfile = file_link, quiet = !verbose, mode = "wb")
-        file <- file_link
-        failed <- FALSE
-      } else if (verbose) {
-        cat("FAILED\n")
-      }
-    }
-
-    if (failed) {
-      .throw_message("File does not exist, NULL returned")
-      return(NULL)
-    }
-  }
-
-  ##check file extension
-  if(!grepl(basename(file), pattern = "SPE$", ignore.case = TRUE)){
-    if(strsplit(file, split = "\\.")[[1]][2] != "SPE"){
-      .throw_error("Unsupported file format: *.",
-                   strsplit(file, split = "\\.")[[1]][2], sep = "")
-  }}
 
   if (!verbose)
     txtProgressBar <- FALSE
 
   # Open Connection ---------------------------------------------------------
+
+  file <- .validate_file(file, ext = "SPE", pattern = "\\.SPE$",
+                         verbose = verbose)
+  if (length(file) == 0)
+    return(NULL)
 
   con <- file(file, "rb")
 
@@ -387,7 +353,7 @@ read_SPE2R <- function(
     object <- set_RLum(
       class = "RLum.Data.Spectrum",
       originator = "read_SPE2R",
-      recordType = "Spectrum",
+      recordType = "Spectrum (NA)",
       curveType = "measured",
       data = data.spectrum.matrix,
       info = temp.info)
@@ -400,7 +366,7 @@ read_SPE2R <- function(
   }else if(output.object == "RLum.Data.Image"){
     object <- as(data.list, "RLum.Data.Image")
     object@originator <- "read_SPE2R"
-    object@recordType <- "Image"
+    object@recordType <- "Image (NA)"
     object@curveType <- "measured"
     object@info <- temp.info
   }

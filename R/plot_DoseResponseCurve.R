@@ -3,10 +3,10 @@
 #' @description
 #'
 #' A dose-response curve is produced for luminescence measurements using a
-#' regenerative or additive protocol as implemented in [fit_DoseResponseCurve].
+#' regenerative or additive protocol as implemented in [Luminescence::fit_DoseResponseCurve].
 #'
-#' @param object [RLum.Results-class] (**required**):
-#' An object produced by [fit_DoseResponseCurve].
+#' @param object [Luminescence::RLum.Results-class] (**required**):
+#' An object produced by [Luminescence::fit_DoseResponseCurve].
 #'
 #' @param plot_extended [logical] (*with default*):
 #' If `TRUE`, 3 plots on one plot area are provided:
@@ -24,10 +24,11 @@
 #' enable/disable output to the terminal.
 #'
 #' @param ... Further graphical parameters to be passed (supported:
-#' `main`, `mtext`, `xlim`, `ylim`, `xlab`, `ylab`, `log` (not valid for objects
-#' fitted with `mode = "extrapolation"`), `legend` (`TRUE/FALSE`), `leged.pos`,
-#' `reg_points_pch`, `density_polygon` (`TRUE/FALSE`), `density_polygon_col`,
-#' `density_rug` (`TRUE`/`FALSE`), `box` (`TRUE`/`FALSE`).
+#' `main`, `mtext`, `xlim`, `ylim`, `xlab`, `ylab`, `log`
+#' (not valid for objects fitted with `mode = "extrapolation"`), `legend` (`TRUE/FALSE`),
+#' `legend.pos`, `reg_points_pch`, `density_polygon` (`TRUE/FALSE`),
+#' `density_polygon_col`, `density_rug` (`TRUE`/`FALSE`),
+#' `box` (`TRUE`/`FALSE`).
 #'
 #' @return
 #' A plot (or a series of plots) is produced.
@@ -35,7 +36,7 @@
 #' @section Function version: 1.0.8
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Michael Dietze, GFZ Potsdam (Germany) \cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
@@ -50,7 +51,7 @@
 #' Pagonis, V., Kitis, G., Chen, R., 2020. A new analytical equation for the dose response of dosimetric materials,
 #' based on the Lambert W function. Journal of Luminescence 225, 117333. \doi{10.1016/j.jlumin.2020.117333}
 #'
-#' @seealso [fit_DoseResponseCurve]
+#' @seealso [Luminescence::fit_DoseResponseCurve]
 #'
 #' @examples
 #'
@@ -190,7 +191,6 @@ plot_DoseResponseCurve <- function(
   ## Main plots -------------------------------------------------------------
 
   ## open plot area
-
   if (plot_extended && !plot_singlePanels) {
     par.default <- .par_defaults()
     graphics::layout(matrix(c(1, 1, 1, 1, 2, 3), 3, 2, byrow = TRUE), respect = TRUE)
@@ -389,8 +389,8 @@ plot_DoseResponseCurve <- function(
 
     if (plot_extended) {
       ## decrease spacing between axis labels and plots
-      par(mar = c(4, 3, ifelse(plot_singlePanels, 1.5, 2.5), 1),
-          mgp = c(1.5, 0.7, 0), tcl = -0.4)
+      par(mar = if (plot_singlePanels) c(4, 2, 1.5, 1) else c(4, 3.5, 2.5, 1),
+          mgp = c(1.2, 0.4, 0), tcl = -0.3)
 
       ## Histogram ----------------------------------------------------------
       if (!plot_singlePanels)
@@ -414,14 +414,15 @@ plot_DoseResponseCurve <- function(
             sub = paste0("valid fits = ", length(na.exclude(x.natural)),
                          "/", fit.args$n.MC),
             cex.sub = 0.8,
+            cex.lab = 0.8,
             cex.main = 0.8,
             col = "grey"
         ), silent = TRUE)
 
         ## add axes
         if (!inherits(histogram, "try-error")) {
-          axis(side = 1)
-          axis(side = 2,
+          axis(side = 1, cex.axis = 0.8)
+          axis(side = 2, cex.axis = 0.8,
                at = seq(min(histogram$density),
                         max(histogram$density), length = 5),
                labels = round(
@@ -465,7 +466,7 @@ plot_DoseResponseCurve <- function(
           De.label <- paste(
             abs(round(De.MonteCarlo, 2)),
             "\u00B1",
-            format(De.Error, scientific = TRUE, digits = 2))
+            format(De.Error, scientific = De.Error < 0.01, digits = 2))
 
           # set expression
           De.expr <- substitute(D[e[MC]] == val, list(val = De.label))
@@ -474,9 +475,10 @@ plot_DoseResponseCurve <- function(
           try(
             mtext(
               side = 3,
-              line = ifelse(plot_extended && !plot_singlePanels, -0.2, -0.3),
+              line = ifelse(plot_singlePanels, -0.45, -0.2),
               text = De.expr,
-              cex = 0.6 * par("cex")),
+              cex = 0.7 * par("cex")
+            ),
             silent = TRUE)
         }
 
@@ -499,8 +501,11 @@ plot_DoseResponseCurve <- function(
               xlab = "#SAR-cycle",
               ylab = expression(paste(T[x] / T[n])),
               main = "Sensitivity",
+              cex.lab = 0.8,
               cex.main = 0.8,
+              cex.axis = 0.8,
               type = "o",
+              xpd = NA,
               pch = 20)
           lines(c(0, nrow(sample) + 1), c(1, 1), lty = 2, col = "gray")
         } else {

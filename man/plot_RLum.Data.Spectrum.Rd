@@ -7,13 +7,14 @@
 plot_RLum.Data.Spectrum(
   object,
   par.local = TRUE,
-  plot.type = "contour",
+  plot.type = c("contour", "persp", "single", "multiple.lines", "image", "transect",
+    "interactive"),
   optical.wavelength.colours = TRUE,
   bg.spectrum = NULL,
   bg.channels = NULL,
   bin.rows = 1,
   bin.cols = 1,
-  norm = NULL,
+  norm = FALSE,
   rug = TRUE,
   limit_counts = NULL,
   xaxis.energy = FALSE,
@@ -24,7 +25,7 @@ plot_RLum.Data.Spectrum(
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Data.Spectrum} or \link{matrix} (\strong{required}):
-S4 object of class \code{RLum.Data.Spectrum} or a \code{matrix} containing count
+S4 object of class \linkS4class{RLum.Data.Spectrum} or a \code{matrix} containing count
 values of the spectrum.\cr
 Please note that in case of a matrix row names and col names are set
 automatically if not provided.}
@@ -71,9 +72,10 @@ allow summing-up channel counts (vertical binning) for plotting,
 e.g. \code{bin.cols = 2} two channels are summed up.
 Binning is applied after the background subtraction.}
 
-\item{norm}{\link{character} (\emph{optional}):
-Normalise data to the maximum (\code{norm = "max"}) or minimum (\code{norm = "min"})
-count values. The normalisation is applied after binning.}
+\item{norm}{\link{logical}, \link{character} (\emph{optional}):
+if logical, whether curve normalisation should occur (\code{FALSE} by default);
+alternatively, one of the values detailed in \link{plot_RLum.Data.Curve}.
+The normalisation is applied after binning.}
 
 \item{rug}{\link{logical} (\emph{with default}):
 enable/disable colour rug. Currently only implemented for plot
@@ -269,15 +271,16 @@ plot_RLum.Data.Spectrum(
 
 }
 \seealso{
-\linkS4class{RLum.Data.Spectrum}, \link{convert_Wavelength2Energy}, \link{plot_RLum},
+\linkS4class{RLum.Data.Spectrum},
+\link{convert_Wavelength2Energy}, \link{plot_RLum},
 \link[graphics:persp]{graphics::persp}, \link[plotly:plot_ly]{plotly::plot_ly}, \link[graphics:contour]{graphics::contour}, \link[graphics:image]{graphics::image}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.6.13. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.6.13. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

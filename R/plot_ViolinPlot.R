@@ -16,21 +16,21 @@
 #' Supported arguments are:
 #' `xlim`, `main`, `xlab`, `ylab`, `col.violin`, `col.boxplot`, `mtext`, `cex`, `mtext`
 #'
-#' **`Valid summary keywords`**
+#' **Valid summary keywords**
 #'
 #' `'n'`, `'mean'`, `'median'`, `'sd.abs'`, `'sd.rel'`, `'se.abs'`, `'se.rel'`.
 #' `'skewness'`, `'kurtosis'`
 #'
-#' @param data [numeric] or [RLum.Results-class] (**required**):
+#' @param data [numeric] or [Luminescence::RLum.Results-class] (**required**):
 #' input data for plotting. Alternatively a [data.frame] or a [matrix] can
 #' be provided, but only the first column will be considered by the
-#' function
+#' function.
 #'
 #' @param boxplot [logical] (*with default*):
-#' enable/disable boxplot
+#' enable/disable the boxplot.
 #'
 #' @param rug [logical] (*with default*):
-#' enable/disable rug
+#' enable/disable the rug.
 #'
 #' @param summary [character] (*with default*):
 #' add statistic measures of centrality and dispersion to the plot.
@@ -43,7 +43,7 @@
 #' `mtext` is not used.
 #'
 #' @param na.rm [logical] (*with default*):
-#' exclude NA values from the data set prior to any further operations.
+#' exclude `NA` values from the data set prior to any further operations.
 #'
 #' @param ... further arguments and graphical parameters passed to
 #' [plot.default], [stats::density] and [boxplot]. See details for further
@@ -58,7 +58,7 @@
 #' @section Function version: 0.1.4
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @references
 #' Daniel Adler (2025). vioplot: violin plot.
@@ -69,7 +69,7 @@
 #'
 #' Wickham. H (2009). ggplot2: elegant graphics for data analysis. Springer New York.
 #'
-#' @seealso [stats::density], [plot], [boxplot], [rug], [calc_Statistics]
+#' @seealso [stats::density], [plot], [boxplot], [rug], [Luminescence::calc_Statistics]
 #'
 #' @examples
 #'
@@ -98,6 +98,8 @@ plot_ViolinPlot <- function(
 
   .validate_class(data, c("RLum.Results", "data.frame", "matrix"))
   .validate_not_empty(data)
+  .validate_logical_scalar(boxplot)
+  .validate_logical_scalar(rug)
   .validate_class(summary, "character")
   if (is.numeric(summary.pos)) {
     .validate_length(summary.pos, 2)

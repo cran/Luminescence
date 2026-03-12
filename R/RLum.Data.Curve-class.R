@@ -31,18 +31,19 @@
 #' The class should only contain data for a single curve. For additional
 #' elements the slot `info` can be used (e.g. providing additional heating
 #' ramp curve). Objects from the class `RLum.Data.Curve` are produced by other
-#' functions (partly within [RLum.Analysis-class] objects),
-#' namely: [Risoe.BINfileData2RLum.Analysis], [read_XSYG2R]
+#' functions (partly within [Luminescence::RLum.Analysis-class] objects),
+#' namely: [Luminescence::Risoe.BINfileData2RLum.Analysis], [Luminescence::read_XSYG2R]
 #'
 #' @section Create objects from this Class:
 #' Objects can be created by calls of the form
 #' `set_RLum(class = "RLum.Data.Curve", ...)`.
 #'
-#' @section Class version: 0.5.1
+#' @section Class version: 0.5.2
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum-class], [RLum.Data-class], [plot_RLum], [merge_RLum]
+#' @seealso [Luminescence::RLum-class], [Luminescence::RLum.Data-class],
+#' [Luminescence::plot_RLum], [Luminescence::merge_RLum]
 #'
 #' @keywords classes
 #'
@@ -75,7 +76,7 @@ setClass("RLum.Data.Curve",
 #'
 #' for `[RLum.Data.Curve-class]`
 #'
-#' **[RLum.Data.Curve-class]**
+#' **[Luminescence::RLum.Data.Curve-class]**
 #'
 #' \tabular{ll}{
 #'  **from** \tab **to**\cr
@@ -84,7 +85,7 @@ setClass("RLum.Data.Curve",
 #'   `matrix` \tab `matrix`
 #' }
 #'
-#' @param from [RLum-class], [list], [data.frame], [matrix] (**required**):
+#' @param from [Luminescence::RLum-class], [list], [data.frame], [matrix] (**required**):
 #'  object to be coerced from
 #'
 #' @param to [character] (**required**):
@@ -166,7 +167,7 @@ setMethod("show",
             cat("\n\t .. range of y-values:",
                 suppressWarnings(min(object@data[,2], na.rm = TRUE)),
                 suppressWarnings(max(object@data[,2], na.rm = TRUE)),
-                if(anyNA(object@data[,2])){"(contains NA values)"}else{""}
+                ifelse(anyNA(object@data[, 2]), "(contains NA values)", "")
                )
             cat("\n\t additional info elements:", length(object@info), "\n")
             #cat("\n\t\t >> names:", names(object@info))
@@ -175,7 +176,7 @@ setMethod("show",
 
 ## set_RLum() ---------------------------------------------------------------
 #' @describeIn set_RLum
-#' Construction method for [RLum.Data.Curve-class] objects.
+#' Construction method for [Luminescence::RLum.Data.Curve-class] objects.
 #'
 #' @param recordType [character] (*optional*):
 #' record type (e.g., "OSL")
@@ -185,7 +186,7 @@ setMethod("show",
 #'
 #' @param data [matrix] or [list] (*with default*):
 #' a matrix containing raw curve data or a list containing the data to be
-#' stored in the object (for [RLum.Results-class] objects) . If `data` itself
+#' stored in the object (for [Luminescence::RLum.Results-class] objects) . If `data` itself
 #' is a `RLum.Data.Curve`-object this can be used to re-construct the object,
 #' i.e. modified parameters except `.uid`, `.pid` and `originator`. The rest
 #' will be subject to copy and paste unless provided.
@@ -206,6 +207,8 @@ setMethod(
     curveType = NA_character_,
     data = matrix(0, ncol = 2),
     info = list()) {
+    .set_function_name("set_RLum")
+    on.exit(.unset_function_name(), add = TRUE)
 
     ##The case where an RLum.Data.Curve object can be provided
     ##with this RLum.Data.Curve objects can be provided to be reconstructed
@@ -228,6 +231,10 @@ setMethod(
       data <- data@data
     }
 
+    if (NCOL(data) != 2) {
+      .throw_error("'data' should be a matrix with 2 columns")
+    }
+
     ## set empty class form object
     newRLumDataCurve <- new("RLum.Data.Curve")
 
@@ -246,7 +253,7 @@ setMethod(
 
 ## get_RLum() ---------------------------------------------------------------
 #' @describeIn get_RLum
-#' Accessor method for [RLum.Data.Curve-class] object.
+#' Accessor method for [Luminescence::RLum.Data.Curve-class] object.
 #' The argument `info.object` is optional to directly access the info elements.
 #' If no info element name is provided, the raw curve data (matrix) will be
 #' returned.
@@ -261,6 +268,7 @@ setMethod("get_RLum",
     if (is.null(info.object)) {
       return(object@data)
     }
+    .validate_class(info.object, "character", null.ok = TRUE, length = 1)
     if (length(object@info) == 0) {
       .throw_warning("'object' has no info objects, NULL returned")
       return(NULL)
@@ -277,9 +285,8 @@ setMethod("get_RLum",
 
 ## length_RLum() ------------------------------------------------------------
 #' @describeIn length_RLum
-#' Returns the number of channels in the curve, which is the maximum of the
-#' value time/temperature of the curve (corresponding to the stimulation
-#' length).
+#' Returns the length of the curve object, which is the maximum of the value
+#' time/temperature of the curve (corresponding to the stimulation length).
 #'
 #' @export
 setMethod("length_RLum",
@@ -348,30 +355,30 @@ setMethod(f = "bin_RLum.Data",
 
 ## smooth_RLum() ------------------------------------------------------------
 #' @describeIn smooth_RLum
-#' Smoothing of [RLum.Data.Curve-class] objects using a rolling mean or median.
+#' Smoothing of [Luminescence::RLum.Data.Curve-class] objects using a rolling mean or median.
 #' For methods `"mean"` and `"median"`, smoothing is performed by rolling
 #' mean and rolling median with window of size `k`. Method `"Carter_etal_2018"`
 #' implements a Poisson smoother for dark-background signals measured by a
 #' photomultiplier tube.
 #'
-#' @param k [`smooth_RLum`]; [integer] (*with default*):
+#' @param k [Luminescence::smooth_RLum]; [integer] (*with default*):
 #' window for the rolling mean or median. If `NULL`, this set automatically
 #' (ignored if `method = "Carter_etal_2018"`).
 #'
-#' @param fill [`smooth_RLum`]; [numeric] (*with default*):
+#' @param fill [Luminescence::smooth_RLum]; [numeric] (*with default*):
 #' value used to pad the result so to have the same length as the input.
 #'
-#' @param align [`smooth_RLum`]; [character] (*with default*):
+#' @param align [Luminescence::smooth_RLum]; [character] (*with default*):
 #' one of `"right"`, `"center"` or `"left"`, specifying whether the index
 #' of the result should be right-aligned (default), centred, or left-aligned
 #' compared to the rolling window of observations (ignored if
 #' `method = "Carter_etal_2018"`).
 #'
-#' @param method [`smooth_RLum`]; [character] (*with default*):
+#' @param method [Luminescence::smooth_RLum]; [character] (*with default*):
 #' smoothing method to be applied: one of `"mean"`, `"median"` or
 #' `"Carter_etal_2018"`.
 #'
-#' @param p_acceptance [`smooth_RLum`]; [numeric] (*with default*):
+#' @param p_acceptance [Luminescence::smooth_RLum]; [numeric] (*with default*):
 #' probability threshold of accepting a value to be a sample from a Poisson
 #' distribution (only used for `method = "Carter_etal_2018"`). Values that
 #' have a Poisson probability below the threshold are replaced by the average
@@ -404,10 +411,28 @@ setMethod(
                  data = object)
     }
  )
-
+## normalise_RLum() --------------------------------------------------------------
+#' @describeIn normalise_RLum
+#' Normalise [Luminescence::RLum.Data.Curve-class] objects to value set via
+#' the argument `norm`
+#'
+#' @export
+setMethod(
+  f = "normalise_RLum",
+  signature = "RLum.Data.Curve",
+  function(object, norm) {
+    if (norm == "intensity") {
+      ## compute the channel length and assign it to `norm`, so that we can
+      ## piggy-back on the code for normalisation by a scalar
+      norm <- diff(c(0, object@data[, 1]))
+    }
+    object@data[, 2] <- .normalise_curve(object@data[, 2], norm)
+    object
+  }
+)
 ## melt_RLum() --------------------------------------------------------------
 #' @describeIn melt_RLum
-#' Melts [RLum.Data.Curve-class] objects into a flat data.frame with columns
+#' Melts [Luminescence::RLum.Data.Curve-class] objects into a flat data.frame with columns
 #' `X`, `Y`, `TYPE`, `UID`, to be used in combination with other packages
 #' such as `ggplot2`.
 #'

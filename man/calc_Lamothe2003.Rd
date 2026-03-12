@@ -57,11 +57,11 @@ terminal.}
 
 \item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.}
 
-\item{...}{further arguments passed to function \link{plot_GrowthCurve}.}
+\item{...}{further arguments passed to \link{plot_DoseResponseCurve}.}
 }
 \value{
 The function returns an \linkS4class{RLum.Results} object and the graphical
-output produced by \link{plot_GrowthCurve}.
+output produced by \link{plot_DoseResponseCurve}.
 
 -----------------------------------\cr
 \verb{[ NUMERICAL OUTPUT ]}\cr
@@ -85,7 +85,7 @@ The original function call
 This function applies the fading correction for the prediction of long-term
 fading as suggested by Lamothe et al., 2003. The function basically adjusts
 the $L_n/T_n$ values and fits a new dose-response curve using function
-\link{plot_GrowthCurve}.
+\link{fit_DoseResponseCurve}.
 }
 \details{
 \strong{Format of \code{object} if \code{data.frame}}
@@ -118,7 +118,7 @@ identical. In such cases, the fading correction cannot be correct until the
 will internally recalculate values to an identical \code{tc} value.
 }
 \section{Function version}{
- 0.1.0
+ 0.1.1
 }
 
 \examples{
@@ -134,10 +134,8 @@ object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
 ##perform SAR analysis and set rejection criteria
 results <- analyse_SAR.CWOSL(
 object = object,
-signal.integral.min = 1,
-signal.integral.max = 2,
-background.integral.min = 900,
-background.integral.max = 1000,
+signal_integral = 1:2,
+background_integral = 900:900,
 verbose = FALSE,
 plot = FALSE,
 onlyLxTxTable = TRUE
@@ -156,7 +154,7 @@ results_corr <- calc_Lamothe2003(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Mercier, N., 2025. calc_Lamothe2003(): Apply fading correction after Lamothe et al., 2003. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Mercier, N., 2026. calc_Lamothe2003(): Apply fading correction after Lamothe et al., 2003. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -171,10 +169,11 @@ Towards a prediction of long-term anomalous fading of feldspar IRSL. Radiation M
 493-498.
 }
 \seealso{
-\link{plot_GrowthCurve}, \link{calc_FadingCorr}, \link{analyse_SAR.CWOSL}, \link{analyse_pIRIRSequence}
+\link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve},
+\link{calc_FadingCorr}, \link{analyse_SAR.CWOSL}, \link{analyse_pIRIRSequence}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany), Norbert Mercier,
-IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
+Norbert Mercier, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 , RLum Developer Team}
 \keyword{datagen}

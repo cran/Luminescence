@@ -18,16 +18,17 @@
 #'
 #' **(Un-)logged model**
 #'
-#' In the original version of the minimum dose model, the basic data are the natural
+#' In the original version of the minimum dose model, which is applied if
+#' `log = TRUE` (default), the basic data are the natural
 #' logarithms of the De estimates and relative standard errors of the De
 #' estimates. The value for `sigmab` must be provided as a ratio
-#' (e.g, 0.2 for 20 %). This model will be applied if `log = TRUE`.
+#' (e.g, 0.2 for 20 %).
 #'
 #' If `log=FALSE`, the modified un-logged model will be applied instead. This
-#' has essentially the same form as the original version.  `gamma` and
+#' has essentially the same form as the original version, but  `gamma` and
 #' `sigma` are in Gy and `gamma` becomes the minimum true dose in the
 #' population.
-#' **Note** that the un-logged model requires `sigmab` to be in the same
+#' **Note:** the un-logged model requires `sigmab` to be in the same
 #' absolute unit as the provided De values (seconds or Gray).
 #'
 #' While the original (logged) version of the minimum dose
@@ -36,7 +37,7 @@
 #' samples containing negative, zero or near-zero De estimates (Arnold et al.
 #' 2009, p. 323).
 #'
-#' **Initial values & boundaries**
+#' **Initial values and boundaries**
 #'
 #' The log-likelihood calculations use the [nlminb] function for box-constrained
 #' optimisation using PORT routines.  Accordingly, initial values for the four
@@ -46,37 +47,35 @@
 #' *sigma* and *p0* are totally off target, consider providing custom
 #' starting values via `init.values`.
 #'
-#' The boundaries for the individual model parameters are not required to be
-#' explicitly specified. If you want to override the default boundary values,
-#' use arguments `gamma.lower`, `gamma.upper`, `sigma.lower`, `sigma.upper`,
+#' The boundaries for individual model parameters need not be specified
+#' explicitly. To override the default boundary values, provide arguments
+#' `gamma.lower`, `gamma.upper`, `sigma.lower`, `sigma.upper`,
 #' `p0.lower`, `p0.upper`, `mu.lower` and `mu.upper`.
 #'
 #' **Bootstrap**
 #'
 #' When `bootstrap=TRUE` the function applies the bootstrapping method as
-#' described in Cunningham & Wallinga (2012). By default, the minimum age model
-#' produces 1000 first level and 3000 second level bootstrap replicates. The
-#' uncertainty on `sigmab` is 0.04 by default. These values can be changed by
-#' using the arguments `bs.M` (first level replicates), `bs.N`
-#' (second level replicates) and `sigmab.sd` (error on `sigmab`). The bandwidth
-#' of the kernel density estimate can be specified with `bs.h`. By default,
-#' this is calculated as:
+#' described in Cunningham & Wallinga (2012). The minimum age model produces
+#' `bs.M` first-level bootstrap replicates (1000 by default) and `bs.N`
+#' second-level replicates (`3 * bs.M` by default), with an uncertainty
+#' `sigma.sd` on the overdispersion parameter (0.04 by default). These values
+#' can be changed by using arguments `bs.M`, `bs.N` and `sigmab.sd`,
+#' respectively. The bandwidth of the kernel density estimate can be specified
+#' with `bs.h`. By default, this is calculated as:
 #'
 #' \deqn{h = (2*\sigma_{DE})/\sqrt{n}}
 #'
 #' **Multicore support**
 #'
-#' Parallel computations can be activated by setting `multicore=TRUE`.
-#' By default, the number of available logical CPU cores is determined
-#' automatically, but can be changed with `cores`. The multicore support
-#' is only available when `bootstrap=TRUE` and spawns `n` R instances
-#' for each core to get MAM estimates for each of the N and M bootstrap
-#' replicates. Note that this option is highly experimental and may or may not
-#' work for your machine. The performance gain increases for larger number
-#' of bootstrap replicates. However, note that with each additional core (and
-#' hence R instance) the memory usage can significantly increase, depending
-#' on the number of bootstrap replicates. When insufficient memory is available,
-#' there will be a massive performance hit.
+#' Parallel processing can be enabled by setting `multicore = TRUE`. By default,
+#' the number of logical CPU cores is detected automatically, but it can be
+#' overridden with the `cores` argument. Multicore processing is supported
+#' only when `bootstrap = TRUE`, and spawns one R process per core to compute
+#' MAM estimates for each of the `N * M` bootstrap replicates. Note that this
+#' feature is experimental and may not work on all systems. Performance gains
+#' grow with the number of bootstrap replicates, but each additional core (R
+#' process) increases memory usage. When memory is insufficient, overall
+#' performance can degrade severely.
 #'
 #' **Likelihood profiles**
 #'
@@ -92,19 +91,20 @@
 #' calculations and plots please see the vignettes of the `bbmle` package
 #' (also available here: [https://CRAN.R-project.org/package=bbmle]().
 #'
-#' @param data [RLum.Results-class] or [data.frame] (**required**):
-#' for [data.frame]: two columns for De and De error.
+#' @param data [Luminescence::RLum.Results-class] or [data.frame] (**required**):
+#' for [data.frame]: two columns with `(data[, 1])` and De error `(data[, 2])`.
 #'
 #' @param sigmab [numeric] (**required**):
 #' additional spread in De values, representing the expected overdispersion in
 #' the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-#' **NOTE**: For the logged model (`log = TRUE`) this value must be
+#' **Note:** For the logged model (`log = TRUE`) this value must be
 #' a fraction, e.g. 0.2 (= 20 %). If the un-logged model is used (`log = FALSE`),
 #' `sigmab` must be provided in the same absolute units of the De values (seconds or Gray).
 #' See details.
 #'
 #' @param log [logical] (*with default*):
-#' whether the logged minimum dose model should be fit to De data.
+#' whether the logged minimum dose model should be fit to De data (`TRUE` by
+#' default).
 #'
 #' @param par [numeric] (*with default*):
 #' number of parameters in the minimum age model, either 3 (default) or 4.
@@ -116,7 +116,7 @@
 #' a named list with starting values for `gamma`, `sigma`, `p0` and `mu`
 #' (e.g. `list(gamma=100, sigma=1.5, p0=0.1, mu=100)`). If no values are
 #' provided, reasonable values will be estimated from the data.
-#' **NOTE**: the initial values must always be given in the absolute units.
+#' **Note:** the initial values must always be given in the absolute units.
 #' If a logged model is applied (`log = TRUE`), the provided `init.values`
 #' are automatically log-transformed.
 #'
@@ -133,8 +133,8 @@
 #' @param multicore [logical] (*with default*):
 #' parallelize the computation of the bootstrap by creating a multicore cluster
 #' (only considered if `bootstrap = TRUE`). By default, it uses all available
-#' logical CPU cores, but this can be changed with option `cores`. Note that
-#' this option is highly experimental and may not work on all machines.
+#' logical CPU cores, but this can be changed with the `cores` argument. Note
+#' that this feature is experimental and may not work on all systems.
 #'
 #' @param ... (*optional*) further arguments for bootstrapping
 #' (`bs.M`, `bs.N`, `bs.h`, `sigmab.sd`). See details for their usage.
@@ -144,7 +144,7 @@
 #' - `cores`: number of cores to be used when `multicore=TRUE`
 #'
 #' @return Returns a plot (*optional*) and terminal output. In addition an
-#' [RLum.Results-class] object is returned containing the
+#' [Luminescence::RLum.Results-class] object is returned containing the
 #' following elements:
 #'
 #' \item{$summary}{[data.frame] summary of all relevant model results.}
@@ -152,12 +152,12 @@
 #' \item{$args}{[list] used arguments}
 #' \item{$call}{[call] the function call}
 #' \item{$mle}{[bbmle::mle2] object containing the maximum log likelihood functions for all parameters}
-#' \item{$BIC}{[numeric] BIC score}
+#' \item{$BIC}{[numeric] BIC score from the non-bootstrapped model}
 #' \item{$confint}{[data.frame] confidence intervals for all parameters}
 #' \item{$profile}{[stats::profile] the log likelihood profiles}
 #' \item{$bootstrap}{[list] bootstrap results}
 #'
-#' The output should be accessed using the function [get_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
 #'
 #' @note
 #' The default starting values for *gamma*, *mu*, *sigma*
@@ -169,16 +169,17 @@
 #' model with `debug=TRUE` which provides extended console output and
 #' forwards all internal warning messages.
 #'
-#' @section Function version: 0.4.6
+#' @section Function version: 0.5.0
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany) \cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany) \cr
 #' Based on a rewritten S script of Rex Galbraith, 2010 \cr
-#' The bootstrap approach is based on a rewritten MATLAB script of Alastair Cunningham. \cr
-#' Alastair Cunningham is thanked for his help in implementing and cross-checking the code.
+#' The bootstrap approach is based on a MATLAB script by Alastair Cunningham,
+#' who helped with implementation and cross-checking.
 #'
-#' @seealso [calc_CentralDose], [calc_CommonDose], [calc_FiniteMixture],
-#' [calc_FuchsLang2001], [calc_MaxDose]
+#' @seealso [Luminescence::calc_CentralDose], [Luminescence::calc_CommonDose], [Luminescence::calc_FiniteMixture],
+#' [Luminescence::calc_FuchsLang2001], [Luminescence::calc_MaxDose]
 #'
 #' @references
 #' Arnold, L.J., Roberts, R.G., Galbraith, R.F. & DeLong, S.B.,
@@ -257,15 +258,15 @@
 #'
 #' # Plot the dose distribution in an abanico plot and draw a line
 #' # at the minimum dose estimate
-#' plot_AbanicoPlot(data = ExampleData.DeValues$CA1,
+#' plot_AbanicoPlot(data = mam,
 #'                  main = "3-parameter Minimum Age Model",
-#'                  line = mam,polygon.col = "none",
+#'                  polygon.col = "none",
 #'                  hist = TRUE,
 #'                  rug = TRUE,
 #'                  summary = c("n", "mean", "mean.weighted", "median", "in.ci"),
 #'                  centrality = res$de,
-#'                  line.col = "red",
 #'                  grid.col = "none",
+#'                  line.col = "red",
 #'                  line.label = paste0(round(res$de, 1), "\U00B1",
 #'                                      round(res$de_err, 1), " Gy"),
 #'                  bw = 0.1,
@@ -276,8 +277,6 @@
 #'                                   gamma == .(round(log(res$de), 1)) ~ ", " ~
 #'                                   sigma == .(round(res$sig, 1)) ~ ", " ~
 #'                                   rho == .(round(res$p0, 2))))
-#'
-#'
 #'
 #' # (3) Run the minimum age model with bootstrap
 #' # NOTE: Bootstrapping is computationally intensive
@@ -356,9 +355,7 @@ calc_MinDose <- function(
 
   .validate_positive_scalar(sigmab)
   if (!is.null(init.values)) {
-    if (!is.list(init.values)) {
-      .throw_error("'init.values' is expected to be a named list")
-    }
+    .validate_class(init.values, "list")
     exp.names <- c("gamma", "sigma", "p0", "mu")
     mis.names <- setdiff(exp.names, names(init.values))
     if (length(init.values) < length(exp.names) || length(mis.names) > 0) {
@@ -373,6 +370,13 @@ calc_MinDose <- function(
   if (!par %in% c(3, 4)) {
     .throw_error("'par' can only be set to 3 or 4")
   }
+
+  .validate_positive_scalar(level)
+  .validate_logical_scalar(log)
+  .validate_logical_scalar(bootstrap)
+  .validate_logical_scalar(log.output)
+  .validate_logical_scalar(plot)
+  .validate_logical_scalar(multicore)
 
   ##============================================================================##
   ## ... ARGUMENTS
@@ -410,6 +414,7 @@ calc_MinDose <- function(
   if ("bs.N" %in% names(extraArgs)) {
     N <- .validate_positive_scalar(as.integer(extraArgs$bs.N),
                                    int = TRUE, name= "'bs.N'")
+    N <- max(N, 2) # issue 1355
   } else {
     N <- 3*M
   }
@@ -435,13 +440,23 @@ calc_MinDose <- function(
     debug <- FALSE
   }
 
-  if ("cores" %in% names(extraArgs)) {
+  if (multicore && "cores" %in% names(extraArgs)) {
     cores <- .validate_positive_scalar(extraArgs$cores,
                                        int = TRUE, name = "'cores'")
   } else {
-    cores <- parallel::detectCores()
-    if (multicore)
+    cores <- ifelse(multicore, parallel::detectCores(), 1)
+    if (multicore && verbose)
       message("Logical CPU cores detected: ", cores) # nocov
+  }
+
+  ## remove non-positive values if using log-transformation
+  if (log) {
+    nonpos <- data[, 1] <= 0
+    if (sum(nonpos) > 0) {
+      .throw_warning("De values must be positive with 'log = TRUE', ",
+                     sum(nonpos), " values set to NA")
+      data[nonpos, 1] <- NA
+    }
   }
 
 
@@ -517,12 +532,12 @@ calc_MinDose <- function(
     res0 <- (gamma - mu0)/sigma0
     res1 <- (gamma - mu)/sigma
     lf1i <- log(p0) - log(si) - 0.5*((zi-gamma)/si)^2   - logsqrt2pi
-    lf2i <- log(1-p0) - 0.5*log(s2) - 0.5*(zi-mu)^2/s2  - logsqrt2pi
-    lf2i <- lf2i + log(1 - stats::pnorm(res0)) - log(1 - stats::pnorm(res1))
+    lf2i <- log1p(-p0) - 0.5 * log(s2) - 0.5 * (zi - mu)^2 / s2  - logsqrt2pi
+    lf2i <- lf2i + log1p(-stats::pnorm(res0)) - log1p(-stats::pnorm(res1))
     llik <- log( exp(lf1i) + exp(lf2i) )
-    negll <- -sum(llik)
 
-    return(negll)
+    ## negative log-likelihood
+    -sum(llik)
   }
 
   # THIS MAXIMIZES THE Neglik_f LIKELIHOOD FUNCTION AND RETURNS AN MLE OBJECT
@@ -546,28 +561,77 @@ calc_MinDose <- function(
     }, error = function(e) {
       .throw_error("Maximizing the negative log-likelihood failed: ", e$message) # nocov
     })
-    return(mle)
+    mle
+  }
+
+  ## Function to extract the estimate of gamma from mle2 objects and converting
+  ## it back to the 'normal' scale
+  save_Gamma <- function(ests) {
+    m <- bbmle::coef(ests)[["gamma"]]
+    if (invert)
+      m <- -1 * (m - x.offset)
+    if (log)
+      m <- exp(m)
+    m
+  }
+
+  ## Undo the invert transformation on a confidence interval data frame
+  undo_invert <- function(conf) {
+    conf[1, ] <- (conf[1, ] - x.offset) * -1
+    tmp <- conf[1, 1]
+    conf[1, 1] <- conf[1,2]
+    conf[1, 2] <- tmp
+    conf
+  }
+
+  ## Collect the parameter estimates from mle2 objects, converting back
+  ## log-transformed values to the normal scale
+  extract_estimates <- function(ests) {
+    res <- data.frame(gamma = save_Gamma(ests),
+                      sigma = bbmle::coef(ests)[["sigma"]],
+                      p0 = bbmle::coef(ests)[["p0"]],
+                      mu = if (par == 4) bbmle::coef(ests)[["mu"]] else NA,
+                      row.names = "Estimate", check.names = FALSE)
+    if (log) {
+      res$sigma <- exp(res$sigma)
+      res$mu <- exp(res$mu)
+    }
+
+    res
   }
 
   ##============================================================================##
   ## MAIN PROGRAM
   ##============================================================================##
 
-  # combine errors
-  if (log) {
-    lcd <- log(data[, 1]) * ifelse(invert, -1, 1)
-    if (invert) {
-      x.offset <- abs(min(lcd))
-      lcd <- lcd+x.offset
+  ## adds the sigmab error to each individual De error
+  combine_Errors <- function(data, err) {
+    if (log) {
+      lcd  <- log(data[, 1]) * ifelse(invert, -1, 1)
+      if (invert) {
+        lcd <- lcd + x.offset
+      }
+      lse <- sqrt((data[, 2] / data[, 1])^2 + err^2)
+    } else {
+      lcd <- data[, 1]
+      lse <- sqrt(data[, 2]^2 + err^2)
     }
-    lse <- sqrt((data[ ,2]/data[ ,1])^2 + sigmab^2)
-  } else {
-    lcd <- data[ ,1]
-    lse <- sqrt(data[ ,2]^2 + sigmab^2)
+    cbind(lcd, lse)
   }
 
-  # create new data frame with DE and combined relative error
-  dat <- cbind(lcd, lse)
+  ## create new data frame with DE and combined relative error
+  x.offset <- 0
+  dat <- combine_Errors(data, sigmab)
+
+  ## recompute the offset if necessary
+  if (log && invert) {
+    x.offset <- abs(min(dat[, 1], na.rm = TRUE))
+    dat[, 1] <- dat[, 1] + x.offset
+  }
+
+  ## remove NAs which may be present if we had non-positive De values with
+  ## log = TRUE
+  dat <- dat[!is.na(dat[, 1]), ]
 
   # get the maximum likelihood estimate
   ests <- Get_mle(dat)
@@ -581,8 +645,10 @@ calc_MinDose <- function(
     print(suppressWarnings(bbmle::summary(ests)))
 
   ## deal with NA/NaN values
-  if (anyNA(coef_err))
-    coef_err[which(is.na(coef_err))] <- t(as.data.frame(ests@coef))[which(is.na(coef_err))] / 100
+  if (anyNA(coef_err)) {
+    na.idx <- is.na(coef_err)
+    coef_err[na.idx] <- t(as.data.frame(ests@coef))[na.idx] / 100
+  }
 
   which <- c("gamma", "sigma", "p0", if (par == 4) "mu")
   prof.lower <- c(gamma = -Inf, sigma = 0, p0 = 0, mu = -Inf)
@@ -632,27 +698,9 @@ calc_MinDose <- function(
     prof@profile$mu <- prof@profile$mu[is.finite(prof@profile$mu$z), ]
   }
 
-  # calculate Bayesian Information Criterion (BIC)
+  ## calculate Bayesian Information Criterion (BIC)
   BIC <- BIC(ests)
-
-  # retrieve results from mle2-object
-  pal <- if (log) {
-    if (invert) {
-      exp((bbmle::coef(ests)[["gamma"]]-x.offset)*-1)
-    } else {
-      exp(bbmle::coef(ests)[["gamma"]])
-    }
-  } else {
-    bbmle::coef(ests)[["gamma"]]
-  }
-  sig <- bbmle::coef(ests)[["sigma"]]
-  p0end <- bbmle::coef(ests)[["p0"]]
-
-  if (par == 4) {
-    muend <- ifelse(log, exp(bbmle::coef(ests)[["mu"]]), bbmle::coef(ests)[["mu"]])
-  } else {
-    muend <- NA
-  }
+  Lmax <- -ests@min
 
   ##============================================================================##
   ## ERROR CALCULATION
@@ -666,10 +714,7 @@ calc_MinDose <- function(
   class(conf[,1]) <- class(conf[,2]) <- "numeric"
 
   if (invert) {
-    conf[1, ] <- (conf[1, ]-x.offset)*-1
-    t <- conf[1,1]
-    conf[1,1] <- conf[1,2]
-    conf[1,2] <- t
+    conf <- undo_invert(conf)
   }
 
   ## keep a copy of the original conf object to be returned at the end
@@ -681,91 +726,34 @@ calc_MinDose <- function(
 
   gamma_err <- (conf["gamma", 2] - conf["gamma", 1]) / 3.92
 
-
-  ##============================================================================##
-  ## AGGREGATE RESULTS
-  summary <- data.frame(de=pal,
-                        de_err=gamma_err,
-                        ci_level = level,
-                        ci_lower = conf["gamma", 1],
-                        ci_upper = conf["gamma", 2],
-                        par=par,
-                        sig=ifelse(log, exp(sig), sig),
-                        p0=p0end,
-                        mu=muend,
-                        Lmax=-ests@min,
-                        BIC=BIC)
-  call <- sys.call()
-  args <- list(log=log, sigmab=sigmab, par = par, bootstrap=bootstrap,
-               init.values=start, log.output = log.output,
-               bs.M=M, bs.N=N, bs.h=h, sigmab.sd=sigmab.sd)
-
-  if (!is.na(summary$mu) && !is.na(summary$de) &&
-    ## equivalent to log(summary$de) > summary$mu, but also valid if de < 0
-    summary$de > exp(summary$mu)) {
-      .throw_warning("Gamma is larger than mu, consider running the model ",
-                     "with new boundary values (see details '?calc_MinDose')")
-  }
+  ## retrieve results from mle2 object
+  res <- extract_estimates(ests)
 
   ##============================================================================##
   ## BOOTSTRAP
   ##============================================================================##
   if (bootstrap) {
 
-    ## BOOTSTRAP FUNCTIONS ----
-    # Function that draws N+M sets of integer values from 1:n and returns
-    # both the indices and frequencies
-    draw_Freq <- function() {
-      f <- R <- matrix(0L, N+M, n)
-      for (i in seq_len(N+M)) {
-        R[i, ] <- sample(x = n, size = n, replace = TRUE)
-        f[i, ] <- tabulate(R, n)
-      }
-      return(list(R = R, freq = f))
-    }
-
-    # Function that adds the additional error sigmab to each individual DE error
-    combine_Errors <- function(d, e) {
-      if (log) {
-        d[ ,2] <- sqrt((d[ ,2]/d[ ,1])^2 + e^2)
-        d[ ,1] <- log(d[ ,1])
-      } else {
-        d[ ,2] <- sqrt(d[ ,2]^2 + e^2)
-      }
-      return(d)
-    }
-
     # Function that produces N+M replicates from the original data set using
     # randomly sampled indices with replacement and adding a randomly drawn
     # sigmab error
-    create_Replicates <- function(f, s) {
-      d <- apply(f$R, 1, function(x) data[x, ])
-      r <- mapply(function(x, y) combine_Errors(x, y), d, s, SIMPLIFY = FALSE)
-      return(r)
-    }
-
-    # Function to extract the estimate of gamma from mle2 objects and converting
-    # it back to the 'normal' scale
-    save_Gamma <- function(d) {
-      m <- bbmle::coef(d)[["gamma"]]
-      if (log && invert) {
-        m <- exp(-(m - x.offset))
-      }
-      return(m)
+    create_Replicates <- function(R, e) {
+      d <- apply(R, 1, function(x) data[x, ])
+      mapply(function(x, y) combine_Errors(x, y), d, e, SIMPLIFY = FALSE)
     }
 
     # Function that takes each of the N replicates and produces a kernel density
     # estimate of length n.
     get_KDE <- function(d) {
-      f <- approx(density(x=d[ ,1], kernel="gaussian", bw = h), xout = d[ ,1])
+      f <- approx(density(x = d[, 1], kernel = "gaussian", bw = h, na.rm = TRUE),
+                  xout = d[, 1])
       pStarTheta <- as.vector(f$y / sum(f$y))
       pStarTheta / (1 / n)
     }
 
     # Function that calculates the product term of the recycled bootstrap
-    get_ProductTerm <- function(Pmat, b2Pmatrix) {
-      prodterm <- apply(Pmat^b2Pmatrix$freq[1:N, ], 1, prod)
-      return(prodterm)
+    get_ProductTerm <- function(Pmat, freq) {
+      apply(Pmat^freq, 1, prod)
     }
 
     # Function that calculates the pseudo likelihoods for M replicates and
@@ -779,6 +767,39 @@ calc_MinDose <- function(
       cbind(theta, likelihood)
     }
 
+    ## Function to produce smoothed polynomial fits
+    ## USS: unshared systematic error (3.5% in the paper)
+    # nocov start
+    get_polyfit <- function(pairs, degree, USS = 0.035) {
+      x <- pairs[, 1]
+      pairs[, 1] <- suppressWarnings(rnorm(length(x), mean = x, sd = USS * x))
+      pairs_sorted <- pairs[order(pairs[, 1]), ]
+      x <- pairs_sorted[, 1]
+      y <- pairs_sorted[, 2]
+
+      ## remove non-positive values as we are applying the log
+      ypos <- y > 0
+      x <- x[ypos]
+      y <- y[ypos]
+
+      ## fit polynomial to log(y), then exponentiate back
+      fit <- stats::lm(log(y) ~ poly(x, degree, raw = TRUE), na.action = na.exclude)
+      f <- exp(predict(fit, newdata = data.frame(x)))
+
+      ## vector of points to interpolate fit
+      xi <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = 100)
+      yi <- approx(x, f, xout = xi)$y
+
+      ind1 <- which(yi > 0)
+      yi[!is.finite(yi)] <- 0
+
+      list(xycurve = cbind(xi[min(ind1):max(ind1)],
+                           yi[min(ind1):max(ind1)]),
+           pairsUSS = pairs,
+           fit = fit)
+    }
+    # nocov end
+
     ## START BOOTSTRAP ----
     msg <- sprintf(paste("\n [calc_MinDose] \n\nRecycled Bootstrap",
                          "\n\nParameters:",
@@ -786,25 +807,30 @@ calc_MinDose <- function(
                          "\n N = %d",
                          "\n sigmab = %.2f \U00B1 %.2f",
                          "\n h = %.2f",
-                         "\n\nCreating %d bootstrap replicates%s..."),
-                   M, N, sigmab, sigmab.sd, h, N+M,
-                   if (multicore) paste(" using", cores, "cores") else "")
+                         "\n\nCreating %d bootstrap replicates..."),
+                   M, N, sigmab, sigmab.sd, h, N+M)
     if (verbose)
       message(msg)
 
     n <- length(data[ ,1])
     # Draw N+M samples from a normally distributed sigmab
-    sigmab <- rnorm(N + M, sigmab, sigmab.sd)
-    # Draw N+M random indices and their frequencies
-    b2Pmatrix <- draw_Freq()
+    sigmab.bs <- rnorm(N + M, sigmab, sigmab.sd)
+
+    ## Draw N+M random indices of size n
+    indices <- matrix(sample(n, size = n * (N + M), replace = TRUE),
+                      nrow = N + M, ncol = n, byrow = TRUE)
+
     # Finally draw N+M bootstrap replicates
-    replicates <- create_Replicates(b2Pmatrix, sigmab)
+    replicates <- create_Replicates(indices, sigmab.bs)
 
     # MULTICORE: The call to 'Get_mle' is the bottleneck of the function.
     # Using multiple CPU cores can reduce the computation cost, but may
     # not work for all machines.
-    if (verbose)
-      message("Applying the model to all replicates, this may take a while...")
+    if (verbose) {
+      message("Applying the model to all replicates using ", cores,
+              " cores, this may take a while...")
+    }
+
     if (multicore) {
       cl <- parallel::makeCluster(cores)
       mle <- parallel::parLapply(cl, replicates, Get_mle)
@@ -819,9 +845,12 @@ calc_MinDose <- function(
     # Save 2nd- and 1st-level bootstrap results (i.e. estimates of gamma)
     b2mam <- sapply(mle[1:N], save_Gamma)
     theta <- sapply(mle[c(N+1):c(N+M)], save_Gamma)
+
     # Calculate the probability/pseudo-likelihood
     Pmat <- lapply(replicates[c(N+1):c(N+M)], get_KDE)
-    prodterm <- vapply(Pmat, get_ProductTerm, b2Pmatrix, FUN.VALUE = numeric(N))
+    freq <- t(apply(indices[1:N, ], 1, tabulate, n))
+    prodterm <- vapply(Pmat, get_ProductTerm, freq, FUN.VALUE = numeric(N))
+
     # Save the bootstrap results as dose-likelihood pairs
     pairs <- make_Pairs(theta, b2mam, prodterm)
 
@@ -855,7 +884,7 @@ calc_MinDose <- function(
     # distribution where actually none is given. The non-parametric
     # LOESS (LOcal polynomial regrESSion) often yields better results than
     # standard polynomials.
-    if (nrow(pairs) >= 7) {
+    if (length(unique(pairs[, 1])) >= 15) {
       loess <- loess(pairs[, 2] ~ pairs[, 1])
     } else {
       loess <- NA
@@ -863,66 +892,116 @@ calc_MinDose <- function(
                      "increasing `bs.M`")
     }
 
+    ## extract the parameters from the bootstrap replicates
+    mle <- rbindlist(lapply(mle[N + 1:M], extract_estimates))
+
+    ## compute the mean of each parameter
+    res <- data.frame(apply(mle, 2, mean, simplify = FALSE))
+    rownames(res) <- "Estimate"
+
+    ## quantiles from the bootstrap replicates
+    prob <- (1 + c(-level, level)) / 2
+    conf <- data.frame(t(apply(mle[, 1:par], 2, quantile,
+                               na.rm = TRUE, probs = prob)))
+    colnames(conf) <- paste(prob * 100, "%")
+
+    ## keep a copy of the conf object in the scale in which the models were
+    ## fitted
+    conf.orig <- conf
+    if (log) {
+      logged.rows <- row.names(conf.orig) != "p0"
+      conf.orig[logged.rows, ] <- log(conf.orig[logged.rows, ])
+    }
+
+    ## standard deviation over the De values from the bootstrap replicates
+    gamma_err <- sd(pairs[, "theta"])
+
   }#EndOf::Bootstrap
+
+  ## ========================================================================
+  ## AGGREGATE RESULTS
+
+  summary <- data.frame(de = res$gamma,
+                        de_err = gamma_err,
+                        ci_level = level,
+                        ci_lower = conf["gamma", 1],
+                        ci_upper = conf["gamma", 2],
+                        par = par,
+                        sig = res$sigma,
+                        p0 = res$p0,
+                        mu = res$mu,
+                        Lmax = Lmax,
+                        BIC = BIC)
+  call <- sys.call()
+  args <- list(log = log, sigmab = sigmab, par = par, bootstrap = bootstrap,
+               init.values = start, log.output = log.output,
+               bs.M = M, bs.N = N, bs.h = h, sigmab.sd = sigmab.sd)
+
+  if (!is.na(summary$mu) && !is.na(summary$de) &&
+    ## equivalent to log(summary$de) > summary$mu, but also valid if de < 0
+    summary$de > exp(summary$mu)) {
+      .throw_warning("Gamma is larger than mu, consider running the model ",
+                     "with new boundary values (see details '?calc_MinDose')")
+  }
 
   ##============================================================================##
   ## CONSOLE PRINT
   ##============================================================================##
-  if (verbose && !bootstrap) {
-      cat("\n----------- meta data -----------\n")
-      print(data.frame(n=length(data[ ,1]),
+
+  if (verbose) {
+    cat("\n----------- Meta data -----------\n")
+    print(data.frame(n = length(data[, 1]),
                        par=par,
                        sigmab=sigmab,
                        logged=log,
-                       Lmax=-ests@min,
+                       Lmax = Lmax,
                        BIC=BIC,
                        row.names = ""))
 
-      cat("\n--- final parameter estimates ---\n")
-      tmp <- round(data.frame(
-        gamma=ifelse(!invert,
-                     ifelse(log, exp(bbmle::coef(ests)[["gamma"]]), bbmle::coef(ests)[["gamma"]]),
-                     ifelse(log, exp((bbmle::coef(ests)[["gamma"]]-x.offset)*-1),(bbmle::coef(ests)[["gamma"]]-x.offset)*-1)
-        ),
-        sigma=ifelse(log, exp(bbmle::coef(ests)[["sigma"]]), bbmle::coef(ests)[["sigma"]]),
-        p0=bbmle::coef(ests)[["p0"]],
-        mu=ifelse(par==4,
-                  muend,
-                  0),
-        row.names="", check.names = FALSE), 2)
+    cat(sprintf("\n--- Final parameter estimates%s ---\n",
+                ifelse(bootstrap, " (bootstrap)", "")))
+    if (log && log.output) {
+      res$`log(gamma)` <- log(res$gamma)
+      res$`log(sigma)` <- log(res$sigma)
+      res$`log(mu)` <- log(res$mu)
+    }
+    print(round(res[, 1:par], 2))
 
-      if (log && log.output) {
-        tmp$`log(gamma)` <- round(log(tmp$gamma),2)
-        tmp$`log(sigma)` <- round(log(tmp$sigma),2)
-        if (par == 4)
-          tmp$`log(mu)` <- round(log(tmp$mu),2)
-      }
+    cat(sprintf("\n------ Confidence intervals%s -----\n",
+                ifelse(bootstrap, " (bootstrap)", "")))
+    conf_print <- conf
+    conf_print <- round(conf_print, 2)
 
-      print(tmp)
+    if (log && log.output) {
+      logged.rows <- row.names(conf) != "p0"
+      conf_log <- conf
+      conf_log[logged.rows, ] <- log(conf_log[logged.rows, ])
 
-      cat("\n------ confidence intervals -----\n")
-      conf_print <- round(conf, 2)
-      if (log && log.output) {
-          conf_tmp <- round(conf.orig, 2)
-          conf_tmp[which(rownames(conf_tmp) == "p0"), ] <- "-"
-          conf_print <- cbind(conf_print,
-                              setNames(conf_tmp, names(conf_tmp)))
-          conf_print <- rbind(
-            setNames(data.frame("", "", "(logged)", "(logged)", row.names = "", stringsAsFactors = FALSE), names(conf_print)),
-            conf_print)
-      }
-      print(conf_print)
+      conf_log <- round(conf_log, 2)
+      conf_log[which(rownames(conf_log) == "p0"), ] <- "-"
+      conf_print <- cbind(conf_print, conf_log)
+      ncols <- ncol(conf_print) / 2
+      conf_print <- rbind(setNames(data.frame(as.list(rep("", ncols)),
+                                              as.list(rep("(logged)", ncols)),
+                                              row.names = ""),
+                                   colnames(conf_print)),
+                          conf_print)
+    }
 
-      cat("\n------ De (asymmetric error) -----\n")
-      print(round(data.frame(De=pal,
-                             lower = conf["gamma", 1],
-                             upper = conf["gamma", 2],
-                             row.names=""), 2))
+    print(conf_print)
 
-      cat("\n------ De (symmetric error) -----\n")
-      print(round(data.frame(De=pal,
-                             error=gamma_err,
-                             row.names=""), 2))
+    cat(sprintf("\n------ De (asymmetric error)%s -----\n",
+                ifelse(bootstrap, " (bootstrap)", "")))
+    print(round(data.frame(De = summary$de,
+                           lower = conf["gamma", 1],
+                           upper = conf["gamma", 2],
+                           row.names = ""), 2))
+
+    cat(sprintf("\n------ De (symmetric error)%s -----\n",
+                ifelse(bootstrap, " (bootstrap)", "")))
+    print(round(data.frame(De = summary$de,
+                           error = gamma_err,
+                           row.names = ""), 2))
   }
 
   ##============================================================================##
@@ -956,8 +1035,10 @@ calc_MinDose <- function(
 
   ##=========##
   ## PLOTTING
-  if (plot)
-    try(plot_RLum.Results(results, ...))
+  if (plot) {
+    try(plot_RLum.Results(results, ...),
+        outFile = stdout()) # redirect error messages so they can be silenced
+  }
 
   results
 }

@@ -12,10 +12,10 @@
 #' @section Class version: 0.2.1
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum-class], [RLum.Data.Curve-class],
-#' [RLum.Data.Spectrum-class], [RLum.Data.Image-class]
+#' @seealso [Luminescence::RLum-class], [Luminescence::RLum.Data.Curve-class],
+#' [Luminescence::RLum.Data.Spectrum-class], [Luminescence::RLum.Data.Image-class]
 #'
 #' @keywords classes internal
 #'
@@ -30,7 +30,7 @@ setClass("RLum.Data",
 
 ## add_metadata() -----------------------------------------------------------
 #' @describeIn metadata
-#' Add metadata entries to [RLum.Data-class] objects.
+#' Add metadata entries to [Luminescence::RLum.Data-class] objects.
 #'
 #' @export
 setMethod("add_metadata<-",
@@ -57,7 +57,7 @@ setMethod("add_metadata<-",
 
 ## rename_metadata() --------------------------------------------------------
 #' @describeIn metadata
-#' Rename a metadata entry of [RLum.Data-class] objects.
+#' Rename a metadata entry of [Luminescence::RLum.Data-class] objects.
 #'
 #' @export
 setMethod("rename_metadata<-",
@@ -87,7 +87,7 @@ setMethod("rename_metadata<-",
 
 ## replace_metadata() -------------------------------------------------------
 #' @describeIn metadata
-#' Replaces or removes metadata of [RLum.Data-class] objects.
+#' Replaces or removes metadata of [Luminescence::RLum.Data-class] objects.
 #'
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
@@ -156,7 +156,7 @@ setMethod("replace_metadata<-",
 
 ## view() -------------------------------------------------------------------
 #' @describeIn view
-#' View method for [RLum.Data-class] objects.
+#' View method for [Luminescence::RLum.Data-class] objects.
 #'
 #' @export
 setMethod("view",

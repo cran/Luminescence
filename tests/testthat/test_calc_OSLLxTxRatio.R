@@ -1,38 +1,6 @@
 ## load data
 data(ExampleData.LxTxOSLData, envir = environment())
 
-test_that("test arguments", {
-  testthat::skip_on_cran()
-  snapshot.tolerance <- 1.5e-6
-
-  ##digits
-  expect_snapshot_RLum(expect_silent(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:2),
-    background.integral = c(85:100),
-    digits = 1)
-    ), tolerance = snapshot.tolerance)
-
-  ##sigmab
-  expect_snapshot_RLum(expect_silent(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:2),
-    background.integral = c(85:100),
-    sigmab = c(1000,100))
-    ), tolerance = snapshot.tolerance)
-
-  ##poisson
-  expect_snapshot_RLum(expect_silent(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:2),
-    background.integral = c(85:100),
-    background.count.distribution = "poisson")
-    ), tolerance = snapshot.tolerance)
-})
-
 test_that("test input", {
   testthat::skip_on_cran()
 
@@ -40,43 +8,61 @@ test_that("test input", {
   expect_silent(calc_OSLLxTxRatio(
     set_RLum(class = "RLum.Data.Curve", data = as.matrix(Lx.data)),
     set_RLum(class = "RLum.Data.Curve", data = as.matrix(Tx.data)),
-    signal.integral = c(1:2),
-    background.integral = c(70:100)))
+    signal_integral = 1:2,
+    background_integral = 70:100))
 
   ##matrix
   expect_silent(calc_OSLLxTxRatio(
     as.matrix(Lx.data),
     as.matrix(Tx.data),
-    signal.integral = c(1:2),
-    background.integral = c(70:100)))
+    signal_integral = 1:2,
+    background_integral = 70:100))
 
   ##numeric
   expect_silent(calc_OSLLxTxRatio(
     as.numeric(Lx.data[,2]),
     as.numeric(Tx.data[,2]),
-    signal.integral = c(1:2),
-    background.integral = c(70:100)))
+    signal_integral = 1:2,
+    background_integral = 70:100))
 
   ##RLum.Curve
   expect_silent(calc_OSLLxTxRatio(
     set_RLum(class = "RLum.Data.Curve", data = as.matrix(Lx.data)),
     Tx.data = NULL,
-    signal.integral = c(1:2),
-    background.integral = c(70:100)))
+    signal_integral = 1:2,
+    background_integral = 70:100))
 
   ##matrix
   expect_silent(calc_OSLLxTxRatio(
     as.matrix(Lx.data),
     Tx.data = NULL,
-    signal.integral = c(1:2),
-    background.integral = c(70:100)))
+    signal_integral = 1:2,
+    background_integral = 70:100))
 
   ##numeric
   expect_silent(calc_OSLLxTxRatio(
     as.numeric(Lx.data[,2]),
     Tx.data = NULL,
-    signal.integral = c(1:2),
-    background.integral = c(70:100)))
+    signal_integral = 1:2,
+    background_integral = 70:100))
+
+  ## list
+  expect_type(calc_OSLLxTxRatio(
+      list(Lx.data),
+      Tx.data = NULL,
+      signal_integral = 1:2,
+      background_integral = 70:100),
+      "list")
+
+  ## integral_input
+  expect_equal(calc_OSLLxTxRatio(Lx.data, Tx.data,
+                                 signal_integral = c(0.0, 0.4),
+                                 background_integral = c(13.8, 15.8, 19.8),
+                                 integral_input = "measurement")@data,
+               calc_OSLLxTxRatio(Lx.data, Tx.data,
+                                 signal_integral = 1:3,
+                                 background_integral = 70:100,
+                                 integral_input = "channel")@data)
 })
 
 test_that("input validation", {
@@ -85,7 +71,7 @@ test_that("input validation", {
   expect_error(calc_OSLLxTxRatio(numeric()),
                "'Lx.data' cannot be an empty numeric")
   expect_error(calc_OSLLxTxRatio(Lx.data, "error"),
-               "'Tx.data' should be of class 'RLum.Data.Curve', 'data.frame', 'numeric', 'matrix'")
+               "'Tx.data' should be of class 'RLum.Data.Curve', 'data.frame', 'matrix', 'numeric', a list")
   expect_error(calc_OSLLxTxRatio("error", "error"),
                "'Lx.data' should be of class 'RLum.Data.Curve', 'data.frame'")
   expect_error(calc_OSLLxTxRatio(Lx.data[, 1, drop = FALSE]),
@@ -95,130 +81,214 @@ test_that("input validation", {
   expect_error(calc_OSLLxTxRatio(Lx.data[1:10, ], Tx.data),
                "Different number of channels for Lx (10) and Tx (100)",
                fixed = TRUE)
+  expect_error(calc_OSLLxTxRatio(Lx.data[1:10, ], signal_integral = NULL),
+               "'signal_integral' should be of class 'integer', 'numeric' or NA")
+  expect_error(calc_OSLLxTxRatio(Lx.data[1:10, ], signal_integral = list(1, 2)),
+               "'signal_integral' should be of class 'integer', 'numeric' or NA")
+  expect_warning(expect_error(
+      calc_OSLLxTxRatio(Lx.data[1:10, ], signal_integral = -1:4),
+      "'background_integral' should be of class 'integer', 'numeric' or NA"),
+      "'signal_integral' out of bounds, reset to be between 1 and 4")
+  expect_error(calc_OSLLxTxRatio(Lx.data[1:10, ], signal_integral = 1:2,
+                                 background_integral = matrix(1:4, ncol =2)),
+               "'background_integral' should be of class 'integer', 'numeric' or NA")
+  expect_error(calc_OSLLxTxRatio(list(Lx.data, Lx.data), Tx.data),
+               "'Tx.data' should either be a list of the same length or NULL")
+
+  expect_error(calc_OSLLxTxRatio(Lx.data, Tx.data,
+                                 signal_integral = 1:20, background_integral = NA,
+                                 signal_integral_Tx = 1:20,
+                                 background_integral_Tx = NULL),
+               "When 'Tx.data' is provided, either both 'signal_integral_Tx' and")
+
+  expect_warning(expect_error(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:2000,
+    background_integral = 85:100
+  ), "'background_integral' is expected to be at least 101, but the maximum allowed is 100"),
+  "'signal_integral' out of bounds, reset to be between 1 and 100")
+
+  SW({
+  expect_warning(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:90,
+    background_integral = 85:100
+  ), "'background_integral' out of bounds, reset to be between 91 and 100")
+
+  expect_warning(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:10,
+    signal_integral_Tx = 1:90,
+    background_integral = 85:100,
+    background_integral_Tx = 85:100
+  ), "'background_integral_Tx' out of bounds, reset to be between 91 and 100")
+
+  expect_warning(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:20,
+    background_integral = 85:1000
+  ), "'background_integral' out of bounds, reset to be between 85 and 100")
+
+  expect_warning(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:10,
+    signal_integral_Tx = 1:10,
+    background_integral = 85:100,
+    background_integral_Tx = 85:10000
+  ), "'background_integral_Tx' out of bounds, reset to be between 85 and 100")
+  })
+
+  expect_warning(expect_error(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:10,
+    signal_integral_Tx = 1:1000,
+    background_integral = 85:100,
+    background_integral_Tx = 85:100
+  ), "background_integral_Tx' is expected to be at least 101, but the maximum"),
+  "'signal_integral_Tx' out of bounds, reset to be between 1 and 100")
 
   expect_error(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
-    signal.integral = c(1:2000),
-    background.integral = c(85:100)
-  ), "'signal.integral' is not valid, max: 100")
+    signal_integral = 1:20,
+    signal_integral_Tx = 1:20,
+    background_integral = 80:100,
+    background_integral_Tx = NULL
+  ), "When 'Tx.data' is provided, either both 'signal_integral_Tx' and")
 
   expect_error(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
-    signal.integral = c(1:90),
-    background.integral = c(85:100)
-  ), "'signal.integral' and 'background.integral' overlap")
-
-  expect_error(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:10),
-    signal.integral.Tx = c(1:90),
-    background.integral = c(85:100),
-    background.integral.Tx = c(85:100)
-  ), "'signal.integral.Tx' and 'background.integral.Tx' overlap")
-
-  expect_error(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:20),
-    background.integral = c(85:1000)
-  ), "'background.integral' is not valid, max: 100")
-
-  expect_error(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:10),
-    signal.integral.Tx = c(1:10),
-    background.integral = c(85:100),
-    background.integral.Tx = c(85:10000)
-  ), "'background.integral.Tx' is not valid, max: 100")
-
-  expect_error(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:10),
-    signal.integral.Tx = c(1:1000),
-    background.integral = c(85:100),
-    background.integral.Tx = c(85:100)
-  ), "'signal.integral.Tx' is not valid, max: 100")
-
-  expect_error(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:20),
-    signal.integral.Tx = c(1:20),
-    background.integral = 80:100,
-    background.integral.Tx = NULL
-  ), "You have to provide both 'signal.integral.Tx' and 'background.integral.Tx'")
-
-  expect_error(calc_OSLLxTxRatio(
-    Lx.data,
-    Tx.data,
-    signal.integral = c(1:20),
-    background.integral = 80:100,
+    signal_integral = 1:20,
+    background_integral = 80:100,
     sigmab = "test"
   ), "'sigmab' should be of class 'numeric'")
 
   expect_error(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
-    signal.integral = c(1:20),
-    background.integral = 80:100,
+    signal_integral = 1:20,
+    background_integral = 80:100,
     sigmab = c(1, 2, 3)
-  ), "'sigmab' can have at most length 2")
+  ), "'sigmab' should be of class 'numeric' or NULL and have length 1 or 2")
+
+  expect_error(calc_OSLLxTxRatio(Lx.data, Tx.data, sig0 = -1),
+               "'sig0' should be a single non-negative value")
 })
 
 test_that("create warnings", {
   testthat::skip_on_cran()
 
+  ## deprecated arguments
+  expect_warning(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal.integral = 1:2,
+      background.integral = 85:100,
+      digits = 1),
+      "were deprecated in v1.2.0, use 'signal_integral', 'background_integral'")
+  expect_warning(expect_error(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal.integral = 1:2,
+      background.integral = 85:100,
+      integral_input = "measurement"),
+      "'integral_input' is not supported with old argument names"),
+      "were deprecated in v1.2.0, use 'signal_integral', 'background_integral'")
+
   expect_warning(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
-    signal.integral = c(1:20),
-    signal.integral.Tx = c(1:20),
-    background.integral = 80:100,
-    background.integral.Tx = 60:100
+    signal_integral = 1:20,
+    signal_integral_Tx = 1:20,
+    background_integral = 80:100,
+    background_integral_Tx = 60:100
   ), "Number of background channels for Lx < 25, error estimation might not be reliable")
 
   expect_warning(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
-    signal.integral = c(1:20),
-    signal.integral.Tx = c(1:20),
-    background.integral = 60:100,
-    background.integral.Tx = 80:100
+    signal_integral = 1:20,
+    signal_integral_Tx = 1:20,
+    background_integral = 60:100,
+    background_integral_Tx = 80:100
   ), "Number of background channels for Tx < 25, error estimation might not be reliable")
 
   expect_warning(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
-    signal.integral = c(1:20),
-    background.integral = 60:100,
+    signal_integral = 1:20,
+    background_integral = 60:100,
     background.count.distribution = "hallo"
   ), "Unknown method for 'background.count.distribution', a non-poisson")
 
   expect_warning(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
-    signal.integral = c(1:20),
-    signal.integral.Tx = c(2:20),
-    background.integral = 60:100,
-    background.integral.Tx = 40:100,
+    signal_integral = 1:20,
+    signal_integral_Tx = 2:20,
+    background_integral = 60:100,
+    background_integral_Tx = 40:100,
     use_previousBG = TRUE
-  ), "With 'use_previousBG = TRUE' independent Lx and Tx integral limits are")
+  ), "When 'use_previousBG = TRUE', independent Tx integral limits are not")
+
+  ## integral_input = "measurement"
+  expect_warning(expect_warning(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:10,
+    signal_integral_Tx = 1:7,
+    background_integral = 10:20,
+    background_integral_Tx = 7:100,
+    integral_input = "measurement"),
+    "'background_integral' out of bounds, reset to be between 52 and 100"),
+    "'background_integral_Tx' out of bounds, reset to be between 37 and 100")
 })
 
 test_that("snapshot tests", {
   testthat::skip_on_cran()
   snapshot.tolerance <- 1.5e-6
 
+  ## digits
+  expect_snapshot_RLum(expect_silent(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal_integral = 1:2,
+      background_integral = 85:100,
+      digits = 1)
+  ), tolerance = snapshot.tolerance)
+
+  ## sigmab
+  expect_snapshot_RLum(expect_silent(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal_integral = 1:2,
+      background_integral = 85:100,
+      sigmab = c(1000,100))
+  ), tolerance = snapshot.tolerance)
+
+  ## poisson
+  expect_snapshot_RLum(expect_silent(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal_integral = 1:2,
+      background_integral = 85:100,
+      background.count.distribution = "poisson")
+  ), tolerance = snapshot.tolerance)
+
+  ## use_previousBG
   expect_snapshot_RLum(calc_OSLLxTxRatio(
       Lx.data = Lx.data,
       Tx.data = Tx.data,
-      signal.integral = c(1:2),
-      background.integral = c(85:100)
+      signal_integral = 1:2,
+      background_integral = 85:100,
+      use_previousBG = TRUE
   ), tolerance = snapshot.tolerance)
 
   ## check weird circumstances
@@ -226,60 +296,101 @@ test_that("snapshot tests", {
   expect_snapshot_RLum(calc_OSLLxTxRatio(
     data.frame(Lx.data[,1],0),
     Tx.data,
-    signal.integral = c(1:2),
-    background.integral = c(85:100)
+    signal_integral = 1:2,
+    background_integral = 85:100
   ))
 
   ##(2) - Tx curve 0
   expect_snapshot_RLum(calc_OSLLxTxRatio(
     Lx.data,
     data.frame(Tx.data[,1],0),
-    signal.integral = c(1:2),
-    background.integral = c(85:100)
+    signal_integral = 1:2,
+    background_integral = 85:100
   ))
 
   ##(3) - Lx and Tx curve 0
   expect_snapshot_RLum(calc_OSLLxTxRatio(
     data.frame(Lx.data[,1],0),
     data.frame(Tx.data[,1],0),
-    signal.integral = c(1:2),
-    background.integral = c(85:100)
+    signal_integral = 1:2,
+    background_integral = 85:100
   ))
 
   ##(4) - Lx < 0
   expect_snapshot_RLum(calc_OSLLxTxRatio(
     data.frame(Lx.data[,1],-1000),
     data.frame(Tx.data[,1],0),
-    signal.integral = c(1:2),
-    background.integral = c(85:100)
+    signal_integral = 1:2,
+    background_integral = 85:100
   ))
 
   ##(5) - Tx < 0
   expect_snapshot_RLum(calc_OSLLxTxRatio(
     Lx.data,
     data.frame(Lx.data[,1],-1000),
-    signal.integral = c(1:2),
-    background.integral = c(85:100)
+    signal_integral = 1:2,
+    background_integral = 85:100
   ))
 
   ##(6) - Lx & Tx < 0
   expect_snapshot_RLum(calc_OSLLxTxRatio(
     data.frame(Lx.data[,1],-1000),
     data.frame(Tx.data[,1],-1000),
-    signal.integral = c(1:2),
-    background.integral = c(85:100)
+    signal_integral = 1:2,
+    background_integral = 85:100
   ))
-})
 
-test_that("test NA mode with no signal integrals", {
-  testthat::skip_on_cran()
-
-  data(ExampleData.LxTxOSLData, envir = environment())
-  temp <- expect_s4_class(calc_OSLLxTxRatio(
+  ## alternate mode with no signal integrals
+  expect_snapshot_RLum(calc_OSLLxTxRatio(
     Lx.data = Lx.data,
     Tx.data = Tx.data,
-    signal.integral = NA,
-    background.integral = NA), "RLum.Results")
+    signal_integral = NA,
+    background_integral = NA
+  ))
 
-  expect_equal(round(sum(temp$LxTx.table[1,]),0), 391926)
+  ## ------------------------------------------------------------------------
+  ## background_integral = NA
+
+  expect_snapshot_RLum(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data = NULL,
+      signal_integral = 1:2,
+      background_integral = NA))
+
+  expect_snapshot_RLum(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal_integral = 1:2,
+      background_integral = NA))
+
+  expect_snapshot_RLum(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:20,
+    background_integral = NA,
+    signal_integral_Tx = 1:10,
+    background_integral_Tx = NA))
+
+  expect_snapshot_RLum(calc_OSLLxTxRatio(
+    Lx.data,
+    Tx.data,
+    signal_integral = 1:20,
+    background_integral = NA,
+    signal_integral_Tx = 1:10,
+    background_integral_Tx = 70:100))
+
+  expect_snapshot_RLum(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal_integral = 1:2,
+      background_integral = NA,
+      use_previousBG = TRUE))
+
+  expect_snapshot_RLum(calc_OSLLxTxRatio(
+      Lx.data,
+      Tx.data,
+      signal_integral = 1:20,
+      background_integral = 70:100,
+      signal_integral_Tx = 1:10,
+      background_integral_Tx = NA))
 })

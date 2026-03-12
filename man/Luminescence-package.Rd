@@ -70,7 +70,7 @@ DFG Heisenberg programme No 505822867.
 \item since 08/2024: The future and sustainable development of 'Luminescence'
 towards better reproducibility and usability is supported through the DFG
 programme "REPLAY: REProducible Luminescence Data AnalYses" No 528704761,
-led by Dr Sebastian Kreutzer (PI at Heidelberg University, DE) and Dr Thomas
+led by Dr Sebastian Kreutzer (PI at LIAG - Institute for Applied Geophysics, Hannover, DE) and Dr Thomas
 Kolb (PI at Justus-Liebig-University Giessen, DE).
 \item All other authors gratefully received additional funding from various public funding bodies.
 }
@@ -78,19 +78,19 @@ Kolb (PI at Justus-Liebig-University Giessen, DE).
 \references{
 Dietze, M., Kreutzer, S., Fuchs, M.C., Burow, C., Fischer, M.,
 Schmidt, C., 2013. A practical guide to the R package Luminescence.
-Ancient TL, 31 (1), 11-18.
+Ancient TL 31 (1), 11-18.
 
 Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2016. The abanico plot:
-visualising chronometric data with individual standard errors. Quaternary Geochronology 31, 1-7.
-https://doi.org/10.1016/j.quageo.2015.09.003
+visualising chronometric data with individual standard errors.
+Quaternary Geochronology 31, 1-7. \doi{10.1016/j.quageo.2015.09.003}
 
 Fuchs, M.C., Kreutzer, S., Burow, C., Dietze, M., Fischer, M., Schmidt, C.,
 Fuchs, M., 2015. Data processing in luminescence dating analysis: An
 exemplary workflow using the R package 'Luminescence'. Quaternary
-International, 362,8-13. https://doi.org/10.1016/j.quaint.2014.06.034
+International 362, 8-13. \doi{10.1016/j.quaint.2014.06.034}
 
 Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M.,
-2012. Introducing an R package for luminescence dating analysis. Ancient TL,
+2012. Introducing an R package for luminescence dating analysis. Ancient TL
 30 (1), 1-8.
 
 Mercier, N., Kreutzer, S., Christophe, C., Guérin, G., Guibert, P., Lahaye, C., Lanos, P., Philippe, A.,
@@ -100,14 +100,14 @@ implementation in the R package 'Luminescence'. Ancient TL 34 (2), 14-21.
 Mercier, N., Galharret, J.-M., Tribolo, C., Kreutzer, S., Philippe, A., 2022.
 Luminescence age calculation through Bayesian convolution of equivalent dose
 and dose-rate distributions: the De_Dr model.
-Geochronology 4, 297–310. https://doi.org/10.5194/gchron-4-297-2022
+Geochronology 4, 297–310. \doi{10.5194/gchron-4-297-2022}
 
 Smedley, R.K., 2015. A new R function for the Internal External Uncertainty (IEU) model.
-Ancient TL, 33 (1), 16-21.
+Ancient TL 33 (1), 16-21.
 
 King, E.G., Burow, C., Roberts, H., Pearce, N.J.G., 2018. Age determination
-using feldspar: evaluating fading-correction model performance. Radiation Measurements 119, 58-73.
-https://doi.org/10.1016/j.radmeas.2018.07.013
+using feldspar: evaluating fading-correction model performance.
+Radiation Measurements 119, 58-73. \doi{10.1016/j.radmeas.2018.07.013}
 }
 \seealso{
 Useful links:
@@ -138,6 +138,7 @@ Authors:
   \item Marco Colombo (\href{https://orcid.org/0000-0001-6672-0623}{ORCID})
   \item Luc Steinbuch (\href{https://orcid.org/0000-0001-6484-0920}{ORCID})
   \item Anna-Maartje de Boer (\href{https://orcid.org/0000-0002-7359-6939}{ORCID})
+  \item Andrzej Bluszcz (\href{https://orcid.org/0000-0002-8027-6941}{ORCID})
 }
 
 Other contributors:

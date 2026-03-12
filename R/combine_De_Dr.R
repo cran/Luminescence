@@ -24,17 +24,17 @@
 #' @param verbose [logical] (*with default*): enable/disable output to the
 #' terminal.
 #'
-#'@return An [RLum.Results-class] object to be used in [combine_De_Dr]
+#'@return An [Luminescence::RLum.Results-class] object to be used in [Luminescence::combine_De_Dr]
 #'
 #'@section Function version: 0.1.0
 #'
-#'@note The function is intended to be called by [combine_De_Dr], however, for
+#'@note The function is intended to be called by [Luminescence::combine_De_Dr], however, for
 #' reasons of transparency
 #'
 #'@author Anne Philippe, Université de Nantes (France),
 #' Jean-Michel Galharret, Université de Nantes (France),
 #' Norbert Mercier, IRAMAT-CRP2A, Université Bordeaux Montaigne (France),
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #'@examples
 #' n <- 1000
@@ -204,14 +204,14 @@
 #' @param verbose [logical] (*with default*): enable/disable output to the
 #' terminal.
 #'
-#'@return An [RLum.Results-class] object
+#'@return An [Luminescence::RLum.Results-class] object
 #'
 #'@section Function version: 0.1.0
 #'
 #'@author Anne Philippe, Université de Nantes (France),
 #'Jean-Michel Galharret, Université de Nantes (France),
 #'Norbert Mercier, IRAMAT-CRP2A, Université Bordeaux Montaigne (France),
-#'Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #'@noRd
 .calc_BayesianCentralAgeModel <- function(
@@ -373,7 +373,8 @@
 #' `return_mcmc`\tab [logical] \tab `FALSE` \tab return additional MCMC diagnostic information\cr
 #'}
 #'
-#'@param De [numeric] (**required**): a equivalent dose sample
+#' @param De [numeric] (**required**):
+#' an equivalent dose sample.
 #'
 #'@param s [numeric] (**required**): a vector of measurement errors on the equivalent dose
 #'
@@ -382,17 +383,19 @@
 #'@param int_OD [numeric] (**required**): the intrinsic overdispersion, typically the standard deviation
 #'characterizing a dose-recovery test distribution
 #'
-#'@param Age_range [numeric] (*with default*): the age range to be investigated by the algorithm, the larger
-#'the value the more iterations are needed and the longer it takes. Should not be set too narrow, cut
-#'the algorithm some slack.
+#' @param Age_range [numeric] (*with default*):
+#' age range to be investigated by the algorithm. The larger the value, the
+#' more iterations are needed and the longer it takes. It should not be set
+#' too narrow to cut the algorithm some slack.
 #'
 #'@param outlier_threshold [numeric] (*with default*): the required significance level used
 #'for the outlier detection. If set to `1`, no outliers are removed. If
 #'`outlier_method = "RousseeuwCroux1993"`, the median distance is used as outlier threshold.
 #'Please see details for further information.
 #'
-#'@param outlier_method [character] (*with default*): select the outlier detection
-#'method, either `"default"` or `"RousseeuwCroux1993"`. See details for further information.
+#' @param outlier_method [character] (*with default*):
+#' outlier detection method, either `"default"` or `"RousseeuwCroux1993"`.
+#' See details.
 #'
 #' @param outlier_analysis_plot [logical] (*with default*): enable/disable the
 #' outlier analysis plot. Note: the outlier analysis will happen independently
@@ -413,15 +416,16 @@
 #'@param par_local [logical] (*with default*): if set to `TRUE` the function uses its
 #'own [graphics::par] settings (which will end in two plots next to each other)
 #'
-#' @param verbose [logical] (*with default*): enable/disable output to the
-#' terminal.
+#' @param verbose [logical] (*with default*):
+#' enable/disable output to the terminal.
 #'
-#' @param plot [logical] (*with default*): enable/disable the plot output.
+#' @param plot [logical] (*with default*):
+#' enable/disable the plot output.
 #'
 #'@param ... a few further arguments to fine-tune the plot output such as
 #'`cdf_ADr_quantiles` (`TRUE`/`FALSE`), `legend.pos`, `legend` (`TRUE`/`FALSE`)
 #'
-#'@return The function returns a plot if `plot = TRUE` and an [RLum.Results-class]
+#'@return The function returns a plot if `plot = TRUE` and an [Luminescence::RLum.Results-class]
 #'object with the following slots:
 #'
 #' `@data`\cr
@@ -440,15 +444,17 @@
 #' `.. $model_IAM`: the BUGS model used to derive the individual age\cr
 #' `.. $model_BCAM`: the BUGS model used to calculate the Bayesian Central Age\cr
 #'
-#'@references
+#' @references
 #'
-#'Mercier, N., Galharret, J.-M., Tribolo, C., Kreutzer, S., Philippe, A., preprint.
-#'Luminescence age calculation through Bayesian convolution of equivalent dose and
-#'dose-rate distributions: the De_Dr model. Geochronology, 1-22.
+#' Mercier, N., Galharret, J.-M., Tribolo, C., Kreutzer, S., Philippe, A., (2022).
+#' Luminescence age calculation through Bayesian convolution of equivalent dose
+#' and dose-rate distributions: the De_Dr model. Geochronology 4, 297-310.
+#' \doi{10.5194/gchron-4-297-2022}
 #'
-#'Galharret, J-M., Philippe, A., Mercier, N., preprint. Detection of outliers with
-#'a Bayesian hierarchical model: application to the single-grain luminescence dating method.
-#'Electronic Journal of Applied Statistics
+#' Galharret, J-M., Philippe, A., Mercier, N. (2021). Detection of outliers
+#' with a Bayesian hierarchical model: application to the single-grain
+#' luminescence dating method. Electronic Journal of Applied Statistics 14 (2),
+#' 318-338. \doi{10.1285/i20705948v14n2p318}
 #'
 #'**Further reading**
 #'
@@ -461,9 +467,9 @@
 #'@author Anne Philippe, Université de Nantes (France),
 #'Jean-Michel Galharret, Université de Nantes (France),
 #'Norbert Mercier, IRAMAT-CRP2A, Université Bordeaux Montaigne (France),
-#'Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#'@seealso [plot_OSLAgeSummary], [rjags::rjags], [mclust::mclust-package]
+#'@seealso [Luminescence::plot_OSLAgeSummary], [rjags::rjags], [mclust::mclust-package]
 #'
 #'@section Function version: 0.1.0
 #'
@@ -518,9 +524,18 @@ combine_De_Dr <- function(
   .require_suggested_package("mclust")
 
   ## Integrity checks -------------------------------------------------------
-
+  .validate_class(De, "numeric")
+  .validate_class(s, "numeric")
+  .validate_class(Dr, "numeric")
   if (length(De) != length(s))
     .throw_error("'De' and 's' should have the same length")
+  .validate_nonnegative_scalar(int_OD)
+  .validate_class(Age_range, "numeric", length = 2)
+  if (anyNA(Age_range))
+    .throw_error("'Age_range' cannot contain missing values")
+  .validate_positive_scalar(outlier_threshold)
+  .validate_class(outlier_method, "character", length = 1)
+  .validate_logical_scalar(outlier_analysis_plot)
   .validate_logical_scalar(verbose)
   .validate_logical_scalar(plot)
 

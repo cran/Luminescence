@@ -14,11 +14,13 @@
 #' where \eqn{N} (in s\eqn{^{-1}}) is the true count rate, \eqn{M} (in s\eqn{^{-1}}) the measured count rate,
 #' and \eqn{t} (in s) the pulse pair resolution.
 #'
-#' @param object [RLum.Analysis-class] [RLum.Data.Curve-class] (**required**):
+#' @param object [Luminescence::RLum.Analysis-class] [Luminescence::RLum.Data.Curve-class] (**required**):
 #' object with records to correct; can be a [list] of such objects
 #'
 #' @param PMT_pulse_pair_resolution [numeric] (*with default*): pulse-pair resolution
 #' in ns. Values can be found on the PMT datasheets. If `NULL` nothing is done.
+#'
+#' @section Function version: 0.1.1
 #'
 #' @returns
 #' Returns the same type of object type as `object`.
@@ -28,8 +30,8 @@
 #' 'OSLdecomposition'.
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
-#' Dirk Mittelstrass, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+#' Dirk Mittelstrass, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @references
 #'
@@ -63,7 +65,6 @@ correct_PMTLinearity <- function(
       PMT_pulse_pair_resolution = PMT_pulse_pair_resolution))
   }
 
-
   ## input validation
   .validate_class(object, c("RLum.Analysis", "RLum.Data.Curve"))
   .validate_positive_scalar(PMT_pulse_pair_resolution, null.ok = TRUE)
@@ -76,7 +77,7 @@ correct_PMTLinearity <- function(
   if (inherits(object, "RLum.Analysis"))
     records <- object@records
   else
-    records <- object
+    records <- list(object)
 
   ## convert to seconds
   res <- PMT_pulse_pair_resolution[1] * 1e-9
@@ -102,6 +103,10 @@ correct_PMTLinearity <- function(
     else
       w <- 1
 
+    ## fall back for channel resolution that is "0"
+    if(w == 0)
+      return(x)
+
     ## get cps
     cps <- rec[, 2, drop = FALSE] / w
 
@@ -109,7 +114,6 @@ correct_PMTLinearity <- function(
     idx <- cps > thresh
 
     ## correct if required
-    idx <- cps > thresh
     if (any(idx)) {
       new_vals <- round(cps[idx] / (1 - cps[idx] * res) * w)
       rec[idx, 2] <- new_vals
@@ -121,7 +125,8 @@ correct_PMTLinearity <- function(
   ## extract records
   if (inherits(object, "RLum.Analysis"))
     object@records <- records
+  else
+    object <- records[[1]]
 
-  ## return
   return(object)
 }

@@ -65,6 +65,12 @@ test_that("Test internals", {
   expect_error(.smoothing(c(1, 1, 2, 50, 0, 2, 1, 2, 0, 1, 50),
                           method = "Carter", p_acceptance = 0.5),
                "'p_acceptance' rejects all counts, set it to a smaller value")
+  expect_error(.smoothing(runif(100), k = integer()),
+               "'k' should be a single positive integer value or NULL")
+  expect_error(.smoothing(runif(100), fill = numeric()),
+               "'fill' should be of class 'numeric' or NA and have length 1")
+  expect_error(.smoothing(runif(100), fill = matrix()),
+               "'fill' should be of class 'numeric' or NA and have length 1")
   expect_error(.smoothing(runif(100), method = "error"),
                "'method' should be one of 'mean', 'median' or")
   expect_error(.smoothing(runif(100), align = "error"),
@@ -84,14 +90,47 @@ test_that("Test internals", {
                4)
 
   ## .normalise_curve() -----------------------------------------------------
+  ## vector
   data <- runif(100)
   expect_equal(data, .normalise_curve(data, FALSE))
   expect_equal(.normalise_curve(data, TRUE), .normalise_curve(data, "max"))
+  expect_silent(.normalise_curve(data, "min"))
+  expect_silent(.normalise_curve(data, "first"))
   expect_silent(.normalise_curve(data, "last"))
   expect_silent(.normalise_curve(data, "huot"))
+  expect_silent(.normalise_curve(data, "intensity"))
+  expect_silent(.normalise_curve(data, 2.2))
+
+  ## check for matrix
+  m <- matrix(runif(10), ncol = 2)
+  expect_equal(m, .normalise_curve(m, FALSE))
+  expect_equal(.normalise_curve(m, TRUE), .normalise_curve(m, "max"))
+  expect_silent(.normalise_curve(m, "min"))
+  expect_silent(.normalise_curve(m, "first"))
+  expect_true(is.matrix(.normalise_curve(m, "last")))
+  expect_silent(.normalise_curve(m, "huot"))
+  expect_silent(.normalise_curve(m, "intensity"))
+  expect_silent(.normalise_curve(m, 2.2))
 
   data[100] <- 0
   expect_warning(.normalise_curve(data, "last"),
+                 "Curve normalisation produced Inf/NaN values, values replaced")
+  expect_warning(.normalise_curve(data, "min"),
+                 "Curve normalisation produced Inf/NaN values, values replaced")
+
+  data[99] <- NA_real_
+  ## this will produce warnings, but still normalise, because
+  ## we use na.rm internally for max(), min() etc.
+  expect_equal(
+    suppressWarnings(.normalise_curve(data, TRUE)),
+    suppressWarnings(.normalise_curve(data, "max")))
+  expect_warning(.normalise_curve(data, "last"),
+                 "Curve normalisation produced Inf/NaN values, values replaced")
+  expect_warning(.normalise_curve(data, "huot"),
+                 "Curve normalisation produced Inf/NaN values, values replaced")
+  expect_warning(.normalise_curve(data, "min"),
+                 "Curve normalisation produced Inf/NaN values, values replaced")
+  expect_warning(.normalise_curve(data, 2),
                  "Curve normalisation produced Inf/NaN values, values replaced")
 
   # fancy_scientific ()--------------------------------------------------------------------------
@@ -103,6 +142,13 @@ test_that("Test internals", {
   plot(1:length(y), y, yaxt = "n", log = "y")
   expect_silent(Luminescence:::.add_fancy_log_axis(side = 2, las = 1))
   expect_null(.add_fancy_log_axis(side = 1, las = 1))
+
+  ## .text_with_bg() --------------------------------------------------------
+  expect_silent(.text_with_bg(x = 2, y = 0.1, label = "pos = NULL", pos = NULL))
+  expect_silent(.text_with_bg(x = 2, y = 0.01, label = "pos = 1", pos = 1))
+  expect_silent(.text_with_bg(x = 2, y = 0.01, label = "pos = 2", pos = 2))
+  expect_silent(.text_with_bg(x = 2, y = 0.01, label = "pos = 3", pos = 3))
+  expect_silent(.text_with_bg(x = 2, y = 0.01, label = "pos = 4", pos = 4))
 
   # .get_keyword_coordinates() ----------------------------------------------
   xlim <- c(0, 5)
@@ -176,6 +222,14 @@ test_that("Test internals", {
               "list")
   expect_length(t, 0)
 
+  # .rm_unnamed_elements() --------------------------------------------------
+  expect_equal(.rm_unnamed_elements(list(a = "a", b = "b")),
+               list(a = "a", b = "b"))
+  expect_equal(.rm_unnamed_elements(list(a = "a", b = NULL, 3, 4, c = 5)),
+               list(a = "a", b = NULL, c = 5))
+  expect_null(.rm_unnamed_elements(list("a", NULL)))
+  expect_null(.rm_unnamed_elements(list()))
+
   # .matrix_binning() ---------------------------------------------------------------------------
   m <- matrix(data = c(rep(1:20, each = 20)), ncol = 20, nrow = 20)
   rownames(m) <- 1:nrow(m)
@@ -206,23 +260,26 @@ test_that("Test internals", {
 
   ## returns just NULL (no URL detected)
   expect_null(.download_file(url = "_url"))
+  expect_null(.download_file(url = "https://"))
+  expect_null(.download_file(url = "_https://github.com"))
 
   ## attempts download but fails
   url.404 <- "https://raw.githubusercontent.com/R-Lum/rxylib/master/inst/extg"
   expect_message(
-      expect_message(
-          expect_message(expect_null(.download_file(url = url.404)),
-                         "URL detected:"),
-          "Attempting download ..."),
+          expect_message(expect_equal(.download_file(url = url.404), NA),
+                         "Downloading"),
       "FAILED")
 
   ## attempts download and succeeds
   url.ok <- "https://raw.githubusercontent.com/R-Lum/rxylib/master/codecov.yml"
-  suppressMessages( # silence other messages already tested above
-      expect_message(expect_type(.download_file(url = url.ok),
-                                 "character"),
-                     "OK")
-  )
+  destfile <- tempfile()
+  SW({
+  expect_message(expect_equal(.download_file(url = url.ok, destfile),
+                              destfile),
+                 "OK")
+  expect_message(.download_file(url = paste("  ", url.ok, "\n")),
+                 "OK")
+  })
 
   ## .throw_error() ---------------------------------------------------------
   fun.int <- function() {
@@ -285,6 +342,12 @@ test_that("Test internals", {
                  "[fun.int()] Simple message", fixed = TRUE)
   expect_message(fun.docall_do(error = FALSE),
                  "[fun.int()] Simple message", fixed = TRUE)
+
+  ## .deprecated() ----------------------------------------------------------
+  expect_warning(.deprecated("old", "new", "1.0"),
+                 "'old' was deprecated in v1.0, use 'new' instead")
+  expect_warning(.deprecated(c("old1", "old2"), c("new1", "new2"), "1.0"),
+                 "'old1' and 'old2' were deprecated in v1.0, use 'new1' and 'new2' instead")
 
   ## SW() ------------------------------------------------------------------
   expect_silent(SW(cat("silenced message")))
@@ -359,6 +422,7 @@ test_that("Test internals", {
   expect_true(.validate_class(iris, c("data.frame", "integer")))
   expect_true(.validate_class(iris, c("data.frame", "integer"),
                               throw.error = FALSE))
+  expect_true(.validate_class(1:3, "integer", length = c(2, 3)))
   expect_warning(expect_false(.validate_class(arg <- NULL, "data.frame",
                                    throw.error = FALSE)),
       "'arg' should be of class 'data.frame'")
@@ -374,6 +438,8 @@ test_that("Test internals", {
                "'test' should be of class 'data.frame'")
   expect_error(.validate_class(test <- 1:5, "data.frame", length = 2),
                "'test' should be of class 'data.frame' and have length 2")
+  expect_error(.validate_class(test <- 1:5, "data.frame", length = 1:2),
+               "'test' should be of class 'data.frame' and have length 1 or 2")
   expect_error(.validate_class(test <- 1:5, c("list", "data.frame", "numeric")),
                "'test' should be of class 'list', 'data.frame' or 'numeric'")
   expect_error(.validate_class(test <- 1:5, c("list", "data.frame")),
@@ -446,6 +512,10 @@ test_that("Test internals", {
                "'iris' should be a single value")
   expect_error(.validate_scalar(iris, null.ok = TRUE),
                "'iris' should be a single value or NULL")
+  expect_error(.validate_scalar(iris, extra = "something else"),
+               "'iris' should be a single value or something else")
+  expect_error(.validate_scalar(iris, extra = "something else", null.ok = TRUE),
+               "'iris' should be a single value or something else or NULL")
   expect_error(.validate_scalar(array(1, c(1, 1, 0))),
                "'NA' should be a single value")
   expect_error(.validate_scalar(-1:2, name = "'var'"),
@@ -478,6 +548,10 @@ test_that("Test internals", {
                "'iris' should be a single positive value")
   expect_error(.validate_positive_scalar(iris, null.ok = TRUE),
                "'iris' should be a single positive value or NULL")
+  expect_error(.validate_positive_scalar(iris, extra = "something else"),
+               "'iris' should be a single positive value or something else")
+  expect_error(.validate_positive_scalar(iris, extra = "something else", null.ok = TRUE),
+               "'iris' should be a single positive value or something else or NULL")
   expect_error(.validate_positive_scalar(1:2, name = "'var'"),
                "'var' should be a single positive value")
   expect_error(.validate_positive_scalar(0, name = "'var'"),
@@ -490,6 +564,38 @@ test_that("Test internals", {
                "'var' should be a single positive integer value")
   expect_error(.validate_positive_scalar(NA, int = TRUE, name = "The variable"),
                "The variable should be a single positive integer value")
+
+  ## .validate_nonnegative_scalar() -----------------------------------------
+  expect_equal(.validate_nonnegative_scalar(0),
+               0)
+  expect_equal(.validate_nonnegative_scalar(2, int = TRUE),
+               2)
+  expect_null(.validate_nonnegative_scalar(NULL, int = TRUE, null.ok = TRUE))
+
+  expect_error(.validate_nonnegative_scalar(int = TRUE),
+               "'NA' should be a single non-negative integer value")
+  expect_error(.validate_nonnegative_scalar(test <- "a"),
+               "'test' should be a single non-negative value")
+  expect_error(.validate_nonnegative_scalar(test <- NULL),
+               "'test' should be a single non-negative value")
+  expect_error(.validate_nonnegative_scalar(iris),
+               "'iris' should be a single non-negative value")
+  expect_error(.validate_nonnegative_scalar(iris, null.ok = TRUE),
+               "'iris' should be a single non-negative value or NULL")
+  expect_error(.validate_nonnegative_scalar(iris, extra = "something else"),
+               "'iris' should be a single non-negative value or something else")
+  expect_error(.validate_nonnegative_scalar(iris, extra = "something else", null.ok = TRUE),
+               "'iris' should be a single non-negative value or something else or NULL")
+  expect_error(.validate_nonnegative_scalar(1:2, name = "'var'"),
+               "'var' should be a single non-negative value")
+  expect_error(.validate_nonnegative_scalar(-1, name = "'var'"),
+               "'var' should be a single non-negative value")
+  expect_error(.validate_nonnegative_scalar(Inf, int = TRUE, name = "'var'"),
+               "'var' should be a single non-negative integer value")
+  expect_error(.validate_nonnegative_scalar(1.5, int = TRUE, name = "'var'"),
+               "'var' should be a single non-negative integer value")
+  expect_error(.validate_nonnegative_scalar(NA, int = TRUE, name = "The variable"),
+               "The variable should be a single non-negative integer value")
 
   ## .validate_logical_scalar() ---------------------------------------------
   expect_equal(.validate_logical_scalar(TRUE),
@@ -508,6 +614,10 @@ test_that("Test internals", {
                "'iris' should be a single logical value")
   expect_error(.validate_logical_scalar(iris, null.ok = TRUE),
                "'iris' should be a single logical value or NULL")
+  expect_error(.validate_logical_scalar(iris, extra = "something else"),
+               "'iris' should be a single logical value or something else")
+  expect_error(.validate_logical_scalar(iris, extra = "something else", null.ok = TRUE),
+               "'iris' should be a single logical value or something else or NULL")
   expect_error(.validate_logical_scalar(c(TRUE, FALSE), name = "'var'"),
                "'var' should be a single logical value")
   expect_error(.validate_logical_scalar(0, name = "'var'"),
@@ -532,6 +642,132 @@ test_that("Test internals", {
   expect_false(.check_originator(NULL, "orig"))
   expect_false(.check_originator(iris, "orig"))
 
+  ## .validate_integral() ----------------------------------------------------
+  expect_null(.validate_integral(NULL, null.ok = TRUE))
+  expect_equal(.validate_integral(integral <- 5:1),
+               1:5)
+  expect_equal(.validate_integral(integral <- NA, na.ok = TRUE),
+               NA)
+  expect_equal(.validate_integral(c(0, 1.5), int = FALSE),
+               c(0, 1.5))
+  expect_error(.validate_integral(integral <- 1:5 + 0.1, int = FALSE),
+               integral)
+  expect_warning(expect_equal(.validate_integral(integral <- c(5:1, -3:3)),
+                              1:5),
+                 "'integral' out of bounds, reset to be between 1 and 5")
+  expect_warning(expect_equal(.validate_integral(integral <- 1:100,
+                                                 min = 5, max = 50),
+                              5:50),
+                 "'integral' out of bounds, reset to be between 5 and 50")
+  expect_error(.validate_integral(integral <- "error"),
+               "'integral' should be of class 'integer' or 'numeric'")
+  expect_error(.validate_integral(integral <- list(NA), na.ok = TRUE),
+               "'integral' should be of class 'integer', 'numeric' or NA")
+  expect_error(.validate_integral(integral <- NA, na.ok = FALSE),
+               "'integral' should be of class 'integer' or 'numeric'")
+  expect_error(.validate_integral(integral <- -9:0),
+               "'integral' is of length 0 after removing values smaller than 1$")
+  expect_error(.validate_integral(integral <- 1:10, min = 50, max = 100),
+               "after removing values smaller than 50 and greater than 100")
+  expect_error(.validate_integral(integral <- 1:10, min = 150, max = 100),
+               "is expected to be at least 150, but the maximum allowed is 100")
+  expect_error(.validate_integral(integral <- 1:5 + 0.1),
+               "'integral' should be a vector of integers")
+  expect_warning(expect_error(.validate_integral(integral <- c(0, 1.5)),
+                              "'integral' should be a vector of integers"),
+                 "'integral' out of bounds, reset to be between 1.5 and 1.5")
+  expect_error(.validate_integral(list.integral <- list(1:4)),
+               "'list.integral' should be of class 'integer' or 'numeric'")
+  expect_error(.validate_integral(list.integral <- list("error"), list.ok = TRUE),
+               "All elements of 'list.integral' should be of class 'integer' or")
+  expect_equal(.validate_integral(list.integral <- list(5:1), list.ok = TRUE),
+               list(1:5))
+  expect_warning(.validate_integral(integral <- c(1, 3)),
+                 "'integral' was defined as c(1, 3) but in general we would",
+                 fixed = TRUE)
+  expect_no_warning(.validate_integral(integral <- c(1, 2)),
+                    message = "'integral' was defined as c(1, 2) but in general")
+
+  ## .convert_to_channels() -------------------------------------------------
+  tl <- seq(1.8, 450, by = 1.8)
+  expect_equal(.convert_to_channels(tl, NULL, null.ok = TRUE),
+               NULL)
+  expect_equal(.convert_to_channels(tl, NA, na.ok = TRUE),
+               NA)
+  expect_equal(.convert_to_channels(tl, 0:20),
+               1:11)
+  expect_equal(.convert_to_channels(tl, 200:220),
+               111:122)
+  expect_equal(.convert_to_channels(tl, c(200:210, NA, 200:220)),
+               111:122)
+  expect_equal(.convert_to_channels(tl, list(200:210, 200:220), list.ok = TRUE),
+               list(111:117, 111:122))
+  expect_warning(expect_equal(.convert_to_channels(tl, signal_integral <- c(0, 1.5),
+                                                   unit = "temperature"),
+                              1),
+                 "Conversion of 'signal_integral' from temperature to channels failed")
+  expect_warning(expect_equal(.convert_to_channels(tl, signal_integral <- c(1000, 2000),
+                                                   unit = "temperature"),
+                              250),
+                 "Conversion of 'signal_integral' from temperature to channels failed")
+
+  expect_error(.convert_to_channels(tl, integral <- NULL),
+               "'integral' should be of class 'integer' or 'numeric'")
+  expect_error(.convert_to_channels(tl, integral <- NA),
+               "'integral' should be of class 'integer' or 'numeric'")
+  expect_error(.convert_to_channels(tl, integral <- list(200:210, NA), list.ok = FALSE),
+               "'integral' should be of class 'integer' or 'numeric'")
+  expect_error(.convert_to_channels(tl, integral <- list(200:210, NA), list.ok = TRUE),
+               "All elements of 'integral' should be of class 'integer' or 'numeric'")
+
+  ## .validate_file() -------------------------------------------------------
+
+  dir.path <- system.file("extdata", package = "Luminescence")
+  expect_equal(.validate_file(file <- c("file1", "file2")),
+               list("file1", "file2"))
+  expect_equal(.validate_file(file <- list("file1")),
+               list("file1"))
+  expect_message(expect_equal(.validate_file(dir.path),
+                              as.list(dir(dir.path, full.names = TRUE))),
+                 "Directory detected, looking for any files")
+  expect_silent(.validate_file(dir.path, verbose = FALSE))
+  expect_message(expect_equal(basename(.validate_file(dir.path, pattern = "xsyg")),
+                              "XSYG_file.xsyg"),
+                 "Directory detected, looking for 'xsyg' files")
+  expect_message(expect_message(
+      expect_length(.validate_file(dir.path, pattern = "_none_"), 0),
+      "Directory detected, looking for '_none_' files"),
+      "No files matching the given pattern found")
+
+  url <- "https://raw.githubusercontent.com/R-Lum/rxylib/master"
+  expect_message(expect_message(.validate_file(file.path(url, "_pkgdown.yml")),
+                                "Downloading"), "OK")
+  expect_message(expect_message(.validate_file(file.path(url, "_error_")),
+                                "Downloading"), "FAILED")
+
+  expect_error(.validate_file(file <- TRUE),
+               "'file' should be of class 'character' or 'list'")
+  expect_error(.validate_file(file <- list(TRUE)),
+               "All elements of 'file' should be of class 'character' and have length 1")
+  expect_error(.validate_file("_error_"),
+               "File '.*_error_' does not exist") # windows CI needs the regexp
+  expect_message(expect_null(.validate_file("_error_", throw.error = FALSE)),
+                 "File '.*_error_' does not exist") # windows CI needs the regexp
+  expect_error(.validate_file(dir.path, scan.dir = FALSE),
+               "File '.*' does not exist")
+  file.create(zero <- tempfile(pattern = "zero", fileext = ".binx"))
+  expect_error(.validate_file(zero),
+               "is a zero-byte file")
+  expect_message(expect_null(.validate_file(zero, throw.error = FALSE)),
+                             "is a zero-byte file")
+  expect_error(.validate_file(test_path("test_read_BIN2R.R"), ext = "e1"),
+               "File extension 'R' is not supported, only 'e1' is valid")
+  expect_error(.validate_file(test_path("test_read_BIN2R.R"), ext = c("e1", "e2")),
+               "File extension 'R' is not supported, only 'e1' and 'e2' are valid")
+  expect_message(expect_null(.validate_file(test_path("test_read_BIN2R.R"),
+                                            ext = c("e1", "e2", "e3"), throw.error = FALSE)),
+                 "File extension 'R' is not supported, only 'e1', 'e2' and 'e3'")
+
   ## .require_suggested_package() -------------------------------------------
   expect_true(.require_suggested_package("utils"))
   expect_error(.require_suggested_package("error"),
@@ -549,6 +785,15 @@ test_that("Test internals", {
   expect_equal(.listify(letters, length = 5),
                .listify(list(letters), length = 5))
 
+
+  ## .strict_na() -----------------------------------------------------------
+  expect_true(.strict_na(NA))
+  expect_true(.strict_na(NA_real_))
+  expect_false(.strict_na(NULL))
+  expect_false(.strict_na(c(1, NA)))
+  expect_false(.strict_na(c(NA, NA)))
+  expect_false(.strict_na(matrix()))
+  expect_false(.strict_na(set_RLum("RLum.Data.Curve")))
 
   ## .collapse() ------------------------------------------------------------
   expect_equal(.collapse(1:3),

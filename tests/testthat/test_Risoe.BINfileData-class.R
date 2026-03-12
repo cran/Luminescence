@@ -61,3 +61,15 @@ test_that("sort_RLum", {
   ## check functionality
   expect_snapshot_Risoe(sort_RLum(obj, info_element = "POSITION"))
 })
+
+test_that("subset.Risoe.BINfileData", {
+  testthat::skip_on_cran()
+
+  small <- subset(CWOSL.SAR.Data, POSITION == 1)
+  expect_length(small, 30)
+  expect_equal(rownames(small@METADATA),
+               c("1", "25", "49", "73", "97", "121", "145", "169", "193", "217",
+                 "241", "265", "289", "313", "337", "361", "385", "409", "433",
+                 "457", "481", "505", "529", "553", "577", "601", "625", "649",
+                 "673", "697"))
+})

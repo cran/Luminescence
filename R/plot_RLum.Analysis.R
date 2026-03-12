@@ -2,7 +2,7 @@
 #'
 #' @description
 #' The function provides a standardised plot output for curve data of an
-#' [RLum.Analysis-class] object.
+#' [Luminescence::RLum.Analysis-class] object.
 #'
 #' The function produces a multiple plot output. A file output is recommended
 #' (e.g., [pdf]).
@@ -20,12 +20,12 @@
 #' is measured with the PMT or not! However, for a fast look it might be
 #' helpful.
 #'
-#' @param object [RLum.Analysis-class] (**required**):
-#' S4 object of class `RLum.Analysis`
+#' @param object [Luminescence::RLum.Analysis-class] (**required**):
+#' S4 object of class [Luminescence::RLum.Analysis-class]
 #'
 #' @param subset named [list] (*optional*):
 #' subsets elements for plotting. The arguments in the named [list] will be
-#' directly passed to the function [get_RLum]
+#' directly passed to the function [Luminescence::get_RLum]
 #' (e.g., `subset = list(curveType = "measured")`)
 #'
 #' @param nrows [integer] (*optional*):
@@ -44,7 +44,7 @@
 #' the first and a vertical line at 100 to the 2nd plot.
 #'
 #' @param combine [logical] (*with default*):
-#' allows to combine all [RLum.Data.Curve-class] objects in one single plot.
+#' allows to combine all [Luminescence::RLum.Data.Curve-class] objects in one single plot.
 #'
 #' @param records_max [integer] (*optional*):
 #' limits number of records shown when `combine = TRUE` is used. The first and
@@ -65,7 +65,7 @@
 #' the `plot` function.
 #'
 #' Supported arguments: `main`, `mtext`, `log`, `lwd`, `lty` `type`, `pch`, `col`,
-#' `norm` (see [plot_RLum.Data.Curve]), `xlim`,`ylim`, `xlab`, `ylab`, ...
+#' `norm` (see [Luminescence::plot_RLum.Data.Curve]), `xlim`,`ylim`, `xlab`, `ylab`, ...
 #'
 #' and for `combine = TRUE` also: `sub_title`, `legend`, `legend.text`, `legend.pos`
 #' (typical plus 'outside'), `legend.col`, `smooth`.
@@ -83,9 +83,9 @@
 #' @section Function version: 0.3.16
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [plot], [plot_RLum], [plot_RLum.Data.Curve]
+#' @seealso [plot], [Luminescence::plot_RLum], [Luminescence::plot_RLum.Data.Curve]
 #'
 #' @keywords aplot
 #'
@@ -197,8 +197,7 @@ plot_RLum.Analysis <- function(
   ## deprecated argument
   if ("plot.single" %in% names(extraArgs)) {
     plot_singlePanels <- extraArgs$plot.single
-    .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
-                   "instead")
+    .deprecated("plot.single", "plot_singlePanels", since = "1.0.0")
   }
 
   ##try to find optimal parameters, this is however, a little bit stupid, but
@@ -209,26 +208,12 @@ plot_RLum.Analysis <- function(
   else
     n.plots <- max(length_RLum(object), 1)
 
-  ## set appropriate values for nrows and ncols if not both specified
-  if (is.null(nrows) || is.null(ncols)) {
-    if (n.plots == 1) {
-      if (is.null(nrows))
-        nrows <- 1
-      if (is.null(ncols))
-        ncols <- 1
-
-    } else { # n.plots > 1
-      if (is.null(ncols)) {
-        ncols <- 2
-      }
-      if (is.null(nrows)) {
-        if (n.plots <= 4) {
-          nrows <- ceiling(n.plots / 2)
-        } else {
-          nrows <- 3
-        }
-      }
-    }
+  ## set appropriate values for nrows and ncols if not specified
+  if (is.null(nrows)) {
+    nrows <- if (n.plots <= 4) ceiling(n.plots / 2) else 3
+  }
+  if (is.null(ncols)) {
+    ncols <- min(n.plots, 2)
   }
 
   curve.transformation <- .validate_args(curve.transformation,
@@ -240,14 +225,14 @@ plot_RLum.Analysis <- function(
   }
 
   # Plotting ------------------------------------------------------------------
-  par.default <- .par_defaults()
-  on.exit(par(par.default), add = TRUE)
 
   ## (1) NORMAL (combine == FALSE) -------------------------------------------
   if (!combine) {
     temp <- object@records
 
     ##set par
+    par.default <- .par_defaults()
+    on.exit(par(par.default), add = TRUE)
     if (!plot_singlePanels) {
       par(mfrow = c(nrows, ncols))
     }
@@ -281,8 +266,8 @@ plot_RLum.Analysis <- function(
 
         ##check plot settings and adjust
         ##xlim
+        xlim.set <- plot.settings$xlim[[i]]
         if (!is.null(plot.settings$xlim)) {
-          xlim.set <- plot.settings$xlim[[i]]
           if (plot.settings$xlim[[i]][1] < min(temp[[i]]@data[,1])) {
             .throw_warning("min('xlim') < x-value range for curve #", i,
                            ", reset to minimum")
@@ -293,14 +278,11 @@ plot_RLum.Analysis <- function(
                            ", reset to maximum")
             xlim.set[2] <- max(temp[[i]]@data[,1])
           }
-
-        }else{
-          xlim.set <- plot.settings$xlim[[i]]
         }
 
         ##ylim
+        ylim.set <- plot.settings$ylim[[i]]
         if (!is.null(plot.settings$ylim)) {
-          ylim.set <- plot.settings$ylim[[i]]
           if (plot.settings$ylim[[i]][1] < min(temp[[i]]@data[,2])) {
             .throw_warning("min('ylim') < y-value range for curve #", i,
                            ", reset to minimum")
@@ -311,9 +293,6 @@ plot_RLum.Analysis <- function(
                            ", reset to maximum")
             ylim.set[2] <- max(temp[[i]]@data[,2])
           }
-
-        }else{
-          ylim.set <- plot.settings$ylim[[i]]
         }
 
         ##col
@@ -322,9 +301,9 @@ plot_RLum.Analysis <- function(
 
         } else{
           col <- "black"
-          if (grepl("IRSL", temp[[i]]@recordType)) {
+          if (grepl("IRSL", temp[[i]]@recordType, fixed = TRUE)) {
             col <- "red"
-          } else if (grepl("OSL", temp[[i]]@recordType)) {
+          } else if (grepl("OSL", temp[[i]]@recordType, fixed = TRUE)) {
             col <- "blue"
           }
         }
@@ -352,7 +331,7 @@ plot_RLum.Analysis <- function(
               lty = plot.settings$lty[[i]],
               xlim = xlim.set,
               ylim = ylim.set,
-              norm = plot.settings$norm,
+              norm = plot.settings$norm[[i]],
               pch = plot.settings$pch[[i]],
               cex = plot.settings$cex[[i]],
               legend.col = plot.settings$legend.col[[i]],
@@ -372,26 +351,21 @@ plot_RLum.Analysis <- function(
           do.call(what = "abline", args = abline[i])
         }
 
-      } else if(inherits(temp[[i]], "RLum.Data.Spectrum")) {
-        ## remove already provided arguments
-        args <- extraArgs[!names(extraArgs) %in% c("object", "mtext", "par.local", "main")]
+      } else {
+        ## RLum.Data.Spectrum and RLum.Data.Image objects
+        args <- extraArgs
+        if (inherits(temp[[i]], "RLum.Data.Spectrum")) {
+          ## remove already provided arguments
+          args <- args[!names(args) %in% c("object", "mtext", "par.local", "main")]
+        }
 
-        do.call(what = "plot_RLum.Data.Spectrum", args = c(list(
+        do.call(what = paste0("plot_", class(temp[[i]])), args = c(list(
             object = temp[[i]],
             mtext = plot.settings$mtext[[i]] %||% paste0("#", i),
             par.local = FALSE,
             main = plot.settings$main %||% temp[[i]]@recordType
         ), args))
-      } else {
-        ## RLum.Data.Image objects
-        do.call(what = "plot_RLum.Data.Image", args = c(list(
-            object = temp[[i]],
-            mtext = plot.settings$mtext[[i]] %||% paste0("#", i),
-            par.local = FALSE,
-            main = plot.settings$main %||% temp[[i]]@recordType
-        ), extraArgs))
       }
-
     }#end for loop
 
   }else{
@@ -465,16 +439,10 @@ plot_RLum.Analysis <- function(
           object.list[[x]] <- get(curve.transformation)(object.list[[x]])
         }
 
-        temp.data <- as(object.list[[x]], "data.frame")
-
         ## curve normalisation
-        if (isTRUE(plot.settings$norm[[k]][1]) ||
-            plot.settings$norm[[k]][1] %in% c("max", "last", "huot")) {
-          temp.data[[2]] <- .normalise_curve(temp.data[[2]],
-                                             plot.settings$norm[[k]])
-        }
-
-        return(temp.data)
+        object.list[[x]] <- normalise_RLum(object.list[[x]],
+                                           plot.settings$norm[[k]][1])
+        as(object.list[[x]], "data.frame")
       })
 
       ##set plot parameters
@@ -483,7 +451,7 @@ plot_RLum.Analysis <- function(
 
       ##xlab
       xlab <- plot.settings$xlab[[k]] %||% (
-        if (temp.recordType[[k]] == "TL")
+        if (grepl("TL", temp.recordType[[k]], fixed = TRUE))
           "Temperature [\u00B0C]"
         else
           "Time [s]"
@@ -536,14 +504,10 @@ plot_RLum.Analysis <- function(
         pch <- rep(plot.settings$pch[[k]], times = num.objects)
       }
 
-      ##legend.text
+      ## legend
       legend.text <- plot.settings$legend.text[[k]] %||%
         paste("Curve", records_show %||% 1:num.objects)
-
-      ##legend.col
       legend.col <- plot.settings$legend.col[[k]]
-
-      ##legend.pos
       legend.pos <- plot.settings$legend.pos[[k]] %||% "topright"
 
       if (legend.pos == "outside") {

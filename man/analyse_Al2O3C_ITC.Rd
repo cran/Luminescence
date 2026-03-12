@@ -7,6 +7,7 @@
 analyse_Al2O3C_ITC(
   object,
   signal_integral = NULL,
+  integral_input = c("channel", "measurement"),
   dose_points = c(2, 4, 8, 12, 16),
   recordType = "OSL (UVVIS)",
   method_control = NULL,
@@ -23,6 +24,11 @@ Alternatively a list of \linkS4class{RLum.Analysis} objects can be provided to a
 \item{signal_integral}{\link{numeric} (\emph{optional}):
 signal integral, used for the signal and the background.
 If nothing is provided the full range is used. Argument can be provided as \link{list}.}
+
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given time range (in seconds) are selected.}
 
 \item{dose_points}{\link{numeric} (\emph{with default}):
 vector with dose points, if dose points are repeated, only the general
@@ -96,12 +102,12 @@ handled using the argument \code{method_control} only, e.g.,
 
 \tabular{lll}{
 \strong{ARGUMENT} \tab \strong{FUNCTION} \tab \strong{DESCRIPTION}\cr
-\code{mode} \tab \code{fit_DoseResponseCurve} \tab as in \link{fit_DoseResponseCurve}; sets the mode used for fitting\cr
-\code{fit.method} \tab \code{fit_DoseResponseCurve} \tab as in \link{fit_DoseResponseCurve}; sets the function applied for fitting\cr
+\code{mode} \tab \code{fit_DoseResponseCurve} \tab sets the mode used for fitting\cr
+\code{fit.method} \tab \code{fit_DoseResponseCurve} \tab sets the function applied for fitting\cr
 }
 }
 \section{Function version}{
- 0.1.1
+ 0.1.2
 }
 
 \examples{
@@ -115,7 +121,7 @@ analyse_Al2O3C_ITC(data_ITC)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -127,6 +133,6 @@ Geochronometria 45, 56-67. doi: 10.1515/geochr-2015-0086
 \link{fit_DoseResponseCurve}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{datagen}

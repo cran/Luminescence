@@ -6,13 +6,12 @@
 \usage{
 plot_DetPlot(
   object,
-  signal.integral.min,
-  signal.integral.max,
-  background.integral.min,
-  background.integral.max,
+  signal_integral,
+  background_integral,
   method = "shift",
   signal_integral.seq = NULL,
-  analyse_function = "analyse_SAR.CWOSL",
+  integral_input = c("channel", "measurement"),
+  analyse_function = c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"),
   analyse_function.control = list(),
   n.channels = NULL,
   show_ShineDownCurve = TRUE,
@@ -27,18 +26,11 @@ plot_DetPlot(
 \item{object}{\linkS4class{RLum.Analysis} (\strong{required}): input object containing data for analysis
 Can be provided as a \link{list} of such objects.}
 
-\item{signal.integral.min}{\link{integer} (\strong{required}):
-lower bound of the signal integral.}
+\item{signal_integral}{\link{integer} (\strong{required}):
+vector of channels for the signal integral.}
 
-\item{signal.integral.max}{\link{integer} (\strong{required}):
-upper bound of the signal integral. Must be strictly greater than
-\code{signal.integral.min}.}
-
-\item{background.integral.min}{\link{integer} (\strong{required}):
-lower bound of the background integral.}
-
-\item{background.integral.max}{\link{integer} (\strong{required}):
-upper bound of the background integral.}
+\item{background_integral}{\link{integer} (\strong{required}):
+vector of channels for the background integral.}
 
 \item{method}{\link{character} (\emph{with default}):
 method applied for constructing the De(t) plot.
@@ -49,6 +41,11 @@ method applied for constructing the De(t) plot.
 
 \item{signal_integral.seq}{\link{numeric} (\emph{optional}):
 argument to provide an own signal integral sequence for constructing the De(t) plot}
+
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given time range (in seconds) are selected.}
 
 \item{analyse_function}{\link{character} (\emph{with default}):
 name of the analyse function to be called. Supported functions are:
@@ -137,7 +134,7 @@ It means, that every sequence should be checked carefully before running long
 calculations using several hundreds of channels.
 }
 \section{Function version}{
- 0.1.8
+ 0.1.10
 }
 
 \examples{
@@ -153,17 +150,15 @@ object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
 
 plot_DetPlot(
   object,
-  signal.integral.min = 1,
-  signal.integral.max = 3,
-  background.integral.min = 900,
-  background.integral.max = 1000,
+  signal_integral = 1:3,
+  background_integral = 900:1000,
   n.channels = 5)
 }
 
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_DetPlot(): Create De(t) plot. Function version 0.1.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_DetPlot(): Create De(t) plot. Function version 0.1.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -175,5 +170,5 @@ doi:10.1016/S1350-4487(03)00063-5
 \link{plot}, \link{analyse_SAR.CWOSL}, \link{analyse_pIRIRSequence}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Ruprecht-Karl University of Heidelberg (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}

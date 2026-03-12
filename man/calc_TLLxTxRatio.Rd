@@ -9,8 +9,9 @@ calc_TLLxTxRatio(
   Lx.data.background = NULL,
   Tx.data.signal = NULL,
   Tx.data.background = NULL,
-  signal.integral.min = NULL,
-  signal.integral.max = NULL
+  signal_integral = NULL,
+  integral_input = c("channel", "measurement"),
+  ...
 )
 }
 \arguments{
@@ -28,13 +29,15 @@ TL data (x = temperature, y = counts) (TL test signal).}
 TL data (x = temperature, y = counts).
 If no data are provided no background subtraction is performed.}
 
-\item{signal.integral.min}{\link{integer} (\strong{required}):
-channel number for the lower signal integral bound
-(e.g. \code{signal.integral.min = 100}).}
+\item{signal_integral}{\link{integer} (\strong{required}):
+vector of channels for the signal integral.}
 
-\item{signal.integral.max}{\link{integer} (\strong{required}):
-channel number for the upper signal integral bound
-(e.g. \code{signal.integral.max = 200}).}
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given temperature range are selected.}
+
+\item{...}{currently not used.}
 }
 \value{
 Returns an S4 object of type \linkS4class{RLum.Results}.
@@ -47,6 +50,10 @@ Slot \code{data} contains a \link{list} with the following structure:
 .. $ TnTx.BG
 .. $ Net_LnLx
 .. $ Net_LnLx.Error
+.. $ SN_RATIO_LnLx
+.. $ SN_RATIO_TnTx
+.. $ LxTx
+.. $ LxTx.Error
 }\if{html}{\out{</div>}}
 }
 \description{
@@ -68,7 +75,7 @@ if both signals are similar the error becomes zero.
 background for both curves results in a zero error and is therefore set to \code{NA}.
 }
 \section{Function version}{
- 0.3.4
+ 0.3.7
 }
 
 \examples{
@@ -83,16 +90,14 @@ Lx.data.signal <- get_RLum(temp, record.id=1)
 Lx.data.background <- get_RLum(temp, record.id=2)
 Tx.data.signal <- get_RLum(temp, record.id=3)
 Tx.data.background <- get_RLum(temp, record.id=4)
-signal.integral.min <- 210
-signal.integral.max <- 230
+signal_integral <- 210:230
 
 output <- calc_TLLxTxRatio(
  Lx.data.signal,
  Lx.data.background,
  Tx.data.signal,
  Tx.data.background,
- signal.integral.min,
- signal.integral.max)
+ signal_integral)
 get_RLum(output)
 
 }
@@ -100,12 +105,12 @@ get_RLum(output)
 \linkS4class{RLum.Results}, \link{analyse_SAR.TL}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 Christoph Schmidt, University of Bayreuth (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Schmidt, C., 2025. calc_TLLxTxRatio(): Calculate the Lx/Tx ratio for a given set of TL curves -beta version-. Function version 0.3.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Schmidt, C., 2026. calc_TLLxTxRatio(): Calculate the Lx/Tx ratio for a given set of TL curves -beta version-. Function version 0.3.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

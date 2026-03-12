@@ -10,11 +10,13 @@ test_that("input validation", {
   expect_error(read_XSYG2R(data.frame()),
                "'file' should be of class 'character' or 'list'")
   expect_error(read_XSYG2R(character(0)),
-               "'file' should have length 1")
+               "'file' cannot be an empty character")
+  expect_error(read_XSYG2R(list()),
+               "'file' cannot be an empty list")
   expect_message(expect_null(read_XSYG2R("_error_file_")),
-                "Error: File does not exist, nothing imported")
+                "File '.*_error_file_' does not exist") # windows CI needs the regexp
   expect_message(expect_null(read_XSYG2R("/Test", fastForward = TRUE)),
-                 "Error: File does not exist, nothing imported")
+                 "File '.*/Test' does not exist") # windows CI needs the regexp
   expect_message(expect_null(read_XSYG2R(test_path("_data/xsyg-tests/XSYG_broken.xsyg"), fastForward = TRUE)),
                  "Error: XML file not readable, nothing imported")
   expect_error(read_XSYG2R(xsyg.file, n_records = "error"),
@@ -50,6 +52,11 @@ test_that("test import of XSYG files", {
                                      verbose = FALSE),
                          type = "list")
   expect_type(results[[1]]@info$file, type = "character")
+  expect_equal(results[[1]]@records[[1]]@info$recordName,
+               "unknown")
+  expect_equal(results[[1]]@records[[1]]@info$sequenceName,
+               "20150601_BT706_TL_Spectra_FS_SLS365")
+  expect_length(results[[1]]@records[[1]]@info, 26)
   expect_output(print(results))
 
   ## check n_records argument
@@ -68,7 +75,6 @@ test_that("test import of XSYG files", {
   expect_type(read_XSYG2R(list(xsyg.file), fastForward = FALSE,
                           verbose = FALSE),
               "list")
-  expect_length(read_XSYG2R(list()), 0)
 
   ## check also internal files
   SW({
@@ -77,6 +83,11 @@ test_that("test import of XSYG files", {
                           fastForward = TRUE, import = TRUE,
                           verbose = TRUE),
               "list")
+
+  ## recursive traversal
+  expect_length(read_XSYG2R(test_path("_data"),
+                            fastForward = TRUE, verbose = FALSE),
+                7)
   })
 
   ## more tests for different TL curve calculation cases
@@ -131,4 +142,14 @@ test_that("test import of XSYG files", {
       verbose = FALSE
     )[[1]],
     class = "RLum.Analysis")
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 1260
+  SW({
+  expect_message(expect_null(do.call(read_XSYG2R, list("a test"))),
+                 "File '.*a test' does not exist") # windows CI needs the regexp
+  })
 })

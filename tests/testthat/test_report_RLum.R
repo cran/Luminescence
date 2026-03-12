@@ -14,6 +14,10 @@ test_that("test functionality", {
   temp <- calc_CommonDose(ExampleData.DeValues$CA1)
   })
 
+  expect_error(report_RLum(temp, file = iris),
+               "'file' should be of class 'character' and have length 1")
+  expect_error(report_RLum(temp, css.file = iris),
+               "'css.file' should be of class 'character' or NULL and have length 1")
   expect_error(report_RLum(temp, css.file = "error"),
                "Couldn't find the specified CSS file")
 
@@ -50,4 +54,12 @@ test_that("test functionality", {
   colnames(df)[2] <- "mat col"
   fake.css <- system.file("CITATION", package = "Luminescence")
   expect_null(report_RLum(df, css.file = fake.css))
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 1260
+  expect_silent(do.call(report_RLum, list(NaN)))
+  expect_silent(do.call(report_RLum, list(iris[0, ])))
 })

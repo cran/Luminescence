@@ -18,18 +18,18 @@
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
-#' @param ... further parameters passed to [fit_IsothermalHolding]
+#' @param ... further parameters passed to [Luminescence::fit_IsothermalHolding]
 #'
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany),
-#' Svenja Riedesel, DTU Risø (Denmark)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+#' Svenja Riedesel, DTU Risø (Denmark)\cr
 #'
 #' @keywords datagen
 #'
 #' @return
-#' An [RLum.Results-class] object is returned:
+#' An [Luminescence::RLum.Results-class] object is returned:
 #'
 #' Slot: **@data**
 #'
@@ -54,8 +54,8 @@
 #' P.G., Visnjevic, V., Wen, X., 2025.
 #' OSLThermo and ESRThermo: Libraries of code for trapped-charge thermochronometry.
 #'
-#' @seealso [analyse_FadingMeasurement], [fit_IsothermalHolding],
-#' [fit_DoseResponseCurve]
+#' @seealso [Luminescence::analyse_FadingMeasurement], [Luminescence::fit_IsothermalHolding],
+#' [Luminescence::fit_DoseResponseCurve]
 #'
 #' @examples
 #' # example code ##TODO
@@ -83,7 +83,7 @@ analyse_ThermochronometryData <- function(
   ## Integrity checks -------------------------------------------------------
   ## for a start we only allow data in the format proposed by the MatLab script
   .validate_class(object, "character")
-  .validate_args(ITL_model, c("GOK", "BTS"))
+  ITL_model <- .validate_args(ITL_model, c("GOK", "BTS"))
   .validate_logical_scalar(plot)
   .validate_logical_scalar(verbose)
 

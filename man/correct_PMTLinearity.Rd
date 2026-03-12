@@ -34,6 +34,10 @@ and \eqn{t} (in s) the pulse pair resolution.
 This function is an adaptation of core from the R package
 'OSLdecomposition'.
 }
+\section{Function version}{
+ 0.1.1
+}
+
 \examples{
 o <- set_RLum("RLum.Data.Curve")
 correct_PMTLinearity(o, PMT_pulse_pair_resolution = 10)
@@ -41,7 +45,7 @@ correct_PMTLinearity(o, PMT_pulse_pair_resolution = 10)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Mittelstrass, D., 2025. correct_PMTLinearity(): Dead-time (linearity) Correction for Photomultiplier tubes (PMT). In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Mittelstrass, D., 2026. correct_PMTLinearity(): Dead-time (linearity) Correction for Photomultiplier tubes (PMT). Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -51,7 +55,7 @@ Mittelstraß, D., Kreutzer, S., Schmidt, C., 2022. OSLdecomposition: Signal
 component analysis for optically stimulated luminescence. \doi{10.32614/CRAN.package.OSLdecomposition}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
-Dirk Mittelstrass, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+Dirk Mittelstrass, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{manip}

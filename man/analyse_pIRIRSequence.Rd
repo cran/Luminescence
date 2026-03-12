@@ -6,10 +6,9 @@
 \usage{
 analyse_pIRIRSequence(
   object,
-  signal.integral.min,
-  signal.integral.max,
-  background.integral.min,
-  background.integral.max,
+  signal_integral,
+  background_integral,
+  integral_input = c("channel", "measurement"),
   dose.points = NULL,
   sequence.structure = c("TL", "IR50", "pIRIR225"),
   plot = TRUE,
@@ -18,26 +17,24 @@ analyse_pIRIRSequence(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} or \link{list} of \linkS4class{RLum.Analysis} objects (\strong{required}):
+\item{object}{\linkS4class{RLum.Analysis} or \link{list} of
+\linkS4class{RLum.Analysis} objects (\strong{required}):
 input object containing data for analysis.
 If a \link{list} is provided the functions tries to iterate over each element
 in the list.}
 
-\item{signal.integral.min}{\link{integer} (\strong{required}):
-lower bound of the signal integral. Provide this value as vector for different
-integration limits for the different IRSL curves.}
+\item{signal_integral}{\link{integer} (\strong{required}):
+vector of channels for the signal integral. Provide this value as a list
+for different integration limits for the different IRSL curves.}
 
-\item{signal.integral.max}{\link{integer} (\strong{required}):
-upper bound of the signal integral. Provide this value as vector for different
-integration limits for the different IRSL curves.}
+\item{background_integral}{\link{integer} (\strong{required}):
+vector of channels for the background integral. Provide this value as a list
+for different integration limits for the different IRSL curves.}
 
-\item{background.integral.min}{\link{integer} (\strong{required}):
-lower bound of the background integral. Provide this value as vector for
-different integration limits for the different IRSL curves.}
-
-\item{background.integral.max}{\link{integer} (\strong{required}):
-upper bound of the background integral. Provide this value as vector for
-different integration limits for the different IRSL curves.}
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given time range (in seconds) are selected.}
 
 \item{dose.points}{\link{numeric} (\emph{optional}):
 a numeric vector containing the dose points values. Using this argument overwrites dose point
@@ -113,7 +110,7 @@ with the following options:
 \code{pdf(file = "<YOUR FILENAME>", height = 18, width = 18)}
 }
 \section{Function version}{
- 0.2.6
+ 0.2.8
 }
 
 \examples{
@@ -144,10 +141,8 @@ object <- set_RLum(class = "RLum.Analysis", records = object, protocol = "pIRIR"
 ##(2) Perform pIRIR analysis (for this example with quartz OSL data!)
 ## Note: output as single plots to avoid problems with this example
 results <- analyse_pIRIRSequence(object,
-     signal.integral.min = 1,
-     signal.integral.max = 2,
-     background.integral.min = 900,
-     background.integral.max = 1000,
+     signal_integral = 1:2,
+     background_integral = 900:1000,
      fit.method = "EXP",
      sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
      main = "Pseudo pIRIR data set based on quartz OSL",
@@ -160,10 +155,8 @@ results <- analyse_pIRIRSequence(object,
 tempfile <- tempfile(fileext = ".pdf")
 pdf(file = tempfile, height = 18, width = 18)
   results <- analyse_pIRIRSequence(object,
-         signal.integral.min = 1,
-         signal.integral.max = 2,
-         background.integral.min = 900,
-         background.integral.max = 1000,
+         signal_integral = 1:2,
+         background_integral = 900:1000,
          fit.method = "EXP",
          main = "Pseudo pIRIR data set based on quartz OSL")
 
@@ -173,7 +166,7 @@ pdf(file = tempfile, height = 18, width = 18)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -187,11 +180,13 @@ extracts. Radiation Measurements 43, 1474-1486.
 \doi{10.1016/j.radmeas.2008.06.002}
 }
 \seealso{
-\link{analyse_SAR.CWOSL}, \link{calc_OSLLxTxRatio}, \link{plot_GrowthCurve},
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Results} \link{get_RLum}
+\link{analyse_SAR.CWOSL}, \link{calc_OSLLxTxRatio},
+\link{plot_DoseResponseCurve}, \link{fit_DoseResponseCurve}
+\linkS4class{RLum.Analysis}, \linkS4class{RLum.Results},
+\link{get_RLum}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{datagen}
 \keyword{plot}

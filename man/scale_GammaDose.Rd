@@ -24,7 +24,7 @@ table must have the following named columns:
 \item \code{id} (\link{character}): an arbitrary id or name of each layer
 \item \code{thickness} (\link{numeric}): vertical extent of each layer in cm
 \item \code{sample_offset} (\link{logical}): distance of the sample in cm,
-\strong{measured from the BOTTOM OF THE TARGET LAYER}. Except for the target layer
+\strong{measured from the bottom of the target layer}. Except for the target layer
 all values must be \code{NA}.
 \item \code{K} (\link{numeric}): K nuclide content in \%
 \item \code{K_se} (\link{numeric}): error on the K content
@@ -124,8 +124,7 @@ taking into account layer-to-layer variations in sediment radioactivity.
 The function scales user inputs of uranium, thorium and potassium based on
 input parameters for sediment density, water content and given layer
 thicknesses and distances to the sample.
-}
-\details{
+
 \strong{User Input}
 
 To calculate the gamma dose which is deposited in a sample, the user needs
@@ -236,21 +235,21 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., Burow, C., 2025. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., Burow, C., 2026. scale_GammaDose(): Calculate the gamma dose deposited within a sample taking layer-to-layer variations in radioactivity into account (according to Aitken, 1985). Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 Aitken, M.J., 1985. Thermoluminescence Dating. Academic Press, London.
 
 Adamiec, G., Aitken, M.J., 1998. Dose-rate conversion factors: update.
-Ancient TL 16, 37-46.
+Ancient TL 16, 37-46. \doi{10.26034/la.atl.1998.292}
 
 Cresswell., A.J., Carter, J., Sanderson, D.C.W., 2018.
 Dose rate conversion parameters: Assessment of nuclear data.
-Radiation Measurements 120, 195-201.
+Radiation Measurements 120, 195-201. \doi{10.1016/j.radmeas.2018.02.007}
 
 Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
-factors: update. Ancient TL, 29, 5-8.
+factors: update. Ancient TL 29, 5-8. \doi{10.26034/la.atl.2011.443}
 
 Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
 A re-evaluation of radiation dose-rate conversion factors. Mediterranean

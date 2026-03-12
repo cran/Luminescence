@@ -27,7 +27,7 @@ Objects can be created by calls of the form \code{set_RLum("RLum.Analysis", ...)
 }
 
 \section{Class version}{
- 0.4.18
+ 0.4.19
 }
 
 \examples{
@@ -64,7 +64,7 @@ remove_RLum(sar, subset = "NPOINTS == 250")
 \linkS4class{Risoe.BINfileData}, \linkS4class{RLum}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{classes}
 \keyword{methods}

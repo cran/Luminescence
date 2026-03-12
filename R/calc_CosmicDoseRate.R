@@ -113,18 +113,19 @@
 #' @param error [numeric] (*with default*):
 #' general error (percentage) to be implemented on corrected cosmic dose rate estimate
 #'
-#' @param ... further arguments (`verbose` to disable/enable console output).
+#' @param ... further arguments (`verbose` to disable/enable output to the
+#' terminal).
 #'
 #' @return
 #' Returns a terminal output. In addition an
-#' [RLum.Results-class] object is returned containing the
+#' [Luminescence::RLum.Results-class] object is returned containing the
 #' following element:
 #'
 #' \item{summary}{[data.frame] summary of all relevant calculation results.}
 #' \item{args}{[list] used arguments}
 #' \item{call}{[call] the function call}
 #'
-#' The output should be accessed using the function [get_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
 #'
 #' @note
 #' Despite its universal use, the equation to calculate the cosmic dose
@@ -164,7 +165,7 @@
 #' @author
 #' Christoph Burow, University of Cologne (Germany)
 #'
-#' @seealso [BaseDataSet.CosmicDoseRate]
+#' @seealso [Luminescence::BaseDataSet.CosmicDoseRate]
 #'
 #' @references
 #' Allkofer, O.C., Carstensen, K., Dau, W.D., Jokisch, H., 1975.
@@ -257,9 +258,9 @@ calc_CosmicDoseRate<- function(
   .validate_not_empty(depth)
   .validate_class(density, "numeric")
   .validate_not_empty(density)
-  .validate_scalar(latitude)
-  .validate_scalar(longitude)
-  .validate_scalar(altitude)
+  .validate_class(latitude, "numeric", length = 1)
+  .validate_class(longitude, "numeric", length = 1)
+  .validate_class(altitude, "numeric", length = 1)
 
   if (any(depth < 0) || anyNA(depth) || any(density < 0) || anyNA(density)) {
     .throw_error("No negative or missing values allowed for 'depth' and 'density'")

@@ -6,7 +6,7 @@
 #' **How does the import function work?**
 #'
 #' The function uses the `'XML'` package to parse the file structure. Each
-#' sequence is subsequently translated into an [RLum.Analysis-class] object.
+#' sequence is subsequently translated into an [Luminescence::RLum.Analysis-class] object.
 #'
 #' **General structure XSYG format**
 #'
@@ -69,7 +69,7 @@
 #'
 #' If the argument `auto_linearity_correction = TRUE`, the function offers a,
 #' theoretically, automated linearity correction of the PMT signal using
-#' the internal function [correct_PMTLinearity]. The critical parameter
+#' the internal function [Luminescence::correct_PMTLinearity]. The critical parameter
 #' is the count-pair resolution, which is provided to the function
 #' automatically depending on the detector. Currently, the following
 #' settings are used:
@@ -97,11 +97,9 @@
 #' is supported as this may lead to endless loops.
 #'
 #' @param file [character] or [list] (**required**):
-#' path and file name of the XSYG file. If input is a `list` it should comprise
-#' only `character`s representing each valid path and XSYG-file names.
-#' Alternatively, the input character can be just a directory (path), in which
-#' case the function tries to detect and import all XSYG-files found in the
-#' directory.
+#' name of one or multiple XSYG files (URLs are supported); it can be the path
+#' to a directory, in which case the function tries to detect and import all
+#' XSYG files found recursively from the given directory.
 #'
 #' @param recalculate.TL.curves [logical] (*with default*):
 #' if set to `TRUE`, TL curves are returned as temperature against count values
@@ -114,8 +112,8 @@
 #' all records.
 #'
 #' @param fastForward [logical] (*with default*):
-#' if `TRUE` for a more efficient data processing only a list of [RLum.Analysis-class]
-#' objects is returned.
+#' if `TRUE` for a more efficient data processing only a list of
+#' [Luminescence::RLum.Analysis-class] objects is returned.
 #'
 #' @param import [logical] (*with default*):
 #' if set to `FALSE`, only the XSYG file structure is shown.
@@ -146,7 +144,7 @@
 #'
 #' A list is provided, the list elements
 #' contain: \item{Sequence.Header}{[data.frame] with information on the
-#' sequence.} \item{Sequence.Object}{[RLum.Analysis-class]
+#' sequence.} \item{Sequence.Object}{[Luminescence::RLum.Analysis-class]
 #' containing the curves.}
 #'
 #' @note
@@ -157,14 +155,14 @@
 #' **So far, no image data import is provided!** \cr
 #' Corresponding values in the XSXG file are skipped.
 #'
-#' @section Function version: 0.7.1
+#' @section Function version: 0.8.2
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
-#' @seealso `'XML'`, [RLum.Analysis-class], [RLum.Data.Curve-class],
-#' [approx], [correct_PMTLinearity]
+#' @seealso `'XML'`, [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Data.Curve-class],
+#' [approx], [Luminescence::correct_PMTLinearity]
 #'
 #' @references
 #' Grehl, S., Kreutzer, S., Hoehne, M., 2013. Documentation of the
@@ -224,33 +222,19 @@ read_XSYG2R <- function(
   ##  - the should be a mode importing ALL metadata
   ##  - xlum should be general, xsyg should take care about subsequent details
 
-  .validate_class(file, c("character", "list"))
-  .validate_positive_scalar(n_records, int = TRUE, null.ok = TRUE)
+  .validate_logical_scalar(verbose)
   .validate_class(pattern, "character")
+  file <- .validate_file(file, pattern = pattern, recursive = TRUE,
+                         throw.error = FALSE, verbose = verbose)
+  if (length(file) == 0)
+    return(NULL)
+  .validate_positive_scalar(n_records, int = TRUE, null.ok = TRUE)
 
   # Self Call -----------------------------------------------------------------------------------
   # Option (a): Input is a list, every element in the list will be treated as file connection
   # with that many file can be read in at the same time
   # Option (b): The input is just a path, the function tries to grep ALL xsyg/XSYG files in the
   # directory and import them, if this is detected, we proceed as list
-  if (is.character(file)) {
-    .validate_length(file, 1)
-
-    ##If this is not really a path we skip this here
-    if (dir.exists(file) & length(dir(file)) > 0) {
-      if (verbose)
-        .throw_message("Directory detected, trying to extract ",
-                       "'*.xsyg' files ...\n", error = FALSE)
-      file <- as.list(dir(file, recursive = TRUE, pattern = pattern, full.names = TRUE))
-      if (length(file) == 0) {
-        if (verbose)
-          .throw_message("No files matching the given pattern ",
-                         "found in directory, NULL returned")
-        return(NULL)
-      }
-    }
-  }
-
   if (inherits(file, "list")) {
     temp.return <- lapply(seq_along(file), function(x) {
       read_XSYG2R(
@@ -263,40 +247,19 @@ read_XSYG2R <- function(
       )
     })
 
-    ##return
-    if (fastForward) {
-      if (import)
-        return(unlist(temp.return, recursive = FALSE))
-      return(as.data.frame(data.table::rbindlist(temp.return)))
-    } else{
+    if (!fastForward)
       return(temp.return)
-    }
+    if (import)
+      return(unlist(temp.return, recursive = FALSE))
+
+    return(as.data.frame(data.table::rbindlist(temp.return)))
   }
 
   ## Integrity checks -------------------------------------------------------
-
   .validate_logical_scalar(fastForward)
   .validate_logical_scalar(import)
   .validate_logical_scalar(auto_linearity_correction)
-  .validate_logical_scalar(verbose)
   .validate_logical_scalar(txtProgressBar)
-
-  ## check for URL and attempt download
-  url_file <- .download_file(file, tempfile("read_XSYG2R_FILE"),
-                             verbose = verbose)
-
-  if(!is.null(url_file))
-    file <- url_file
-
-  ## normalise path, just in case
-  file <- suppressWarnings(normalizePath(file))
-
-  ## check whether file exist
-  if(!file.exists(file)) {
-    if(verbose)
-      .throw_message("File does not exist, nothing imported, NULL returned")
-    return(NULL)
-  }
 
   ## don't show the progress bar if not verbose
   if (!verbose)
@@ -453,10 +416,22 @@ read_XSYG2R <- function(
           recordType  <- "IRSL"
       }
 
+      ## get all record attributes
+      attrs_record <- XML::xmlAttrs(record)
+      names(attrs_record) <- gsub("^name$", "recordName", names(attrs_record))
+
+      header.position <- as.integer(as.character(sequence.header["position", ]))
+      header.name <- as.character(sequence.header["name", ])
+
       ## loop 3rd level
       lapply(1:xml.size, function(j) {
         curve <- record[[j]]
         attrs <- XML::xmlAttrs(curve)
+
+        ## all curves after the first in a record are marked with a leading
+        ## underscore: this should make it easier to identify the curve to
+        ## analyze (the first) from the others
+        recordType <- paste0(ifelse(j == 1, "", "_"), recordType)
 
           ##get curveType
           temp.sequence.object.curveType <- as.character(attrs["curveType"])
@@ -464,13 +439,17 @@ read_XSYG2R <- function(
           ##get detector
           temp.sequence.object.detector <- as.character(attrs["detector"])
 
-          ##get additional information
-          temp.sequence.object.info <- c(as.list(attrs),
-                                         position = as.integer(as.character(sequence.header["position", ])),
-                                         name = as.character(sequence.header["name", ]))
+          ## combine attributes
+          attrs_comb <- as.list(c(attrs, attrs_record))
+          attrs_comb <- attrs_comb[!duplicated(names(attrs_comb))]
 
-          ## TL curve recalculation ============================================
-          if(recalculate.TL.curves){
+        ## get additional information
+        temp.sequence.object.info <- modifyList(attrs_comb,
+                                                list(position = header.position,
+                                                     sequenceName = header.name))
+
+        ## TL curve recalculation ===========================================
+        if (recalculate.TL.curves) {
             ##TL curve heating values is stored in the 3rd curve of every set
             if (recordType == "TL" && j == 1) {
               #grep values from PMT measurement or spectrometer

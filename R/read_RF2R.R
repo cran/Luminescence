@@ -1,29 +1,35 @@
 #' @title Import RF-files to R
 #'
-#' @description Import files produced by the IR-RF 'ImageJ' macro (`SR-RF.ijm`; Mittelstraß and Kreutzer, 2021) into R and create a list of [RLum.Analysis-class]
-#' objects
+#' @description Import files produced by the IR-RF 'ImageJ' macro (`SR-RF.ijm`;
+#' Mittelstraß and Kreutzer, 2021) into R and create a list of
+#' [Luminescence::RLum.Analysis-class] objects
 #'
 #' @details The results of spatially resolved IR-RF data are summarised in
 #' so-called RF-files (Mittelstraß and Kreutzer, 2021).
 #' This functions provides an easy import to process the data seamlessly with the R package 'Luminescence'.
-#' The output of the function can be passed to function [analyse_IRSAR.RF].
+#' The output of the function can be passed to function [Luminescence::analyse_IRSAR.RF].
 #'
-#' @param file [character] (**required**): path and file name of the RF file. Alternatively a list of file
-#' names can be provided.
+#' @param file [character] (**required**):
+#' name of one or multiple RF files (URLs are supported); it can be the path
+#' to a directory, in which case the function tries to detect and import all
+#' RF files found in the directory.
 #'
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
 #' @param ... not used, only for compatible reasons
 #'
-#' @return Returns an S4 [RLum.Analysis-class] object containing
-#' [RLum.Data.Curve-class] objects for each curve.
+#' @return
+#' Returns an S4 [Luminescence::RLum.Analysis-class] object containing
+#' [Luminescence::RLum.Data.Curve-class] objects for each curve. Results are
+#' returned as a list when multiple files are processed or `file` is a list.
 #'
-#' @seealso [RLum.Analysis-class], [RLum.Data.Curve-class], [analyse_IRSAR.RF]
+#' @seealso [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Data.Curve-class],
+#' [Luminescence::analyse_IRSAR.RF]
 #'
-#' @author Sebastian Kreutzer, Geography & Earth Science, Aberystwyth University (United Kingdom)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @section Function version: 0.1.1
+#' @section Function version: 0.1.2
 #'
 #' @keywords IO
 #'
@@ -45,13 +51,13 @@ read_RF2R <- function(
   .set_function_name("read_RF2R")
   on.exit(.unset_function_name(), add = TRUE)
 
-# Self-call -----------------------------------------------------------------------------------
-  if(inherits(file, "list")){
+  ## Integrity checks -------------------------------------------------------
+  .validate_logical_scalar(verbose)
+  file <- .validate_file(file, verbose = verbose)
+
+  ## Self-call --------------------------------------------------------------
+  if (inherits(file, "list")) {
     results_list <- lapply(file, function(f){
-      if (!.validate_class(f, "character", throw.error = FALSE,
-                           name = "All elements of 'file'")) {
-        return(NULL)
-      }
       temp <- try(read_RF2R(file = f, verbose = verbose), silent = TRUE)
 
       ##check whether it worked
@@ -65,24 +71,6 @@ read_RF2R <- function(
 
     return(unlist(results_list, recursive = FALSE))
   }
-
-
-  ## Integrity checks -------------------------------------------------------
-
-  .validate_class(file, "character", extra = "'list'")
-  .validate_not_empty(file)
-
-  ##throw warning if we have a vector
-  if(length(file) > 1){
-    .throw_warning("'file' has length > 1, only the first element was taken. ",
-                   "If you want to import multiple files, 'file' has to be ",
-                   "of type 'list'")
-    file <- file[1]
-  }
-
-  ##check whether file is available
-  if(!file.exists(file))
-    .throw_error("File '", file, "' does not exist")
 
   ##read first line to ensure the format
   vers_str <-  readLines(file, 1)
@@ -215,7 +203,6 @@ read_RF2R <- function(
       records <- lapply(1:2, function(o) {
         if(o == 1){
           temp_curve <- m_RF_nat[,c(2,2 + a)]
-
         }else{
           temp_curve <- m_RF_reg[,c(2,2 + a)]
         }
@@ -225,7 +212,7 @@ read_RF2R <- function(
           class = "RLum.Data.Curve",
           originator = "read_RF2R",
           curveType = "measured",
-          recordType = "RF",
+          recordType = "RF (NA)",
           data = temp_curve
         )
       })

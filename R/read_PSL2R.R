@@ -8,11 +8,9 @@
 #' extract all relevant information. See **note**.
 #'
 #' @param file [character] (**required**):
-#' path and file name of the PSL file. If input is a `vector` it should comprise
-#' only `character`s representing valid paths and PSL file names.
-#' Alternatively, the input character can be just a directory (path), in which
-#' case the function tries to detect and import all PSL files found in the
-#' directory.
+#' name of one or multiple PSL files (URLs are supported); it can be the path
+#' to a directory, in which case the function tries to detect and import all
+#' PSL files found in the directory.
 #'
 #' @param drop_bg [logical] (*with default*):
 #' `TRUE` to automatically remove all non-OSL/IRSL curves.
@@ -27,7 +25,7 @@
 #' to hardware errors.
 #'
 #' @param merge [logical] (*with default*):
-#' `TRUE` to merge all `RLum.Analysis` objects. Only applicable if multiple
+#' `TRUE` to merge all [Luminescence::RLum.Analysis-class] objects. Only applicable if multiple
 #' files are imported.
 #'
 #' @param pattern [character] (*with default*):
@@ -40,15 +38,17 @@
 #' @param ... currently not used.
 #'
 #' @return
-#' Returns an S4 [RLum.Analysis-class] object containing
-#' [RLum.Data.Curve-class] objects for each curve.
+#' Returns an S4 [Luminescence::RLum.Analysis-class] object containing
+#' [Luminescence::RLum.Data.Curve-class] objects for each curve. Results are
+#' returned as a list when multiple files are processed or `file` is a list.
 #'
-#' @seealso [RLum.Analysis-class], [RLum.Data.Curve-class], [RLum.Data.Curve-class]
+#' @seealso [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Data.Curve-class],
+#' [Luminescence::RLum.Data.Curve-class]
 #'
-#' @author Christoph Burow, University of Cologne (Germany),
-#'  Sebastian Kreutzer, Institut of Geography, Heidelberg University (Germany)
+#' @author Christoph Burow, University of Cologne (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #'
-#' @section Function version: 0.1.1
+#' @section Function version: 0.1.2
 #'
 #' @note
 #' Because this function relies heavily on regular expressions to parse
@@ -82,17 +82,11 @@ read_PSL2R <- function(
   on.exit(.unset_function_name(), add = TRUE)
 
   ## Integrity checks -------------------------------------------------------
-
-  .validate_class(file, "character")
-  .validate_not_empty(file)
-  .validate_class(pattern, "character")
-
-  if (length(file) == 1 && !grepl("\\.psl$", file, ignore.case = TRUE)) {
-      file <- list.files(file, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
-      if (length(file) == 0)
-        .throw_error("No .psl files found")
-      .throw_message("The following files were found and imported:\n",
-                     paste(" ..", file, collapse = "\n"), error = FALSE)
+  .validate_logical_scalar(verbose)
+  .validate_class(pattern, "character", length = 1)
+  file <- unlist(.validate_file(file, ext = "psl", pattern = pattern, verbose = verbose))
+  if (length(file) == 0) {
+    return(NULL)
   }
   if (!all(file.exists(file)))
     .throw_error("The following files do not exist, please check:\n",
@@ -213,7 +207,7 @@ read_PSL2R <- function(
        protocol = "portable OSL",
        info = c(
          header,
-         list(Sequence = measurement_sequence)),
+         list(Sequence = as.data.frame(measurement_sequence))),
        records = measurements_formatted)
   }#Eof::Loop
 
@@ -288,7 +282,7 @@ format_Measurements <- function(x, convert, header) {
   set_RLum(
     class = "RLum.Data.Curve",
     originator = "read_PSL2R",
-    recordType = recordType,
+    recordType = paste(recordType, "(PMT)"),
     curveType = "measured",
     data = data,
     info = list(settings = c(settings_list, header),

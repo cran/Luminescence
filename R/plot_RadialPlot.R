@@ -15,7 +15,7 @@
 #' Rather it applies only to the x-y-coordinate system (standardised error vs.
 #' precision). A spread in doses or ages must be drawn as lines originating at
 #' zero precision (x0) and zero standardised estimate (y0). Such a range may be
-#' drawn by adding lines to the radial plot ( `line`, `line.col`,
+#' drawn by adding lines to the radial plot (`line`, `line.col`,
 #' `line.label`, cf. examples).
 #'
 #' A statistic summary, i.e. a collection of statistic measures of
@@ -38,7 +38,7 @@
 #' - `"kurtosis"` (kurtosis) and
 #' - `"skewness"` (skewness).
 #'
-#' @param data [data.frame] or [RLum.Results-class] object (**required**):
+#' @param data [data.frame] or [Luminescence::RLum.Results-class] object (**required**):
 #' for `data.frame`: either two columns: De (`data[,1]`) and De error
 #' (`data[,2]`), or one: De (`values[,1]`). If a single-column data frame
 #' is provided, De error is assumed to be 10^-9 for all measurements.
@@ -126,36 +126,36 @@
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Based on a rewritten S script of Rex Galbraith, 2010
 #'
-#' @seealso [plot], [plot_KDE], [plot_Histogram], [plot_AbanicoPlot]
+#' @seealso [plot], [Luminescence::plot_KDE], [Luminescence::plot_Histogram], [Luminescence::plot_AbanicoPlot]
 #'
 #' @references
 #' Galbraith, R.F., 1988. Graphical Display of Estimates Having
-#' Differing Standard Errors. Technometrics, 30 (3), 271-281.
+#' Differing Standard Errors. Technometrics 30 (3), 271-281.
 #'
 #' Galbraith, R.F., 1990. The radial plot: Graphical assessment of spread in
 #' ages. International Journal of Radiation Applications and Instrumentation.
-#' Part D. Nuclear Tracks and Radiation Measurements, 17 (3), 207-214.
+#' Part D. Nuclear Tracks and Radiation Measurements 17 (3), 207-214.
 #'
 #' Galbraith, R. & Green, P., 1990. Estimating the component ages in a finite
 #' mixture. International Journal of Radiation Applications and
-#' Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3)
+#' Instrumentation. Part D. Nuclear Tracks and Radiation Measurements 17 (3)
 #' 197-206.
 #'
 #' Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
-#' track ages. Nuclear Tracks And Radiation Measurements, 21 (4), 459-470.
+#' track ages. Nuclear Tracks And Radiation Measurements 21 (4), 459-470.
 #'
 #' Galbraith, R.F., 1994. Some Applications of Radial Plots. Journal of the
-#' American Statistical Association, 89 (428), 1232-1242.
+#' American Statistical Association 89 (428), 1232-1242.
 #'
-#' Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL, 28 (1),
+#' Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL 28 (1),
 #' 1-10.
 #'
 #' Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent
 #' dose and error calculation and display in OSL dating: An overview and some
-#' recommendations. Quaternary Geochronology, 11, 1-27.
+#' recommendations. Quaternary Geochronology 11, 1-27.
 #'
 #' @examples
 #'
@@ -266,7 +266,7 @@ plot_RadialPlot <- function(
   na.rm = TRUE,
   log.z = TRUE,
   central.value = NULL,
-  centrality = "mean.weighted",
+  centrality = c("mean.weighted", "mean.weighted", "median", "median.weighted"),
   mtext = "",
   summary = c("n", "in.2s"),
   summary.pos = "sub",
@@ -318,9 +318,26 @@ plot_RadialPlot <- function(
       ## what `calc_Statistics() does)
       if (ncol(data[[i]]) < 2) {
         data[[i]] <- data.frame(data[[i]], 10^-9)
-      } else if (ncol(data[[i]]) > 2) {
-        ## keep only the first two columns
-        data[[i]] <- data[[i]][, 1:2]
+      } else {
+        if (ncol(data[[i]]) > 2) {
+          ## keep only the first two columns
+          data[[i]] <- data[[i]][, 1:2]
+        }
+
+        ## if all errors are NA, we set them to 0 so we correct them in the
+        ## next block
+        if (all(is.na(data[[i]][, 2]))) {
+          data[[i]][, 2] <- 0
+        }
+
+        ## don't let the error be NA or zero: we set it to the smallest between
+        ## the smallest non-zero error and 10^-9
+        is.zero <- data[[i]][, 2] == 0
+        if (any(is.zero)) {
+          min.value <- min(data[[i]][!is.zero, 2], 10^-9)
+          data[[i]][is.zero, 2] <- min.value
+          .throw_warning("Error values cannot be zero or NA, reset to ", min.value)
+        }
       }
   }
 
@@ -342,6 +359,8 @@ plot_RadialPlot <- function(
 
   .validate_class(stats, "character")
   .validate_logical_scalar(rug)
+  .validate_positive_scalar(plot.ratio, null.ok = TRUE)
+  .validate_logical_scalar(y.ticks)
   .validate_class(line, c("numeric", "integer"), null.ok = TRUE)
 
   if (is.null(bar.col)) {
@@ -358,6 +377,7 @@ plot_RadialPlot <- function(
   }
 
   ## optionally, remove NA-values
+  .validate_logical_scalar(na.rm)
   if (na.rm) {
     for(i in 1:length(data)) {
       data[[i]] <- na.exclude(data[[i]])
@@ -412,14 +432,15 @@ plot_RadialPlot <- function(
   ## calculate central values
   data <- lapply(data, function(x) {
     cbind(x,
-          z.central = switch(as.character(centrality[1]),
-                             mean = rep(mean(x[, 3], na.rm = TRUE), nrow(x)),
-                             median = rep(median(x[, 3], na.rm = TRUE), nrow(x)),
-                             mean.weighted = sum(x[, 3] / x[, 4]^2) / sum(1 / x[, 4]^2),
-                             median.weighted = rep(.weighted.median(x[, 3], w = x[, 4]), nrow(x)),
-                             if (is.numeric(centrality) && length(centrality) >= length(data)) {
-                               rep(median(x[, 3], na.rm = TRUE), nrow(x))
-                             } else NA)
+          z.central = switch(
+            as.character(centrality[1]),
+            mean = rep(mean(x[, 3], na.rm = TRUE), nrow(x)),
+            median = rep(median(x[, 3], na.rm = TRUE), nrow(x)),
+            mean.weighted = rep(stats::weighted.mean(x[, 3], w = 1 / x[, 4]^2), nrow(x)),
+            median.weighted = rep(.weighted.median(x[, 3], w = 1 / x[, 4]^2), nrow(x)),
+            if (is.numeric(centrality) && length(centrality) >= length(data)) {
+             rep(median(x[, 3], na.rm = TRUE), nrow(x))
+            } else NA)
           )
   })
 
@@ -448,8 +469,9 @@ plot_RadialPlot <- function(
   z.central.global <- switch(as.character(centrality[1]),
                              mean = mean(data.global[, 3], na.rm = TRUE),
                              median = median(data.global[, 3], na.rm = TRUE),
-                             mean.weighted = sum(data.global[, 3] / data.global[, 4]^2) / sum(1 / data.global[, 4]^2),
-                             median.weighted = .weighted.median(data.global[, 3], w = data.global[, 4]),
+                             mean.weighted = stats::weighted.mean(data.global[, 3], w = 1 / data.global[, 4]^2),
+                             median.weighted = .weighted.median(data.global[, 3],
+                                                                w = 1 / data.global[, 4]^2),
                              if (is.numeric(centrality) && length(centrality) >= length(data)) {
                                mean(data.global[, 3], na.rm = TRUE)
                              } else NA)
@@ -473,8 +495,8 @@ plot_RadialPlot <- function(
 
   ## print warning for too small scatter
   if (max(abs(1 / data.global[, 6])) < 0.02) {
-    message("Attention, small standardised estimate scatter. ",
-            "Toggle off y.ticks?")
+    .throw_message("Small standardised estimate scatter, toggle off y.ticks?",
+                   error = FALSE)
   }
 
   ## read out additional arguments---------------------------------------------

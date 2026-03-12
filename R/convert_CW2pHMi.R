@@ -1,11 +1,13 @@
-#' Transform a CW-OSL curve into a pHM-OSL curve via interpolation under
+#' @title Transform a CW-OSL curve into a pHM-OSL curve via interpolation under
 #' hyperbolic modulation conditions
 #'
+#' @description
 #' This function transforms a conventionally measured continuous-wave (CW)
 #' OSL-curve to a pseudo hyperbolic modulated (pHM) curve under hyperbolic
 #' modulation conditions using the interpolation procedure described by Bos &
 #' Wallinga (2012).
 #'
+#' @details
 #' The complete procedure of the transformation is described in Bos & Wallinga
 #' (2012). The input `data.frame` consists of two columns: time (t) and
 #' count values (CW(t))
@@ -41,17 +43,14 @@
 #'
 #' (7) Combine all values and truncate all values for t' > `max(t)`
 #'
-#'
-#' **NOTE:**
+#' **Note:**
 #' The number of values for t' < `min(t)` depends on the stimulation rate
 #' parameter `delta`. To avoid the production of too many artificial data
 #' at the raising tail of the determined pHM curve, it is recommended to use
 #' the automatic estimation routine for `delta`, i.e. provide no value for
 #' `delta`.
 #'
-#' @param values [RLum.Data.Curve-class] or [data.frame] (**required**):
-#' [RLum.Data.Curve-class] or [data.frame] with measured curve data of type
-#' stimulation time (t) (`values[,1]`) and measured counts (cts) (`values[,2]`).
+#' @inheritParams convert_CW2pLMi
 #'
 #' @param delta [vector] (*optional*):
 #' stimulation rate parameter, if no value is given, the optimal value is
@@ -85,34 +84,35 @@
 #' provided manually and more than two points are extrapolated, a warning
 #' message is returned.
 #'
-#' The function [approx] may produce some `Inf` and `NaN` data.
-#' The function tries to manually interpolate these values by calculating
-#' the `mean` using the adjacent channels. If two invalid values are succeeding,
+#' The function [approx] may produce some `Inf` and `NaN` data, in which case
+#' the function tries to interpolate these values by calculating the mean of
+#' the adjacent channels. If two invalid values are succeeding,
 #' the values are removed and no further interpolation is attempted.
 #' In every case a warning message is shown.
 #'
-#' @section Function version: 0.2.3
+#' @section Function version: 0.2.5
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
-#' Based on comments and suggestions from:\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
+#' Based on comments and suggestions from:
 #' Adrie J.J. Bos, Delft University of Technology, The Netherlands
 #'
-#' @seealso [convert_CW2pLM], [convert_CW2pLMi], [convert_CW2pPMi],
-#' [fit_LMCurve], [lm], [RLum.Data.Curve-class]
+#' @seealso [Luminescence::convert_CW2pLM], [Luminescence::convert_CW2pLMi], [Luminescence::convert_CW2pPMi],
+#' [Luminescence::fit_LMCurve], [lm], [Luminescence::RLum.Data.Curve-class]
 #'
 #' @references
 #' Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL
-#' signal components. Radiation Measurements, 47, 752-758.\cr
+#' signal components. Radiation Measurements 47, 752-758.\cr
 #'
 #' **Further Reading**
 #'
 #' Bulur, E., 1996. An Alternative Technique For
-#' Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements,
+#' Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements
 #' 26, 701-709.
 #'
 #' Bulur, E., 2000. A simple transformation for converting CW-OSL curves to
-#' LM-OSL curves. Radiation Measurements, 32, 141-145.
+#' LM-OSL curves. Radiation Measurements 32, 141-145.
 #'
 #' @keywords manip
 #'
@@ -147,19 +147,15 @@
 #'                                        ,"NPOINTS"]
 #'
 #' ##combine curve to data set
-#'
 #' curve<-data.frame(x = seq(curve.HIGH/curve.NPOINTS,curve.HIGH,
 #'                           by = curve.HIGH/curve.NPOINTS),
 #'                   y=unlist(CWOSL.SAR.Data@@DATA[curve.ID[1]]))
 #'
-#'
 #' ##transform values
-#'
 #' curve.transformed <- convert_CW2pHMi(curve)
 #'
 #' ##plot curve
 #' plot(curve.transformed$x, curve.transformed$y.t, log = "x")
-#'
 #'
 #' ##(3) - produce Fig. 4 from Bos & Wallinga (2012)
 #'
@@ -193,40 +189,24 @@
 #'
 #' @export
 convert_CW2pHMi<- function(
-  values,
-  delta
+  object,
+  delta = NULL,
+  ...
 ) {
   .set_function_name("convert_CW2pHMi")
   on.exit(.unset_function_name(), add = TRUE)
 
+  ## deprecated argument
+  if ("values" %in% ...names()) {
+    object <- list(...)$values
+    .deprecated(old = "values", new = "object", since = "1.2.0")
+  }
+
   ## Integrity checks -------------------------------------------------------
-
-  ##(1) data.frame or RLum.Data.Curve object?
-  .validate_class(values, c("data.frame", "RLum.Data.Curve"))
-  .validate_not_empty(values)
-  if (ncol(values) < 2) {
-    .throw_error("'values' should have 2 columns")
-  }
-
-  ##(2) if the input object is an 'RLum.Data.Curve' object check for allowed curves
-  if (inherits(values, "RLum.Data.Curve")) {
-    if(!grepl("OSL", values@recordType) & !grepl("IRSL", values@recordType)){
-
-      .throw_error("recordType ", values@recordType,
-                   " is not allowed for the transformation")
-    }
-
-    temp.values <- as(values, "data.frame")
-
-  }else{
-
-    temp.values <- values
-  }
-
-  ## remove NAs
-  temp.values <- na.exclude(temp.values)
-  if (nrow(temp.values) < 2) {
-    .throw_error("'values' should have at least 2 non-missing values")
+  temp.values <- .prepare_CW2pX(object)
+  .validate_class(delta, "numeric", null.ok = TRUE)
+  if (anyNA(delta)) {
+    .throw_error("'delta' cannot contain NA values")
   }
 
   # (1) Transform values ------------------------------------------------------
@@ -240,7 +220,7 @@ convert_CW2pHMi<- function(
   ##set delta
   ##if no values for delta is set selected a delta value for a maximum of
   ##two extrapolation points
-  if (missing(delta)) {
+  if (is.null(delta)) {
     i<-10
     delta<-i
     t.transformed<-t-(1/delta)*log(1+delta*t)
@@ -260,52 +240,19 @@ convert_CW2pHMi<- function(
   ##interpolate values, values beyond the range return NA values
   CW_OSL.interpolated <- approx(t,CW_OSL.log, xout=t.transformed, rule=1)
 
-  ##combine t.transformed and CW_OSL.interpolated in a data.frame
-  temp <- data.frame(x=t.transformed, y=unlist(CW_OSL.interpolated$y))
+  ## In some cases the interpolation algorithm is not working properly, and
+  ## Inf or NaN values are produced
+  interpolated <- .fix_interpolation_inf_nan(unlist(CW_OSL.interpolated$y),
+                                             warn = TRUE)
 
-  ##Problem: In some cases the interpolation algorithm is not working properly
-  ##and Inf or NaN values are returned
-
-  ##fetch row number of the invalid values
-  invalid_values.id <- c(which(is.infinite(temp[,2]) | is.nan(temp[,2])))
-
-  if(length(invalid_values.id) > 0){
-    .throw_warning(length(invalid_values.id), " invalid values have been found ",
-                   "and replaced by the mean of the nearest values")
-  }
-
-  ##interpolate between the lower and the upper value
-  invalid_values.interpolated <- sapply(invalid_values.id,
-                                        function(x) mean(temp[c(x - 1, x + 1), 2]))
-
-  ##replace invalid values in data.frame with newly interpolated values
-  if(length(invalid_values.id)>0){
-    temp[invalid_values.id,2]<-invalid_values.interpolated
-  }
+  ## combine t.transformed and CW_OSL.interpolated in a data.frame
+  temp <- data.frame(x = t.transformed, y = interpolated)
 
   # (3) Extrapolate first values of the curve ---------------------------------
 
-  ##(a) - find index of first rows which contain NA values (needed for extrapolation)
-  temp.sel.id <- min(which(!is.na(temp[, 2])))
-
-  ##(b) - fit linear function
-  fit.lm <- stats::lm(y ~ x, data.frame(x = t[1:2], y = CW_OSL.log[1:2]))
-
-  ##select values to extrapolate and predict (extrapolate) values based on the fitted function
-  x.i<-data.frame(x=temp[1:(min(temp.sel.id)-1),1])
-  y.i<-predict(fit.lm,x.i)
-
-  ##replace NA values by extrapolated values
-  temp[1:length(y.i),2]<-y.i
-
-  ##set method values
-  temp.method<-c(rep("extrapolation",length(y.i)),rep("interpolation",(length(temp[,2])-length(y.i))))
-
-  ##print a warning message for more than two extrapolation points
-  if (length(y.i) > 2) {
-    .throw_warning("t' is beyond the time resolution and more than ",
-                   "two data points have been extrapolated")
-  }
+  res <- .extrapolate_first(temp, t = t[1:2], y = CW_OSL.log[1:2])
+  temp <- res$df
+  temp.method <- res$method
 
   # (4) Convert, transform and combine values ---------------------------------
 
@@ -330,18 +277,18 @@ convert_CW2pHMi<- function(
   # (5) Return values ---------------------------------------------------------
 
   ##returns the same data type as the input
-  if (is.data.frame(values)) {
+  if (is.data.frame(object)) {
     return(temp.values)
   }
 
     ##add old info elements to new info elements
-    temp.info <- c(values@info,
+    temp.info <- c(object@info,
                    CW2pHMi.x.t = list(temp.values$x.t),
                    CW2pHMi.method = list(temp.values$method))
 
   set_RLum(
       class = "RLum.Data.Curve",
-      recordType = values@recordType,
+      recordType = object@recordType,
       data = as.matrix(temp.values[,1:2]),
       info = temp.info)
 }

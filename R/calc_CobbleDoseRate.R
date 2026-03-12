@@ -1,14 +1,12 @@
 #'@title Calculate dose rate of slices in a spherical cobble
 #'
 #'@description
-#'
 #'Calculates the dose rate profile through the cobble based on Riedesel and Autzen (2020).
 #'
 #'Corrects the beta dose rate in the cobble for the grain size following results
 #'of Guérin et al. (2012). Sediment beta and gamma dose rates are corrected
 #'for the water content of the sediment using the correction factors of Aitken (1985).
 #'Water content in the cobble is assumed to be 0.
-#'
 #'
 #'@details
 #'
@@ -47,31 +45,35 @@
 #'
 #'\deqn{(Wet\_weight - Dry\_weight) / Dry\_weight * 100}
 #'
-#'@param input [data.frame] (**required**): A table containing all relevant information
-#'for each individual layer. For the table layout see details.
+#' @param object [data.frame] (**required**):
+#' A data frame containing all relevant information for each individual layer.
+#' For the table layout see details.
 #'
 #' @param conversion [character] (*with default*): dose rate conversion factors
-#' to use, see [BaseDataSet.ConversionFactors] for the accepted values.
+#' to use, see [Luminescence::BaseDataSet.ConversionFactors] for the accepted values.
+#'
+#' @param ... currently not used.
 #'
 #'@references
 #'Riedesel, S., Autzen, M., 2020. Beta and gamma dose rate attenuation in rocks and sediment.
 #'Radiation Measurements 133, 106295.
 #'
-#'@section Function version: 0.1.0
+#' @section Function version: 0.1.1
 #'
 #'@author Svenja Riedesel, Aberystwyth University (United Kingdom) \cr
 #'Martin Autzen, DTU NUTECH Center for Nuclear Technologies (Denmark)
 #'
-#'@return The function returns an [RLum.Results-class] object for which the first element
-#'is a [matrix] (`DataIndividual`) that gives the dose rate results for each slice
-#'for each decay chain individually, for both, the cobble dose rate and the sediment
-#'dose rate. The second element is also a [matrix] (`DataComponent`) that gives
-#'the total beta and gamma-dose rates for the cobble and the adjacent sediment
-#'for each slice of the cobble.
+#' @return
+#' The function returns an [Luminescence::RLum.Results-class] object for which
+#' the first element is a [matrix] (`DataIndividual`) that gives the dose rate
+#' results for each slice for each decay chain individually, for both, the
+#' cobble dose rate and the sediment dose rate. The second element is also a
+#' [matrix] (`DataComponent`) that gives the total beta and gamma-dose rates
+#' for the cobble and the adjacent sediment for each slice of the cobble.
 #'
 #'@keywords datagen
 #'
-#'@seealso [convert_Concentration2DoseRate]
+#'@seealso [Luminescence::convert_Concentration2DoseRate]
 #'
 #'@examples
 #'## load example data
@@ -81,27 +83,37 @@
 #'calc_CobbleDoseRate(ExampleData.CobbleData)
 #'
 #'@export
-calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
+calc_CobbleDoseRate <- function(
+  object,
+  conversion = "Guerinetal2011",
+  ...
+  ) {
   .set_function_name("calc_CobbleDoseRate")
   on.exit(.unset_function_name(), add = TRUE)
 
+  ## deprecated argument
+  if ("input" %in% ...names()) {
+    object <- list(...)$input
+    .deprecated(old = "input", new = "object", since = "1.2.0")
+  }
+
   ## Integrity checks -------------------------------------------------------
-  .validate_class(input, "data.frame")
-  .validate_not_empty(input)
+  .validate_class(object, "data.frame")
+  .validate_not_empty(object)
 
   ## this lists only the columns that are referenced by name in the script
   exp.cols <- c("Distance", "DistanceError", "Thickness", "ThicknessError",
                 "Density", "CobbleDiameter")
+  input <- object
   mis.cols <- setdiff(exp.cols, colnames(input))
   if (length(mis.cols) > 0)
-    .throw_error("'input' doesn't contain the following columns: ",
+    .throw_error("'object' doesn't contain the following columns: ",
                  .collapse(mis.cols))
 
   if ((max(input[,1])>input$CobbleDiameter[1]*10) ||
       ((max(input[,1]) + input[length(input[,1]),3]) > input$CobbleDiameter[1]*10))
     .throw_error("Slices outside of cobble: please ensure your distances ",
                  "are in mm and diameter is in cm")
-
 
   ## conversion factors: we do not use BaseDataSet.ConversionFactors directly
   ## as it is in alphabetical level, but we want to have 'Guerinetal2011'
@@ -120,12 +132,14 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
 
   CobbleDoseData <- input[1,5:12]
   CobbleDoseData <- cbind(CobbleDoseData,0,0)
-  SedDoseData <- cbind(input[1,5],input[1,15:20],input[1,12],input[1,23:24])
+  SedDoseData <- cbind(input[1, 5], input[1, 15:20], GrainSize = input[1, 12],
+                       input[1, 23:24])
 
-  CobbleDoseRate <- get_RLum(convert_Concentration2DoseRate(
-    input = CobbleDoseData, conversion = conversion))
-  SedDoseRate <- get_RLum(
-    convert_Concentration2DoseRate(input = SedDoseData, conversion = conversion))
+  res <- convert_Concentration2DoseRate(CobbleDoseData, conversion = conversion)
+  CobbleDoseRate <- get_RLum(res)
+
+  res <- convert_Concentration2DoseRate(SedDoseData, conversion = conversion)
+  SedDoseRate <- get_RLum(res)
 
   ## Distance should be from the surface of the rock to the top of the slice. Distances and thicknesses are in mm
   N <- length(input$Distance)
@@ -160,11 +174,14 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
   tGamma <- t
 
   #Beta and gamma functions for the cobbles own dose rate
+  beta.cobble.fun <- function(a, b) {
+    function(x) (1 - a * exp(b * x * Scaling)) + (1 - a * exp(b * t * Scaling)) - 1
+  }
   KBetaCobble <- function(x) (1 - 0.5 * exp(-3.77 * DiameterSeq))+(1-0.5*exp(-3.77*t))-1
-  ThBetaCobble_short <- function(x) (1 - 0.5 * exp(-5.36 * x * Scaling))+(1-0.5*exp(-5.36*t*Scaling))-1
-  ThBetaCobble_long <- function(x) (1 - 0.33 * exp(-2.36 * x * Scaling))+(1-0.33*exp(-2.36*t*Scaling))-1
-  UBetaCobble_short <- function(x) (1 - 0.5 * exp(-4.15 * x * Scaling))+(1-0.5*exp(-4.15*t*Scaling))-1
-  UBetaCobble_long <- function(x) (1 - 0.33 * exp(-2.36 * x * Scaling))+(1-0.33*exp(-2.36*t*Scaling))-1
+  ThBetaCobble_short <- beta.cobble.fun(0.5, -5.36)
+  ThBetaCobble_long <- beta.cobble.fun(0.33, -2.36)
+  UBetaCobble_short <- beta.cobble.fun(0.5, -4.15)
+  UBetaCobble_long <- beta.cobble.fun(0.33, -2.36)
 
   GammaCobble <- function(x) {
     (GammaCentre - GammaEdge * exp(-CobbleGammaAtt * x * Scaling)) +
@@ -173,11 +190,14 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
   }
 
   #Beta and gamma functions for the sediment dose rates into the cobble
-  KBetaSed <- function(x) 2 - (1 - 0.5 * exp(-3.77 * x * Scaling)) - (1 - 0.5 * exp(-3.77 * t * Scaling))
-  ThBetaSed_short <- function(x) 2 - (1 - 0.5 * exp(-5.36 * x * Scaling)) - (1 - 0.5 * exp(-5.36 * t * Scaling))
-  ThBetaSed_long <- function(x) 2 - (1 - 0.33 * exp(-2.36 * x * Scaling)) - (1 - 0.33 * exp(-2.36 * t * Scaling))
-  UBetaSed_short <- function(x) 2 - (1 - 0.5 * exp(-4.15 * x * Scaling)) - (1 - 0.5 * exp(-4.15 * t * Scaling))
-  UBetaSed_long <- function(x) 2 - (1 - 0.33 * exp(-2.36 * x * Scaling)) - (1 - 0.33 * exp(-2.36 * t * Scaling))
+  beta.sed.fun <- function(a, b) {
+    function(x) 2 - (1 - a * exp(b * x * Scaling)) - (1 - a * exp(b * t * Scaling))
+  }
+  KBetaSed <- beta.sed.fun(0.5, -3.77)
+  ThBetaSed_short <- beta.sed.fun(0.5, -5.36)
+  ThBetaSed_long <- beta.sed.fun(0.33, -2.36)
+  UBetaSed_short <- beta.sed.fun(0.5, -4.15)
+  UBetaSed_long <- beta.sed.fun(0.33, -2.36)
 
   GammaSed <- function(x) 2 - (1 - 0.5 * exp(-0.02 * x * Scaling)) - (1 - 0.5 * exp(-0.02 * tGamma *
                                                                                       Scaling))
@@ -200,17 +220,11 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
   Max <- length(DiameterSeq)
 
   ## Create the full matrix based on the short and long beta attenuations
-  Temp[0:16, 3] <- TempThCob[0:16]
-  Temp[n:Max, 3] <- TempThCob[n:Max]
-
-  Temp[0:16, 7] <- TempThSed[0:16]
-  Temp[n:Max, 7] <- TempThSed[n:Max]
-
-  Temp[0:16, 4] <- TempUCob[0:16]
-  Temp[n:Max, 4] <- TempUCob[n:Max]
-
-  Temp[0:16, 8] <- TempUSed[0:16]
-  Temp[n:Max, 8] <- TempUSed[n:Max]
+  idx <- c(0:16, n:Max)
+  Temp[idx, 3] <- TempThCob[idx]
+  Temp[idx, 7] <- TempThSed[idx]
+  Temp[idx, 4] <- TempUCob[idx]
+  Temp[idx, 8] <- TempUSed[idx]
 
   colnames(Temp) <- c(
     "Distance",
@@ -394,7 +408,6 @@ calc_CobbleDoseRate <- function(input,conversion = "Guerinetal2011"){
       "Total Gamma Sed.",
       "SE"
     )
-
 
   DataIndividual[is.na(DataIndividual)] <- 0
   DataComponent[is.na(DataComponent)] <- 0

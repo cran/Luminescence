@@ -33,7 +33,7 @@ is returned instead.}
 \item{compact}{\link{logical} (\emph{with default}): if \code{TRUE} (default) the output
 will be simpler but less comprehensive, that is not all elements in the
 objects will be fully broken down. This is in particular useful for writing
-\code{RLum.Results} objects to CSV files, as such objects can be rather complex
+\linkS4class{RLum.Results} objects to CSV files, as such objects can be rather complex
 and not all information are needed in a CSV file or can be meaningfully
 translated to CSV format.}
 
@@ -91,7 +91,7 @@ Sebastian Kreutzer, Geography & Earth Science, Aberystwyth University (United Ki
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. write_RLum2CSV(): Export RLum-objects to CSV. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. write_RLum2CSV(): Export RLum-objects to CSV. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

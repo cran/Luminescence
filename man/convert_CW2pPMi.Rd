@@ -5,17 +5,20 @@
 \title{Transform a CW-OSL curve into a pPM-OSL curve via interpolation under
 parabolic modulation conditions}
 \usage{
-convert_CW2pPMi(values, P)
+convert_CW2pPMi(object, P = NULL, ...)
 }
 \arguments{
-\item{values}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-\linkS4class{RLum.Data.Curve} or \code{data.frame} with measured curve data of type
-stimulation time (t) (\code{values[,1]}) and measured counts (cts) (\code{values[,2]})}
+\item{object}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\linkS4class{RLum.Data.Curve} object or a \code{data.frame} with measured
+curve data of type stimulation time (t) (\code{object[, 1]}) and measured counts
+(cts) (\code{object[, 2]}).}
 
-\item{P}{\link{vector} (\emph{optional}):
-stimulation period in seconds. If no value is given, the optimal value is
+\item{P}{\link{numeric} (\emph{optional}):
+stimulation time in seconds. If set to \code{NULL}, the optimal value is
 estimated automatically (see details). Greater values of P produce more
 points in the rising tail of the curve.}
+
+\item{...}{currently not used.}
 }
 \value{
 The function returns the same data type as the input data type with
@@ -84,7 +87,7 @@ Transform values using
 (7)
 Combine all values and truncate all values for t' > \code{max(t)}
 
-\strong{NOTE:}
+\strong{Note:}
 The number of values for t' < \code{min(t)} depends on the stimulation
 period \code{P}. To avoid the production of too many artificial data at the
 raising tail of the determined pPM curve, it is recommended to use the
@@ -97,11 +100,10 @@ should be limited to avoid artificial intensity data. If \code{P} is
 provided manually, not more than two points are extrapolated.
 }
 \section{Function version}{
- 0.2.2
+ 0.2.4
 }
 
 \examples{
-
 
 ##(1)
 ##load CW-OSL curve data
@@ -146,30 +148,30 @@ text(0.5,6500,"PM", col = "blue", cex = .8)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. convert_CW2pPMi(): Transform a CW-OSL curve into a pPM-OSL curve via interpolation under parabolic modulation conditions. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. convert_CW2pPMi(): Transform a CW-OSL curve into a pPM-OSL curve via interpolation under parabolic modulation conditions. Function version 0.2.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL
-signal components. Radiation Measurements, 47, 752-758.
+signal components. Radiation Measurements 47, 752-758.
 
 \strong{Further Reading}
 
 Bulur, E., 1996. An Alternative Technique For
-Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements,
+Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements
 26, 701-709.
 
 Bulur, E., 2000. A simple transformation for converting CW-OSL curves to
-LM-OSL curves. Radiation Measurements, 32, 141-145.
+LM-OSL curves. Radiation Measurements 32, 141-145.
 }
 \seealso{
 \link{convert_CW2pLM}, \link{convert_CW2pLMi}, \link{convert_CW2pHMi},
 \link{fit_LMCurve}, \linkS4class{RLum.Data.Curve}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
-
-Based on comments and suggestions from:\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
+Based on comments and suggestions from:
 Adrie J.J. Bos, Delft University of Technology, The Netherlands
 , RLum Developer Team}
 \keyword{manip}

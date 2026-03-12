@@ -18,11 +18,9 @@ read_XSYG2R(
 }
 \arguments{
 \item{file}{\link{character} or \link{list} (\strong{required}):
-path and file name of the XSYG file. If input is a \code{list} it should comprise
-only \code{character}s representing each valid path and XSYG-file names.
-Alternatively, the input character can be just a directory (path), in which
-case the function tries to detect and import all XSYG-files found in the
-directory.}
+name of one or multiple XSYG files (URLs are supported); it can be the path
+to a directory, in which case the function tries to detect and import all
+XSYG files found recursively from the given directory.}
 
 \item{recalculate.TL.curves}{\link{logical} (\emph{with default}):
 if set to \code{TRUE}, TL curves are returned as temperature against count values
@@ -35,8 +33,8 @@ number of records to be imported; by default the function attempts to import
 all records.}
 
 \item{fastForward}{\link{logical} (\emph{with default}):
-if \code{TRUE} for a more efficient data processing only a list of \linkS4class{RLum.Analysis}
-objects is returned.}
+if \code{TRUE} for a more efficient data processing only a list of
+\linkS4class{RLum.Analysis} objects is returned.}
 
 \item{import}{\link{logical} (\emph{with default}):
 if set to \code{FALSE}, only the XSYG file structure is shown.}
@@ -178,7 +176,7 @@ be done using the functions provided with the package \code{'XML'}.
 Corresponding values in the XSXG file are skipped.
 }
 \section{Function version}{
- 0.7.1
+ 0.8.2
 }
 
 \examples{
@@ -210,7 +208,7 @@ structure_RLum(OSL.SARMeasurement$Sequence.Object)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2025. read_XSYG2R(): Import XSYG files into R. Function version 0.7.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. read_XSYG2R(): Import XSYG files into R. Function version 0.8.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -226,7 +224,7 @@ XML: \url{https://en.wikipedia.org/wiki/XML}
 \link{approx}, \link{correct_PMTLinearity}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}
 \keyword{IO}

@@ -1,9 +1,9 @@
 #' @title Export PSL-file(s) to CSV-files
 #'
-#' @description This function is a wrapper function around the functions [read_PSL2R] and
-#' [write_RLum2CSV] and it imports an PSL-file (SUERC portable OSL reader file format)
+#' @description This function is a wrapper function around the functions [Luminescence::read_PSL2R] and
+#' [Luminescence::write_RLum2CSV] and it imports an PSL-file (SUERC portable OSL reader file format)
 #' and directly exports its content to CSV-files.
-#' If nothing is set for the argument `path` ([write_RLum2CSV]) the input folder will
+#' If nothing is set for the argument `path` ([Luminescence::write_RLum2CSV]) the input folder will
 #' become the output folder.
 #'
 #' @param file [character] (**required**):
@@ -12,25 +12,26 @@
 #' @param extract_raw_data [logical] (*with default*): enable/disable raw data
 #' extraction. The PSL files imported into R contain an element `$raw_data`, which
 #' provides a few more information (e.g., count errors), sometimes it makes
-#' sense to use this data of the more compact standard values created by [read_PSL2R]
+#' sense to use this data of the more compact standard values created by [Luminescence::read_PSL2R]
 #'
 #' @param single_table [logical] (*with default*): enable/disable the creation
 #' of single table with n rows and n columns, instead of separate [data.frame]
 #' objects. Each curve will be represented by two columns for time and counts
 #'
 #' @param ... further arguments that will be passed to the function
-#' [read_PSL2R] and [write_RLum2CSV]
+#' [Luminescence::read_PSL2R] and [Luminescence::write_RLum2CSV]
 #'
 #' @return
-#' The function returns either a CSV-file (or many of them) or for the option
-#' `export = FALSE` a list comprising objects of type [data.frame] and [matrix]
+#' The function returns either a CSV-file (or many of them) or, when
+#' `export = FALSE`, a list of [data.frame] and [matrix] objects.
 #'
 #' @section Function version: 0.1.2
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Analysis-class], [RLum.Data-class], [RLum.Results-class],
-#' [utils::write.table], [write_RLum2CSV], [read_PSL2R]
+#' @seealso [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Data-class], [Luminescence::RLum.Results-class],
+#' [utils::write.table], [Luminescence::write_RLum2CSV], [Luminescence::read_PSL2R]
 #'
 #' @keywords IO
 #'
@@ -40,14 +41,12 @@
 #' file <- system.file("extdata/DorNie_0016.psl", package="Luminescence")
 #' convert_PSL2CSV(file, export = FALSE, single_table = TRUE)
 #'
-#'
 #' \dontrun{
 #' ##select your BIN-file
 #' file <- file.choose()
 #'
 #' ##convert
 #' convert_PSL2CSV(file)
-#'
 #' }
 #'
 #' @export
@@ -64,6 +63,8 @@ convert_PSL2CSV <- function(
 
   .validate_class(file, c("character", "RLum"))
   .validate_not_empty(file)
+  .validate_logical_scalar(extract_raw_data)
+  .validate_logical_scalar(single_table)
 
   ##set input arguments
   convert_PSL2R_settings.default <- list(

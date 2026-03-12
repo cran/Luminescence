@@ -6,8 +6,8 @@
 #'
 #' @details
 #' The Abanico Plot is a combination of the classic Radial Plot
-#' (`plot_RadialPlot`) and a kernel density estimate plot (e.g
-#' `plot_KDE`). It allows straightforward visualisation of data precision,
+#' [Luminescence::plot_RadialPlot] and a kernel density estimate plot (e.g
+#' [Luminescence::plot_KDE]. It allows straightforward visualisation of data precision,
 #' error scatter around a user-defined central value and the combined
 #' distribution of the values, on the actual scale of the measured data (e.g.
 #' seconds, equivalent dose, years). The principle of the plot is shown in
@@ -58,12 +58,12 @@
 #' - `"kurtosis"` (kurtosis)
 #' - `"skewness"` (skewness)
 #'
-#' **Note** that the input data for the statistic summary is sent to the function
-#' `calc_Statistics()` depending on the log-option for the z-scale. If
+#' **Note:** the input data for the statistic summary is sent to the function
+#' [Luminescence::calc_Statistics] depending on the log-option for the z-scale. If
 #' `"log.z = TRUE"`, the summary is based on the logarithms of the input
 #' data. If `"log.z = FALSE"` the linearly scaled data is used.
 #'
-#' **Note** as well, that `"calc_Statistics()"` calculates these statistic
+#' **Note:** [Luminescence::calc_Statistics] calculates these statistic
 #' measures in three different ways: `unweighted`, `weighted` and
 #' `MCM-based` (i.e., based on Monte Carlo Methods). By default, the
 #' MCM-based version is used. If you wish to use another method, indicate this
@@ -73,8 +73,8 @@
 #' the entire plot. Each element of the plot can be addressed and its properties
 #' can be defined. This includes font type, size and decoration, colours and
 #' sizes of all plot items. To infer the definition of a specific layout style
-#' cf. `get_Layout()` or type e.g., for the layout type `"journal"`
-#' `get_Layout("journal")`. A layout type can be modified by the user by
+#' cf. [Luminescence::get_Layout] or type, e.g. for the layout type `"journal"`.
+#' A layout type can be modified by the user by
 #' assigning new values to the list object.
 #'
 #' It is possible for the z-scale to specify where ticks are to be drawn
@@ -82,13 +82,22 @@
 #'  documentation of `axis`. Specifying tick positions manually overrides a
 #' `zlim`-definition.
 #'
-#' @param data [data.frame] or [RLum.Results-class] object (**required**):
+#' @param data [data.frame] or [Luminescence::RLum.Results-class] object (**required**):
 #' for `data.frame` two columns: De (`data[,1]`) and De error (`data[,2]`).
 #'  To plot several data sets in one plot the data sets must be provided as
-#'  `list`, e.g. `list(data.1, data.2)`.
+#'  `list`, e.g. `list(data.1, data.2)`.\cr
+#' For some [Luminescence::RLum.Results-class] objects, one or more lines (and
+#' corresponding labels) are drawn automatically:
+#' - [Luminescence::calc_AverageDose] (ADM)
+#' - [Luminescence::calc_CentralDose] (CDM)
+#' - [Luminescence::calc_MaxDose] (MDM)
+#' - [Luminescence::calc_MinDose] (MAM)
+#' - [Luminescence::calc_FiniteMixture]
+#' Alternative labels can be set via the `line.label` option. This behaviour
+#' can be suppressed altogether by setting `line = NA`.
 #'
 #' @param na.rm [logical] (*with default*):
-#' exclude NA values from the data set prior to any further operations.
+#' exclude `NA` values from the data set prior to any further operations.
 #'
 #' @param log.z [logical] (*with default*):
 #' Option to display the z-axis in logarithmic scale. Default is `TRUE`.
@@ -113,7 +122,7 @@
 #'
 #' @param plot.ratio [numeric] (*with default*):
 #' Relative space, given to the radial versus the cartesian plot part,
-#' default is `0.75`.
+#' default is 0.75.
 #'
 #' @param rotate [logical] (*with default*):
 #' Option to turn the plot by 90 degrees.
@@ -134,12 +143,8 @@
 #'
 #' @param summary.method [character] (*with default*):
 #' keyword indicating the method used to calculate the statistic summary.
-#' One out of
-#' - `"unweighted"`,
-#' - `"weighted"` and
-#' - `"MCM"`.
-#'
-#' See [calc_Statistics] for details.
+#' One of `"MCM"` (default), `"weighted"` or `"unweighted"`.
+#' See [Luminescence::calc_Statistics] for details.
 #'
 #' @param legend [character] vector (*optional*):
 #' legend content to be added to the plot.
@@ -194,8 +199,9 @@
 #' polygon may be omitted for clarity. To disable it use `FALSE` or
 #' `polygon = FALSE`. Default is `"grey80"`.
 #'
-#' @param line [numeric] or [RLum.Results-class]:
-#' numeric values of the additional lines to be added.
+#' @param line [numeric] or [Luminescence::RLum.Results-class]:
+#' numeric values of the additional lines to be added. This can be set to `NA`
+#' to suppress the line added automatically by some `RLum.Results` objects.
 #'
 #' @param line.col [character] or [numeric]:
 #' colour of the additional lines.
@@ -233,19 +239,21 @@
 #' @return
 #' Returns a plot object and, optionally, a list with plot calculus data.
 #'
-#' @section Function version: 0.1.20
+#' @section Function version: 0.1.21
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
 #' Inspired by a plot introduced by Galbraith & Green (1990)
 #'
-#' @seealso [plot_RadialPlot], [plot_KDE], [plot_Histogram], [plot_ViolinPlot]
+#' @seealso [Luminescence::plot_RadialPlot], [Luminescence::plot_KDE],
+#' [Luminescence::plot_Histogram], [Luminescence::plot_ViolinPlot]
 #'
 #' @references
 #' Galbraith, R. & Green, P., 1990. Estimating the component ages
 #' in a finite mixture. International Journal of Radiation Applications and
-#' Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3),
+#' Instrumentation. Part D. Nuclear Tracks and Radiation Measurements 17 (3),
 #' 197-206.
 #'
 #' Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2015.
@@ -320,11 +328,8 @@
 #' ## now with user-defined green line for minimum age model
 #' CAM <- calc_CentralDose(ExampleData.DeValues,
 #'                         plot = FALSE)
-#'
-#' plot_AbanicoPlot(data = ExampleData.DeValues,
-#'                  line = CAM,
-#'                  line.col = "darkgreen",
-#'                  line.label = "CAM")
+#' plot_AbanicoPlot(data = CAM,
+#'                  line.col = "darkseagreen")
 #'
 #' ## now create plot with legend, colour, different points and smaller scale
 #' plot_AbanicoPlot(data = ExampleData.DeValues,
@@ -436,14 +441,14 @@ plot_AbanicoPlot <- function(
   data,
   na.rm = TRUE,
   log.z = TRUE,
-  z.0 = "mean.weighted",
-  dispersion = "qr",
+  z.0 = c("mean.weighted", "mean.weighted", "median"),
+  dispersion = c("qr", "sd", "2sd"),
   plot.ratio = 0.75,
   rotate = FALSE,
   mtext = "",
   summary = c("n", "in.2s"),
   summary.pos = "sub",
-  summary.method = "MCM",
+  summary.method = c("MCM", "weighted", "unweighted"),
   legend = NULL,
   legend.pos = "topleft",
   stats = NULL,
@@ -477,12 +482,37 @@ plot_AbanicoPlot <- function(
     data <- list(data)
   }
 
+  ## whether the user has set the line argument or not
+  line.is.null <- is.null(line)
+  line.mtext <- NULL
+
   ## Check input data
   for (i in seq_along(data)) {
     .validate_class(data[[i]], c("data.frame", "RLum.Results"),
                     name = "All elements of 'data'")
-    if (inherits(data[[i]], "RLum.Results"))
+    if (inherits(data[[i]], "RLum.Results")) {
+      if (line.is.null &&
+          .check_originator(data[[i]], c("calc_AverageDose", "calc_CentralDose",
+                                         "calc_MaxDose", "calc_MinDose",
+                                         "calc_FiniteMixture"))) {
+        ## set lines automatically based on originator
+        de <- data[[i]]$summary$de
+        de.pm.err <- sprintf("%.2f \u00b1 %.2f", de, data[[i]]$summary$de_err)
+        lab <- switch(data[[i]]@originator,
+                      "calc_AverageDose" = "ADM",
+                      "calc_CentralDose" = "CDM",
+                      "calc_MaxDose" = "MDM",
+                      "calc_MinDose" = "MAM",
+                      "calc_FiniteMixture" = de.pm.err)
+        line <- c(line, de)
+        line.label <- c(line.label, lab)
+        if (data[[i]]@originator == "calc_FiniteMixture")
+          line.mtext <- c(line.mtext, paste("FMM:", length(de), "components"))
+        else
+          line.mtext <- c(line.mtext, paste0(lab, ": ", de.pm.err))
+      }
       data[[i]] <- get_RLum(data[[i]], "data")
+    }
 
       if (ncol(data[[i]]) < 2) {
         .throw_error("Data set ", i, " has fewer than 2 columns: data ",
@@ -491,8 +521,11 @@ plot_AbanicoPlot <- function(
 
       data[[i]] <- data[[i]][, 1:2]
   }
+  if (!is.null(line.mtext) && mtext == "" && summary.pos != "sub")
+    mtext <- line.mtext
 
   ## optionally, remove NA-values
+  .validate_logical_scalar(na.rm)
   if (na.rm) {
     for(i in seq_along(data)) {
       n.NA <- sum(!stats::complete.cases(data[[i]]))
@@ -513,7 +546,7 @@ plot_AbanicoPlot <- function(
   }
   ##(2)
   ##check for sets with only 1 row or 0 rows at all
-  else if (any(sapply(data, nrow) < 2)) {
+  if (any(sapply(data, nrow) < 2)) {
     ##select problematic sets and remove the entries from the list
     NArm.id <- which(sapply(data, nrow) <= 1)
     data[NArm.id] <- NULL
@@ -569,8 +602,9 @@ plot_AbanicoPlot <- function(
   ## the 'pnn' option need some special treatment
   main.choices <- c("qr", "sd", "2sd")
   extra.choice <-"a percentile of the form 'pnn' (eg. 'p05')"
-  if (!dispersion %in% main.choices && !grepl("^p[0-9][0-9]$", dispersion))
+  if (!any(grepl("^p[0-9][0-9]$", dispersion)))
     dispersion <- .validate_args(dispersion, main.choices, extra = extra.choice)
+  .validate_length(dispersion, 1)
 
   valid.pos <- c("left", "center", "right", "topleft", "top", "topright",
                  "bottomleft", "bottom", "bottomright")
@@ -588,6 +622,7 @@ plot_AbanicoPlot <- function(
     legend.pos <- .validate_args(legend.pos, valid.pos)
   }
 
+  summary.method <- .validate_args(summary.method, c("MCM", "weighted", "unweighted"))
   frame <- .validate_args(frame, c(0, 1, 2, 3))
 
   ## check/set layout definitions
@@ -806,8 +841,8 @@ plot_AbanicoPlot <- function(
   ylab <- extraArgs$ylab %||% "Standardised estimate"
   zlab <- extraArgs$zlab %||% expression(D[e] * " " * "[Gy]")
 
-  if ("zlim" %in% names(extraArgs) && !is.null(extraArgs$zlim)) {
-    limits.z <- extraArgs$zlim
+  limits.z <- extraArgs$zlim
+  if (!is.null(limits.z)) {
     .validate_class(limits.z, "numeric", name = "'zlim'")
     if (log.z && any(limits.z <= 0)) {
       .throw_error("'zlim' should only contain positive values when 'log.z = TRUE'")
@@ -819,8 +854,8 @@ plot_AbanicoPlot <- function(
                   (1.1 + z.span) * max(data.global[[1]]))
   }
 
-  if ("xlim" %in% names(extraArgs) && !is.null(extraArgs$xlim)) {
-    limits.x <- extraArgs$xlim
+  limits.x <- extraArgs$xlim
+  if (!is.null(limits.x)) {
     .validate_class(limits.x, "numeric", name = "'xlim'")
     if (limits.x[1] != 0) {
       .throw_warning("Lower x-axis limit was ", limits.x[1], ", reset to zero")
@@ -830,8 +865,8 @@ plot_AbanicoPlot <- function(
     limits.x <- c(0, max(data.global[,6]) * 1.05)
   }
 
-  if ("ylim" %in% names(extraArgs) && !is.null(extraArgs$ylim)) {
-    limits.y <- extraArgs$ylim
+  limits.y <- extraArgs$ylim
+  if (!is.null(limits.y)) {
     .validate_class(limits.y, "numeric", name = "'ylim'")
   } else {
     y.span <- (mean(data.global[,1]) * 10) / (sd(data.global[,1]) * 100)
@@ -935,6 +970,9 @@ plot_AbanicoPlot <- function(
   }
   text.rot <- function(x, y, ...) {
     if (!rotate) text(x, y, ...) else text(y, x, ...)
+  }
+  text_with_bg.rot <- function(x, y, ...) {
+    if (!rotate) .text_with_bg(x, y, ...) else .text_with_bg(y, x, ...)
   }
 
   ## create empty plot to update plot parameters
@@ -1149,6 +1187,8 @@ plot_AbanicoPlot <- function(
       label.text[[i]] <- substr(x = label.text[[i]],
                                 start = 1,
                                 stop = nchar(label.text[[i]]) - 3)
+      if (!is.null(line.mtext))
+        label.text[[i]] <- paste(label.text[[i]], "|", line.mtext[i])
     }
   }
 
@@ -1419,6 +1459,66 @@ plot_AbanicoPlot <- function(
       }
     }
 
+  ## optionally add KDE plot
+  if (kde) {
+    ## calculate max KDE value for axis label
+    KDE.max.plot <- 0
+    for (x in data) {
+      KDE.plot <- density(x[, 1],
+                          kernel = "gaussian",
+                          bw = bw,
+                          from = limits.z[1],
+                          to = limits.z[2])
+      KDE.max.plot <- max(KDE.plot$y, KDE.max.plot)
+    }
+    KDE.scale <- (y.max - xy.0[rotate.idx]) / (KDE.max * 1.05)
+
+    ## plot KDE lines
+    for (i in 1:length(data)) {
+      polygon.rot(x = xy.0[rotate.idx] + KDE[[i]][, 2] * KDE.scale,
+                  y = (KDE[[i]][, 1] - z.central.global) * min.ellipse,
+                  col = kde.fill[i],
+                  border = kde.line[i],
+                  lwd = 1.7)
+    }
+
+    ## plot KDE x-axis
+    axis(side = rotate.idx,
+         at = c(xy.0[rotate.idx], y.max),
+         col = layout$abanico$colour$xtck3,
+         col.axis = layout$abanico$colour$xtck3,
+         labels = NA,
+         tcl = -layout$abanico$dimension$xtcl3 / 200,
+         cex = cex)
+
+    axis(side = rotate.idx,
+         at = c(xy.0[rotate.idx], y.max),
+         labels = as.character(round(c(0, KDE.max.plot), 3)),
+         line = 2 * layout$abanico$dimension$xtck3.line / 100 - 2,
+         lwd = 0,
+         col = layout$abanico$colour$xtck3,
+         family = layout$abanico$font.type$xtck3,
+         font = which(c("normal", "bold", "italic", "bold italic") ==
+                      layout$abanico$font.deco$xtck3)[1],
+         col.axis = layout$abanico$colour$xtck3,
+         cex.axis = layout$abanico$font.size$xtck3 / 12)
+
+    ## KDE x-axis label including bandwidth size
+    mtext(text = paste0(xlab[3],
+                        " (bw ",
+                        round(x = KDE.bw,
+                              digits = 3),
+                        ")"),
+          at = (xy.0[rotate.idx] + y.max) / 2,
+          side = rotate.idx,
+          line = 2.5 * layout$abanico$dimension$xlab3.line / 100,
+          col = layout$abanico$colour$xlab3,
+          family = layout$abanico$font.type$xlab3,
+          font = which(c("normal", "bold", "italic", "bold italic") ==
+                       layout$abanico$font.deco$xlab3)[1],
+          cex = cex * layout$abanico$font.size$xlab3 / 12)
+  }
+
   ## optionally add further lines
   if (length(line) > 0) {
 
@@ -1439,11 +1539,7 @@ plot_AbanicoPlot <- function(
     if (log.z)
       line <- log(line)
     if (is.null(line.col))
-      line.col <- seq_along(line)
-    if (is.null(line.lty))
-      line.lty <- rep(1, length(line))
-    if (is.null(line.label))
-      line.label <- rep("", length(line))
+      line.col <- seq_along(line) + ifelse(line.is.null, 1, 0)
 
     ## calculate line coordinates and further parameters
     line.x <- c(limits.x[1], min.ellipse, y.max)
@@ -1453,14 +1549,14 @@ plot_AbanicoPlot <- function(
         lines.rot(x = line.x,
                   y = c(0, line.y[i], line.y[i]),
                   col = line.col[i],
-                  lty = line.lty[i]
+                  lty = line.lty[i] %||% 1
                   )
-        text.rot(x = line.x[3],
-                 y = line.y[i] + par()$cxy[2] * 0.3,
-                 labels = line.label[i],
-                 pos = 3 - rotate.idx,
-                 col = line.col[i],
-                 cex = 0.9)
+        text_with_bg.rot(x = line.x[3] - par()$cxy[rotate.idx] * 0.5,
+                         y = line.y[i] + par()$cxy[3 - rotate.idx] * 0.5,
+                         label = line.label[i] %||% "",
+                         pos = 3 - rotate.idx,
+                         bg = ifelse(line.is.null, line.col[i], NA),
+                         cex = 0.8)
       }
     }
 
@@ -1696,66 +1792,6 @@ plot_AbanicoPlot <- function(
              col = value.dot[i],
              pch = pch[i],
              cex = layout$abanico$dimension$pch / 100)
-  }
-
-  ## optionally add KDE plot
-  if (kde) {
-
-    ## calculate max KDE value for axis label
-    KDE.max.plot <- 0
-    for (x in data) {
-      KDE.plot <- density(x[, 1],
-                          kernel = "gaussian",
-                          bw = bw,
-                          from = limits.z[1],
-                          to = limits.z[2])
-      KDE.max.plot <- max(KDE.plot$y, KDE.max.plot)
-    }
-    KDE.scale <- (y.max - xy.0[rotate.idx]) / (KDE.max * 1.05)
-
-    ## plot KDE lines
-    for (i in 1:length(data)) {
-      polygon.rot(x = xy.0[rotate.idx] + KDE[[i]][, 2] * KDE.scale,
-                  y = (KDE[[i]][, 1] - z.central.global) * min.ellipse,
-                col = kde.fill[i],
-                border = kde.line[i],
-                lwd = 1.7)
-      }
-
-      ## plot KDE x-axis
-      axis(side = rotate.idx,
-           at = c(xy.0[rotate.idx], y.max),
-           col = layout$abanico$colour$xtck3,
-           col.axis = layout$abanico$colour$xtck3,
-           labels = NA,
-           tcl = -layout$abanico$dimension$xtcl3 / 200,
-           cex = cex)
-
-      axis(side = rotate.idx,
-           at = c(xy.0[rotate.idx], y.max),
-           labels = as.character(round(c(0, KDE.max.plot), 3)),
-           line = 2 * layout$abanico$dimension$xtck3.line / 100 - 2,
-           lwd = 0,
-           col = layout$abanico$colour$xtck3,
-           family = layout$abanico$font.type$xtck3,
-           font = which(c("normal", "bold", "italic", "bold italic") ==
-                          layout$abanico$font.deco$xtck3)[1],
-           col.axis = layout$abanico$colour$xtck3,
-           cex.axis = layout$abanico$font.size$xtck3 / 12)
-
-      mtext(text = paste0(xlab[3],
-                         " (bw ",
-                         round(x = KDE.bw,
-                               digits = 3),
-                         ")"),
-            at = (xy.0[rotate.idx] + y.max) / 2,
-            side = rotate.idx,
-            line = 2.5 * layout$abanico$dimension$xlab3.line / 100,
-            col = layout$abanico$colour$xlab3,
-            family = layout$abanico$font.type$xlab3,
-            font = which(c("normal", "bold", "italic", "bold italic") ==
-                           layout$abanico$font.deco$xlab3)[1],
-            cex = cex * layout$abanico$font.size$xlab3 / 12)
   }
 
   ## compute data for histogram and dot plot

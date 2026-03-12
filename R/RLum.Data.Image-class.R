@@ -1,7 +1,7 @@
 #' Class `"RLum.Data.Image"`
 #'
 #' Class for representing luminescence image data (TL/OSL/RF). Such data are
-#' for example produced by function [read_SPE2R].
+#' for example produced by function [Luminescence::read_SPE2R].
 #'
 #' @name RLum.Data.Image-class
 #'
@@ -31,9 +31,10 @@
 #' @section Class version: 0.5.1
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum-class], [RLum.Data-class], [plot_RLum], [read_SPE2R], [read_TIFF2R]
+#' @seealso [Luminescence::RLum-class], [Luminescence::RLum.Data-class], [Luminescence::plot_RLum],
+#' [Luminescence::read_SPE2R], [Luminescence::read_TIFF2R]
 #'
 #' @keywords classes
 #'
@@ -69,7 +70,7 @@ setClass(
 #'
 #' for `[RLum.Data.Image-class]`
 #'
-#' **[RLum.Data.Image-class]**
+#' **[Luminescence::RLum.Data.Image-class]**
 #'
 #' \tabular{ll}{
 #'  **from** \tab **to**\cr
@@ -188,7 +189,7 @@ setMethod("show",
 
 ## set_RLum() ---------------------------------------------------------------
 #' @describeIn set_RLum
-#' Construction method for [RLum.Data.Image-class] objects.
+#' Construction method for [Luminescence::RLum.Data.Image-class] objects.
 #'
 #' @export
 setMethod(
@@ -256,7 +257,7 @@ setMethod(
 
 ## get_RLum() ---------------------------------------------------------------
 #' @describeIn get_RLum
-#' Accessor method for [RLum.Data.Image-class] objects.
+#' Accessor method for [Luminescence::RLum.Data.Image-class] objects.
 #' The argument `info.object` is optional to directly access the info elements.
 #' If no info element name is provided, the raw image data (`array`) will be
 #' returned.
@@ -268,7 +269,7 @@ setMethod("get_RLum",
             .set_function_name("get_RLum")
             on.exit(.unset_function_name(), add = TRUE)
 
-            .validate_class(info.object, "character", null.ok = TRUE)
+            .validate_class(info.object, "character", null.ok = TRUE, length = 1)
             if (!is.null(info.object)) {
               if(info.object %in% names(object@info)){
                 unlist(object@info[info.object])
@@ -291,3 +292,48 @@ setMethod(
   "names_RLum",
   "RLum.Data.Image",
   function(object) names(object@info))
+
+## normalise_RLum() --------------------------------------------------------------
+#' @describeIn normalise_RLum
+#' Normalise [Luminescence::RLum.Data.Image-class] objects to value set via
+#' the argument `norm`.
+#'
+#' @param global [logical] (*with default): this defines whether the normalisation
+#' is applied globally (same to all) or locally, in which case each frame has its
+#' own normalisation. If `global = TRUE` the arguments for `norm  = 'first'` and
+#' `norm = 'last'` work as expected and consider either the first or the last
+#' frame for the normalisation.
+#'
+#'  Normalise [Luminescence::RLum.Data.Image-class] objects to value set via
+#' the argument `norm`
+#'
+#' @export
+setMethod(
+  f = "normalise_RLum",
+  signature = "RLum.Data.Image",
+  function(object, norm = TRUE, global = TRUE) {
+    ## for frames we use the last frame
+    if(global) {
+       if(norm == "last") {
+         object@data[] <- object@data / array(
+           object@data[,,dim(object@data)[3]], dim = dim(object@data))
+
+       } else if (norm == "first") {
+         object@data[] <- object@data / array(
+           object@data[,,1], dim = dim(object@data))
+
+       } else {
+         object@data[] <- .normalise_curve(object@data[], norm = norm)
+
+       }
+
+    } else {
+      object@data[] <- apply(
+        object@data,
+        MARGIN = 3,
+        FUN = .normalise_curve,
+        norm = norm)
+    } ## end global
+
+    return(object)
+  })

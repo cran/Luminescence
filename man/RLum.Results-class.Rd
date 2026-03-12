@@ -16,7 +16,7 @@ Object class contains results data from functions (e.g., \link{analyse_SAR.CWOSL
 \note{
 The class is intended to store results from functions to be used by
 other functions. The data in the object should always be accessed by the
-method \code{get_RLum}.
+method \link{get_RLum}.
 }
 \section{Objects from the Class}{
 
@@ -60,7 +60,7 @@ dose.rate$parameters
 \linkS4class{RLum}, \link{plot_RLum}, \link{merge_RLum}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{classes}
 \keyword{methods}

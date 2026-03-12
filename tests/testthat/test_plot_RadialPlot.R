@@ -24,6 +24,8 @@ test_that("input validation", {
                "After NA removal, nothing is left from data set 1")
   expect_error(plot_RadialPlot(data.frame(1, 3)),
                "At least two data points are required")
+  expect_error(plot_RadialPlot(df, na.rm = -1),
+               "'na.rm' should be a single logical value")
   expect_error(plot_RadialPlot(df, central.value = -1),
                "'central.value' should be a single positive value")
   expect_error(plot_RadialPlot(df, xlab = "x"),
@@ -40,6 +42,8 @@ test_that("input validation", {
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
   expect_error(plot_RadialPlot(df, summary.pos = "error"),
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
+  expect_error(plot_RadialPlot(df, plot.ratio = NA),
+               "'plot.ratio' should be a single positive value or NULL")
   expect_error(plot_RadialPlot(df, line = c(NA, NA)),
                "'line' should be of class 'numeric', 'integer' or NULL")
   expect_error(plot_RadialPlot(df, zlim = 1),
@@ -96,7 +100,7 @@ test_that("check functionality", {
 
   ## single-column data frame
   expect_message(plot_RadialPlot(data.frame(x = c(-0.1, -1.2, 10))),
-                 "Attention, small standardised estimate scatter")
+                 "Small standardised estimate scatter")
 
   ## data frame with more than 2 columns
   expect_silent(plot_RadialPlot(cbind(df, df)))
@@ -143,7 +147,7 @@ test_that("check functionality", {
       data = data.frame(x = df$x, y = rep(0.0001, nrow(df))),
       centrality = -1,
       log.z = FALSE),
-    regexp = "Attention.*")
+    regexp = "Small standardised estimate scatter")
 
   expect_message(plot_RadialPlot(df, line = -1),
                  "Lines with negative value skipped due to 'log.z = TRUE'")
@@ -158,6 +162,12 @@ test_that("check functionality", {
     )
   expect_silent(plot_RadialPlot(df, central.value = -1, log.z = FALSE,
                                 bar.col = "none"))
+
+  expect_warning(plot_RadialPlot(data.frame(c(12, 2, 7), c(0, 2, 3))),
+                 "Error values cannot be zero or NA, reset to 1e-09")
+  expect_message(expect_warning(plot_RadialPlot(data.frame(1:5, NA)),
+                                "Error values cannot be zero or NA, reset to"),
+                 "Small standardised estimate scatter, toggle off y.ticks?")
 })
 
 test_that("graphical snapshot tests", {
@@ -196,7 +206,7 @@ test_that("graphical snapshot tests", {
                               plot_RadialPlot(ExampleData.DeValues$CA1,
                                               xlim = c(0, 30),
                                               zlim = c(5, 1000),
-                                              plot.ratio = 0))
+                                              plot.ratio = 0.0001))
   vdiffr::expect_doppelganger("regression 1194",
                               plot_RadialPlot(ExampleData.DeValues$CA1,
                                               xlim = c(0, 0.416),

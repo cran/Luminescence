@@ -1,6 +1,6 @@
 #' Class `"RLum.Results"`
 #'
-#' Object class contains results data from functions (e.g., [analyse_SAR.CWOSL]).
+#' Object class contains results data from functions (e.g., [Luminescence::analyse_SAR.CWOSL]).
 #'
 #' @name RLum.Results-class
 #'
@@ -12,7 +12,7 @@
 #' @note
 #' The class is intended to store results from functions to be used by
 #' other functions. The data in the object should always be accessed by the
-#' method `get_RLum`.
+#' method [Luminescence::get_RLum].
 #'
 #' @section Objects from the Class:
 #' Objects can be created by calls of the form `new("RLum.Results", ...)`.
@@ -20,9 +20,9 @@
 #' @section Class version: 0.5.2
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum-class], [plot_RLum], [merge_RLum]
+#' @seealso [Luminescence::RLum-class], [Luminescence::plot_RLum], [Luminescence::merge_RLum]
 #'
 #' @keywords classes methods
 #'
@@ -70,14 +70,14 @@ setClass(
 #'
 #' for `[RLum.Results-class]`
 #'
-#' **[RLum.Results-class]**
+#' **[Luminescence::RLum.Results-class]**
 #'
 #' \tabular{ll}{
 #'  **from** \tab **to**\cr
 #'   `list` \tab `list`\cr
 #' }
 #'
-#' Given that the [list] consists of [RLum.Results-class] objects.
+#' Given that the [list] consists of [Luminescence::RLum.Results-class] objects.
 #'
 #' @name as
 setAs("list", "RLum.Results",
@@ -119,7 +119,7 @@ setMethod("show",
 
 ## set_RLum() ---------------------------------------------------------------
 #' @describeIn set_RLum
-#' Construction method for [RLum.Results-class] objects.
+#' Construction method for [Luminescence::RLum.Results-class] objects.
 #'
 #' @export
 setMethod("set_RLum",
@@ -147,7 +147,7 @@ setMethod("set_RLum",
 
 ## get_RLum() ---------------------------------------------------------------
 #' @describeIn get_RLum
-#' Accessor method for [RLum.Results-class] object.
+#' Accessor method for [Luminescence::RLum.Results-class] object.
 #' The argument `data.object` allows to access directly objects stored
 #' within the slot data. The default return object depends on the object
 #' originator (e.g., `fit_LMCurve`). If nothing is specified always the first
@@ -160,7 +160,7 @@ setMethod("set_RLum",
 #'
 #' 1. Data object from the specified slot
 #' 2. [list] of data objects from the slots if 'data.object' is vector or
-#' 3. an [RLum.Results-class] for `drop = FALSE`.
+#' 3. an [Luminescence::RLum.Results-class] for `drop = FALSE`.
 #'
 #' @param data.object [character] or [numeric]:
 #' name or index of the data slot to be returned.
@@ -178,6 +178,7 @@ setMethod(
 
     ## if info.object is set, only the info objects are returned if present
     if (!is.null(info.object)) {
+      .validate_class(info.object, "character", null.ok = TRUE, length = 1)
       if (!info.object %in% names(object@info)) {
         if (length(object@info) == 0) {
           .throw_warning("This 'RLum.Results' object has no info objects, ",
@@ -220,6 +221,7 @@ setMethod(
     }
 
     ## check whether an RLum.Results object needs to be produced
+    .validate_logical_scalar(drop)
     if (drop) {
         ##we need to access the list here, otherwise we get unexpected behaviour as drop = TRUE
         ##should always return the lowest possible element here
@@ -257,7 +259,7 @@ setMethod("names_RLum",
 
 ## view() -------------------------------------------------------------------
 #' @describeIn view
-#' View method for [RLum.Results-class] objects.
+#' View method for [Luminescence::RLum.Results-class] objects.
 #'
 #' @param element [integer] (*with default*):
 #' index of the element to display.

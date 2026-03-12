@@ -36,11 +36,16 @@
 #' the information from the first curves with all others. If the ratio differs more from
 #' unity than the defined by the threshold, a warning is returned.
 #'
-#' @param object [RLum.Analysis-class] (**required**):  measurement input
+#' @param object [Luminescence::RLum.Analysis-class] (**required**):  measurement input
 #'
 #' @param signal_integral [numeric] (*optional*): signal integral, used for the signal
 #' and the background. Example: `c(1:10)` for the first 10 channels.
 #' If nothing is provided the full range is used
+#'
+#' @param integral_input [character] (*with default*):
+#' input type for `signal_integral`, one of `"channel"` (default) or
+#' `"measurement"`. If set to `"measurement"`, the best matching channels
+#' corresponding to the given time range (in seconds) are selected.
 #'
 #' @param dose_points [numeric] (*with default*):
 #' vector with dose points, if dose points are repeated, only the general
@@ -48,9 +53,9 @@
 #' made by Kreutzer et al., 2018
 #'
 #' @param recordType [character] (*with default*): input curve selection, which is passed to
-#' function [get_RLum]. To deactivate the automatic selection set the argument to `NULL`
+#' function [Luminescence::get_RLum]. To deactivate the automatic selection set the argument to `NULL`
 #'
-#' @param irradiation_time_correction [numeric] or [RLum.Results-class] (*optional*):
+#' @param irradiation_time_correction [numeric] or [Luminescence::RLum.Results-class] (*optional*):
 #' information on the used irradiation time correction obtained by another experiments.
 #' If a `numeric` is provided it has to be of length two: mean, standard error
 #'
@@ -58,7 +63,7 @@
 #' enables/disable experimental dose estimation based on the TL curves.
 #' It is computed as the ratio of the peak sums of each curves +/- 5 channels.
 #'
-#' @param cross_talk_correction [numeric] or [RLum.Results-class] (*optional*):
+#' @param cross_talk_correction [numeric] or [Luminescence::RLum.Results-class] (*optional*):
 #' information on the used irradiation time correction obtained by another experiments.
 #' If a `numeric` vector is provided it has to be of length three:
 #' mean, 2.5 % quantile, 97.5 % quantile.
@@ -99,9 +104,10 @@
 #'  `data_TDcorrected` \tab `data.frame` \tab travel dosimeter corrected results (only if TD was provided)\cr
 #' }
 #'
-#' *Note: If correction the irradiation time and the cross-talk correction method is used, the De
-#' values in the table `data` table are already corrected, i.e. if you want to get an uncorrected value,
-#' you can use the column `CT_CORRECTION` remove the correction*
+#' **Note:** If correction the irradiation time and the cross-talk correction
+#' method is used, the De values in the table `data` table are already
+#' corrected, i.e. if you want to get an uncorrected value, you can use the
+#' column `CT_CORRECTION` remove the correction.
 #'
 #'**slot:** **`@info`**
 #'
@@ -114,11 +120,11 @@
 #' - OSL and TL curves, combined on two plots.
 #'
 #'
-#' @section Function version: 0.2.6
+#' @section Function version: 0.2.7
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [analyse_Al2O3C_ITC]
+#' @seealso [Luminescence::analyse_Al2O3C_ITC]
 #'
 #' @references
 #'
@@ -139,6 +145,7 @@
 analyse_Al2O3C_Measurement <- function(
   object,
   signal_integral = NULL,
+  integral_input = c("channel", "measurement"),
   dose_points = c(0,4),
   recordType = c("OSL (UVVIS)", "TL (UVVIS)"),
   calculate_TL_dose = FALSE,
@@ -188,6 +195,7 @@ analyse_Al2O3C_Measurement <- function(
       temp <- analyse_Al2O3C_Measurement(
         object = object[[x]],
         signal_integral = signal_integral[[x]],
+        integral_input = integral_input,
         dose_points = dose_points[[x]],
         irradiation_time_correction = irradiation_time_correction[[x]],
         cross_talk_correction = cross_talk_correction[[x]],
@@ -271,6 +279,7 @@ analyse_Al2O3C_Measurement <- function(
   .validate_class(object, "RLum.Analysis",
                   extra = "a 'list' of such objects")
   .validate_not_empty(object)
+  integral_input <- .validate_args(integral_input, c("channel", "measurement"))
   .validate_class(irradiation_time_correction, c("RLum.Results", "numeric"),
                   null.ok = TRUE)
   .validate_class(cross_talk_correction, c("numeric", "RLum.Results"),
@@ -289,15 +298,16 @@ analyse_Al2O3C_Measurement <- function(
     }
   }
 
-  ##set signal integral
-  max.signal_integral <- nrow(object[[1]][])
-  if(is.null(signal_integral)){
-   signal_integral <- 1:max.signal_integral
-  } else if (min(signal_integral) < 1 ||
-             max(signal_integral) > max.signal_integral) {
-    ## check whether the input is valid, otherwise make it valid
-    signal_integral <- 1:max.signal_integral
-    .throw_warning("'signal_integral' corrected to 1:", max.signal_integral)
+  ## signal integral
+  x.range <- object[[1]][, 1]
+  if (integral_input == "measurement") {
+    signal_integral <- .convert_to_channels(x.range, signal_integral,
+                                            "time", null.ok = TRUE)
+  }
+  signal_integral <- .validate_integral(signal_integral,
+                                        max = length(x.range), null.ok = TRUE)
+  if (is.null(signal_integral)) {
+    signal_integral <- seq_along(x.range)
   }
 
   ## Set Irradiation Time Correction ---------------

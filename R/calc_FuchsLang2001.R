@@ -21,7 +21,7 @@
 #' 3. Calculate a running mean, starting with the lowermost two values and add values iteratively.
 #' 4. Stop if the calculated `c[v]` exceeds the specified `cvThreshold`
 #'
-#' @param data [RLum.Results-class] or [data.frame] (**required**):
+#' @param data [Luminescence::RLum.Results-class] or [data.frame] (**required**):
 #' for [data.frame]: two columns with De `(data[,1])` and De error `(values[,2])`
 #'
 #' @param cvThreshold [numeric] (*with default*):
@@ -38,7 +38,7 @@
 #'
 #' @return
 #' Returns a plot (*optional*) and terminal output. In addition an
-#' [RLum.Results-class] object is returned containing the
+#' [Luminescence::RLum.Results-class] object is returned containing the
 #' following elements:
 #'
 #' \item{summary}{[data.frame] summary of all relevant model results.}
@@ -53,11 +53,11 @@
 #' @section Function version: 0.4.1
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 #' Christoph Burow, University of Cologne (Germany)
 #'
-#' @seealso [plot], [calc_MinDose], [calc_FiniteMixture], [calc_CentralDose],
-#' [calc_CommonDose], [RLum.Results-class]
+#' @seealso [plot], [Luminescence::calc_MinDose], [Luminescence::calc_FiniteMixture],
+#' [Luminescence::calc_CentralDose], [Luminescence::calc_CommonDose], [Luminescence::RLum.Results-class]
 #'
 #' @references
 #' Fuchs, M. & Lang, A., 2001. OSL dating of coarse-grain fluvial
@@ -99,11 +99,15 @@ calc_FuchsLang2001 <- function(
   if (ncol(data) < 2) {
     .throw_error("'data' should have 2 columns")
   }
+  .validate_positive_scalar(cvThreshold)
+  .validate_positive_scalar(startDeValue, int = TRUE)
+  .validate_logical_scalar(plot)
 
   # Deal with extra arguments -----------------------------------------------
   ##deal with addition arguments
   extraArgs <- list(...)
   verbose <- extraArgs$verbose %||% TRUE
+  .validate_logical_scalar(verbose)
 
   ##============================================================================##
   ##PREPARE DATA

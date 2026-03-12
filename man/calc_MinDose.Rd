@@ -20,18 +20,19 @@ calc_MinDose(
 }
 \arguments{
 \item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
-for \link{data.frame}: two columns for De and De error.}
+for \link{data.frame}: two columns with \code{(data[, 1])} and De error \code{(data[, 2])}.}
 
 \item{sigmab}{\link{numeric} (\strong{required}):
 additional spread in De values, representing the expected overdispersion in
 the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-\strong{NOTE}: For the logged model (\code{log = TRUE}) this value must be
+\strong{Note:} For the logged model (\code{log = TRUE}) this value must be
 a fraction, e.g. 0.2 (= 20 \%). If the un-logged model is used (\code{log = FALSE}),
 \code{sigmab} must be provided in the same absolute units of the De values (seconds or Gray).
 See details.}
 
 \item{log}{\link{logical} (\emph{with default}):
-whether the logged minimum dose model should be fit to De data.}
+whether the logged minimum dose model should be fit to De data (\code{TRUE} by
+default).}
 
 \item{par}{\link{numeric} (\emph{with default}):
 number of parameters in the minimum age model, either 3 (default) or 4.}
@@ -43,7 +44,7 @@ apply the recycled bootstrap approach of Cunningham & Wallinga (2012).}
 a named list with starting values for \code{gamma}, \code{sigma}, \code{p0} and \code{mu}
 (e.g. \code{list(gamma=100, sigma=1.5, p0=0.1, mu=100)}). If no values are
 provided, reasonable values will be estimated from the data.
-\strong{NOTE}: the initial values must always be given in the absolute units.
+\strong{Note:} the initial values must always be given in the absolute units.
 If a logged model is applied (\code{log = TRUE}), the provided \code{init.values}
 are automatically log-transformed.}
 
@@ -60,8 +61,8 @@ enable/disable the plot output.}
 \item{multicore}{\link{logical} (\emph{with default}):
 parallelize the computation of the bootstrap by creating a multicore cluster
 (only considered if \code{bootstrap = TRUE}). By default, it uses all available
-logical CPU cores, but this can be changed with option \code{cores}. Note that
-this option is highly experimental and may not work on all machines.}
+logical CPU cores, but this can be changed with the \code{cores} argument. Note
+that this feature is experimental and may not work on all systems.}
 
 \item{...}{(\emph{optional}) further arguments for bootstrapping
 (\code{bs.M}, \code{bs.N}, \code{bs.h}, \code{sigmab.sd}). See details for their usage.
@@ -82,7 +83,7 @@ following elements:
 \item{$args}{\link{list} used arguments}
 \item{$call}{\link{call} the function call}
 \item{$mle}{\link[bbmle:mle2]{bbmle::mle2} object containing the maximum log likelihood functions for all parameters}
-\item{$BIC}{\link{numeric} BIC score}
+\item{$BIC}{\link{numeric} BIC score from the non-bootstrapped model}
 \item{$confint}{\link{data.frame} confidence intervals for all parameters}
 \item{$profile}{\link[stats:profile]{stats::profile} the log likelihood profiles}
 \item{$bootstrap}{\link{list} bootstrap results}
@@ -107,16 +108,17 @@ where \code{gamma=mu}. For \code{par=4} the 4-parameter model is applied instead
 
 \strong{(Un-)logged model}
 
-In the original version of the minimum dose model, the basic data are the natural
+In the original version of the minimum dose model, which is applied if
+\code{log = TRUE} (default), the basic data are the natural
 logarithms of the De estimates and relative standard errors of the De
 estimates. The value for \code{sigmab} must be provided as a ratio
-(e.g, 0.2 for 20 \%). This model will be applied if \code{log = TRUE}.
+(e.g, 0.2 for 20 \%).
 
 If \code{log=FALSE}, the modified un-logged model will be applied instead. This
-has essentially the same form as the original version.  \code{gamma} and
+has essentially the same form as the original version, but  \code{gamma} and
 \code{sigma} are in Gy and \code{gamma} becomes the minimum true dose in the
 population.
-\strong{Note} that the un-logged model requires \code{sigmab} to be in the same
+\strong{Note:} the un-logged model requires \code{sigmab} to be in the same
 absolute unit as the provided De values (seconds or Gray).
 
 While the original (logged) version of the minimum dose
@@ -125,7 +127,7 @@ modified (un-logged) version is specially designed for modern-age and young
 samples containing negative, zero or near-zero De estimates (Arnold et al.
 2009, p. 323).
 
-\strong{Initial values & boundaries}
+\strong{Initial values and boundaries}
 
 The log-likelihood calculations use the \link{nlminb} function for box-constrained
 optimisation using PORT routines.  Accordingly, initial values for the four
@@ -135,37 +137,35 @@ from the input data.  If the final estimates of \emph{gamma}, \emph{mu},
 \emph{sigma} and \emph{p0} are totally off target, consider providing custom
 starting values via \code{init.values}.
 
-The boundaries for the individual model parameters are not required to be
-explicitly specified. If you want to override the default boundary values,
-use arguments \code{gamma.lower}, \code{gamma.upper}, \code{sigma.lower}, \code{sigma.upper},
+The boundaries for individual model parameters need not be specified
+explicitly. To override the default boundary values, provide arguments
+\code{gamma.lower}, \code{gamma.upper}, \code{sigma.lower}, \code{sigma.upper},
 \code{p0.lower}, \code{p0.upper}, \code{mu.lower} and \code{mu.upper}.
 
 \strong{Bootstrap}
 
 When \code{bootstrap=TRUE} the function applies the bootstrapping method as
-described in Cunningham & Wallinga (2012). By default, the minimum age model
-produces 1000 first level and 3000 second level bootstrap replicates. The
-uncertainty on \code{sigmab} is 0.04 by default. These values can be changed by
-using the arguments \code{bs.M} (first level replicates), \code{bs.N}
-(second level replicates) and \code{sigmab.sd} (error on \code{sigmab}). The bandwidth
-of the kernel density estimate can be specified with \code{bs.h}. By default,
-this is calculated as:
+described in Cunningham & Wallinga (2012). The minimum age model produces
+\code{bs.M} first-level bootstrap replicates (1000 by default) and \code{bs.N}
+second-level replicates (\code{3 * bs.M} by default), with an uncertainty
+\code{sigma.sd} on the overdispersion parameter (0.04 by default). These values
+can be changed by using arguments \code{bs.M}, \code{bs.N} and \code{sigmab.sd},
+respectively. The bandwidth of the kernel density estimate can be specified
+with \code{bs.h}. By default, this is calculated as:
 
 \deqn{h = (2*\sigma_{DE})/\sqrt{n}}
 
 \strong{Multicore support}
 
-Parallel computations can be activated by setting \code{multicore=TRUE}.
-By default, the number of available logical CPU cores is determined
-automatically, but can be changed with \code{cores}. The multicore support
-is only available when \code{bootstrap=TRUE} and spawns \code{n} R instances
-for each core to get MAM estimates for each of the N and M bootstrap
-replicates. Note that this option is highly experimental and may or may not
-work for your machine. The performance gain increases for larger number
-of bootstrap replicates. However, note that with each additional core (and
-hence R instance) the memory usage can significantly increase, depending
-on the number of bootstrap replicates. When insufficient memory is available,
-there will be a massive performance hit.
+Parallel processing can be enabled by setting \code{multicore = TRUE}. By default,
+the number of logical CPU cores is detected automatically, but it can be
+overridden with the \code{cores} argument. Multicore processing is supported
+only when \code{bootstrap = TRUE}, and spawns one R process per core to compute
+MAM estimates for each of the \code{N * M} bootstrap replicates. Note that this
+feature is experimental and may not work on all systems. Performance gains
+grow with the number of bootstrap replicates, but each additional core (R
+process) increases memory usage. When memory is insufficient, overall
+performance can degrade severely.
 
 \strong{Likelihood profiles}
 
@@ -192,7 +192,7 @@ model with \code{debug=TRUE} which provides extended console output and
 forwards all internal warning messages.
 }
 \section{Function version}{
- 0.4.6
+ 0.5.0
 }
 
 \examples{
@@ -225,15 +225,15 @@ plot_RLum(mam)
 
 # Plot the dose distribution in an abanico plot and draw a line
 # at the minimum dose estimate
-plot_AbanicoPlot(data = ExampleData.DeValues$CA1,
+plot_AbanicoPlot(data = mam,
                  main = "3-parameter Minimum Age Model",
-                 line = mam,polygon.col = "none",
+                 polygon.col = "none",
                  hist = TRUE,
                  rug = TRUE,
                  summary = c("n", "mean", "mean.weighted", "median", "in.ci"),
                  centrality = res$de,
-                 line.col = "red",
                  grid.col = "none",
+                 line.col = "red",
                  line.label = paste0(round(res$de, 1), "\U00B1",
                                      round(res$de_err, 1), " Gy"),
                  bw = 0.1,
@@ -244,8 +244,6 @@ plot_AbanicoPlot(data = ExampleData.DeValues$CA1,
                                   gamma == .(round(log(res$de), 1)) ~ ", " ~
                                   sigma == .(round(res$sig, 1)) ~ ", " ~
                                   rho == .(round(res$p0, 2))))
-
-
 
 # (3) Run the minimum age model with bootstrap
 # NOTE: Bootstrapping is computationally intensive
@@ -290,7 +288,7 @@ summary(bs$poly.fits$poly.three$fitted.values)
 } 
 
 \section{How to cite}{
-Burow, C., 2025. calc_MinDose(): (Un-)logged minimum age model (MAM) after Galbraith et al. (1999). Function version 0.4.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Burow, C., Colombo, M., 2026. calc_MinDose(): (Un-)logged minimum age model (MAM) after Galbraith et al. (1999). Function version 0.5.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -346,7 +344,8 @@ obtain a reproducible distribution?. Ancient TL 26, 3-10.
 }
 \author{
 Christoph Burow, University of Cologne (Germany) \cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany) \cr
 Based on a rewritten S script of Rex Galbraith, 2010 \cr
-The bootstrap approach is based on a rewritten MATLAB script of Alastair Cunningham. \cr
-Alastair Cunningham is thanked for his help in implementing and cross-checking the code.
+The bootstrap approach is based on a MATLAB script by Alastair Cunningham,
+who helped with implementation and cross-checking.
 , RLum Developer Team}

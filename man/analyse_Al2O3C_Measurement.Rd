@@ -7,6 +7,7 @@
 analyse_Al2O3C_Measurement(
   object,
   signal_integral = NULL,
+  integral_input = c("channel", "measurement"),
   dose_points = c(0, 4),
   recordType = c("OSL (UVVIS)", "TL (UVVIS)"),
   calculate_TL_dose = FALSE,
@@ -25,6 +26,11 @@ analyse_Al2O3C_Measurement(
 \item{signal_integral}{\link{numeric} (\emph{optional}): signal integral, used for the signal
 and the background. Example: \code{c(1:10)} for the first 10 channels.
 If nothing is provided the full range is used}
+
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given time range (in seconds) are selected.}
 
 \item{dose_points}{\link{numeric} (\emph{with default}):
 vector with dose points, if dose points are repeated, only the general
@@ -84,9 +90,10 @@ Function returns results numerically and graphically:
 \code{data_TDcorrected} \tab \code{data.frame} \tab travel dosimeter corrected results (only if TD was provided)\cr
 }
 
-\emph{Note: If correction the irradiation time and the cross-talk correction method is used, the De
-values in the table \code{data} table are already corrected, i.e. if you want to get an uncorrected value,
-you can use the column \code{CT_CORRECTION} remove the correction}
+\strong{Note:} If correction the irradiation time and the cross-talk correction
+method is used, the De values in the table \code{data} table are already
+corrected, i.e. if you want to get an uncorrected value, you can use the
+column \code{CT_CORRECTION} remove the correction.
 
 \strong{slot:} \strong{\verb{@info}}
 
@@ -136,7 +143,7 @@ the information from the first curves with all others. If the ratio differs more
 unity than the defined by the threshold, a warning is returned.
 }
 \section{Function version}{
- 0.2.6
+ 0.2.7
 }
 
 \examples{
@@ -149,7 +156,7 @@ analyse_Al2O3C_Measurement(data_CrossTalk)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_Al2O3C_Measurement(): Al2O3:C Passive Dosimeter Measurement Analysis. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_Al2O3C_Measurement(): Al2O3:C Passive Dosimeter Measurement Analysis. Function version 0.2.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -161,6 +168,6 @@ Geochronometria 45, 56-67.
 \link{analyse_Al2O3C_ITC}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{datagen}

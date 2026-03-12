@@ -44,7 +44,7 @@ Objects can be created by calls of the form
 }
 
 \section{Class version}{
- 0.5.1
+ 0.5.2
 }
 
 \examples{
@@ -56,9 +56,10 @@ set_RLum(class = "RLum.Data.Curve")
 
 }
 \seealso{
-\linkS4class{RLum}, \linkS4class{RLum.Data}, \link{plot_RLum}, \link{merge_RLum}
+\linkS4class{RLum}, \linkS4class{RLum.Data},
+\link{plot_RLum}, \link{merge_RLum}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{classes}

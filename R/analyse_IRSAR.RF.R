@@ -91,7 +91,7 @@
 #' - `show_fit` ([logical], default: `FALSE`): enable/disable the plot of the
 #' fitted curve routinely obtained during the evaluation.
 #' - `n.MC` ([integer], default: 1000): number of Monte Carlo runs within the
-#' sliding (assessing the possible minimum values). **Note**: This parameter
+#' sliding (assessing the possible minimum values). **Note:** This parameter
 #' is not the same as the function argument `n.MC`.
 #' - `vslide_range` ([numeric] or [character], default: "auto"): boundaries
 #' for the vertical curve sliding. The argument expects a vector with absolute
@@ -177,13 +177,12 @@
 #' this parameter is obtained during the fitting; for `method = "SLIDE"` a
 #' rather rough estimation is made using the function [minpack.lm::nlsLM] and
 #' the equation given above.
-#' Note: As this procedure requests more computation time, it is performed only
-#' if all three parameters are set.
+#' **Note:** As this procedure requests more computation time, it is performed
+#' only if all three parameters are set.
 #'
-#'
-#' @param object [RLum.Analysis-class] or a [list] of [RLum.Analysis-class]-objects (**required**):
+#' @param object [Luminescence::RLum.Analysis-class] or a [list] of [Luminescence::RLum.Analysis-class]-objects (**required**):
 #' input object containing data for protocol analysis. The function expects to
-#' find at least two curves in the [RLum.Analysis-class] object: (1) `RF_nat`, (2) `RF_reg`.
+#' find at least two curves in the [Luminescence::RLum.Analysis-class] object: (1) `RF_nat`, (2) `RF_reg`.
 #' If a `list` is provided as input all other parameters can be provided as
 #' `list` as well to gain full control.
 #'
@@ -322,7 +321,7 @@
 #'
 #' The original function call ([methods::language-class]-object)
 #'
-#' The output (`data`) should be accessed using the function [get_RLum].
+#' The output (`data`) should be accessed using the function [Luminescence::get_RLum].
 #'
 #' ------------------------\cr
 #' `[ PLOT OUTPUT ]`\cr
@@ -337,10 +336,10 @@
 #'
 #' @section Function version: 0.7.10
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Analysis-class], [RLum.Results-class], [get_RLum],
-#' [nls], [minpack.lm::nlsLM], [parallel::mclapply], [ExampleData.RF70Curves]
+#' @seealso [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Results-class], [Luminescence::get_RLum],
+#' [nls], [minpack.lm::nlsLM], [parallel::mclapply], [Luminescence::ExampleData.RF70Curves]
 #'
 #'
 #' @references
@@ -447,7 +446,7 @@ analyse_IRSAR.RF<- function(
   sequence_structure = c("NATURAL", "REGENERATED"),
   RF_nat.lim = NULL,
   RF_reg.lim = NULL,
-  method = "FIT",
+  method = c("FIT", "SLIDE", "VSLIDE", "NONE"),
   method_control = NULL,
   test_parameters = NULL,
   n.MC = 10,
@@ -689,8 +688,7 @@ analyse_IRSAR.RF<- function(
   ## deprecated argument
   if ("method.control" %in% names(extraArgs)) {
     method_control <- extraArgs$method.control
-    .throw_warning("'method.control' is deprecated, use ",
-                   "'method_control' instead")
+    .deprecated("method.control", "method_control", since = "1.0.0")
   }
 
   ##modify list if necessary
@@ -1047,7 +1045,7 @@ analyse_IRSAR.RF<- function(
 
       #(2) get minimum value (index and time value)
       index_min <- which.min(temp.sum.residuals$sliding_vector)
-      if(length(index_min) == 0) t_n.id <- 1 else t_n.id <- index_min
+      t_n.id <- if (length(index_min) == 0) 1 else index_min
 
       I_n <- vslide_range[temp.sum.residuals$vslide_index] %||% 0
       temp.sliding.step <- RF_reg.limited[t_n.id] - t_min
@@ -1556,7 +1554,7 @@ analyse_IRSAR.RF<- function(
         )
       }
 
-      ##plot range choosen for fitting
+      ## plot range chosen for fitting
       abline(v=RF_reg[min(RF_reg.lim), 1], lty=2)
       abline(v=RF_reg[max(RF_reg.lim), 1], lty=2)
 
@@ -1686,7 +1684,7 @@ analyse_IRSAR.RF<- function(
       ##could become a polygone for future versions
       #lapply(1:n.MC, function(x){lines(slide.MC.list[[x]], col = rgb(0,0,0, alpha = 0.2))})
 
-      ##plot range choosen for fitting
+      ## plot range chosen for fitting
       abline(v=RF_reg[min(RF_reg.lim), 1], lty=2)
       abline(v=RF_reg[max(RF_reg.lim), 1], lty=2)
 

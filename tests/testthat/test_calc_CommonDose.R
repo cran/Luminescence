@@ -12,8 +12,16 @@ test_that("input validation", {
                "'data' object must have two columns")
   expect_error(calc_CommonDose(data.frame(col = 1:10)),
                "'data' object must have two columns")
+  expect_error(calc_CommonDose(data.frame(a = c(12, -2.1), b = 1:2)),
+               "'data' cannot contain negative times")
+  expect_error(calc_CommonDose(ExampleData.DeValues$CA1, sigmab = iris),
+               "'sigmab' should be a single non-negative value")
   expect_error(calc_CommonDose(ExampleData.DeValues$CA1, sigmab = 2),
-               "'sigmab' must be a value between 0 and 1")
+               "'sigmab' must be a value between 0 and 1 if 'log = TRUE'")
+  expect_error(calc_CommonDose(iris, log = numeric()),
+               "'log' should be a single logical value")
+  expect_error(calc_CommonDose(ExampleData.DeValues$CA1, verbose = NA),
+               "'verbose' should be a single logical value")
 })
 
 test_that("check functionality", {
@@ -52,6 +60,10 @@ test_that("snapshot tests", {
       tolerance = snapshot.tolerance)
   expect_snapshot_RLum(calc_CommonDose(
       ExampleData.DeValues$CA1, sigmab = 0.25, log = FALSE,
+      plot = FALSE, verbose = FALSE),
+      tolerance = snapshot.tolerance)
+  expect_snapshot_RLum(calc_CommonDose(
+      ExampleData.DeValues$CA1, sigmab = 1.25, log = FALSE,
       plot = FALSE, verbose = FALSE),
       tolerance = snapshot.tolerance)
 })

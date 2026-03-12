@@ -5,22 +5,25 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(extract_IrradiationTimes("fail"),
-               "Wrong XSYG file name or file does not exist!")
+               "File '.*fail' does not exist") # windows CI needs the regexp
   expect_error(extract_IrradiationTimes(character(0)),
                "'object' cannot be an empty character")
   expect_error(extract_IrradiationTimes(letters),
                "'object' should have length 1")
   expect_error(extract_IrradiationTimes(tempdir()),
-               "File is expected to have 'xsyg' or 'XSYG' extension")
+               "File '.*' does not exist") # windows CI needs the regexp
+  expect_error(extract_IrradiationTimes(test_path("_data/BINfile_V3.bin")),
+               "File extension 'bin' is not supported, only 'xsyg' is valid")
   expect_error(extract_IrradiationTimes(FALSE),
                "'object' should be of class 'character', 'RLum.Analysis' or a")
-  expect_error(extract_IrradiationTimes(xsyg, file.BINX = "fail"),
-               "Wrong BINX file name or file does not exist!")
   expect_error(extract_IrradiationTimes(xsyg, return_same_as_input = "error"),
                "return_same_as_input' should be a single logical value")
+  SW({
+  expect_error(extract_IrradiationTimes(xsyg, file.BINX = "fail"),
+               "File '.*fail' does not exist") # windows CI needs the regexp
   expect_error(extract_IrradiationTimes(xsyg, file.BINX = tempdir()),
-               "File is expected to have 'binx' or 'BINX' extension")
-
+               "File '.*' does not exist") # windows CI needs the regexp
+  })
   expect_message(extract_IrradiationTimes(xsyg, file.BINX = binx,
                                           txtProgressBar = FALSE),
                  "XSYG-file and BINX-file do not contain similar entries")
@@ -90,4 +93,18 @@ test_that("snapshot tests", {
   expect_snapshot_RLum(extract_IrradiationTimes(list(xsyg), txtProgressBar = FALSE,
                                                 recordType = list("OSL (UVVIS)")),
                        tolerance = snapshot.tolerance)
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 1273
+  expect_error(extract_IrradiationTimes(iris, file.BINX = NA),
+               "'object' should be of class 'character', 'RLum.Analysis' or")
+
+  ## issue 1466
+  tmp <- read_XSYG2R(xsyg, verbose = FALSE, fastForward = TRUE)[[1]]
+  tmp@records[[1]]@info$position <- NULL
+  expect_s4_class(extract_IrradiationTimes(tmp),
+                  "RLum.Results")
 })

@@ -59,8 +59,9 @@
 #' @param ... further parameters that can be passed to better control the plot output. Support arguments
 #' are `xlab`, `xlim`.
 #'
-#' @author Pierre Guibert, IRAMAT-CRP2A, UMR 5060, Université Bordeaux Montaigne (France),
-#' Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
+#' @author
+#' Pierre Guibert, IRAMAT-CRP2A, UMR 5060, Université Bordeaux Montaigne (France)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #'
 #' @section Function version: 0.1.1
 #'
@@ -69,8 +70,8 @@
 #' light - Towards a new tool for single grain OSL dating of poorly bleached mortars.
 #' Radiation Measurements 107, 48–57. \doi{10.1016/j.radmeas.2017.10.003}
 #'
-#' @seealso [RLum.Results-class], [calc_MinDose], [calc_FuchsLang2001], [calc_IEU],
-#' [calc_FiniteMixture]
+#' @seealso [Luminescence::RLum.Results-class], [Luminescence::calc_MinDose], [Luminescence::calc_FuchsLang2001],
+#' [Luminescence::calc_IEU], [Luminescence::calc_FiniteMixture]
 #'
 #' @keywords datagen
 #'
@@ -127,9 +128,10 @@ calc_EED_Model <- function(
   ## Integrity checks -------------------------------------------------------
 
   .validate_class(data, "data.frame")
-  .validate_class(expected_dose, "numeric")
-  .validate_class(MinIndivDose, "numeric", null.ok = TRUE)
-  .validate_class(MaxIndivDose, "numeric", null.ok = TRUE)
+  .validate_positive_scalar(D0, int = TRUE)
+  .validate_positive_scalar(expected_dose)
+  .validate_positive_scalar(MinIndivDose, null.ok = TRUE)
+  .validate_positive_scalar(MaxIndivDose, null.ok = TRUE)
 
   ##store and restore par settings
   par.default <- .par_defaults()

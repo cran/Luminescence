@@ -1,7 +1,7 @@
 #' Apply the maximum age model to a given De distribution
 #'
 #' Function to fit the maximum age model to De data. This is a wrapper function
-#' that calls [calc_MinDose] and applies a similar approach as described in
+#' that calls [Luminescence::calc_MinDose] and applies a similar approach as described in
 #' Olley et al. (2006).
 #'
 #' **Data transformation**
@@ -24,39 +24,14 @@
 #'
 #' **Further documentation**
 #'
-#' Please see [calc_MinDose].
+#' Please see [Luminescence::calc_MinDose].
 #'
-#' @param data [RLum.Results-class] or [data.frame] (**required**):
-#' for [data.frame]: two columns with De `(data[ ,1])` and De error `(data[ ,2])`.
-#'
-#' @param sigmab [numeric] (**required**):
-#' additional spread in De values, representing the expected overdispersion in
-#' the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-#' **NOTE**: For the logged model (`log = TRUE`) this value must be
-#' a fraction, e.g. 0.2 (= 20 %). If the un-logged model is used (`log = FALSE`),
-#' sigmab must be provided in the same absolute units of the De values (seconds or Gray).
-#' See details ([calc_MinDose].
-#'
-#' @param log [logical] (*with default*):
-#' fit the (un-)logged three parameter minimum dose model to De data
-#'
-#' @param par [numeric] (*with default*):
-#' apply the 3- or 4-parameter minimum age model (`par=3` or `par=4`).
-#'
-#' @param bootstrap [logical] (*with default*):
-#' apply the recycled bootstrap approach of Cunningham & Wallinga (2012).
-#'
-#' @param init.values [numeric] (*with default*):
-#' starting values for gamma, sigma, p0 and mu. Custom values need to be provided in a vector of
-#' length three in the form of `c(gamma, sigma, p0)`.
-#'
-#' @param plot [logical] (*with default*):
-#' enable/disable the plot output.
+#' @inheritParams calc_MinDose
 #'
 #' @param ... further arguments for bootstrapping (`bs.M, bs.N, bs.h, sigmab.sd`).
 #' See details for their usage.
 #'
-#' @return Please see [calc_MinDose].
+#' @return Please see [Luminescence::calc_MinDose].
 #'
 #' @section Function version: 0.3.2
 #'
@@ -64,8 +39,8 @@
 #' Christoph Burow, University of Cologne (Germany) \cr
 #' Based on a rewritten S script of Rex Galbraith, 2010
 #'
-#' @seealso [calc_CentralDose], [calc_CommonDose], [calc_FiniteMixture],
-#' [calc_FuchsLang2001], [calc_MinDose]
+#' @seealso [Luminescence::calc_CentralDose], [Luminescence::calc_CommonDose], [Luminescence::calc_FiniteMixture],
+#' [Luminescence::calc_FuchsLang2001], [Luminescence::calc_MinDose]
 #'
 #' @references
 #' Arnold, L.J., Roberts, R.G., Galbraith, R.F. & DeLong, S.B.,
@@ -131,7 +106,10 @@ calc_MaxDose<- function(
 ){
   res<- calc_MinDose(data, sigmab, log, par, bootstrap, init.values, plot=FALSE, invert=TRUE, ...)
   res@originator<- "calc_MaxDose"
-  if (plot) try(plot_RLum.Results(res, ...))
+  if (plot) {
+    try(plot_RLum.Results(res, ...),
+        outFile = stdout()) # redirect error messages so they can be silenced
+  }
 
   invisible(res)
 }

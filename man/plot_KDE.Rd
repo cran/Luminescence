@@ -13,7 +13,7 @@ plot_KDE(
   rug = TRUE,
   summary = "",
   summary.pos = "sub",
-  summary.method = "MCM",
+  summary.method = c("MCM", "weighted", "unweighted"),
   bw = "nrd0",
   ...
 )
@@ -28,7 +28,7 @@ For plotting multiple data sets, these must be provided as
 \code{list} (e.g. \code{list(dataset1, dataset2)}).}
 
 \item{na.rm}{\link{logical} (\emph{with default}):
-exclude NA values from the data set prior to any further operation.}
+exclude \code{NA} values from the data set prior to any further operation.}
 
 \item{values.cumulative}{\link{logical} (\emph{with default}):
 show cumulative individual data.}
@@ -57,7 +57,7 @@ specification, y-coordinate refers to the right y-axis.}
 
 \item{summary.method}{\link{character} (\emph{with default}):
 keyword indicating the method used to calculate the statistic summary.
-One out of \code{"MCM"} (default), \code{"weighted"} or \code{"unweighted"}.
+One of \code{"MCM"} (default), \code{"weighted"} or \code{"unweighted"}.
 See \link{calc_Statistics} for details.}
 
 \item{bw}{\link{character}, \link{numeric} (\emph{with default}):
@@ -97,12 +97,12 @@ one or more of the following keywords:
 \item \code{"skewness"} (skewness)
 }
 
-\strong{Note} that the input data for the statistic summary is sent to function
+\strong{Note:} the input data for the statistic summary is sent to function
 \link{calc_Statistics} depending on the log-option for the z-scale. If
 \code{"log.z = TRUE"}, the summary is based on the logarithms of the input
 data. If \code{"log.z = FALSE"} the linearly-scaled data is used.
 
-\strong{Note} as well, that \code{"calc_Statistics()"} calculates these statistic
+\strong{Note:} \link{calc_Statistics} calculates these statistic
 measures in three different ways: \code{unweighted}, \code{weighted} and
 \code{MCM-based} (i.e., based on Monte Carlo Methods). By default, the
 MCM-based version is used. This can be controlled via the \code{summary.method}
@@ -113,7 +113,7 @@ The plot output is no 'probability density' plot (cf. the discussion
 of Berger and Galbraith in Ancient TL; see references)!
 }
 \section{Function version}{
- 3.6.0
+ 3.6.1
 }
 
 \examples{
@@ -175,10 +175,10 @@ KDE_out <- plot_KDE(data = ExampleData.DeValues)
 }
 \author{
 Michael Dietze, GFZ Potsdam (Germany)\cr
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2025. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 

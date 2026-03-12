@@ -50,7 +50,8 @@ sedimentation rate can safely be assumed.}
 \item{error}{\link{numeric} (\emph{with default}):
 general error (percentage) to be implemented on corrected cosmic dose rate estimate}
 
-\item{...}{further arguments (\code{verbose} to disable/enable console output).}
+\item{...}{further arguments (\code{verbose} to disable/enable output to the
+terminal).}
 }
 \value{
 Returns a terminal output. In addition an
@@ -220,7 +221,7 @@ results<- calc_CosmicDoseRate(depth = c(0.1, 0.5 , 2.1, 2.7, 4.2, 6.3),
 } 
 
 \section{How to cite}{
-Burow, C., 2025. calc_CosmicDoseRate(): Calculate the cosmic dose rate. Function version 0.5.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Burow, C., 2026. calc_CosmicDoseRate(): Calculate the cosmic dose rate. Function version 0.5.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -1,4 +1,4 @@
-#' Apply the central age model (CAM) after Galbraith et al. (1999) to a given
+#' @title Apply the central age model (CAM) after Galbraith et al. (1999) to a given
 #' De distribution
 #'
 #' @description
@@ -16,14 +16,14 @@
 #' be found in the appendix of Galbraith & Laslett (1993, 468-470) and
 #' Galbraith & Roberts (2012, 15)
 #'
-#' @param data [RLum.Results-class] or [data.frame] (**required**):
+#' @param data [Luminescence::RLum.Results-class] or [data.frame] (**required**):
 #' for [data.frame]: two columns with De `(data[,1])` and De error `(data[,2])`.
 #' Records containing missing values will be removed.
 #'
 #' @param sigmab [numeric] (*with default*):
 #' additional spread in De values, representing the expected overdispersion in
 #' the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-#' **NOTE**: For the logged model (`log = TRUE`) this value must be
+#' **Note:** For the logged model (`log = TRUE`) this value must be
 #' a fraction, e.g. 0.2 (= 20 %). If the un-logged model is used (`log = FALSE`),
 #' sigmab must be provided in the same absolute units of the De values (seconds or Gray).
 #'
@@ -37,7 +37,7 @@
 #' @param ... further arguments (`trace`, `verbose`).
 #'
 #' @return Returns a plot (*optional*) and terminal output. In addition an
-#' [RLum.Results-class] object is returned containing the following elements:
+#' [Luminescence::RLum.Results-class] object is returned containing the following elements:
 #'
 #' \item{.$summary}{[data.frame] summary of all relevant model results.}
 #' \item{.$data}{[data.frame] original input data}
@@ -45,7 +45,7 @@
 #' \item{.$call}{[call] the function call}
 #' \item{.$profile}{[data.frame] the log likelihood profile for sigma}
 #'
-#' The output should be accessed using the function [get_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
 #'
 #' @section Function version: 1.5
 #'
@@ -53,8 +53,8 @@
 #' Christoph Burow, University of Cologne (Germany) \cr
 #' Based on a rewritten S script of Rex Galbraith, 2010
 #'
-#' @seealso [plot], [calc_CommonDose], [calc_FiniteMixture],
-#' [calc_FuchsLang2001], [calc_MinDose]
+#' @seealso [plot], [Luminescence::calc_CommonDose], [Luminescence::calc_FiniteMixture],
+#' [Luminescence::calc_FuchsLang2001], [Luminescence::calc_MinDose]
 #'
 #' @references
 #' Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for
@@ -83,7 +83,7 @@
 #' Quaternary Geochronology 12, 98-106.
 #'
 #' Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing the reproducibility and accuracy
-#' of optical dating of fluvial deposits.  Quaternary Geochronology, 1 109-120.
+#' of optical dating of fluvial deposits.  Quaternary Geochronology 1 109-120.
 #'
 #' Rodnight, H., 2008. How many equivalent dose values are needed to
 #' obtain a reproducible distribution?. Ancient TL 26, 3-10.
@@ -113,6 +113,7 @@ calc_CentralDose <- function(
   if (inherits(data, "RLum.Results")) {
     data <- get_RLum(data, "data")
   }
+  .validate_nonnegative_scalar(sigmab)
 
   ##remove NA values
   if (anyNA(data)) {
@@ -135,15 +136,13 @@ calc_CentralDose <- function(
     log <- FALSE
     .throw_warning("'data' contains non-positive De values, 'log' set to FALSE")
   }
+  .validate_logical_scalar(plot)
 
   ## don't allow negative errors, silently make them positive
   if (any(data[, 2] < 0)) {
     data[, 2] <- abs(data[, 2])
   }
 
-  if (sigmab < 0) {
-    .throw_error("'sigmab' should be a non-negative value")
-  }
   if (log && sigmab > 1) {
     .throw_error("'sigmab' should be a value between 0 and 1 if log = TRUE")
   }
@@ -152,10 +151,11 @@ calc_CentralDose <- function(
   ## ... ARGUMENTS
   ## ============================================================================##
 
-  options <- list(verbose = TRUE,
-                  trace = FALSE)
-
-  options <- modifyList(options, list(...))
+  options <- modifyList(list(verbose = TRUE,
+                             trace = FALSE),
+                        list(...))
+  .validate_logical_scalar(options$verbose, name = "'verbose'")
+  .validate_logical_scalar(options$trace, name = "'trace'")
 
   ## deprecated argument
   if ("na.rm" %in% ...names()) {

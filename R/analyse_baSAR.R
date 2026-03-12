@@ -44,9 +44,9 @@
 #'
 #' It does not matter how the information of the BIN/BINX file are provided.
 #' The function supports **(a)** either a path to a file or directory or a
-#' `list` of file names or paths or  **(b)** a [Risoe.BINfileData-class] object
+#' `list` of file names or paths or  **(b)** a [Luminescence::Risoe.BINfileData-class] object
 #' or a list of these objects. The latter one can be produced by using function
-#' [read_BIN2R], but this function is called automatically if only a file name
+#' [Luminescence::read_BIN2R], but this function is called automatically if only a file name
 #' and/or a path is provided. In both cases it will become the data that can be
 #' used for the analysis.
 #'
@@ -55,9 +55,9 @@
 #' If no CSV file (or data frame with the same format) is provided, the
 #' function runs an automatic process that consists of the following steps:
 #'
-#'  1. Select all valid aliquots using the function [verify_SingleGrainData]
-#'  2. Calculate `Lx/Tx` values using the function [calc_OSLLxTxRatio]
-#'  3. Calculate De values using the function [plot_GrowthCurve]
+#'  1. Select all valid aliquots using the function [Luminescence::verify_SingleGrainData]
+#'  2. Calculate `Lx/Tx` values using the function [Luminescence::calc_OSLLxTxRatio]
+#'  3. Calculate De values using the function [Luminescence::fit_DoseResponseCurve]
 #'
 #' These proceeded data are subsequently used in for the Bayesian analysis
 #'
@@ -66,16 +66,16 @@
 #' If a CSV file is provided (or a `data.frame` containing similar information)
 #' the pre-processing phase consists of the following steps:
 #'
-#'  1. Calculate `Lx/Tx` values using the function [calc_OSLLxTxRatio]
-#'  2. Calculate De values using the function [plot_GrowthCurve]
+#'  1. Calculate `Lx/Tx` values using the function [Luminescence::calc_OSLLxTxRatio]
+#'  2. Calculate De values using the function [Luminescence::fit_DoseResponseCurve]
 #'
 #' The CSV file should contain the BIN-file names and the aliquots selected
 #' for the further analysis. This allows a manual selection of input data, as
-#' the automatic selection by [verify_SingleGrainData] might not be sufficient.
+#' the automatic selection by [Luminescence::verify_SingleGrainData] might not be sufficient.
 #'
 #' **(2) - `object` `RLum.Results object`**
 #'
-#' If an [RLum.Results-class] object is provided as input and(!) this object was
+#' If an [Luminescence::RLum.Results-class] object is provided as input and(!) this object was
 #' previously created by the function `analyse_baSAR()` itself, the pre-processing part
 #' is skipped and the function starts directly with the Bayesian analysis. This option is very powerful
 #' as it allows to change parameters for the Bayesian analysis without the need to repeat
@@ -147,29 +147,28 @@
 #' functions.
 #'
 #' \tabular{llll}{
-#' **Supported argument** \tab **Corresponding function** \tab **Default** \tab **Short description **\cr
-#' `threshold` \tab [verify_SingleGrainData] \tab `30` \tab change rejection threshold for curve selection \cr
+#' **Supported argument** \tab **Corresponding function** \tab **Default** \tab **Short description**\cr
+#' `threshold` \tab [Luminescence::verify_SingleGrainData] \tab `30` \tab change rejection threshold for curve selection \cr
 #' `skip` \tab [data.table::fread] \tab `0` \tab number of rows to be skipped during import\cr
-#' `n.records` \tab [read_BIN2R] \tab `NULL` \tab limit records during BIN-file import\cr
-#' `duplicated.rm` \tab [read_BIN2R] \tab `TRUE` \tab remove duplicated records in the BIN-file\cr
-#' `pattern` \tab [read_BIN2R] \tab `TRUE` \tab select BIN-file by name pattern\cr
-#' `position` \tab [read_BIN2R] \tab `NULL` \tab limit import to a specific position\cr
-#' `background.count.distribution` \tab [calc_OSLLxTxRatio] \tab `"non-poisson"` \tab set assumed count distribution\cr
-#' `fit.weights` \tab [plot_GrowthCurve] \tab `TRUE` \tab enable/disable fit weights\cr
-#' `fit.bounds` \tab [plot_GrowthCurve] \tab `TRUE` \tab enable/disable fit bounds\cr
-#' `n.MC` \tab [plot_GrowthCurve] \tab `100` \tab number of MC runs for error calculation\cr
-#' `output.plot` \tab [plot_GrowthCurve] \tab `TRUE` \tab enable/disable dose response curve plot\cr
-#' `output.plotExtended` \tab [plot_GrowthCurve] \tab `TRUE` \tab enable/disable extended dose response curve plot\cr
-#' `recordType` \tab [get_RLum] \tab `c(OSL (UVVIS), irradiation (NA)` \tab helps for the curve selection\cr
+#' `n.records` \tab [Luminescence::read_BIN2R] \tab `NULL` \tab limit records during BIN-file import\cr
+#' `duplicated.rm` \tab [Luminescence::read_BIN2R] \tab `TRUE` \tab remove duplicated records in the BIN-file\cr
+#' `pattern` \tab [Luminescence::read_BIN2R] \tab `TRUE` \tab select BIN-file by name pattern\cr
+#' `position` \tab [Luminescence::read_BIN2R] \tab `NULL` \tab limit import to a specific position\cr
+#' `background.count.distribution` \tab [Luminescence::calc_OSLLxTxRatio] \tab `"non-poisson"` \tab set assumed count distribution\cr
+#' `fit.weights` \tab [Luminescence::fit_DoseResponseCurve] \tab `TRUE` \tab enable/disable fit weights\cr
+#' `fit.bounds` \tab [Luminescence::fit_DoseResponseCurve] \tab `TRUE` \tab enable/disable fit bounds\cr
+#' `n.MC` \tab [Luminescence::fit_DoseResponseCurve] \tab `100` \tab number of MC runs for error calculation\cr
+#' `plot_drc` \tab [Luminescence::plot_DoseResponseCurve] \tab `TRUE` \tab enable/disable dose response curve plot\cr
+#' `plot_extended` \tab [Luminescence::plot_DoseResponseCurve] \tab `TRUE` \tab enable/disable extended dose response curve plot\cr
+#' `recordType` \tab [Luminescence::get_RLum] \tab `c(OSL (UVVIS), irradiation (NA)` \tab helps for the curve selection\cr
 #' }
 #'
-#'
-#' @param object [Risoe.BINfileData-class], [RLum.Results-class], [list] of [RLum.Analysis-class],
+#' @param object [Luminescence::Risoe.BINfileData-class], [Luminescence::RLum.Results-class], [list] of [Luminescence::RLum.Analysis-class],
 #' [character] or [list] (**required**):
 #' input object used for the Bayesian analysis. If a `character` is provided the function
 #' assumes a file connection and tries to import a BIN/BINX-file using the provided path. If a `list` is
 #' provided the list can only contain either `Risoe.BINfileData` objects or `character`s
-#' providing a file connection. Mixing of both types is not allowed. If an [RLum.Results-class]
+#' providing a file connection. Mixing of both types is not allowed. If an [Luminescence::RLum.Results-class]
 #' is provided the function directly starts with the Bayesian Analysis (see details)
 #'
 #' @param CSV_file [character] or [data.frame] (*optional*):
@@ -181,36 +180,37 @@
 #' @param aliquot_range [numeric] (*optional*):
 #' allows to limit the range of the aliquots used for the analysis.
 #' This argument has only an effect if the argument `CSV_file` is used or
-#' `object` is a previous output (i.e. is [RLum.Results-class]). In this case,
+#' `object` is a previous output (i.e. is [Luminescence::RLum.Results-class]). In this case,
 #' the new selection will add the aliquots to the removed aliquots table.
 #'
 #' @param source_doserate [numeric] (**required**):
 #' source dose rate of beta-source used for the measurement and its uncertainty
 #' in Gy/s, e.g., `source_doserate = c(0.12, 0.04)`. Parameter can be provided
-#' as `list`, for the case that more than one BIN-file is provided, e.g.,
+#' as a list, for the case that more than one BIN-file is provided, e.g.,
 #' `source_doserate = list(c(0.04, 0.004), c(0.05, 0.004))`.
 #'
-#' @param signal.integral [vector] (**required**):
+#' @param signal_integral [vector] (**required**):
 #' vector with the limits for the signal integral used for the calculation,
-#' e.g., `signal.integral = c(1:5)`. Ignored if `object` is an [RLum.Results-class] object.
-#' The parameter can be provided as `list`, see `source_doserate`.
+#' e.g., `signal_integral = 1:5`. It is ignored if `object` is an
+#' [Luminescence::RLum.Results-class] object.
+#' The parameter can be provided as a list, see `source_doserate`.
 #'
-#' @param signal.integral.Tx [vector] (*optional*):
-#' vector with the limits for the signal integral for the Tx curve. I
-#' f nothing is provided the value from `signal.integral` is used and it is ignored
-#' if `object` is an [RLum.Results-class] object.
-#' The parameter can be provided as `list`, see `source_doserate`.
+#' @param background_integral [vector] (**required**):
+#' vector with the limits for the background integral. It is ignored if
+#' `object` is an [Luminescence::RLum.Results-class] object.
+#' The parameter can be provided as a list, see `source_doserate`.
 #'
-#' @param background.integral [vector] (**required**):
-#' vector with the bounds for the background integral.
-#' Ignored if `object` is an [RLum.Results-class] object.
-#' The parameter can be provided as `list`, see `source_doserate`.
+#' @param signal_integral_Tx [vector] (*optional*):
+#' vector with the limits for the signal integral for the Tx curve. If nothing
+#' is provided, the value from `signal_integral` is used. It is ignored
+#' if `object` is an [Luminescence::RLum.Results-class] object.
+#' The parameter can be provided as a list, see `source_doserate`.
 #'
-#' @param background.integral.Tx [vector] (*optional*):
+#' @param background_integral_Tx [vector] (*optional*):
 #' vector with the limits for the background integral for the Tx curve.
-#' If nothing is provided the value from `background.integral` is used.
-#' Ignored if `object` is an [RLum.Results-class] object.
-#' The parameter can be provided as `list`, see `source_doserate`.
+#' If nothing is provided, the value from `background_integral` is used.
+#' It is ignored if `object` is an [Luminescence::RLum.Results-class] object.
+#' The parameter can be provided as a list, see `source_doserate`.
 #'
 #' @param irradiation_times [numeric] (*optional*): if set this vector replaces all irradiation
 #' times for one aliquot and one cycle (Lx and Tx curves) and recycles it for all others cycles and aliquots.
@@ -220,30 +220,32 @@
 #' @param sigmab [numeric] (*with default*):
 #' option to set a manual value for the overdispersion (for `LnTx` and `TnTx`),
 #' used for the `Lx`/`Tx` error calculation. The value should be provided as
-#' absolute squared count values, cf. [calc_OSLLxTxRatio].
+#' absolute squared count values, cf. [Luminescence::calc_OSLLxTxRatio].
 #' The parameter can be provided as `list`, see `source_doserate`.
 #'
 #' @param sig0 [numeric] (*with default*):
 #' allow adding an extra component of error to the final Lx/Tx error value
-#' (e.g., instrumental error, see details is [calc_OSLLxTxRatio]).
+#' (e.g., instrumental error, see details is [Luminescence::calc_OSLLxTxRatio]).
 #' The parameter can be provided as `list`, see `source_doserate`.
 #'
 #' @param distribution [character] (*with default*):
-#' type of distribution that is used during Bayesian calculations for
-#' determining the Central dose and overdispersion values.
-#' Allowed inputs are `"cauchy"`, `"normal"` and `"log_normal"`.
+#' type of distribution used during Bayesian calculations to determine the
+#' Central dose and overdispersion values (one of `"cauchy"`, `"normal"`,
+#' `"log_normal"` and `"user_defined"`). If set to `"user_defined"`, argument
+#' `baSAR_model` must be provided.
 #'
 #' @param baSAR_model [character] (*optional*):
 #' option to provide an own modified or new model for the Bayesian calculation
-#' (see details). If an own model is provided the argument `distribution` is
-#' ignored and set to `'user_defined'`
+#' (see details). If provided, argument `distribution` is automatically set to
+#' `"user_defined"`.
 #'
 #' @param n.MCMC [integer] (*with default*):
 #' number of iterations for the Markov chain Monte Carlo (MCMC) simulations
 #'
 #' @param fit.method [character] (*with default*):
-#' equation used for the fitting of the dose-response curve using the function
-#' [plot_GrowthCurve] and then for the Bayesian modelling. Here supported methods: `EXP`, `EXP+LIN` and `LIN`
+#' equation used both for the fitting of the dose-response curve using function
+#' [Luminescence::fit_DoseResponseCurve] and then for the Bayesian modelling.
+#' Supported methods: `EXP`, `EXP+LIN` and `LIN`.
 #'
 #' @param fit.force_through_origin [logical] (*with default*):
 #' force fitting through origin
@@ -261,7 +263,8 @@
 #'
 #' @param distribution_plot [character] (*with default*): sets the final distribution plot that
 #' shows equivalent doses obtained using the frequentist approach and sets in the central dose
-#' as comparison obtained using baSAR. Allowed input is `'abanico'` or `'kde'`. If set to `NULL` nothing is plotted.
+#' as comparison obtained using baSAR. Allowed input is `'abanico'` or `'kde'`.
+#' If set to `NULL` nothing is plotted.
 #'
 #' @param plot [logical] (*with default*):
 #' enable/disable the plot output.
@@ -275,8 +278,8 @@
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
-#' @param ... parameters that can be passed to the function [calc_OSLLxTxRatio]
-#' (almost full support), [data.table::fread] (`skip`), [read_BIN2R] (`n.records`,
+#' @param ... parameters that can be passed to the function [Luminescence::calc_OSLLxTxRatio]
+#' (almost full support), [data.table::fread] (`skip`), [Luminescence::read_BIN2R] (`n.records`,
 #' `position`, `duplicated.rm`), see details.
 #'
 #'
@@ -320,18 +323,18 @@
 #'  and the central dose with the HPDs marked within. This figure is only provided for a comparison,
 #'  no further statistical conclusion should be drawn from it.
 #'
-#'
 #' **Please note: If distribution was set to `log_normal` the central dose is given as geometric mean!**
 #'
-#' @section Function version: 0.1.37
+#' @section Function version: 0.1.41
 #'
 #' @author
 #' Norbert Mercier, Archéosciences Bordeaux, CNRS-Université Bordeaux Montaigne (France) \cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 #' The underlying Bayesian model based on a contribution by Combès et al., 2015.
 #'
-#' @seealso [read_BIN2R], [calc_OSLLxTxRatio], [plot_GrowthCurve],
-#' [data.table::fread], [verify_SingleGrainData],
+#' @seealso [Luminescence::read_BIN2R], [Luminescence::calc_OSLLxTxRatio],
+#' [Luminescence::fit_DoseResponseCurve], [Luminescence::plot_DoseResponseCurve],
+#' [data.table::fread], [Luminescence::verify_SingleGrainData],
 #' [rjags::jags.model], [rjags::coda.samples], [boxplot.default]
 #'
 #' @references
@@ -358,8 +361,8 @@
 #' **If you provide more than one BIN-file**, it is **strongly** recommended to provide
 #' a `list` with the same number of elements for the following parameters:
 #'
-#' `source_doserate`, `signal.integral`, `signal.integral.Tx`, `background.integral`,
-#' `background.integral.Tx`, `sigmab`, `sig0`.
+#' `source_doserate`, `signal_integral`, `signal_integral_Tx`, `background_integral`,
+#' `background_integral_Tx`, `sigmab`, `sig0`.
 #'
 #' Example for two BIN-files: `source_doserate = list(c(0.04, 0.006), c(0.05, 0.006))`
 #'
@@ -379,20 +382,19 @@
 #'
 #' \dontrun{
 #' ##(3) run analysis
-#' ##please not that the here selected parameters are
-#' ##choosen for performance, not for reliability
+#' ## please note that the parameters used here are
+#' ## chosen for performance, not for reliability
 #' results <- analyse_baSAR(
 #'   object = CWOSL.SAR.Data,
 #'   source_doserate = c(0.04, 0.001),
-#'   signal.integral = c(1:2),
-#'   background.integral = c(80:100),
+#'   signal_integral = 1:2,
+#'   background_integral = 80:100,
 #'   fit.method = "LIN",
 #'   plot = FALSE,
 #'   n.MCMC = 200
 #' )
 #'
 #' print(results)
-#'
 #'
 #' ##CSV_file template
 #' ##copy and paste this the code below in the terminal
@@ -406,9 +408,7 @@
 #'  GRAIN = NA_real_),
 #'    .Names = c("BIN_FILE", "DISC", "GRAIN"),
 #'    class = "data.frame",
-#'    row.names = 1L
-#' )
-#'
+#'    row.names = 1L)
 #' }
 #'
 #' @export
@@ -417,22 +417,22 @@ analyse_baSAR <- function(
   CSV_file = NULL,
   aliquot_range = NULL,
   source_doserate = NULL,
-  signal.integral,
-  signal.integral.Tx = NULL,
-  background.integral,
-  background.integral.Tx = NULL,
+  signal_integral = NULL,
+  background_integral = NULL,
+  signal_integral_Tx = NULL,
+  background_integral_Tx = NULL,
   irradiation_times = NULL,
   sigmab = 0,
   sig0 = 0.025,
   distribution = "cauchy",
   baSAR_model = NULL,
   n.MCMC = 100000,
-  fit.method = "EXP",
+  fit.method = c("EXP", "EXP+LIN", "LIN"),
   fit.force_through_origin = TRUE,
   fit.includingRepeatedRegPoints = TRUE,
   method_control = list(),
   digits = 3L,
-  distribution_plot = "kde",
+  distribution_plot = c("kde", "abanico"),
   plot = TRUE,
   plot_reduced = TRUE,
   plot_singlePanels = FALSE,
@@ -457,25 +457,18 @@ analyse_baSAR <- function(
              fit.force_through_origin,
              fit.includingRepeatedRegPoints,
              method_control,
+             lower_centralD,
+             upper_centralD,
              baSAR_model,
              verbose)
     {
-      ## lower and upper De
-      lower_centralD <- method_control[["lower_centralD"]]
-      upper_centralD <- method_control[["upper_centralD"]]
-
-      ##number of MCMC
       n.chains <- method_control[["n.chains"]] %||% 3
-
-      ##inits
       inits <- method_control[["inits"]]
-
-      ##thin
       thin <-  if (is.null(method_control[["thin"]])) {
         if(n.MCMC >= 1e+05){
-          thin <- n.MCMC/1e+05 * 250
+          n.MCMC / 1e+05 * 250
         }else{
-          thin <- min(10, n.MCMC / 2)
+          min(10, n.MCMC / 2)
         }
       } else{
         .validate_positive_scalar(method_control[["thin"]], int = TRUE,
@@ -491,14 +484,11 @@ analyse_baSAR <- function(
                        "', reset to ", thin)
       }
 
-      ## check whether this makes sense at all, just a quick and dirty test
-      stopifnot(lower_centralD >= 0)
-
       ExpoGC <- as.numeric(grepl("EXP", fit.method))
       LinGC <- as.numeric(grepl("LIN", fit.method))
       GC_Origin <- as.numeric(fit.force_through_origin)
 
-      ##Include or exclude repeated dose points
+      ## exclude repeated dose points
       if (!fit.includingRepeatedRegPoints) {
         for (i in 1:Nb_aliquots) {
           temp.logic <- !duplicated(data.Dose[, i], incomparables = 0) # logical excluding 0
@@ -524,13 +514,12 @@ analyse_baSAR <- function(
 
       # Bayesian Models ----------------------------------------------------------------------------
       # INFO: >
-      #  > sometimes lines apear to be in a wrong logical order, however, this is allowed in the
+      #  > sometimes lines appear to be in a wrong logical order, however, this is allowed in the
       #  > model definition since:
       #  > "The data block is not limited to logical relations, but may also include stochastic relations."
       #  > (Plummer, 2017. JAGS Version 4.3.0 user manual, p. 9)
       baSAR_models <- list(
         cauchy = "model {
-
             central_D ~  dunif(lower_centralD,upper_centralD)
 
             precision_D ~ dt(0, pow(0.16*central_D, -2), 1)T(0, )
@@ -575,7 +564,6 @@ analyse_baSAR <- function(
               Lum[1,i] ~ dnorm ( Q[1,i] , S_y[1,i])
               Q[1,i]  <-  GC_Origin * g[i] + LinGC * (c[i] * D[i] ) + ExpoGC * (a[i] * (1 - exp (-D[i] /b[i])) )
 
-
               for (m in 2:Limited_cycles[i]) {
                 S_y[m,i] <-  1/(sLum[m,i]^2 + sigma_f[i]^2)
                 Lum[m,i] ~ dnorm( Q[m,i] , S_y[m,i] )
@@ -617,13 +605,6 @@ analyse_baSAR <- function(
        )
 
       ##check whether the input for distribution was sufficient
-      if (!distribution %in% names(baSAR_models)) {
-        .throw_error("No pre-defined model for the requested distribution. ",
-                     "Please select one of ",
-                     .collapse(rev(names(baSAR_models))[-1]),
-                     ", or define an own model using argument 'baSAR_model'")
-      }
-
       if (distribution == "user_defined" && is.null(baSAR_model)) {
         .throw_error("You specified a 'user_defined' distribution, ",
                      "but did not provide a model via 'baSAR_model'")
@@ -648,16 +629,8 @@ analyse_baSAR <- function(
         cat("[analyse_baSAR()] Bayesian analysis in progress ...\n")
         message(".. >> bounds set to: lower_centralD = ", lower_centralD,
                 " | upper_centralD = ", upper_centralD)
-      }
-
-      Nb_Iterations <- n.MCMC
-
-      if (verbose) {
-        message(
-          ".. >> calculation will be done assuming a '",
-          distribution,
-          "' distribution\n"
-        )
+        message(".. >> calculation will be done assuming a '",
+                distribution, "' distribution\n")
       }
 
       ##set model
@@ -666,14 +639,14 @@ analyse_baSAR <- function(
           data = data_list,
           inits = inits,
           n.chains = n.chains,
-          n.adapt = Nb_Iterations,
+          n.adapt = n.MCMC,
           quiet = !verbose
        )
 
       ##update jags model (it is a S3-method)
       stats::update(
         object = jagsfit,
-        n.iter = Nb_Iterations,
+        n.iter = n.MCMC,
         progress.bar = if(verbose){"text"}else{NULL}
         )
 
@@ -681,7 +654,7 @@ analyse_baSAR <- function(
       sampling <- rjags::coda.samples(
         model = jagsfit,
         variable.names = variable.names,
-        n.iter = Nb_Iterations,
+        n.iter = n.MCMC,
         thin = thin
       )
 
@@ -691,7 +664,7 @@ analyse_baSAR <- function(
       sampling_reduced <- rjags::coda.samples(
         model = jagsfit,
         variable.names = c('central_D', 'sigma_D'),
-        n.iter = Nb_Iterations,
+        n.iter = n.MCMC,
         thin = thin
       )
 
@@ -746,6 +719,21 @@ analyse_baSAR <- function(
   ##END
   ##////////////////////////////////////////////////////////////////////////////////////////////////
 
+  ## deprecated arguments
+  extraArgs <- list(...)
+  if (any(grepl("[signal|background]\\.integral\\.?[.Tx]?", names(extraArgs))) &&
+      !is.null(c(extraArgs$signal.integral, extraArgs$signal.integral.Tx,
+                 extraArgs$background.integral, extraArgs$background.integral.Tx))) {
+    .deprecated(old = c("signal.integral", "background.integral",
+                        "signal.integral.Tx", "background.integral.Tx"),
+                new = c("signal_integral", "background_integral",
+                        "signal_integral_Tx", "background_integral_Tx"),
+                since = "1.2.0")
+    signal_integral <- extraArgs$signal.integral
+    background_integral <- extraArgs$background.integral
+    signal_integral_Tx <- extraArgs$signal.integral.Tx
+    background_integral_Tx <- extraArgs$background.integral.Tx
+  }
 
   ## Integrity checks -------------------------------------------------------
   .require_suggested_package("rjags")
@@ -753,8 +741,20 @@ analyse_baSAR <- function(
   .validate_class(object, c("Risoe.BINfileData", "RLum.Results", "character", "list"))
   .validate_not_empty(object)
   .validate_class(CSV_file, c("data.frame", "character"), null.ok = TRUE)
+  if (!inherits(object, "RLum.Results")) {
+    signal_integral <- .validate_integral(signal_integral, list.ok = TRUE)
+    background_integral <- .validate_integral(background_integral, list.ok = TRUE)
+    signal_integral_Tx <- .validate_integral(signal_integral_Tx,
+                                             null.ok = TRUE, list.ok = TRUE)
+    background_integral_Tx <- .validate_integral(background_integral_Tx,
+                                                 null.ok = TRUE, list.ok = TRUE)
+  }
+  distribution <- .validate_args(distribution, c("cauchy", "normal",
+                                                 "log_normal", "user_defined"))
+  .validate_class(baSAR_model, "character", length = 1, null.ok = TRUE)
   .validate_positive_scalar(n.MCMC, int = TRUE)
   fit.method <- .validate_args(fit.method, c("EXP", "EXP+LIN", "LIN"))
+  .validate_nonnegative_scalar(digits, int = TRUE)
   distribution_plot <- .validate_args(distribution_plot, c("kde", "abanico"),
                                       null.ok = TRUE) %||% ""
 
@@ -776,12 +776,14 @@ analyse_baSAR <- function(
     position = NULL,
     pattern = NULL,
 
-    ## plot_GrowthCurve()
+    ## fit_DoseResponseCurve()
     fit.weights = TRUE,
     fit.bounds = TRUE,
     n.MC = 100,
-    output.plot = plot,
-    output.plotExtended = plot,
+
+    ## plot_DoseResponseCurve()
+    plot_drc = plot,
+    plot_extended = plot,
 
     ## get_RLum
     recordType = c("OSL (UVVIS)", "irradiation (NA)")
@@ -790,6 +792,16 @@ analyse_baSAR <- function(
   #modify this list on purpose
   additional_arguments <- modifyList(x = additional_arguments,
                                      val = list(...))
+
+  ## deprecated arguments
+  if ("output.plot" %in% ...names()) {
+    additional_arguments$plot_drc <- list(...)$output.plot
+    .deprecated("output.plot", "plot_drc", since = "1.2.0")
+  }
+  if ("output.plotExtended" %in% ...names()) {
+    additional_arguments$plot_extended <- list(...)$output.plotExtended
+    .deprecated("output.plotExtended", "plot_extended", since = "1.2.0")
+  }
 
   ##set function arguments
   function_arguments <- NULL
@@ -805,6 +817,33 @@ analyse_baSAR <- function(
   ## always monitor the D variable
   variable.names <- unique(c(variable.names, "D"))
 
+  ## check the central_D bounds and set defaults according to Combès et al., 2015
+  ## "We set the bounds for the prior on the central dose D, Dmin = 0 Gy and
+  ##  Dmax = 1000 Gy, to cover the likely range of possible values for D."
+  msg <- paste("You have modified the %s central_D boundary while applying",
+               "a predefined model. This is possible but not recommended")
+
+  ## check lower_centralD and upper_centralD
+  lower_centralD <- method_control$lower_centralD
+  if (is.null(lower_centralD)) {
+    lower_centralD <- 0
+  } else if (distribution != "user_defined") {
+    .validate_nonnegative_scalar(lower_centralD, null.ok = TRUE,
+                                 name = "'lower_centralD' in 'method_control'")
+    .throw_warning(sprintf(msg, "lower"))
+  }
+  upper_centralD <- method_control$upper_centralD
+  if (is.null(upper_centralD)) {
+    upper_centralD <- 1000
+  } else if (distribution != "user_defined") {
+    .validate_nonnegative_scalar(upper_centralD, null.ok = TRUE,
+                                 name = "'upper_centralD' in 'method_control'")
+    .throw_warning(sprintf(msg, "upper"))
+  }
+  if (upper_centralD <= lower_centralD) {
+    .throw_error("'upper_centralD' in 'method_control' must be greater than ",
+                 "'lower_centralD'")
+  }
 
   # Set input -----------------------------------------------------------------------------------
 
@@ -816,124 +855,66 @@ analyse_baSAR <- function(
   if (inherits(object, "RLum.Results")) {
     .validate_originator(object, "analyse_baSAR")
 
-      ##We want to use previous function arguments and recycle them
+    ## start with arguments used in the RLum.Results object
+    function_arguments <- modifyList(formals(),
+                                     as.list(object@info$call))
 
-        ##(1) get information you need as input from the RLum.Results object
-        function_arguments <- as.list(object@info$call)
+    ## overwrite with currently provided arguments
+    arguments.new <- modifyList(function_arguments,
+                                as.list(match.call()))
 
-        ##(2) overwrite by current provided arguments
-        ##by using a new argument we have the choise which argument is allowed for
-        ##changes
-        function_arguments.new <- modifyList(x = function_arguments, val = as.list(match.call()))
-
-     ##get maximum cycles
-     max_cycles <- max(object$input_object[["CYCLES_NB"]])
-
-     ##set Nb_aliquots
-     Nb_aliquots <- nrow(object$input_object)
+    ## evaluate all arguments, as match.call() may leave some of them as
+    ## unevaluated symbols (such as 1:3 instead of c(1, 2, 3))
+    arguments.new$`...` <- NULL
+    arguments.new <- lapply(arguments.new, eval, envir = parent.frame())
 
      ## return NULL if not at least three aliquots are used for the calculation
+     Nb_aliquots <- nrow(object$input_object)
      if (Nb_aliquots < 3) {
        .throw_message("Number of aliquots < 3, NULL returned")
        return(NULL)
      }
 
-     ##set variables
-     ##Why is.null() ... it prevents that in case of a function crash is nothing is provided ...
+    ## source_doserate
+    if (length(as.list(match.call())$source_doserate) > 0) {
+      .throw_warning("'source_doserate' is ignored in this mode as ",
+                     "it was already set")
+    }
 
-     ##set changeable function arguments
+    ## set variables
+    distribution <- arguments.new$distribution
+    n.MCMC <- arguments.new$n.MCMC
+    fit.method <- arguments.new$fit.method
+    fit.force_through_origin <- arguments.new$fit.force_through_origin
+    fit.includingRepeatedRegPoints <- arguments.new$fit.includingRepeatedRegPoints
+    aliquot_range <- arguments.new$aliquot_range
+    method_control <- arguments.new$method_control
+    baSAR_model <- arguments.new$baSAR_model
+    plot <- arguments.new$plot
+    verbose <- arguments.new$verbose
 
-       ##distribution
-       if(!is.null(function_arguments.new$distribution)){
-         distribution <- function_arguments.new$distribution
-       }
+    input_object <- object$input_object
+    removed_aliquots <- object$removed_aliquots
 
-       ##n.MCMC
-       if(!is.null(function_arguments.new$n.MCMC)){
-         n.MCMC <- function_arguments.new$n.MCMC
-       }
-
-       ##fit.method
-       if(!is.null(function_arguments.new$fit.method)){
-         fit.method <- function_arguments.new$fit.method
-       }
-
-       ## fit.force_through_origin
-       if(!is.null(function_arguments.new$fit.force_through_origin)){
-          fit.force_through_origin <- function_arguments.new$fit.force_through_origin
-       }
-
-       ##fit.includingRepeatedRegPoints
-       if(!is.null(function_arguments.new$fit.includingRepeatedRegPoints)){
-          fit.includingRepeatedRegPoints <- function_arguments.new$fit.includingRepeatedRegPoints
-       }
-
-       ##source_doserate
-       if(length(as.list(match.call())$source_doserate) > 0){
-         .throw_warning("'source_doserate' is ignored in this mode as ",
-                        "it was already set")
-       }
-
-       ##aliquot_range
-       if(!is.null(function_arguments.new$aliquot_range)){
-         aliquot_range <- eval(function_arguments.new$aliquot_range)
-       }
-
-       ##method_control
-       if(!is.null(function_arguments.new$method_control)){
-         method_control <- eval(function_arguments.new$method_control)
-       }
-
-       ##baSAR_model
-       if(!is.null(function_arguments.new$baSAR_model)){
-         baSAR_model <- eval(function_arguments.new$baSAR_model)
-       }
-
-       ##plot
-       if(!is.null(function_arguments.new$plot)){
-         plot <- function_arguments.new$plot
-       }
-
-       ##verbose
-       if(!is.null(function_arguments.new$verbose)){
-         verbose <- function_arguments.new$verbose
-       }
-
-
-     ##limit according to aliquot_range
-     ##TODO Take care of the case that this was provided, otherwise more and more is removed!
-     if (!is.null(aliquot_range)) {
-       if (max(aliquot_range) <= nrow(object$input_object)) {
-         input_object <- object$input_object[aliquot_range, ]
+    ## limit according to aliquot_range
+    if (!is.null(aliquot_range)) {
+      .validate_class(aliquot_range, c("integer", "numeric"), null.ok = TRUE)
+      if (min(aliquot_range) < 1 ||  max(aliquot_range) > nrow(input_object)) {
+        .throw_message("'aliquot_range' out of bounds, input ignored")
+        aliquot_range <- NULL
+      } else {
+        input_object <- input_object[aliquot_range, ]
 
          ##update list of removed aliquots
          removed_aliquots <-rbind(object$removed_aliquots, object$input_object[-aliquot_range,])
 
          ##correct Nb_aliquots
          Nb_aliquots <- nrow(input_object)
-
-       } else{
-         .throw_message("'aliquot_range' out of bounds, input ignored")
-
-         ##reset aliquot range
-         aliquot_range <- NULL
-
-         ##take entire object
-         input_object <- object$input_object
-
-         ##set removed aliquots
-         removed_aliquots <- object$removed_aliquots
        }
-
-     } else{
-       ##set the normal case
-       input_object <- object$input_object
-
-       ##set removed aliquots
-       removed_aliquots <- object$removed_aliquots
      }
 
      ##set non function arguments
+     max_cycles <- max(object$input_object[["CYCLES_NB"]])
      Doses <- t(input_object[,9:(8 + max_cycles)])
      LxTx <- t(input_object[,(9 + max_cycles):(8 + 2 * max_cycles)])
      LxTx.error <-  t(input_object[,(9 + 2 * max_cycles):(8 + 3 * max_cycles)])
@@ -971,7 +952,7 @@ analyse_baSAR <- function(
 
       ## check that we are not left with empty records
       if (length(object[[1]]@records) == 0) {
-        .throw_error("No records of the appropriate type were found")
+        .throw_error("No records of the appropriate type found")
       }
 
       ##extract irradiation times
@@ -1006,11 +987,8 @@ analyse_baSAR <- function(
       }
     }
 
-    if (inherits(object, "Risoe.BINfileData")) {
-      fileBIN.list <- list(object)
-
-    } else if (inherits(object, "list")) {
-      ##check what the list containes ...
+    if (inherits(object, "list")) {
+      ## check what the list contains ...
       object_type <- unique(sapply(object, function(x) {
         .validate_class(x, c("Risoe.BINfileData", "character"),
                         name = "All elements of 'object'")
@@ -1032,19 +1010,22 @@ analyse_baSAR <- function(
             pattern = additional_arguments$pattern,
             verbose = verbose
           )
+          fileBIN.list <- .rm_NULL_elements(fileBIN.list)
+          if (length(fileBIN.list) == 0)
+            return(NULL)
         }
 
     } else if (is.character(object)) {
-      fileBIN.list <- list(
-        read_BIN2R(
+      fileBIN.list <- list(read_BIN2R(
           file = object,
           position = additional_arguments$position,
           duplicated.rm = additional_arguments$duplicated.rm,
           n.records = additional_arguments$n.records,
           pattern = additional_arguments$pattern,
-          verbose = verbose
-        )
-      )
+          verbose = verbose))
+
+    } else if (inherits(object, "Risoe.BINfileData")) {
+      fileBIN.list <- list(object)
     }
 
     ##Problem ... the user might have made a pre-selection in the Analyst software, if this the
@@ -1125,14 +1106,14 @@ analyse_baSAR <- function(
   source_doserate <- .listify(source_doserate, rep.length)
   sigmab <- .listify(sigmab, rep.length)
   sig0 <- .listify(sig0, rep.length)
-  signal.integral <- .listify(signal.integral, rep.length)
-  background.integral <- .listify(background.integral, rep.length)
+  signal_integral <- .listify(signal_integral, rep.length)
+  background_integral <- .listify(background_integral, rep.length)
 
-  if (!is.null(signal.integral.Tx)) {
-    signal.integral.Tx <- .listify(signal.integral.Tx, rep.length)
+  if (!is.null(signal_integral_Tx)) {
+    signal_integral_Tx <- .listify(signal_integral_Tx, rep.length)
   }
-  if (!is.null(background.integral.Tx)) {
-    background.integral.Tx <- .listify(background.integral.Tx, rep.length)
+  if (!is.null(background_integral_Tx)) {
+    background_integral_Tx <- .listify(background_integral_Tx, rep.length)
   }
 
   # Read CSV file -----------------------------------------------------------
@@ -1200,10 +1181,6 @@ analyse_baSAR <- function(
       if (ncol(datalu) < 3) {
         .throw_error(err.msg)
       }
-      if(!all(grepl(colnames(datalu), pattern = " ")[1:3])){
-        .throw_error("One of the first 3 columns in 'CSV_file' has no ",
-                     "header. ", err.msg)
-      }
 
       ##get rid of empty rows if the BIN_FILE name column is empty
       datalu <- datalu[!is.na(datalu[[1]]), ]
@@ -1235,8 +1212,7 @@ analyse_baSAR <- function(
       if (!is.na(datalu[nn, 1]))  {
 
         ##check whether one file fits
-        file.basename <- strsplit(basename(datalu[nn, 1]),
-                                  split = ".", fixed = TRUE)[[1]][1]
+        file.basename <- tools::file_path_sans_ext(basename(datalu[nn, 1]))
         matches <- grep(pattern = file.basename, x = unlist(object.file_name))
         if (length(matches) > 0) {
           k <- matches[1]
@@ -1250,8 +1226,7 @@ analyse_baSAR <- function(
           }
 
         }else{
-          .throw_warning("'", datalu[nn, 1], "' not recognised ",
-                         "or not loaded, skipped")
+          .throw_warning("File '", datalu[nn, 1], "' doesn't match, skipped")
         }
 
       } else{
@@ -1300,8 +1275,7 @@ analyse_baSAR <- function(
     }
 
   if(verbose){
-    cat("\n[analyse_baSAR()] Preliminary analysis in progress ... ")
-    cat("\n[analyse_baSAR()] Hang on, this may take a while ... \n")
+    cat("[analyse_baSAR()] Preliminary analysis in progress, this may take a while ... \n")
   }
 
   for (k in seq_along(fileBIN.list)) {
@@ -1334,6 +1308,8 @@ analyse_baSAR <- function(
       return(NULL)
     }
 
+    dose.rate <- unlist(source_doserate[[k]][1]) %||% 1
+
     ### Automatic Filling - Disc_Grain.list
     for (i in seq_along(Disc[[k]])) {
       disc_selected <-  as.integer(Disc[[k]][i])
@@ -1363,11 +1339,7 @@ analyse_baSAR <- function(
         grain_selected <- 1
 
       for (t in index_list) {
-              dose.value <- irrad_time.vector[t]
-              if(!is.null(unlist(source_doserate))){
-                dose.value <- dose.value * unlist(source_doserate[[k]][1])
-              }
-
+        dose.value <- irrad_time.vector[t] * dose.rate
               s <- 1 + length( Disc_Grain.list[[k]][[disc_selected]][[grain_selected]][[1]] )
               Disc_Grain.list[[k]][[disc_selected]][[grain_selected]][[1]][s] <- n_index.vector[t]  # indexes
               if ( s%%2 == 1) { Disc_Grain.list[[k]][[disc_selected]][[grain_selected]][[2]][as.integer(1+s/2)] <- dose.value  }      # irradiation doses
@@ -1417,8 +1389,8 @@ analyse_baSAR <- function(
       )
 
       ##add integration limits
-      abline(v = range(signal.integral[[k]]), lty = 2, col = "green")
-      abline(v = range(background.integral[[k]]), lty = 2, col = "red")
+      abline(v = range(signal_integral[[k]]), lty = 2, col = "green")
+      abline(v = range(background_integral[[k]]), lty = 2, col = "red")
       mtext(paste0("ALQ: ",count, ":", count + ncol(curve_index)))
 
       graphics::matplot(
@@ -1431,10 +1403,10 @@ analyse_baSAR <- function(
         type = "l"
       )
 
-      ##add integration limits depending on the choosen value
-      abline(v = range(signal.integral.Tx[[k]] %||% signal.integral[[k]]),
+      ## add integration limits depending on the chosen value
+      abline(v = range(signal_integral_Tx[[k]] %||% signal_integral[[k]]),
              lty = 2, col = "green")
-      abline(v = range(background.integral.Tx[[k]] %||% background.integral[[k]]),
+      abline(v = range(background_integral_Tx[[k]] %||% background_integral[[k]]),
              lty = 2, col = "red")
 
       mtext(paste0("ALQ: ",count, ":", count + ncol(curve_index)))
@@ -1471,18 +1443,18 @@ analyse_baSAR <- function(
           calc_OSLLxTxRatio(
             Lx.data = Lx.data,
             Tx.data = Tx.data,
-            signal.integral = signal.integral[[k]],
-            signal.integral.Tx = signal.integral.Tx[[k]],
-            background.integral = background.integral[[k]],
-            background.integral.Tx = background.integral.Tx[[k]],
+            signal_integral = signal_integral[[k]],
+            signal_integral_Tx = signal_integral_Tx[[k]],
+            background_integral = background_integral[[k]],
+            background_integral_Tx = background_integral_Tx[[k]],
             background.count.distribution = additional_arguments$background.count.distribution,
             sigmab = sigmab[[k]],
             sig0 = sig0[[k]])$LxTx.table
         )
 
-        Disc_Grain.list[[k]][[dd]][[gg]][[3]][nb_index] <- LxTx.table[[9]]
-        Disc_Grain.list[[k]][[dd]][[gg]][[4]][nb_index] <- LxTx.table[[10]]
-        Disc_Grain.list[[k]][[dd]][[gg]][[5]][nb_index] <- LxTx.table[[7]]
+        Disc_Grain.list[[k]][[dd]][[gg]][[3]][nb_index] <- LxTx.table$LxTx
+        Disc_Grain.list[[k]][[dd]][[gg]][[4]][nb_index] <- LxTx.table$LxTx.Error
+        Disc_Grain.list[[k]][[dd]][[gg]][[5]][nb_index] <- LxTx.table$Net_TnTx
 
         ##free memory
         rm(LxTx.table)
@@ -1491,7 +1463,7 @@ analyse_baSAR <- function(
       ## reset `sel.disc.grain` because the data it pointed to has changed
       sel.disc.grain <- Disc_Grain.list[[k]][[dd]][[gg]]
 
-      # Fitting Growth curve and Plot
+      ## fit dose response curve and plot
       sample_dose <- unlist(sel.disc.grain[[2]])
       sample_LxTx <- unlist(sel.disc.grain[[3]])
       sample_sLxTx <- unlist(sel.disc.grain[[4]])
@@ -1500,10 +1472,10 @@ analyse_baSAR <- function(
       ##create needed data.frame (this way to make sure that rows are doubled if something is missing)
       selected_sample <- as.data.frame(cbind(sample_dose, sample_LxTx, sample_sLxTx, TnTx))
 
-      ## call plot_GrowthCurve() to get De and De value
+      ## get De and De value
       fitcurve <-
-        suppressWarnings(plot_GrowthCurve(
-          sample = selected_sample,
+        suppressWarnings(fit_DoseResponseCurve(
+          selected_sample,
           na.rm = TRUE,
           fit.method = fit.method,
           fit.force_through_origin = fit.force_through_origin,
@@ -1511,12 +1483,17 @@ analyse_baSAR <- function(
           fit.includingRepeatedRegPoints = fit.includingRepeatedRegPoints,
           fit.bounds = additional_arguments$fit.bounds,
           n.MC = additional_arguments$n.MC,
-          output.plot = additional_arguments$output.plot,
-          output.plotExtended = additional_arguments$output.plotExtended,
-          txtProgressBar = FALSE,
           verbose = verbose,
-          main = paste0("ALQ: ", count," | POS: ", Disc[[k]][i], " | GRAIN: ", Grain[[k]][i])
+          txtProgressBar = FALSE
         ))
+      if (!is.null(fitcurve) && additional_arguments$plot_drc) {
+        plot_DoseResponseCurve(
+            fitcurve,
+            plot_extended = additional_arguments$plot_extended,
+            verbose = verbose,
+            main = paste0("ALQ: ", count, " | POS: ", Disc[[k]][i],
+                          " | GRAIN: ", Grain[[k]][i]))
+      }
 
         ##get data.frame with De values
         Disc_Grain.list[[k]][[dd]][[gg]][[6]][1:4] <- NA
@@ -1655,33 +1632,13 @@ analyse_baSAR <- function(
 
   # Call baSAR-function -------------------------------------------------------------------------
 
-  ##check for the central_D bound settings
-  ##Why do we use 0 and 1000: Combes et al., 2015 wrote
-  ## that "We set the bounds for the prior on the central dose D, Dmin = 0 Gy and
-  ## Dmax = 1000 Gy, to cover the likely range of possible values for D.
-
-  msg <- paste("You have modified the %s central_D boundary while applying",
-               "a predefined model. This is possible but not recommended")
-
-    ##check if something is set in method control, if not, set it
-    if (is.null(method_control[["upper_centralD"]])) {
-      method_control <- c(method_control, upper_centralD = 1000)
-    } else if (distribution %in% c("normal", "cauchy", "log_normal")) {
-      .throw_warning(sprintf(msg, "upper"))
-    }
-
-    ## do the same for the lower_centralD, just to have everything in one place
-    if (is.null(method_control[["lower_centralD"]])) {
-      method_control <- c(method_control, lower_centralD = 0)
-    } else if (distribution %in% c("normal", "cauchy", "log_normal")) {
-      .throw_warning(sprintf(msg, "lower"))
-    }
-
-    if (min(input_object[["DE"]][input_object[["DE"]] > 0], na.rm = TRUE) < method_control$lower_centralD ||
-        max(input_object[["DE"]], na.rm = TRUE) > method_control$upper_centralD) {
+  temp.DE <- input_object$DE
+  if (all(is.na(temp.DE)) ||
+      min(temp.DE[temp.DE > 0], na.rm = TRUE) < lower_centralD ||
+      max(temp.DE, na.rm = TRUE) > upper_centralD) {
       .throw_warning("Your lower_centralD and/or upper_centralD values ",
-                     "seem not to fit to your input data. This may indicate ",
-                     "a wronlgy set 'source_doserate'.")
+                     "seem not to fit to your input data, which may indicate ",
+                     "an incorrect 'source_doserate'")
     }
 
   ##>> try here is much better, as the user might run a very long preprocessing and do not
@@ -1698,6 +1655,8 @@ analyse_baSAR <- function(
       fit.force_through_origin = fit.force_through_origin,
       fit.includingRepeatedRegPoints = fit.includingRepeatedRegPoints,
       method_control = method_control,
+      lower_centralD = lower_centralD,
+      upper_centralD = upper_centralD,
       baSAR_model = baSAR_model,
       verbose = verbose
     ), outFile = stdout()) # redirect error messages so they can be silenced
@@ -1718,24 +1677,19 @@ analyse_baSAR <- function(
         }
       }
 
-      systematic_error <- unlist(lapply(source_doserate, function(x){
-        if(length(x) == 2) x[2] else 0
-       }))
-    }
+      systematic_error <- unlist(lapply(source_doserate, function(x) {
+        if (length(x) == 2 && !is.na(x[2])) x[2] else 0
+      }))
 
-    ##state are warning for very different errors
-    if(mean(systematic_error) != systematic_error[1]){
-      .throw_warning("Provided source dose rate errors differ: the mean was ",
-                     "taken, but the calculated systematic error may not be valid")
+      ## check if different errors were provided
+      if (length(unique(systematic_error)) > 1) {
+        .throw_warning("Provided source dose rate errors differ: the mean was ",
+                       "taken, but the calculated systematic error may not be valid")
+      }
     }
 
     ##add to the final de
     DE_FINAL.ERROR <- sqrt(results[[1]][["CENTRAL.SD"]]^2 + mean(systematic_error)^2)
-
-    ##consider the case that we get NA and this might be confusing
-    if(is.na(DE_FINAL.ERROR)){
-      DE_FINAL.ERROR <- results[[1]][["CENTRAL.SD"]]
-    }
 
     ##combine
     results[[1]] <- cbind(results[[1]], DE_FINAL = results[[1]][["CENTRAL"]], DE_FINAL.ERROR = DE_FINAL.ERROR)
@@ -1798,8 +1752,7 @@ analyse_baSAR <- function(
     ## deprecated argument
     if ("plot.single" %in% ...names()) {
       plot_singlePanels <- list(...)$plot.single
-      .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
-                     "instead")
+      .deprecated("plot.single", "plot_singlePanels", since = "1.0.0")
     }
 
     ##get colours from the package Luminescence
@@ -1855,7 +1808,7 @@ analyse_baSAR <- function(
     LinGC <- as.numeric(grepl("LIN", fit.method))
     GC_Origin <- as.numeric(fit.force_through_origin)
 
-    ## to assure a minimum of quality not more then 15 boxes are plotted in each plot
+    ## to ensure a minimum of quality no more than 15 boxes are plotted in each plot
     i <- 1
     while(i < ncol(plot_matrix)){
       step <- min(ncol(plot_matrix), i + 14)
@@ -1865,7 +1818,7 @@ analyse_baSAR <- function(
         horizontal = TRUE,
         outline = TRUE,
         col = box.col[i:step],
-        xlab = if(is.null(unlist(source_doserate))){"Dose [s]"}else{"Dose [Gy]"},
+        xlab = ifelse(is.null(unlist(source_doserate)), "Dose [s]", "Dose [Gy]"),
         ylab = "Aliquot index",
         yaxt = "n",
         xlim = c(1,19),
@@ -1873,13 +1826,10 @@ analyse_baSAR <- function(
       ))
 
       if (!inherits(plot_check, "try-error")) {
-      if(step == ncol(plot_matrix)){
-        axis(side = 2, at = 1:15, labels = as.character(c(i:step, rep(" ", length = 15 - length(i:step)))),
-             cex.axis = 0.8
-        )
-      }else{
-        axis(side = 2, at = 1:15, labels = as.character(i:step), cex.axis = 0.8)
-      }
+        ## pad with spaces then take first 15
+        labels <- c(i:step, rep(" ", 15))[1:15]
+        tick.pos <- which(labels != " ")
+        axis(side = 2, at = tick.pos, labels = labels[tick.pos], cex.axis = 0.8)
 
       ##add HPD with text
       ##HPD - 68%
@@ -1971,7 +1921,7 @@ analyse_baSAR <- function(
           ylim = ylim,
           xlim = xlim,
           ylab = expression(paste(L[x] / T[x])),
-          xlab = if(is.null(unlist(source_doserate))){"Dose [s]"}else{"Dose [Gy]"},
+          xlab = ifelse(is.null(unlist(source_doserate)), "Dose [s]", "Dose [Gy]"),
           main = "baSAR Dose Response Curves"
         ))
 
@@ -2067,7 +2017,9 @@ analyse_baSAR <- function(
       if(distribution_plot == "abanico"){
         plot_check <- plot_AbanicoPlot(
           data = input_object[, c("DE", "DE.SD")],
-          zlab = if(is.null(unlist(source_doserate))){expression(paste(D[e], " [s]"))}else{expression(paste(D[e], " [Gy]"))},
+          zlab = ifelse(is.null(unlist(source_doserate)),
+                        expression(paste(D[e], " [s]")),
+                        expression(paste(D[e], " [Gy]"))),
           log.z = distribution == "log_normal",
           z.0 = results[[1]]$CENTRAL,
           y.axis = FALSE,
@@ -2104,14 +2056,16 @@ analyse_baSAR <- function(
       if(is.null(plot_check) && distribution_plot == "kde"){
         plot_check <- try(suppressWarnings(plot_KDE(
           data = input_object[, c("DE", "DE.SD")],
-          xlab = if(is.null(unlist(source_doserate))){expression(paste(D[e], " [s]"))}else{expression(paste(D[e], " [Gy]"))},
+          xlab = ifelse(is.null(unlist(source_doserate)),
+                        expression(paste(D[e], " [s]")),
+                        expression(paste(D[e], " [Gy]"))),
           mtext =   paste0(
             nrow(input_object) - length(which(is.na(input_object[, c("DE", "DE.SD")]))),
             "/",
             nrow(input_object),
             " (removed are NA values)"
           )
-        )))
+        )), outFile = stdout()) # redirect error messages so they can be silenced
 
         if (!inherits(plot_check, "try-error")) {
           abline(v = results[[1]]$CENTRAL, lty = 2)

@@ -7,22 +7,21 @@
 subset_SingleGrainData(object, selection)
 }
 \arguments{
-\item{object}{\linkS4class{Risoe.BINfileData} (\strong{required}): input object with the
-data to subset}
+\item{object}{\linkS4class{Risoe.BINfileData} (\strong{required}):
+input object with the data to subset.}
 
-\item{selection}{\link{data.frame} (\strong{required}): selection table with two columns
-for position (1st column) and grain (2nd column) (columns names do not matter)}
+\item{selection}{\link{data.frame}, \link{matrix} (\strong{required}):
+selection table with two columns for position and grain, respectively.}
 }
 \value{
 A subset \linkS4class{Risoe.BINfileData} object
 }
 \description{
-Most measured single grains do not exhibit light and it makes
-usually sense to subset single grain datasets using a table of
-position and grain pairs
+Most measured single grains do not exhibit light and it usually makes sense
+to subset single grain datasets using a table of position and grain pairs.
 }
 \section{Function version}{
- 0.1.0
+ 0.1.1
 }
 
 \examples{
@@ -38,14 +37,15 @@ subset_SingleGrainData(object = CWOSL.SAR.Data, selection = selection)
 
 }
 \seealso{
-\linkS4class{Risoe.BINfileData}, \link{read_BIN2R}, \link{verify_SingleGrainData}
+\linkS4class{Risoe.BINfileData}, \link{read_BIN2R},
+\link{verify_SingleGrainData}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. subset_SingleGrainData(): Simple Subsetting of Single Grain Data from Risø BIN/BINX files. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. subset_SingleGrainData(): Simple Subsetting of Single Grain Data from Risø BIN/BINX files. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

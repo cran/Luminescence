@@ -4,18 +4,20 @@
 #' Calculating the dose rate of the irradiation source via the date of
 #' measurement based on: source calibration date, source dose rate, dose rate
 #' error. The function returns a data.frame that provides the input argument
-#' dose_rate for the function [convert_Second2Gray].
+#' dose_rate for the function [Luminescence::convert_Second2Gray].
 #'
 #' Calculation of the source dose rate based on the time elapsed since the last
 #' calibration of the irradiation source. Decay parameters assume a Sr-90 beta
-#' source. \deqn{dose.rate = D0 * exp(-log(2) / T.1/2 * t)} \cr with: D0 <-
-#' calibration dose rate T.1/2 <- half-life of the source nuclide (here in
-#' days) t <- time since source calibration (in days) log(2) / T.1/2 equals the
-#' decay constant lambda
+#' source.
+#' \deqn{dose.rate = D0 \exp(-\frac{\log(2)}{T.1/2} t)}
+#'
+#' where `D0` is the calibration dose rate, \eqn{T.1/2} is the half-life of the
+#' source nuclide (in days), `t` is the time since source calibration (in days),
+#' and \eqn{\log(2) / T.1/2} equals the decay constant lambda.
 #'
 #' Information on the date of measurements may be taken from the data's
-#' original .BIN file (using e.g., `BINfile <- readBIN2R()` and the slot
-#' `BINfile@@METADATA$DATE`)
+#' original .BIN file (using e.g., `BINfile <- Luminescence::read_BIN2R()` and the slot
+#' `BINfile@METADATA$DATE`).
 #'
 #' **Allowed source types and related values**
 #'
@@ -45,7 +47,7 @@
 #'
 #' @param dose.rate.unit [character] (*with default*):
 #' dose rate unit for input (one of `Gy/min` or `Gy/s`). The output is given in
-#' Gy/s as valid for the function [convert_Second2Gray].
+#' Gy/s as valid for the function [Luminescence::convert_Second2Gray].
 #'
 #' @param predict [integer] (*with default*):
 #' option allowing to predict the dose rate of the source over time in days
@@ -54,7 +56,7 @@
 #' the source dose rate for the next 100 days.
 #'
 #' @return
-#' Returns an S4 object of type [RLum.Results-class].
+#' Returns an S4 object of type [Luminescence::RLum.Results-class].
 #' Slot `data` contains a [list] with the following structure:
 #'
 #' ```
@@ -69,8 +71,8 @@
 #' $ call (the original function call)
 #' ```
 #'
-#' The output should be accessed using the function [get_RLum].
-#' A plot method of the output is provided via [plot_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
+#' A plot method of the output is provided via [Luminescence::plot_RLum].
 #'
 #' @note
 #' Please be careful when using the option `predict`, especially when a
@@ -86,9 +88,9 @@
 #'
 #' @author
 #' Margret C. Fuchs, HZDR, Helmholtz-Institute Freiberg for Resource Technology (Germany) \cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [convert_Second2Gray], [get_RLum], [plot_RLum]
+#' @seealso [Luminescence::convert_Second2Gray], [Luminescence::get_RLum], [Luminescence::plot_RLum]
 #'
 #' @references
 #' NNDC, Brookhaven National Laboratory `http://www.nndc.bnl.gov/`
@@ -134,8 +136,8 @@ calc_SourceDoseRate <- function(
   calib.date,
   calib.dose.rate,
   calib.error,
-  source.type = "Sr-90",
-  dose.rate.unit = "Gy/s",
+  source.type = c("Sr-90", "Am-214", "Co-60", "Cs-137"),
+  dose.rate.unit = c("Gy/s", "Gy/min"),
   predict = NULL
 ) {
   .set_function_name("calc_SourceDoseRate")

@@ -35,10 +35,10 @@
 #' in standard books on R can be used without knowing the specifics of the R
 #' package `'Luminescence'`. For examples see the example section.
 #'
-#' @param x [RLum-class] or [Risoe.BINfileData-class] (**required**):
+#' @param x [Luminescence::RLum-class] or [Luminescence::Risoe.BINfileData-class] (**required**):
 #' input object
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' input object
 #'
 #' @param y [integer] (*optional*):
@@ -48,21 +48,22 @@
 #' the column index of the matrix, data.frame
 #'
 #' @param i [character] (*optional*):
-#' name of the wanted record type or data object or row in the `RLum.Data.Curve` object
+#' name of the wanted record type or data object or row in the
+#' [Luminescence::RLum.Data.Curve-class] object
 #'
 #' @param j [integer] (*optional*):
-#' column of the data matrix in the `RLum.Data.Curve` object
+#' column of the data matrix in the [Luminescence::RLum.Data.Curve-class] object
 #'
 #' @param value [numeric] (**required**):
-#' numeric value which replace the value in the `RLum.Data.Curve` object
+#' numeric value which replace the value in the [Luminescence::RLum.Data.Curve-class] object
 #'
 #' @param drop [logical] (*with default*):
 #' keep object structure or drop it
 #'
 #' @param subset `[subset]` [expression] (**required**):
 #' logical expression indicating elements or rows to keep, this function works
-#' in [Risoe.BINfileData-class] objects like [subset.data.frame], but takes care
-#' of the object structure. Works also on [RLum.Analysis-class] objects.
+#' in [Luminescence::Risoe.BINfileData-class] objects like [subset.data.frame], but takes care
+#' of the object structure. Works also on [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @param row.names [logical] (*with default*):
 #' enable/disable row names (`as.data.frame`).
@@ -387,62 +388,6 @@ as.matrix.RLum.Data.Spectrum <- function(x, ...) as(x, "matrix")
 as.matrix.RLum.Data.Image <- function(x, ...) as(x, "matrix")
 # for RLum.Results ... makes no sense and may yield in unpredictable behaviour
 
-
-# is() --------------------------------------------------------------------
-
-#For this function no S4 method was written, as this would come at the cost of performance and
-#is totally unnecessary
-
-#' @rdname methods_RLum
-#' @export
-# nocov start
-is.RLum <- function(x, ...) {
-  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
-  is(x, "RLum")
-}
-
-#' @rdname methods_RLum
-#' @export
-is.RLum.Data <- function(x, ...) {
-  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
-  is(x, "RLum.Data")
-}
-
-#' @rdname methods_RLum
-#' @export
-is.RLum.Data.Curve <- function(x, ...) {
-  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
-  is(x, "RLum.Data.Curve")
-}
-
-#' @rdname methods_RLum
-#' @export
-is.RLum.Data.Spectrum <- function(x, ...) {
-  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
-  is(x, "RLum.Data.Spectrum")
-}
-
-#' @rdname methods_RLum
-#' @export
-is.RLum.Data.Image <- function(x, ...) {
-  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
-  is(x, "RLum.Data.Image")
-}
-
-#' @rdname methods_RLum
-#' @export
-is.RLum.Analysis <- function(x, ...) {
-  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
-  is(x, "RLum.Analysis")
-}
-
-#' @rdname methods_RLum
-#' @export
-is.RLum.Results <- function(x, ...) {
-  .Deprecated(msg = "This function is deprecated, it will be removed in a future release")
-  is(x, "RLum.Results")
-}
-# nocov end
 
 # merge() -----------------------------------------------------------------
 

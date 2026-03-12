@@ -8,17 +8,21 @@ test_that("input validation", {
   testthat::skip_on_cran()
 
   expect_error(plot_DRTResults("error"),
-               "'values' should be of class 'data.frame' or 'RLum.Results'")
+               "'object' should be of class 'data.frame' or 'RLum.Results'")
   expect_error(plot_DRTResults(list("error")),
-               "'values' should be of class 'data.frame' or 'RLum.Results'")
+               "'object' should be of class 'data.frame' or 'RLum.Results'")
   expect_error(plot_DRTResults(iris[, 1, drop = FALSE]),
-               "'values' should have 2 columns")
+               "'object' should have 2 columns")
+  expect_error(plot_DRTResults(data.frame(1:5, NA)),
+               "No valid data remains after removing NA values")
   expect_error(plot_DRTResults(df, preheat = c(200, 240, 240)),
                "'preheat' should have length equal to the number of De values")
   expect_error(plot_DRTResults(df, given.dose = "error"),
                "'given.dose' should be of class 'numeric'")
   expect_error(plot_DRTResults(df, given.dose = numeric(0)),
                "'given.dose' cannot be an empty numeric")
+  expect_error(plot_DRTResults(df, given.dose = NA_real_),
+               "'given.dose' cannot contain NA values")
   expect_error(plot_DRTResults(df, given.dose = c(2800, 3000)),
                "'given.dose' should have length equal to the number of input")
   expect_warning(plot_DRTResults(df, boxplot = TRUE),
@@ -34,11 +38,11 @@ test_that("input validation", {
 
   empty <- set_RLum("RLum.Results")
   expect_error(plot_DRTResults(empty),
-               "'values' cannot be an empty RLum.Results")
+               "'object' cannot be an empty RLum.Results")
   expect_error(plot_DRTResults(list()),
-               "'values' cannot be an empty list")
+               "'object' cannot be an empty list")
   expect_error(plot_DRTResults(data.frame()),
-               "'values' cannot be an empty data.frame")
+               "'object' cannot be an empty data.frame")
   expect_error(plot_DRTResults(list(empty, empty)),
                      "No valid records in 'values'")
 })
@@ -83,7 +87,10 @@ test_that("check functionality", {
   ## missing values
   df.na <- df
   df.na[2, 1] <- NA
-  expect_silent(plot_DRTResults(df, preheat = c(200, 200, 200, 240, 240)))
+  expect_silent(plot_DRTResults(df.na, preheat = c(200, 200, 200, 240, 240)))
+
+  ## deprecated argument
+  expect_warning(plot_DRTResults(values = df, preheat = c(200, 200, 200, 240, 240)))
 })
 
 test_that("graphical snapshot tests", {
@@ -93,8 +100,8 @@ test_that("graphical snapshot tests", {
   SW({
   vdiffr::expect_doppelganger("defaults",
                               plot_DRTResults(df))
-  vdiffr::expect_doppelganger("cex",
-                              plot_DRTResults(df, cex = 2))
+  vdiffr::expect_doppelganger("cex col",
+                              plot_DRTResults(df, cex = 2, col = 1:5))
   vdiffr::expect_doppelganger("summary sub",
                               plot_DRTResults(df, summary.pos = "sub",
                                               summary = c("n", "se.rel", "median",
@@ -102,6 +109,10 @@ test_that("graphical snapshot tests", {
   vdiffr::expect_doppelganger("summary left",
                               plot_DRTResults(df, summary.pos = "left",
                                               summary = c("mean", "sd.abs")))
+  vdiffr::expect_doppelganger("list bottomright",
+                              plot_DRTResults(df.list,
+                                              summary.pos = "bottomright",
+                                              summary = c("n", "mean", "sd.abs")))
   })
 })
 

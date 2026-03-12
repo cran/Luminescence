@@ -17,7 +17,8 @@ sort_RLum(object, ...)
 \S4method{sort_RLum}{Risoe.BINfileData}(object, info_element, decreasing = FALSE, ...)
 }
 \arguments{
-\item{object}{\linkS4class{RLum} or \linkS4class{Risoe.BINfileData} (\strong{required}):
+\item{object}{\linkS4class{RLum} or
+\linkS4class{Risoe.BINfileData} (\strong{required}):
 S4 object of class \code{RLum.Analysis} or \code{Risoe.BINfileData}.}
 
 \item{...}{further arguments passed to the specific class method}
@@ -84,7 +85,7 @@ Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Colombo, M., 2025. sort_RLum(): Sort data for RLum-class and Risoe.BINfileData-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Colombo, M., 2026. sort_RLum(): Sort data for RLum-class and Risoe.BINfileData-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

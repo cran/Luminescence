@@ -7,9 +7,10 @@
 analyse_FadingMeasurement(
   object,
   structure = c("Lx", "Tx"),
-  signal.integral = NULL,
-  background.integral = NULL,
-  t_star = "half",
+  signal_integral = NULL,
+  background_integral = NULL,
+  integral_input = c("channel", "measurement"),
+  t_star = c("half", "half_complex", "end"),
   n.MC = 100,
   verbose = TRUE,
   plot = TRUE,
@@ -26,26 +27,31 @@ Can also be a wide table, i.e. a \link{data.frame} with a number of columns
 divisible by 3 and where each triplet has the before mentioned column
 structure.
 
-\strong{Please note: The input object should solely consists of the curve needed
+\strong{Note:} The input object should solely consists of the curve needed
 for the data analysis, i.e. only IRSL curves representing Lx (and Tx). If
 the object originated from an XSYG file, also the irradiation steps must
-be preserved in the input object.}
+be preserved in the input object.
 
-If data from multiple aliquots are provided please \strong{see the details below}
-with regard to Lx/Tx normalisation. \strong{The function assumes that all your
+If data from multiple aliquots are provided, please see the details below
+with regard to Lx/Tx normalisation. \strong{Note:} The function assumes that all your
 measurements are related to one (comparable) sample. If you have to treat
-independent samples, you have use this function in a loop.}}
+independent samples, you have use this function in a loop.}
 
 \item{structure}{\link{character} (\emph{with default}):
 the structure of the measurement data, one of \code{'Lx'} or \code{c('Lx','Tx')}.}
 
-\item{signal.integral}{\link{vector} (\strong{required}):
+\item{signal_integral}{\link{vector} (\strong{required}):
 vector with channels for the signal integral (e.g., \code{1:10}). It is not
 required if a \code{data.frame} with \code{LxTx} values is provided.}
 
-\item{background.integral}{\link{vector} (\strong{required}):
+\item{background_integral}{\link{vector} (\strong{required}):
 vector with channels for the background integral (e.g., \code{90:100}). It is not
 required if a \code{data.frame} with \code{LxTx} values is provided.}
+
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given time range (in seconds) are selected.}
 
 \item{t_star}{\link{character}, \link{function} (\emph{with default}):
 method for calculating the time elapsed since irradiation if input is
@@ -165,7 +171,7 @@ a maximum of five pause steps are plotted to avoid graphically overloaded plots.
 However, \emph{all} pause times are taken into consideration for the analysis.
 }
 \section{Function version}{
- 0.1.25
+ 0.1.27
 }
 
 \examples{
@@ -193,7 +199,7 @@ n.MC = 10)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2025. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.25. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Burow, C., 2026. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.27. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -212,11 +218,12 @@ fading correction for feldspar  IRSL dating-tests on samples in field saturation
 Radiation Measurements 43, 786-790. \doi{10.1016/j.radmeas.2008.01.021}
 }
 \seealso{
-\link{calc_OSLLxTxRatio}, \link{read_BIN2R}, \link{read_XSYG2R},
+\link{calc_OSLLxTxRatio}, \link{read_BIN2R},
+\link{read_XSYG2R},
 \link{extract_IrradiationTimes}, \link{calc_FadingCorr}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 Christoph Burow, University of Cologne (Germany)
 , RLum Developer Team}
 \keyword{datagen}

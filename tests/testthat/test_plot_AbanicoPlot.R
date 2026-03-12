@@ -2,6 +2,11 @@
 data(ExampleData.DeValues, envir = environment())
 ExampleData.DeValues <- ExampleData.DeValues$CA1
 
+CAM <- calc_CentralDose(ExampleData.DeValues,
+                        plot = FALSE, verbose = FALSE)
+FMM <- calc_FiniteMixture(ExampleData.DeValues, sigmab = 0.01,
+                          n.components = 2:3, plot = FALSE, verbose = FALSE)
+
 test_that("input validation", {
   testthat::skip_on_cran()
 
@@ -21,6 +26,8 @@ test_that("input validation", {
       "Error: After removing invalid entries, nothing is plotted"),
       "Data set 1 empty or consisting of only 1 row, removed")
 
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, na.rm = "error"),
+               "'na.rm' should be a single logical value")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, plot = FALSE),
                "'plot.ratio' should be a single positive value")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, xlab = "x"),
@@ -35,6 +42,8 @@ test_that("input validation", {
                "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, dispersion = "p500"),
                "'dispersion' should be one of 'qr', 'sd', '2sd' or a percentile")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, dispersion = c("p95", "p86")),
+               "'dispersion' should have length 1")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary = 5),
                "'summary' should be of class 'character'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = 5),
@@ -129,9 +138,6 @@ test_that("Test examples from the example page", {
                    dispersion = "p17"))
 
   ## now with user-defined green line for minimum age model
-  CAM <- calc_CentralDose(ExampleData.DeValues,
-                          plot = FALSE, verbose = FALSE)
-
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
                    line = list(CAM),
                    line.col = "darkgreen",
@@ -380,7 +386,6 @@ test_that("Test graphical snapshot", {
                                                  pch = c(2, 6),
                                                  angle = c(30, 50),
                                                  summary = c("n", "in.2s", "median")))
-
     vdiffr::expect_doppelganger("line frame legend rotated",
                                 plot_AbanicoPlot(data = data.list,
                                                  rotate = TRUE,
@@ -398,5 +403,17 @@ test_that("Test graphical snapshot", {
                                                  pch = c(2, 6),
                                                  angle = c(30, 50),
                                                  summary = c("n", "in.2s", "median")))
+
+    vdiffr::expect_doppelganger("CAM",
+                                plot_AbanicoPlot(data = CAM,
+                                                 line.col = "darkseagreen",
+                                                 summary.pos = "bottomleft"))
+    vdiffr::expect_doppelganger("CAM cex",
+                                plot_AbanicoPlot(data = CAM, cex = 2))
+
+    vdiffr::expect_doppelganger("FMM",
+                                plot_AbanicoPlot(data = FMM, rotate = TRUE))
+    vdiffr::expect_doppelganger("FMM cex",
+                                plot_AbanicoPlot(data = FMM, rotate = TRUE, cex = 2))
   })
 })

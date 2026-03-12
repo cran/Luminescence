@@ -4,7 +4,12 @@
 \alias{extract_ROI}
 \title{Extract Pixel Values through Circular Region-of-Interests (ROI) from an Image}
 \usage{
-extract_ROI(object, roi, roi_summary = "mean", plot = FALSE)
+extract_ROI(
+  object,
+  roi,
+  roi_summary = c("mean", "median", "sd", "sum"),
+  plot = FALSE
+)
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Data.Image}, \link{array} or \link{matrix} (\strong{required}): input image data}
@@ -60,11 +65,11 @@ extract_ROI(object = m, roi = roi, plot = TRUE)
 \linkS4class{RLum.Data.Image}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. extract_ROI(): Extract Pixel Values through Circular Region-of-Interests (ROI) from an Image. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. extract_ROI(): Extract Pixel Values through Circular Region-of-Interests (ROI) from an Image. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{manip}

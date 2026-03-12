@@ -33,7 +33,7 @@ enable/disable the plot output.}
 
 \item{...}{further arguments that can be passed to control the plot output.
 Supported are \code{main}, \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{type}, \code{lty}, \code{lwd}.
-For non common plotting parameters, see the details section.}
+For non-common plotting parameters, see the details section.}
 }
 \value{
 Returns an S4 object of type \linkS4class{RLum.Results}.
@@ -130,7 +130,7 @@ e.g., the legend can be fully customised by disabling the standard legend
 and using the function \link[graphics:legend]{graphics::legend} instead.
 }
 \section{Function version}{
- 0.3.2
+ 0.3.3
 }
 
 \examples{
@@ -157,7 +157,6 @@ plot(results$OD_total)
 ##Example 4
 ##show the filters using the interactive mode
 plot_FilterCombinations(filters = list(filter1, filter2), interactive = TRUE)
-
 }
 
 }
@@ -165,11 +164,11 @@ plot_FilterCombinations(filters = list(filter1, filter2), interactive = TRUE)
 \linkS4class{RLum.Results}, \link{approx}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

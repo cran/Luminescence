@@ -19,7 +19,7 @@ path and file name of the XSYG file or an \linkS4class{RLum.Analysis}
 produced by the function \link{read_XSYG2R};
 alternatively, a \code{list} of \linkS4class{RLum.Analysis} can be provided.
 
-\strong{Note}: If an \linkS4class{RLum.Analysis} is used, any input for
+\strong{Note:} If an \linkS4class{RLum.Analysis} is used, any input for
 the arguments \code{file.BINX} and \code{recordType} will be ignored!}
 
 \item{file.BINX}{\link{character} (\emph{optional}):
@@ -177,7 +177,7 @@ write.table(x = get_RLum(output),
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. extract_IrradiationTimes(): Extract Irradiation Times from an XSYG-file or RLum.Analysis object. Function version 0.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. extract_IrradiationTimes(): Extract Irradiation Times from an XSYG-file or RLum.Analysis object. Function version 0.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -185,11 +185,12 @@ Duller, G.A.T., 2015. The Analyst software package for luminescence data: overvi
 recent improvements. Ancient TL 33, 35-42. \doi{10.26034/la.atl.2015.489}
 }
 \seealso{
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Results}, \linkS4class{Risoe.BINfileData},
+\linkS4class{RLum.Analysis}, \linkS4class{RLum.Results},
+\linkS4class{Risoe.BINfileData},
 \link{read_XSYG2R}, \link{read_BIN2R}, \link{write_R2BIN}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{IO}
 \keyword{manip}

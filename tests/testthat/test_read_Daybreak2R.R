@@ -11,6 +11,8 @@ test_that("Test functionality", {
   expect_type(read_Daybreak2R(txt.file), "list")
   expect_type(read_Daybreak2R(txt.file, txtProgressBar = FALSE),
               "list")
+  expect_type(read_Daybreak2R(test_path("_data/daybreak-tests/morethan4cols.txt")),
+              "list")
   })
   expect_silent(read_Daybreak2R(txt.file, verbose = FALSE))
 
@@ -22,13 +24,15 @@ test_that("Test functionality", {
   })
   expect_silent(read_Daybreak2R(dat.file, verbose = FALSE))
 
+  ## lowercase extension
+  expect_s3_class(read_Daybreak2R(test_path("_data/daybreak-tests/lowercase.dat"),
+                                  raw = TRUE, verbose = FALSE),
+                  "data.table")
+
   ## list
   SW({
   expect_type(read_Daybreak2R(list(dat.file)), "list")
   })
-  expect_silent(res <- read_Daybreak2R(list()))
-  expect_type(res, "list")
-  expect_length(res, 0)
 })
 
 test_that("input validation", {
@@ -37,26 +41,50 @@ test_that("input validation", {
   expect_error(read_Daybreak2R(data.frame()),
                "'file' should be of class 'character' or 'list'")
   expect_error(read_Daybreak2R(character(0)),
-               "'file' should have length 1")
+               "'file' cannot be an empty character")
+  expect_error(read_Daybreak2R(list()),
+               "'file' cannot be an empty list")
+  expect_error(read_Daybreak2R("not-existing"),
+               "File '.*not-existing' does not exist") # windows CI needs the regexp
 
   ## directory
+  SW({
   expect_error(
-    expect_output(read_Daybreak2R(
+    expect_message(read_Daybreak2R(
       file = system.file("extdata", package = "Luminescence")),
-      "Directory detected, trying to extract"),
-    "File does not exist")
+      "Directory detected, looking for '.txt$' files"),
+    "File '.*.txt' doesn't appear to be in Daybreak format")
+  })
 
-  ## test presence of non-ascii characters
   expect_error(read_Daybreak2R(
     file = system.file("extdata/BINfile_V8.binx", package = "Luminescence"),
     verbose = FALSE),
-    "The provided file is not ASCII and cannot be imported")
+    "File extension 'binx' is not supported, only 'DAT' and 'txt' are valid")
 
-  file.nonascii <- tempfile()
+  ## test presence of non-ascii characters
+  file.nonascii <- tempfile(fileext = ".txt")
   writeLines(gsub("ScriptFile", "ScriptFile \uf6", # ö
                   readLines(system.file("extdata/Daybreak_TestFile.txt",
                                         package = "Luminescence"))),
              file.nonascii)
   expect_error(read_Daybreak2R(file = file.nonascii, verbose = FALSE),
     "The provided file is not ASCII and cannot be imported")
+})
+
+test_that("command records", {
+  testthat::skip_on_cran()
+
+  res <- read_Daybreak2R(test_path("_data/daybreak-tests/command-1.txt"),
+                         verbose = FALSE)
+  expect_type(res, "list")
+  expect_length(res, 1)
+  expect_length(res[[1]], 2)
+  expect_output(print(res[[1]]@records[[2]]))
+
+  res <- read_Daybreak2R(test_path("_data/daybreak-tests/command-2.txt"),
+                         verbose = FALSE)
+  expect_type(res, "list")
+  expect_length(res, 1)
+  expect_length(res[[1]], 11)
+  expect_true(all(!is.na(res[[1]]@records[[11]]@data)))
 })

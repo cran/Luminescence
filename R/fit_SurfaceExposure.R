@@ -23,7 +23,7 @@
 #' saturation dose (`D0`) (in Gy) must be provided. The function will then fit
 #' equation 12 in Sohbati et al. (2012b) to the data.
 #'
-#' **NOTE**: Currently, this function does **not** consider the variability
+#' **Note:** Currently, this function does **not** consider the variability
 #' of the dose rate with sample depth (`x`)! In the original equation the dose
 #' rate `D` is an arbitrary function of `x` (term `D(x)`), but here `D` is assumed
 #' constant.
@@ -32,9 +32,8 @@
 #' If `data` is [list] of multiple `data.frame`s, each representing a separate
 #' sample, the function automatically performs a global fit to the data. This
 #' may be useful to better constrain the parameters `sigmaphi` or `mu` and
-#' **requires** that known ages for each sample is provided
+#' **requires** that a known age for each sample
 #' (e.g., `age = c(100, 1000)` if `data` is a list with two samples).
-#'
 #'
 #' @param data [data.frame] or [list] (**required**):
 #' Measured OSL surface exposure data with the following structure:
@@ -98,7 +97,7 @@
 #'
 #' @param ... Further parameters passed to [plot].
 #' Custom parameters include:
-#' - `verbose` ([logical]): show or hide console output
+#' - `verbose` ([logical]): enable/disable output to the terminal
 #' - `line_col`: Colour of the fitted line
 #' - `line_lty`: Type of the fitted line (see `lty` in `?par`)
 #' - `line_lwd`: Line width of the fitted line (see `lwd` in `?par`)
@@ -143,7 +142,7 @@
 #'
 #' @author Christoph Burow, University of Cologne (Germany)
 #'
-#' @seealso  [ExampleData.SurfaceExposure], [minpack.lm::nlsLM]
+#' @seealso  [Luminescence::ExampleData.SurfaceExposure], [minpack.lm::nlsLM]
 #'
 #' @references
 #'
@@ -173,7 +172,6 @@
 #'  sigmaphi = 5e-10)
 #' get_RLum(results)
 #'
-#'
 #' ## Example 2 - Single sample and considering dose rate
 #' # Known parameters: 10000 a, mu = 0.9, sigmaphi = 5e-10,
 #' # dose rate = 2.5 Gy/ka, D0 = 40 Gy
@@ -197,7 +195,6 @@
 #'   sigmaphi = 5e-10)
 #' get_RLum(results)
 #'
-#'
 #' ## Example 4 - Multiple samples (global fit) and considering dose rate
 #' # Known parameters: ages = 1e2, 1e3, 1e4, 1e5, 1e6 a, mu = 0.9, sigmaphi = 5e-10,
 #' # dose rate = 1.0 Ga/ka, D0 = 40 Gy
@@ -209,7 +206,7 @@
 #'  sigmaphi = 5e-10,
 #'  Ddot = 1,
 #'  D0 = 40)
-#'get_RLum(results)
+#' get_RLum(results)
 #'
 #' @export
 fit_SurfaceExposure <- function(
@@ -239,6 +236,9 @@ fit_SurfaceExposure <- function(
   ## Integrity checks -------------------------------------------------------
 
   .validate_not_empty(data)
+  .validate_logical_scalar(weights)
+  if (!is.null(mu))
+    .validate_not_empty(mu)
 
   ## Data type validation
   if (inherits(data, "RLum.Results"))
@@ -252,6 +252,8 @@ fit_SurfaceExposure <- function(
 
   ## For global fitting of multiple data sets 'data' must be a list
   if (inherits(data, "list")) {
+    lapply(data, function(x) .validate_class(x, "data.frame",
+                                             name = "All elements of 'data'"))
 
     # Global fitting requires and equal amount of ages to be provided
     if (length(data) != length(age))
@@ -296,6 +298,13 @@ fit_SurfaceExposure <- function(
   if (!is.null(age) && anyNA(age)) age <- NULL
   if (!is.null(sigmaphi) && anyNA(sigmaphi)) sigmaphi <- NULL
   if (!is.null(mu) && anyNA(mu)) mu <- NULL
+  .validate_class(mu, "numeric", null.ok = TRUE)
+  .validate_positive_scalar(sigmaphi, null.ok = TRUE)
+  .validate_logical_scalar(settings$verbose, name = "'verbose'")
+  .validate_logical_scalar(plot)
+  .validate_logical_scalar(legend)
+  .validate_logical_scalar(error_bars)
+  .validate_logical_scalar(coord_flip)
 
   ## Weighting options (only available for global fitting)
   if (ncol(data) >= 3 && weights && !global_fit)

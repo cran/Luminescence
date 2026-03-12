@@ -12,7 +12,7 @@
 #' specific fraction of saturation of a feldspar and also to calculate fading
 #' corrected age using this model. \eqn{\rho}' (`rhop`), the density of recombination
 #' centres, is a crucial parameter of this model and must be determined
-#' separately from a fading measurement. The function [analyse_FadingMeasurement]
+#' separately from a fading measurement. The function [Luminescence::analyse_FadingMeasurement]
 #' can be used to calculate the sample specific \eqn{\rho}' value.
 #'
 #' **Kars et al. (2008) -- Single saturating exponential**
@@ -37,7 +37,7 @@
 #' Using fit parameters \eqn{A} and \eqn{D_0}, the function then computes a natural dose
 #' response curve using the environmental dose rate, \eqn{\dot{D}} (Gy/s) and equations
 #' `[1]` and `[2]`. Computed \eqn{\frac{L_x}{T_x}} values are then fitted using the
-#' [fit_DoseResponseCurve] function and the laboratory measured LnTn can then
+#' [Luminescence::fit_DoseResponseCurve] function and the laboratory measured LnTn can then
 #' be interpolated onto this curve to determine the fading corrected
 #' \eqn{D_e} value, from which the fading corrected age is calculated.
 #'
@@ -57,7 +57,8 @@
 #'
 #' **Level of saturation**
 #'
-#' The [calc_Huntley2006] function also calculates the level of saturation (\eqn{\frac{n}{N}})
+#' The [Luminescence::calc_Huntley2006] function also calculates the level of
+#' saturation (\eqn{\frac{n}{N}})
 #' and the field saturation (i.e. athermal steady state, (n/N)_SS) value for
 #' the sample under investigation using the sample specific \eqn{\rho}',
 #' unfaded \eqn{D_0} and \eqn{\dot{D}} values, following the approach of Kars et al. (2008).
@@ -106,7 +107,7 @@
 #' [x, ]|  Rx     | LxTx | LxTx error |
 #'
 #' ```
-#' **NOTE:** The function assumes the first row of the data to be the
+#' **Note:** The function assumes the first row of the data to be the
 #' `Ln/Tn`-value. If you want to provide more than one `Ln/Tn`-values, consider
 #' using argument `LnTn`.
 #'
@@ -129,7 +130,7 @@
 #' this value must be calculated beforehand and used in the first row in the
 #' data frame for argument `data`.
 #'
-#' **NOTE:** This argument should **only** be used to provide more than one
+#' **Note:** This argument should **only** be used to provide more than one
 #' `Ln/Tn`-value. If you provide `LnTn`-values with this argument, the data
 #' frame for the `data`-argument **must not** contain any `LnTn`-values.
 #'
@@ -167,7 +168,7 @@
 #' e.g. `c(0, 0, 0, 0)`. The values of the vectors are, respectively, for
 #' parameters `a`, `D0`, `c` and `d` in that order (parameter `d` is ignored
 #' when `fit.method = "EXP"`). More details can be found in
-#' [fit_DoseResponseCurve].
+#' [Luminescence::fit_DoseResponseCurve].
 #'
 #' @param cores [integer] (*with default*):
 #' The number of cores to use. This will be capped to the number of available
@@ -188,15 +189,15 @@
 #' - `cex` [numeric]: Scaling of the plot (default = 1)
 #' - `maxiter` [numeric]: Number of iteration limits for nls fitting
 #' - `trace` [logical]: Enable/disable value tracing the terminal during fitting
-#' **Note** that it is generally advised to have a large number of Monte Carlo
+#' **Note:** it is generally advised to have a large number of Monte Carlo
 #' iterations for the results to converge. Decreasing the number of iterations
 #' will often result in unstable estimates.
 #'
-#' All other arguments are passed to [plot] and [fit_DoseResponseCurve] (in
+#' All other arguments are passed to [plot] and [Luminescence::fit_DoseResponseCurve] (in
 #' particular `mode` for the De calculation mode, `fit.force_through_origin`,
 #' and `fit.bounds`).
 #'
-#' @return An [RLum.Results-class] object is returned:
+#' @return An [Luminescence::RLum.Results-class] object is returned:
 #'
 #' Slot: **@data**\cr
 #'
@@ -224,7 +225,7 @@
 #' @author
 #' Georgina E. King, University of Lausanne (Switzerland) \cr
 #' Christoph Burow, University of Cologne (Germany) \cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
 #' @keywords datagen

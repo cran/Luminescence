@@ -1,10 +1,11 @@
-#' Transform a CW-OSL curve into a pPM-OSL curve via interpolation under
+#' @title Transform a CW-OSL curve into a pPM-OSL curve via interpolation under
 #' parabolic modulation conditions
 #'
-#' Transforms a conventionally measured continuous-wave (CW) OSL-curve into a
+#' @description Transforms a conventionally measured continuous-wave (CW) OSL-curve into a
 #' pseudo parabolic modulated (pPM) curve under parabolic modulation conditions
 #' using the interpolation procedure described by Bos & Wallinga (2012).
 #'
+#' @details
 #' The complete procedure of the transformation is given in Bos & Wallinga
 #' (2012). The input `data.frame` consists of two columns: time (t) and
 #' count values (CW(t))
@@ -45,21 +46,14 @@
 #' (7)
 #' Combine all values and truncate all values for t' > `max(t)`
 #'
-#' **NOTE:**
+#' **Note:**
 #' The number of values for t' < `min(t)` depends on the stimulation
 #' period `P`. To avoid the production of too many artificial data at the
 #' raising tail of the determined pPM curve, it is recommended to use the
 #' automatic estimation routine for `P`, i.e. provide no value for
 #' `P`.
 #'
-#' @param values [RLum.Data.Curve-class] or [data.frame] (**required**):
-#' [RLum.Data.Curve-class] or `data.frame` with measured curve data of type
-#' stimulation time (t) (`values[,1]`) and measured counts (cts) (`values[,2]`)
-#'
-#' @param P [vector] (*optional*):
-#' stimulation period in seconds. If no value is given, the optimal value is
-#' estimated automatically (see details). Greater values of P produce more
-#' points in the rising tail of the curve.
+#' @inheritParams convert_CW2pLMi
 #'
 #' @return
 #' The function returns the same data type as the input data type with
@@ -86,34 +80,33 @@
 #' should be limited to avoid artificial intensity data. If `P` is
 #' provided manually, not more than two points are extrapolated.
 #'
-#' @section Function version: 0.2.2
+#' @section Function version: 0.2.4
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
-#'
-#' Based on comments and suggestions from:\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
+#' Based on comments and suggestions from:
 #' Adrie J.J. Bos, Delft University of Technology, The Netherlands
 #'
-#' @seealso [convert_CW2pLM], [convert_CW2pLMi], [convert_CW2pHMi],
-#' [fit_LMCurve], [RLum.Data.Curve-class]
+#' @seealso [Luminescence::convert_CW2pLM], [Luminescence::convert_CW2pLMi], [Luminescence::convert_CW2pHMi],
+#' [Luminescence::fit_LMCurve], [Luminescence::RLum.Data.Curve-class]
 #'
 #' @references
 #' Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL
-#' signal components. Radiation Measurements, 47, 752-758.
+#' signal components. Radiation Measurements 47, 752-758.
 #'
 #' **Further Reading**
 #'
 #' Bulur, E., 1996. An Alternative Technique For
-#' Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements,
+#' Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements
 #' 26, 701-709.
 #'
 #' Bulur, E., 2000. A simple transformation for converting CW-OSL curves to
-#' LM-OSL curves. Radiation Measurements, 32, 141-145.
+#' LM-OSL curves. Radiation Measurements 32, 141-145.
 #'
 #' @keywords manip
 #'
 #' @examples
-#'
 #'
 #' ##(1)
 #' ##load CW-OSL curve data
@@ -157,39 +150,22 @@
 #'
 #' @export
 convert_CW2pPMi<- function(
-  values,
-  P
+  object,
+  P = NULL,
+  ...
 ) {
   .set_function_name("convert_CW2pPMi")
   on.exit(.unset_function_name(), add = TRUE)
 
+  ## deprecated argument
+  if ("values" %in% ...names()) {
+    object <- list(...)$values
+    .deprecated(old = "values", new = "object", since = "1.2.0")
+  }
+
   ## Integrity checks -------------------------------------------------------
-
-  ##(1) data.frame or RLum.Data.Curve object?
-  .validate_class(values, c("data.frame", "RLum.Data.Curve"))
-  .validate_not_empty(values)
-  if (ncol(values) < 2) {
-    .throw_error("'values' should have 2 columns")
-  }
-
-  ##(2) if the input object is an 'RLum.Data.Curve' object check for allowed curves
-  if (inherits(values, "RLum.Data.Curve")) {
-    if(!grepl("OSL", values@recordType) & !grepl("IRSL", values@recordType)){
-      .throw_error("recordType ", values@recordType,
-                   " is not allowed for the transformation")
-    }
-
-    temp.values <- as(values, "data.frame")
-
-  }else{
-    temp.values <- values
-  }
-
-  ## remove NAs
-  temp.values <- na.exclude(temp.values)
-  if (nrow(temp.values) < 2) {
-    .throw_error("'values' should have at least 2 non-missing values")
-  }
+  temp.values <- .prepare_CW2pX(object)
+  .validate_positive_scalar(P, null.ok = TRUE)
 
   # (3) Transform values ------------------------------------------------------
 
@@ -202,7 +178,7 @@ convert_CW2pPMi<- function(
   ##set P
   ##if no values for P is set selected a P value for a maximum of
   ##two extrapolation points
-  if (missing(P)) {
+  if (is.null(P)) {
     i<-1
     P<-1/i
     t.transformed<-(1/3)*(1/P^2)*t^3
@@ -220,36 +196,18 @@ convert_CW2pPMi<- function(
 
   ##interpolate values, values beyond the range return NA values
   CW_OSL.interpolated <- approx(t, CW_OSL.log, xout=t.transformed, rule=1 )
+  if (all(is.na(CW_OSL.interpolated$y))) {
+    .throw_error("All points are outside the interpolation range")
+  }
 
   ##combine t.transformed and CW_OSL.interpolated in a data.frame
   temp<-data.frame(x=t.transformed, y = unlist(CW_OSL.interpolated$y))
 
 
   # (5) Extrapolate first values of the curve ---------------------------------
-
-  ##(a) - find index of first rows which contain NA values (needed for extrapolation)
-  temp.sel.id <- min(which(!is.na(temp[, 2])))
-
-  ##(b) - fit linear function
-  fit.lm <- stats::lm(y ~ x, data.frame(x = t[1:2], y = CW_OSL.log[1:2]))
-
-  ##select values to extrapolate and predict (extrapolate) values based on the fitted function
-  x.i<-data.frame(x=temp[1:(min(temp.sel.id)-1),1])
-  y.i<-predict(fit.lm,x.i)
-
-  ##replace NA values by extrapolated values
-  temp[1:length(y.i),2]<-y.i
-
-  ##set method values
-  temp.method<-c(rep("extrapolation",length(y.i)),rep("interpolation",(length(temp[,2])-length(y.i))))
-
-
-  ##print a warning message for more than two extrapolation points
-  if (temp.sel.id > 2) {
-    .throw_warning("t' is beyond the time resolution: only two data points ",
-                   "have been extrapolated, the first ", temp.sel.id - 3,
-                   " points were set to 0")
-  }
+  res <- .extrapolate_first(temp, t = t[1:2], y = CW_OSL.log[1:2])
+  temp <- res$df
+  temp.method <- res$method
 
   # (6) Convert, transform and combine values ---------------------------------
 
@@ -267,18 +225,18 @@ convert_CW2pPMi<- function(
   # (7) Return values ---------------------------------------------------------
 
   ##returns the same data type as the input
-  if (is.data.frame(values)) {
+  if (is.data.frame(object)) {
     return(temp.values)
   }
 
     ##add old info elements to new info elements
-    temp.info <- c(values@info,
+    temp.info <- c(object@info,
                    CW2pPMi.x.t = list(temp.values$x.t),
                    CW2pPMi.method = list(temp.values$method))
 
   set_RLum(
       class = "RLum.Data.Curve",
-      recordType = values@recordType,
+      recordType = object@recordType,
       data = as.matrix(temp.values[,1:2]),
       info = temp.info)
 }

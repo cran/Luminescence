@@ -10,7 +10,7 @@ test_that("test RLum.Analysis S3 methods", {
   expect_s4_class(subset(analysis), "RLum.Analysis")
   expect_equal(length(analysis), 2)
   expect_length(rep(analysis, 2), 2)
-  expect_equal(names(analysis), c("RF", "RF"))
+  expect_equal(names(analysis), c("RF (NA)", "RF (NA)"))
   expect_type(as.list(analysis), "list")
   expect_equal(is(analysis), c("RLum.Analysis", "RLum"))
   expect_s4_class(merge(analysis, analysis), "RLum.Analysis")
@@ -79,6 +79,8 @@ test_that("test RLum.Data.Curve S3 methods", {
   expect_visible(curve / curve)
   expect_vector(curve[1])
   expect_equal(curve$a, c(a = "test"))
+  expect_error(rep(curve, numeric()),
+               "'times' should be a single positive integer value")
 })
 
 test_that("test RLum.Data.Image S3 methods", {

@@ -16,7 +16,7 @@ test_that("input validation", {
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "error"),
                "'plot.type' should be one of 'contour', 'persp', 'single'")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, norm = "error"),
-               "'norm' should be one of 'min', 'max' or NULL")
+               "'norm' should be one of 'max', 'min', 'first', 'last', 'huot' or")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bg.spectrum = "error"),
                "'bg.spectrum' should be of class 'RLum.Data.Spectrum', 'matrix' or")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bin.rows = 1.7),
@@ -24,10 +24,20 @@ test_that("input validation", {
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bin.cols = 0),
                "'bin.cols' should be a single positive integer value")
 
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, xlim = 1.2),
+               "'xlim' should be of class 'numeric' and have length 2")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, xlim = c(0, 100)),
       "No data left after applying 'xlim' and 'ylim'")
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, xlim = c(NA, 1.2)),
+               "No data left after applying 'xlim' and 'ylim'")
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, ylim = 1.2),
+               "'ylim' should be of class 'numeric' and have length 2")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, ylim = c(5, 10)),
       "No data left after applying 'xlim' and 'ylim'")
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, ylim = c(NA_real_, NA_real_)),
+               "No data left after applying 'xlim' and 'ylim'")
+  expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, zlim = 1.2),
+               "'zlim' should be of class 'numeric' and have length 2")
   expect_error(plot_RLum.Data.Spectrum(TL.Spectrum, bg.spectrum = bg.spectrum,
                                        ylim = c(0, 100)),
                "No background channels left after applying 'ylim'")
@@ -59,8 +69,9 @@ test_that("check functionality", {
                    "Duplicated column names found")
 
     ## no plot
-    expect_type(plot(TL.Spectrum, plot = FALSE),
+    expect_type(plot_RLum.Data.Spectrum(TL.Spectrum, plot = FALSE),
                 "double")
+    expect_null(plot(TL.Spectrum, plot = FALSE))
 
     ##test background subtraction ... with bgchannel
     expect_warning(plot_RLum.Data.Spectrum(
@@ -136,6 +147,20 @@ test_that("check functionality", {
         showscale = TRUE
       )
     ))
+
+  ## normalisation replaces all values with 0
+  expect_warning(expect_message(expect_null(
+      plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "persp",
+                              bg.spectrum = bg.spectrum, norm = "min")),
+      "Error: Insufficient data for plotting, NULL returned"),
+      "Curve normalisation produced Inf/NaN values, values replaced by 0")
+
+  ## log transformation with negative data
+  suppressWarnings( # surface extends beyond the box
+  expect_warning(plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "persp",
+                                         log = "z", norm = "huot"),
+                 "Data contains non-positive values, set to NA")
+  )
 
   ## more coverage
   plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "multiple.lines",
@@ -280,4 +305,12 @@ test_that("regression tests", {
                           data = spec@data[, 15:16, drop = FALSE])
   expect_silent(plot_RLum.Data.Spectrum(spec, bg.spectrum = bg.spectrum,
                                         xlim = c(0, 100), ylim = c(0, 10)))
+
+  ## issue 1307
+  expect_warning(plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "single",
+                                         log = "z", norm = "huot"),
+                 "Data contains non-positive values, set to NA")
+  expect_warning(plot_RLum.Data.Spectrum(TL.Spectrum, plot.type = "transect",
+                                         log = "z", norm = "huot"),
+                 "Data contains non-positive values, set to NA")
 })

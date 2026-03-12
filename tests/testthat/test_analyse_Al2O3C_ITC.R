@@ -15,6 +15,8 @@ test_that("input validation", {
                "'object' should be of class 'RLum.Analysis' or a 'list' of")
   expect_error(analyse_Al2O3C_ITC(set_RLum("RLum.Analysis")),
                "'object' cannot be an empty RLum.Analysis")
+  expect_error(analyse_Al2O3C_ITC(list()),
+               "'object' cannot be an empty list")
   expect_error(analyse_Al2O3C_ITC(list(data_ITC, "test")),
                "All elements of 'object' should be of class 'RLum.Analysis'")
   expect_error(analyse_Al2O3C_ITC(data_ITC, recordType = NA),
@@ -28,11 +30,8 @@ test_that("input validation", {
                "'dose_points' should be of class 'numeric' or 'list'")
   expect_error(analyse_Al2O3C_ITC(data_ITC, dose_points = list(NA)),
                "All elements of 'dose_points' should be of class 'numeric'")
-
-  SW({
-  expect_warning(analyse_Al2O3C_ITC(data_ITC, signal_integral = 0),
-                 "'signal_integral' corrected to 1:99")
-  })
+  expect_error(analyse_Al2O3C_ITC(data_ITC, signal_integral = 0),
+               "'signal_integral' is of length 0 after removing values smaller")
 })
 
 test_that("check functionality", {
@@ -44,6 +43,22 @@ test_that("check functionality", {
                                                 dose_points = list(2))),
                  "Nothing was merged as the object list was found to be empty")
   })
+
+  ## integral_input
+  set.seed(1)
+  res1 <- analyse_Al2O3C_ITC(data_ITC, signal_integral = c(42.1, 42.3),
+                             integral_input = "measurement", verbose = FALSE)
+  set.seed(1)
+  res2 <- analyse_Al2O3C_ITC(data_ITC, signal_integral = 1:3,
+                             integral_input = "channel", verbose = FALSE)
+  res1@info <- res2@info <- list() # remove $call
+  res1@data$fit <- res2@data$fit <- NULL
+  res1@.uid <- res2@.uid <- NA_character_
+  expect_equal(res1, res2)
+
+  expect_warning(analyse_Al2O3C_ITC(data_ITC, signal_integral = 1:4,
+                                    integral_input = "measurement", verbose = FALSE),
+                 "from time to channels failed: expected values in 42.1:51.9")
 })
 
 test_that("snapshot tests", {

@@ -108,8 +108,8 @@ please check, e.g., package \code{'tgcd'}.
 The emission spectra (on an energy scale) can be best described as the sum of multiple
 Gaussian components:
 
-'\deqn{
-y = \Sigma  Ci * 1/(\sigma_{i} * \sqrt(2 * \pi)) * exp(-1/2 * ((x - \mu_{i})/\sigma_{i}))^2)
+\deqn{
+y = \sum_i \frac{C_i}{\sigma_{i} \sqrt{2 \pi}} exp(-1/2 ((x - \mu_{i})/\sigma_{i})^2)
 }
 
 with the parameters \eqn{\sigma} (peak width) and \eqn{\mu} (peak centre) and \eqn{C}
@@ -124,8 +124,8 @@ The spectrum deconvolution consists of the following steps:
 \item Fitting via \link[minpack.lm:nls.lm]{minpack.lm::nls.lm}\cr
 }
 
-The peak finding is realised by an approach (re-)suggested by Petr Pikal via the R-help
-mailing list (\verb{https://stat.ethz.ch/pipermail/r-help/2005-November/thread.html}) in November 2005.
+The peak finding is based on an approach (re-)suggested by Petr Pikal in
+November 2005 in the R-help mailing list (https://stat.ethz.ch/pipermail/r-help/2005-November/thread.html).
 This goes back to even earlier discussion in 2001 based on Prof Brian Ripley's idea.
 It smartly uses the functions \link[stats:embed]{stats::embed} and \link{max.col} to identify peaks positions.
 For the use in this context, the algorithm has been further modified to scale on the
@@ -190,12 +190,12 @@ results <- fit_EmissionSpectra(
 \link{convert_Wavelength2Energy}, \link[minpack.lm:nls.lm]{minpack.lm::nls.lm}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2025. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

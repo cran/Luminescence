@@ -29,24 +29,24 @@ S4 object of class \code{RLum}}
 
 \item{...}{further arguments passed to the specific class method}
 
-\item{k}{\code{\link{smooth_RLum}}; \link{integer} (\emph{with default}):
+\item{k}{\link{smooth_RLum}; \link{integer} (\emph{with default}):
 window for the rolling mean or median. If \code{NULL}, this set automatically
 (ignored if \code{method = "Carter_etal_2018"}).}
 
-\item{fill}{\code{\link{smooth_RLum}}; \link{numeric} (\emph{with default}):
+\item{fill}{\link{smooth_RLum}; \link{numeric} (\emph{with default}):
 value used to pad the result so to have the same length as the input.}
 
-\item{align}{\code{\link{smooth_RLum}}; \link{character} (\emph{with default}):
+\item{align}{\link{smooth_RLum}; \link{character} (\emph{with default}):
 one of \code{"right"}, \code{"center"} or \code{"left"}, specifying whether the index
 of the result should be right-aligned (default), centred, or left-aligned
 compared to the rolling window of observations (ignored if
 \code{method = "Carter_etal_2018"}).}
 
-\item{method}{\code{\link{smooth_RLum}}; \link{character} (\emph{with default}):
+\item{method}{\link{smooth_RLum}; \link{character} (\emph{with default}):
 smoothing method to be applied: one of \code{"mean"}, \code{"median"} or
 \code{"Carter_etal_2018"}.}
 
-\item{p_acceptance}{\code{\link{smooth_RLum}}; \link{numeric} (\emph{with default}):
+\item{p_acceptance}{\link{smooth_RLum}; \link{numeric} (\emph{with default}):
 probability threshold of accepting a value to be a sample from a Poisson
 distribution (only used for \code{method = "Carter_etal_2018"}). Values that
 have a Poisson probability below the threshold are replaced by the average
@@ -63,7 +63,8 @@ function \code{.smoothing()}.
 }
 \section{Functions}{
 \itemize{
-\item \code{smooth_RLum(list)}: Returns a list of \linkS4class{RLum} objects that had been passed to \link{smooth_RLum}
+\item \code{smooth_RLum(list)}: Returns a list of \linkS4class{RLum} objects that had been passed to
+\link{smooth_RLum}
 
 \item \code{smooth_RLum(RLum.Analysis)}: Smoothing of \code{RLum.Data} records contained in the input object.
 
@@ -102,7 +103,7 @@ plot_RLum(smooth_RLum(curve))
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. smooth_RLum(): Smoothing of data for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. smooth_RLum(): Smoothing of data for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -115,6 +116,6 @@ implications for luminescence dating. Radiation Measurements 120, 267-273.
 \linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Analysis}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{utilities}

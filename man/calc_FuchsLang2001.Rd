@@ -73,7 +73,7 @@ temp<- calc_FuchsLang2001(ExampleData.DeValues$BT998, cvThreshold = 5)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2025. calc_FuchsLang2001(): Apply the model after Fuchs & Lang (2001) to a given De distribution. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Burow, C., 2026. calc_FuchsLang2001(): Apply the model after Fuchs & Lang (2001) to a given De distribution. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -86,11 +86,11 @@ small aliquots of quartz for reconstructing soil erosion in Greece.
 Quaternary Science Reviews 22, 1161-1167.
 }
 \seealso{
-\link{plot}, \link{calc_MinDose}, \link{calc_FiniteMixture}, \link{calc_CentralDose},
-\link{calc_CommonDose}, \linkS4class{RLum.Results}
+\link{plot}, \link{calc_MinDose}, \link{calc_FiniteMixture},
+\link{calc_CentralDose}, \link{calc_CommonDose}, \linkS4class{RLum.Results}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 Christoph Burow, University of Cologne (Germany)
 , RLum Developer Team}
 \keyword{dplot}

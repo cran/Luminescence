@@ -4,7 +4,7 @@
 #' This function applies the fading correction for the prediction of long-term
 #' fading as suggested by Lamothe et al., 2003. The function basically adjusts
 #' the $L_n/T_n$ values and fits a new dose-response curve using function
-#' [plot_GrowthCurve].
+#' [Luminescence::fit_DoseResponseCurve].
 #'
 #' @details
 #'
@@ -38,11 +38,11 @@
 #' `tc.g_value` is manually set to 2-days (`172800` s) because the function
 #' will internally recalculate values to an identical `tc` value.
 #'
-#' @param object [RLum.Results-class] [data.frame] (**required**):
+#' @param object [Luminescence::RLum.Results-class] [data.frame] (**required**):
 #' Input data for applying the fading correction, can be (1) a [data.frame]
 #' with three columns (`dose`, `LxTx`, `LxTx error`; see details), or (2) an
-#' [RLum.Results-class] object created by [analyse_SAR.CWOSL] or
-#' [analyse_pIRIRSequence].
+#' [Luminescence::RLum.Results-class] object created by [Luminescence::analyse_SAR.CWOSL] or
+#' [Luminescence::analyse_pIRIRSequence].
 #'
 #' @param dose_rate.envir [numeric] vector of length 2 (**required**):
 #' Environmental dose rate in mGy/a.
@@ -54,7 +54,7 @@
 #' @param g_value [numeric] vector of length 2 (**required**): g_value in
 #' %/decade *recalculated at the moment* the equivalent dose was calculated,
 #' i.e. `tc` is either similar for the *g*-value measurement **and** the
-#' De measurement or needs be to recalculated (cf. [calc_FadingCorr]).
+#' De measurement or needs be to recalculated (cf. [Luminescence::calc_FadingCorr]).
 #' Inserting a normalised g-value, e.g., normalised to 2-days , will
 #' lead to wrong results.
 #'
@@ -78,11 +78,11 @@
 #' @param verbose [logical] (*with default*): enable/disable output to the
 #' terminal.
 #'
-#' @param ... further arguments passed to function [plot_GrowthCurve].
+#' @param ... further arguments passed to [Luminescence::plot_DoseResponseCurve].
 #'
 #' @return
-#' The function returns an [RLum.Results-class] object and the graphical
-#' output produced by [plot_GrowthCurve].
+#' The function returns an [Luminescence::RLum.Results-class] object and the graphical
+#' output produced by [Luminescence::plot_DoseResponseCurve].
 #'
 #' -----------------------------------\cr
 #' `[ NUMERICAL OUTPUT ]`\cr
@@ -114,14 +114,16 @@
 #' Towards a prediction of long-term anomalous fading of feldspar IRSL. Radiation Measurements 37,
 #' 493-498.
 #'
-#' @section Function version: 0.1.0
+#' @section Function version: 0.1.1
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany), Norbert Mercier,
-#' IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
+#' @author
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
+#' Norbert Mercier, IRAMAT-CRP2A, Université Bordeaux Montaigne (France)
 #'
 #' @keywords datagen
 #'
-#' @seealso [plot_GrowthCurve], [calc_FadingCorr], [analyse_SAR.CWOSL], [analyse_pIRIRSequence]
+#' @seealso [Luminescence::fit_DoseResponseCurve], [Luminescence::plot_DoseResponseCurve],
+#' [Luminescence::calc_FadingCorr], [Luminescence::analyse_SAR.CWOSL], [Luminescence::analyse_pIRIRSequence]
 #'
 #' @examples
 #'
@@ -136,10 +138,8 @@
 #'##perform SAR analysis and set rejection criteria
 #'results <- analyse_SAR.CWOSL(
 #' object = object,
-#' signal.integral.min = 1,
-#' signal.integral.max = 2,
-#' background.integral.min = 900,
-#' background.integral.max = 1000,
+#' signal_integral = 1:2,
+#' background_integral = 900:900,
 #' verbose = FALSE,
 #' plot = FALSE,
 #' onlyLxTxTable = TRUE
@@ -273,27 +273,29 @@ calc_Lamothe2003 <- function(
 
 
   # Fitting ---------------------------------------------------------------------------------
-  ##set arguments
-  argument_list <- modifyList(list(
-    sample = data,
-    verbose = FALSE,
-    main = "Corrected Dose Response Curve",
-    xlab = "Dose [Gy]",
-    txtProgressBar = verbose,
-    output.plotExtended = FALSE,
-    output.plot = plot
-  ), val = list(...))
 
-  ##run plot function
-  par.default <- .par_defaults()
-  on.exit(par(par.default), add = TRUE)
-  fit_results <- do.call(what = plot_GrowthCurve, args = argument_list)
+  fit_results <- fit_DoseResponseCurve(data, verbose = FALSE)
 
   # Age calculation -----------------------------------------------------------------------------
   res <- get_RLum(fit_results)
   Age <- res[["De"]] / dose_rate.envir[1]
   s_Age <- sqrt((100 * res[["De.Error"]] / res[["De"]])^2 +
                 (100 * dose_rate.envir[2] / dose_rate.envir[1])^2) * Age / 100
+
+  if (plot) {
+    par.default <- .par_defaults()
+    on.exit(par(par.default), add = TRUE)
+
+    argument_list <- modifyList(list(
+        object = fit_results,
+        verbose = FALSE,
+        main = "Corrected Dose Response Curve",
+        xlab = "Dose [Gy]",
+        plot_extended = FALSE),
+        val = list(...))
+
+    do.call(plot_DoseResponseCurve, args = argument_list)
+  }
 
   # Terminal output -----------------------------------------------------------------------------
   if(verbose){

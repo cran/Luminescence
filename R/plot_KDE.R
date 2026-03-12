@@ -30,18 +30,18 @@
 #' - `"kurtosis"` (kurtosis)
 #' - `"skewness"` (skewness)
 #'
-#' **Note** that the input data for the statistic summary is sent to function
-#' [calc_Statistics] depending on the log-option for the z-scale. If
+#' **Note:** the input data for the statistic summary is sent to function
+#' [Luminescence::calc_Statistics] depending on the log-option for the z-scale. If
 #' `"log.z = TRUE"`, the summary is based on the logarithms of the input
 #' data. If `"log.z = FALSE"` the linearly-scaled data is used.
 #'
-#' **Note** as well, that `"calc_Statistics()"` calculates these statistic
+#' **Note:** [Luminescence::calc_Statistics] calculates these statistic
 #' measures in three different ways: `unweighted`, `weighted` and
 #' `MCM-based` (i.e., based on Monte Carlo Methods). By default, the
 #' MCM-based version is used. This can be controlled via the `summary.method`
 #' argument.
 #'
-#' @param data [data.frame], [vector] or [RLum.Results-class] object (**required**):
+#' @param data [data.frame], [vector] or [Luminescence::RLum.Results-class] object (**required**):
 #' for `data.frame`: either two columns: De (`values[,1]`) and De error
 #' (`values[,2]`), or one: De (`values[,1]`). If a numeric vector or a
 #' single-column data frame is provided, De error is assumed to be 10^-9
@@ -50,7 +50,7 @@
 #' `list` (e.g. `list(dataset1, dataset2)`).
 #'
 #' @param na.rm [logical] (*with default*):
-#' exclude NA values from the data set prior to any further operation.
+#' exclude `NA` values from the data set prior to any further operation.
 #'
 #' @param values.cumulative [logical] (*with default*):
 #' show cumulative individual data.
@@ -79,8 +79,8 @@
 #'
 #' @param summary.method [character] (*with default*):
 #' keyword indicating the method used to calculate the statistic summary.
-#' One out of `"MCM"` (default), `"weighted"` or `"unweighted"`.
-#' See [calc_Statistics] for details.
+#' One of `"MCM"` (default), `"weighted"` or `"unweighted"`.
+#' See [Luminescence::calc_Statistics] for details.
 #'
 #' @param bw [character], [numeric] (*with default*):
 #' bin-width, chose a numeric value for manual setting.
@@ -91,11 +91,11 @@
 #' The plot output is no 'probability density' plot (cf. the discussion
 #' of Berger and Galbraith in Ancient TL; see references)!
 #'
-#' @section Function version: 3.6.0
+#' @section Function version: 3.6.1
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @seealso [density], [plot]
 #'
@@ -162,7 +162,7 @@ plot_KDE <- function(
   rug = TRUE,
   summary = "",
   summary.pos = "sub",
-  summary.method = "MCM",
+  summary.method = c("MCM", "weighted", "unweighted"),
   bw = "nrd0",
   ...
 ) {
@@ -233,7 +233,7 @@ plot_KDE <- function(
   .validate_logical_scalar(order)
   .validate_logical_scalar(boxplot)
   .validate_logical_scalar(rug)
-  .validate_args(summary.method, c("MCM", "weighted", "unweighted"))
+  summary.method <- .validate_args(summary.method, c("MCM", "weighted", "unweighted"))
   .validate_class(summary, "character")
   if (is.numeric(summary.pos)) {
     .validate_length(summary.pos, 2)
@@ -678,7 +678,7 @@ plot_KDE <- function(
         boxplot.data[[i]] <- boxplot.i
       }
 
-      ## get new line hights
+      ## get new line heights
       l_height <- par()$cxy[2]
 
       for(i in 1:length(data)) {
@@ -745,16 +745,14 @@ plot_KDE <- function(
     ## optionally add rug
     if (rug) {
       for(i in 1:length(data)) {
-        for(j in 1:nrow(data[[i]])) {
           suppressWarnings( # some values will be clipped
-          rug(data[[i]][j, 1],
-              ticksize = 0.01 * l_height,
+          rug(data[[i]][, 1],
+              ticksize = l_height / (nrow(data[[i]]) * 4),
               side = 3,
               pos = 0,
               lwd = 1,
               col = col.value.rug[i])
           )
-        }
       }
     }
 

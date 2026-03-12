@@ -6,7 +6,7 @@
 \usage{
 plot_NRt(
   data,
-  log = FALSE,
+  log = "",
   smooth = c("none", "spline", "rmean"),
   k = 3,
   legend = TRUE,
@@ -18,8 +18,8 @@ plot_NRt(
 \item{data}{\link{list}, \link{data.frame}, \link{matrix} or \linkS4class{RLum.Analysis} (\strong{required}):
 X,Y data of measured values (time and counts). See details on individual data structure.}
 
-\item{log}{\link{character} (\emph{optional}):
-logarithmic axes (\code{c("x", "y", "xy")}).}
+\item{log}{\link{character} (\emph{with default}):
+logarithmic axes (\code{"x"}, \code{"y"}, \code{"xy"}) or \code{""} (default) for linear axes.}
 
 \item{smooth}{\link{character} (\emph{with default}):
 apply data smoothing. If \code{"none"} (default), no data smoothing is applied.
@@ -127,11 +127,10 @@ for (i in 1:length(aliquot)) {
 # reset graphical parameters
 par(mfrow = c(1, 1))
 
-
 } 
 
 \section{How to cite}{
-Burow, C., 2025. plot_NRt(): Visualise natural/regenerated signal ratios. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Burow, C., 2026. plot_NRt(): Visualise natural/regenerated signal ratios. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

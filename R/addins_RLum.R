@@ -23,23 +23,12 @@
 ##    package 'rstudioapi', 'devtools' and get happy.
 
 
-#'Install package development version
-#'
-#'The function uses the GitHub APconnection provided by Christoph Burow
-#'
-#'@author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
-#'
-#'@noRd
-.installDevelopmentVersion <- function(){
-  install_DevelopmentVersion(force_install = TRUE) # nocov
-}
-
 #'Search for TODOs in the source code and list them in the terminal
 #'
 #'This add-in is a tool developers may want to use to briefly list all open
 #'issues in the terminal, instead of using search and stepping through the results.
 #'
-#'@author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'@author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #'@noRd
 .listTODO <- function(){

@@ -15,6 +15,10 @@ test_that("input validation", {
                "'gSGC.type' should be one of '0-250' or '0-450'")
   expect_error(calc_gSGC(df, gSGC.type = "error"),
                "'gSGC.type' should be one of '0-250' or '0-450'")
+  expect_error(calc_gSGC(df, n.MC = 0),
+               "'n.MC' should be a single positive integer value")
+  expect_error(calc_gSGC(df, verbose = NA),
+               "'verbose' should be a single logical value")
 })
 
 test_that("check functionality", {

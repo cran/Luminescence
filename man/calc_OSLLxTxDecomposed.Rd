@@ -44,14 +44,13 @@ Slot \code{data} contains a \link{list} with the following structure:
 \strong{@data}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{$LxTx.table (data.frame)
-.. $ LnLx
-.. $ TnTx
 .. $ Net_LnLx
 .. $ Net_LnLx.Error
 .. $ Net_TnTx
 .. $ Net_TnTx.Error
+.. $ SN_RATIO_LnLx = NA,
+.. $ SN_RATIO_TnTx = NA
 .. $ LxTx
-.. $ LxTx.relError
 .. $ LxTx.Error
 }\if{html}{\out{</div>}}
 }
@@ -60,12 +59,12 @@ Calculate \code{Lx/Tx} ratios from a given set of decomposed
 CW-OSL curves decomposed by \code{OSLdecomposition::RLum.OSL_decomposition}.
 }
 \section{Function version}{
- 0.1.0
+ 0.1.1
 }
  
 
 \section{How to cite}{
-Mittelstrass, D., 2025. calc_OSLLxTxDecomposed(): Calculate Lx/Tx ratio for decomposed CW-OSL signal components. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Mittelstrass, D., 2026. calc_OSLLxTxDecomposed(): Calculate Lx/Tx ratio for decomposed CW-OSL signal components. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -75,7 +74,8 @@ talk presented at DLED 2019, Bingen, Germany
 \url{http://luminescence.de/OSLdecomp_talk.pdf}\cr
 }
 \seealso{
-\linkS4class{RLum.Data.Curve}, \link{fit_DoseResponseCurve}, \link{analyse_SAR.CWOSL}
+\linkS4class{RLum.Data.Curve}, \link{fit_DoseResponseCurve},
+\link{analyse_SAR.CWOSL}
 }
 \author{
 Dirk Mittelstrass

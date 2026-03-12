@@ -8,7 +8,7 @@
 #' This function only applies on RLum.Analysis objects and was written for performance not
 #' usability, means the functions runs without any checks and is for internal usage only.
 #'
-#' @param [RLum.Analysis-class] (**required**):
+#' @param [Luminescence::RLum.Analysis-class] (**required**):
 #' input object where the function should be applied on
 #'
 #' @return
@@ -16,7 +16,7 @@
 #'
 #' @section Function version: 0.1.0
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @examples
 #'
@@ -56,7 +56,7 @@
 #'
 #' @section Function version: 0.2.0
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @examples
 #'
@@ -102,7 +102,7 @@
 #' Smooth data based on rolling means or medians
 #'
 #' The function allows a direct and meaningful access to the functionality of
-#' `data.table::frollmean()` and `data.table::frollapply()`. It also provides
+#' `data.table::frollmean()` and `data.table::frollmedian()`. It also provides
 #' an implementation of the Poisson smoother of Carter et al. (2018).
 #'
 #' @param x [numeric] (**required**):
@@ -134,10 +134,10 @@
 #' @return
 #' Returns a numeric vector with smoothed values.
 #'
-#' @section Function version: 0.3
+#' @section Function version: 0.4
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
 #' @examples
@@ -156,6 +156,9 @@
   .set_function_name(".smoothing")
   on.exit(.unset_function_name(), add = TRUE)
 
+  .validate_positive_scalar(k, int = TRUE, null.ok = TRUE)
+  if (is.array(fill) || !(length(fill) == 1 && is.na(fill)))
+    .validate_class(fill, "numeric", length = 1, extra = "NA")
   .validate_args(align, c("right", "center", "left"))
   method <- .validate_args(method, c("mean", "median", "Carter_etal_2018"))
   .validate_positive_scalar(p_acceptance)
@@ -170,8 +173,7 @@
     data.table::frollmean(x, n = k, fill = fill, align = align)
   },
   median = {
-    data.table::frollapply(x, n = k, FUN = "median",
-                           fill = fill, align = align)
+    data.table::frollmedian(x, n = k, fill = fill, align = align)
   },
   Carter_etal_2018 = {
     ## Code derived with corrections and improvements from the supplementary
@@ -240,32 +242,47 @@
 
 #' Curve normalisation
 #'
-#' Details on the normalisation methods are specified in [plot_RLum.Analysis]
-#' and [plot_RLum.Data.Curve].
+#' Details on the normalisation methods are specified in
+#' [Luminescence::plot_RLum.Data.Curve].
 #'
 #' The function assumes that `NA` or other invalid values have already been
 #' removed by the caller function, and that the `norm` option has already
 #' been validated.
 #'
-#' @param data [numeric] (**required**):
-#' the curve data to be normalised
+#' @param data [numeric], [matrix] (**required**):
+#' the curve data to be normalised.
 #'
 #' @param norm [logical] [character] (**required**):
 #' if logical, whether curve normalisation should occur; alternatively, one
-#' of `"max"` (used with `TRUE`), `"last"` and `"huot"`.
+#' of `"max"` (used with `TRUE`), `"min"`, `"first"`, `"last"`, `"huot"`,
+#' or a positive number (e.g., 2.2; here it can also be a vector of the same
+#' length as `data` to support the `"intensity"` option).
 #'
 #' @noRd
 .normalise_curve <- function(data, norm) {
+  ## early return if no normalisation is requested
+  if (isFALSE(norm)) {
+    return(data)
+  }
 
-  if (norm == "max" || isTRUE(norm)) {
-    data <- data / max(data)
+  if (inherits(norm, "numeric")) {
+    data <- data / norm
+  }
+  else if (norm == "max" || isTRUE(norm)) {
+    data <- data / max(data, na.rm = TRUE)
   }
   else if (norm == "last") {
     data <- data / data[length(data)]
   }
+  else if (norm == "first") {
+    data <- data / data[1]
+  }
+  else if (norm == "min") {
+    data <- data / min(data, na.rm = TRUE)
+  }
   else if (norm == "huot") {
-    bg <- median(data[floor(length(data) * 0.8):length(data)])
-    data <- (data - bg) / max(data - bg)
+    bg <- median(data[floor(length(data) * 0.8):length(data)], na.rm = TRUE)
+    data <- (data - bg) / max(data - bg, na.rm = TRUE)
   }
 
   ## check for Inf and NA
@@ -376,7 +393,7 @@ fancy_scientific <- function(l) {
 #'@return
 #'Returns fancy log axis
 #'
-#'@author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'@author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #'@examples
 #'
@@ -418,6 +435,29 @@ fancy_scientific <- function(l) {
     at = 10^ticks,
     labels = fancy_scientific(10^ticks)),
     args))
+}
+
+#' Add text with a background box to an existing plot
+#'
+#' @param label [character] (**required**):
+#' The text to be written.
+#'
+#' @param bg [character], [numeric] (*with default*):
+#' Background colour. If `NA`, no background box is drawn.
+#'
+#' @inheritParams base::text
+#'
+#' @noRd
+.text_with_bg <- function(x, y, label, col = "black", bg = NA,
+                          pos = NULL, cex = 1, ...) {
+  switch(as.character(pos %||% 0),
+         "1" = { xjust <- 0.5; yjust <- 1.0 },
+         "2" = { xjust <- 1.0; yjust <- 0.5 },
+         "3" = { xjust <- 0.5; yjust <- 0.0 },
+         "4" = { xjust <- 0.0; yjust <- 0.5 },
+         { xjust <- 0.5; yjust <- 0.5 })
+  legend(x, y, label, col = col, bg = bg, box.col = NA, cex = cex,
+         xjust = xjust, yjust = yjust, x.intersp = -0.5, y.intersp = -0.15, ...)
 }
 
 #' Retrieve graphical parameters
@@ -523,7 +563,7 @@ fancy_scientific <- function(l) {
 #'
 #'@param suffix [character] (*with default*): suffix to add to the string
 #'
-#'@author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'@author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #'@section Version: 0.1.0
 #'
@@ -577,7 +617,7 @@ fancy_scientific <- function(l) {
 #'
 #' @param x [list] (**required**): list with lists
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @examples
 #' a <- list(b = list(c = list("test")))
@@ -601,16 +641,16 @@ fancy_scientific <- function(l) {
 #'
 #' @description
 #' Removes all non-RLum objects from a list supposed to consist only of
-#' [RLum-class] objects.
+#' [Luminescence::RLum-class] objects.
 #' As an internal function, the function is rather unforgiving, no further
 #' checks are applied.
 #'
 #' @param x [list] (**required**): list
 #'
 #' @param class [character] (*with default*):
-#' class of elements to keep, by default [RLum-class].
+#' class of elements to keep, by default [Luminescence::RLum-class].
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @examples
 #' x <- c(list(set_RLum("RLum.Analysis"), set_RLum("RLum.Analysis")), 2)
@@ -631,7 +671,7 @@ fancy_scientific <- function(l) {
 #'
 #' @param x [list] (**required**): list
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @examples
 #' l <- list("a", NULL)
@@ -643,6 +683,28 @@ fancy_scientific <- function(l) {
 .rm_NULL_elements <- function(x){
   x[vapply(x, is.null, logical(1))] <- NULL
   x
+}
+
+#++++++++++++++++++++++++++++++
+#+ .rm_unnamed_elements       +
+#++++++++++++++++++++++++++++++
+#' @title Removes all unnamed elements from a list
+#'
+#' @param x [list] (**required**): list
+#'
+#' @author Marco Colombo, Institute of Geography, Heidelberg University (Germany)
+#'
+#' @examples
+#' l <- list(a1 = "a", a2 = NULL, 3, 4)
+#' .rm_unnamed_elements(l)
+#'
+#' @return [list] without `NULL` elements, can be empty
+#'
+#' @noRd
+.rm_unnamed_elements <- function(x) {
+  nm <- names(x)
+  if (is.null(nm)) return(NULL)
+  x[nzchar(nm)]
 }
 
 #++++++++++++++++++++++++++++++
@@ -754,12 +816,12 @@ fancy_scientific <- function(l) {
 #' repeated in every function using the self-call. This functions
 #' does it once and for all similar in all functions.
 #'
-#' **NOTE**: the first argument is never extended due to performance reasons,
+#' **Note:** the first argument is never extended due to performance reasons,
 #' it might be a very large object
 #'
 #' @param len [numeric] (**required**): length of the parameter expansion
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @return [list] with expanded parameters
 #'
@@ -847,7 +909,7 @@ fancy_scientific <- function(l) {
 #'
 #' @param ... further arguments passed to [stats::density]
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @references
 #' Hyndman, R.J., 1996. Computing and Graphing Highest Density Regions.
@@ -899,34 +961,39 @@ fancy_scientific <- function(l) {
 #++++++++++++++++++++++++++++++
 #+ .download_file             +
 #++++++++++++++++++++++++++++++
-#'@title Internal File Download Handler
+#' @title Internal file download handler
 #'
-#'@description For file imports using function commencing with `read_` the file download
-#'was little consistent and surprisingly error-prone. This function should keep the requirements
-#'more consistent
+#' @description
+#' For file imports using function commencing with `read_` the file download
+#' was little consistent and surprisingly error-prone. This function should
+#' keep the callers more consistent.
 #'
-#'@param url [character] (**required**)
+#' @param url [character] (**required**):
+#' URL to download.
 #'
-#'@param dest [character] (*with default*)
+#' @param destfile [character] (*with default*):
+#' filename where the content of the URL should be saved into. By default, a
+#' temporary file will be used.
 #'
-#' @param verbose [logical] (*with default*)
+#' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
-#'@returns Returns either nothing (no URL) or the file path of the downloaded file
+#' @returns
+#' Returns the file path of the downloaded file, or `NULL` if `url` is not
+#' valid, or `NA` in case of failure during download.
 #'
-#'@author Sebastian Kreutzer, Insitut of Geography, Heidelberg University, Germany
+#' @author
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
-#'@examples
+#' @examples
+#' ## returns NA (no valid URL detected)
+#' .download_file(url = "teststs")
+#' .download_file(url = "https://")
+#' .download_file(url = "_https://github.com/")
 #'
-#'## returns just NULL (no URL detected)
-#'.download_file(url = "teststs")
-#'
-#'## attempts download
-#'.download_file(url = "https://raw.githubusercontent.com/R-Lum/rxylib/master/inst/extg")
-#'
-#'## attempts download silently
-#' suppressMessages(
-#' .download_file(url = "https://raw.githubusercontent.com/R-Lum/rxylib/master/inst/extg"))
+#' ## attempts download
+#' .download_file("https://raw.githubusercontent.com/R-Lum/rxylib/master/NEWS.md")
 #'
 #'@noRd
 .download_file <- function(
@@ -934,25 +1001,23 @@ fancy_scientific <- function(l) {
     destfile = tempfile(),
     verbose = TRUE
 ) {
-  ## get name of calling function
-  caller <- paste0("[", as.character(sys.call(which = -1)[[1]]), "()]")
-  out_file_path <- NULL
+  ## detect and extract url after removing possible whitespace
+  url <- trimws(url)
+  pattern <- "^https?\\:\\/\\/.+"
+  if (!grepl(pattern, url, perl = TRUE)) {
+    return(NULL)
+  }
 
-  ## detect and extract URL
-  if(grepl(pattern = "https?\\:\\/\\/", x = url, perl = TRUE)) {
     ## status reports
     if (verbose) {
-      message(caller, " URL detected: ", url)
-      message(caller, " Attempting download ... ", appendLF = FALSE)
+      .throw_message("Downloading ", url, " ... ",
+                     appendLF = FALSE, error = FALSE)
     }
-
-    ## extract URL from string only
-    url <- regmatches(x = url, m = regexec(pattern = "https?\\:\\/\\/.+", text = url, perl = TRUE))[[1]]
 
     fail.msg <- function(w) {
       if (verbose)
         message("FAILED")
-      NULL
+      NA
     }
     ## use internal download
     t <- tryCatch(
@@ -966,12 +1031,11 @@ fancy_scientific <- function(l) {
       warning = fail.msg,
       error = fail.msg)
 
-    if(!is.null(t) && t == 0) {
+  out_file_path <- NA
+  if (!is.na(t) && t == 0) {
       if (verbose)
         message("OK ", appendLF = TRUE)
       out_file_path <- destfile
-      unlink(url)
-    }
   }
 
   ## return file path
@@ -1051,6 +1115,20 @@ fancy_scientific <- function(l) {
           if (error) "Error: ", ...)
 }
 
+#' @title Throws a deprecation warning
+#'
+#' @param old Old argument names.
+#' @param new New argument names.
+#' @param since Release when the deprecation happened.
+#'
+#' @noRd
+.deprecated <- function(old, new, since) {
+  .throw_warning(.collapse(old, last_sep = " and "),
+                 if (length(old) > 1) " were " else " was ", "deprecated",
+                 paste0(" in v", since),
+                 ", use ", .collapse(new, last_sep = " and "), " instead")
+}
+
 #' @title Silence Output and Warnings during Tests
 #'
 #' @description
@@ -1078,10 +1156,13 @@ SW <- function(expr) {
 
 #' @title Retrieve the name of the variable used as first argument
 #'
+#' @param idx [integer] (*with default*):
+#' Index of the argument to use to retrieve the name.
+#'
 #' @noRd
-.first_argument <- function() {
+.first_argument <- function(idx = 1) {
   sprintf("'%s'", all.vars(match.call(sys.function(sys.parent()),
-                                      sys.call(sys.parent())))[1])
+                                      sys.call(sys.parent())))[idx])
 }
 
 #' @title Throw an error or a warning based on a condition
@@ -1091,6 +1172,15 @@ SW <- function(expr) {
   if (throw.error)
     .throw_error(msg)
   .throw_warning(msg)
+}
+
+#' @title Throw an error or a message based on a condition
+#'
+#' @noRd
+.error_or_message <- function(msg, throw.error) {
+  if (throw.error)
+    .throw_error(msg)
+  .throw_message(msg)
 }
 
 #' @title Validate a character argument from a list of choices
@@ -1163,9 +1253,9 @@ SW <- function(expr) {
 #'        thrown in case of failed validation (`TRUE` by default). If `FALSE`,
 #'        the function raises a warning and proceeds.
 #' @param length [integer] (*with default*): if not `NULL`, validate that
-#'        the length matches the one provided. This can be used only when
-#'        `classes` contains only base vector types, not [RLum-class] objects
-#'        or container types.
+#'        the length matches the one (or more) provided. This can be used only
+#'        when `classes` contains only base vector types, not
+#'        [Luminescence::RLum-class] objects or container types.
 #' @inheritParams .validate_args
 #'
 #' @return
@@ -1181,7 +1271,7 @@ SW <- function(expr) {
     return(TRUE)
 
   if (missing(arg) || sum(inherits(arg, classes)) == 0L ||
-      !is.null(length) && length(arg) != length) {
+      !is.null(length) && !length(arg) %in% length) {
     ## additional text to append after the valid classes to account for
     ## extra options that cannot be validated but we want to report
     classes.extra <- c(sQuote(classes, q = FALSE), extra)
@@ -1191,7 +1281,8 @@ SW <- function(expr) {
     msg <- paste0(name %||% .first_argument(), " should be of class ",
                   .collapse(classes.extra, quote = FALSE, last_sep = " or "))
     if (!is.null(length))
-      msg <- paste0(msg, " and have length ", length)
+      msg <- paste0(msg, " and have length ",
+                    .collapse(length, quote = FALSE, last_sep = " or "))
     .error_or_warning(msg, throw.error)
     return(FALSE)
   }
@@ -1266,6 +1357,8 @@ SW <- function(expr) {
 #'        integer (`FALSE` by default).
 #' @param pos [logical] (*with default*): whether the value has to be positive
 #'        (`FALSE` by default).
+#' @param nng [logical] (*with default*): whether the value has to be non-negative
+#'        (`FALSE` by default).
 #' @param log [logical] (*with default*): whether the value has to be logical
 #'        (`FALSE` by default).
 #' @inheritParams .validate_args
@@ -1274,17 +1367,24 @@ SW <- function(expr) {
 #' The validated value, unless the validation failed with an error thrown.
 #'
 #' @noRd
-.validate_scalar <- function(val, int = FALSE, pos = FALSE, log = FALSE,
-                             null.ok = FALSE, name = NULL) {
+.validate_scalar <- function(val, int = FALSE, pos = FALSE, nng = FALSE, log = FALSE,
+                             null.ok = FALSE, name = NULL, extra = NULL) {
   if (!missing(val) && is.null(val) && null.ok)
     return(NULL)
   if (missing(val) || NROW(val) != 1 || NCOL(val) != 1 || !is.null(dim(val)) || is.na(val) ||
       (!log && !is.numeric(val)) || (log && !is.logical(val)) ||
       (int && (is.infinite(val) || val != as.integer(val))) ||
-      (pos && val <= 0)) {
+      (pos && val <= 0) || (nng && val < 0)) {
+    ## additional text to append for extra options that cannot be validated
+    ## but we want to report
+    if (null.ok)
+      extra <- c(extra, "NULL")
+    if (!is.null(extra))
+      extra <- paste(" or", .collapse(extra, quote = FALSE, last_sep = " or "))
     .throw_error(name %||% .first_argument(), " should be a single ",
-                 if (pos) "positive ", if (int) "integer ", if (log) "logical ",
-                 "value", if (null.ok) " or NULL")
+                 if (pos) "positive ", if (nng) "non-negative ",
+                 if (int) "integer ", if (log) "logical ",
+                 "value", extra)
   }
   val
 }
@@ -1295,9 +1395,20 @@ SW <- function(expr) {
 #'
 #' @noRd
 .validate_positive_scalar <- function(val, int = FALSE, null.ok = FALSE,
-                                      name = NULL) {
+                                      name = NULL, extra = NULL) {
   .validate_scalar(val, int = int, pos = TRUE, null.ok = null.ok,
-                   name = name %||% .first_argument())
+                   name = name %||% .first_argument(), extra = extra)
+}
+
+#' @title Validate scalar variables expected to be non-negative
+#'
+#' @inheritParams .validate_scalar
+#'
+#' @noRd
+.validate_nonnegative_scalar <- function(val, int = FALSE, null.ok = FALSE,
+                                         name = NULL, extra = NULL) {
+  .validate_scalar(val, int = int, nng = TRUE, null.ok = null.ok,
+                   name = name %||% .first_argument(), extra = extra)
 }
 
 #' @title Validate logical scalar variables
@@ -1305,14 +1416,150 @@ SW <- function(expr) {
 #' @inheritParams .validate_scalar
 #'
 #' @noRd
-.validate_logical_scalar <- function(val, null.ok = FALSE, name = NULL) {
+.validate_logical_scalar <- function(val, null.ok = FALSE,
+                                     name = NULL, extra = NULL) {
   .validate_scalar(val, log = TRUE, null.ok = null.ok,
-                   name = name %||% .first_argument())
+                   name = name %||% .first_argument(), extra = extra)
+}
+
+#' @title Validate a filename
+#'
+#' @param file [character], [list] (**required**):
+#' Name of file to validate (can be more than one), or path to a directory to
+#' scan for files, or list of file names.
+#'
+#' @param ext [character] (*optional*):
+#' Vector of accepted extensions. If `NULL` (default), no check against the
+#' file extension is performed. The check is always case-insensitive.
+#'
+#' @param pattern [character] (*optional*):
+#' A regular expression pattern to select files from a directory. If `NULL`
+#' (default), no pattern is applied, which corresponds to selecting all files
+#' found. It is considered only when `file` is a path to a directory.
+#'
+#' @param scan.dir [logical] (*with default*):
+#' Whether directories should be scanned for filed (`TRUE` by default).
+#'
+#' @param recursive [logical] (*with default*):
+#' Whether the scan of a path for files should be done recursively (`FALSE`
+#' by default).
+#'
+#' @inheritParams .validate_class
+#'
+#' @return
+#' A list of file names or a single file name or `NULL`, unless the validation
+#' failed with an error thrown.
+#'
+#' @noRd
+.validate_file <- function(file, ext = NULL, pattern = NULL,
+                           scan.dir = TRUE, recursive = FALSE,
+                           throw.error = TRUE, verbose = TRUE) {
+  .validate_class(file, c("character", "list"))
+  .validate_not_empty(file)
+
+  ## if it's a list, we only validate its elements and return it as is
+  if (inherits(file, "list")) {
+    lapply(file, .validate_class, classes = "character", length = 1,
+           name = "All elements of 'file'")
+    return(file)
+  }
+
+  ## if it's a character vector, we return it as a list
+  if (length(file) > 1) {
+    return(as.list(file))
+  }
+
+  ## check if it's a path: if we find multiple files (or none), we return
+  if (scan.dir) {
+    files_in_path <- .scan_path_for_files(file, pattern, recursive, verbose)
+    if (length(files_in_path) != 1) {
+      return(as.list(files_in_path))
+    }
+
+    ## this was not a path or the path contained a single file
+    file <- files_in_path
+  }
+
+  ## check if it's a URL, in which case download the file locally
+  ## .download_file() returns one of these:
+  ## - NULL: the URL is not valid, so we continue with `file`
+  ## - NA:   the download failed, so we exit
+  ## - else: the download was successful, so we continue with `url_file`
+  url_file <- tempfile("url_file_", fileext = paste0(".", ext[1]))
+  url_file <- .download_file(file, destfile = url_file, verbose = verbose)
+  if (.strict_na(url_file)) {
+    return(NULL)
+  }
+  if (!is.null(url_file)) {
+    file <- url_file
+  }
+
+  ## from now on, we are dealing with a filename
+  filename <- normalizePath(file, mustWork = FALSE)
+  info <- file.info(filename)
+  if (is.na(info$size) || isTRUE(info$isdir)) {
+    .error_or_message(paste0("File '", filename, "' does not exist"),
+                      throw.error)
+    return(NULL)
+  }
+
+  if (!is.null(ext)) {
+    file.ext <- tools::file_ext(filename)
+    if (!tolower(file.ext) %in% tolower(ext)) {
+      msg <- paste0 ("File extension '", file.ext, "' is not supported, only ",
+                     .collapse(ext, last_sep = " and "),
+                     ifelse(length(ext) > 1, " are", " is"), " valid")
+      .error_or_message(msg, throw.error)
+      return(NULL)
+    }
+  }
+
+  if (info$size == 0) {
+    .error_or_message(paste0("File '", filename, "' is a zero-byte file"),
+                      throw.error)
+    return(NULL)
+  }
+
+  filename
+}
+
+#' Find the files matching a given pattern in a path
+#'
+#' @param path [character] (**required**):
+#' The path to search.
+#'
+#' @inheritParams .validate_file
+#'
+#' @return
+#' A vector of file names, or `NULL` if no files are found.
+#'
+#' @noRd
+.scan_path_for_files <- function(path, pattern, recursive, verbose) {
+  ## return immediately if this is not a path to a directory
+  if (!dir.exists(path) || length(dir(path)) == 0) {
+    return(path)
+  }
+
+  if (verbose) {
+    .throw_message("Directory detected, looking for ",
+                   if (is.null(pattern)) "any" else .collapse(pattern),
+                   " files ...", error = FALSE)
+  }
+
+  files <- dir(path, pattern = pattern, recursive = recursive,
+               full.names = TRUE, include.dirs = FALSE)
+  if (length(files) == 0 && verbose) {
+    .throw_message("No files matching the given pattern found in directory")
+    files <- NULL
+  }
+
+  files
 }
 
 #' @title Validate the originator of an RLum object
 #'
-#' @param object [RLum-class] (**required**): object whose originator should be
+#' @param object [Luminescence::RLum-class] (**required**): object whose
+#' originator should be
 #'        checked.
 #' @inheritParams .validate_args
 #'
@@ -1338,6 +1585,116 @@ SW <- function(expr) {
 #' @noRd
 .check_originator <- function(object, choices) {
   .hasSlot(object, "originator") && object@originator %in% choices
+}
+
+#' Validate a vector used for signal and background integrals
+#'
+#' @param integral [vector] [integer] (**required**):
+#' the vector to validate.
+#'
+#' @param int [logical] (*with default*):
+#' whether the integral values should be integers (`TRUE` by default).
+#'
+#' @param min [integer] (*with default*):
+#' the minimum value for the integral. By default the minimum value is 1 if
+#' `int = TRUE` (channels), and 0 otherwise (measurements).
+#'
+#' @param max [integer] (*with default*):
+#' the maximum value for the integral.
+#'
+#' @param list.ok [logical] (*with default*):
+#' whether the argument should be considered valid also as a list (`FALSE` by
+#' default).
+#'
+#' @param na.ok [logical] (*with default*):
+#' whether the argument should be considered valid also when it's exactly `NA`
+#' (`FALSE` by default).
+#'
+#' @inheritParams .validate_args
+#'
+#' @return
+#' A vector with negative elements and `NA` values removed, sorted and without
+#' duplicates, unless the validation failed with an error thrown. If `max.value`
+#' is not `NULL`, then the integral is capped to the value specified.
+#'
+#' @noRd
+.validate_integral <- function(integral, int = TRUE, min = ifelse(int, 1, 0), max = Inf,
+                               null.ok = FALSE, list.ok = FALSE, na.ok = FALSE,
+                               name = NULL) {
+  if (null.ok && is.null(integral) || na.ok && .strict_na(integral))
+    return(integral)
+  name <- name %||% .first_argument()
+  .validate_class(integral, c("integer", "numeric", if (list.ok) "list"),
+                  null.ok = null.ok, extra = if (na.ok) "NA" else NULL, name = name)
+  if (list.ok && inherits(integral, "list")) {
+    return(lapply(integral, .validate_integral,
+                  name = paste("All elements of", name)))
+  }
+  orig.length <- length(integral)
+  if (min > max)
+    .throw_error(name, " is expected to be at least ", min,
+                 ", but the maximum allowed is ", max)
+  integral <- integral[!is.na(integral) & between(integral, min, max)]
+  if (length(integral) == 0)
+    .throw_error(name, " is of length 0 after removing values smaller than ",
+                 min, if (!is.infinite(max)) paste(" and greater than", max))
+  else if (length(integral) != orig.length)
+    .throw_warning(name, " out of bounds, reset to be between ", min(integral),
+                   " and ", max(integral))
+  if (int && any(integral != as.integer(integral)))
+    .throw_error(name, " should be a vector of integers")
+  if (length(integral) == 2 && diff(integral) > 1 && int)
+    .throw_warning(name, " was defined as c(", .format_range(integral, sep = ", "),
+                   ") but in general we would expect it to be defined as ",
+                   .format_range(integral), ", please check your input")
+  sort(unique(integral))
+}
+
+#' Convert integral from time/temperature to channel numbers
+#'
+#' @param x.range [numeric] (**required**)
+#' The measurement values.
+#'
+#' @param integral [numeric] (**required**):
+#' The integral range expressed as time/temperature.
+#'
+#' @param unit [character] (**required**):
+#' The measurement unit expected ("time" or "temperature").
+#'
+#' @inheritParams .validate_integral
+#'
+#' @return
+#' The best matching channel numbers corresponding to the given measurement
+#' range, unless the validation failed with an error thrown. If all integral
+#' values are outside the object range, a warning is thrown and the lower or
+#' upper bound (whichever is closest) of the valid values is returned.
+#'
+#' @noRd
+.convert_to_channels <- function(x.range, integral, unit,
+                                 null.ok = FALSE, na.ok = FALSE,
+                                 list.ok = FALSE, name = NULL) {
+  if (null.ok && is.null(integral) || na.ok && .strict_na(integral))
+    return(integral)
+
+  name <- name %||% .first_argument(idx = 2)
+  .validate_class(integral, c("integer", "numeric", if (list.ok) "list"),
+                  null.ok = null.ok, extra = if (na.ok) "NA" else NULL,
+                  name = name)
+  if (list.ok && inherits(integral, "list")) {
+    return(lapply(integral, .convert_to_channels, x.range = x.range, unit = unit,
+                  null.ok = null.ok, na.ok = na.ok, list.ok = FALSE,
+                  name = paste("All elements of", name)))
+  }
+
+  integral <- integral[!is.na(integral)]
+  if (min(integral) > max(x.range) || max(integral) < min(x.range))
+    .throw_warning("Conversion of ", name, " from ", unit,
+                   " to channels failed: expected values in ",
+                   .format_range(x.range))
+
+  integral.min <- which.min(abs(min(integral) - x.range))
+  integral.max <- which.min(abs(max(integral) - x.range))
+  integral.min:integral.max
 }
 
 #' Check that a suggested package is installed
@@ -1383,6 +1740,20 @@ SW <- function(expr) {
   if (!inherits(x, "list"))
     x <- list(x)
   rep(x, length = length)
+}
+
+#' Check that a given object is exactly `NA`
+#'
+#' @param x (**required): The object to check.
+#'
+#' @return
+#' Whether the object is exactly `NA`.
+#'
+#' @noRd
+.strict_na <- function(x) {
+  if (length(x) != 1 || is.recursive(x) || is.array(x))
+    return(FALSE)
+  is.na(x)
 }
 
 #' Comma-separated string concatenation

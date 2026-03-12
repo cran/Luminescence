@@ -10,19 +10,19 @@
 #'@param ... arguments to be further passed down to supported functions (please check the functions
 #'to determine the correct arguments)
 #'
-#'@param fastForward [logical] (*with default*): option to create [RLum-class] objects
+#'@param fastForward [logical] (*with default*): option to create [Luminescence::RLum-class] objects
 #'during import or a [list] of such objects
 #'
 #' @param verbose [logical] (*with default*): enable/disable output to the
 #' terminal.
 #'
-#'@section Function version: 0.1.5
+#' @section Function version: 0.1.6
 #'
-#'@author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'@author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#'@returns Always returns a [list]; empty or filled with [RLum.Analysis-class] objects
+#'@returns Always returns a [list]; empty or filled with [Luminescence::RLum.Analysis-class] objects
 #'
-#' @seealso `r toString(paste0("[", grep("^read_", getNamespaceExports("Luminescence"), value = TRUE), "]"))`
+#' @seealso `r toString(paste0("[Luminescence::", sort(grep("^read_", getNamespaceExports("Luminescence"), value = TRUE)), "]"))`
 #'
 #'@keywords datagen
 #'
@@ -67,12 +67,13 @@ import_Data <- function(
 
   ## just try all functions and all files
   for (i in fun) {
+    SW({
       ## get arguments and remove non-supported arguments
-      t <- suppressWarnings(suppressMessages(try(do.call(what = i, args = args), silent = TRUE)))
+      t <- try(do.call(what = i, args = args), silent = TRUE)
+    })
 
       if (!is.null(t) && !inherits(t, "try-error"))
         out <- c(out, t)
-
   }
 
   ## return if output is not empty
@@ -80,5 +81,4 @@ import_Data <- function(
    .throw_message("Unknown file format, nothing imported")
 
   return(out)
-
 }

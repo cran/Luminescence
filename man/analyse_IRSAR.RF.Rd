@@ -9,7 +9,7 @@ analyse_IRSAR.RF(
   sequence_structure = c("NATURAL", "REGENERATED"),
   RF_nat.lim = NULL,
   RF_reg.lim = NULL,
-  method = "FIT",
+  method = c("FIT", "SLIDE", "VSLIDE", "NONE"),
   method_control = NULL,
   test_parameters = NULL,
   n.MC = 10,
@@ -263,7 +263,7 @@ MC run results. Nothing is shown if the distribution is too narrow.
 \item \code{show_fit} (\link{logical}, default: \code{FALSE}): enable/disable the plot of the
 fitted curve routinely obtained during the evaluation.
 \item \code{n.MC} (\link{integer}, default: 1000): number of Monte Carlo runs within the
-sliding (assessing the possible minimum values). \strong{Note}: This parameter
+sliding (assessing the possible minimum values). \strong{Note:} This parameter
 is not the same as the function argument \code{n.MC}.
 \item \code{vslide_range} (\link{numeric} or \link{character}, default: "auto"): boundaries
 for the vertical curve sliding. The argument expects a vector with absolute
@@ -345,8 +345,8 @@ might be useful to evaluate the shape of the curves. For \code{method = "FIT"},
 this parameter is obtained during the fitting; for \code{method = "SLIDE"} a
 rather rough estimation is made using the function \link[minpack.lm:nlsLM]{minpack.lm::nlsLM} and
 the equation given above.
-Note: As this procedure requests more computation time, it is performed only
-if all three parameters are set.
+\strong{Note:} As this procedure requests more computation time, it is performed
+only if all three parameters are set.
 }
 }
 \note{
@@ -389,7 +389,7 @@ results <- analyse_IRSAR.RF(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_IRSAR.RF(): Analyse IRSAR RF measurements. Function version 0.7.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_IRSAR.RF(): Analyse IRSAR RF measurements. Function version 0.7.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -465,6 +465,6 @@ Infrared radiofluorescence (IR-RF) dating: A review. Quaternary Geochronology 64
 \link{nls}, \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}, \link[parallel:mclapply]{parallel::mclapply}, \link{ExampleData.RF70Curves}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{datagen}

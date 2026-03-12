@@ -34,7 +34,21 @@ test_that("check functionality", {
   expect_equal(results$par, 3)
   expect_equal(round(results$sig, digits = 2), 1.71)
   expect_equal(round(results$p0, digits = 2), 0.65)
-  expect_equal(results$mu, NA)
+  expect_equal(results$mu, NA_real_)
   expect_equal(round(results$Lmax, digits = 2), -19.79)
   expect_equal(round(results$BIC, digits = 2), 58.87)
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 1320
+  set.seed(9)
+  SW({
+  expect_warning(calc_MaxDose(data = data.frame(De = c(rnorm(4) + 5, -1),
+                                                De_Err = rnorm(5) + 1),
+                              sigmab = 1, log = TRUE, bootstrap = TRUE,
+                              bs.M = 10, bs.N = 5, bs.h = 2, plot = FALSE),
+                 "De values must be positive with 'log = TRUE', 1 values set to NA")
+  })
 })

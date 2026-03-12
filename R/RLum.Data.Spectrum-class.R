@@ -23,7 +23,7 @@
 #' @note
 #' The class should only contain data for a single spectra data set. For
 #' additional elements the slot `info` can be used. Objects from this class are automatically
-#' created by, e.g., [read_XSYG2R]
+#' created by, e.g., [Luminescence::read_XSYG2R]
 #'
 #' @section Objects from the Class:
 #' Objects can be created by calls of the form `set_RLum("RLum.Data.Spectrum", ...)`.
@@ -31,9 +31,9 @@
 #' @section Class version: 0.5.2
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum-class], [RLum.Data-class], [plot_RLum]
+#' @seealso [Luminescence::RLum-class], [Luminescence::RLum.Data-class], [Luminescence::plot_RLum]
 #'
 #' @keywords classes
 #'
@@ -79,7 +79,7 @@ setClass(
 #'
 #' for `[RLum.Data.Spectrum-class]`
 #'
-#' **[RLum.Data.Spectrum-class]**
+#' **[Luminescence::RLum.Data.Spectrum-class]**
 #'
 #' \tabular{ll}{
 #'   **from** \tab **to**\cr
@@ -170,7 +170,7 @@ setMethod("show",
 
 ## set_RLum() ---------------------------------------------------------------
 #' @describeIn set_RLum
-#' Construction method for [RLum.Data.Spectrum-class] objects.
+#' Construction method for [Luminescence::RLum.Data.Spectrum-class] objects.
 #'
 #' @export
 setMethod(
@@ -227,7 +227,7 @@ setMethod(
 
 ## get_RLum() ---------------------------------------------------------------
 #' @describeIn get_RLum
-#' Accessor method for [RLum.Data.Spectrum-class] objects.
+#' Accessor method for [Luminescence::RLum.Data.Spectrum-class] objects.
 #' The argument `info.object` is optional to directly access the info elements.
 #' If no info element name is provided, the raw curve data (matrix) will be
 #' returned.
@@ -239,7 +239,7 @@ setMethod("get_RLum",
               .set_function_name("get_RLum")
               on.exit(.unset_function_name(), add = TRUE)
 
-              .validate_class(info.object, "character", null.ok = TRUE)
+              .validate_class(info.object, "character", null.ok = TRUE, length = 1)
               if (!is.null(info.object)) {
                 if (!info.object %in% names(object@info)) {
                   .throw_error("Invalid element name, valid names are: ",
@@ -263,8 +263,6 @@ setMethod("names_RLum",
           function(object){
             names(object@info)
           })
-
-
 ## bin_RLum() ---------------------------------------------------------------
 #' @describeIn bin_RLum.Data
 #' Allows binning of RLum.Data.Spectrum data. Count values and values on the
@@ -319,3 +317,24 @@ setMethod(f = "bin_RLum.Data",
             ##return object
             return(object)
           })
+
+## normalise_RLum() --------------------------------------------------------------
+#' @describeIn normalise_RLum
+#' Normalise [Luminescence::RLum.Data.Spectrum-class] objects to value set via
+#' the argument `norm`
+#'
+#' @export
+setMethod(
+  f = "normalise_RLum",
+  signature = "RLum.Data.Spectrum",
+  function(object, norm = TRUE) {
+    if (norm == "intensity") {
+      ## compute the channel length and assign it to `norm`, so that we can
+      ## piggy-back on the code for normalisation by a scalar
+      time.temp <- as.numeric(colnames(object@data))
+      norm <- rep(diff(c(0, time.temp)), each = nrow(object@data))
+    }
+    object@data[] <- .normalise_curve(object@data[], norm = norm)
+    object
+  }
+)

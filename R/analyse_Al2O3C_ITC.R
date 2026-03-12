@@ -20,17 +20,22 @@
 #'
 #' \tabular{lll}{
 #' **ARGUMENT** \tab **FUNCTION** \tab **DESCRIPTION**\cr
-#' `mode` \tab `fit_DoseResponseCurve` \tab as in [fit_DoseResponseCurve]; sets the mode used for fitting\cr
-#' `fit.method` \tab `fit_DoseResponseCurve` \tab as in [fit_DoseResponseCurve]; sets the function applied for fitting\cr
+#' `mode` \tab `fit_DoseResponseCurve` \tab sets the mode used for fitting\cr
+#' `fit.method` \tab `fit_DoseResponseCurve` \tab sets the function applied for fitting\cr
 #' }
 #'
-#' @param object [RLum.Analysis-class] or [list] (**required**):
+#' @param object [Luminescence::RLum.Analysis-class] or [list] (**required**):
 #' results obtained from the measurement.
-#' Alternatively a list of [RLum.Analysis-class] objects can be provided to allow an automatic analysis
+#' Alternatively a list of [Luminescence::RLum.Analysis-class] objects can be provided to allow an automatic analysis
 #'
 #' @param signal_integral [numeric] (*optional*):
 #' signal integral, used for the signal and the background.
 #' If nothing is provided the full range is used. Argument can be provided as [list].
+#'
+#' @param integral_input [character] (*with default*):
+#' input type for `signal_integral`, one of `"channel"` (default) or
+#' `"measurement"`. If set to `"measurement"`, the best matching channels
+#' corresponding to the given time range (in seconds) are selected.
 #'
 #' @param dose_points [numeric] (*with default*):
 #' vector with dose points, if dose points are repeated, only the general
@@ -38,7 +43,7 @@
 #' made by Kreutzer et al., 2018. Argument can be provided as [list].
 #'
 #' @param recordType [character] (*with default*): input curve selection, which is passed to
-#' function [get_RLum]. To deactivate the automatic selection set the argument to `NULL`
+#' function [Luminescence::get_RLum]. To deactivate the automatic selection set the argument to `NULL`
 #'
 #' @param method_control [list] (*optional*):
 #' optional parameters to control the calculation.
@@ -68,7 +73,7 @@
 #'  `$data` \tab `data.frame` \tab correction value and error \cr
 #'  `$table` \tab `data.frame` \tab table used for plotting  \cr
 #'  `$table_mean` \tab `data.frame` \tab table used for fitting \cr
-#'  `$fit` \tab `lm` or `nls` \tab the fitting as returned by the function [fit_DoseResponseCurve]
+#'  `$fit` \tab `lm` or `nls` \tab the fitting as returned by the function [Luminescence::fit_DoseResponseCurve]
 #' }
 #'
 #'**slot:** **`@info`**
@@ -81,11 +86,11 @@
 #'
 #' - A dose response curve with the marked correction values
 #'
-#' @section Function version: 0.1.1
+#' @section Function version: 0.1.2
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [fit_DoseResponseCurve]
+#' @seealso [Luminescence::fit_DoseResponseCurve]
 #'
 #' @references
 #'
@@ -107,6 +112,7 @@
 analyse_Al2O3C_ITC <- function(
   object,
   signal_integral = NULL,
+  integral_input = c("channel", "measurement"),
   dose_points = c(2,4,8,12,16),
   recordType = "OSL (UVVIS)",
   method_control = NULL,
@@ -116,6 +122,8 @@ analyse_Al2O3C_ITC <- function(
 ) {
   .set_function_name("analyse_Al2O3C_ITC")
   on.exit(.unset_function_name(), add = TRUE)
+
+  .validate_not_empty(object) # here for issue 1256
 
   # SELF CALL -----------------------------------------------------------------------------------
   if (inherits(object, "list")) {
@@ -134,6 +142,7 @@ analyse_Al2O3C_ITC <- function(
       results <- try(analyse_Al2O3C_ITC(
         object = object[[x]],
         signal_integral = signal_integral[[x]],
+        integral_input = integral_input,
         dose_points = dose_points[[x]],
         method_control = method_control,
         verbose = verbose,
@@ -154,7 +163,7 @@ analyse_Al2O3C_ITC <- function(
 
   ## Integrity checks -------------------------------------------------------
   .validate_class(object, "RLum.Analysis", extra = "a 'list' of such objects")
-  .validate_not_empty(object)
+  integral_input <- .validate_args(integral_input, c("channel", "measurement"))
   .validate_class(dose_points, c("numeric", "list"))
   if (is.list(dose_points)) {
     lapply(dose_points, .validate_class, "numeric",
@@ -190,21 +199,23 @@ analyse_Al2O3C_ITC <- function(
   dose_points <- rep(dose_points, times = length(object)/2)
 
   # Calculation ---------------------------------------------------------------------------------
-  ##set signal integral
-  max.signal_integral <- nrow(object[[1]][])
-  if(is.null(signal_integral)){
-    signal_integral <- 1:max.signal_integral
-  } else if (min(signal_integral) < 1 ||
-             max(signal_integral) > max.signal_integral) {
-    ## check whether the input is valid, otherwise make it valid
-    signal_integral <- 1:max.signal_integral
-    .throw_warning("'signal_integral' corrected to 1:", max.signal_integral)
+
+  ## signal integral
+  x.range <- object[[1]][, 1]
+  if (integral_input == "measurement") {
+    signal_integral <- .convert_to_channels(x.range, signal_integral,
+                                            "time", null.ok = TRUE)
+  }
+  signal_integral <- .validate_integral(signal_integral,
+                                        max = length(x.range), null.ok = TRUE)
+  if (is.null(signal_integral)) {
+    signal_integral <- seq_along(x.range)
   }
 
   ##calculate curve sums, assuming the background
   net_SIGNAL <- vapply(seq(1, length(object), by = 2), function(x) {
-    temp_signal <- sum(object[[x]][, 2])
-    temp_background <- sum(object[[x + 1]][, 2])
+    temp_signal <- sum(object[[x]][signal_integral, 2])
+    temp_background <- sum(object[[x + 1]][signal_integral, 2])
     return(temp_signal - temp_background)
   }, FUN.VALUE = numeric(1))
 

@@ -19,7 +19,7 @@ plot_RLum.Analysis(
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Analysis} (\strong{required}):
-S4 object of class \code{RLum.Analysis}}
+S4 object of class \linkS4class{RLum.Analysis}}
 
 \item{subset}{named \link{list} (\emph{optional}):
 subsets elements for plotting. The arguments in the named \link{list} will be
@@ -136,11 +136,11 @@ abline = list(v = c(110))
 \link{plot}, \link{plot_RLum}, \link{plot_RLum.Data.Curve}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

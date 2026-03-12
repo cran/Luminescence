@@ -2,13 +2,13 @@
 % Please edit documentation in R/fit_CWCurve.R
 \name{fit_CWCurve}
 \alias{fit_CWCurve}
-\title{Nonlinear Least Squares Fit for CW-OSL curves -beta version-}
+\title{Non-linear Least Squares Fit for CW-OSL curves -beta version-}
 \usage{
 fit_CWCurve(
-  values,
+  object,
   n.components.max = 7,
   fit.failure_threshold = 5,
-  fit.method = "port",
+  fit.method = c("port", "LM"),
   fit.trace = FALSE,
   fit.calcError = FALSE,
   LED.power = 36,
@@ -23,8 +23,8 @@ fit_CWCurve(
 )
 }
 \arguments{
-\item{values}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-x, y data of measured values (time and counts). See examples.}
+\item{object}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+x, y data of measured values (time and counts).}
 
 \item{n.components.max}{\link{vector} (\emph{optional}):
 maximum number of components that are to be used for fitting.
@@ -163,7 +163,7 @@ The function \strong{does not} ensure that the fitting procedure has reached a
 global minimum rather than a local minimum!
 }
 \section{Function version}{
- 0.5.5
+ 0.5.6
 }
 
 \examples{
@@ -172,7 +172,7 @@ global minimum rather than a local minimum!
 data(ExampleData.CW_OSL_Curve, envir = environment())
 
 ##fit data
-fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,
+fit <- fit_CWCurve(ExampleData.CW_OSL_Curve,
                    main = "CW Curve Fit",
                    n.components.max = 4,
                    log = "x")
@@ -180,7 +180,7 @@ fit <- fit_CWCurve(values = ExampleData.CW_OSL_Curve,
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. fit_CWCurve(): Nonlinear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. fit_CWCurve(): Non-linear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -198,7 +198,7 @@ Gentleman, K. Hornik, G. Parmigiani, eds., Springer, p. 150.
 \linkS4class{RLum.Results}, \link{get_RLum}, \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{dplot}
 \keyword{models}

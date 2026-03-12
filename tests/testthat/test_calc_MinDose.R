@@ -19,7 +19,7 @@ test_that("input validation", {
   expect_error(calc_MinDose(ExampleData.DeValues$CA1),
                "'sigmab' should be a single positive value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 1, init.values = 1:4),
-               "'init.values' is expected to be a named list")
+               "'init.values' should be of class 'list'")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                             init.values = list(1, 2, 3)),
                "Please provide initial values for all model parameters")
@@ -30,6 +30,8 @@ test_that("input validation", {
                "'par' should be a single positive integer value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1, par = 2),
                "'par' can only be set to 3 or 4")
+  expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1, level = 0),
+               "'level' should be a single positive value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                             invert = "error"),
                "'invert' should be a single logical value")
@@ -52,7 +54,7 @@ test_that("input validation", {
                             bootstrap = TRUE, bs.h = -1),
                "'bs.h' should be a single positive value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
-                            cores = -1),
+                            cores = -1, multicore = TRUE),
                "'cores' should be a single positive integer value")
 })
 
@@ -62,13 +64,10 @@ test_that("check functionality", {
   SW({
   ## bootstrap
   expect_message(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
-                              bootstrap = TRUE, bs.M = 10, bs.N = 5),
-                 "Recycled Bootstrap")
-  expect_message(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                               bootstrap = TRUE, bs.M = 10, bs.N = 5, bs.h = 5,
                               sigmab.sd = 0.04, debug = TRUE, log = FALSE,
                               multicore = TRUE, cores = 2),
-                 "bootstrap replicates using 2 cores")
+                 "Applying the model to all replicates using 2 cores")
   })
 
   ## RLum.Results object
@@ -87,7 +86,7 @@ test_that("check functionality", {
 
   ## no converging fit
   skip_on_os("windows")
-  set.seed(1)
+  set.seed(7)
   data.nofit <- data.frame(rep(4, 5), rnorm(5, 5))
   SW({
   expect_error(calc_MinDose(data.nofit, sigmab = 0.9, par=4),
@@ -104,33 +103,44 @@ test_that("check functionality", {
                              bootstrap = TRUE, bs.M = 5, bs.N = 5, bs.h = 5,
                              debug = TRUE, log = FALSE),
                  "Not enough bootstrap replicates for loess fitting")
-  expect_output(calc_MinDose(ExampleData.DeValues$CA1 / 100, sigmab = 0.1,
-                             gamma.upper = 4,
-                             verbose = TRUE, log.output = TRUE, par = 4))
-  expect_silent(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
-                             verbose = FALSE, invert = TRUE,
-                             bootstrap = TRUE, bs.M = 10, bs.N = 5, bs.h = 10))
   })
 })
 
-test_that("check values from output example", {
+test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  expect_s4_class(temp, "RLum.Results")
-  expect_equal(length(temp), 9)
+  set.seed(1)
+  snapshot.tolerance <- 1.5e-6
 
-  results <- get_RLum(temp)
-  expect_equal(round(results$de, digits = 5), 34.31834)
-  expect_equal(round(results$de_err, digits = 6), 2.550964)
-  expect_equal(results$ci_level, 0.95)
-  expect_equal(round(results$ci_lower, digits = 5), 29.37526)
-  expect_equal(round(results$ci_upper, digits = 5), 39.37503)
-  expect_equal(results$par, 3)
-  expect_equal(round(results$sig, digits = 2), 2.07)
-  expect_equal(round(results$p0, digits = 8), 0.01053938)
-  expect_equal(results$mu, NA)
-  expect_equal(round(results$Lmax, digits = 5), -43.57969)
-  expect_equal(round(results$BIC, digits = 4), 106.4405)
+  expect_snapshot_RLum(temp, tolerance = snapshot.tolerance)
+  SW({
+  expect_snapshot_RLum(calc_MinDose(data = ExampleData.DeValues$CA1 / 100,
+                                    sigmab = 0.2, gamma.upper = 4, par = 4,
+                                    log.output = TRUE, plot = FALSE),
+                       tolerance = snapshot.tolerance)
+  })
+  expect_snapshot_RLum(calc_MinDose(data = ExampleData.DeValues$CA1,
+                                    sigmab = 0.2, log = FALSE,
+                                    verbose = FALSE, plot = FALSE),
+                       tolerance = snapshot.tolerance)
+
+  ## bootstrap = TRUE
+  suppressWarnings( # Not enough bootstrap replicates for loess fitting
+  expect_snapshot_RLum(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
+                                    bootstrap = TRUE, bs.M = 10, bs.N = 5,
+                                    verbose = FALSE, plot = FALSE),
+                       tolerance = snapshot.tolerance)
+  )
+  expect_snapshot_RLum(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.2,
+                                    invert = TRUE, bootstrap = TRUE,
+                                    bs.M = 20, bs.N = 5, bs.h = 10,
+                                    verbose = FALSE, plot = FALSE),
+                       tolerance = snapshot.tolerance)
+  expect_snapshot_RLum(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 2.1,
+                                    bootstrap = TRUE, log = FALSE, par = 4,
+                                    bs.M = 20, bs.N = 5, bs.h = 10,
+                                    verbose = FALSE, plot = FALSE),
+                       tolerance = snapshot.tolerance)
 })
 
 test_that("graphical snapshot tests", {
@@ -162,5 +172,23 @@ test_that("regression tests", {
   ## issue 900
   expect_warning(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                               bootstrap = TRUE, bs.M = 1,
+                              verbose = FALSE, plot = FALSE))
+
+  ## issue 1332
+  ## the seed was picked to get the smallest number of warnings and messages;
+  ## this test relies on not using SW() to do its job
+  set.seed(3)
+  expect_warning(expect_warning(expect_message(
+      calc_MinDose(data = data.frame(De = c(rnorm(4) + 5, -1),
+                                     De_Err = rnorm(5) + 1),
+                   sigmab = 1, log = TRUE, bootstrap = TRUE,
+                   bs.M = 10, bs.N = 5, bs.h = 2, verbose = FALSE),
+      "Unable to plot the likelihood profile for: p0"),
+      "De values must be positive with 'log = TRUE', 1 values set to NA"),
+      "Not enough bootstrap replicates for loess fitting, try increasing `bs.M`")
+
+  ## issue 1355
+  expect_warning(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
+                              bootstrap = TRUE, bs.M = 10, bs.N = 1,
                               verbose = FALSE, plot = FALSE))
 })

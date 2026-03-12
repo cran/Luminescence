@@ -38,7 +38,7 @@
 #' per cent) calculated by the FMM. The last plot shows the achieved BIC scores
 #' and maximum log-likelihood estimates for each value of *k*.
 #'
-#' @param data [RLum.Results-class] or [data.frame] (**required**):
+#' @param data [Luminescence::RLum.Results-class] or [data.frame] (**required**):
 #' for [data.frame]: two columns with De `(data[,1])` and De error `(values[,2])`
 #'
 #' @param sigmab [numeric] (**required**):
@@ -87,7 +87,7 @@
 #'
 #' @return
 #' Returns a plot (*optional*) and terminal output. In addition an
-#' [RLum.Results-class] object is returned containing the
+#' [Luminescence::RLum.Results-class] object is returned containing the
 #' following elements:
 #'
 #' \item{.$summary}{[data.frame] summary of all relevant model results.}
@@ -105,7 +105,7 @@
 #' `mle` and `grain.probability` are lists containing matrices of the
 #' results for each iteration of the model.
 #'
-#' The output should be accessed using the function [get_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
 #'
 #' @section Function version: 0.4.4
 #'
@@ -114,8 +114,8 @@
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany) \cr
 #' Based on a rewritten S script of Rex Galbraith, 2006.
 #'
-#' @seealso [calc_CentralDose], [calc_CommonDose],
-#' [calc_FuchsLang2001], [calc_MinDose]
+#' @seealso [Luminescence::calc_CentralDose], [Luminescence::calc_CommonDose],
+#' [Luminescence::calc_FuchsLang2001], [Luminescence::calc_MinDose]
 #'
 #' @references
 #' Galbraith, R.F. & Green, P.F., 1990. Estimating the component
@@ -190,8 +190,8 @@ calc_FiniteMixture <- function(
   n.components,
   grain.probability = FALSE,
   pdf.weight = TRUE,
-  pdf.sigma = "sigmab",
-  pdf.colors = "gray",
+  pdf.sigma = c("sigmab", "se"),
+  pdf.colors = c("gray", "colors", "none"),
   plot.proportions = TRUE,
   plot.criteria = TRUE,
   plot=TRUE,
@@ -221,7 +221,7 @@ calc_FiniteMixture <- function(
     .throw_error("'sigmab' must be a value between 0 and 1")
   }
   .validate_class(n.components, c("integer", "numeric"))
-  if (min(n.components) < 2) {
+  if (length(n.components) == 1 && n.components < 2) {
     .throw_error("'n.components' should be at least 2")
   }
   .validate_logical_scalar(grain.probability)
@@ -233,6 +233,7 @@ calc_FiniteMixture <- function(
   .validate_logical_scalar(plot)
 
   ## ensure that the chosen components are sorted
+  n.components <- setdiff(n.components, 1)
   n.components <- sort(n.components)
   multiple.components <- length(n.components) > 1
 

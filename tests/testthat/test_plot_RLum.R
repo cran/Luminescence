@@ -1,3 +1,9 @@
+## load data
+obj <- set_RLum(class = "RLum.Analysis",
+                records = list(
+                    set_RLum("RLum.Data.Curve", data = matrix(1:10, ncol = 2)),
+                    set_RLum("RLum.Data.Curve", data = matrix(1:20, ncol = 2))))
+
 test_that("input validation", {
   testthat::skip_on_cran()
 
@@ -9,6 +15,7 @@ test_that("input validation", {
 test_that("empty objects", {
   testthat::skip_on_cran()
 
+  expect_null(plot_RLum(list()))
   expect_message(plot_RLum(set_RLum("RLum.Analysis")),
                  "Nothing to plot, NULL returned")
   expect_silent(plot_RLum(set_RLum("RLum.Data.Curve")))
@@ -29,28 +36,34 @@ test_that("check functionality", {
   image_short <- as(array(rnorm(100), dim = c(10, 10, 1)), "RLum.Data.Image")
   expect_silent(plot_RLum(list(image_short, image_short), main = list("test1", "test2"), mtext = "test"))
 
-  ## test list of RLum.Analysis
-  l <- list(set_RLum(
-    class = "RLum.Analysis",
-    records = list(
-      set_RLum("RLum.Data.Curve", data = matrix(1:10, ncol = 2)),
-      set_RLum("RLum.Data.Curve", data = matrix(1:20, ncol = 2)))))
-
-  expect_silent(plot_RLum(l, main = list("test", "test2")))
-  expect_silent(plot_RLum(l, main = list("test", "test2"), mtext = "test",
-                          subset = NA))
-
   ## plot results objects
   data(ExampleData.BINfileData, envir = environment())
   object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1:3)
   results <- analyse_SAR.CWOSL(
     object = object,
-    signal.integral.min = 1,
-    signal.integral.max = 2,
+    signal_integral = 1:2,
+    background_integral = 900:1000,
     plot = FALSE,
     verbose = FALSE,
-    background.integral.min = 900,
-    background.integral.max = 1000,
     fit.method = "LIN")
   expect_null(plot_RLum(results))
+
+  ## subset
+  expect_silent(plot_RLum(list(obj), main = list("test", "test2"),
+                          mtext = "test", subset = NA))
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+
+  SW({
+  vdiffr::expect_doppelganger("RLum.Analysis main",
+                              plot_RLum(obj, main = list("a", "b")))
+  vdiffr::expect_doppelganger("RLum.Analysis list main",
+                              plot_RLum(list(obj, obj), main = list("a", "b")))
+  vdiffr::expect_doppelganger("RLum.Analysis list mtext sub",
+                              plot_RLum(list(obj, obj), mtext = "test",
+                                        sub = "sub"))
+  })
 })

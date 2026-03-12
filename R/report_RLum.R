@@ -103,8 +103,8 @@
 #' @section Function version: 0.1.5
 #'
 #' @author
-#' Christoph Burow, University of Cologne (Germany),
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#' Christoph Burow, University of Cologne (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 #'
 #' @note
 #' This function requires the R packages 'rmarkdown', 'pander' and 'rstudioapi'.
@@ -208,6 +208,8 @@ report_RLum <- function(
   # nocov end
 
   # check if files exist
+  .validate_class(file, "character", length = 1)
+  .validate_class(css.file, "character", length = 1, null.ok = TRUE)
   if (!is.null(css.file) && !file.exists(css.file)) {
       .throw_error("Couldn't find the specified CSS file at '", css.file, "'")
   }
@@ -271,7 +273,7 @@ report_RLum <- function(
   saveRDS(object, file.rds)
 
   # get object
-  elements <- .struct_RLum(object, root = deparse(substitute(object)))
+  elements <- .struct_RLum(object, root = deparse1(substitute(object)))
 
   ## ------------------------------------------------------------------------ ##
   ## WRITE CONTENT ----
@@ -689,9 +691,9 @@ report_RLum <- function(
   # for the report we must not have the same last element names of same
   # depth (HTML cannot discriminate between #links of <h> headers)
   ## TODO: this is highly inefficient for unnamed list due to recurrent indices
-  dlevel <- max(table(df$bud))
+  dlevel <- max(table(df$bud), 0)
 
-  for (i in 1:dlevel) {
+  for (i in seq_len(dlevel)) {
     unique.bud <- unique(df[is.na(df$bud.freq), ]$bud)
     df[is.na(df$bud.freq), ][match(unique.bud, df[is.na(df$bud.freq), ]$bud), ]$bud.freq <- i - 1
   }

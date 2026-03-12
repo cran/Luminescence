@@ -8,13 +8,13 @@ plot_RLum.Data.Image(
   object,
   frames = NULL,
   par.local = TRUE,
-  plot.type = "plot.raster",
+  plot.type = c("plot.raster", "contour"),
   ...
 )
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Data.Image} (\strong{required}): S4
-object of class \code{RLum.Data.Image}}
+object of class \linkS4class{RLum.Data.Image}}
 
 \item{frames}{\link{numeric} (\emph{optional}): sets the frames to be set, by default all
 frames are plotted. Can be sequence of numbers, as long as the frame number is valid.}
@@ -76,14 +76,15 @@ plot_RLum.Data.Image(ExampleData.RLum.Data.Image)
 
 }
 \seealso{
-\linkS4class{RLum.Data.Image}, \link{plot}, \link{plot_RLum}, \link[graphics:image]{graphics::image}, \link[graphics:contour]{graphics::contour}
+\linkS4class{RLum.Data.Image}, \link{plot}, \link{plot_RLum},
+\link[graphics:image]{graphics::image}, \link[graphics:contour]{graphics::contour}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Data.Image(): Plot function for an RLum.Data.Image S4 class object. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_RLum.Data.Image(): Plot function for an RLum.Data.Image S4 class object. Function version 0.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

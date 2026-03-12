@@ -8,14 +8,14 @@ plot_AbanicoPlot(
   data,
   na.rm = TRUE,
   log.z = TRUE,
-  z.0 = "mean.weighted",
-  dispersion = "qr",
+  z.0 = c("mean.weighted", "mean.weighted", "median"),
+  dispersion = c("qr", "sd", "2sd"),
   plot.ratio = 0.75,
   rotate = FALSE,
   mtext = "",
   summary = c("n", "in.2s"),
   summary.pos = "sub",
-  summary.method = "MCM",
+  summary.method = c("MCM", "weighted", "unweighted"),
   legend = NULL,
   legend.pos = "topleft",
   stats = NULL,
@@ -44,10 +44,21 @@ plot_AbanicoPlot(
 \item{data}{\link{data.frame} or \linkS4class{RLum.Results} object (\strong{required}):
 for \code{data.frame} two columns: De (\code{data[,1]}) and De error (\code{data[,2]}).
 To plot several data sets in one plot the data sets must be provided as
-\code{list}, e.g. \code{list(data.1, data.2)}.}
+\code{list}, e.g. \code{list(data.1, data.2)}.\cr
+For some \linkS4class{RLum.Results} objects, one or more lines (and
+corresponding labels) are drawn automatically:
+\itemize{
+\item \link{calc_AverageDose} (ADM)
+\item \link{calc_CentralDose} (CDM)
+\item \link{calc_MaxDose} (MDM)
+\item \link{calc_MinDose} (MAM)
+\item \link{calc_FiniteMixture}
+Alternative labels can be set via the \code{line.label} option. This behaviour
+can be suppressed altogether by setting \code{line = NA}.
+}}
 
 \item{na.rm}{\link{logical} (\emph{with default}):
-exclude NA values from the data set prior to any further operations.}
+exclude \code{NA} values from the data set prior to any further operations.}
 
 \item{log.z}{\link{logical} (\emph{with default}):
 Option to display the z-axis in logarithmic scale. Default is \code{TRUE}.}
@@ -74,7 +85,7 @@ centre the polygon.}
 
 \item{plot.ratio}{\link{numeric} (\emph{with default}):
 Relative space, given to the radial versus the cartesian plot part,
-default is \code{0.75}.}
+default is 0.75.}
 
 \item{rotate}{\link{logical} (\emph{with default}):
 Option to turn the plot by 90 degrees.}
@@ -95,13 +106,7 @@ option in only possible if \code{mtext} is not used.}
 
 \item{summary.method}{\link{character} (\emph{with default}):
 keyword indicating the method used to calculate the statistic summary.
-One out of
-\itemize{
-\item \code{"unweighted"},
-\item \code{"weighted"} and
-\item \code{"MCM"}.
-}
-
+One of \code{"MCM"} (default), \code{"weighted"} or \code{"unweighted"}.
 See \link{calc_Statistics} for details.}
 
 \item{legend}{\link{character} vector (\emph{optional}):
@@ -160,7 +165,8 @@ polygon may be omitted for clarity. To disable it use \code{FALSE} or
 \code{polygon = FALSE}. Default is \code{"grey80"}.}
 
 \item{line}{\link{numeric} or \linkS4class{RLum.Results}:
-numeric values of the additional lines to be added.}
+numeric values of the additional lines to be added. This can be set to \code{NA}
+to suppress the line added automatically by some \code{RLum.Results} objects.}
 
 \item{line.col}{\link{character} or \link{numeric}:
 colour of the additional lines.}
@@ -207,8 +213,8 @@ kernel density estimate, histogram and/or dot plot of the dose values.
 }
 \details{
 The Abanico Plot is a combination of the classic Radial Plot
-(\code{plot_RadialPlot}) and a kernel density estimate plot (e.g
-\code{plot_KDE}). It allows straightforward visualisation of data precision,
+\link{plot_RadialPlot} and a kernel density estimate plot (e.g
+\link{plot_KDE}. It allows straightforward visualisation of data precision,
 error scatter around a user-defined central value and the combined
 distribution of the values, on the actual scale of the measured data (e.g.
 seconds, equivalent dose, years). The principle of the plot is shown in
@@ -259,12 +265,12 @@ one or more of the following keywords:
 \item \code{"skewness"} (skewness)
 }
 
-\strong{Note} that the input data for the statistic summary is sent to the function
-\code{calc_Statistics()} depending on the log-option for the z-scale. If
+\strong{Note:} the input data for the statistic summary is sent to the function
+\link{calc_Statistics} depending on the log-option for the z-scale. If
 \code{"log.z = TRUE"}, the summary is based on the logarithms of the input
 data. If \code{"log.z = FALSE"} the linearly scaled data is used.
 
-\strong{Note} as well, that \code{"calc_Statistics()"} calculates these statistic
+\strong{Note:} \link{calc_Statistics} calculates these statistic
 measures in three different ways: \code{unweighted}, \code{weighted} and
 \code{MCM-based} (i.e., based on Monte Carlo Methods). By default, the
 MCM-based version is used. If you wish to use another method, indicate this
@@ -274,8 +280,8 @@ The optional parameter \code{layout} allows more sophisticated ways to modify
 the entire plot. Each element of the plot can be addressed and its properties
 can be defined. This includes font type, size and decoration, colours and
 sizes of all plot items. To infer the definition of a specific layout style
-cf. \code{get_Layout()} or type e.g., for the layout type \code{"journal"}
-\code{get_Layout("journal")}. A layout type can be modified by the user by
+cf. \link{get_Layout} or type, e.g. for the layout type \code{"journal"}.
+A layout type can be modified by the user by
 assigning new values to the list object.
 
 It is possible for the z-scale to specify where ticks are to be drawn
@@ -284,7 +290,7 @@ documentation of \code{axis}. Specifying tick positions manually overrides a
 \code{zlim}-definition.
 }
 \section{Function version}{
- 0.1.20
+ 0.1.21
 }
 
 \examples{
@@ -354,11 +360,8 @@ plot_AbanicoPlot(data = ExampleData.DeValues,
 ## now with user-defined green line for minimum age model
 CAM <- calc_CentralDose(ExampleData.DeValues,
                         plot = FALSE)
-
-plot_AbanicoPlot(data = ExampleData.DeValues,
-                 line = CAM,
-                 line.col = "darkgreen",
-                 line.label = "CAM")
+plot_AbanicoPlot(data = CAM,
+                 line.col = "darkseagreen")
 
 ## now create plot with legend, colour, different points and smaller scale
 plot_AbanicoPlot(data = ExampleData.DeValues,
@@ -468,13 +471,13 @@ points(x = AP$data[[1]]$precision[!in_2sigma],
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2025. plot_AbanicoPlot(): Function to create an Abanico Plot.. Function version 0.1.20. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., Colombo, M., 2026. plot_AbanicoPlot(): Function to create an Abanico Plot.. Function version 0.1.21. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 Galbraith, R. & Green, P., 1990. Estimating the component ages
 in a finite mixture. International Journal of Radiation Applications and
-Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3),
+Instrumentation. Part D. Nuclear Tracks and Radiation Measurements 17 (3),
 197-206.
 
 Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2015.
@@ -482,10 +485,12 @@ The abanico plot: visualising chronometric data with individual standard errors.
 Quaternary Geochronology. doi:10.1016/j.quageo.2015.09.003
 }
 \seealso{
-\link{plot_RadialPlot}, \link{plot_KDE}, \link{plot_Histogram}, \link{plot_ViolinPlot}
+\link{plot_RadialPlot}, \link{plot_KDE},
+\link{plot_Histogram}, \link{plot_ViolinPlot}
 }
 \author{
 Michael Dietze, GFZ Potsdam (Germany)\cr
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
 Inspired by a plot introduced by Galbraith & Green (1990)
 , RLum Developer Team}

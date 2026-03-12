@@ -1,37 +1,39 @@
-#' Convert an element from a Risoe.BINfileData object to an RLum.Data.Curve
+#' @title Convert an element from a Risoe.BINfileData object to an RLum.Data.Curve
 #' object
 #'
+#' @description
 #' The function converts one specified single record from a Risoe.BINfileData
 #' object to an RLum.Data.Curve object.
 #'
+#' @details
 #' The function extracts all `METADATA` from the `Risoe.BINfileData`
-#' object and stores them in the `RLum.Data.Curve` object. This function
-#' can be used stand-alone, but is the base function for [Risoe.BINfileData2RLum.Analysis].
+#' object and stores them in the [Luminescence::RLum.Data.Curve-class] object. This function
+#' can be used stand-alone, but is the base function for [Luminescence::Risoe.BINfileData2RLum.Analysis].
 #'
-#' @param object [Risoe.BINfileData-class] (**required**):
+#' @param object [Luminescence::Risoe.BINfileData-class] (**required**):
 #' `Risoe.BINfileData` object
 #'
 #' @param id [integer] (**required**):
 #' record id in the `Risoe.BINfileData` object of the curve that is to be
-#' stored in the `RLum.Data.Curve` object. If no value for id is provided,
+#' stored in the [Luminescence::RLum.Data.Curve-class] object. If no value for id is provided,
 #' the record has to be specified by `pos`, `set` and `run`.
 #'
 #' @param pos [integer] (*optional*):
 #' record position number in the `Risoe.BINfileData` object of the curve that
-#' is to be stored in the `RLum.Data.Curve` object. If a value for `id` is
+#' is to be stored in the [Luminescence::RLum.Data.Curve-class] object. If a value for `id` is
 #' provided, this argument is ignored.
 #'
 #' @param run [integer] (*optional*):
 #' record run number in the `Risoe.BINfileData` object of the curve that is
-#' to be stored in the `RLum.Data.Curve` object. If a value for `id` is
+#' to be stored in the [Luminescence::RLum.Data.Curve-class] object. If a value for `id` is
 #' provided, this argument is ignored.
 #'
 #' @param set [integer] (*optional*):
 #' record set number in the `Risoe.BINfileData` object of the curve that is
-#' to be stored in the `RLum.Data.Curve` object. If a value for `id` is
+#' to be stored in the [Luminescence::RLum.Data.Curve-class] object. If a value for `id` is
 #' provided, this argument is ignored.
 #'
-#' @return Returns an [RLum.Data.Curve-class] object.
+#' @return Returns an [Luminescence::RLum.Data.Curve-class] object.
 #'
 #' @note
 #' Due to changes in the BIN-file (version 3 to version 4) format the recalculation of TL-curves might be not
@@ -40,12 +42,12 @@
 #' @section Function version: 0.5.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Christoph Burow, Universtiy of Cologne (Germany)
 #'
-#' @seealso [Risoe.BINfileData2RLum.Analysis], [set_RLum],
-#' [RLum.Data.Curve-class], [RLum.Analysis-class], [Risoe.BINfileData-class],
-#' [plot_RLum]
+#' @seealso [Luminescence::Risoe.BINfileData2RLum.Analysis], [Luminescence::set_RLum],
+#' [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::Risoe.BINfileData-class],[Luminescence::plot_RLum]
 #'
 #' @keywords manip
 #'
@@ -87,7 +89,7 @@
   # Build object ------------------------------------------------------------
   set_RLum(
     class = "RLum.Data.Curve",
-    recordType = METADATA[["LTYPE"]][id],
+    recordType = paste(METADATA[["LTYPE"]][id], "(PMT)"),
     data =  src_create_RLumDataCurve_matrix(
       DATA = DATA[[id]],
       NPOINTS = METADATA[["NPOINTS"]][id],

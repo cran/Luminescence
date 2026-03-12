@@ -1,7 +1,7 @@
 #'@title Extract Pixel Values through Circular Region-of-Interests (ROI) from an Image
 #'
 #'@description Light-weighted function to extract pixel values from pre-defined regions-of-interest (ROI) from
-#'[RLum.Data.Image-class], [array] or [matrix] objects and provide simple image processing
+#'[Luminescence::RLum.Data.Image-class], [array] or [matrix] objects and provide simple image processing
 #'capacity. The function is limited to circular ROIs.
 #'
 #'@details The function uses a cheap approach to decide whether a pixel lies within
@@ -13,7 +13,7 @@
 #'where \eqn{x} and \eqn{y} are integer pixel coordinates and \eqn{d} is the integer
 #'diameter of the circle in pixel.
 #'
-#'@param object [RLum.Data.Image-class], [array] or [matrix] (**required**): input image data
+#'@param object [Luminescence::RLum.Data.Image-class], [array] or [matrix] (**required**): input image data
 #'
 #'@param roi [matrix] (**required**): matrix with three columns containing the centre coordinates
 #'of the ROI (first two columns) and the diameter of the circular ROI. All numbers must by of type [integer]
@@ -27,20 +27,20 @@
 #' @param plot [logical] (*optional*): enable/disable the plot output. Only
 #' the first image frame is shown.
 #'
-#'@return [RLum.Results-class] object with the following elements:
+#'@return [Luminescence::RLum.Results-class] object with the following elements:
 #'`..$roi_signals`: a named [list] with all ROI values and their coordinates
 #'`..$roi_summary`: a [matrix] where rows are frames from the image, and columns are different ROI
 #'The element has two attributes: `summary` (the method used to summarise pixels) and `area` (the pixel area)
-#'`..$roi_coord`: a [matrix] that can be passed to [plot_ROI]
+#'`..$roi_coord`: a [matrix] that can be passed to [Luminescence::plot_ROI]
 #'
 #'If `plot = TRUE` a control plot is returned.
 #'
 #'@section Function version: 0.1.0
 #'
 #'@author
-#'Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#'Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#'@seealso [RLum.Data.Image-class]
+#'@seealso [Luminescence::RLum.Data.Image-class]
 #'
 #'@keywords manip
 #'
@@ -54,7 +54,7 @@
 extract_ROI <- function(
   object,
   roi,
-  roi_summary = "mean",
+  roi_summary = c("mean", "median", "sd", "sum"),
   plot = FALSE
 ) {
   .set_function_name("extract_ROI")

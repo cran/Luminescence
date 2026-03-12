@@ -22,12 +22,10 @@ read_BIN2R(
 )
 }
 \arguments{
-\item{file}{\link{character} or \link{list} (\strong{required}): path and file name of the
-BIN/BINX file (URLs are supported). If input is a \code{list} it should comprise
-only \code{character}s representing valid path and BIN/BINX-file names.
-Alternatively, the input character can be just a directory (path), in which
-case the function tries to detect and import all BIN/BINX files found in
-the directory.}
+\item{file}{\link{character} or \link{list} (\strong{required}):
+name of one or multiple BIN/BINX files (URLs are supported); it can be the
+path to a directory, in which case the function tries to detect and import
+all BIN/BINX files found recursively from the given directory.}
 
 \item{show.raw.values}{\link{logical} (\emph{with default}):
 shows raw values from BIN-file for \code{LTYPE}, \code{DTYPE} and \code{LIGHTSOURCE} without
@@ -55,7 +53,8 @@ produced BIN/BINX-file. This option compares only predecessor and successor.
 Can be provided as \code{list} if \code{file} is a \code{list}.}
 
 \item{fastForward}{\link{logical} (\emph{with default}):
-if \code{TRUE} for a more efficient data processing only a list of \code{RLum.Analysis}
+if \code{TRUE} for a more efficient data processing only a list of
+\linkS4class{RLum.Analysis}
 objects is returned instead of a \linkS4class{Risoe.BINfileData} object.
 Can be provided as \code{list} if \code{file} is a \code{list}.}
 
@@ -82,7 +81,7 @@ for import.}
 
 \item{pattern}{\link{character} (\emph{optional}):
 regular expression pattern passed to \link{list.files} to construct a list of
-files to read (used only when a path is provided).}
+files to read (used only when \code{file} specifies a path).}
 
 \item{verbose}{\link{logical} (\emph{with default}):
 enable/disable output to the terminal.}
@@ -99,8 +98,11 @@ slots:
 \item{DATA}{A \link{list} containing a numeric \link{vector} of the measured data.
 The ID corresponds to the record ID in METADATA.}
 
-If \code{fastForward = TRUE} a list of \linkS4class{RLum.Analysis} object is returned. The
-internal coercing is done using the function \link{Risoe.BINfileData2RLum.Analysis}
+If \code{fastForward = TRUE} an \linkS4class{RLum.Analysis} object is
+returned (coerced by \link{Risoe.BINfileData2RLum.Analysis}).
+
+Results are returned as a list when multiple files are processed or \code{file}
+is a list.
 }
 \description{
 Import a \verb{*.bin} or a \verb{*.binx} file produced by a Risø DA15 and DA20 TL/OSL
@@ -118,7 +120,7 @@ The function works for BIN/BINX-format versions 03, 04, 05, 06, 07 and 08. The
 version number depends on the used Sequence Editor.
 }
 \section{Function version}{
- 0.18
+ 0.19
 }
 
 \examples{
@@ -130,7 +132,7 @@ temp
 } 
 
 \section{How to cite}{
-Kreutzer, S., Fuchs, M.C., Colombo, M., 2025. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Fuchs, M.C., Colombo, M., 2026. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.19. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -143,7 +145,7 @@ DTU Nutech, 2016. The Sequence Editor, Users Manual, February, 2016.
 \link[utils:txtProgressBar]{utils::txtProgressBar}, \link{list.files}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Margret C. Fuchs, HZDR Freiberg, (Germany) \cr
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
 based on information provided by Torben Lapp and Karsten Bracht Nielsen (Risø DTU, Denmark)

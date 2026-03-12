@@ -1,4 +1,4 @@
-#' Fitting and Deconvolution of OSL Lifetime Components
+#' @title Fitting and Deconvolution of OSL Lifetime Components
 #'
 #' @details
 #' The function intends to provide an easy access to pulsed optically stimulated luminescence (POSL) data,
@@ -42,7 +42,7 @@
 #' `nlsLM.lower` \tab [logical] \tab enable/disable lower parameter boundary, default is `TRUE`
 #' }
 #'
-#' @param object [RLum.Data.Curve-class], [RLum.Analysis-class], [data.frame] or [matrix] (**required**):
+#' @param object [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Analysis-class], [data.frame] or [matrix] (**required**):
 #' Input object containing the data to be analysed. All objects can be provided also as list for an automated
 #' processing. Please note: `NA` values are automatically removed and the dataset should comprise at least 5 data points (possibly more if `n.components` is
 #' set to a value greater than 1)
@@ -74,7 +74,7 @@
 #'
 #' @param ... parameters passed to [plot.default] to control the plot output, supported are:
 #' `main`, `xlab`, `ylab`, `log`, `xlim`, `ylim`, `col`, `lty`, `legend.pos`, `legend.text`. If the input
-#' object is of type [RLum.Analysis-class] this arguments can be provided as a [list].
+#' object is of type [Luminescence::RLum.Analysis-class] this arguments can be provided as a [list].
 #'
 #' @return
 #'
@@ -132,7 +132,8 @@
 #'
 #' @section Function version: 0.1.5
 #'
-#' @author Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University,
+#' @author
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Christoph Schmidt, University of Bayreuth (Germany)
 #'
 #' @seealso [minpack.lm::nls.lm], [DEoptim::DEoptim]
@@ -299,6 +300,7 @@ fit_OSLLifeTimes <- function(
   ##signal_range
   if(!is.null(signal_range)){
     .validate_class(signal_range, "numeric")
+    .validate_not_empty(signal_range)
 
     ## format the extremes of the signal range
     reset_msg <- function(sr) {
@@ -347,6 +349,9 @@ fit_OSLLifeTimes <- function(
     return(NULL)
   }
 
+  .validate_logical_scalar(plot)
+  .validate_logical_scalar(plot_simple)
+  .validate_logical_scalar(verbose)
 
 # Fitting -------------------------------------------------------------------------------------
 

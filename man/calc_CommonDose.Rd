@@ -5,7 +5,7 @@
 \title{Apply the (un-)logged common age model after Galbraith et al. (1999) to a
 given De distribution}
 \usage{
-calc_CommonDose(data, sigmab, log = TRUE, ...)
+calc_CommonDose(data, sigmab = 0, log = TRUE, ...)
 }
 \arguments{
 \item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
@@ -14,7 +14,7 @@ for \link{data.frame}: two columns with De \code{(data[,1])} and De error \code{
 \item{sigmab}{\link{numeric} (\emph{with default}):
 additional spread in De values, representing the expected overdispersion in
 the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-\strong{NOTE}: For the logged model (\code{log = TRUE}) this value must be
+\strong{Note:} For the logged model (\code{log = TRUE}) this value must be
 a fraction, e.g. 0.2 (= 20\%). If the un-logged model is used (\code{log = FALSE}),
 \code{sigmab} must be provided in the same absolute units of the De values
 (seconds or Gray).}
@@ -69,7 +69,7 @@ calc_CommonDose(ExampleData.DeValues$CA1)
 } 
 
 \section{How to cite}{
-Burow, C., 2025. calc_CommonDose(): Apply the (un-)logged common age model after Galbraith et al. (1999) to a given De distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Burow, C., 2026. calc_CommonDose(): Apply the (un-)logged common age model after Galbraith et al. (1999) to a given De distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -99,7 +99,7 @@ Cunningham, A.C. & Wallinga, J., 2012. Realizing the potential of fluvial archiv
 Quaternary Geochronology 12, 98-106.
 
 Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing the reproducibility and accuracy
-of optical dating of fluvial deposits.  Quaternary Geochronology, 1 109-120.
+of optical dating of fluvial deposits.  Quaternary Geochronology 1 109-120.
 
 Rodnight, H., 2008. How many equivalent dose values are needed to
 obtain a reproducible distribution?. Ancient TL 26, 3-10.

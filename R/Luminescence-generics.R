@@ -3,10 +3,10 @@
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [RLum.Data-class] objects. Depending on the input object, the corresponding
+#' [Luminescence::RLum.Data-class] objects. Depending on the input object, the corresponding
 #' function will be selected.
 #'
-#' @param object [RLum.Data-class] (**required**):
+#' @param object [Luminescence::RLum.Data-class] (**required**):
 #' S4 object of class `RLum.Data`
 #'
 #' @param ... further arguments passed to the specific class method
@@ -17,12 +17,12 @@
 #' @section Function version: 0.2.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @note Currently only `RLum.Data` objects of class [RLum.Data.Curve-class]
-#' and [RLum.Data.Spectrum-class] are supported.
+#' @note Currently only `RLum.Data` objects of class [Luminescence::RLum.Data.Curve-class]
+#' and [Luminescence::RLum.Data.Spectrum-class] are supported.
 #'
-#' @seealso [RLum.Data.Curve-class], [RLum.Data.Spectrum-class]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Data.Spectrum-class]
 #'
 #' @examples
 #'
@@ -55,12 +55,12 @@ setGeneric("bin_RLum.Data", function(object, ...) {
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [RLum-class] objects. Depending on the input object, the corresponding
+#' [Luminescence::RLum-class] objects. Depending on the input object, the corresponding
 #' function will be selected.
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' S4 object of class `RLum` or an object of type [list] containing only objects
-#' of type [RLum-class]
+#' of type [Luminescence::RLum-class]
 #'
 #' @param ... further arguments passed to the specific class method.
 #'
@@ -70,10 +70,11 @@ setGeneric("bin_RLum.Data", function(object, ...) {
 #' @section Function version: 0.3.3
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Data.Curve-class], [RLum.Data.Image-class],
-#' [RLum.Data.Spectrum-class], [RLum.Analysis-class], [RLum.Results-class]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Data.Image-class],
+#' [Luminescence::RLum.Data.Spectrum-class], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Results-class]
 #'
 #' @keywords utilities
 #'
@@ -96,12 +97,13 @@ setGeneric("get_RLum", function(object, ...) {
 })
 
 #' @describeIn get_RLum
-#' Returns a list of [RLum-class] objects that had been passed to [get_RLum]
+#' Returns a list of [Luminescence::RLum-class] objects that had been passed to
+#' [Luminescence::get_RLum]
 #'
 #' @param class [character] (*optional*):
 #' define which class gets selected if applied to a list, e.g., if a list
-#' consists of different type of [RLum-class] objects, this arguments allows
-#' to make a selection. If nothing is provided, all [RLum-class] objects are
+#' consists of different type of [Luminescence::RLum-class] objects, this arguments allows
+#' to make a selection. If nothing is provided, all [Luminescence::RLum-class] objects are
 #' treated.
 #'
 #' @param null.rm [logical] (*with default*):
@@ -110,6 +112,10 @@ setGeneric("get_RLum", function(object, ...) {
 #' @export
 setMethod("get_RLum", signature = "list",
     function(object, class = NULL, null.rm = FALSE, ...) {
+      ## input validation
+      .validate_class(class, "character", null.ok = TRUE, length = 1)
+      .validate_logical_scalar(null.rm)
+
       ## take care of the class argument
       if (!is.null(class)) {
         sel <- class[1] == vapply(object, function(x) class(x)[1], character(1))
@@ -166,9 +172,9 @@ setMethod("get_RLum", signature = "NULL",
 #'
 #' @description
 #' Remove records from an RLum-class object in a convenient way using
-#' [get_RLum] for the selection.
+#' [Luminescence::get_RLum] for the selection.
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' object with records to be removed.
 #'
 #' @param ... further arguments passed to the specific class method
@@ -180,9 +186,9 @@ setMethod("get_RLum", signature = "NULL",
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Analysis-class]
+#' @seealso [Luminescence::RLum.Analysis-class]
 #'
 #' @examples
 #' ## load example data
@@ -201,7 +207,7 @@ setGeneric("remove_RLum", function(object, ...) {
 })
 
 #' @describeIn remove_RLum
-#' Returns a list of [RLum-class] objects where the selected records are stripped
+#' Returns a list of [Luminescence::RLum-class] objects where the selected records are stripped
 #'
 #' @export
 setMethod("remove_RLum", signature = "list",
@@ -224,10 +230,10 @@ setMethod("remove_RLum", signature = "list",
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [RLum-class] objects. Depending on the input object, the corresponding
+#' [Luminescence::RLum-class] objects. Depending on the input object, the corresponding
 #' function will be selected.
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' S4 object of class `RLum`
 #'
 #' @return
@@ -236,14 +242,14 @@ setMethod("remove_RLum", signature = "list",
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @seealso
-#' [RLum.Data.Curve-class],
-#' [RLum.Data.Image-class],
-#' [RLum.Data.Spectrum-class],
-#' [RLum.Analysis-class],
-#' [RLum.Results-class]
+#' [Luminescence::RLum.Data.Curve-class],
+#' [Luminescence::RLum.Data.Image-class],
+#' [Luminescence::RLum.Data.Spectrum-class],
+#' [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Results-class]
 #' @keywords utilities
 #'
 #' @export
@@ -255,7 +261,7 @@ setGeneric("length_RLum", function(object) {
 ## melt_RLum() --------------------------------------------------------------
 #' @title Melt RLum-class objects into a flat data.frame
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' S4 object of class `RLum`
 #'
 #' @param ... further arguments passed to the specific class method
@@ -266,9 +272,9 @@ setGeneric("length_RLum", function(object) {
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Data.Curve-class], [RLum.Analysis-class]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Analysis-class]
 #'
 #' @examples
 #' data(ExampleData.XSYG, envir = environment())
@@ -282,7 +288,7 @@ setGeneric("melt_RLum", function(object, ...) {
 })
 
 #' @describeIn melt_RLum
-#' Returns a list of melted [RLum-class] objects; non-RLum objects are silently
+#' Returns a list of melted [Luminescence::RLum-class] objects; non-RLum objects are silently
 #' removed.
 #'
 #' @export
@@ -317,10 +323,11 @@ setMethod("melt_RLum", signature = "list",
 #' @title Safe manipulation of object metadata
 #'
 #' @description
-#' Generic functions for manipulation of metadata in [Risoe.BINfileData-class],
-#' [RLum.Analysis-class] and [RLum.Data-class] objects.
+#' Generic functions for manipulation of metadata in [Luminescence::Risoe.BINfileData-class],
+#' [Luminescence::RLum.Analysis-class] and [Luminescence::RLum.Data-class] objects.
 #'
-#' @param object [RLum.Analysis-class], [Risoe.BINfileData-class] (**required**):
+#' @param object [Luminescence::RLum.Analysis-class],
+#' [Luminescence::Risoe.BINfileData-class] (**required**):
 #' object of class `RLum.Analysis` or `Risoe.BINfileData` to manipulate.
 #'
 #' @param ... further arguments passed to the specific class method
@@ -333,7 +340,8 @@ setMethod("melt_RLum", signature = "list",
 #' @author
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
-#' @seealso [RLum.Data-class], [RLum.Analysis-class], [Risoe.BINfileData-class]
+#' @seealso [Luminescence::RLum.Data-class], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::Risoe.BINfileData-class]
 #'
 #' @keywords utilities
 #'
@@ -391,10 +399,10 @@ setGeneric("replace_metadata<-", function(object, ..., value) {
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [RLum-class] objects. Depending on the input object, the corresponding
+#' [Luminescence::RLum-class] objects. Depending on the input object, the corresponding
 #' function will be selected.
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' S4 object of class `RLum`
 #'
 #' @return
@@ -403,10 +411,11 @@ setGeneric("replace_metadata<-", function(object, ..., value) {
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Data.Curve-class], [RLum.Data.Image-class],
-#' [RLum.Data.Spectrum-class], [RLum.Analysis-class], [RLum.Results-class]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Data.Image-class],
+#' [Luminescence::RLum.Data.Spectrum-class], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Results-class]
 #'
 #' @keywords utilities
 #'
@@ -416,7 +425,7 @@ setGeneric("names_RLum", function(object) {
 })
 
 #' @describeIn names_RLum
-#' Returns a list of names of the [RLum-class] objects that had been passed to
+#' Returns a list of names of the [Luminescence::RLum-class] objects that had been passed to
 #' it.
 #'
 #' @export
@@ -437,11 +446,11 @@ setMethod("names_RLum", signature = "list",
 #' @title General replication function for RLum-class objects
 #'
 #' @description
-#' The function replicates [RLum-class] objects and returns a list of such
+#' The function replicates [Luminescence::RLum-class] objects and returns a list of such
 #' objects.
 #'
-#' @param object [RLum-class] (**required**):
-#' an [RLum-class] object
+#' @param object [Luminescence::RLum-class] (**required**):
+#' an [Luminescence::RLum-class] object
 #'
 #' @param times [integer] (*optional*):
 #' number for times each element should be repeated.
@@ -452,9 +461,9 @@ setMethod("names_RLum", signature = "list",
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum-class]
+#' @seealso [Luminescence::RLum-class]
 #'
 #' @keywords utilities
 #'
@@ -469,10 +478,10 @@ setGeneric("replicate_RLum", function(object, times = 1) {
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [Risoe.BINfileData-class] objects. Depending on the input object, the
+#' [Luminescence::Risoe.BINfileData-class] objects. Depending on the input object, the
 #' corresponding function will be selected.
 #' Allowed arguments can be found in the documentations of the corresponding
-#' [Risoe.BINfileData-class] class.
+#' [Luminescence::Risoe.BINfileData-class] class.
 #'
 #' @param METADATA x
 #'
@@ -481,14 +490,14 @@ setGeneric("replicate_RLum", function(object, times = 1) {
 #' @param .RESERVED x
 #'
 #' @return
-#' A [Risoe.BINfileData-class] object.
+#' A [Luminescence::Risoe.BINfileData-class] object.
 #'
 #' @section Function version: 0.1
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [Risoe.BINfileData-class]
+#' @seealso [Luminescence::Risoe.BINfileData-class]
 #'
 #' @keywords utilities
 #'
@@ -504,11 +513,11 @@ setGeneric("set_Risoe.BINfileData", function(METADATA = data.frame(),
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [RLum-class] objects. Depending on the given class, the corresponding
+#' [Luminescence::RLum-class] objects. Depending on the given class, the corresponding
 #' method to create an object from this class will be selected.
 #'
 #' @param class [character] (**required**):
-#' name of the S4 class to create, must correspond to one of the [RLum-class]
+#' name of the S4 class to create, must correspond to one of the [Luminescence::RLum-class]
 #' classes.
 #'
 #' @param originator [character] (*automatic*):
@@ -525,15 +534,16 @@ setGeneric("set_Risoe.BINfileData", function(METADATA = data.frame(),
 #' @param ... further arguments passed to the specific class method
 #'
 #' @return
-#' An object of the specified [RLum-class] class.
+#' An object of the specified [Luminescence::RLum-class] class.
 #'
 #' @section Function version: 0.3.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Data.Curve-class], [RLum.Data.Image-class],
-#' [RLum.Data.Spectrum-class], [RLum.Analysis-class], [RLum.Results-class]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Data.Image-class],
+#' [Luminescence::RLum.Data.Spectrum-class], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Results-class]
 #'
 #' @keywords utilities
 #'
@@ -591,7 +601,7 @@ setGeneric("set_RLum", function(class, originator, .uid = create_UID(),
 #' @name show
 #' @title Show the structure of RLum-class and Risoe.BINfileData-class objects
 #'
-#' @param object [RLum-class], [Risoe.BINfileData-class] (**required**):
+#' @param object [Luminescence::RLum-class], [Luminescence::Risoe.BINfileData-class] (**required**):
 #' object of class `RLum` or `Risoe.BINfileData`.
 #'
 NULL
@@ -601,11 +611,11 @@ NULL
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [RLum-class] objects. Depending on the input object, the corresponding
+#' [Luminescence::RLum-class] objects. Depending on the input object, the corresponding
 #' function will be selected. The smoothing is performed in the internal
 #' function `.smoothing()`.
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' S4 object of class `RLum`
 #'
 #' @param ... further arguments passed to the specific class method
@@ -616,13 +626,13 @@ NULL
 #' @section Function version: 0.1.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @note
 #' Currently only `RLum` objects of class `RLum.Data.Curve` and `RLum.Analysis`
 #' (with curve data) are supported.
 #'
-#' @seealso [RLum.Data.Curve-class], [RLum.Analysis-class]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Analysis-class]
 #'
 #' @examples
 #'
@@ -649,7 +659,8 @@ setGeneric("smooth_RLum", function(object, ...) {
 })
 
 #' @describeIn smooth_RLum
-#' Returns a list of [RLum-class] objects that had been passed to [smooth_RLum]
+#' Returns a list of [Luminescence::RLum-class] objects that had been passed to
+#' [Luminescence::smooth_RLum]
 #'
 #' @export
 setMethod("smooth_RLum", signature = "list",
@@ -664,16 +675,128 @@ setMethod("smooth_RLum", signature = "list",
       })
     })
 
+## normalise_RLum() ------------------------------------------------------------
+#' @title Normalisation of RLum-class objects
+#'
+#' @description
+#' The function provides a generalised access point for specific
+#' [Luminescence::RLum-class] objects. Depending on the input object, the corresponding
+#' function will be selected. The normalisation is performed in the internal
+#' function `.normalise_curve()`.
+#'
+#' @param object [Luminescence::RLum-class] (**required**):
+#' S4 object of class `RLum`
+#'
+#' @param norm [logical] [character] (**required**):
+#' if logical, whether curve normalisation should occur; alternatively, one
+#' of `"max"` (used with `TRUE`), `"min"`, `"first"`, `"last"`, `"huot"`,
+#' `"intensity"` or a positive number (e.g., 2.2).
+#'
+#' @param ... further arguments passed to the specific class method
+#'
+#' @details
+#' The `norm` argument normalises all count values. The following options are
+#' supported:
+#'
+#' `norm = TRUE` or `norm = "max"`: Curve values are normalised to the highest
+#' count value in the curve
+#'
+#' `norm = "min"`: Curve values are normalised to the smallest count value
+#' in the curve
+#'
+#' `norm = "first"`: Curve values are normalised to the first count value.
+#'
+#' `norm = "last"`: Curve values are normalised to the last count value
+#' (this can be useful in particular for radiofluorescence curves)
+#'
+#' `norm = "huot"`: Curve values are normalised as suggested by Sébastien Huot
+#'  via GitHub:
+#' \deqn{
+#' y = (observed - median(background)) / (max(observed) - median(background))
+#' }
+#'
+#' The background of the curve is defined as the last 20% of the count values
+#' of a curve.
+#'
+#' `norm = "intensity"`: Curve values are normalised to the channel length.
+#'
+#' `norm = 2.2`: Curve values are normalised to a positive number (e.g., 2.2).
+#'
+#' @return
+#' An object of the same type as the input object provided.
+#'
+#' @section Function version: 0.1.2
+#'
+#' @author
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
+#'
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Data.Spectrum-class],  [Luminescence::RLum.Data.Image-class]
+#'
+#' @examples
+#'
+#' ## load example data
+#' data(ExampleData.CW_OSL_Curve, envir = environment())
+#'
+#' ## create RLum.Data.Curve object from this example
+#' curve <-
+#'   set_RLum(
+#'       class = "RLum.Data.Curve",
+#'       recordType = "OSL",
+#'       data = as.matrix(ExampleData.CW_OSL_Curve)
+#'   )
+#'
+#' ## plot data without and with smoothing
+#' plot_RLum(curve)
+#' plot_RLum(normalise_RLum(curve))
+#'
+#' @keywords utilities
+#'
+#' @export
+setGeneric("normalise_RLum", function(object, norm = TRUE, ...) {
+  .set_function_name("normalise_RLum")
+  on.exit(.unset_function_name(), add = TRUE)
+
+  ## validation
+  .validate_class(norm, c("logical", "character", "numeric"), length = 1)
+
+  valid.norms <- c("max", "min", "first", "last", "huot", "intensity")
+  if(inherits(norm, "character"))
+    .validate_args(norm, valid.norms)
+  else if (inherits(norm, "numeric"))
+    .validate_positive_scalar(norm, extra = paste("one of", .collapse(valid.norms)))
+
+  ## set generic
+  standardGeneric("normalise_RLum")
+})
+
+#' @describeIn normalise_RLum
+#' Returns a list of [Luminescence::RLum.Data-class] objects that had been passed to
+#' [Luminescence::normalise_RLum]
+#'
+#' @export
+setMethod("normalise_RLum", signature = "list",
+          function(object, norm, ...) {
+            ## apply method in the objects and return the same
+            lapply(object, function(x) {
+              if (inherits(x, c("RLum.Analysis", "RLum.Data"))) {
+                return(normalise_RLum(x, norm = norm, ...))
+              } else {
+                return(x)
+              }
+            })
+          })
 
 ## sort_RLum() --------------------------------------------------------------
 #' @title Sort data for RLum-class and Risoe.BINfileData-class objects
 #'
 #' @description
-#' The function provides a generalised access point for specific [RLum-class]
-#' and [Risoe.BINfileData-class] objects. Depending on the input object,
+#' The function provides a generalised access point for specific [Luminescence::RLum-class]
+#' and [Luminescence::Risoe.BINfileData-class] objects. Depending on the input object,
 #' the corresponding function will be selected.
 #'
-#' @param object [RLum-class] or [Risoe.BINfileData-class] (**required**):
+#' @param object [Luminescence::RLum-class] or
+#' [Luminescence::Risoe.BINfileData-class] (**required**):
 #' S4 object of class `RLum.Analysis` or `Risoe.BINfileData`.
 #'
 #' @param ... further arguments passed to the specific class method
@@ -686,7 +809,7 @@ setMethod("smooth_RLum", signature = "list",
 #' @author
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
-#' @seealso [RLum.Analysis-class], [Risoe.BINfileData-class]
+#' @seealso [Luminescence::RLum.Analysis-class], [Luminescence::Risoe.BINfileData-class]
 #'
 #' @examples
 #'
@@ -705,7 +828,7 @@ setGeneric("sort_RLum", function(object, ...) {
 })
 
 #' @describeIn sort_RLum
-#' Returns a list of sorted [RLum-class] objects.
+#' Returns a list of sorted [Luminescence::RLum-class] objects.
 #'
 #' @export
 setMethod("sort_RLum", signature = "list",
@@ -726,10 +849,10 @@ setMethod("sort_RLum", signature = "list",
 #'
 #' @description
 #' The function provides a generalised access point for specific
-#' [RLum-class] objects. Depending on the input object, the corresponding
+#' [Luminescence::RLum-class] objects. Depending on the input object, the corresponding
 #' function will be selected.
 #'
-#' @param object [RLum-class] (**required**):
+#' @param object [Luminescence::RLum-class] (**required**):
 #' S4 object of class `RLum`
 #'
 #' @param ... further arguments passed to the specific class method
@@ -740,10 +863,11 @@ setMethod("sort_RLum", signature = "list",
 #' @section Function version: 0.2.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Data.Curve-class], [RLum.Data.Image-class],
-#' [RLum.Data.Spectrum-class], [RLum.Analysis-class], [RLum.Results-class]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::RLum.Data.Image-class],
+#' [Luminescence::RLum.Data.Spectrum-class], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Results-class]
 #'
 #' @keywords utilities
 #'
@@ -761,7 +885,7 @@ setGeneric("structure_RLum", function(object, ...) {
 })
 
 #' @describeIn structure_RLum
-#' Returns a list of data frames containing the structure of each [RLum-class]
+#' Returns a list of data frames containing the structure of each [Luminescence::RLum-class]
 #' object in the input list.
 #'
 #' @export
@@ -795,7 +919,7 @@ setMethod("structure_RLum", signature = "list",
 #' `NULL` and opens the data viewer.
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @keywords utilities
 #'

@@ -9,22 +9,22 @@ analyse_baSAR(
   CSV_file = NULL,
   aliquot_range = NULL,
   source_doserate = NULL,
-  signal.integral,
-  signal.integral.Tx = NULL,
-  background.integral,
-  background.integral.Tx = NULL,
+  signal_integral = NULL,
+  background_integral = NULL,
+  signal_integral_Tx = NULL,
+  background_integral_Tx = NULL,
   irradiation_times = NULL,
   sigmab = 0,
   sig0 = 0.025,
   distribution = "cauchy",
   baSAR_model = NULL,
   n.MCMC = 1e+05,
-  fit.method = "EXP",
+  fit.method = c("EXP", "EXP+LIN", "LIN"),
   fit.force_through_origin = TRUE,
   fit.includingRepeatedRegPoints = TRUE,
   method_control = list(),
   digits = 3L,
-  distribution_plot = "kde",
+  distribution_plot = c("kde", "abanico"),
   plot = TRUE,
   plot_reduced = TRUE,
   plot_singlePanels = FALSE,
@@ -56,30 +56,31 @@ the new selection will add the aliquots to the removed aliquots table.}
 \item{source_doserate}{\link{numeric} (\strong{required}):
 source dose rate of beta-source used for the measurement and its uncertainty
 in Gy/s, e.g., \code{source_doserate = c(0.12, 0.04)}. Parameter can be provided
-as \code{list}, for the case that more than one BIN-file is provided, e.g.,
+as a list, for the case that more than one BIN-file is provided, e.g.,
 \code{source_doserate = list(c(0.04, 0.004), c(0.05, 0.004))}.}
 
-\item{signal.integral}{\link{vector} (\strong{required}):
+\item{signal_integral}{\link{vector} (\strong{required}):
 vector with the limits for the signal integral used for the calculation,
-e.g., \code{signal.integral = c(1:5)}. Ignored if \code{object} is an \linkS4class{RLum.Results} object.
-The parameter can be provided as \code{list}, see \code{source_doserate}.}
+e.g., \code{signal_integral = 1:5}. It is ignored if \code{object} is an
+\linkS4class{RLum.Results} object.
+The parameter can be provided as a list, see \code{source_doserate}.}
 
-\item{signal.integral.Tx}{\link{vector} (\emph{optional}):
-vector with the limits for the signal integral for the Tx curve. I
-f nothing is provided the value from \code{signal.integral} is used and it is ignored
+\item{background_integral}{\link{vector} (\strong{required}):
+vector with the limits for the background integral. It is ignored if
+\code{object} is an \linkS4class{RLum.Results} object.
+The parameter can be provided as a list, see \code{source_doserate}.}
+
+\item{signal_integral_Tx}{\link{vector} (\emph{optional}):
+vector with the limits for the signal integral for the Tx curve. If nothing
+is provided, the value from \code{signal_integral} is used. It is ignored
 if \code{object} is an \linkS4class{RLum.Results} object.
-The parameter can be provided as \code{list}, see \code{source_doserate}.}
+The parameter can be provided as a list, see \code{source_doserate}.}
 
-\item{background.integral}{\link{vector} (\strong{required}):
-vector with the bounds for the background integral.
-Ignored if \code{object} is an \linkS4class{RLum.Results} object.
-The parameter can be provided as \code{list}, see \code{source_doserate}.}
-
-\item{background.integral.Tx}{\link{vector} (\emph{optional}):
+\item{background_integral_Tx}{\link{vector} (\emph{optional}):
 vector with the limits for the background integral for the Tx curve.
-If nothing is provided the value from \code{background.integral} is used.
-Ignored if \code{object} is an \linkS4class{RLum.Results} object.
-The parameter can be provided as \code{list}, see \code{source_doserate}.}
+If nothing is provided, the value from \code{background_integral} is used.
+It is ignored if \code{object} is an \linkS4class{RLum.Results} object.
+The parameter can be provided as a list, see \code{source_doserate}.}
 
 \item{irradiation_times}{\link{numeric} (\emph{optional}): if set this vector replaces all irradiation
 times for one aliquot and one cycle (Lx and Tx curves) and recycles it for all others cycles and aliquots.
@@ -98,21 +99,23 @@ allow adding an extra component of error to the final Lx/Tx error value
 The parameter can be provided as \code{list}, see \code{source_doserate}.}
 
 \item{distribution}{\link{character} (\emph{with default}):
-type of distribution that is used during Bayesian calculations for
-determining the Central dose and overdispersion values.
-Allowed inputs are \code{"cauchy"}, \code{"normal"} and \code{"log_normal"}.}
+type of distribution used during Bayesian calculations to determine the
+Central dose and overdispersion values (one of \code{"cauchy"}, \code{"normal"},
+\code{"log_normal"} and \code{"user_defined"}). If set to \code{"user_defined"}, argument
+\code{baSAR_model} must be provided.}
 
 \item{baSAR_model}{\link{character} (\emph{optional}):
 option to provide an own modified or new model for the Bayesian calculation
-(see details). If an own model is provided the argument \code{distribution} is
-ignored and set to \code{'user_defined'}}
+(see details). If provided, argument \code{distribution} is automatically set to
+\code{"user_defined"}.}
 
 \item{n.MCMC}{\link{integer} (\emph{with default}):
 number of iterations for the Markov chain Monte Carlo (MCMC) simulations}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-equation used for the fitting of the dose-response curve using the function
-\link{plot_GrowthCurve} and then for the Bayesian modelling. Here supported methods: \code{EXP}, \code{EXP+LIN} and \code{LIN}}
+equation used both for the fitting of the dose-response curve using function
+\link{fit_DoseResponseCurve} and then for the Bayesian modelling.
+Supported methods: \code{EXP}, \code{EXP+LIN} and \code{LIN}.}
 
 \item{fit.force_through_origin}{\link{logical} (\emph{with default}):
 force fitting through origin}
@@ -130,7 +133,8 @@ round output to the number of given digits}
 
 \item{distribution_plot}{\link{character} (\emph{with default}): sets the final distribution plot that
 shows equivalent doses obtained using the frequentist approach and sets in the central dose
-as comparison obtained using baSAR. Allowed input is \code{'abanico'} or \code{'kde'}. If set to \code{NULL} nothing is plotted.}
+as comparison obtained using baSAR. Allowed input is \code{'abanico'} or \code{'kde'}.
+If set to \code{NULL} nothing is plotted.}
 
 \item{plot}{\link{logical} (\emph{with default}):
 enable/disable the plot output.}
@@ -249,7 +253,7 @@ function runs an automatic process that consists of the following steps:
 \enumerate{
 \item Select all valid aliquots using the function \link{verify_SingleGrainData}
 \item Calculate \code{Lx/Tx} values using the function \link{calc_OSLLxTxRatio}
-\item Calculate De values using the function \link{plot_GrowthCurve}
+\item Calculate De values using the function \link{fit_DoseResponseCurve}
 }
 
 These proceeded data are subsequently used in for the Bayesian analysis
@@ -260,7 +264,7 @@ If a CSV file is provided (or a \code{data.frame} containing similar information
 the pre-processing phase consists of the following steps:
 \enumerate{
 \item Calculate \code{Lx/Tx} values using the function \link{calc_OSLLxTxRatio}
-\item Calculate De values using the function \link{plot_GrowthCurve}
+\item Calculate De values using the function \link{fit_DoseResponseCurve}
 }
 
 The CSV file should contain the BIN-file names and the aliquots selected
@@ -338,7 +342,7 @@ This list summarizes the additional arguments that can be passed to the internal
 functions.
 
 \tabular{llll}{
-\strong{Supported argument} \tab \strong{Corresponding function} \tab \strong{Default} \tab **Short description **\cr
+\strong{Supported argument} \tab \strong{Corresponding function} \tab \strong{Default} \tab \strong{Short description}\cr
 \code{threshold} \tab \link{verify_SingleGrainData} \tab \code{30} \tab change rejection threshold for curve selection \cr
 \code{skip} \tab \link[data.table:fread]{data.table::fread} \tab \code{0} \tab number of rows to be skipped during import\cr
 \code{n.records} \tab \link{read_BIN2R} \tab \code{NULL} \tab limit records during BIN-file import\cr
@@ -346,11 +350,11 @@ functions.
 \code{pattern} \tab \link{read_BIN2R} \tab \code{TRUE} \tab select BIN-file by name pattern\cr
 \code{position} \tab \link{read_BIN2R} \tab \code{NULL} \tab limit import to a specific position\cr
 \code{background.count.distribution} \tab \link{calc_OSLLxTxRatio} \tab \code{"non-poisson"} \tab set assumed count distribution\cr
-\code{fit.weights} \tab \link{plot_GrowthCurve} \tab \code{TRUE} \tab enable/disable fit weights\cr
-\code{fit.bounds} \tab \link{plot_GrowthCurve} \tab \code{TRUE} \tab enable/disable fit bounds\cr
-\code{n.MC} \tab \link{plot_GrowthCurve} \tab \code{100} \tab number of MC runs for error calculation\cr
-\code{output.plot} \tab \link{plot_GrowthCurve} \tab \code{TRUE} \tab enable/disable dose response curve plot\cr
-\code{output.plotExtended} \tab \link{plot_GrowthCurve} \tab \code{TRUE} \tab enable/disable extended dose response curve plot\cr
+\code{fit.weights} \tab \link{fit_DoseResponseCurve} \tab \code{TRUE} \tab enable/disable fit weights\cr
+\code{fit.bounds} \tab \link{fit_DoseResponseCurve} \tab \code{TRUE} \tab enable/disable fit bounds\cr
+\code{n.MC} \tab \link{fit_DoseResponseCurve} \tab \code{100} \tab number of MC runs for error calculation\cr
+\code{plot_drc} \tab \link{plot_DoseResponseCurve} \tab \code{TRUE} \tab enable/disable dose response curve plot\cr
+\code{plot_extended} \tab \link{plot_DoseResponseCurve} \tab \code{TRUE} \tab enable/disable extended dose response curve plot\cr
 \code{recordType} \tab \link{get_RLum} \tab \verb{c(OSL (UVVIS), irradiation (NA)} \tab helps for the curve selection\cr
 }
 }
@@ -358,15 +362,15 @@ functions.
 \strong{If you provide more than one BIN-file}, it is \strong{strongly} recommended to provide
 a \code{list} with the same number of elements for the following parameters:
 
-\code{source_doserate}, \code{signal.integral}, \code{signal.integral.Tx}, \code{background.integral},
-\code{background.integral.Tx}, \code{sigmab}, \code{sig0}.
+\code{source_doserate}, \code{signal_integral}, \code{signal_integral_Tx}, \code{background_integral},
+\code{background_integral_Tx}, \code{sigmab}, \code{sig0}.
 
 Example for two BIN-files: \code{source_doserate = list(c(0.04, 0.006), c(0.05, 0.006))}
 
 \strong{The function is currently limited to work with standard Risoe BIN-files only!}
 }
 \section{Function version}{
- 0.1.37
+ 0.1.41
 }
 
 \examples{
@@ -381,20 +385,19 @@ CWOSL.SAR.Data <- subset(
 
 \dontrun{
 ##(3) run analysis
-##please not that the here selected parameters are
-##choosen for performance, not for reliability
+## please note that the parameters used here are
+## chosen for performance, not for reliability
 results <- analyse_baSAR(
   object = CWOSL.SAR.Data,
   source_doserate = c(0.04, 0.001),
-  signal.integral = c(1:2),
-  background.integral = c(80:100),
+  signal_integral = 1:2,
+  background_integral = 80:100,
   fit.method = "LIN",
   plot = FALSE,
   n.MCMC = 200
 )
 
 print(results)
-
 
 ##CSV_file template
 ##copy and paste this the code below in the terminal
@@ -408,15 +411,13 @@ list(
  GRAIN = NA_real_),
    .Names = c("BIN_FILE", "DISC", "GRAIN"),
    class = "data.frame",
-   row.names = 1L
-)
-
+   row.names = 1L)
 }
 
 } 
 
 \section{How to cite}{
-Mercier, N., Kreutzer, S., 2025. analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.37. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Mercier, N., Kreutzer, S., 2026. analyse_baSAR(): Bayesian models (baSAR) applied on luminescence data. Function version 0.1.41. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -439,13 +440,14 @@ regenerative-dose protocol. Radiation Measurements 32, 57-73. doi:10.1016/S1350-
 Plummer, M., 2017. JAGS Version 4.3.0 user manual. \verb{https://sourceforge.net/projects/mcmc-jags/files/Manuals/4.x/jags_user_manual.pdf/download}
 }
 \seealso{
-\link{read_BIN2R}, \link{calc_OSLLxTxRatio}, \link{plot_GrowthCurve},
+\link{read_BIN2R}, \link{calc_OSLLxTxRatio},
+\link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve},
 \link[data.table:fread]{data.table::fread}, \link{verify_SingleGrainData},
 \link[rjags:jags.model]{rjags::jags.model}, \link[rjags:coda.samples]{rjags::coda.samples}, \link{boxplot.default}
 }
 \author{
 Norbert Mercier, Archéosciences Bordeaux, CNRS-Université Bordeaux Montaigne (France) \cr
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 The underlying Bayesian model based on a contribution by Combès et al., 2015.
 , RLum Developer Team}
 \keyword{datagen}

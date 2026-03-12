@@ -16,11 +16,19 @@ test_that("input validation", {
   expect_error(calc_CentralDose(data = "error"),
                "'data' should be of class 'data.frame' or 'RLum.Results'")
   expect_error(calc_CentralDose(temp, sigmab = -10),
-               "'sigmab' should be a non-negative value")
+               "'sigmab' should be a single non-negative value")
   expect_error(calc_CentralDose(temp, sigmab = 10),
                "'sigmab' should be a value between 0 and 1 if log = TRUE")
   expect_error(calc_CentralDose(data.frame()),
                "should have at least two columns and two rows")
+  expect_error(calc_CentralDose(iris, iris),
+               "'sigmab' should be a single non-negative value")
+  expect_error(calc_CentralDose(iris, log = NA),
+               "'log' should be a single logical value")
+  expect_error(calc_CentralDose(iris, plot = NA),
+               "'plot' should be a single logical value")
+  expect_error(calc_CentralDose(iris, verbose = NA),
+               "'verbose' should be a single logical value")
 
   SW({
   expect_s4_class(calc_CentralDose(temp_NA), "RLum.Results")

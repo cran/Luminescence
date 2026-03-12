@@ -1,8 +1,11 @@
-#' Apply the (un-)logged common age model after Galbraith et al. (1999) to a
+#' @title Apply the (un-)logged common age model after Galbraith et al. (1999) to a
 #' given De distribution
+#'
+#' @description
 #'
 #' Function to calculate the common dose of a De distribution.
 #'
+#' @details
 #' **(Un-)logged model**
 #'
 #' When `log = TRUE` this function
@@ -17,13 +20,13 @@
 #' calculated using the un-logged estimates of De and their absolute standard
 #' error (Galbraith & Roberts 2012, p. 14).
 #'
-#' @param data [RLum.Results-class] or [data.frame] (**required**):
+#' @param data [Luminescence::RLum.Results-class] or [data.frame] (**required**):
 #' for [data.frame]: two columns with De `(data[,1])` and De error `(data[,2])`
 #'
 #' @param sigmab [numeric] (*with default*):
 #' additional spread in De values, representing the expected overdispersion in
 #' the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-#' **NOTE**: For the logged model (`log = TRUE`) this value must be
+#' **Note:** For the logged model (`log = TRUE`) this value must be
 #' a fraction, e.g. 0.2 (= 20%). If the un-logged model is used (`log = FALSE`),
 #' `sigmab` must be provided in the same absolute units of the De values
 #' (seconds or Gray).
@@ -35,7 +38,7 @@
 #'
 #' @return
 #' Returns a terminal output. In addition an
-#' [RLum.Results-class] object is returned containing the
+#' [Luminescence::RLum.Results-class] object is returned containing the
 #' following element:
 #'
 #' \item{$summary}{[data.frame] summary of all relevant model results.}
@@ -43,15 +46,15 @@
 #' \item{$args}{[list] used arguments}
 #' \item{$call}{[call] the function call}
 #'
-#' The output should be accessed using the function [get_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
 #'
 #' @section Function version: 0.1.1
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany)
 #'
-#' @seealso [calc_CentralDose], [calc_FiniteMixture],
-#' [calc_FuchsLang2001], [calc_MinDose]
+#' @seealso [Luminescence::calc_CentralDose], [Luminescence::calc_FiniteMixture],
+#' [Luminescence::calc_FuchsLang2001], [Luminescence::calc_MinDose]
 #'
 #' @references
 #' Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for
@@ -80,7 +83,7 @@
 #' Quaternary Geochronology 12, 98-106.
 #'
 #' Rodnight, H., Duller, G.A.T., Wintle, A.G. & Tooth, S., 2006. Assessing the reproducibility and accuracy
-#' of optical dating of fluvial deposits.  Quaternary Geochronology, 1 109-120.
+#' of optical dating of fluvial deposits.  Quaternary Geochronology 1 109-120.
 #'
 #' Rodnight, H., 2008. How many equivalent dose values are needed to
 #' obtain a reproducible distribution?. Ancient TL 26, 3-10.
@@ -96,7 +99,7 @@
 #' @export
 calc_CommonDose <- function(
   data,
-  sigmab,
+  sigmab = 0,
   log=TRUE,
   ...
 ) {
@@ -114,10 +117,14 @@ calc_CommonDose <- function(
   if (ncol(data) < 2) {
     .throw_error("'data' object must have two columns")
   }
-  if (!missing(sigmab) && (sigmab < 0 || sigmab > 1)) {
-      .throw_error("'sigmab' must be a value between 0 and 1")
+  if (any(data[, 1] < 0)) {
+    .throw_error("'data' cannot contain negative times")
   }
+  .validate_nonnegative_scalar(sigmab)
   .validate_logical_scalar(log)
+  if (log && (sigmab < 0 || sigmab > 1)) {
+    .throw_error("'sigmab' must be a value between 0 and 1 if 'log = TRUE'")
+  }
 
   ## set expected column names
   colnames(data)[1:2] <- c("ED", "ED_Error")
@@ -126,15 +133,15 @@ calc_CommonDose <- function(
   ##============================================================================##
   ## ADDITIONAL ARGUMENTS
   ##============================================================================##
-  settings <- list(verbose = TRUE)
-  settings <- modifyList(settings, list(...))
+
+  settings <- modifyList(list(verbose = TRUE),
+                         list(...))
+  .validate_logical_scalar(settings$verbose, name = "'verbose'")
+
 
   ##============================================================================##
   ## CALCULATIONS
   ##============================================================================##
-
-  # set default value of sigmab
-  if (missing(sigmab)) sigmab<- 0
 
   # calculate  yu = log(ED) and su = se(logED)
   if (log) {

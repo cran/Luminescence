@@ -78,3 +78,13 @@ test_that("check functionality", {
       Risoe.BINfileData2RLum.Analysis(zero, keep.empty = FALSE)),
       "Empty Risoe.BINfileData object detected")
 })
+
+test_that("check functionality", {
+  testthat::skip_on_cran()
+
+  SW({
+  expect_snapshot_RLum(Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data,
+                                                       pos = 1, run = 1,
+                                                       txtProgressBar = FALSE))
+  })
+})

@@ -36,7 +36,7 @@
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany) \cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @keywords internal
 #'
@@ -62,7 +62,6 @@
     split = NULL,
     tabular_only = FALSE,
 ...) {
-
 
   ## TODO:
   # - Improve by using RegEx to dynamically find error fields, e.g. ( "([ ]err)|(^err)" )
@@ -171,7 +170,7 @@
     split = NULL,
     tabular_only = FALSE,
     ...) {
-  .set_function_name("as.latex.table.data.frame")
+  .set_function_name(".as.latex.table.data.frame")
   on.exit(.unset_function_name(), add = TRUE)
 
   ## Integrity checks -------------------------------------------------------
@@ -185,10 +184,9 @@
     .throw_error("Length of 'pos' does not match the number of columns")
 
   ## Default settings ----
-  options <- list(verbose = TRUE)
-
-  ## Override settings ----
-  options <- modifyList(options, list(...))
+  options <- modifyList(list(verbose = TRUE),
+                        list(...))
+  .validate_logical_scalar(options$verbose, name = "'verbose'")
 
   ## Subset data frame ----
   if (!is.null(select)) {

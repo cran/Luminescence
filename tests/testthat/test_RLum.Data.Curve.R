@@ -1,14 +1,21 @@
+## load data
+data(ExampleData.XSYG, envir = environment())
+object <- set_RLum(class = "RLum.Data.Curve")
+
 test_that("check class", {
   testthat::skip_on_cran()
 
   ##set empty curve object and show it
   expect_output(show(set_RLum(class = "RLum.Data.Curve")))
 
+  expect_error(set_RLum("RLum.Data.Curve", data = matrix(1:5, ncol = 1)))
+
   ##check replacements fo
-  object <- set_RLum(class = "RLum.Data.Curve")
   expect_s4_class(set_RLum(class = "RLum.Data.Curve", data = object), class = "RLum.Data.Curve")
 
   ##check get_RLum
+  expect_error(get_RLum(object, info.object = list()),
+               "'info.object' should be of class 'character' or NULL and have length 1")
   expect_warning(expect_null(get_RLum(object, info.object = "test")),
                  "'object' has no info objects, NULL returned")
   object <- set_RLum(class = "RLum.Data.Curve", data = object, info = list(a = "test"))
@@ -29,11 +36,22 @@ test_that("check class", {
   expect_type(as(object = object, Class = "list"), "list")
   expect_s4_class(as(object = matrix(1:10,ncol = 2), Class = "RLum.Data.Curve"), "RLum.Data.Curve")
 
+  ## show
+  expect_output(print(object),
+                "range of y-values: 0 0")
+  object@data[, 2] <- NA
+  expect_output(print(object),
+                "range of y-values: Inf -Inf (contains NA values)",
+                fixed = TRUE)
+})
+
+test_that("melt_RLum", {
+  testthat::skip_on_cran()
+
   ## test melt simple
   expect_type(melt_RLum(object = object), "list")
 
   ## test melt more complicated
-  data(ExampleData.XSYG, envir = environment())
   t <- melt_RLum(OSL.SARMeasurement[[2]][[1]])
   expect_length(t, n = 4)
 

@@ -3,45 +3,16 @@
 #' @description
 #'
 #' A dose-response curve is produced for luminescence measurements using a
-#' regenerative or additive protocol as implemented in [fit_DoseResponseCurve]
-#' and [plot_DoseResponseCurve]
+#' regenerative or additive protocol as implemented in [Luminescence::fit_DoseResponseCurve]
+#' and [Luminescence::plot_DoseResponseCurve]
 #'
-#' @param sample [data.frame] (**required**):
-#' data frame with columns for `Dose`, `LxTx`, `LxTx.Error` and `TnTx`.
-#' The column for the test dose response is optional, but requires `'TnTx'` as
-#' column name if used. For exponential fits at least three dose points
-#' (including the natural) should be provided. If `fit.method = "OTORX"` you have
-#' to provide the test dose in the same unit as the dose in a column called `Test_Dose`.
-#' The function searches explicitly for this column name.
-#'
-#' @param mode [character] (*with default*):
-#' selects calculation mode of the function.
-#' - `"interpolation"` (default) calculates the De by interpolation,
-#' - `"extrapolation"` calculates the equivalent dose by extrapolation (useful for MAAD measurements) and
-#' - `"alternate"` calculates no equivalent dose and just fits the data points.
-#'
-#' Please note that for option `"interpolation"` the first point is considered
-#' as natural dose
-#'
-#' @param fit.method [character] (*with default*):
-#' function used for fitting. Possible options are:
-#' - `LIN`,
-#' - `QDR`,
-#' - `EXP`,
-#' - `EXP OR LIN`,
-#' - `EXP+LIN`,
-#' - `EXP+EXP`,
-#' - `GOK`,
-#' - `OTOR`,
-#' - `OTORX`
-#'
-#' See details in [fit_DoseResponseCurve].
+#' @inheritParams fit_DoseResponseCurve
 #'
 #' @param output.plot [logical] (*with default*):
 #' enable/disable the plot output.
 #'
 #' @param output.plotExtended [logical] (*with default*):
-#' If' `TRUE`, 3 plots on one plot area are provided:
+#' If `TRUE`, 3 plots on one plot area are provided:
 #' 1. growth curve,
 #' 2. histogram from Monte Carlo error simulation and
 #' 3. a test dose response plot.
@@ -50,28 +21,25 @@
 #'
 #' @param plot_singlePanels [logical] (*with default*):
 #' single plot output (`TRUE/FALSE`) to allow for plotting the results in
-#' single plot windows. Requires `plotExtended = TRUE`.
-#'
-#' @param verbose [logical] (*with default*):
-#' enable/disable output to the terminal.
+#' single plot windows. Requires `output.plotExtended = TRUE`.
 #'
 #' @param n.MC [integer] (*with default*):
 #' number of MC runs for error calculation.
 #'
-#' @param ... Further arguments to [fit_DoseResponseCurve] (`fit_weights`,
+#' @param ... Further arguments to [Luminescence::fit_DoseResponseCurve] (`fit_weights`,
 #' `fit_bounds`, `fit.force_through_origin`, `fit.includingRepeatedRegPoints`,
 #' `fit.NumberRegPoints`, `fit.NumberRegPointsReal`, `n.MC`,
 #' `txtProgressBar`) and graphical parameters to be passed (supported:
 #' `xlim`, `ylim`, `main`, `xlab`, `ylab`).
 #'
 #' @return
-#' Along with a plot (if wanted) the `RLum.Results` object produced by
-#' [fit_DoseResponseCurve] is returned.
+#' Along with a plot (if wanted) the [Luminescence::RLum.Results-class] object produced by
+#' [Luminescence::fit_DoseResponseCurve] is returned.
 #'
-#' @section Function version: 1.2.2
+#' @section Function version: 1.2.3
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Michael Dietze, GFZ Potsdam (Germany) \cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
@@ -86,7 +54,7 @@
 #' Pagonis, V., Kitis, G., Chen, R., 2020. A new analytical equation for the dose response of dosimetric materials,
 #' based on the Lambert W function. Journal of Luminescence 225, 117333. \doi{10.1016/j.jlumin.2020.117333}
 #'
-#' @seealso [fit_DoseResponseCurve], [plot_DoseResponseCurve]
+#' @seealso [Luminescence::fit_DoseResponseCurve], [Luminescence::plot_DoseResponseCurve]
 #'
 #' @examples
 #'
@@ -126,7 +94,7 @@
 #'
 #' @export
 plot_GrowthCurve <- function(
-  sample,
+  object,
   mode = "interpolation",
   fit.method = "EXP",
   output.plot = TRUE,
@@ -143,13 +111,15 @@ plot_GrowthCurve <- function(
   extraArgs <- list(...)
   if ("output.plotExtended.single" %in% names(extraArgs)) {
     plot_singlePanels <- extraArgs$output.plotExtended.single
-    .throw_warning("'output.plotExtended.single' is deprecated, use ",
-                   "'plot_singlePanels' instead")
+    .deprecated("output.plotExtended.single", "plot_singlePanels", since = "1.0.0")
   }
   if ("NumberIterations.MC" %in% names(extraArgs)) {
     n.MC <- extraArgs$NumberIterations.MC
-    .throw_warning("'NumberIterations.MC' is deprecated, use ",
-                   "'n.MC' instead")
+    .deprecated("NumberIterations.MC", "n.MC", since = "1.0.0")
+  }
+  if ("sample" %in% names(extraArgs)) {
+    object <- extraArgs$sample
+    .deprecated(old = "sample", new = "object", since = "1.2.0")
   }
 
   ## input validation
@@ -159,7 +129,7 @@ plot_GrowthCurve <- function(
   .validate_logical_scalar(verbose)
 
   ## remaining input validation occurs inside the fitting function
-  fit <- fit_DoseResponseCurve(sample, mode, fit.method,
+  fit <- fit_DoseResponseCurve(object, mode, fit.method,
                                verbose = verbose, n.MC = n.MC, ...)
 
   if (is.null(fit)) {

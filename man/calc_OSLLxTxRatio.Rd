@@ -7,41 +7,53 @@
 calc_OSLLxTxRatio(
   Lx.data,
   Tx.data = NULL,
-  signal.integral = NULL,
-  signal.integral.Tx = NULL,
-  background.integral = NULL,
-  background.integral.Tx = NULL,
+  signal_integral = NULL,
+  background_integral = NULL,
+  signal_integral_Tx = NULL,
+  background_integral_Tx = NULL,
+  integral_input = c("channel", "measurement"),
   background.count.distribution = "non-poisson",
   use_previousBG = FALSE,
   sigmab = NULL,
   sig0 = 0,
-  digits = NULL
+  digits = NULL,
+  ...
 )
 }
 \arguments{
-\item{Lx.data}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-requires a CW-OSL shine down curve (x = time, y = counts)}
+\item{Lx.data}{\linkS4class{RLum.Data.Curve}, \link{data.frame}, \link{list} (\strong{required}):
+requires a CW-OSL shine down curve (x = time, y = counts). Data can also be
+provided as a list.}
 
 \item{Tx.data}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
 requires a CW-OSL shine down curve (x = time, y = counts). If no
 input is given the \code{Tx.data} will be treated as \code{NA} and no \code{Lx/Tx} ratio
-is calculated.}
+is calculated. When \code{Lx.data} is a list, it must be provided as a list of
+the same length.}
 
-\item{signal.integral}{\link{numeric} (\strong{required}):
-vector with the limits for the signal integral. If set to \code{NA}, no integrals
-are considered and all other integrals are ignored.}
+\item{signal_integral}{\link{integer} (\strong{required}):
+vector of channels for the signal integral. If set to \code{NA} (alternate mode),
+no integrals are taken into account and their settings are ignored.}
 
-\item{signal.integral.Tx}{\link{numeric} (\emph{optional}):
-vector with the limits for the signal integral for the \code{Tx}-curve. If
-missing, the value from \code{signal.integral} is used.}
+\item{background_integral}{\link{integer} (\strong{required}):
+vector of channels for the background integral. If set to \code{NA}, no
+background integral is subtracted; in this case, the error calculation and
+the signal-to-noise ratio will report \code{NA} values.}
 
-\item{background.integral}{\link{numeric} (\strong{required}):
-vector with the limits for the background integral. If set to \code{NA}, no
-integrals are considered and all other integrals ignored.}
+\item{signal_integral_Tx}{\link{integer} (\emph{optional}):
+vector of channels for the signal integral for the \code{Tx} curve.
+If \code{NULL}, the \code{signal_integral} vector is used.}
 
-\item{background.integral.Tx}{\link{numeric} (\emph{optional}):
-vector with the limits for the background integral for the \code{Tx} curve.
-If missing, the value from \code{background.integral} is used.}
+\item{background_integral_Tx}{\link{integer} (\emph{optional}):
+vector of channels for the background integral for the \code{Tx} curve.
+If \code{NULL}, the \code{background_integral} vector is used. If set to \code{NA}, no
+background integral for the \code{Tx} curve is subtracted; in this case, the
+error calculation and the signal-to-noise ratio will report \code{NA} values.}
+
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given time/temperature range are selected.}
 
 \item{background.count.distribution}{\link{character} (\emph{with default}):
 sets the count distribution assumed for the error calculation.
@@ -65,6 +77,8 @@ allow adding an extra component of error to the final \code{Lx/Tx} error value
 
 \item{digits}{\link{integer} (\emph{with default}):
 round numbers to the specified digits. If set to \code{NULL} no rounding occurs.}
+
+\item{...}{currently not used.}
 }
 \value{
 Returns an S4 object of type \linkS4class{RLum.Results}.
@@ -82,6 +96,8 @@ Slot \code{data} contains a \link{list} with the following structure:
 .. $ Net_LnLx.Error
 .. $ Net_TnTx
 .. $ Net_TnTx.Error
+.. $ SN_RATIO_LnLx,
+.. $ SN_RATIO_TnTx,
 .. $ LxTx
 .. $ LxTx.Error
 $ calc.parameters (list)
@@ -100,8 +116,8 @@ Calculate \code{Lx/Tx} ratios from a given set of CW-OSL curves assuming late li
 background subtraction.
 }
 \details{
-The integrity of the chosen values for the signal and background integral is
-checked by the function; the signal integral limits have to be lower than
+The function checks the integrity of the values chosen for the signal and
+background integrals; the signal integral limits have to be lower than
 the background integral limits. If a \link{vector} is given as input instead
 of a \link{data.frame}, an artificial \link{data.frame} is produced. The
 error calculation is done according to Galbraith (2002).
@@ -124,6 +140,12 @@ the already calculated \code{LxTx} and the result is add up by:
 
 \deqn{se(LxTx) = \sqrt(se(LxTx)^2 + (LxTx * sig0)^2)}
 
+\strong{\code{SN_RATIO_LnLx} and \code{SN_RATIO_TnTx}}
+
+For convenience, the function returns the signal-to-noise ratio (\code{SN_RATIO})
+for the \code{LnLx} and the \code{TnTx} curves. This is simply the signal divided
+by the background signal counts normalised to the \code{k} value (see below).
+
 \strong{\code{background.count.distribution}}
 
 This argument allows selecting the distribution assumption that is used for
@@ -143,7 +165,7 @@ standard error is calculated as:
 \strong{Please note} that when using the early background subtraction method in
 combination with the 'non-poisson' distribution argument, the corresponding \code{Lx/Tx} error
 may considerably increase due to a high \code{sigmab} value.
-Please check whether this is valid for your data set and  if necessary
+Please check whether this is valid for your data set and if necessary
 consider to provide an own \code{sigmab} value using the corresponding argument \code{sigmab}.
 }
 \note{
@@ -154,7 +176,7 @@ The results of this function have been cross-checked with the Analyst
 own \code{sigmab} value or use \code{background.count.distribution = "poisson"}.
 }
 \section{Function version}{
- 0.8.2
+ 0.9.5
 }
 
 \examples{
@@ -166,8 +188,8 @@ data(ExampleData.LxTxOSLData, envir = environment())
 results <- calc_OSLLxTxRatio(
  Lx.data = Lx.data,
  Tx.data = Tx.data,
- signal.integral = c(1:2),
- background.integral = c(85:100))
+ signal_integral = 1:2,
+ background_integral = 85:100)
 
 ##get results object
 get_RLum(results)
@@ -175,7 +197,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.8.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.9.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -189,9 +211,11 @@ Galbraith, R.F., 2014. A further note on the variance of a
 background-corrected OSL count. Ancient TL, 31 (2), 1-3. \doi{10.26034/la.atl.2014.477}
 }
 \seealso{
-\linkS4class{RLum.Data.Curve}, \link{fit_DoseResponseCurve}, \link{analyse_SAR.CWOSL}
+\linkS4class{RLum.Data.Curve}, \link{fit_DoseResponseCurve},
+\link{analyse_SAR.CWOSL}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}
 \keyword{datagen}

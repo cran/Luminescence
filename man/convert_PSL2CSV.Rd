@@ -23,8 +23,8 @@ objects. Each curve will be represented by two columns for time and counts}
 \link{read_PSL2R} and \link{write_RLum2CSV}}
 }
 \value{
-The function returns either a CSV-file (or many of them) or for the option
-\code{export = FALSE} a list comprising objects of type \link{data.frame} and \link{matrix}
+The function returns either a CSV-file (or many of them) or, when
+\code{export = FALSE}, a list of \link{data.frame} and \link{matrix} objects.
 }
 \description{
 This function is a wrapper function around the functions \link{read_PSL2R} and
@@ -43,14 +43,12 @@ become the output folder.
 file <- system.file("extdata/DorNie_0016.psl", package="Luminescence")
 convert_PSL2CSV(file, export = FALSE, single_table = TRUE)
 
-
 \dontrun{
 ##select your BIN-file
 file <- file.choose()
 
 ##convert
 convert_PSL2CSV(file)
-
 }
 
 }
@@ -59,11 +57,11 @@ convert_PSL2CSV(file)
 \link[utils:write.table]{utils::write.table}, \link{write_RLum2CSV}, \link{read_PSL2R}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. convert_PSL2CSV(): Export PSL-file(s) to CSV-files. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. convert_PSL2CSV(): Export PSL-file(s) to CSV-files. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

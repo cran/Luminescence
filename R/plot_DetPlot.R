@@ -23,21 +23,14 @@
 #' `sequence.structure`, `dose.points`, `mtext.outer`, `fit.method`,
 #' `fit.force_through_origin`, `plot`, `plot_singlePanels`
 #'
-#' @param object [RLum.Analysis-class] (**required**): input object containing data for analysis
+#' @param object [Luminescence::RLum.Analysis-class] (**required**): input object containing data for analysis
 #' Can be provided as a [list] of such objects.
 #'
-#' @param signal.integral.min [integer] (**required**):
-#' lower bound of the signal integral.
+#' @param signal_integral [integer] (**required**):
+#' vector of channels for the signal integral.
 #'
-#' @param signal.integral.max [integer] (**required**):
-#' upper bound of the signal integral. Must be strictly greater than
-#' `signal.integral.min`.
-#'
-#' @param background.integral.min [integer] (**required**):
-#' lower bound of the background integral.
-#'
-#' @param background.integral.max [integer] (**required**):
-#' upper bound of the background integral.
+#' @param background_integral [integer] (**required**):
+#' vector of channels for the background integral.
 #'
 #' @param method [character] (*with default*):
 #' method applied for constructing the De(t) plot.
@@ -47,13 +40,18 @@
 #' @param signal_integral.seq [numeric] (*optional*):
 #' argument to provide an own signal integral sequence for constructing the De(t) plot
 #'
+#' @param integral_input [character] (*with default*):
+#' input type for `signal_integral`, one of `"channel"` (default) or
+#' `"measurement"`. If set to `"measurement"`, the best matching channels
+#' corresponding to the given time range (in seconds) are selected.
+#'
 #' @param analyse_function [character] (*with default*):
 #' name of the analyse function to be called. Supported functions are:
-#' [analyse_SAR.CWOSL], [analyse_pIRIRSequence]
+#' [Luminescence::analyse_SAR.CWOSL], [Luminescence::analyse_pIRIRSequence]
 #'
 #' @param analyse_function.control [list] (*optional*):
 #' selected arguments to be passed to the supported analyse functions
-#' ([analyse_SAR.CWOSL], [analyse_pIRIRSequence]). The arguments must be provided
+#' ([Luminescence::analyse_SAR.CWOSL], [Luminescence::analyse_pIRIRSequence]). The arguments must be provided
 #' as named [list], e.g., `list(dose.points = c(0,10,20,30,0,10)` will set the
 #' regeneration dose points.
 #'
@@ -66,14 +64,14 @@
 #' enable/disable shine down curve in the plot output.
 #'
 #' @param respect_RC.Status [logical] (*with default*):
-#' remove De values with 'FAILED' RC.Status from the plot (cf. [analyse_SAR.CWOSL]
-#' and [analyse_pIRIRSequence]).
+#' remove De values with 'FAILED' RC.Status from the plot (cf. [Luminescence::analyse_SAR.CWOSL]
+#' and [Luminescence::analyse_pIRIRSequence]).
 #'
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
 #' @param multicore [logical] (*with default*) : enable/disable multi core
-#' calculation if `object` is a [list] of [RLum.Analysis-class] objects. Can be an
+#' calculation if `object` is a [list] of [Luminescence::RLum.Analysis-class] objects. Can be an
 #' [integer] specifying the number of cores
 #'
 #' @param plot [logical] (*with default*): enable/disable the plot output.
@@ -81,12 +79,12 @@
 #' differently.
 #'
 #' @param ... further arguments and graphical parameters passed to
-#' [plot.default], [analyse_SAR.CWOSL] and [analyse_pIRIRSequence] (see details for further information).
+#' [plot.default], [Luminescence::analyse_SAR.CWOSL] and [Luminescence::analyse_pIRIRSequence] (see details for further information).
 #' Plot control parameters are: `ylim`, `xlim`, `ylab`, `xlab`, `main`, `pch`, `mtext`, `cex`, `legend`,
 #' `legend.text`, `legend.pos`
 #'
 #' @return
-#' A plot and an [RLum.Results-class] object with the produced \eqn{D_e} values
+#' A plot and an [Luminescence::RLum.Results-class] object with the produced \eqn{D_e} values
 #'
 #' `@data`:
 #'
@@ -103,24 +101,23 @@
 #' call \tab `call` \tab the original function call
 #' }
 #'
-#'
 #' @note
 #' The entire analysis is based on the used analysis functions, namely
-#' [analyse_SAR.CWOSL] and [analyse_pIRIRSequence]. However, the integrity
+#' [Luminescence::analyse_SAR.CWOSL] and [Luminescence::analyse_pIRIRSequence]. However, the integrity
 #' checks of this function are not that thoughtful as in these functions itself.
 #' It means, that every sequence should be checked carefully before running long
 #' calculations using several hundreds of channels.
 #'
-#' @section Function version: 0.1.8
+#' @section Function version: 0.1.10
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Ruprecht-Karl University of Heidelberg (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @references
 #' Bailey, R.M., Singarayer, J.S., Ward, S., Stokes, S., 2003. Identification of partial resetting
 #' using De as a function of illumination time. Radiation Measurements 37, 511-518.
 #' doi:10.1016/S1350-4487(03)00063-5
 #'
-#' @seealso [plot], [analyse_SAR.CWOSL], [analyse_pIRIRSequence]
+#' @seealso [plot], [Luminescence::analyse_SAR.CWOSL], [Luminescence::analyse_pIRIRSequence]
 #'
 #' @examples
 #'
@@ -135,23 +132,20 @@
 #'
 #' plot_DetPlot(
 #'   object,
-#'   signal.integral.min = 1,
-#'   signal.integral.max = 3,
-#'   background.integral.min = 900,
-#'   background.integral.max = 1000,
+#'   signal_integral = 1:3,
+#'   background_integral = 900:1000,
 #'   n.channels = 5)
 #' }
 #'
 #' @export
 plot_DetPlot <- function(
   object,
-  signal.integral.min,
-  signal.integral.max,
-  background.integral.min,
-  background.integral.max,
+  signal_integral,
+  background_integral,
   method = "shift",
   signal_integral.seq = NULL,
-  analyse_function = "analyse_SAR.CWOSL",
+  integral_input = c("channel", "measurement"),
+  analyse_function = c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"),
   analyse_function.control = list(),
   n.channels = NULL,
   show_ShineDownCurve = TRUE,
@@ -175,8 +169,8 @@ plot_DetPlot <- function(
 
     ## detect cores
     .validate_class(multicore, c("logical", "numeric", "integer"), length = 1)
-    cores <- if (is.logical(multicore) && multicore) {
-               parallel::detectCores() # nocov
+    cores <- if (isTRUE(multicore)) {
+               min(parallel::detectCores(), length(object))
              } else {
                max(multicore, 1)
              }
@@ -204,37 +198,54 @@ plot_DetPlot <- function(
   }
 
   ## Integrity checks -------------------------------------------------------
-
   .validate_class(object, "RLum.Analysis")
   .validate_not_empty(object)
-
-  ## signal.integral
-  .validate_positive_scalar(signal.integral.min, int = TRUE)
-  .validate_positive_scalar(signal.integral.max, int = TRUE)
-  if (signal.integral.min >= signal.integral.max) {
-    .throw_error("'signal.integral.max' must be greater than 'signal.integral.min'")
-  }
-
-  ## background.integral
-  .validate_positive_scalar(background.integral.min, int = TRUE)
-  .validate_positive_scalar(background.integral.min, int = TRUE)
-
-  ## analyse_function
+  integral_input <- .validate_args(integral_input, c("channel", "measurement"))
+  method <- .validate_args(method, c("shift", "expansion"))
   analyse_function <- .validate_args(analyse_function,
                                      c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"))
 
-  ## deprecated argument
+  ## deprecated arguments
   if ("plot.single" %in% ...names()) {
     plot_singlePanels <- list(...)$plot.single
-    .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
-                   "instead")
+    .deprecated("plot.single", "plot_singlePanels", since = "1.0.0")
   }
+  if (any(grepl("[signal|background]\\.integral\\.[min|max]", ...names()))) {
+    extraArgs <- list(...)
+    .deprecated(old = c("signal.integral.min", "signal.integral.max",
+                        "background.integral.min", "background.integral.max"),
+                new = c("signal_integral", "background_integral"),
+                since = "1.2.0")
+
+    if (integral_input != "channel") {
+      .throw_error("'integral_input' is not supported with old argument names")
+    }
+    signal.integral.min <- extraArgs$signal.integral.min
+    signal.integral.max <- extraArgs$signal.integral.max
+    background.integral.min <- extraArgs$background.integral.min
+    background.integral.max <- extraArgs$background.integral.max
+    .validate_class(signal.integral.min, c("integer", "numeric"))
+    .validate_class(signal.integral.max, c("integer", "numeric"))
+    .validate_class(background.integral.min, c("integer", "numeric"))
+    .validate_class(background.integral.max, c("integer", "numeric"))
+    signal_integral <- signal.integral.min:signal.integral.max
+    background_integral <- background.integral.min:background.integral.max
+  }
+
+  if (integral_input == "measurement") {
+    x.range <- get_RLum(object, recordType = c("OSL", "IRSL"))[[1]][, 1]
+    signal_integral <- .convert_to_channels(x.range, signal_integral, "time")
+    background_integral <- .convert_to_channels(x.range, background_integral, "time")
+  }
+  signal_integral <- .validate_integral(signal_integral)
+  background_integral <- .validate_integral(background_integral,
+                                            min = max(signal_integral) + 1)
 
 # Set parameters ------------------------------------------------------------------------------
   ##set n.channels
   if(is.null(n.channels)){
     n.channels <- ceiling(
-      (background.integral.min - 1 - signal.integral.max) / (signal.integral.max - signal.integral.min)
+      (min(background_integral) - 1 - max(signal_integral)) / (max(signal_integral) - min(signal_integral))
     )
     if (verbose) {
       .throw_message("'n.channels' not specified, set to ", n.channels,
@@ -258,19 +269,18 @@ plot_DetPlot <- function(
 # Analyse -------------------------------------------------------------------------------------
   ##set integral sequence
   if (is.null(signal_integral.seq)) {
-    signal_integral.seq <- seq(signal.integral.min,
-                               background.integral.min - 1,
-                               by = signal.integral.max - signal.integral.min)
+    signal_integral.seq <- seq(min(signal_integral),
+                               min(background_integral) - 1,
+                               by = max(signal_integral) - min(signal_integral))
   }
 
   if(analyse_function  == "analyse_SAR.CWOSL"){
     results <- merge_RLum(lapply(1:n.channels, function(x){
+      integral <- signal_integral.seq[if (method == "shift") x else 1]:signal_integral.seq[x+1]
       analyse_SAR.CWOSL(
         object = object,
-        signal.integral.min = if(method == "shift"){signal_integral.seq[x]}else{signal_integral.seq[1]},
-        signal.integral.max =  signal_integral.seq[x+1],
-        background.integral.min = background.integral.min,
-        background.integral.max = background.integral.max,
+        signal_integral = integral,
+        background_integral = background_integral,
         dose.points = analyse_function.settings$dose.points,
         mtext.outer = analyse_function.settings$mtext.outer,
         fit.force_through_origin = analyse_function.settings$fit.force_through_origin,
@@ -283,12 +293,11 @@ plot_DetPlot <- function(
     }))
   } else if (analyse_function == "analyse_pIRIRSequence") {
     results <- lapply(1:n.channels, function(x) {
+      integral <- signal_integral.seq[if (method == "shift") x else 1]:signal_integral.seq[x+1]
       analyse_pIRIRSequence(
         object = object,
-        signal.integral.min = if(method == "shift"){signal_integral.seq[x]}else{signal_integral.seq[1]},
-        signal.integral.max = signal_integral.seq[x+1],
-        background.integral.min = background.integral.min,
-        background.integral.max = background.integral.max,
+        signal_integral = integral,
+        background_integral = background_integral,
         dose.points = analyse_function.settings$dose.points,
         mtext.outer = analyse_function.settings$mtext.outer,
         plot = analyse_function.settings$plot,
@@ -365,7 +374,7 @@ plot_DetPlot <- function(
 
         ##set x-axis
         df_x <-
-          OSL_curve[seq(signal.integral.max, signal_integral.seq[n.channels+1], length.out = nrow(df)),1]
+          OSL_curve[seq(max(signal_integral), signal_integral.seq[n.channels+1], length.out = nrow(df)),1]
 
         #combine everything to allow excluding unwanted values
         df_final <- cbind(df, df_x)

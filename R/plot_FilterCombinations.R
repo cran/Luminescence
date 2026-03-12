@@ -94,9 +94,9 @@
 #'
 #' @param ... further arguments that can be passed to control the plot output.
 #' Supported are `main`, `xlab`, `ylab`, `xlim`, `ylim`, `type`, `lty`, `lwd`.
-#' For non common plotting parameters, see the details section.
+#' For non-common plotting parameters, see the details section.
 #'
-#' @return Returns an S4 object of type [RLum.Results-class].
+#' @return Returns an S4 object of type [Luminescence::RLum.Results-class].
 #'
 #' **@data**
 #'
@@ -114,11 +114,11 @@
 #' `call` \tab [call] \tab the original function call
 #' }
 #'
-#' @section Function version: 0.3.2
+#' @section Function version: 0.3.3
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Results-class], [approx]
+#' @seealso [Luminescence::RLum.Results-class], [approx]
 #'
 #' @keywords datagen aplot
 #'
@@ -146,7 +146,6 @@
 #' ##Example 4
 #' ##show the filters using the interactive mode
 #' plot_FilterCombinations(filters = list(filter1, filter2), interactive = TRUE)
-#'
 #' }
 #'
 #' @export
@@ -241,7 +240,6 @@ plot_FilterCombinations <- function(
 
   # Plotting ------------------------------------------------------------------------------------
   if (plot) {
-
     ##(1) ... select transmission values
     filter_matrix_transmission <- filter_matrix[, !grepl(pattern = "OD",
                                                          colnames(filter_matrix)),
@@ -274,49 +272,60 @@ plot_FilterCombinations <- function(
 
       ##create basic plot
       p <-
-        plotly::plot_ly(x = wavelength_range,
-                        y = filter_matrix[,1],
-                        type = "scatter",
-                        name = colnames(filter_matrix_transmission)[1],
-                        mode = "lines")
+        plotly::plot_ly(
+          x = wavelength_range,
+          y = filter_matrix[,1],
+          type = "scatter",
+          name = plot_settings$legend.text[1],
+          mode = "lines")
 
         ##add further filters
         if (ncol(filter_matrix_transmission) > 1) {
           for (i in 2:ncol(filter_matrix_transmission)) {
             p <- plotly::add_trace(p,
                         y = filter_matrix[, i],
-                        name = colnames(filter_matrix_transmission)[i],
+                        name = plot_settings$legend.text[i],
                         mode = 'lines')
           }
         }
 
       ##add polygon
-      ##replace all NA vaules with 0, otherwise it looks odd
+      ##replace all NA values with 0, otherwise it looks odd
       net_transmission_window[is.na(net_transmission_window)] <- 0
 
-      p <-  plotly::add_polygons(p,
-                        x = c(wavelength_range, rev(wavelength_range)),
-                        y = c(net_transmission_window[, 2], rep(0, length(wavelength_range))),
-                        name = "net transmission"
-                        )
+      if(show_net_transmission) {
+        p <-  plotly::add_polygons(
+          p,
+          x = c(wavelength_range, rev(wavelength_range)),
+          y = c(net_transmission_window[, 2], rep(0, length(wavelength_range))),
+          name = "net transmission"
+        )
+      }
 
       ##change graphical parameters
       p <-  plotly::layout(
         p = p,
         xaxis = list(
-          title = plot_settings$xlab
+          title = plot_settings$xlab,
+          range = plot_settings$xlim
         ),
         yaxis = list(
-          title = plot_settings$ylab
+          title = plot_settings$ylab,
+          range = plot_settings$ylim
         ),
-        title = plot_settings$main
+        title = plot_settings$main,
+        showlegend = plot_settings$legend
       )
 
-      print(p)
+      ## use hidden option for shiny to make it
+      ## work in the filter app
+      if(is.null(list(...)$.shiny_server))
+        print(p)
+
       on.exit(return(p), add = TRUE)
 
     }else{
-      ##plot induvidal filters
+      ##plot individual filters
       graphics::matplot(
         x = wavelength_range,
         y = filter_matrix_transmission,
@@ -337,8 +346,7 @@ plot_FilterCombinations <- function(
 
       ##show effective transmission, which is the minimum for each row
       if (show_net_transmission) {
-
-        ##replace all NA vaules with 0, otherwise it looks odd
+        ##replace all NA values with 0, otherwise it looks odd
         net_transmission_window[is.na(net_transmission_window)] <- 0
 
         polygon(

@@ -16,7 +16,7 @@ plot_RLum.Data.Curve(
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Data.Curve} (\strong{required}):
-S4 object of class \code{RLum.Data.Curve}}
+S4 object of class \linkS4class{RLum.Data.Curve}}
 
 \item{par.local}{\link{logical} (\emph{with default}):
 use local graphical parameters for plotting, e.g. the plot is shown in one
@@ -43,7 +43,7 @@ Returns a plot.
 }
 \description{
 The function provides a standardised plot output for curve data of an
-\code{RLum.Data.Curve} S4-class object.
+\linkS4class{RLum.Data.Curve} S4-class object.
 }
 \details{
 Only single curve data can be plotted with this function. Arguments
@@ -57,6 +57,11 @@ options are supported:
 \code{norm = TRUE} or \code{norm = "max"}: Curve values are normalised to the highest
 count value in the curve
 
+\code{norm = "min"}: Curve values are normalised to the smallest count value
+in the curve
+
+\code{norm = "first"}: Curve values are normalised to the very first count value
+
 \code{norm = "last"}: Curve values are normalised to the last count value
 (this can be useful in particular for radiofluorescence curves)
 
@@ -68,6 +73,10 @@ y = (observed - median(background)) / (max(observed) - median(background))
 
 The background of the curve is defined as the last 20\% of the count values
 of a curve.
+
+\code{norm = "intensity"}: Curve values are normalised to the channel length.
+
+\code{norm = 2.2}: Curve values are normalised to a positive number (e.g., 2.2).
 }
 \note{
 Not all arguments of \link{plot} will be passed!
@@ -94,11 +103,11 @@ plot_RLum.Data.Curve(temp)
 \link{plot}, \link{plot_RLum}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

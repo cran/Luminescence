@@ -6,54 +6,59 @@
 \usage{
 analyse_SAR.CWOSL(
   object,
-  signal.integral.min = NA,
-  signal.integral.max = NA,
-  background.integral.min = NA,
-  background.integral.max = NA,
+  signal_integral = NA,
+  background_integral = NA,
+  signal_integral_Tx = NULL,
+  background_integral_Tx = NULL,
+  integral_input = c("channel", "measurement"),
   OSL.component = NULL,
   rejection.criteria = list(),
   dose.points = NULL,
   dose.points.test = NULL,
+  dose_rate_source = NULL,
   trim_channels = FALSE,
   mtext.outer = "",
   plot = TRUE,
   plot_onePage = FALSE,
   plot_singlePanels = FALSE,
   onlyLxTxTable = FALSE,
+  method_control = list(),
   ...
 )
 }
 \arguments{
 \item{object}{\linkS4class{RLum.Analysis} (\strong{required}):
 input object containing data for analysis, alternatively a \link{list} of
-\linkS4class{RLum.Analysis} objects can be provided. The object should \strong{only}
-contain curves considered part of the SAR protocol (see Details).}
+\linkS4class{RLum.Analysis} objects can be provided. The object
+should \strong{only} contain curves considered part of the SAR protocol (see
+Details). When \code{OSL.component} is set, the input object must have been
+processed by \code{OSLdecomposition::RLum.OSL_decomposition()}.}
 
-\item{signal.integral.min}{\link{integer} (\strong{required}):
-lower bound of the signal integral. It can be a \link{list} of integers, if
-\code{object} is a list. If the input is a vector (e.g., \code{c(1,2)}), the second
-value will be interpreted as the minimum signal integral for the \code{Tx} curve.
-It can be set to \code{NA}, in which case no integrals are taken into account.}
+\item{signal_integral}{\link{integer} (\strong{required}):
+vector of channels for the signal integral. It can be a \link{list} of integers,
+if \code{object} is a list. If set to \code{NA}, no integrals are taken into account
+and their settings are ignored.}
 
-\item{signal.integral.max}{\link{integer} (\strong{required}):
-upper bound of the signal integral. It can be a \link{list} of integers if
-\code{object} is a list. If the input is a vector (e.g., \code{c(1,2)}), the second
-value will be interpreted as the maximum signal integral for the \code{Tx} curve.
-It can be set to \code{NA}, in which case no integrals are taken into account.}
+\item{background_integral}{\link{integer} (\strong{required}):
+vector of channels for the background integral. It can be a \link{list} of
+integers, if \code{object} is a list. If set to \code{NA}, no background integral is
+subtracted.}
 
-\item{background.integral.min}{\link{integer} (\strong{required}):
-lower bound of the background integral. It can be a \link{list} of integers if
-\code{object} is a list. If the input is a vector (e.g., \code{c(1,2)}), the second
-value will be interpreted as the minimum background integral for the \code{Tx}
-curve. It can be set to \code{NA}, in which case no integrals are taken into
-account.}
+\item{signal_integral_Tx}{\link{integer} (\emph{optional}):
+vector of channels for the signal integral for the \code{Tx} curve. It can be a
+\link{list} of integers, if \code{object} is a list. If \code{NULL}, the \code{signal_integral}
+vector is used also for the \code{Tx} curve.}
 
-\item{background.integral.max}{\link{integer} (\strong{required}):
-upper bound of the background integral. It can be a \link{list} of integers if
-\code{object} is a list. If the input is a vector (e.g., \code{c(1,2)}), the second
-value will be interpreted as the maximum background integral for the \code{Tx}
-curve. It can be set to \code{NA}, in which case no integrals are taken into
-account.}
+\item{background_integral_Tx}{\link{integer} (\emph{optional}):
+vector of channels for the background integral for the \code{Tx} curve. It can
+be a \link{list} of integers, if \code{object} is a list. If \code{NULL}, the
+\code{background_integral} vector is used. If set to \code{NA}, no background integral
+for the \code{Tx} curve is subtracted.}
+
+\item{integral_input}{\link{character} (\emph{with default}):
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given time range (in seconds) are selected.}
 
 \item{OSL.component}{\link{character} or \link{integer} (\emph{optional}):
 single index or a \link{character} defining the signal component to be evaluated.
@@ -68,17 +73,33 @@ aliquot with component \code{1} and the second aliquot with component \code{2}.
 \code{NULL} does not process any component.}
 
 \item{rejection.criteria}{\link{list} (\emph{with default}):
-provide a \emph{named} list and set rejection criteria in \strong{percentage}
-for further calculation. Can be a \link{list} in a \link{list}, if \code{object} is of type \link{list}.
-Note: If an \emph{unnamed} \link{list} is provided the new settings are ignored!
+provide a \emph{named} list and set rejection criteria in \strong{percentage}. It can
+be a nested \link{list}, if \code{object} is of type \link{list}.
+Note: \emph{unnamed} list elements are ignored.
 
-Allowed arguments are \code{recycling.ratio}, \code{recuperation.rate},
-\code{palaeodose.error}, \code{testdose.error}, \code{exceed.max.regpoint = TRUE/FALSE},
-\code{recuperation_reference} ("Natural" or any other dose point, e.g., \code{"R1"}).
+Allowed options:
+\itemize{
+\item \code{recycling.ratio} \link{numeric} (default: \code{10})
+\item \code{recuperation.rate} \link{numeric} (default: \code{10})
+\item \code{palaeodose.error} \link{numeric} (default: \code{10})
+\item \code{testdose.error} \link{numeric} (default: \code{10})
+\item \code{sn.ratio} \link{numeric} (default: \code{NA})
+\item \code{exceed.max.regpoint} \link{logical} (default: \code{FALSE})
+\item \code{consider.uncertainties} \link{logical} (default: \code{FALSE})
+\item \code{recuperation_reference} \link{character} (default: \code{"Natural"}; set to, e.g.,
+\code{"R1"} for other point)
+\item \code{sn_reference} \link{character} (default: \code{"Natural"}).
+}
+
 Example: \code{rejection.criteria = list(recycling.ratio = 10)}.
-By default, all numerical values are set to 10, \code{exceed.max.regpoint = TRUE}.
-Every criterion can be set to \code{NA}, in which case values are calculated, but
-they are not considered, i.e. their corresponding RC.Status is always \code{'OK'}.}
+
+All numerical criteria can be set to \code{NA}, in which case values are
+calculated, but they are not considered, and their corresponding RC.Status
+is always \code{"OK"}. In the "Checks" plot, they are shown with a grey circle
+and only their value is reported (without showing \verb{<= NA} or \verb{>= NA}).
+
+If \code{onlyLxTxTable = TRUE}, the \code{palaeodose.error} and \code{exceed.max.regpoint}
+criteria are not computed.}
 
 \item{dose.points}{\link{numeric} (\emph{optional}):
 a numeric vector containing the dose points values. Using this argument
@@ -89,6 +110,9 @@ overwrites dose point values extracted from other data. Can be a \link{list} of
 a numeric vector containing the test dose in the same units as \code{dose.points}.
 If length = 1, the values will be recycled. It has only an effect for
 \code{fit.method = 'OTORX'}.}
+
+\item{dose_rate_source}{\link{numeric} (\emph{optional}): a numerical value for the source dose rate,
+typically Gy/s. If set, the x-axis default for the dose-response curve changes to \code{Dose [Gy]}.}
 
 \item{trim_channels}{\link{logical} (\emph{with default}):
 trim channels per record category to the lowest number of channels in the
@@ -113,16 +137,27 @@ not the legend (5) or the
 growth curve (6), (7) and (8) belong to rejection criteria plots. Requires
 \code{plot = TRUE}.}
 
-\item{onlyLxTxTable}{\link{logical} (\emph{with default}): If \code{TRUE} the dose response
-curve fitting and plotting is skipped.
+\item{onlyLxTxTable}{\link{logical} (\emph{with default}):
+If \code{TRUE} the dose response curve fitting and plotting is skipped, and the
+\code{palaeodose.error} and \code{exceed.max.regpoint} criteria are not computed.
 This allows to get hands on the \code{Lx/Tx} table for large datasets
 without the need for a curve fitting.}
 
-\item{...}{further arguments that will be passed to the functions
-\link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve} or \link{calc_OSLLxTxRatio}
-(supported: \code{background.count.distribution}, \code{sigmab}, \code{sig0}).
-\strong{Please note} that if you consider to use the early light subtraction
-method you should provide your own \code{sigmab} value!}
+\item{method_control}{\link{list} (\emph{optional}):
+options to control the function behaviour. Currently only the
+'auto_curve_removal' (logical) option is supported, which controls whether
+curves with \code{recordType} starting with \verb{_} should be automatically removed
+(\code{TRUE} by default).}
+
+\item{...}{further arguments that will be passed to
+\link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve}
+or \link{calc_OSLLxTxRatio} (supported:
+\code{background.count.distribution}, \code{sigmab}, \code{sig0}).
+\strong{Note:} if you consider to use the early light subtraction method,
+\code{sigmab} should be provided.
+
+Additionally, supported are \code{legend.cex} and \code{legend.pch} to modify the
+the legend symbols.}
 }
 \value{
 A plot (\emph{optional}) and an \linkS4class{RLum.Results} object is
@@ -213,6 +248,19 @@ in \link{calc_OSLLxTxRatio}.
 \verb{[palaeodose.error]}: set the allowed error for the De value, which per
 default should not exceed 10\%.
 
+\verb{[sn.ratio]}: set the allowed signal/noise ratio, which by default should
+be at least 50. By default it uses the value from the natural curve, but
+this can be changed by specifying the \code{sn_reference} option.
+
+By default, the computed values are compared directly to the corresponding
+thresholds to establish their result status ("OK" or "FAILED"). By setting
+the option \code{consider.uncertainties = TRUE} in the \code{rejection.criteria}
+list, quantified uncertainties are considered into the computation of the
+test value prior before comparing it to the threshold(currently supported
+only for \code{recycling.ratio}, \code{recuperation.rate} and \code{exceed.max.regpoint}).
+This reduces tests being marked as "FAILED" when the deviation from the
+threshold is smaller than the uncertainty margin.
+
 \strong{Irradiation times}
 
 The function makes two attempts to extra irradiation data (dose points)
@@ -227,7 +275,7 @@ function does \strong{not} overwrite values preset in \code{IRR_TIME}.
 }
 }
 \section{Function version}{
- 0.11.1
+ 0.13.8
 }
 
 \examples{
@@ -243,10 +291,8 @@ object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
 ##perform SAR analysis and set rejection criteria
 results <- analyse_SAR.CWOSL(
 object = object,
-signal.integral.min = 1,
-signal.integral.max = 2,
-background.integral.min = 900,
-background.integral.max = 1000,
+signal_integral = 1:2,
+background_integral = 900:1000,
 log = "x",
 fit.method = "EXP",
 plot_onePage = TRUE,
@@ -256,6 +302,8 @@ rejection.criteria = list(
   testdose.error = 10,
   palaeodose.error = 10,
   recuperation_reference = "Natural",
+  sn.ratio = 50,
+  sn_reference = "Natural",
   exceed.max.regpoint = TRUE)
 )
 
@@ -270,11 +318,9 @@ get_RLum(results, data.object = "LnLxTnTx.table")
 \dontrun{
 results <- analyse_SAR.CWOSL(
  object = object,
- signal.integral.min = 1,
- signal.integral.max = 2,
+ signal_integral = 1:2,
+ background_integral = 900:1000,
  dose.points.test = 15,
- background.integral.min = 900,
- background.integral.max = 1000,
  n.MC = 10,
  fit.method = "OTORX")
 }
@@ -282,7 +328,7 @@ results <- analyse_SAR.CWOSL(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_SAR.CWOSL(): Analyse SAR CW-OSL Measurements. Function version 0.11.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. analyse_SAR.CWOSL(): Analyse SAR CW-OSL Measurements. Function version 0.13.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -290,7 +336,7 @@ Aitken, M.J. and Smith, B.W., 1988. Optical dating: recuperation
 after bleaching. Quaternary Science Reviews 7, 387-393.
 
 Duller, G., 2003. Distinguishing quartz and feldspar in single grain
-luminescence measurements. Radiation Measurements, 37 (2), 161-165.
+luminescence measurements. Radiation Measurements 37 (2), 161-165.
 
 Murray, A.S. and Wintle, A.G., 2000. Luminescence dating of quartz using an
 improved single-aliquot regenerative-dose protocol. Radiation Measurements
@@ -303,10 +349,12 @@ doi:10.1016/j.radmeas.2008.06.002
 }
 \seealso{
 \link{calc_OSLLxTxRatio}, \link{fit_DoseResponseCurve},
-\link{plot_DoseResponseCurve}, \linkS4class{RLum.Analysis}, \linkS4class{RLum.Results}
+\link{plot_DoseResponseCurve}, \linkS4class{RLum.Analysis},
+\linkS4class{RLum.Results}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}
 \keyword{datagen}
 \keyword{plot}

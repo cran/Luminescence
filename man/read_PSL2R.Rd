@@ -17,11 +17,9 @@ read_PSL2R(
 }
 \arguments{
 \item{file}{\link{character} (\strong{required}):
-path and file name of the PSL file. If input is a \code{vector} it should comprise
-only \code{character}s representing valid paths and PSL file names.
-Alternatively, the input character can be just a directory (path), in which
-case the function tries to detect and import all PSL files found in the
-directory.}
+name of one or multiple PSL files (URLs are supported); it can be the path
+to a directory, in which case the function tries to detect and import all
+PSL files found in the directory.}
 
 \item{drop_bg}{\link{logical} (\emph{with default}):
 \code{TRUE} to automatically remove all non-OSL/IRSL curves.}
@@ -36,7 +34,7 @@ Smoothing is encouraged if you see random signal drops within the decay curves r
 to hardware errors.}
 
 \item{merge}{\link{logical} (\emph{with default}):
-\code{TRUE} to merge all \code{RLum.Analysis} objects. Only applicable if multiple
+\code{TRUE} to merge all \linkS4class{RLum.Analysis} objects. Only applicable if multiple
 files are imported.}
 
 \item{pattern}{\link{character} (\emph{with default}):
@@ -50,7 +48,8 @@ enable/disable output to the terminal.}
 }
 \value{
 Returns an S4 \linkS4class{RLum.Analysis} object containing
-\linkS4class{RLum.Data.Curve} objects for each curve.
+\linkS4class{RLum.Data.Curve} objects for each curve. Results are
+returned as a list when multiple files are processed or \code{file} is a list.
 }
 \description{
 This function provides an import routine for the SUERC portable OSL Reader
@@ -66,7 +65,7 @@ a specific PSL file please report to \verb{<christoph.burow@gmx.net>} so the
 function can be updated.
 }
 \section{Function version}{
- 0.1.1
+ 0.1.2
 }
 
 \examples{
@@ -80,15 +79,16 @@ plot(psl, combine = TRUE)
 
 }
 \seealso{
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Data.Curve}
+\linkS4class{RLum.Analysis}, \linkS4class{RLum.Data.Curve},
+\linkS4class{RLum.Data.Curve}
 }
 \author{
-Christoph Burow, University of Cologne (Germany),
-Sebastian Kreutzer, Institut of Geography, Heidelberg University (Germany)
+Christoph Burow, University of Cologne (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 , RLum Developer Team} 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2025. read_PSL2R(): Import SUERC portable OSL Reader PSL files into R. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2026. read_PSL2R(): Import SUERC portable OSL Reader PSL files into R. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

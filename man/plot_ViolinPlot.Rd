@@ -18,13 +18,13 @@ plot_ViolinPlot(
 \item{data}{\link{numeric} or \linkS4class{RLum.Results} (\strong{required}):
 input data for plotting. Alternatively a \link{data.frame} or a \link{matrix} can
 be provided, but only the first column will be considered by the
-function}
+function.}
 
 \item{boxplot}{\link{logical} (\emph{with default}):
-enable/disable boxplot}
+enable/disable the boxplot.}
 
 \item{rug}{\link{logical} (\emph{with default}):
-enable/disable rug}
+enable/disable the rug.}
 
 \item{summary}{\link{character} (\emph{with default}):
 add statistic measures of centrality and dispersion to the plot.
@@ -37,7 +37,7 @@ below the plot header. However, this latter option in only possible if
 \code{mtext} is not used.}
 
 \item{na.rm}{\link{logical} (\emph{with default}):
-exclude NA values from the data set prior to any further operations.}
+exclude \code{NA} values from the data set prior to any further operations.}
 
 \item{...}{further arguments and graphical parameters passed to
 \link{plot.default}, \link[stats:density]{stats::density} and \link{boxplot}. See details for further
@@ -59,7 +59,7 @@ The function is passing several arguments to the functions \link{plot},
 Supported arguments are:
 \code{xlim}, \code{main}, \code{xlab}, \code{ylab}, \code{col.violin}, \code{col.boxplot}, \code{mtext}, \code{cex}, \code{mtext}
 
-\strong{\verb{Valid summary keywords}}
+\strong{Valid summary keywords}
 
 \code{'n'}, \code{'mean'}, \code{'median'}, \code{'sd.abs'}, \code{'sd.rel'}, \code{'se.abs'}, \code{'se.rel'}.
 \code{'skewness'}, \code{'kurtosis'}
@@ -87,7 +87,7 @@ plot_ViolinPlot(data = ExampleData.DeValues)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. plot_ViolinPlot(): Create a violin plot. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_ViolinPlot(): Create a violin plot. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -103,5 +103,5 @@ Wickham. H (2009). ggplot2: elegant graphics for data analysis. Springer New Yor
 \link[stats:density]{stats::density}, \link{plot}, \link{boxplot}, \link{rug}, \link{calc_Statistics}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}

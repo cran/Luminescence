@@ -8,8 +8,8 @@
 #' to be displayed. As this function is wrapped around the base plot function, one can also choose to add elements
 #' manually.
 #'
-#' @param object [RLum.Results-class] or [numeric] (**required**): the values
-#' to show, should have length 100.
+#' @param object [Luminescence::RLum.Results-class] or [numeric] (**required**):
+#' the values to show, should have length 100.
 #'
 #' @param show_coordinates [logical] (*with default*): Show coordinates (1..10)
 #' in x and in y direction. Defaults to `FALSE`.
@@ -17,7 +17,7 @@
 #' @param show_location_ids [logical] (*with default*): Show id with every
 #' grain location (1..100). Defaults to `FALSE`.
 #'
-#' @param show_neighbours [logical]  (*with default*): Show which
+#' @param show_neighbours [logical] (*with default*): Show which
 #' neighbour connections are taken into account if calculating Moran's I.
 #' This makes sense when there are `NA` observations, or when a non-standard
 #' neighbour setting is defined.
@@ -28,7 +28,7 @@
 #' @param df_neighbours [data.frame] (*with default*): only relevant if
 #' `show_neighbours` is `TRUE`. Data frame indicating which borders to
 #' consider, and their respective weights (see the description provided for
-#' [calc_MoransI]). If `NULL` (default), this is constructed automatically by
+#' [Luminescence::calc_MoransI]). If `NULL` (default), this is constructed automatically by
 #' the internal function `.get_Neighbours`.
 #'
 #' @param ignore_borders [logical] (*with default*): whether only grain
@@ -48,27 +48,30 @@
 #' as `main`, `col` and `pch`. `legend` can be used to enable/disable the
 #' legend (`FALSE` by default).
 #'
-#' @author Anna-Maartje de Boer, Luc Steinbuch, Wageningen University & Research, 2025
+#' @author
+#' Anna-Maartje de Boer, Wageningen University & Research (The Netherlands)\cr
+#' Luc Steinbuch, Wageningen University & Research (The Netherlands)\cr
 #'
 #' @references
 #' de Boer, A-M., Steinbuch, L., Heuvelink, G.B.M., Wallinga, J., 2025.
-#' A novel tool to assess crosstalk in single-grain luminescence detection.
-#' Submitted.
+#' A novel method to assess crosstalk in single-grain luminescence detection.
+#' Radiation Measurements 186, 107459. \doi{10.1016/j.radmeas.2025.107459}
 #'
 #' @examples
 #'
 #' plot_SingleGrainDisc(1:100)
 #'
 #' @export
-plot_SingleGrainDisc <- function(object,
-                                 show_coordinates = FALSE,
-                                 show_location_ids = FALSE,
-                                 show_neighbours = FALSE,
-                                 show_positioning_holes = TRUE,
-                                 df_neighbours = NULL,
-                                 ignore_borders = FALSE,
-                                 str_transform = "sqrt", # Options: "lin", "log" and "sqrt"
-                                 ...
+plot_SingleGrainDisc <- function(
+    object,
+    show_coordinates = FALSE,
+    show_location_ids = FALSE,
+    show_neighbours = FALSE,
+    show_positioning_holes = TRUE,
+    df_neighbours = NULL,
+    ignore_borders = FALSE,
+    str_transform = c("sqrt", "lin", "log"),
+    ...
 ) {
   .set_function_name("plot_SingleGrainDisc")
   on.exit(.unset_function_name(), add = TRUE)
@@ -98,7 +101,7 @@ plot_SingleGrainDisc <- function(object,
     .throw_error("'df_neighbours' should be a data frame with 3 columns")
   }
 
-  .validate_args(str_transform, c("sqrt", "lin", "log"))
+  str_transform <- .validate_args(str_transform, c("sqrt", "lin", "log"))
 
   ## get ... arguments
   plot_settings <- modifyList(

@@ -5,15 +5,16 @@
 \title{Merge Risoe.BINfileData objects or Risoe BIN-files}
 \usage{
 merge_Risoe.BINfileData(
-  input.objects,
+  objects,
   output.file,
   keep.position.number = FALSE,
   position.number.append.gap = 0,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 }
 \arguments{
-\item{input.objects}{\link{character} or \linkS4class{Risoe.BINfileData} objects (\strong{required}):
+\item{objects}{\link{character} or \linkS4class{Risoe.BINfileData} (\strong{required}):
 Character vector with path and files names with ".bin" or ".binx" extension
 (e.g. \code{input.objects = c("path/file1.bin", "path/file2.bin")} or a list of
 \linkS4class{Risoe.BINfileData} objects (e.g. \code{input.objects = c(object1, object2)}).}
@@ -33,6 +34,8 @@ information.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
 enable/disable output to the terminal.}
+
+\item{...}{currently not used.}
 }
 \value{
 Returns a \linkS4class{Risoe.BINfileData} object or writes to the BIN-file
@@ -72,7 +75,7 @@ With no additional summand the new position numbers would be:
 The validity of the output objects is not further checked.
 }
 \section{Function version}{
- 0.2.10
+ 0.2.11
 }
 
 \examples{
@@ -88,7 +91,7 @@ object.new <- merge_Risoe.BINfileData(c(object1, object2))
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. merge_Risoe.BINfileData(): Merge Risoe.BINfileData objects or Risoe BIN-files. Function version 0.2.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. merge_Risoe.BINfileData(): Merge Risoe.BINfileData objects or Risoe BIN-files. Function version 0.2.11. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -98,7 +101,7 @@ Duller, G.A.T., 2007. Analyst (Version 3.24) (manual). Aberystwyth University, A
 \linkS4class{Risoe.BINfileData}, \link{read_BIN2R}, \link{write_R2BIN}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{IO}
 \keyword{manip}

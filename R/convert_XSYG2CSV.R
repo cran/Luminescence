@@ -1,27 +1,27 @@
 #' @title Export XSYG-file(s) to CSV-files
 #'
 #' @description
-#' This function is a wrapper function around the functions [read_XSYG2R] and
-#' [write_RLum2CSV] and it imports an XSYG-file and directly exports its content
-#' to CSV-files. If nothing is set for the argument `path` ([write_RLum2CSV])
+#' This function is a wrapper function around the functions [Luminescence::read_XSYG2R] and
+#' [Luminescence::write_RLum2CSV] and it imports an XSYG-file and directly exports its content
+#' to CSV-files. If nothing is set for the argument `path` ([Luminescence::write_RLum2CSV])
 #' the input folder will become the output folder.
 #'
 #' @param file [character] (**required**):
 #' name of the XSYG-file to be converted to CSV-files
 #'
 #' @param ... further arguments that will be passed to the function
-#' [read_XSYG2R] and [write_RLum2CSV]
+#' [Luminescence::read_XSYG2R] and [Luminescence::write_RLum2CSV]
 #'
 #' @return
 #' The function returns either a CSV-file (or many of them) or for the option `export = FALSE`
 #' a list comprising objects of type [data.frame] and [matrix]
 #'
-#' @section Function version: 0.1.0
+#' @section Function version: 0.1.1
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Analysis-class], [RLum.Data-class], [RLum.Results-class],
-#' [utils::write.table], [write_RLum2CSV], [read_XSYG2R]
+#' @seealso [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Data-class], [Luminescence::RLum.Results-class],
+#' [utils::write.table], [Luminescence::write_RLum2CSV], [Luminescence::read_XSYG2R]
 #'
 #' @keywords IO
 #'
@@ -66,6 +66,7 @@ convert_XSYG2CSV <- function(
 
   # Import file ---------------------------------------------------------------------------------
   if(!inherits(file, "RLum")){
+    .validate_length(file, 1)
     object <- read_XSYG2R(
       file = file,
       fastForward = TRUE,

@@ -2,7 +2,7 @@
 #'
 #' Object class to represent analysis data for protocol analysis, i.e. all curves,
 #' spectra etc. from one measurements. Objects from this class are produced,
-#' by e.g. [read_XSYG2R], [read_Daybreak2R]
+#' by e.g. [Luminescence::read_XSYG2R], [Luminescence::read_Daybreak2R]
 #'
 #' @name RLum.Analysis-class
 #'
@@ -12,22 +12,22 @@
 #' Object of class [character] describing the applied measurement protocol
 #'
 #' @slot records
-#' Object of class [list] containing objects of class [RLum.Data-class]
+#' Object of class [list] containing objects of class [Luminescence::RLum.Data-class]
 #'
 #' @note
-#' The method [structure_RLum] is currently just available for objects
-#' containing [RLum.Data.Curve-class].
+#' The method [Luminescence::structure_RLum] is currently just available for objects
+#' containing [Luminescence::RLum.Data.Curve-class].
 #'
 #' @section Objects from the Class:
 #' Objects can be created by calls of the form `set_RLum("RLum.Analysis", ...)`.
 #'
-#' @section Class version: 0.4.18
+#' @section Class version: 0.4.19
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [Risoe.BINfileData2RLum.Analysis],
-#' [Risoe.BINfileData-class], [RLum-class]
+#' @seealso [Luminescence::Risoe.BINfileData2RLum.Analysis],
+#' [Luminescence::Risoe.BINfileData-class], [Luminescence::RLum-class]
 #'
 #' @keywords classes methods
 #'
@@ -80,14 +80,14 @@ setClass("RLum.Analysis",
 #'
 #' for `[RLum.Analysis-class]`
 #'
-#' **[RLum.Analysis-class]**
+#' **[Luminescence::RLum.Analysis-class]**
 #'
 #' \tabular{ll}{
 #'  **from** \tab **to**\cr
 #'   `list` \tab `list`\cr
 #' }
 #'
-#' Given that the [list] consists of [RLum.Analysis-class] objects.
+#' Given that the [list] consists of [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @name as
 setAs("list", "RLum.Analysis",
@@ -123,9 +123,7 @@ setMethod("show",
             #skip this part if nothing is included in the object
             if(length(object@records) > 0){
               ##get object class types
-              temp <- vapply(object@records, function(x){
-                class(x)[1]
-              }, FUN.VALUE = character(1))
+              temp <- vapply(object@records, \(x) class(x)[1], character(1))
 
               ##print object class types
               table.temp <- table(temp)
@@ -144,12 +142,14 @@ setMethod("show",
 
                 ##create terminal output
                 terminal_output <-
-                  vapply(1:length(object@records),  function(i) {
+                  vapply(seq_along(object@records),  function(i) {
+                    ## take care of NULL objects and keep this output the rest
+                    o <- object@records[[i]] %||% return("<NULL object>")
+                    
                     if (inherits(object@records[[i]], x)) {
-                      if (i %% temp.width == 0 & i != length(object@records)) {
+                      if (i %% temp.width == 0 & i != length(object@records)) 
                         assign(x = "linebreak", value = TRUE, envir = env)
-                      }
-
+              
                       ##FIRST
                       first <-  paste0("#", i, " ", object@records[[i]]@recordType)
 
@@ -197,13 +197,13 @@ setMethod("show",
 
 ## set_RLum() ---------------------------------------------------------------
 #' @describeIn set_RLum
-#' Construction method for [RLum.Analysis-class] objects.
+#' Construction method for [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @param protocol [character] (*optional*):
 #' sets protocol type for analysis object. Value may be used by subsequent analysis functions.
 #'
 #' @param records [list] (*optional*):
-#' list of [RLum.Analysis-class] objects
+#' list of [Luminescence::RLum.Analysis-class] objects
 #'
 #' @param info [list] (*optional*):
 #' a list containing additional info data for the object.
@@ -261,9 +261,10 @@ setMethod(
 #'
 #' Returns:
 #'
-#' 1. [list] of [RLum.Data-class] objects or
-#' 2. Single [RLum.Data-class] object, if only one object is contained and `recursive = FALSE` or
-#' 3. [RLum.Analysis-class] objects for `drop = FALSE`
+#' 1. [list] of [Luminescence::RLum.Data-class] objects or
+#' 2. Single [Luminescence::RLum.Data-class] object, if only one object
+#' is contained and `recursive = FALSE` or
+#' 3. [Luminescence::RLum.Analysis-class] objects for `drop = FALSE`
 #'
 #' @param record.id [numeric] or [logical] (*optional*):
 #' IDs of specific records. If of type `logical` the entire id range is assumed
@@ -287,8 +288,8 @@ setMethod(
 #' object (`FALSE` by default).
 #'
 #' @param drop [logical] (*with default*):
-#' coerce to the next possible layer (which are [RLum.Data-class] objects if
-#' `object` is an [RLum.Analysis-class] object). If `drop = FALSE`, an object
+#' coerce to the next possible layer (which are [Luminescence::RLum.Data-class] objects if
+#' `object` is an [Luminescence::RLum.Analysis-class] object). If `drop = FALSE`, an object
 #' of the same type as the input is returned.
 #'
 #' @param recursive [logical] (*with default*):
@@ -377,6 +378,7 @@ setMethod("get_RLum",
 
             ##if info.object is set, only the info objects are returned
             else if(!is.null(info.object)) {
+              .validate_class(info.object, "character", null.ok = TRUE, length = 1)
               if(info.object %in% names(object@info)){
                 return(unlist(object@info[info.object]))
               }
@@ -423,9 +425,7 @@ setMethod("get_RLum",
               ##recordType
               .validate_class(recordType, "character", null.ok = TRUE)
               if (is.null(recordType)) {
-                recordType <-
-                  unique(vapply(object@records, function(x)
-                    x@recordType, character(1)))
+                recordType <- unique(names(object))
               }
 
               ##curveType
@@ -449,21 +449,22 @@ setMethod("get_RLum",
               object@records <- object@records[record.id]
               record.id <- seq_along(object@records)
 
+              ## translate input to regular expression and remove ^ $
+              recordType <- glob2rx(recordType)
+              recordType <- substr(recordType,
+                                   start = 2, stop = nchar(recordType) - 1)
+
               ##select curves according to the chosen parameter
               temp <- lapply(record.id, function(x) {
-                  if (inherits(object@records[[x]], RLum.type)) {
-                    ## translate input to regular expression and remove ^ $
-                    recordType <- glob2rx(recordType)
-                    recordType <- substr(recordType,
-                                         start = 2, stop = nchar(recordType) - 1)
-                    temp <- lapply(recordType, function(type) {
-                      ## use format() to handle NA so that it gets turned into
-                      ## the "NA" string (as.character() would leave it as NA)
-                      recordType_comp <- format(object@records[[x]]@recordType)
+                  if (inherits(object@records[[x]], RLum.type) &&
+                      object@records[[x]]@curveType %in% curveType) {
+                    ## use format() to handle NA so that it gets turned into
+                    ## the "NA" string (as.character() would leave it as NA)
+                    recordType_comp <- format(object@records[[x]]@recordType)
 
+                    temp <- lapply(recordType, function(type) {
                       ## get the results object and if requested, get the index
-                      if (grepl(type, recordType_comp) &&
-                          object@records[[x]]@curveType %in% curveType) {
+                      if (grepl(type, recordType_comp)) {
                         if (!get.index) object@records[[x]] else x
                       }
                     })
@@ -489,6 +490,7 @@ setMethod("get_RLum",
                 if (get.index) {
                   return(unlist(temp))
                 }
+                .validate_logical_scalar(drop)
                 if (!drop) {
                     temp <- set_RLum(
                       class = "RLum.Analysis",
@@ -508,9 +510,9 @@ setMethod("get_RLum",
 
 ## remove_RLum() ------------------------------------------------------------
 #' @describeIn remove_RLum
-#' Method to remove records from an [RLum.Analysis-class] object.
+#' Method to remove records from an [Luminescence::RLum.Analysis-class] object.
 #'
-#' @param ... parameters to be passed to [get_RLum]. The arguments `get.index` and
+#' @param ... parameters to be passed to [Luminescence::get_RLum]. The arguments `get.index` and
 #' `drop` are preset and have no effect when provided
 #'
 #' @export
@@ -545,6 +547,10 @@ setMethod("remove_RLum",
   else
     rm_id <- suppressWarnings(do.call(get_RLum, args = c(object, args_set, args)))
 
+  ## ensure that we don't specify invalid record indices, or we end up adding
+  ## NULL records
+  rm_id <- rm_id[rm_id <= length(object@records)]
+
   ## remove objects
   object@records[rm_id] <- NULL
   return(object)
@@ -552,7 +558,7 @@ setMethod("remove_RLum",
 
 ## structure_RLum() ---------------------------------------------------------
 #' @describeIn structure_RLum
-#' Returns the structure of an [RLum.Analysis-class] object.
+#' Returns the structure of an [Luminescence::RLum.Analysis-class] object.
 #'
 #' @param fullExtent [logical] (*with default*):
 #' extends the returned `data.frame` to its full extent, i.e. all info elements
@@ -577,8 +583,7 @@ setMethod("structure_RLum",
             temp.id <- seq_len(temp.object.length)
 
             ##recordType
-            temp.recordType <-
-              vapply(object@records, function(x) x@recordType, character(1))
+            temp.recordType <- names(object)
 
             ##PROTOCOL STEP
             temp.protocol.step <- rep_len(NA_character_, temp.object.length)
@@ -661,19 +666,19 @@ setMethod("length_RLum",
 
 ## names_RLum() -------------------------------------------------------------
 #' @describeIn names_RLum
-#' Returns the names of the [RLum.Data-class] objects stored in the object.
+#' Returns the names of the [Luminescence::RLum.Data-class] objects stored in the object.
 #'
 #' @export
 setMethod("names_RLum",
           "RLum.Analysis",
           function(object){
-            sapply(object@records, function(x) x@recordType)
+            vapply(object@records, function(x) x@recordType, character(1))
           })
 
 
 ## add_metadata() -----------------------------------------------------------
 #' @describeIn metadata
-#' Adds metadata to [RLum.Analysis-class] objects.
+#' Adds metadata to [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @param info_element [character] (**required**):
 #' name of the metadata entry to manipulate.
@@ -697,7 +702,7 @@ setMethod("add_metadata<-",
 
 ## rename_metadata() --------------------------------------------------------
 #' @describeIn metadata
-#' Renames a metadata entry of [RLum.Analysis-class] objects.
+#' Renames a metadata entry of [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @export
 setMethod("rename_metadata<-",
@@ -718,7 +723,7 @@ setMethod("rename_metadata<-",
 
 ## replace_metadata() -------------------------------------------------------
 #' @describeIn metadata
-#' Replaces or removes metadata of [RLum.Analysis-class] objects.
+#' Replaces or removes metadata of [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @param subset [expression] (*optional*):
 #' logical expression to limit the substitution only to the selected subset
@@ -758,6 +763,22 @@ setMethod(
   signature = "RLum.Analysis",
   function(object, ...) {
     object@records <- lapply(object@records, smooth_RLum, ...)
+    return(object)
+  }
+)
+
+## normalise_RLum() ------------------------------------------------------------
+#' @describeIn normalise_RLum
+#' Normalisation of `RLum.Data` records contained in the input object.
+#'
+#' @export
+setMethod(
+  f = "normalise_RLum",
+  signature = "RLum.Analysis",
+  function(object, norm, ...) {
+    object@records <- lapply(
+      X = object@records,
+      FUN = normalise_RLum, norm = norm, ...)
     return(object)
   }
 )
@@ -902,7 +923,7 @@ setMethod(
 
 ## melt_RLum() --------------------------------------------------------------
 #' @describeIn melt_RLum
-#' Melts [RLum.Analysis-class] objects into a flat data.frame with columns
+#' Melts [Luminescence::RLum.Analysis-class] objects into a flat data.frame with columns
 #' `X`, `Y`, `TYPE`, `UID`, to be used in combination with other packages
 #' such as `ggplot2`.
 #'
@@ -917,7 +938,7 @@ setMethod(
 
 ## view() -------------------------------------------------------------------
 #' @describeIn view
-#' View method for [RLum.Analysis-class] objects.
+#' View method for [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @export
 setMethod("view",

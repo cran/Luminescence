@@ -1,7 +1,8 @@
 #' @title Create a DRAC input data template (v1.2)
 #'
-#' @description This function returns a DRAC input template (v1.2) to be used in conjunction
-#' with the [use_DRAC] function
+#' @description
+#' This function returns a DRAC input template (v1.2) to be used in conjunction
+#' with the [Luminescence::use_DRAC] function
 #'
 #' @param nrow [integer] (*with default*):
 #' specifies the number of rows of the template (i.e., the number of data
@@ -10,8 +11,8 @@
 #' @param preset [character] (*optional*):
 #' By default, all values of the template are set to `NA`, which means that
 #' the user needs to fill in **all** data first before submitting to DRAC
-#' using `use_DRAC()`. To reduce the number of values that need to be
-#' provided, `preset` can be used to create a template with at least
+#' using [Luminescence::use_DRAC]. To reduce the number of values that need to
+#' be provided, `preset` can be used to create a template with at least
 #' a minimum of reasonable preset values.
 #'
 #' `preset` can be one of the following:
@@ -26,19 +27,21 @@
 #' Note that the last three options can be used to produce a template
 #' with values directly taken from the official DRAC input `.csv` file.
 #'
-#' @param file_input [character] file connection to a DRAC `.csv` file, the file
-#' will be imported and translated to the template that can be used by [use_DRAC].
-#' Please note that there is not check on validity of the `.csv` file.
+#' @param file_input [character] (*optional*):
+#' file connection to a DRAC `.csv` file. The file will be imported and
+#' translated to a template usable by [Luminescence::use_DRAC].
+#' Please note that there is no check on the validity of the `.csv` file.
 #'
 #' @param notification [logical] (*with default*):
-#' show or hide the notification
+#' show or hide the notification.
 #'
 #' @return A  list of class `DRAC.list`.
 #'
 #' @section Function version: 0.1.1
 #'
 #' @author
-#' Christoph Burow, University of Cologne (Germany), Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Christoph Burow, University of Cologne (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #'
 #' @references
 #' Durcan, J.A., King, G.E., Duller, G.A.T., 2015. DRAC: Dose Rate and Age Calculator for trapped charge dating.

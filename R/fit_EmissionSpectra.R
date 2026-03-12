@@ -2,7 +2,7 @@
 #'
 #' @description
 #' This function performs a luminescence spectra deconvolution on
-#' [RLum.Data.Spectrum-class] and [matrix] objects on an **energy scale**.
+#' [Luminescence::RLum.Data.Spectrum-class] and [matrix] objects on an **energy scale**.
 #' The function is optimised for emission spectra typically obtained in the
 #' context of TL, OSL and RF  measurements detected between 200 and 1000 nm.
 #' The function is not designed to deconvolve TL curves (counts against
@@ -16,13 +16,12 @@
 #'The emission spectra (on an energy scale) can be best described as the sum of multiple
 #'Gaussian components:
 #'
-#''\deqn{
-#'y = \Sigma  Ci * 1/(\sigma_{i} * \sqrt(2 * \pi)) * exp(-1/2 * ((x - \mu_{i})/\sigma_{i}))^2)
+#'\deqn{
+#' y = \sum_i \frac{C_i}{\sigma_{i} \sqrt{2 \pi}} exp(-1/2 ((x - \mu_{i})/\sigma_{i})^2)
 #'}
 #'
 #'with the parameters \eqn{\sigma} (peak width) and \eqn{\mu} (peak centre) and \eqn{C}
 #'(scaling factor).
-#'
 #'
 #'**Start parameter estimation and fitting algorithm**
 #'
@@ -32,8 +31,8 @@
 #'2. Start parameter estimation \cr
 #'3. Fitting via [minpack.lm::nls.lm]\cr
 #'
-#'The peak finding is realised by an approach (re-)suggested by Petr Pikal via the R-help
-#'mailing list (`https://stat.ethz.ch/pipermail/r-help/2005-November/thread.html`) in November 2005.
+#' The peak finding is based on an approach (re-)suggested by Petr Pikal in
+#' November 2005 in the R-help mailing list (https://stat.ethz.ch/pipermail/r-help/2005-November/thread.html).
 #'This goes back to even earlier discussion in 2001 based on Prof Brian Ripley's idea.
 #'It smartly uses the functions [stats::embed] and [max.col] to identify peaks positions.
 #'For the use in this context, the algorithm has been further modified to scale on the
@@ -61,7 +60,7 @@
 #' `trace` \tab [logical] \tab `FALSE` \tab enable/disable the tracing of the minimisation routine
 #'}
 #'
-#'@param object [RLum.Data.Spectrum-class], [matrix] (**required**): input
+#'@param object [Luminescence::RLum.Data.Spectrum-class], [matrix] (**required**): input
 #'object. Please note that an energy spectrum is expected
 #'
 #' @param frame [integer] (*optional*): number of the frame to be analysed. If
@@ -140,11 +139,11 @@
 #' @section Function version: 0.1.3
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
-#'@seealso [RLum.Data.Spectrum-class], [RLum.Results-class], [plot_RLum],
-#'[convert_Wavelength2Energy], [minpack.lm::nls.lm]
+#'@seealso [Luminescence::RLum.Data.Spectrum-class], [Luminescence::RLum.Results-class], [Luminescence::plot_RLum],
+#'[Luminescence::convert_Wavelength2Energy], [minpack.lm::nls.lm]
 #'
 #'@keywords datagen
 #'

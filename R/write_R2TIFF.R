@@ -1,10 +1,10 @@
 #' @title Export RLum.Data.Image and RLum.Data.Spectrum objects to TIFF Images
 #'
 #' @description
-#' Simple wrapper around [tiff::writeTIFF] to export suitable [RLum-class]
+#' Simple wrapper around [tiff::writeTIFF] to export suitable [Luminescence::RLum-class]
 #' objects to TIFF images. Per default 16-bit TIFF files are exported.
 #'
-#' @param object [RLum.Data.Image-class] or [RLum.Data.Spectrum-class] object (**required**):
+#' @param object [Luminescence::RLum.Data.Image-class] or [Luminescence::RLum.Data.Spectrum-class] object (**required**):
 #' input object, can be a [list] of such objects.
 #'
 #' @param file [character] (**required**):
@@ -22,11 +22,12 @@
 #' @return A TIFF file
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @section Function version: 0.1.2
 #'
-#' @seealso [tiff::writeTIFF], [RLum.Data.Image-class], [RLum.Data.Spectrum-class]
+#' @seealso [tiff::writeTIFF], [Luminescence::RLum.Data.Image-class],
+#' [Luminescence::RLum.Data.Spectrum-class]
 #'
 #' @keywords IO
 #'
@@ -63,7 +64,7 @@ write_R2TIFF <- function(
       .throw_error("Empty RLum.Data.Image object detected")
   })
 
-  .validate_class(file, "character")
+  .validate_class(file, "character", length = 1)
   .validate_positive_scalar(norm)
 
   ## Prepare filenames ------------------------------------------------------

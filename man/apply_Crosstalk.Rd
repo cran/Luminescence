@@ -7,17 +7,19 @@
 apply_Crosstalk(object, n_crosstalk = 0.2)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Results} or \link{numeric} (\strong{required}): containing
+\item{object}{\linkS4class{RLum.Results} or \link{numeric} (\strong{required}):
 a numerical vector of length 100, representing one or more measurement
 discs ("positions") in a reader.
 Each element in the vector represents one grain hole location on a disc.}
 
-\item{n_crosstalk}{\link{numeric} (\emph{with default}): A single number quantifying the added
+\item{n_crosstalk}{\link{numeric} (\emph{with default}):
+A single number quantifying the added
 crosstalk. Defaults for testing purposes to 0.2. Can be any number, even negative,
 but for realistic simulations we suggest something between 0 and 0.25.}
 }
 \value{
-A vector of size 100, with the value at each grain hole location including simulated crosstalk.
+A vector of size 100, with the value at each grain hole location including
+simulated crosstalk.
 }
 \description{
 Add crosstalk, evenly spread in rook (top-right-bottom-left)
@@ -48,15 +50,16 @@ hist(observations_with_simulated_crosstalk)
 } 
 
 \section{How to cite}{
-Boer, A.d., Steinbuch, L., 2025. apply_Crosstalk(): Apply crosstalk. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Boer, A.d., Steinbuch, L., 2026. apply_Crosstalk(): Apply crosstalk. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 de Boer, A-M., Steinbuch, L., Heuvelink, G.B.M., Wallinga, J., 2025.
-A novel tool to assess crosstalk in single-grain luminescence detection.
-Submitted.
+A novel method to assess crosstalk in single-grain luminescence detection.
+Radiation Measurements 186, 107459. \doi{10.1016/j.radmeas.2025.107459}
 }
 \author{
-Anna-Maartje de Boer, Luc Steinbuch, Wageningen University & Research, 2025
+Anna-Maartje de Boer, Wageningen University & Research (The Netherlands)\cr
+Luc Steinbuch, Wageningen University & Research (The Netherlands)\cr
 , RLum Developer Team}
 \keyword{manip}

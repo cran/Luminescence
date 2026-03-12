@@ -6,7 +6,7 @@
 #' @param file [character] (**required**):
 #' name of a CSV file (formatted according to the DRAC v1.2 CSV template) to
 #' be sent to the DRAC website for calculation. It can also be a DRAC template
-#' object obtained from [template_DRAC()], which supports also import from
+#' object obtained from [Luminescence::template_DRAC()], which supports also import from
 #' CSV-files.
 #'
 #' @param name [character] (*with default*):
@@ -28,9 +28,9 @@
 #' if the version has changed, but not the column order
 #' - `user` [character]: option to provide username for secured site
 #' - `password` [character]: password for secured site, only works jointly with `user`
-#' - `verbose` [logical]: show or hide console output
+#' - `verbose` [logical]: enable/disable output to the terminal
 #'
-#' @return Returns an [RLum.Results-class] object containing the following elements:
+#' @return Returns an [Luminescence::RLum.Results-class] object containing the following elements:
 #'
 #' \item{DRAC}{[list]: a named list containing the following elements in slot `@@data`:
 #'
@@ -49,20 +49,20 @@
 #' \item{call}{[call] the function call}
 #' \item{args}{[list] used arguments}
 #'
-#' The output should be accessed using the function [get_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
 #'
-#' @seealso [template_DRAC], [.as.latex.table]
+#' @seealso [Luminescence::template_DRAC], [Luminescence::.as.latex.table]
 #'
 #' @section Function version: 0.17
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
 #' Christoph Burow, University of Cologne (Germany)
 #'
 #' @references
 #' Durcan, J.A., King, G.E., Duller, G.A.T., 2015. DRAC: Dose Rate and Age Calculator for trapped charge dating.
-#' Quaternary Geochronology 28, 54-61. doi:10.1016/j.quageo.2015.03.012
+#' Quaternary Geochronology 28, 54-61. \doi{10.1016/j.quageo.2015.03.012}
 #'
 #' @examples
 #'
@@ -153,14 +153,9 @@ use_DRAC <- function(
   .validate_not_empty(file)
 
   if (inherits(file, "character")) {
+    .validate_file(file, ext = "csv", scan.dir = FALSE,
+                   verbose = settings$verbose)
     .validate_length(file, 1)
-    if(!file.exists(file)){
-      .throw_error("Input file does not exist")
-    }
-
-    if (tools::file_ext(file) == "xls" || tools::file_ext(file) == "xlsx") {
-      .throw_error("XLS/XLSX format no longer supported, use CSV instead")
-    }
 
     ## Import data ----------------------------------------------------------
 
@@ -272,7 +267,7 @@ use_DRAC <- function(
   ## check for correct response
   if (inherits(DRAC.response, "try-error")) {
     .throw_error("Transmission failed with error: ",
-                 attr(DRAC.response, "condition")$message)
+                 gsub(".*\n", "", attr(DRAC.response, "condition")$message))
   } else if (DRAC.response$status_code != 200) {
     .throw_error("Transmission failed with HTTP status code: ",
                  DRAC.response$status_code)

@@ -4,29 +4,33 @@
 \alias{convert_Concentration2DoseRate}
 \title{Dose-rate conversion function}
 \usage{
-convert_Concentration2DoseRate(input, conversion = "Guerinetal2011")
+convert_Concentration2DoseRate(object, conversion = "Guerinetal2011", ...)
 }
 \arguments{
-\item{input}{\link{data.frame} (\emph{optional}): a table containing all relevant
-information for each individual layer. If nothing is provided, the function
-returns a template data frame, the values of which need to be filled in by
-the user. Please note that only one dataset per input is supported.}
+\item{object}{\link{data.frame} (\emph{optional}):
+a data frame containing all relevant information for each individual layer.
+If nothing is provided, the function returns a template data frame, the
+values of which should be filled in by the user. Please note that only one
+dataset per input is supported.}
 
 \item{conversion}{\link{character} (\emph{with default}):
 dose rate conversion factors to use, by default those by Guérin et al. (2011).
 For accepted values see \link{BaseDataSet.ConversionFactors}.}
+
+\item{...}{currently not used.}
 }
 \value{
-The function returns an \linkS4class{RLum.Results} object for which the first
-element is \link{matrix} with the converted values. If no input is provided, the
-function returns a template \link{data.frame} that can be used as input.
+The function returns an \linkS4class{RLum.Results} object for which
+the first element is a \link{matrix} with the converted values. If no input is
+provided, the function returns a template \link{data.frame} that can be used as
+input.
 }
 \description{
-This function converts radionuclide concentrations
-(K in \%, Th and U in ppm) into dose rates (Gy/ka). Beta-dose rates are also
-attenuated for the grain size. Beta and gamma-dose rates are corrected
-for the water content. This function converts concentrations into dose rates
-(Gy/ka) and corrects for grain size attenuation and water content
+This function converts radionuclide concentrations (K in \%, Th and U in ppm)
+into dose rates (Gy/ka). Beta-dose rates are also attenuated for the grain
+size. Beta and gamma-dose rates are corrected for the water content. This
+function converts concentrations into dose rates (Gy/ka) and corrects for
+grain size attenuation and water content.
 
 Dose rate conversion factors can be chosen from Adamiec and Aitken (1998),
 Guérin et al. (2011), Liritzis et al. (201) and Cresswell et al. (2018).
@@ -63,7 +67,7 @@ The water content provided by the user should be calculated according to:
 The unit for the weight is gram (g).
 }
 \section{Function version}{
- 0.1.0
+ 0.1.1
 }
 
 \examples{
@@ -89,7 +93,7 @@ convert_Concentration2DoseRate(input)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., 2025. convert_Concentration2DoseRate(): Dose-rate conversion function. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., 2026. convert_Concentration2DoseRate(): Dose-rate conversion function. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -99,11 +103,11 @@ Cresswell., A.J., Carter, J., Sanderson, D.C.W., 2018. Dose rate conversion para
 Assessment of nuclear data. Radiation Measurements 120, 195-201.
 
 Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion factors: update.
-Ancient TL, 29, 5-8.
+Ancient TL 29, 5-8.
 
 Guérin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012. On the use
 of the infinite matrix assumption and associated concepts: A critical review.
-Radiation Measurements, 47, 778-785.
+Radiation Measurements 47, 778-785.
 
 Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
 A re-evaluation of radiation dose-rate conversion factors. Mediterranean

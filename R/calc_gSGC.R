@@ -37,7 +37,7 @@
 #'
 #' @param ... parameters will be passed to the plot output
 #'
-#' @return Returns an S4 object of type [RLum.Results-class].
+#' @return Returns an S4 object of type [Luminescence::RLum.Results-class].
 #'
 #' **`@data`**\cr
 #' `$ De.value` ([data.frame]) \cr
@@ -53,9 +53,9 @@
 #' @section Function version: 0.1.3
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Results-class], [get_RLum], [uniroot]
+#' @seealso [Luminescence::RLum.Results-class], [Luminescence::get_RLum], [uniroot]
 #'
 #' @references
 #' Li, B., Roberts, R.G., Jacobs, Z., Li, S.-H., 2015. Potential of establishing
@@ -76,7 +76,7 @@
 #' @export
 calc_gSGC<- function(
   data,
-  gSGC.type = "0-250",
+  gSGC.type = c("0-250", "0-450"),
   gSGC.parameters = NULL,
   n.MC = 100,
   verbose = TRUE,
@@ -94,6 +94,9 @@ calc_gSGC<- function(
     .throw_error("'data' is expected to have 5 columns")
   gSGC.type <- .validate_args(gSGC.type, c("0-250", "0-450"))
   .validate_class(gSGC.parameters, "list", null.ok = TRUE)
+  .validate_positive_scalar(n.MC, int = TRUE)
+  .validate_logical_scalar(verbose)
+  .validate_logical_scalar(plot)
 
   ##rename columns for consistency reasons
   colnames(data) <- c('LnTn', 'LnTn.error', 'Lr1Tr1', 'Lr1Tr1.error', 'Dr1')

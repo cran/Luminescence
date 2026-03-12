@@ -10,15 +10,15 @@ verify_SingleGrainData(
   threshold = 10,
   use_fft = FALSE,
   cleanup = FALSE,
-  cleanup_level = "aliquot",
+  cleanup_level = c("aliquot", "curve"),
   verbose = TRUE,
   plot = FALSE,
   ...
 )
 }
 \arguments{
-\item{object}{\linkS4class{Risoe.BINfileData} or \linkS4class{RLum.Analysis} (\strong{required}):
-input object. The function also accepts a list with objects of allowed type.}
+\item{object}{\linkS4class{Risoe.BINfileData} or \linkS4class{RLum.Analysis}
+(\strong{required}):  input object. The function also accepts a list with objects of allowed type.}
 
 \item{threshold}{\link{numeric} (\emph{with default}):
 numeric threshold value for the allowed difference between the \code{mean} and
@@ -153,15 +153,15 @@ write_R2BIN(object, paste0(dirname(file),"/", basename(file), "_CLEANED.BIN"))
 
 }
 \seealso{
-\linkS4class{Risoe.BINfileData}, \linkS4class{RLum.Analysis}, \link{write_R2BIN},
-\link{read_BIN2R}
+\linkS4class{Risoe.BINfileData}, \linkS4class{RLum.Analysis},
+\link{write_R2BIN}, \link{read_BIN2R}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. verify_SingleGrainData(): Verify single grain data sets and check for invalid grains, i.e. zero-light level grains. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. verify_SingleGrainData(): Verify single grain data sets and check for invalid grains, i.e. zero-light level grains. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

@@ -1,7 +1,7 @@
-#' Calculate the gamma dose deposited within a sample taking layer-to-layer
+#' @title Calculate the gamma dose deposited within a sample taking layer-to-layer
 #' variations in radioactivity into account (according to Aitken, 1985)
 #'
-#' This function calculates the gamma dose deposited in a luminescence sample
+#' @description This function calculates the gamma dose deposited in a luminescence sample
 #' taking into account layer-to-layer variations in sediment radioactivity.
 #' The function scales user inputs of uranium, thorium and potassium based on
 #' input parameters for sediment density, water content and given layer
@@ -42,7 +42,6 @@
 #' - `"Liritzisetal2013"` (Liritzis et al., 2013)
 #' - `"Guerinetal2011"` (Guérin et al., 2011)
 #' - `"AdamiecAitken1998"` (Adamiec and Aitken, 1998)
-#'
 #'
 #' **Water content**
 #'
@@ -91,7 +90,7 @@
 #' - `id` ([character]): an arbitrary id or name of each layer
 #' - `thickness` ([numeric]): vertical extent of each layer in cm
 #' - `sample_offset` ([logical]): distance of the sample in cm,
-#'  **measured from the BOTTOM OF THE TARGET LAYER**. Except for the target layer
+#'  **measured from the bottom of the target layer**. Except for the target layer
 #'  all values must be `NA`.
 #' - `K` ([numeric]): K nuclide content in %
 #' - `K_se` ([numeric]): error on the K content
@@ -194,27 +193,26 @@
 #' Christoph Burow, University of Cologne (Germany) \cr
 #' Based on an excel spreadsheet and accompanying macro written by Ian Bailiff.
 #'
-#' @seealso [ExampleData.ScaleGammaDose],
-#' [BaseDataSet.ConversionFactors], [approx], [barplot]
+#' @seealso [Luminescence::ExampleData.ScaleGammaDose],
+#' [Luminescence::BaseDataSet.ConversionFactors], [approx], [barplot]
 #'
 #' @references
 #'
 #' Aitken, M.J., 1985. Thermoluminescence Dating. Academic Press, London.
 #'
 #' Adamiec, G., Aitken, M.J., 1998. Dose-rate conversion factors: update.
-#' Ancient TL 16, 37-46.
+#' Ancient TL 16, 37-46. \doi{10.26034/la.atl.1998.292}
 #'
 #' Cresswell., A.J., Carter, J., Sanderson, D.C.W., 2018.
 #' Dose rate conversion parameters: Assessment of nuclear data.
-#' Radiation Measurements 120, 195-201.
+#' Radiation Measurements 120, 195-201. \doi{10.1016/j.radmeas.2018.02.007}
 #'
 #' Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
-#' factors: update. Ancient TL, 29, 5-8.
+#' factors: update. Ancient TL 29, 5-8. \doi{10.26034/la.atl.2011.443}
 #'
 #' Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
 #' A re-evaluation of radiation dose-rate conversion factors. Mediterranean
 #' Archaeology and Archaeometry 13, 1-15.
-#'
 #'
 #' @section Acknowledgements:
 #'

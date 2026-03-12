@@ -16,15 +16,25 @@ test_that("input validation", {
                "'data' cannot be an empty data.frame")
   expect_error(fit_SurfaceExposure(matrix()),
                "'data' should have at least two columns")
-  expect_error(fit_SurfaceExposure(list(d1)),
+  expect_error(fit_SurfaceExposure(list(set_RLum("RLum.Data.Curve"))),
+               "All elements of 'data' should be of class 'data.frame'")
+  expect_error(fit_SurfaceExposure(d3),
                "'age' must be of the same length")
   expect_error(fit_SurfaceExposure(d4, age = 1e4),
                "'age' must be of the same length")
+  expect_error(fit_SurfaceExposure(d1, age = 1e4, mu = numeric()),
+               "'mu' cannot be an empty numeric")
+  expect_error(fit_SurfaceExposure(list(d1), age = 1e4, mu = numeric()),
+               "'mu' cannot be an empty numeric")
   expect_error(fit_SurfaceExposure(d4, age = rep(1e4, 5), mu = c(0.8, 0.9)),
                "'mu' must either be of the same length or of length 1")
+  expect_error(fit_SurfaceExposure(d1, age = 1e4, plot = NA),
+               "'plot' should be a single logical value")
   expect_error(fit_SurfaceExposure(data.frame(NA, 1:5)),
                "After NA removal, nothing is left from the data set")
-
+  expect_error(fit_SurfaceExposure(data = d1, sigmaphi = 5e-10, mu = 0.9,
+                                   verbose = NULL),
+               "'verbose' should be a single logical value")
   SW({
   expect_message(fit_SurfaceExposure(rbind(d1, NA), mu = 0.9),
                  "\\[fit\\_SurfaceExposure\\(\\)\\] NA values in 'data' were removed")

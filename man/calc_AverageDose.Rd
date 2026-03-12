@@ -28,7 +28,7 @@ unrecognised measurement uncertainty.}
 sample size used for the bootstrapping}
 
 \item{na.rm}{\link{logical} (\emph{with default}):
-exclude NA values from the data set prior to any further operation.}
+exclude \code{NA} values from the data set prior to any further operation.}
 
 \item{plot}{\link{logical} (\emph{with default}):
 enable/disable the plot output.}
@@ -45,17 +45,16 @@ supported, but the output of \code{hist} is returned and can be used of own plot
 Further supported arguments: \code{mtext} (\link{character}), \code{rug} (\code{TRUE/FALSE}).}
 }
 \value{
-The function returns numerical output and an (\emph{optional}) plot.
+The function produces numerical output and an optional plot. In addition,
+an \linkS4class{RLum.Results} object containing the following
+elements is returned:
 
------------------------------------\cr
-\verb{[ NUMERICAL OUTPUT ]} \cr
------------------------------------\cr
-\strong{\code{RLum.Results}}-object\cr
+\item{$summary}{\link{data.frame} summary of all relevant model results.}
+\item{$data}{\link{data.frame} with original input data.}
+\item{$dstar}{\link{matrix} with bootstrap values.}
+\item{$hist}{\link{list} object as produced by the \link{hist} function.}
 
-\strong{slot:} \strong{\verb{@data}} \cr
-
-\verb{[.. $summary : data.frame]}\cr
-
+The \verb{$summary} data.frame contains the following columns:
 \tabular{lll}{
 \strong{Column} \tab \strong{Type} \tab \strong{Description}\cr
 AVERAGE_DOSE \tab \link{numeric} \tab the obtained average dose\cr
@@ -68,20 +67,10 @@ IC_AVERAGE_DOSE.UPPER \tab \link{character}\tab upper quantile of average dose\c
 IC_SIGMA_D.LEVEL \tab \link{integer}\tab confidence level sigma\cr
 IC_SIGMA_D.LOWER \tab \link{character}\tab lower sigma quantile\cr
 IC_SIGMA_D.UPPER \tab \link{character}\tab upper sigma quantile\cr
-L_MAX \tab \link{character}\tab maximum likelihood value
+L_MAX \tab \link{character}\tab maximum likelihood value \cr
+de \tab \link{numeric} \tab same as \code{AVERAGE_DOSE} (internal use)\cr
+de_err \tab \link{numeric} \tab same as \code{AVERAGE_DOSE.SE} (internal use)\cr
 }
-
-\verb{[.. $dstar : matrix]} \cr
-
-Matrix with bootstrap values\cr
-
-\verb{[.. $hist : list]}\cr
-
-Object as produced by the function histogram
-
-------------------------\cr
-\verb{[ PLOT OUTPUT ]}\cr
-------------------------\cr
 
 The function returns two different plot panels.
 
@@ -106,28 +95,24 @@ will be that over and above \code{sigma_m} (and individual uncertainties \code{s
 This function has beta status!
 }
 \section{Function version}{
- 0.1.6
+ 0.1.7
 }
 
 \examples{
 
-##Example 01 using package example data
-##load example data
+## load example data
 data(ExampleData.DeValues, envir = environment())
 
-##calculate Average dose
-##(use only the first 56 values here)
-AD <- calc_AverageDose(ExampleData.DeValues$CA1[1:56,], sigma_m = 0.1)
+## calculate Average dose (using only the first 56 values here)
+AD <- calc_AverageDose(ExampleData.DeValues$CA1[1:56, ], sigma_m = 0.1)
 
-##plot De and set Average dose as central value
-plot_AbanicoPlot(
- data = ExampleData.DeValues$CA1[1:56,],
- z.0 = AD$summary$AVERAGE_DOSE)
+## plot De and set Average dose as central value
+plot_AbanicoPlot(AD, z.0 = AD$summary$de)
 
 } 
 
 \section{How to cite}{
-Christophe, C., Philippe, A., Guérin, G., Kreutzer, S., 2025. calc_AverageDose(): Calculate the Average Dose and the dose rate dispersion. Function version 0.1.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Christophe, C., Philippe, A., Guérin, G., Kreutzer, S., 2026. calc_AverageDose(): Calculate the Average Dose and the dose rate dispersion. Function version 0.1.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -145,9 +130,9 @@ and Other Measures of Statistical Accuracy. Statistical Science 1, 54-75.
 \link{read.table}, \link[graphics:hist]{graphics::hist}
 }
 \author{
-Claire Christophe, IRAMAT-CRP2A, Université de Nantes (France),
-Anne Philippe, Université de Nantes, (France),
-Guillaume Guérin, IRAMAT-CRP2A, Université Bordeaux Montaigne, (France),
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Claire Christophe, IRAMAT-CRP2A, Université de Nantes (France)\cr
+Anne Philippe, Université de Nantes, (France)\cr
+Guillaume Guérin, IRAMAT-CRP2A, Université Bordeaux Montaigne, (France)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{datagen}

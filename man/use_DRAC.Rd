@@ -38,7 +38,7 @@ or \code{"R"}. Default is \code{"text"}.}
 if the version has changed, but not the column order
 \item \code{user} \link{character}: option to provide username for secured site
 \item \code{password} \link{character}: password for secured site, only works jointly with \code{user}
-\item \code{verbose} \link{logical}: show or hide console output
+\item \code{verbose} \link{logical}: enable/disable output to the terminal
 }}
 }
 \value{
@@ -124,18 +124,18 @@ output <- use_DRAC(input)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Burow, C., 2025. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Burow, C., 2026. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 Durcan, J.A., King, G.E., Duller, G.A.T., 2015. DRAC: Dose Rate and Age Calculator for trapped charge dating.
-Quaternary Geochronology 28, 54-61. doi:10.1016/j.quageo.2015.03.012
+Quaternary Geochronology 28, 54-61. \doi{10.1016/j.quageo.2015.03.012}
 }
 \seealso{
 \link{template_DRAC}, \link{.as.latex.table}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Michael Dietze, GFZ Potsdam (Germany)\cr
 Christoph Burow, University of Cologne (Germany)
 , RLum Developer Team}

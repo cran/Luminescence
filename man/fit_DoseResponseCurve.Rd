@@ -6,8 +6,9 @@
 \usage{
 fit_DoseResponseCurve(
   object,
-  mode = "interpolation",
-  fit.method = "EXP",
+  mode = c("interpolation", "extrapolation", "alternate"),
+  fit.method = c("EXP", "LIN", "QDR", "EXP OR LIN", "EXP+LIN", "EXP+EXP", "GOK", "OTOR",
+    "OTORX"),
   fit.force_through_origin = FALSE,
   fit.weights = TRUE,
   fit.includingRepeatedRegPoints = TRUE,
@@ -45,20 +46,9 @@ Please note that for option \code{"interpolation"} the first point is considered
 as natural dose}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-function used for fitting. Possible options are:
-\itemize{
-\item \code{LIN},
-\item \code{QDR},
-\item \code{EXP},
-\item \verb{EXP OR LIN},
-\item \code{EXP+LIN},
-\item \code{EXP+EXP} (not defined for extrapolation),
-\item \code{GOK},
-\item \code{OTOR},
-\item \code{OTORX}
-}
-
-See details.}
+function used for fitting. Possible options are: \code{LIN}, \code{QDR}, \code{EXP},
+\verb{EXP OR LIN}, \code{EXP+LIN}, \code{EXP+EXP} (not defined for extrapolation), \code{GOK},
+\code{OTOR} and \code{OTORX}. See details.}
 
 \item{fit.force_through_origin}{\link{logical} (\emph{with default})
 allow to force the fitted function through the origin.
@@ -85,8 +75,8 @@ set lower fit bounds for all fitting parameters to 0. Limited for the use
 with the fit methods \code{EXP}, \code{EXP+LIN}, \verb{EXP OR LIN}, \code{GOK}, \code{OTOR}, \code{OTORX}
 Argument to be inserted for experimental application only!}
 
-\item{n.MC}{\link{integer} (\emph{with default}):  number of Monte Carlo simulations
-for error estimation, see details.}
+\item{n.MC}{\link{integer} (\emph{with default}):
+number of Monte Carlo simulations for error estimation, see details.}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
 enable/disable the progress bar. If \code{verbose = FALSE} also no
@@ -98,7 +88,8 @@ enable/disable output to the terminal.}
 \item{...}{Further arguments to be passed (currently ignored).}
 }
 \value{
-An \code{RLum.Results} object is returned containing the slot \code{data} with the
+An \linkS4class{RLum.Results} object is returned
+containing the slot \code{data} with the
 following elements:
 
 \strong{Overview elements}
@@ -110,10 +101,17 @@ following elements:
 In case of a resulting  linear fit when using \code{LIN}, \code{QDR} or \verb{EXP OR LIN} \cr
 \code{..Fit.Args} : \tab \code{list} \tab Arguments to the function \cr
 \code{..$Formula} : \tab \link{expression} \tab Fitting formula as R expression \cr
-\code{..$call} : \tab \code{call} \tab The original function call\cr
 }
 
-If \code{object} is a list, then the function returns a list of \code{RLum.Results}
+The \verb{@info} slot contains the following elements:
+\tabular{lll}{
+\strong{DATA.OBJECT} \tab \strong{TYPE} \tab \strong{DESCRIPTION} \cr
+\code{..$fit_messag}: \tab \code{character} \tab The fit message reported \cr
+\code{..$call} : \tab \code{call} \tab The original function call \cr
+}
+
+If \code{object} is a list, then the function returns a list of
+\linkS4class{RLum.Results}
 objects as defined above.
 
 \strong{Details - \code{DATA.OBJECT$De}}
@@ -121,10 +119,12 @@ This object is a \link{data.frame} with the following columns
 \tabular{lll}{
 \code{De} \tab \link{numeric} \tab equivalent dose \cr
 \code{De.Error} \tab \link{numeric} \tab standard error the equivalent dose \cr
-\code{D01} \tab \link{numeric} \tab D-nought value, curvature parameter of the exponential \cr
-\code{D01.ERROR} \tab \link{numeric} \tab standard error of the D-nought value\cr
-\code{D02} \tab \link{numeric} \tab 2nd D-nought value, only for \code{EXP+EXP}\cr
-\code{D02.ERROR} \tab \link{numeric} \tab standard error for 2nd D-nought; only for \code{EXP+EXP}\cr
+\code{D01} \tab \link{numeric} \tab \eqn{D_0} value, curvature parameter of the exponential \cr
+\code{D01.ERROR} \tab \link{numeric} \tab standard error of the \eqn{D_0} value\cr
+\code{D02} \tab \link{numeric} \tab 2nd \eqn{D_0} value, only for \code{EXP+EXP}\cr
+\code{D02.ERROR} \tab \link{numeric} \tab standard error for 2nd \eqn{D_0}; only for \code{EXP+EXP}\cr
+\code{R} \tab \link{numeric} \tab the material specific parameter \eqn{R}\cr
+\code{R.ERROR} \tab \link{numeric} \tab the uncertainty of R \eqn{R}\cr
 \code{Dc} \tab \link{numeric} \tab value indicating saturation level; only for \code{OTOR} \cr
 \code{D63} \tab \link{numeric} \tab the specific saturation level; only for \code{OTORX} \cr
 \code{n_N} \tab \link{numeric} \tab saturation level of dose-response curve derived via integration from the used function; it compares the full integral of the curves (\code{N}) to the integral until \code{De} (\code{n}) (e.g.,  Guralnik et al., 2015)\cr
@@ -207,23 +207,25 @@ where \eqn{c > 0} is a kinetic order modifier
 \strong{Keyword: \code{OTOR}} (former \code{LambertW})
 
 This tries to fit a dose-response curve based on the Lambert W function
-and the one trap one recombination centre (OTOR)
-model according to Pagonis et al. (2020). The function has the form
+and the one trap one recombination centre (OTOR) model according to Pagonis
+et al. (2020). The function has the form:
 
 \deqn{y = (1 + (\mathcal{W}((R - 1) * exp(R - 1 - ((x + D_{int}) / D_{c}))) / (1 - R))) * N}
 
-with \eqn{W} the Lambert W function, calculated using the package \link[lamW:lamW]{lamW::lambertW0},
+with \eqn{W} the Lambert W function (calculated using \link[lamW:lamW]{lamW::lambertW0}),
 \eqn{R} the dimensionless retrapping ratio, \eqn{N} the total concentration
-of trappings states in cm\eqn{^{-3}} and \eqn{D_{c} = N/R} a constant. \eqn{D_{int}} is
-the offset on the x-axis. Please note that finding the root in \code{mode = "extrapolation"}
+of trappings states in cm\eqn{^{-3}}, \eqn{D_{c} = N/R} a constant, and
+\eqn{D_{int}} is the offset on the x-axis. Note that \eqn{R} and \eqn{D_{c}}
+have a valid physical interpretation only when saturation is reached.
+Please note that finding the root in \code{mode = "extrapolation"}
 is a non-easy task due to the shape of the function and the results might be
 unexpected.
 
 \strong{Keyword: \code{OTORX}}
 
-This adapts extended OTOR (therefore: OTORX) model proposed by Lawless and Timar-Gabor (2024)
-accounting for retrapping. Mathematically, the implementation reads (the equation here
-as implemented, it is slightly differently written than in the original manuscript):
+This adapts extended OTOR (therefore: OTORX) model proposed by Lawless and
+Timar-Gabor (2024) accounting for retrapping (the equation implemented here
+is slightly differently written than in the original manuscript):
 
 \deqn{F_{OTORX} = 1 + \left[\mathcal{W}(-Q * exp(-Q-(1-Q*(1-\frac{1}{exp(1)})) * \frac{(D + a)}{D_{63}}))\right] / Q}
 
@@ -245,6 +247,9 @@ with \eqn{D_{test}} being the test dose in the same unit (usually s or Gy) as
 the regeneration dose points. This value is essential and needs to provided
 along with the usual dose and \eqn{\frac{L_x}{T_x}} values (see \code{object} parameter input
 and the example section). For more details see Lawless and Timar-Gabor (2024).
+
+The fit also returns the parameter \eqn{R} know from \code{OTOR}, which is derived
+as \eqn{R = 1 - Q}.
 
 \emph{Note: The offset adder \eqn{a} is not part of the formula in Timar-Gabor (2024) and can
 be set to zero with the option \code{fit.force_through_origin = TRUE}}
@@ -274,7 +279,7 @@ Each error estimation is done with the function of the chosen fitting method.
 }
 }
 \section{Function version}{
- 1.4.3
+ 1.4.5
 }
 
 \examples{
@@ -343,7 +348,7 @@ print(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2025. fit_DoseResponseCurve(): Fit a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.4.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2026. fit_DoseResponseCurve(): Fit a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -359,11 +364,12 @@ Pagonis, V., Kitis, G., Chen, R., 2020. A new analytical equation for the dose r
 based on the Lambert W function. Journal of Luminescence 225, 117333. \doi{10.1016/j.jlumin.2020.117333}
 }
 \seealso{
-\link{plot_GrowthCurve}, \link{nls}, \linkS4class{RLum.Results}, \link{get_RLum},
+\link{plot_DoseResponseCurve}, \link{nls},
+\linkS4class{RLum.Results}, \link{get_RLum},
 \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}, \link{lm}, \link{uniroot}, \link[lamW:lamW]{lamW::lambertW0}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Michael Dietze, GFZ Potsdam (Germany) \cr
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}

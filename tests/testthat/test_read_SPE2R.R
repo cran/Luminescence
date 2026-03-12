@@ -3,20 +3,6 @@ github.url <- file.path("https://github.com/R-Lum/Luminescence",
                         "raw/master/tests/testthat/_data")
 local.file <- test_path("_data/SPEfile.SPE")
 
-## `read_SPE2R()` calls `download.file()` which, in turn, uses curl to
-## perform the actual download. If `verbose = TRUE`, curl is invoked with
-## `quiet = FALSE`, and the output it produces cannot be captured by `SW()`,
-## nor by other simple R approaches because curl writes directly to the
-## console bypassing R. The workaround is to divert all output to a file, see:
-## https://stackoverflow.com/questions/66138345/how-to-suppress-download-file-trying-url-message-in-r
-sink.curl.messages <- function(expr) {
-  nullcon <- file(nullfile(), open = "wb")
-  sink(nullcon, type = "message")
-  expr
-  sink(type = "message")
-  close(nullcon)
-}
-
 test_that("input validation", {
   testthat::skip_on_cran()
 
@@ -24,8 +10,8 @@ test_that("input validation", {
                "'file' should be of class 'character'")
   expect_error(read_SPE2R(character(0)),
                "'file' should have length 1")
-  expect_message(expect_null(read_SPE2R("error")),
-                 "Error: File does not exist, NULL returned")
+  expect_error(read_SPE2R("error"),
+               "File '.*error' does not exist") # windows CI needs the regexp
   expect_error(read_SPE2R(local.file, output.object = "error"),
                "'output.object' should be one of 'RLum.Data.Image'")
   expect_error(read_SPE2R(local.file, frame.range = NA),
@@ -34,26 +20,27 @@ test_that("input validation", {
                "'frame.range' should contain positive values")
   expect_error(read_SPE2R(local.file, frame.range = c(0, 3)),
                "'frame.range' should contain positive values")
-  SW({
-  expect_message(expect_null(read_SPE2R("http://httpbingo.org/status/404")),
-                 "Error: File does not exist, NULL returned")
-  })
+  expect_message(expect_message(expect_null(read_SPE2R("http://httpbingo.org/status/404")),
+                                "Downloading"), "FAILED")
 
   wrong <- system.file("extdata/BINfile_V8.binx", package = "Luminescence")
   expect_error(read_SPE2R(wrong),
-               "Unsupported file format")
+               "File extension 'binx' is not supported, only 'SPE' is valid")
+  expect_message(expect_message(expect_null(read_SPE2R(dirname(wrong))),
+                                "Directory detected, looking for"),
+                 "Error: No files matching the given pattern found in directory")
 })
 
 test_that("check functionality", {
   testthat::skip_on_cran()
 
   ## default values
-  sink.curl.messages(
-  expect_output(
+  SW({
+  expect_message(
       expect_s4_class(read_SPE2R(file.path(github.url, "SPEfile.SPE")),
                       "RLum.Data.Image"),
-      "URL detected, checking connection")
-  )
+      "Downloading")
+  })
 })
 
 test_that("snapshot tests", {

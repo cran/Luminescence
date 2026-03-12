@@ -5,7 +5,7 @@
 \title{Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose)}
 \usage{
 plot_GrowthCurve(
-  sample,
+  object,
   mode = "interpolation",
   fit.method = "EXP",
   output.plot = TRUE,
@@ -17,19 +17,23 @@ plot_GrowthCurve(
 )
 }
 \arguments{
-\item{sample}{\link{data.frame} (\strong{required}):
+\item{object}{\link{data.frame} or a \link{list} of such objects (\strong{required}):
 data frame with columns for \code{Dose}, \code{LxTx}, \code{LxTx.Error} and \code{TnTx}.
 The column for the test dose response is optional, but requires \code{'TnTx'} as
 column name if used. For exponential fits at least three dose points
-(including the natural) should be provided. If \code{fit.method = "OTORX"} you have
-to provide the test dose in the same unit as the dose in a column called \code{Test_Dose}.
-The function searches explicitly for this column name.}
+(including the natural) should be provided. If \code{object} is a list,
+the function is called on each of its elements.
+If \code{fit.method = "OTORX"} you have  to provide the test dose in the same unit
+as the dose in a column called \code{Test_Dose}. The function searches explicitly
+for this column name. Only the first value will be used assuming a constant
+test dose over the measurement cycle.}
 
 \item{mode}{\link{character} (\emph{with default}):
 selects calculation mode of the function.
 \itemize{
 \item \code{"interpolation"} (default) calculates the De by interpolation,
-\item \code{"extrapolation"} calculates the equivalent dose by extrapolation (useful for MAAD measurements) and
+\item \code{"extrapolation"} calculates the equivalent dose by extrapolation
+(useful for MAAD measurements) and
 \item \code{"alternate"} calculates no equivalent dose and just fits the data points.
 }
 
@@ -37,26 +41,15 @@ Please note that for option \code{"interpolation"} the first point is considered
 as natural dose}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-function used for fitting. Possible options are:
-\itemize{
-\item \code{LIN},
-\item \code{QDR},
-\item \code{EXP},
-\item \verb{EXP OR LIN},
-\item \code{EXP+LIN},
-\item \code{EXP+EXP},
-\item \code{GOK},
-\item \code{OTOR},
-\item \code{OTORX}
-}
-
-See details in \link{fit_DoseResponseCurve}.}
+function used for fitting. Possible options are: \code{LIN}, \code{QDR}, \code{EXP},
+\verb{EXP OR LIN}, \code{EXP+LIN}, \code{EXP+EXP} (not defined for extrapolation), \code{GOK},
+\code{OTOR} and \code{OTORX}. See details.}
 
 \item{output.plot}{\link{logical} (\emph{with default}):
 enable/disable the plot output.}
 
 \item{output.plotExtended}{\link{logical} (\emph{with default}):
-If' \code{TRUE}, 3 plots on one plot area are provided:
+If \code{TRUE}, 3 plots on one plot area are provided:
 \enumerate{
 \item growth curve,
 \item histogram from Monte Carlo error simulation and
@@ -67,7 +60,7 @@ If \code{FALSE}, just the growth curve will be plotted.}
 
 \item{plot_singlePanels}{\link{logical} (\emph{with default}):
 single plot output (\code{TRUE/FALSE}) to allow for plotting the results in
-single plot windows. Requires \code{plotExtended = TRUE}.}
+single plot windows. Requires \code{output.plotExtended = TRUE}.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
 enable/disable output to the terminal.}
@@ -82,7 +75,7 @@ number of MC runs for error calculation.}
 \code{xlim}, \code{ylim}, \code{main}, \code{xlab}, \code{ylab}).}
 }
 \value{
-Along with a plot (if wanted) the \code{RLum.Results} object produced by
+Along with a plot (if wanted) the \linkS4class{RLum.Results} object produced by
 \link{fit_DoseResponseCurve} is returned.
 }
 \description{
@@ -91,7 +84,7 @@ regenerative or additive protocol as implemented in \link{fit_DoseResponseCurve}
 and \link{plot_DoseResponseCurve}
 }
 \section{Function version}{
- 1.2.2
+ 1.2.3
 }
 
 \examples{
@@ -133,7 +126,7 @@ print(plot_GrowthCurve(LxTxData, mode = "alternate"))
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2025. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.2.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2026. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.2.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -150,7 +143,7 @@ based on the Lambert W function. Journal of Luminescence 225, 117333. \doi{10.10
 \link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Michael Dietze, GFZ Potsdam (Germany) \cr
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}

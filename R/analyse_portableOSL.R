@@ -6,27 +6,27 @@
 #' and the IRSL/OSL ratio.
 #'
 #' @details
-#' This function only works with [RLum.Analysis-class] objects produced by [read_PSL2R].
+#' This function only works with [Luminescence::RLum.Analysis-class] objects produced by [Luminescence::read_PSL2R].
 #' It further assumes (or rather requires) an equal amount of OSL and IRSL curves that
 #' are pairwise combined for calculating the IRSL/OSL ratio.
 #' For calculating the depletion ratios, the cumulative signal of the last *n*
-#' channels (same number of channels as specified by `signal.integral`) is
-#' divided by cumulative signal of the first *n* channels (`signal.integral`).
+#' channels (same number of channels as specified by `signal_integral`) is
+#' divided by cumulative signal of the first *n* channels (`signal_integral`).
 #'
-#' **Note:  The function assumes the following sequence pattern:
-#' `DARK COUNT`, `IRSL`, `DARK COUNT`, `BSL`, `DARK COUNT`.** Therefore, the
+#' **Note:** The function assumes the following sequence pattern:
+#' `DARK COUNT`, `IRSL`, `DARK COUNT`, `BSL`, `DARK COUNT`. Therefore, the
 #' total number of curves in the input object must be a multiple of 5, and
-#' there must be 3 `DARK_COUNT` records for each IRSL/BSL pair. If you have used
-#' a different sequence, the function will produce an error.
+#' there must be 3 `DARK_COUNT` records for each IRSL/BSL pair. If a different
+#' sequence was used, the function will produce an error.
 #'
 #' **Signal processing**
-#' The function processes the signals as follows: `BSL` and `IRSL` signals are extracted using the
-#' chosen signal integral, dark counts are taken in full.
+#' The function processes the signals as follows: `BSL` and `IRSL` signals are
+#' extracted using the chosen signal integral, dark counts are taken in full.
 #'
 #' **Working with coordinates**
-#' Usually samples are taken from a profile with a certain stratigraphy. In the past the function
-#' calculated an index. With this newer version, you have two option of passing on xy-coordinates
-#' to the function:
+#' Usually samples are taken from a profile with a certain stratigraphy. In
+#' the past, the function calculated an index. Currently, you have two ways
+#' of passing on xy-coordinates to the function:
 #'
 #' * (1) Add coordinates to the sample name during measurement. The form is rather
 #' strict and has to follow the scheme `_x:<number>|y:<number>`. Example:
@@ -39,18 +39,24 @@
 #' If in your profile the x-coordinates were not measured, *x* should be set
 #' to 0. Note that, in such case, a surface plot cannot be produced.
 #'
-#' @param object [RLum.Analysis-class] (**required**):
-#' object produced by [read_PSL2R]. The input can be a [list] of such objects,
+#' @param object [Luminescence::RLum.Analysis-class] (**required**):
+#' object produced by [Luminescence::read_PSL2R]. The input can be a [list] of such objects,
 #' in which case each input is treated as a separate sample and the results
 #' are merged.
 #'
-#' @param signal.integral [numeric] (**required**):
-#' A vector specifying the range of channels used to calculate the OSL/IRSL
+#' @param signal_integral [numeric] (**required**):
+#' vector specifying the range of channels used to calculate the OSL/IRSL
 #' signal. It can be provided as a vector of length 2 such as `c(1, 5)`, or
 #' as a sequence such as `1:5`, in which case the lowest and highest values
 #' define the range.
 #'
-#' @param invert [logical] (*with default*): `TRUE` flip the plot the data in reverse order.
+#' @param integral_input [character] (*with default*):
+#' input type for `signal_integral`, one of `"channel"` (default) or
+#' `"measurement"`. If set to `"measurement"`, the best matching channels
+#' corresponding to the given time range (in seconds) are selected.
+#'
+#' @param invert [logical] (*with default*):
+#' whether the data should be plotted in reverse order (`FALSE` by default).
 #'
 #' @param normalise [logical] (*with default*):
 #' whether the OSL/IRSL signals should be normalised to the *mean* of all
@@ -84,20 +90,20 @@
 #' `labcex` (scaling of the contour labels), `zlim`.
 #'
 #' @return
-#' Returns an S4 [RLum.Results-class] object with the following elements:
+#' Returns an S4 [Luminescence::RLum.Results-class] object with the following elements:
 #'
 #' `$data`\cr
 #' `.. $summary`: [data.frame] with the results\cr
-#' `.. $data`: [list] with the [RLum.Analysis-class] objects\cr
+#' `.. $data`: [list] with the [Luminescence::RLum.Analysis-class] objects\cr
 #' `.. $args`: [list] the input arguments
 #'
-#' @seealso [RLum.Analysis-class], [RLum.Data.Curve-class], [read_PSL2R]
+#' @seealso [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Data.Curve-class], [Luminescence::read_PSL2R]
 #'
 #' @author Christoph Burow, University of Cologne (Germany) \cr
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
-#' @section Function version: 0.1.3
+#' @section Function version: 0.1.5
 #'
 #' @keywords datagen plot
 #'
@@ -119,7 +125,7 @@
 #' # (3) analyse and plot
 #' results <- analyse_portableOSL(
 #'   merged,
-#'   signal.integral = 1:5,
+#'   signal_integral = 1:5,
 #'   invert = FALSE,
 #'   normalise = TRUE)
 #' get_RLum(results)
@@ -127,10 +133,11 @@
 #' @export
 analyse_portableOSL <- function(
   object,
-  signal.integral = NULL,
+  signal_integral = NULL,
+  integral_input = c("channel", "measurement"),
   invert = FALSE,
   normalise = FALSE,
-  mode = "profile",
+  mode = c("profile", "surface"),
   coord = NULL,
   plot = TRUE,
   ...
@@ -143,7 +150,8 @@ analyse_portableOSL <- function(
       temp <- .warningCatcher(lapply(seq_along(object), function(x) {
         analyse_portableOSL(
           object = object[[x]],
-          signal.integral = signal.integral,
+          signal_integral = signal_integral,
+          integral_input = integral_input,
           invert = invert,
           normalise = normalise,
           mode = mode,
@@ -159,6 +167,7 @@ analyse_portableOSL <- function(
   ## only RLum.Analysis objects
   .validate_class(object, "RLum.Analysis")
   .validate_not_empty(object)
+  integral_input <- .validate_args(integral_input, c("channel", "measurement"))
 
   ## only curve objects
   if (!all(sapply(object, class) == "RLum.Data.Curve"))
@@ -171,30 +180,43 @@ analyse_portableOSL <- function(
 
   ## check length and start of the sequence pattern, we check it further below
   if (length(object) %% 5 != 0 ||
-      !all(names(object)[1:5] == c("USER", "IRSL", "USER", "OSL", "USER")))
+      !all(gsub(" (PMT)", "", names(object)[1:5], fixed = TRUE) ==
+           c("USER", "IRSL", "USER", "OSL", "USER")))
     .throw_error("Sequence pattern not supported: see the manual for details")
 
-  if (is.null(signal.integral)) {
-    signal.integral <- c(1, 1)
-    .throw_warning("No value for 'signal.integral' provided. Only the ",
-                   "first data point of each curve was used")
-  } else {
-    signal.integral <- range(signal.integral)
+  ## deprecated argument
+  if (any(grepl("signal.integral", ...names(), fixed = TRUE))) {
+    .deprecated(old = "signal.integral",
+                new = "signal_integral",
+               since = "1.2.0")
+    if (integral_input != "channel") {
+      .throw_error("'integral_input' is not supported with old argument names")
+    }
+    signal_integral <- list(...)$signal.integral
   }
 
   ## set the maximum signal_integral allowed: as this must be valid across all
   ## records, we cap it to the minimum number of points
   num.points <- min(lengths(get_RLum(object, recordType = c("OSL", "IRSL"))))
-  if (max(signal.integral) > num.points || min(signal.integral) < 1) {
-    orig.signal.int <- signal.integral
-    signal.integral <- pmin(pmax(signal.integral, 1), num.points)
-    .throw_warning("'signal.integral' (",
-                   .collapse(orig.signal.int, quote = FALSE), ") ",
-                   "exceeds the number of data points, reset to (",
-                   .collapse(signal.integral, quote = FALSE), ")")
+
+  if (integral_input == "measurement") {
+    x.range <- get_RLum(object, recordType = c("OSL", "IRSL"))[[1]][, 1]
+    signal_integral <- .convert_to_channels(x.range, signal_integral, "time",
+                                            null.ok = TRUE)
+  }
+  signal_integral <- .validate_integral(signal_integral, max = num.points,
+                                        null.ok = TRUE)
+
+  ## convert the signal integral to a range
+  if (is.null(signal_integral)) {
+    signal_integral <- c(1, 1)
+    .throw_warning("No value for 'signal_integral' provided. Only the ",
+                   "first data point of each curve was used")
+  } else {
+    signal_integral <- range(signal_integral)
   }
 
-  .validate_args(mode, c("profile", "surface"))
+  mode <- .validate_args(mode, c("profile", "surface"))
   .validate_logical_scalar(invert)
   .validate_logical_scalar(normalise)
   .validate_logical_scalar(plot)
@@ -208,11 +230,11 @@ analyse_portableOSL <- function(
   ## returns a list
   ### get OSL -------
   OSL <- .unlist_RLum(list(get_RLum(object, recordType = "OSL")))
-  OSL <- do.call(rbind, lapply(OSL, .posl_get_signal, signal.integral))
+  OSL <- do.call(rbind, lapply(OSL, .posl_get_signal, signal_integral))
 
   ### get IRSL -------
   IRSL <- .unlist_RLum(list(get_RLum(object, recordType = "IRSL")))
-  IRSL <- do.call(rbind, lapply(IRSL, .posl_get_signal, signal.integral))
+  IRSL <- do.call(rbind, lapply(IRSL, .posl_get_signal, signal_integral))
 
   if (nrow(OSL) != nrow(IRSL)) {
     .throw_error("Sequence pattern not supported: the number of OSL records ",

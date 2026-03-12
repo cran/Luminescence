@@ -41,7 +41,8 @@ replace_metadata(object, ...) <- value
 \S4method{replace_metadata}{Risoe.BINfileData}(object, info_element, subset = NULL) <- value
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis}, \linkS4class{Risoe.BINfileData} (\strong{required}):
+\item{object}{\linkS4class{RLum.Analysis},
+\linkS4class{Risoe.BINfileData} (\strong{required}):
 object of class \code{RLum.Analysis} or \code{Risoe.BINfileData} to manipulate.}
 
 \item{...}{further arguments passed to the specific class method}
@@ -118,14 +119,15 @@ CWOSL.SAR.Data
 
 }
 \seealso{
-\linkS4class{RLum.Data}, \linkS4class{RLum.Analysis}, \linkS4class{Risoe.BINfileData}
+\linkS4class{RLum.Data}, \linkS4class{RLum.Analysis},
+\linkS4class{Risoe.BINfileData}
 }
 \author{
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Colombo, M., 2025. add_metadata<-(): Safe manipulation of object metadata. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Colombo, M., 2026. add_metadata<-(): Safe manipulation of object metadata. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

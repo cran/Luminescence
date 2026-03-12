@@ -5,18 +5,21 @@
 \title{Transform a CW-OSL curve into a pHM-OSL curve via interpolation under
 hyperbolic modulation conditions}
 \usage{
-convert_CW2pHMi(values, delta)
+convert_CW2pHMi(object, delta = NULL, ...)
 }
 \arguments{
-\item{values}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-\linkS4class{RLum.Data.Curve} or \link{data.frame} with measured curve data of type
-stimulation time (t) (\code{values[,1]}) and measured counts (cts) (\code{values[,2]}).}
+\item{object}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\linkS4class{RLum.Data.Curve} object or a \code{data.frame} with measured
+curve data of type stimulation time (t) (\code{object[, 1]}) and measured counts
+(cts) (\code{object[, 2]}).}
 
 \item{delta}{\link{vector} (\emph{optional}):
 stimulation rate parameter, if no value is given, the optimal value is
 estimated automatically (see details). Smaller values of delta produce more
 points in the rising tail of
 the curve.}
+
+\item{...}{currently not used.}
 }
 \value{
 The function returns the same data type as the input data type with
@@ -80,7 +83,7 @@ Transform values using
 
 (7) Combine all values and truncate all values for t' > \code{max(t)}
 
-\strong{NOTE:}
+\strong{Note:}
 The number of values for t' < \code{min(t)} depends on the stimulation rate
 parameter \code{delta}. To avoid the production of too many artificial data
 at the raising tail of the determined pHM curve, it is recommended to use
@@ -93,14 +96,14 @@ should be limited to avoid artificial intensity data. If \code{delta} is
 provided manually and more than two points are extrapolated, a warning
 message is returned.
 
-The function \link{approx} may produce some \code{Inf} and \code{NaN} data.
-The function tries to manually interpolate these values by calculating
-the \code{mean} using the adjacent channels. If two invalid values are succeeding,
+The function \link{approx} may produce some \code{Inf} and \code{NaN} data, in which case
+the function tries to interpolate these values by calculating the mean of
+the adjacent channels. If two invalid values are succeeding,
 the values are removed and no further interpolation is attempted.
 In every case a warning message is shown.
 }
 \section{Function version}{
- 0.2.3
+ 0.2.5
 }
 
 \examples{
@@ -134,19 +137,15 @@ curve.NPOINTS<-CWOSL.SAR.Data@METADATA[CWOSL.SAR.Data@METADATA[,"ID"]==curve.ID[
                                        ,"NPOINTS"]
 
 ##combine curve to data set
-
 curve<-data.frame(x = seq(curve.HIGH/curve.NPOINTS,curve.HIGH,
                           by = curve.HIGH/curve.NPOINTS),
                   y=unlist(CWOSL.SAR.Data@DATA[curve.ID[1]]))
 
-
 ##transform values
-
 curve.transformed <- convert_CW2pHMi(curve)
 
 ##plot curve
 plot(curve.transformed$x, curve.transformed$y.t, log = "x")
-
 
 ##(3) - produce Fig. 4 from Bos & Wallinga (2012)
 
@@ -181,29 +180,30 @@ text(0.5,6500,"PM", col="blue" ,cex=.8)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. convert_CW2pHMi(): Transform a CW-OSL curve into a pHM-OSL curve via interpolation under hyperbolic modulation conditions. Function version 0.2.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. convert_CW2pHMi(): Transform a CW-OSL curve into a pHM-OSL curve via interpolation under hyperbolic modulation conditions. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL
-signal components. Radiation Measurements, 47, 752-758.\cr
+signal components. Radiation Measurements 47, 752-758.\cr
 
 \strong{Further Reading}
 
 Bulur, E., 1996. An Alternative Technique For
-Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements,
+Optically Stimulated Luminescence (OSL) Experiment. Radiation Measurements
 26, 701-709.
 
 Bulur, E., 2000. A simple transformation for converting CW-OSL curves to
-LM-OSL curves. Radiation Measurements, 32, 141-145.
+LM-OSL curves. Radiation Measurements 32, 141-145.
 }
 \seealso{
 \link{convert_CW2pLM}, \link{convert_CW2pLMi}, \link{convert_CW2pPMi},
 \link{fit_LMCurve}, \link{lm}, \linkS4class{RLum.Data.Curve}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
-Based on comments and suggestions from:\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
+Based on comments and suggestions from:
 Adrie J.J. Bos, Delft University of Technology, The Netherlands
 , RLum Developer Team}
 \keyword{manip}

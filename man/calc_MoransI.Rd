@@ -16,8 +16,8 @@ calc_MoransI(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Results} or \link{numeric} (\strong{required}) containing
-the values of the grains of one. Should have length 100; can contain \code{NA}
+\item{object}{\linkS4class{RLum.Results} or \link{numeric} (\strong{required}):
+values of the grains of one disc. Should have length 100; can contain \code{NA}
 values.}
 
 \item{df_neighbours}{\link{data.frame} (\emph{with default}): a data frame with 3
@@ -100,14 +100,15 @@ calc_MoransI(object = rnorm(n = 100))
 } 
 
 \section{How to cite}{
-Boer, A.d., Steinbuch, L., 2025. calc_MoransI(): Calculate Moran's I. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Boer, A.d., Steinbuch, L., 2026. calc_MoransI(): Calculate Moran's I. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 de Boer, A-M., Steinbuch, L., Heuvelink, G.B.M., Wallinga, J., 2025.
-A novel tool to assess crosstalk in single-grain luminescence detection.
-Submitted.
+A novel method to assess crosstalk in single-grain luminescence detection.
+Radiation Measurements 186, 107459. \doi{10.1016/j.radmeas.2025.107459}
 }
 \author{
-Anna-Maartje de Boer, Luc Steinbuch, Wageningen University & Research, 2025
+Anna-Maartje de Boer, Wageningen University & Research (The Netherlands)\cr
+Luc Steinbuch, Wageningen University & Research (The Netherlands)\cr
 , RLum Developer Team}

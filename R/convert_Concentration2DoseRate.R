@@ -1,10 +1,11 @@
 #'@title Dose-rate conversion function
 #'
-#'@description This function converts radionuclide concentrations
-#'(K in %, Th and U in ppm) into dose rates (Gy/ka). Beta-dose rates are also
-#'attenuated for the grain size. Beta and gamma-dose rates are corrected
-#'for the water content. This function converts concentrations into dose rates
-#'(Gy/ka) and corrects for grain size attenuation and water content
+#' @description
+#' This function converts radionuclide concentrations (K in %, Th and U in ppm)
+#' into dose rates (Gy/ka). Beta-dose rates are also attenuated for the grain
+#' size. Beta and gamma-dose rates are corrected for the water content. This
+#' function converts concentrations into dose rates (Gy/ka) and corrects for
+#' grain size attenuation and water content.
 #'
 #'Dose rate conversion factors can be chosen from Adamiec and Aitken (1998),
 #'Guérin et al. (2011), Liritzis et al. (201) and Cresswell et al. (2018).
@@ -34,7 +35,6 @@
 #'`WaterContent_SE` \tab `numeric` \tab relative error on water content
 #'}
 #'
-#'
 #'**Water content**
 #'The water content provided by the user should be calculated according to:
 #'
@@ -42,20 +42,25 @@
 #'
 #'The unit for the weight is gram (g).
 #'
-#' @param input [data.frame] (*optional*): a table containing all relevant
-#' information for each individual layer. If nothing is provided, the function
-#' returns a template data frame, the values of which need to be filled in by
-#' the user. Please note that only one dataset per input is supported.
+#' @param object [data.frame] (*optional*):
+#' a data frame containing all relevant information for each individual layer.
+#' If nothing is provided, the function returns a template data frame, the
+#' values of which should be filled in by the user. Please note that only one
+#' dataset per input is supported.
 #'
 #' @param conversion [character] (*with default*):
 #' dose rate conversion factors to use, by default those by Guérin et al. (2011).
-#' For accepted values see [BaseDataSet.ConversionFactors].
+#' For accepted values see [Luminescence::BaseDataSet.ConversionFactors].
 #'
-#'@return The function returns an [RLum.Results-class] object for which the first
-#'element is [matrix] with the converted values. If no input is provided, the
-#'function returns a template [data.frame] that can be used as input.
+#' @param ... currently not used.
 #'
-#'@section Function version: 0.1.0
+#' @return
+#' The function returns an [Luminescence::RLum.Results-class] object for which
+#' the first element is a [matrix] with the converted values. If no input is
+#' provided, the function returns a template [data.frame] that can be used as
+#' input.
+#'
+#' @section Function version: 0.1.1
 #'
 #'@author Svenja Riedesel, Aberystwyth University (United Kingdom) \cr
 #'Martin Autzen, DTU NUTECH Center for Nuclear Technologies (Denmark)
@@ -67,11 +72,11 @@
 #'Assessment of nuclear data. Radiation Measurements 120, 195-201.
 #'
 #'Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion factors: update.
-#'Ancient TL, 29, 5-8.
+#'Ancient TL 29, 5-8.
 #'
 #'Guérin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012. On the use
 #'of the infinite matrix assumption and associated concepts: A critical review.
-#'Radiation Measurements, 47, 778-785.
+#'Radiation Measurements 47, 778-785.
 #'
 #'Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
 #'A re-evaluation of radiation dose-rate conversion factors. Mediterranean
@@ -101,8 +106,9 @@
 #'
 #'@export
 convert_Concentration2DoseRate <- function(
-  input,
-  conversion = "Guerinetal2011"
+  object,
+  conversion = "Guerinetal2011",
+  ...
 ) {
   .set_function_name("convert_Concentration2DoseRate")
   on.exit(.unset_function_name(), add = TRUE)
@@ -119,8 +125,14 @@ convert_Concentration2DoseRate <- function(
       WaterContent = NA_integer_,
       WaterContent_SE = NA_integer_)
 
+  ## deprecated argument
+  if ("input" %in% ...names()) {
+    object <- list(...)$input
+    .deprecated(old = "input", new = "object", since = "1.2.0")
+  }
+
   ## return a template if no input is given
-  if (missing(input)) {
+  if (missing(object)) {
     .throw_message("Input template returned, please fill this data frame ",
                    "and use it as input to the function", error = FALSE)
     return(template)
@@ -141,18 +153,20 @@ convert_Concentration2DoseRate <- function(
 
   ## Integrity checks -------------------------------------------------------
 
-  .validate_class(input, c("data.frame", "matrix"))
+  .validate_class(object, c("data.frame", "matrix"))
 
-  if (ncol(input) != ncol(template))
-    .throw_error("'input' should have ", ncol(template), " columns")
-  if (nrow(input) > 1)
-    .throw_error("'input' should have only one row")
-  if (anyNA(input))
-    .throw_error("'input' should not contain NA values")
-  for (idx in 2:ncol(input)) {
-    .validate_class(input[, idx], c("numeric", "integer"),
-                    name = "Each element of 'input' other than the first")
+  if (ncol(object) != ncol(template))
+    .throw_error("'object' should have ", ncol(template), " columns")
+  if (nrow(object) > 1)
+    .throw_error("'object' should have only one row")
+  if (anyNA(object))
+    .throw_error("'object' should not contain NA values")
+  for (idx in 2:ncol(object)) {
+    .validate_class(object[, idx], c("numeric", "integer"),
+                    name = "Each element of 'object' other than the first")
   }
+  if (!"GrainSize" %in% colnames(object))
+    .throw_error("'object' should contain a 'GrainSize' column")
 
   ## conversion factors: we do not use BaseDataSet.ConversionFactors directly
   ## as it is in alphabetical level, but we want to have 'Guerinetal2011'
@@ -162,11 +176,12 @@ convert_Concentration2DoseRate <- function(
   stopifnot(names(BaseDataSet.ConversionFactors) %in% valid_conversion_factors)
   conversion <- .validate_args(conversion, valid_conversion_factors)
 
-  if(!any(input[,1] %in% c("FS","Q")))
+  if (!any(object[, 1] %in% c("FS","Q")))
     .throw_error("As mineral only 'FS' or 'Q' is supported")
 
   ## Convert ----------------------------------------------------------------
 
+  input <- object
     InfDR <- matrix(data = NA, nrow = 2, ncol = 6)
     colnames(InfDR) <- c("K","SE","Th","SE","U","SE")
     rownames(InfDR) <- c("Beta","Gamma")
@@ -198,28 +213,29 @@ convert_Concentration2DoseRate <- function(
       }
     }
 
-    ##### --- dose rate for grain size --- #####
+  ##### --- dose rate for grain size --- #####
+  grain.size <- input$GrainSize[1]
+  if (grain.size < min(GSA$GrainSize) || grain.size > max(GSA$GrainSize)) {
+    .throw_error("No attenuation data available for the grain size provided (",
+                 grain.size, ")")
+  }
 
-    if (input[1,1] == "FS") {                                       # FELDSPAR
-      KFit <- approx(GSA$GrainSize, GSA$FS_K, n = 981, method = "linear")
-      ThFit <- approx(GSA$GrainSize, GSA$FS_Th,n = 981, method = "linear")
-      UFit <- approx(GSA$GrainSize, GSA$FS_U, n = 981, method = "linear")
+  if (input[1, 1] == "FS") {
+    ## feldspar
+    KFit <- approx(GSA$GrainSize, GSA$FS_K, xout = grain.size, method = "linear")
+    ThFit <- approx(GSA$GrainSize, GSA$FS_Th, xout = grain.size, method = "linear")
+    UFit <- approx(GSA$GrainSize, GSA$FS_U, xout = grain.size, method = "linear")
 
-    } else if (input[1,1] == "Q")  {                                # QUARTZ
-      KFit <- approx(GSA$GrainSize, GSA$Q_K, n = 981, method = "linear")
-      ThFit <- approx(GSA$GrainSize, GSA$Q_Th, n = 981, method = "linear")
-      UFit <- approx(GSA$GrainSize, GSA$Q_U, n = 981, method = "linear")
-    }
+  } else if (input[1, 1] == "Q")  {
+    ## quartz
+    KFit <- approx(GSA$GrainSize, GSA$Q_K, xout = grain.size, method = "linear")
+    ThFit <- approx(GSA$GrainSize, GSA$Q_Th, xout = grain.size, method = "linear")
+    UFit <- approx(GSA$GrainSize, GSA$Q_U, xout = grain.size, method = "linear")
+  }
 
-    Temp <- which(KFit$x == input[1, 8])
-    if (length(Temp) == 0) {
-      .throw_error("No attenuation data available for the grain size provided (",
-                   input[1, 8], ")")
-    }
-
-    InfDR[1, 1] <- InfDR[1, 1] * (1 - KFit$y[Temp])   # K
-    InfDR[1, 3] <- InfDR[1, 3] * (1 - ThFit$y[Temp])  # Th
-    InfDR[1, 5] <- InfDR[1, 5] * (1 - UFit$y[Temp])   # U
+  InfDR[1, 1] <- InfDR[1, 1] * (1 - KFit$y)   # K
+  InfDR[1, 3] <- InfDR[1, 3] * (1 - ThFit$y)  # Th
+  InfDR[1, 5] <- InfDR[1, 5] * (1 - UFit$y)   # U
 
     ##### --- Correct beta sediment dose rate for water content --- #####
     InfDRG <- matrix(data = NA, nrow = 2, ncol = 6)

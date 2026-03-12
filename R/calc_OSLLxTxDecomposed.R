@@ -26,29 +26,29 @@
 #' @param digits [integer] (*with default*): round numbers to the specified digits.
 #' If digits is set to `NULL` nothing is rounded.
 #'
-#' @return Returns an S4 object of type [RLum.Results-class].
+#' @return Returns an S4 object of type [Luminescence::RLum.Results-class].
 #'
 #' Slot `data` contains a [list] with the following structure:
 #'
 #' **@data**
 #' ```
 #' $LxTx.table (data.frame)
-#' .. $ LnLx
-#' .. $ TnTx
 #' .. $ Net_LnLx
 #' .. $ Net_LnLx.Error
 #' .. $ Net_TnTx
 #' .. $ Net_TnTx.Error
+#' .. $ SN_RATIO_LnLx = NA,
+#' .. $ SN_RATIO_TnTx = NA
 #' .. $ LxTx
-#' .. $ LxTx.relError
 #' .. $ LxTx.Error
 #' ```
 #'
-#' @section Function version: 0.1.0
+#' @section Function version: 0.1.1
 #'
 #' @author Dirk Mittelstrass
 #'
-#' @seealso [RLum.Data.Curve-class], [fit_DoseResponseCurve], [analyse_SAR.CWOSL]
+#' @seealso [Luminescence::RLum.Data.Curve-class], [Luminescence::fit_DoseResponseCurve],
+#' [Luminescence::analyse_SAR.CWOSL]
 #'
 #' @references Mittelstrass D., Schmidt C., Beyer J., Straessner A., 2019.
 #' Automated identification and separation of quartz CW-OSL signal components with R.
@@ -102,10 +102,7 @@ calc_OSLLxTxDecomposed <- function(
   # get component index from component name
   if (is.character(OSL.component)) {
     if (tolower(OSL.component) %in% tolower(Lx.data$name)) {
-      ## FIXME(mcol): this seems unreachable, as Lx.data doesn't store the
-      ## component names
-      component_index <- which(tolower(OSL.component) == tolower(Lx.data$name)) # nocov
-
+      component_index <- which(tolower(OSL.component) == tolower(Lx.data$name))
     } else {
       .throw_error("Invalid OSL component name, valid names are: ",
                    .collapse(Lx.data$name))
@@ -141,21 +138,16 @@ calc_OSLLxTxDecomposed <- function(
     TnTx.Error <- Tx.data$n.error[component_index]
   }
 
-  ##combine results
-  LnLxTnTx <- cbind(
-    LnLx,
-    LnLx.Error,
-    TnTx,
-    TnTx.Error
-  )
-
   ##--------------------------------------------------------------------------##
   ##(4) Calculate LxTx error according Galbraith (2014)
 
   ## transform results to a data.frame
-  LnLxTnTx <- as.data.frame(LnLxTnTx)
-  colnames(LnLxTnTx)<-c("Net_LnLx", "Net_LnLx.Error",
-                        "Net_TnTx", "Net_TnTx.Error")
+  LnLxTnTx <- data.frame(Net_LnLx = LnLx,
+                         Net_LnLx.Error = LnLx.Error,
+                         Net_TnTx = TnTx,
+                         Net_TnTx.Error = TnTx.Error,
+                         SN_RATIO_LnLx = NA,
+                         SN_RATIO_TnTx = NA)
 
   temp <- .calculate_LxTx_error(LnLxTnTx, sig0, digits)
 

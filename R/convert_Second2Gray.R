@@ -25,7 +25,7 @@
 #'
 #' **(2) `gaussian`** error propagation
 #'
-#' \deqn{se(De) [Gy] = \sqrt((DR [Gy/s] * se(De) [s])^2 + (De [s] * se(DR) [Gy/s])^2)}
+#' \deqn{se(De) [Gy] = \sqrt{(DR [Gy/s] * se(De) [s])^2 + (De [s] * se(DR) [Gy/s])^2}}
 #'
 #' Applicable under the assumption that errors of `De` and `se` are uncorrelated.
 #'
@@ -40,8 +40,8 @@
 #' input values, structure: data (`values[,1]`) and data error (`values [,2]`)
 #' are required.
 #'
-#' @param dose.rate [RLum.Results-class], [data.frame] or [numeric] (**required**):
-#' `RLum.Results` needs to be originated from the function [calc_SourceDoseRate],
+#' @param dose.rate [Luminescence::RLum.Results-class], [data.frame] or [numeric] (**required**):
+#' `RLum.Results` needs to be originated from the function [Luminescence::calc_SourceDoseRate],
 #' for `vector` dose rate in Gy/s and dose rate error in Gy/s.
 #'
 #' @param error.propagation [character] (*with default*):
@@ -59,11 +59,11 @@
 #' @section Function version: 0.6.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
 #' Margret C. Fuchs, HZDR, Helmholtz-Institute Freiberg for Resource Technology (Germany)
 #'
-#' @seealso [calc_SourceDoseRate]
+#' @seealso [Luminescence::calc_SourceDoseRate]
 #'
 #' @references
 #' Aitken, M.J., 1985. Thermoluminescence dating. Academic Press.
@@ -95,7 +95,7 @@
 convert_Second2Gray <- function(
   data,
   dose.rate,
-  error.propagation = "omit"
+  error.propagation = c("omit", "gaussian", "absolute")
 ) {
   .set_function_name("convert_Second2Gray")
   on.exit(.unset_function_name(), add = TRUE)
@@ -113,6 +113,7 @@ convert_Second2Gray <- function(
     .validate_originator(dose.rate, "calc_SourceDoseRate")
     dose.rate <- get_RLum(dose.rate, data.object = "dose.rate")
   }
+  .validate_not_empty(dose.rate)
 
   error.propagation <- .validate_args(error.propagation,
                                       c("omit", "gaussian", "absolute"))

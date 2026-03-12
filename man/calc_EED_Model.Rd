@@ -110,7 +110,7 @@ calc_EED_Model(
 } 
 
 \section{How to cite}{
-Guibert, P., Kreutzer, S., 2025. calc_EED_Model(): Modelling Exponential Exposure Distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Guibert, P., Kreutzer, S., 2026. calc_EED_Model(): Modelling Exponential Exposure Distribution. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -120,11 +120,11 @@ light - Towards a new tool for single grain OSL dating of poorly bleached mortar
 Radiation Measurements 107, 48–57. \doi{10.1016/j.radmeas.2017.10.003}
 }
 \seealso{
-\linkS4class{RLum.Results}, \link{calc_MinDose}, \link{calc_FuchsLang2001}, \link{calc_IEU},
-\link{calc_FiniteMixture}
+\linkS4class{RLum.Results}, \link{calc_MinDose}, \link{calc_FuchsLang2001},
+\link{calc_IEU}, \link{calc_FiniteMixture}
 }
 \author{
-Pierre Guibert, IRAMAT-CRP2A, UMR 5060, Université Bordeaux Montaigne (France),
-Sebastian Kreutzer, Geography & Earth Sciences, Aberystwyth University (United Kingdom)
+Pierre Guibert, IRAMAT-CRP2A, UMR 5060, Université Bordeaux Montaigne (France)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 , RLum Developer Team}
 \keyword{datagen}

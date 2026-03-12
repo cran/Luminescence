@@ -117,7 +117,8 @@ function will be selected.
 }
 \section{Functions}{
 \itemize{
-\item \code{get_RLum(list)}: Returns a list of \linkS4class{RLum} objects that had been passed to \link{get_RLum}
+\item \code{get_RLum(list)}: Returns a list of \linkS4class{RLum} objects that had been passed to
+\link{get_RLum}
 
 \item \code{get_RLum(`NULL`)}: Returns \code{NULL}.
 
@@ -133,7 +134,8 @@ Currently supported objects are: RLum.Data.Curve and RLum.Data.Spectrum
 Returns:
 \enumerate{
 \item \link{list} of \linkS4class{RLum.Data} objects or
-\item Single \linkS4class{RLum.Data} object, if only one object is contained and \code{recursive = FALSE} or
+\item Single \linkS4class{RLum.Data} object, if only one object
+is contained and \code{recursive = FALSE} or
 \item \linkS4class{RLum.Analysis} objects for \code{drop = FALSE}
 }
 
@@ -189,14 +191,15 @@ temp.get <- get_RLum(object = temp1)
 }
 \seealso{
 \linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Data.Image},
-\linkS4class{RLum.Data.Spectrum}, \linkS4class{RLum.Analysis}, \linkS4class{RLum.Results}
+\linkS4class{RLum.Data.Spectrum}, \linkS4class{RLum.Analysis},
+\linkS4class{RLum.Results}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2025. get_RLum(): General accessor function for RLum-class objects. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. get_RLum(): General accessor function for RLum-class objects. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

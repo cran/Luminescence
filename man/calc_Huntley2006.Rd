@@ -44,7 +44,7 @@ and where each triplet has the aforementioned column structure.
 
 }\if{html}{\out{</div>}}
 
-\strong{NOTE:} The function assumes the first row of the data to be the
+\strong{Note:} The function assumes the first row of the data to be the
 \code{Ln/Tn}-value. If you want to provide more than one \code{Ln/Tn}-values, consider
 using argument \code{LnTn}.}
 
@@ -66,7 +66,7 @@ another mean value (e.g. a weighted mean or median) or error is preferred,
 this value must be calculated beforehand and used in the first row in the
 data frame for argument \code{data}.
 
-\strong{NOTE:} This argument should \strong{only} be used to provide more than one
+\strong{Note:} This argument should \strong{only} be used to provide more than one
 \code{Ln/Tn}-value. If you provide \code{LnTn}-values with this argument, the data
 frame for the \code{data}-argument \strong{must not} contain any \code{LnTn}-values.}
 
@@ -125,7 +125,7 @@ enable/disable the plot output.}
 \item \code{cex} \link{numeric}: Scaling of the plot (default = 1)
 \item \code{maxiter} \link{numeric}: Number of iteration limits for nls fitting
 \item \code{trace} \link{logical}: Enable/disable value tracing the terminal during fitting
-\strong{Note} that it is generally advised to have a large number of Monte Carlo
+\strong{Note:} it is generally advised to have a large number of Monte Carlo
 iterations for the results to converge. Decreasing the number of iterations
 will often result in unstable estimates.
 }
@@ -214,7 +214,8 @@ Guralnik et al., 2015).
 
 \strong{Level of saturation}
 
-The \link{calc_Huntley2006} function also calculates the level of saturation (\eqn{\frac{n}{N}})
+The \link{calc_Huntley2006} function also calculates the level of
+saturation (\eqn{\frac{n}{N}})
 and the field saturation (i.e. athermal steady state, (n/N)_SS) value for
 the sample under investigation using the sample specific \eqn{\rho}',
 unfaded \eqn{D_0} and \eqn{\dot{D}} values, following the approach of Kars et al. (2008).
@@ -299,7 +300,7 @@ kars <- calc_Huntley2006(
 } 
 
 \section{How to cite}{
-King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2025. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2026. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -324,7 +325,7 @@ for the fading in million year old basaltic rocks. Geochronometria 38(3), 223-23
 \author{
 Georgina E. King, University of Lausanne (Switzerland) \cr
 Christoph Burow, University of Cologne (Germany) \cr
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}
 \keyword{datagen}

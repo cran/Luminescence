@@ -4,15 +4,15 @@
 #' While analysing OSL SAR or pIRIR-data the view on the data is usually
 #' limited to one dose-response curve (DRC) at the time for one aliquot. This
 #' function overcomes this limitation by plotting all DRCs from an
-#' [RLum.Results-class] object created by [analyse_SAR.CWOSL] in one single
+#' [Luminescence::RLum.Results-class] object created by [Luminescence::analyse_SAR.CWOSL] in one single
 #' plot.
 #'
 #' If you want plot your DRC on an energy scale (dose in Gy), you can either
 #' use option `source_dose_rate` or perform your SAR analysis with the dose
 #' points in Gy (better axis scaling).
 #'
-#' @param object [RLum.Results-class] (**required**): input object created by
-#' [analyse_SAR.CWOSL]. The input object can be provided as [list].
+#' @param object [Luminescence::RLum.Results-class] (**required**): input object created by
+#' [Luminescence::analyse_SAR.CWOSL]. The input object can be provided as [list].
 #'
 #' @param source_dose_rate [numeric] (*optional*): allows to modify the axis
 #' and show values in Gy, instead seconds. Only a single numerical value is
@@ -33,18 +33,19 @@
 #' usually not needed.
 #'
 #'@param ... Further arguments and graphical parameters to be passed.
-#'In particular: `main`, `xlab`, `ylab`, `xlim`, `ylim`, `lty`, `lwd`, `pch`, `col.pch`, `col.lty`, `mtext`
+#'In particular: `main`, `xlab`, `ylab`, `xlim`, `ylim`, `lty`, `lwd`, `pch`,
+#'`col.pch`, `col.lty`, `mtext`
 #'
 #'@section Function version: 0.2.4
 #'
-#'@return An [RLum.Results-class] object is returned:
+#'@return An [Luminescence::RLum.Results-class] object is returned:
 #'
 #' Slot: **@data**\cr
 #'
 #' \tabular{lll}{
 #' **OBJECT** \tab **TYPE** \tab **COMMENT**\cr
 #' `results` \tab [data.frame] \tab with dose and LxTx values \cr
-#' `data` \tab [RLum.Results-class] \tab original input data \cr
+#' `data` \tab [Luminescence::RLum.Results-class] \tab original input data \cr
 #' }
 #'
 #' Slot: **@info**\cr
@@ -55,12 +56,12 @@
 #' `args` \tab `list` \tab arguments of the original function call \cr
 #' }
 #'
-#'*Note: If the input object is a [list] a list of [RLum.Results-class] objects is returned.*
+#'*Note: If the input object is a [list] a list of [Luminescence::RLum.Results-class] objects is returned.*
 #'
-#'@author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#'@author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 #' Christoph Burow, University of Cologne (Germany)
 #'
-#'@seealso [RLum.Results-class], [analyse_SAR.CWOSL]
+#'@seealso [Luminescence::RLum.Results-class], [Luminescence::analyse_SAR.CWOSL]
 #'
 #'@examples
 #'
@@ -70,19 +71,18 @@
 #'#transform the values from the first position in a RLum.Analysis object
 #'object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos=1)
 #'
-##perform SAR analysis
+#' ## perform SAR analysis
 #' results <- analyse_SAR.CWOSL(
-#'   object = object,
-#'   signal.integral.min = 1,
-#'   signal.integral.max = 2,
-#'    background.integral.min = 900,
-#'    background.integral.max = 1000,
-#'    plot = FALSE
-#'  )
+#'     object,
+#'     signal_integral = 1:2,
+#'     background_integral = 900:1000,
+#'     plot = FALSE
+#' )
 #'
 #'##plot only DRC
 #'plot_DRCSummary(results)
 #'
+#'@md
 #'@export
 plot_DRCSummary <- function(
   object,
@@ -132,9 +132,7 @@ if(inherits(object, "list")){
 
   ## Integrity checks -------------------------------------------------------
   .validate_class(object, "RLum.Results")
-  .validate_args(object@originator,
-                 c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"),
-                 name = "Object originator")
+  .validate_originator(object, c("analyse_SAR.CWOSL", "analyse_pIRIRSequence"))
 
 # Extract data from object --------------------------------------------------------------------
 
@@ -148,10 +146,12 @@ if(inherits(object, "list")){
         sel_curves <- 1:length(object@data$Formula)
   }
 
-    ## check the whether the fitting was all the same
-    if(length(unique(object@data[["data"]][["Fit"]])) != 1)
-      .throw_error("I can only visualise dose-response curves based ",
-                   "on the same fitting equation")
+  ## check whether the same fit method was used
+  fit.method <- unique(object@data[["data"]][["Fit"]])
+  if (length(fit.method) > 1) {
+    .throw_error("Dose-response curves fitted using different equations: ",
+                 .collapse(fit.method))
+  }
 
     ##get DRC
     DRC <- object@data$Formula[sel_curves]
@@ -214,7 +214,6 @@ if(inherits(object, "list")){
   #exchange x-axis if source dose rate is set
   if(!is.null(source_dose_rate)){
     axis(side = 1, at = axTicks(side = 1), labels = round(axTicks(side = 1) * source_dose_rate[1],0))
-
   }else{
     axis(side = 1)
   }

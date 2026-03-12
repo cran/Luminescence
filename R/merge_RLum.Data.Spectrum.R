@@ -1,7 +1,7 @@
 #' @title Merge function for RLum.Data.Spectrum S4 class objects
 #'
 #' @description
-#' This function allows to merge [RLum.Data.Spectrum-class] objects in
+#' This function allows to merge [Luminescence::RLum.Data.Spectrum-class] objects in
 #' different ways without modifying the original objects.
 #'
 #' @details
@@ -42,7 +42,7 @@
 #' The max values from the cell values is chosen using the function
 #' [matrixStats::rowMins][matrixStats::rowRanges].
 #'
-#' `"append"` (only for [RLum.Data.Curve-class])
+#' `"append"` (only for [Luminescence::RLum.Data.Curve-class])
 #'
 #' Appends cell values of all curves to one combined data curve. The channel width
 #' is automatically re-calculated, but requires a constant channel width of the
@@ -60,7 +60,7 @@
 #'
 #' Values of the first object are divided by cell sums of the last objects.
 #'
-#' @param object [list] of [RLum.Data.Spectrum-class] (**required**):
+#' @param object [list] of [Luminescence::RLum.Data.Spectrum-class] (**required**):
 #' list of objects to be merged.
 #'
 #' @param merge.method [character] (**required**):
@@ -80,7 +80,7 @@
 #' be merged: when differences exceed this threshold value, the merging
 #' occurs but a warning is raised.
 #'
-#' @return Returns an [RLum.Data.Spectrum-class] object.
+#' @return Returns an [Luminescence::RLum.Data.Spectrum-class] object.
 #'
 #' @note
 #' The information from the slot `recordType` is taken from the first
@@ -96,9 +96,9 @@
 #'
 #' @author
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [merge_RLum], [RLum.Data.Spectrum-class]
+#' @seealso [Luminescence::merge_RLum], [Luminescence::RLum.Data.Spectrum-class]
 #'
 #' @keywords utilities internal
 #'
@@ -118,7 +118,8 @@
 #' @export
 merge_RLum.Data.Spectrum <- function(
   object,
-  merge.method = "mean",
+  merge.method = c("mean", "median", "sum", "sd", "var", "min", "max",
+                   "append", "-", "*", "/"),
   method.info = NULL,
   max.temp.diff = 0.1
 ) {
@@ -180,9 +181,11 @@ merge_RLum.Data.Spectrum <- function(
 
     ## for time/temperature data we allow some small differences: we report
     ## a warning if they are too high, but continue anyway
-    if (max(abs(as.numeric(colnames(x@data)) - y.vals)) > max.temp.diff) {
-      .throw_warning("The time/temperatures recorded are too different, ",
-                     "proceed with caution")
+    if (!is.null(colnames(x@data))) {
+      if (max(abs(as.numeric(colnames(x@data)) - y.vals)) > max.temp.diff) {
+        .throw_warning("The time/temperatures recorded are too different, ",
+                       "proceed with caution")
+      }
     }
 
     x@data

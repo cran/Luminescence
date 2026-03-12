@@ -7,8 +7,7 @@
 analyse_SAR.TL(
   object,
   object.background,
-  signal.integral.min,
-  signal.integral.max,
+  signal_integral,
   integral_input = "channel",
   sequence.structure = c("PREHEAT", "SIGNAL", "BACKGROUND"),
   rejection.criteria = list(recycling.ratio = 10, recuperation.rate = 10),
@@ -23,19 +22,13 @@ input object containing data for analysis}
 
 \item{object.background}{currently not used}
 
-\item{signal.integral.min}{\link{integer} (\strong{required}):
-requires the channel number for the lower signal integral bound
-(e.g. \code{signal.integral.min = 100})}
-
-\item{signal.integral.max}{\link{integer} (\strong{required}):
-requires the channel number for the upper signal integral bound
-(e.g. \code{signal.integral.max = 200})}
+\item{signal_integral}{\link{integer} (\strong{required}):
+vector of inputs (as defined by \code{integral_input}) for the signal integral.}
 
 \item{integral_input}{\link{character} (\emph{with default}):
-defines the input for the arguments \code{signal.integral.min} and
-\code{signal.integral.max}. These limits can be either provided \code{'channel'}
-number (the default) or \code{'temperature'}. If \code{'temperature'} is chosen, the
-best matching channel is selected.}
+input type for \code{signal_integral}, one of \code{"channel"} (default) or
+\code{"measurement"}. If set to \code{"measurement"}, the best matching channels
+corresponding to the given temperature range are selected.}
 
 \item{sequence.structure}{\link{vector} \link{character} (\emph{with default}):
 specifies the general sequence structure. Three steps are allowed
@@ -63,7 +56,7 @@ returned containing the following elements:
 
 \item{De.values}{\link{data.frame} containing De-values and further parameters}
 \item{LnLxTnTx.values}{\link{data.frame} of all calculated \code{Lx/Tx} values including signal, background counts and the dose points.}
-\item{rejection.criteria}{\link{data.frame} with values that might by used as rejection criteria. NA is produced if no R0 dose point exists.}
+\item{rejection.criteria}{\link{data.frame} with values that might by used as rejection criteria. \code{NA} is produced if no R0 dose point exists.}
 
 The output should be accessed using the function \link{get_RLum}.
 }
@@ -92,7 +85,7 @@ background see Aitken and Smith (1988)
 No TL curves will be removed from the input object without further warning.
 }
 \section{Function version}{
- 0.3.1
+ 0.3.3
 }
 
 \examples{
@@ -106,15 +99,14 @@ object <- Risoe.BINfileData2RLum.Analysis(TL.SAR.Data, pos=3)
 ##perform analysis
 analyse_SAR.TL(
  object = object,
- signal.integral.min = 210,
- signal.integral.max = 220,
+ signal_integral = 210:220,
  fit.method = "EXP OR LIN",
  sequence.structure = c("SIGNAL", "BACKGROUND"))
 
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2025. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_SAR.TL(): Analyse SAR TL measurements. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -130,7 +122,7 @@ improved single-aliquot regenerative-dose protocol. Radiation Measurements
 \linkS4class{RLum.Results}, \link{get_RLum}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team}
 \keyword{datagen}
 \keyword{plot}

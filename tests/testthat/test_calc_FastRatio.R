@@ -14,6 +14,11 @@ test_that("input validation", {
   expect_error(calc_FastRatio(matrix()),
                "'object' should have at least two columns")
 
+  expect_error(calc_FastRatio(obj, stimulation.power = iris),
+               "'stimulation.power' should be a single positive value")
+  expect_error(calc_FastRatio(obj, wavelength = iris),
+               "'wavelength' should be a single positive value")
+
   expect_error(calc_FastRatio(obj, Ch_L1 = NULL),
                "'Ch_L1' should be a single positive integer value")
   expect_error(calc_FastRatio(obj, Ch_L1 = 0),
@@ -64,6 +69,8 @@ test_that("input validation", {
                "After NA removal, nothing is left from the data set")
   expect_error(calc_FastRatio(data.frame(1:4, NA)),
                "After NA removal, nothing is left from the data set")
+  expect_error(calc_FastRatio(ExampleData.CW_OSL_Curve, verbose = NA),
+               "'verbose' should be a single logical value")
 
   expect_warning(expect_null(calc_FastRatio(ExampleData.CW_OSL_Curve,
                                             Ch_L2 = 1)),

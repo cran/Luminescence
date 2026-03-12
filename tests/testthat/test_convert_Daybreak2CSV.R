@@ -6,10 +6,10 @@ test_that("input validation", {
   expect_error(convert_Daybreak2CSV(character(0)),
                "'file' cannot be an empty character")
   expect_error(convert_Daybreak2CSV(letters),
-               "[read_Daybreak2R()] 'file' should have length 1",
+               "[convert_Daybreak2CSV()] 'file' should have length 1",
                fixed = TRUE)
   expect_error(convert_Daybreak2CSV(""),
-               "File does not exist")
+               "File '' does not exist")
 })
 
 test_that("check class and length of output", {

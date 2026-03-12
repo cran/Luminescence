@@ -4,19 +4,16 @@
 #' reader into R.
 #'
 #' @details
-#'
 #' The binary data file is parsed byte by byte following the data structure
 #' published in the Appendices of the Analyst manual p. 42.
 #'
 #' For the general BIN/BINX-file structure, the reader is referred to the
 #' Risø website: [https://www.fysik.dtu.dk]()
 #'
-#' @param file [character] or [list] (**required**): path and file name of the
-#' BIN/BINX file (URLs are supported). If input is a `list` it should comprise
-#' only `character`s representing valid path and BIN/BINX-file names.
-#' Alternatively, the input character can be just a directory (path), in which
-#' case the function tries to detect and import all BIN/BINX files found in
-#' the directory.
+#' @param file [character] or [list] (**required**):
+#' name of one or multiple BIN/BINX files (URLs are supported); it can be the
+#' path to a directory, in which case the function tries to detect and import
+#' all BIN/BINX files found recursively from the given directory.
 #'
 #' @param show.raw.values [logical] (*with default*):
 #' shows raw values from BIN-file for `LTYPE`, `DTYPE` and `LIGHTSOURCE` without
@@ -44,8 +41,9 @@
 #' Can be provided as `list` if `file` is a `list`.
 #'
 #' @param fastForward [logical] (*with default*):
-#' if `TRUE` for a more efficient data processing only a list of `RLum.Analysis`
-#' objects is returned instead of a [Risoe.BINfileData-class] object.
+#' if `TRUE` for a more efficient data processing only a list of
+#' [Luminescence::RLum.Analysis-class]
+#' objects is returned instead of a [Luminescence::Risoe.BINfileData-class] object.
 #' Can be provided as `list` if `file` is a `list`.
 #'
 #' @param show.record.number [logical] (*with default*):
@@ -71,41 +69,44 @@
 #'
 #' @param pattern [character] (*optional*):
 #' regular expression pattern passed to [list.files] to construct a list of
-#' files to read (used only when a path is provided).
+#' files to read (used only when `file` specifies a path).
 #'
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
 #' @param ... further arguments that will be passed to the function
-#' [Risoe.BINfileData2RLum.Analysis]. Please note that any matching argument
+#' [Luminescence::Risoe.BINfileData2RLum.Analysis]. Please note that any matching argument
 #' automatically sets `fastForward = TRUE`
 #'
 #' @return
-#' Returns an S4 [Risoe.BINfileData-class] object containing two
+#' Returns an S4 [Luminescence::Risoe.BINfileData-class] object containing two
 #' slots:
 #'
 #' \item{METADATA}{A [data.frame] containing all variables stored in the BIN-file.}
 #' \item{DATA}{A [list] containing a numeric [vector] of the measured data.
 #' The ID corresponds to the record ID in METADATA.}
 #'
-#' If `fastForward = TRUE` a list of [RLum.Analysis-class] object is returned. The
-#' internal coercing is done using the function [Risoe.BINfileData2RLum.Analysis]
+#' If `fastForward = TRUE` an [Luminescence::RLum.Analysis-class] object is
+#' returned (coerced by [Luminescence::Risoe.BINfileData2RLum.Analysis]).
+#'
+#' Results are returned as a list when multiple files are processed or `file`
+#' is a list.
 #'
 #' @note
 #' The function works for BIN/BINX-format versions 03, 04, 05, 06, 07 and 08. The
 #' version number depends on the used Sequence Editor.
 #'
-#' @section Function version: 0.18
+#' @section Function version: 0.19
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Margret C. Fuchs, HZDR Freiberg, (Germany) \cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
 #' based on information provided by Torben Lapp and Karsten Bracht Nielsen (Risø DTU, Denmark)
 #'
 #'
-#' @seealso [write_R2BIN], [Risoe.BINfileData-class],
-#' [base::readBin], [merge_Risoe.BINfileData], [RLum.Analysis-class]
+#' @seealso [Luminescence::write_R2BIN], [Luminescence::Risoe.BINfileData-class],
+#' [base::readBin], [Luminescence::merge_Risoe.BINfileData], [Luminescence::RLum.Analysis-class]
 #' [utils::txtProgressBar], [list.files]
 #'
 #'
@@ -147,31 +148,10 @@ read_BIN2R <- function(
   # with that many file can be read in at the same time
   # Option (b): The input is just a path, the function tries to grep ALL BIN/BINX files in the
   # directory and import them, if this is detected, we proceed as list
-  .validate_class(file, c("character", "list"))
-
-  if (is.character(file)) {
-    .validate_not_empty(file)
-
-    if (is.null(pattern)) {
-      ##If this is not really a path we skip this here
-      if (all(dir.exists(file)) & length(dir(file)) > 0) {
-        if (verbose)
-          .throw_message("Directory detected, trying to extract ",
-                         "'*.bin'/'*.binx' files ...\n", error = FALSE)
-
-        ##get files
-        file <- as.list(list.files(
-          path = file,
-          recursive = FALSE,
-          pattern = "\\.bin*",
-          full.names = TRUE,
-          ignore.case = TRUE))
-      }
-
-    }else if(dir.exists(file)){
-      file <- as.list(list.files(file, pattern = pattern, full.names = TRUE, recursive = TRUE))
-    }
-  }
+  file <- .validate_file(file, ext = c("bin", "binx"),
+                         pattern = pattern %||% "\\.bin.*$",
+                         recursive = TRUE,
+                         verbose = verbose)
 
   if (is.list(file)) {
     ## expand input arguments
@@ -186,7 +166,7 @@ read_BIN2R <- function(
     forced.VersionNumber <- .listify(forced.VersionNumber, rep.length)
 
     temp.return <- lapply(seq_along(file), function(x) {
-      temp <- read_BIN2R(
+      temp <- try(read_BIN2R(
         file = file[[x]],
         fastForward = fastForward,
         position = position[[x]],
@@ -200,7 +180,10 @@ read_BIN2R <- function(
         ignore.RECTYPE = ignore.RECTYPE,
         verbose = verbose,
         ...
-      )
+      ), outFile = stdout()) # redirect error messages so they can be silenced
+      if (inherits(temp, "try-error"))
+        return(NULL)
+      temp
     })
 
     ##return
@@ -221,16 +204,10 @@ read_BIN2R <- function(
   .validate_logical_scalar(fastForward)
   .validate_logical_scalar(show.record.number)
   .validate_logical_scalar(txtProgressBar)
-  .validate_class(ignore.RECTYPE, c("logical", "numeric"))
+  .validate_class(ignore.RECTYPE, c("logical", "numeric"), length = 1)
 
   ##set file_link for internet downloads
-  url_file <- NULL
   on_exit <- function(){
-    ##unlink internet connection
-    if(!is.null(url_file)){
-      unlink(url_file)
-    }
-
     ##close connection
     if(exists("con") && !is.null(con)){
       close(con)
@@ -241,36 +218,6 @@ read_BIN2R <- function(
   ## never show the progress bar if not verbose
   if (!verbose) {
     txtProgressBar <- FALSE
-  }
-
-  ## check for URL and attempt download
-  url_file <- .download_file(file, verbose = verbose,
-                             tempfile("read_BIN22R_FILE", fileext = ".binx"))
-
-  if(!is.null(url_file))
-    file <- url_file
-
-  ## normalise path, just in case
-  file <- suppressWarnings(normalizePath(file))
-
-  ## check whether file exists
-  info <- file.info(file)
-  if (is.na(info$size)) {
-    .throw_error("File '", file, "' does not exist")
-  }
-
-  ## skip if zero-byte
-  if (info$size == 0) {
-    .throw_message("File '", file, "' is a zero-byte file, NULL returned")
-    return(NULL)
-  }
-
-  ## check if file is a BIN or BINX file
-  if(!any(tolower(tools::file_ext(file)) %in%  c("bin", "binx"))) {
-    .throw_message("File '", file, "' is not a file of type ",
-                   "'BIN' or 'BINX', NULL returned")
-    con <- NULL
-    return(NULL)
   }
 
   ##set supported BIN format version
@@ -529,6 +476,7 @@ read_BIN2R <- function(
 
   ##set progress bar
   if (txtProgressBar) {
+    info <- file.info(file)
     pb <- txtProgressBar(min = 0, max = info$size, char = "=", style = 3)
   }
 
@@ -592,12 +540,13 @@ read_BIN2R <- function(
         RECTYPE[id_row] <- temp.RECTYPE
 
         ## we can check for a specific value for temp.RECTYPE
-        if(inherits(ignore.RECTYPE[1], "numeric") && temp.RECTYPE == ignore.RECTYPE[1]) {
+        if (inherits(ignore.RECTYPE, "numeric") && temp.RECTYPE == ignore.RECTYPE) {
           seek.connection(con, temp.LENGTH - 15, origin = "current")
           if(verbose) {
             message("") # add a newline
             .throw_message("Record #", temp.ID + 1,
-                           " skipped due to ignore.RECTYPE setting", error = FALSE)
+                           " skipped due to 'ignore.RECTYPE = ", ignore.RECTYPE,
+                           "'", error = FALSE)
           }
           next()
         }
@@ -608,7 +557,7 @@ read_BIN2R <- function(
           msg <- paste0("Byte RECTYPE = ", temp.RECTYPE,
                         " is not supported in record #", temp.ID + 1)
           if (!ignore.RECTYPE) {
-            .throw_error(msg, ", set `ignore.RECTYPE = TRUE` to skip this record")
+            .throw_error(msg, ", set 'ignore.RECTYPE = TRUE' to skip this record")
           }
 
           ## skip to next record

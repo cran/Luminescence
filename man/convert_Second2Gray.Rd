@@ -4,7 +4,11 @@
 \alias{convert_Second2Gray}
 \title{Converting equivalent dose values from seconds (s) to Gray (Gy)}
 \usage{
-convert_Second2Gray(data, dose.rate, error.propagation = "omit")
+convert_Second2Gray(
+  data,
+  dose.rate,
+  error.propagation = c("omit", "gaussian", "absolute")
+)
 }
 \arguments{
 \item{data}{\link{data.frame} (\strong{required}):
@@ -47,7 +51,7 @@ be prescriptive.
 
 \strong{(2) \code{gaussian}} error propagation
 
-\deqn{se(De) [Gy] = \sqrt((DR [Gy/s] * se(De) [s])^2 + (De [s] * se(DR) [Gy/s])^2)}
+\deqn{se(De) [Gy] = \sqrt{(DR [Gy/s] * se(De) [s])^2 + (De [s] * se(DR) [Gy/s])^2}}
 
 Applicable under the assumption that errors of \code{De} and \code{se} are uncorrelated.
 
@@ -90,7 +94,7 @@ convert_Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Fuchs, M.C., 2025. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Fuchs, M.C., 2026. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -100,7 +104,7 @@ Aitken, M.J., 1985. Thermoluminescence dating. Academic Press.
 \link{calc_SourceDoseRate}
 }
 \author{
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Michael Dietze, GFZ Potsdam (Germany)\cr
 Margret C. Fuchs, HZDR, Helmholtz-Institute Freiberg for Resource Technology (Germany)
 , RLum Developer Team}

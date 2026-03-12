@@ -9,7 +9,7 @@
 #' `x2` % respectively using eq. 3 to determine channels L2 and L3 (start
 #' and end). The fast ratio is then calculated from: \eqn{(L1-L3)/(L2-L3)}.
 #'
-#' @param object [RLum.Analysis-class], [RLum.Data.Curve-class] or [data.frame] (**required**):
+#' @param object [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Data.Curve-class] or [data.frame] (**required**):
 #' x, y data of measured values (time and counts).
 #'
 #' @param stimulation.power [numeric] (*with default*):
@@ -50,25 +50,25 @@
 #' Channels that do not contain OSL data, i.e. at the start or end of measurement.
 #'
 #' @param fitCW.sigma [logical] (*optional*):
-#' fit CW-OSL curve using [fit_CWCurve] to calculate `sigmaF` and `sigmaM` (**experimental**).
+#' fit CW-OSL curve using [Luminescence::fit_CWCurve] to calculate `sigmaF` and `sigmaM` (**experimental**).
 #'
 #' @param fitCW.curve [logical] (*optional*):
-#' fit CW-OSL curve using [fit_CWCurve] and derive the counts of L2 and L3
+#' fit CW-OSL curve using [Luminescence::fit_CWCurve] and derive the counts of L2 and L3
 #' from the fitted OSL curve (**experimental**).
 #'
 #' @param plot [logical] (*with default*):
 #' enable/disable the plot output.
 #'
 #' @param ... available options: `verbose` ([logical]).
-#' Further arguments passed to [fit_CWCurve].
+#' Further arguments passed to [Luminescence::fit_CWCurve].
 #'
 #' @return
-#' Returns a plot (*optional*) and an S4 object of type [RLum.Results-class].
+#' Returns a plot (*optional*) and an S4 object of type [Luminescence::RLum.Results-class].
 #' The slot `data` contains a [list] with the following elements:
 #'
 #' \item{summary}{[data.frame] summary of all relevant results}
 #' \item{data}{the original input data}
-#' \item{fit}{[RLum.Results-class] object if either `fitCW.sigma` or `fitCW.curve` is `TRUE`}
+#' \item{fit}{[Luminescence::RLum.Results-class] object if either `fitCW.sigma` or `fitCW.curve` is `TRUE`}
 #' \item{args}{[list] of used arguments}
 #' \item{call}{[call] the function call}
 #'
@@ -94,8 +94,8 @@
 #' due to unstable signal components. Quaternary Geochronology 4, 353-362.
 #'
 #'
-#' @seealso [fit_CWCurve], [get_RLum], [RLum.Analysis-class],
-#' [RLum.Results-class], [RLum.Data.Curve-class]
+#' @seealso [Luminescence::fit_CWCurve], [Luminescence::get_RLum], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Results-class], [Luminescence::RLum.Data.Curve-class]
 #'
 #' @examples
 #' # load example CW-OSL curve
@@ -131,6 +131,8 @@ calc_FastRatio <- function(object,
   .validate_class(object, c("RLum.Analysis", "RLum.Results", "RLum.Data.Curve",
                             "data.frame", "matrix"))
   .validate_not_empty(object)
+  .validate_positive_scalar(stimulation.power)
+  .validate_positive_scalar(wavelength)
   .validate_positive_scalar(Ch_L1, int = TRUE)
   .validate_positive_scalar(Ch_L2, int = TRUE, null.ok = TRUE)
   .validate_class(Ch_L3, c("integer", "numeric"), null.ok = TRUE, length = 2)
@@ -180,6 +182,8 @@ calc_FastRatio <- function(object,
   # override defaults with args in ...
   settings <- modifyList(settings, list(...))
 
+  .validate_logical_scalar(settings$verbose, name = "'verbose'")
+  .validate_logical_scalar(settings$output.terminal, name = "'output.terminal'")
 
   ## Calculations --------------------------------------------------------------
   # iterate over all user provided objects and calculate the FR

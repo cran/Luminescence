@@ -22,7 +22,7 @@
 #'
 #'@param plot [logical] (*with default*): enable/disable the plot output.
 #'
-#'@return Returns an S4 object of type [RLum.Results-class].
+#'@return Returns an S4 object of type [Luminescence::RLum.Results-class].
 #'
 #' **`@data`**\cr
 #' `$ df` ([data.frame]) \cr
@@ -38,9 +38,9 @@
 #' @section Function version: 0.1.1
 #'
 #' @author Harrison Gray, USGS (United States),
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Results-class], [get_RLum], [uniroot], [calc_gSGC]
+#' @seealso [Luminescence::RLum.Results-class], [Luminescence::get_RLum], [uniroot], [Luminescence::calc_gSGC]
 #'
 #' @references Li, B., Roberts, R.G., Jacobs, Z., Li, S.-H., Guo, Y.-J., 2015.
 #' Construction of a “global standardised growth curve” (gSGC) for infrared
@@ -84,6 +84,8 @@ calc_gSGC_feldspar <- function(
   }
   colnames(data) <- c("LnTn", "LnTn.error", "Lr1Tr1", "Lr1Tr1.error",
                       "Dr1")
+  .validate_positive_scalar(n.MC)
+  .validate_logical_scalar(plot)
 
 # Parametrize -------------------------------------------------------------
   params <- data.frame( # this is the data from Table 3 of Li et al., 2015

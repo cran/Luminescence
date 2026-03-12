@@ -12,7 +12,7 @@
 #'by a dose recovery experiment. Then the dispersion in doses (`sigma_d`)
 #'will be that over and above `sigma_m` (and individual uncertainties `sigma_wi`).
 #'
-#' @param data [RLum.Results-class] or [data.frame] (**required**):
+#' @param data [Luminescence::RLum.Results-class] or [data.frame] (**required**):
 #' for [data.frame]: two columns with `De` `(data[,1])` and `De error` `(values[,2])`
 #'
 #' @param sigma_m [numeric] (**required**):
@@ -25,7 +25,7 @@
 #' sample size used for the bootstrapping
 #'
 #' @param na.rm [logical] (*with default*):
-#' exclude NA values from the data set prior to any further operation.
+#' exclude `NA` values from the data set prior to any further operation.
 #'
 #' @param plot [logical] (*with default*):
 #' enable/disable the plot output.
@@ -41,26 +41,26 @@
 #'
 #' Further supported arguments: `mtext` ([character]), `rug` (`TRUE/FALSE`).
 #'
-#' @section Function version: 0.1.6
+#' @section Function version: 0.1.7
 #'
-#' @author Claire Christophe, IRAMAT-CRP2A, Université de Nantes (France),
-#' Anne Philippe, Université de Nantes, (France),
-#' Guillaume Guérin, IRAMAT-CRP2A, Université Bordeaux Montaigne, (France),
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Claire Christophe, IRAMAT-CRP2A, Université de Nantes (France)\cr
+#' Anne Philippe, Université de Nantes, (France)\cr
+#' Guillaume Guérin, IRAMAT-CRP2A, Université Bordeaux Montaigne, (France)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
 #' @seealso [read.table], [graphics::hist]
 #'
-#' @return The function returns numerical output and an (*optional*) plot.
+#' @return
+#' The function produces numerical output and an optional plot. In addition,
+#' an [Luminescence::RLum.Results-class] object containing the following
+#' elements is returned:
 #'
-#' -----------------------------------\cr
-#' `[ NUMERICAL OUTPUT ]` \cr
-#' -----------------------------------\cr
-#' **`RLum.Results`**-object\cr
+#' \item{$summary}{[data.frame] summary of all relevant model results.}
+#' \item{$data}{[data.frame] with original input data.}
+#' \item{$dstar}{[matrix] with bootstrap values.}
+#' \item{$hist}{[list] object as produced by the [hist] function.}
 #'
-#' **slot:** **`@data`** \cr
-#'
-#' `[.. $summary : data.frame]`\cr
-#'
+#' The `$summary` data.frame contains the following columns:
 #' \tabular{lll}{
 #'  **Column** \tab **Type** \tab **Description**\cr
 #'  AVERAGE_DOSE \tab [numeric] \tab the obtained average dose\cr
@@ -73,20 +73,10 @@
 #'  IC_SIGMA_D.LEVEL \tab [integer]\tab confidence level sigma\cr
 #'  IC_SIGMA_D.LOWER \tab [character]\tab lower sigma quantile\cr
 #'  IC_SIGMA_D.UPPER \tab [character]\tab upper sigma quantile\cr
-#'  L_MAX \tab [character]\tab maximum likelihood value
+#'  L_MAX \tab [character]\tab maximum likelihood value \cr
+#'  de \tab [numeric] \tab same as `AVERAGE_DOSE` (internal use)\cr
+#'  de_err \tab [numeric] \tab same as `AVERAGE_DOSE.SE` (internal use)\cr
 #' }
-#'
-#' `[.. $dstar : matrix]` \cr
-#'
-#' Matrix with bootstrap values\cr
-#'
-#' `[.. $hist : list]`\cr
-#'
-#' Object as produced by the function histogram
-#'
-#' ------------------------\cr
-#' `[ PLOT OUTPUT ]`\cr
-#' ------------------------\cr
 #'
 #' The function returns two different plot panels.
 #'
@@ -112,18 +102,14 @@
 #'
 #' @examples
 #'
-#'##Example 01 using package example data
-#'##load example data
-#'data(ExampleData.DeValues, envir = environment())
+#' ## load example data
+#' data(ExampleData.DeValues, envir = environment())
 #'
-#'##calculate Average dose
-#'##(use only the first 56 values here)
-#'AD <- calc_AverageDose(ExampleData.DeValues$CA1[1:56,], sigma_m = 0.1)
+#' ## calculate Average dose (using only the first 56 values here)
+#' AD <- calc_AverageDose(ExampleData.DeValues$CA1[1:56, ], sigma_m = 0.1)
 #'
-#'##plot De and set Average dose as central value
-#'plot_AbanicoPlot(
-#'  data = ExampleData.DeValues$CA1[1:56,],
-#'  z.0 = AD$summary$AVERAGE_DOSE)
+#' ## plot De and set Average dose as central value
+#' plot_AbanicoPlot(AD, z.0 = AD$summary$de)
 #'
 #' @export
 calc_AverageDose <- function(
@@ -400,6 +386,8 @@ calc_AverageDose <- function(
     IC_SIGMA_D.LOWER = IC_sigma_d[2],
     IC_SIGMA_D.UPPER = IC_sigma_d[3],
     L_MAX = llik,
+    de = delta,
+    de_err = sedelta,
     row.names = NULL
   )
 
@@ -492,6 +480,7 @@ calc_AverageDose <- function(
     class = "RLum.Results",
     data = list(
       summary = results_df,
+      data = data,
       dstar = as.data.frame(dstar),
       hist = hist
     ),

@@ -68,7 +68,7 @@
 #' * since 08/2024: The future and sustainable development of 'Luminescence'
 #' towards better reproducibility and usability is supported through the DFG
 #' programme "REPLAY: REProducible Luminescence Data AnalYses" No 528704761,
-#' led by Dr Sebastian Kreutzer (PI at Heidelberg University, DE) and Dr Thomas
+#' led by Dr Sebastian Kreutzer (PI at LIAG - Institute for Applied Geophysics, Hannover, DE) and Dr Thomas
 #' Kolb (PI at Justus-Liebig-University Giessen, DE).
 #'
 #' * All other authors gratefully received additional funding from various public funding bodies.
@@ -76,19 +76,19 @@
 #' @references
 #' Dietze, M., Kreutzer, S., Fuchs, M.C., Burow, C., Fischer, M.,
 #' Schmidt, C., 2013. A practical guide to the R package Luminescence.
-#' Ancient TL, 31 (1), 11-18.
+#' Ancient TL 31 (1), 11-18.
 #'
 #' Dietze, M., Kreutzer, S., Burow, C., Fuchs, M.C., Fischer, M., Schmidt, C., 2016. The abanico plot:
-#' visualising chronometric data with individual standard errors. Quaternary Geochronology 31, 1-7.
-#' https://doi.org/10.1016/j.quageo.2015.09.003
+#' visualising chronometric data with individual standard errors.
+#' Quaternary Geochronology 31, 1-7. \doi{10.1016/j.quageo.2015.09.003}
 #'
 #' Fuchs, M.C., Kreutzer, S., Burow, C., Dietze, M., Fischer, M., Schmidt, C.,
 #' Fuchs, M., 2015. Data processing in luminescence dating analysis: An
 #' exemplary workflow using the R package 'Luminescence'. Quaternary
-#' International, 362,8-13. https://doi.org/10.1016/j.quaint.2014.06.034
+#' International 362, 8-13. \doi{10.1016/j.quaint.2014.06.034}
 #'
 #' Kreutzer, S., Schmidt, C., Fuchs, M.C., Dietze, M., Fischer, M., Fuchs, M.,
-#' 2012. Introducing an R package for luminescence dating analysis. Ancient TL,
+#' 2012. Introducing an R package for luminescence dating analysis. Ancient TL
 #' 30 (1), 1-8.
 #'
 #' Mercier, N., Kreutzer, S., Christophe, C., Guérin, G., Guibert, P., Lahaye, C., Lanos, P., Philippe, A.,
@@ -98,14 +98,14 @@
 #' Mercier, N., Galharret, J.-M., Tribolo, C., Kreutzer, S., Philippe, A., 2022.
 #' Luminescence age calculation through Bayesian convolution of equivalent dose
 #' and dose-rate distributions: the De_Dr model.
-#' Geochronology 4, 297–310. https://doi.org/10.5194/gchron-4-297-2022
+#' Geochronology 4, 297–310. \doi{10.5194/gchron-4-297-2022}
 #'
 #' Smedley, R.K., 2015. A new R function for the Internal External Uncertainty (IEU) model.
-#' Ancient TL, 33 (1), 16-21.
+#' Ancient TL 33 (1), 16-21.
 #'
 #' King, E.G., Burow, C., Roberts, H., Pearce, N.J.G., 2018. Age determination
-#' using feldspar: evaluating fading-correction model performance. Radiation Measurements 119, 58-73.
-#' https://doi.org/10.1016/j.radmeas.2018.07.013
+#' using feldspar: evaluating fading-correction model performance.
+#' Radiation Measurements 119, 58-73. \doi{10.1016/j.radmeas.2018.07.013}
 #'
 #' @keywords package
 #'
@@ -183,7 +183,7 @@ NULL
 #' Radiation Measurements 120, 195-201.
 #'
 #' Guérin, G., Mercier, N., Adamiec, G., 2011. Dose-rate conversion
-#' factors: update. Ancient TL, 29, 5-8.
+#' factors: update. Ancient TL 29, 5-8.
 #'
 #' Liritzis, I., Stamoulis, K., Papachristodoulou, C., Ioannides, K., 2013.
 #' A re-evaluation of radiation dose-rate conversion factors. Mediterranean
@@ -208,7 +208,7 @@ NULL
 #'
 #' Guérin, G., Mercier, N., Nathan, R., Adamiec, G., Lefrais, Y., 2012.
 #' On the use of the infinite matrix assumption and associated concepts:
-#' A critical review. Radiation Measurements, 47, 778-785.
+#' A critical review. Radiation Measurements 47, 778-785.
 #'
 #' @examples
 #' ## grain size attenuation
@@ -267,12 +267,12 @@ NULL
 
 #' Example data for calc_CobbleDoseRate()
 #'
-#' An example data set for the function [calc_CobbleDoseRate] containing layer
+#' An example data set for the function [Luminescence::calc_CobbleDoseRate] containing layer
 #' specific information for the cobble to be used in the function.
 #'
 #' @format
 #'
-#' A [`data.frame`]. Please see [calc_CobbleDoseRate] for detailed information
+#' A [`data.frame`]. Please see [Luminescence::calc_CobbleDoseRate] for detailed information
 #' on the structure of the [data.frame].
 #'
 #' @section Version: 0.1.0
@@ -318,14 +318,14 @@ NULL
 #'
 #' @references
 #' Gruen, R., 2009. The "AGE" program for the calculation of luminescence age estimates.
-#' Ancient TL, 27, pp. 45-46.
+#' Ancient TL 27, pp. 45-46.
 #'
 #' Prescott, J.R., Hutton, J.T., 1988. Cosmic ray and gamma ray dosimetry for
-#' TL and ESR. Nuclear Tracks and Radiation Measurements, 14, pp. 223-227.
+#' TL and ESR. Nuclear Tracks and Radiation Measurements 14, pp. 223-227.
 #'
 #' Prescott, J.R., Hutton, J.T., 1994. Cosmic ray contributions to dose rates
 #' for luminescence and ESR dating: large depths and long-term time variations.
-#' Radiation Measurements, 23, pp. 497-500.
+#' Radiation Measurements 23, pp. 497-500.
 #'
 #' @source
 #' The following data were carefully read from figures in mentioned
@@ -410,30 +410,30 @@ NULL
 #' These examples are fully documented:
 #'
 #' \itemize{
-#' \item [ExampleData.CobbleData]
-#' \item [ExampleData.DeValues]
-#' \item [ExampleData.Fading]
-#' \item [ExampleData.portableOSL]
-#' \item [ExampleData.RLum.Data.Image]
-#' \item [ExampleData.ScaleGammaDose]
-#' \item [ExampleData.SurfaceExposure]
-#' \item [ExampleData.TR_OSL]
+#' \item [Luminescence::ExampleData.CobbleData]
+#' \item [Luminescence::ExampleData.DeValues]
+#' \item [Luminescence::ExampleData.Fading]
+#' \item [Luminescence::ExampleData.portableOSL]
+#' \item [Luminescence::ExampleData.RLum.Data.Image]
+#' \item [Luminescence::ExampleData.ScaleGammaDose]
+#' \item [Luminescence::ExampleData.SurfaceExposure]
+#' \item [Luminescence::ExampleData.TR_OSL]
 #' }
 #'
 #' The following ones are also available, but are visible only via the
 #' internal documentation, as they correspond to unpublished or synthetic data:
 #'
 #' \itemize{
-#' \item [ExampleData.Al2O3C]
-#' \item [ExampleData.BINfileData]
-#' \item [ExampleData.CW_OSL_Curve]
-#' \item [ExampleData.FittingLM]
-#' \item [ExampleData.LxTxData]
-#' \item [ExampleData.LxTxOSLData]
-#' \item [ExampleData.MortarData]
-#' \item [ExampleData.RF70Curves]
-#' \item [ExampleData.RLum.Analysis]
-#' \item [ExampleData.XSYG]
+#' \item [Luminescence::ExampleData.Al2O3C]
+#' \item [Luminescence::ExampleData.BINfileData]
+#' \item [Luminescence::ExampleData.CW_OSL_Curve]
+#' \item [Luminescence::ExampleData.FittingLM]
+#' \item [Luminescence::ExampleData.LxTxData]
+#' \item [Luminescence::ExampleData.LxTxOSLData]
+#' \item [Luminescence::ExampleData.MortarData]
+#' \item [Luminescence::ExampleData.RF70Curves]
+#' \item [Luminescence::ExampleData.RLum.Analysis]
+#' \item [Luminescence::ExampleData.XSYG]
 #' }
 #'
 #' @keywords datasets
@@ -447,7 +447,7 @@ NULL
 #'
 #' @description Example data from a SAR OSL and TL measurement for package Luminescence
 #' directly extracted from a Risoe BIN-file and provided in an object of type
-#' [Risoe.BINfileData-class]
+#' [Luminescence::Risoe.BINfileData-class]
 #'
 #' @format
 #'
@@ -522,11 +522,11 @@ NULL
 #' @references
 #' Baartman, J.E.M., Veldkamp, A., Schoorl, J.M., Wallinga, J.,
 #' Cammeraat, L.H., 2011. Unravelling Late Pleistocene and Holocene landscape
-#' dynamics: The Upper Guadalentin Basin, SE Spain. Geomorphology, 125,
+#' dynamics: The Upper Guadalentin Basin, SE Spain. Geomorphology 125,
 #' 172-185.
 #'
 #' Bos, A.J.J. & Wallinga, J., 2012. How to visualize quartz OSL signal
-#' components. Radiation Measurements, 47, 752-758.
+#' components. Radiation Measurements 47, 752-758.
 #'
 #' @source **ExampleData.CW_OSL_Curve**
 #'
@@ -560,8 +560,8 @@ NULL
 
 #' Example portable OSL curve data for the package Luminescence
 #'
-#' A `list` of [RLum.Analysis-class] objects, each containing
-#' the same number of [RLum.Data.Curve-class] objects representing
+#' A `list` of [Luminescence::RLum.Analysis-class] objects, each containing
+#' the same number of [Luminescence::RLum.Data.Curve-class] objects representing
 #' individual OSL, IRSL and dark count measurements of a sample.
 #'
 #' @name ExampleData.portableOSL
@@ -600,7 +600,7 @@ NULL
 #' @references
 #' Fuchs, M., Kreutzer, S., Fischer, M., Sauer, D., Soerensen, R., 2012. OSL and IRSL
 #' dating of raised beach sand deposits along the south-eastern coast of Norway.
-#' Quaternary Geochronology, 10, 195-200.
+#' Quaternary Geochronology 10, 195-200.
 #'
 #' @source
 #'
@@ -703,9 +703,9 @@ NULL
 #' @aliases MortarData
 NULL
 
-#' Example data as [RLum.Analysis-class] objects
+#' Example data as [Luminescence::RLum.Analysis-class] objects
 #'
-#' Collection of different [RLum.Analysis-class] objects for
+#' Collection of different [Luminescence::RLum.Analysis-class] objects for
 #' protocol analysis.
 #'
 #' @format
@@ -750,14 +750,14 @@ NULL
 #' @aliases IRSAR.RF.Data
 NULL
 
-#' RF70 Example data as [RLum.Analysis-class] objects
+#' RF70 Example data as [Luminescence::RLum.Analysis-class] objects
 #'
 #' Collection two curves from Kreutzer et al. (2018) measured using the RF70 protocol
-#' (Frouin et al., 2017) as [RLum.Analysis-class] objects.
+#' (Frouin et al., 2017) as [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @format
 #'
-#' `BDX16648`: [RLum.Analysis-class] with two IR-RF curves as [RLum.Data.Curve-class] objects
+#' `BDX16648`: [Luminescence::RLum.Analysis-class] with two IR-RF curves as [Luminescence::RLum.Data.Curve-class] objects
 #'
 #' @section Version: 0.1.0
 #'
@@ -795,13 +795,13 @@ NULL
 #' @aliases RF70Curves
 NULL
 
-#' Example data as [RLum.Data.Image-class] objects
+#' Example data as [Luminescence::RLum.Data.Image-class] objects
 #'
 #' Measurement of Princton Instruments camera imported with the function
-#' [read_SPE2R] to R to produce an
-#' [RLum.Data.Image-class] object.
+#' [Luminescence::read_SPE2R] to R to produce an
+#' [Luminescence::RLum.Data.Image-class] object.
 #'
-#' @format Object of class [RLum.Data.Image-class]
+#' @format Object of class [Luminescence::RLum.Data.Image-class]
 #'
 #' @section Version: 0.1
 #'
@@ -839,7 +839,7 @@ NULL
 #'
 #' Example data from a SAR OSL measurement and a TL spectrum for package
 #' Luminescence imported from a Freiberg Instruments XSYG file using the
-#' function [read_XSYG2R].
+#' function [Luminescence::read_XSYG2R].
 #'
 #' @format
 #'
@@ -847,12 +847,12 @@ NULL
 #'
 #' The data contain two elements: (a) `$Sequence.Header` is a
 #' [data.frame] with metadata from the measurement,(b)
-#' `Sequence.Object` contains an [RLum.Analysis-class] object
+#' `Sequence.Object` contains an [Luminescence::RLum.Analysis-class] object
 #' for further analysis.
 #'
 #' `TL.Spectrum`: TL spectrum data
 #'
-#' [RLum.Data.Spectrum-class] object for further analysis. The
+#' [Luminescence::RLum.Data.Spectrum-class] object for further analysis. The
 #' spectrum was cleaned from cosmic-rays using the function
 #'
 #' `apply_CosmicRayRemoval`. Note that no quantum efficiency calibration
@@ -860,8 +860,9 @@ NULL
 #'
 #' @section Version: 0.1
 #'
-#' @seealso [read_XSYG2R], [RLum.Analysis-class], [RLum.Data.Spectrum-class],
-#' [plot_RLum], [plot_RLum.Analysis], [plot_RLum.Data.Spectrum]
+#' @seealso [Luminescence::read_XSYG2R], [Luminescence::RLum.Analysis-class],
+#' [Luminescence::RLum.Data.Spectrum-class],
+#' [Luminescence::plot_RLum], [Luminescence::plot_RLum.Analysis], [Luminescence::plot_RLum.Data.Spectrum]
 #'
 #' @references
 #' Unpublished data measured to serve as example data for that
@@ -1098,7 +1099,7 @@ NULL
 #' Example OSL surface exposure dating data
 #'
 #' A set of synthetic OSL surface exposure dating data to demonstrate the
-#' [fit_SurfaceExposure] functionality. See examples to reproduce the data
+#' [Luminescence::fit_SurfaceExposure] functionality. See examples to reproduce the data
 #' interactively.
 #'
 #' @details
@@ -1251,22 +1252,24 @@ NULL
 #' The example data used in particular to allow test of the functions
 #' developed in framework of the work by Kreutzer et al., 2018.
 #'
-#' @format Two datasets comprising [RLum.Analysis-class] data imported using the function [read_XSYG2R]
+#' @format Two datasets comprising [Luminescence::RLum.Analysis-class] data imported using the function
+#' [Luminescence::read_XSYG2R]
 #'
 #' \describe{
 #' `data_ITC`: Measurement data to determine the irradiation time correction, the data can
-#' be analysed with the function [analyse_Al2O3C_ITC]
+#' be analysed with the function [Luminescence::analyse_Al2O3C_ITC]
 #'
 #' `data_CrossTalk`: Measurement data obtained while estimating the irradiation cross-talk of the
 #' reader used for the experiments. The data can be analysed either with the function
-#' [analyse_Al2O3C_CrossTalk] or [analyse_Al2O3C_Measurement]
+#' [Luminescence::analyse_Al2O3C_CrossTalk] or [Luminescence::analyse_Al2O3C_Measurement]
 #' }
 #'
 #' @note From both datasets unneeded curves have been removed and
 #' the number of aliquots have been reduced to a required minimum to keep the file size small, but
 #' still being able to run the corresponding functions.
 #'
-#' @seealso [analyse_Al2O3C_ITC], [analyse_Al2O3C_CrossTalk], [analyse_Al2O3C_Measurement]
+#' @seealso [Luminescence::analyse_Al2O3C_ITC], [Luminescence::analyse_Al2O3C_CrossTalk],
+#' [Luminescence::analyse_Al2O3C_Measurement]
 #'
 #' @references Kreutzer, S., Martin, L., Guérin, G., Tribolo, C., Selva, P., Mercier, N., 2018.
 #' Environmental Dose Rate Determination Using a Passive Dosimeter: Techniques and Workflow for alpha-Al2O3:C Chips.
@@ -1289,13 +1292,13 @@ NULL
 #' Single TR-OSL curve obtained by Schmidt et al. (2019) for quartz sample BT729
 #' (origin: Trebgast Valley, Germany, quartz, 90-200 µm, unpublished data).
 #'
-#' @format One [RLum.Data.Curve-class] dataset imported using the function [read_XSYG2R]
+#' @format One [Luminescence::RLum.Data.Curve-class] dataset imported using the function [Luminescence::read_XSYG2R]
 #'
 #' \describe{
-#' `ExampleData.TR_OSL`: A single [RLum.Data.Curve-class] object with the TR-OSL data
+#' `ExampleData.TR_OSL`: A single [Luminescence::RLum.Data.Curve-class] object with the TR-OSL data
 #' }
 #'
-#' @seealso [fit_OSLLifeTimes]
+#' @seealso [Luminescence::fit_OSLLifeTimes]
 #'
 #' @references Schmidt, C., Simmank, O., Kreutzer, S., 2019.
 #' Time-Resolved Optically Stimulated Luminescence of Quartz in the Nanosecond Time Domain.

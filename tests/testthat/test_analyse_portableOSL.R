@@ -4,14 +4,14 @@ data(ExampleData.portableOSL, envir = environment())
 ## generate test data set for profile
 merged <- merge_RLum(ExampleData.portableOSL)
 
-test_that("check class and length of output", {
+test_that("check functionality", {
     testthat::skip_on_cran()
 
     ## standard run profile
     results <- expect_s4_class(
       analyse_portableOSL(
         merged,
-        signal.integral = 1:5,
+        signal_integral = 1:5,
         invert = FALSE,
         mode = "profile",
         normalise = TRUE,
@@ -32,7 +32,7 @@ test_that("check class and length of output", {
     results <- expect_s4_class(
         analyse_portableOSL(
           merged,
-          signal.integral = 1:5,
+          signal_integral = 1:5,
           invert = FALSE,
           mode = "surface",
           normalise = TRUE,
@@ -44,7 +44,7 @@ test_that("check class and length of output", {
     results <- expect_s4_class(
       analyse_portableOSL(
         merged,
-        signal.integral = 1:5,
+        signal_integral = 1:5,
         invert = TRUE,
         mode = "surface",
         xlim = c(0.1, 0.6),
@@ -69,7 +69,7 @@ test_that("check class and length of output", {
     ## check additional argument sample
     expect_s4_class(analyse_portableOSL(
       merged,
-      signal.integral = 1:5,
+      signal_integral = 1:5,
       invert = FALSE,
       normalise = TRUE,
       ylim = c(1,2),
@@ -79,13 +79,43 @@ test_that("check class and length of output", {
     ),
     "RLum.Results")
 
+    ## integral_input
+    res1 <- analyse_portableOSL(merged,
+                                signal_integral = 1:5,
+                                integral_input = "measurement",
+                                invert = FALSE,
+                                mode = "profile",
+                                normalise = TRUE,
+                                plot = FALSE)
+    res2 <- analyse_portableOSL(merged,
+                                signal_integral = 1:5,
+                                integral_input = "channel",
+                                invert = FALSE,
+                                mode = "profile",
+                                normalise = TRUE,
+                                plot = FALSE)
+    res1@info <- res2@info <- list() # remove $call
+    res1@.uid <- res2@.uid <- NA_character_
+    res1@data$args$integral_input <- res2@data$args$integral_input <- NULL
+    expect_equal(res1, res2)
+
     ## more coverage
     expect_s4_class(analyse_portableOSL(
         merged,
-        signal.integral = 1:5,
+        signal_integral = 1:5,
         mode = "surface",
         bg_img = as.raster(matrix(0:1, ncol = 4, nrow = 3))
     ), "RLum.Results")
+
+    ## deprecated arguments
+    expect_warning(analyse_portableOSL(merged,
+                                       signal.integral = 1:5),
+                   "was deprecated in v1.2.0, use 'signal_integral'")
+    expect_warning(expect_error(analyse_portableOSL(merged,
+                                                    signal.integral = 1:5,
+                                                    integral_input = "measurement"),
+                   "'integral_input' is not supported with old argument names"),
+                   "was deprecated in v1.2.0, use 'signal_integral'")
 })
 
 test_that("input validation", {
@@ -96,7 +126,7 @@ test_that("input validation", {
                  fixed = TRUE)
     expect_error(analyse_portableOSL(set_RLum("RLum.Analysis")),
                  "'object' cannot be an empty RLum.Analysis")
-    expect_error(analyse_portableOSL(merged, signal.integral = 1:5,
+    expect_error(analyse_portableOSL(merged, signal_integral = 1:5,
                                      mode = "error"),
                  "'mode' should be one of 'profile' or 'surface'")
 
@@ -113,31 +143,31 @@ test_that("input validation", {
                  "At least one element of 'object' has an unsupported originator")
 
     ## Sequence pattern
-    expect_error(analyse_portableOSL(merged[-7], signal.integral = 1:5),
+    expect_error(analyse_portableOSL(merged[-7], signal_integral = 1:5),
                  "Sequence pattern not supported: see the manual for details")
-    expect_error(analyse_portableOSL(merged[1:3], signal.integral = 1:3),
+    expect_error(analyse_portableOSL(merged[1:3], signal_integral = 1:3),
                  "Sequence pattern not supported: see the manual for details")
     expect_error(analyse_portableOSL(merged[c(1:5, rep(7, 5))],
-                                     signal.integral = 1:5),
+                                     signal_integral = 1:5),
                  "Sequence pattern not supported: the number of OSL records")
     expect_error(analyse_portableOSL(merged[c(1:5, rep(6, 5))],
-                                     signal.integral = 1:5),
+                                     signal_integral = 1:5),
                  "Sequence pattern not supported: expected 3 DARK_COUNT records")
-    expect_error(analyse_portableOSL(merged[-c(7:11)], signal.integral = 1:5),
+    expect_error(analyse_portableOSL(merged[-c(7:11)], signal_integral = 1:5),
                  "'object' references 14 sample names, but 13 IRSL/OSL pairs")
 
     ## coordinates not list or matrix
-    expect_error(analyse_portableOSL(merged, signal.integral = 1:5,
+    expect_error(analyse_portableOSL(merged, signal_integral = 1:5,
                                      coord = "error"),
       "'coord' should be of class 'matrix' or 'list'")
 
     ## coordinates are not of the correct size
-    expect_error(analyse_portableOSL(merged, signal.integral = 1:5,
+    expect_error(analyse_portableOSL(merged, signal_integral = 1:5,
                                      coord = list(COORD_X = c(0, 0),
                                                   COORD_Y = c(1, 2))),
                  "The number of coordinates in 'coord' should match the number",
                  fixed = TRUE)
-    expect_error(analyse_portableOSL(merged, signal.integral = 1:5,
+    expect_error(analyse_portableOSL(merged, signal_integral = 1:5,
                                      coord = as.list(1:14)),
                  "'coord' should specify two coordinates per sample")
 
@@ -150,7 +180,7 @@ test_that("input validation", {
     expect_message(
       analyse_portableOSL(
         mod,
-        signal.integral = 1:5,
+        signal_integral = 1:5,
         invert = FALSE,
         normalise = TRUE,
         mode = "surface",
@@ -162,7 +192,7 @@ test_that("input validation", {
     expect_error(
       analyse_portableOSL(
         merged,
-        signal.integral = 1:5,
+        signal_integral = 1:5,
         mode = "surface",
         surface_value = "error"),
       "Unknown value to plot, valid values are:")
@@ -170,7 +200,7 @@ test_that("input validation", {
     expect_warning(
       analyse_portableOSL(
         merged,
-        signal.integral = 1:5,
+        signal_integral = 1:5,
         invert = FALSE,
         normalise = TRUE,
         mode = "profile",
@@ -180,9 +210,8 @@ test_that("input validation", {
       regexp = "\\[analyse\\_portableOSL\\(\\)\\] In profile mode, zlim.+")
 
     expect_warning(analyse_portableOSL(merged[1:5],
-                                       signal.integral = c(1, 102)),
-                   "'signal.integral' (1, 102) exceeds the number of data points",
-                   fixed = TRUE)
+                                       signal_integral = c(1, 102)),
+                   "'signal_integral' out of bounds, reset to be between 1 and 1")
 })
 
 test_that("graphical snapshot tests", {
@@ -192,15 +221,15 @@ test_that("graphical snapshot tests", {
   SW({
   vdiffr::expect_doppelganger("profile",
                               analyse_portableOSL(merged, mode = "profile",
-                                                  signal.integral = 1:5))
+                                                  signal_integral = 1:5))
   vdiffr::expect_doppelganger("surface",
                               analyse_portableOSL(merged, mode = "surface",
-                                                  signal.integral = 1:5,
+                                                  signal_integral = 1:5,
                                                   nx = 40,
                                                   ny = 40))
   vdiffr::expect_doppelganger("surface contour cex",
                               analyse_portableOSL(merged, mode = "surface",
-                                                  signal.integral = 1:5,
+                                                  signal_integral = 1:5,
                                                   nx = 40,
                                                   ny = 40,
                                                   contour = TRUE,
@@ -216,13 +245,12 @@ test_that("regression tests", {
   ## issue 675
   expect_warning(analyse_portableOSL(ExampleData.portableOSL[[1]],
                                      coord = list(c(1, 1)),
-                                     signal.integral = 1:5, mode = "surface"),
+                                     signal_integral = 1:5, mode = "surface"),
                  "Surface interpolation failed: this happens when all points")
 
   ## issue 680
   expect_warning(analyse_portableOSL(ExampleData.portableOSL[[1]],
-                                     signal.integral = c(-3, 200)),
-                 "exceeds the number of data points, reset to (1, 100)",
-                 fixed = TRUE)
+                                     signal_integral = -3:200),
+                 "'signal_integral' out of bounds, reset to be between 1 and 100")
   })
 })

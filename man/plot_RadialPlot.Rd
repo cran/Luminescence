@@ -9,7 +9,7 @@ plot_RadialPlot(
   na.rm = TRUE,
   log.z = TRUE,
   central.value = NULL,
-  centrality = "mean.weighted",
+  centrality = c("mean.weighted", "mean.weighted", "median", "median.weighted"),
   mtext = "",
   summary = c("n", "in.2s"),
   summary.pos = "sub",
@@ -132,7 +132,7 @@ that the 2-sigma range may also refer to the z-scale, which it does not!
 Rather it applies only to the x-y-coordinate system (standardised error vs.
 precision). A spread in doses or ages must be drawn as lines originating at
 zero precision (x0) and zero standardised estimate (y0). Such a range may be
-drawn by adding lines to the radial plot ( \code{line}, \code{line.col},
+drawn by adding lines to the radial plot (\code{line}, \code{line.col},
 \code{line.label}, cf. examples).
 
 A statistic summary, i.e. a collection of statistic measures of
@@ -267,40 +267,40 @@ plot_RadialPlot(
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2025. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.11. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.11. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 Galbraith, R.F., 1988. Graphical Display of Estimates Having
-Differing Standard Errors. Technometrics, 30 (3), 271-281.
+Differing Standard Errors. Technometrics 30 (3), 271-281.
 
 Galbraith, R.F., 1990. The radial plot: Graphical assessment of spread in
 ages. International Journal of Radiation Applications and Instrumentation.
-Part D. Nuclear Tracks and Radiation Measurements, 17 (3), 207-214.
+Part D. Nuclear Tracks and Radiation Measurements 17 (3), 207-214.
 
 Galbraith, R. & Green, P., 1990. Estimating the component ages in a finite
 mixture. International Journal of Radiation Applications and
-Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17 (3)
+Instrumentation. Part D. Nuclear Tracks and Radiation Measurements 17 (3)
 197-206.
 
 Galbraith, R.F. & Laslett, G.M., 1993. Statistical models for mixed fission
-track ages. Nuclear Tracks And Radiation Measurements, 21 (4), 459-470.
+track ages. Nuclear Tracks And Radiation Measurements 21 (4), 459-470.
 
 Galbraith, R.F., 1994. Some Applications of Radial Plots. Journal of the
-American Statistical Association, 89 (428), 1232-1242.
+American Statistical Association 89 (428), 1232-1242.
 
-Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL, 28 (1),
+Galbraith, R.F., 2010. On plotting OSL equivalent doses. Ancient TL 28 (1),
 1-10.
 
 Galbraith, R.F. & Roberts, R.G., 2012. Statistical aspects of equivalent
 dose and error calculation and display in OSL dating: An overview and some
-recommendations. Quaternary Geochronology, 11, 1-27.
+recommendations. Quaternary Geochronology 11, 1-27.
 }
 \seealso{
 \link{plot}, \link{plot_KDE}, \link{plot_Histogram}, \link{plot_AbanicoPlot}
 }
 \author{
 Michael Dietze, GFZ Potsdam (Germany)\cr
-Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 Based on a rewritten S script of Rex Galbraith, 2010
 , RLum Developer Team}

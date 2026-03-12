@@ -67,6 +67,9 @@ test_that("input validation", {
   expect_error(fit_DoseResponseCurve(LxTxData,
                                      n.MC = "error"),
                "'n.MC' should be a single positive integer value")
+  expect_error(fit_DoseResponseCurve(LxTxData,
+                                     verbose = "error"),
+               "'verbose' should be a single logical value")
 
   ## shorten dataframe
   expect_warning(fit_DoseResponseCurve(LxTxData[1:2, ], verbose = FALSE),
@@ -426,7 +429,7 @@ temp_OTORX_alt <-
    expect_equal(round(temp_OTORX$De[[1]], digits = 2),  1785.43)
    expect_equal(round(temp_OTORX_alt$De[[1]], digits = 2),  758.280)
    expect_equal(round(temp_OTORX_alt2$De[[1]], digits = 2),  793.21, tolerance = 0.2)
-   expect_equal(round(sum(temp_OTOR$De.MC, na.rm = TRUE), digits = 0), 17748)
+   expect_equal(round(sum(temp_OTOR$De.MC, na.rm = TRUE), digits = 0), 17719)
    expect_equal(round(sum(temp_OTORX$De.MC, na.rm = TRUE), digits = 0), 17851, tolerance = 0.2)
 
 # Check extrapolation -----------------------------------------------------
@@ -485,6 +488,7 @@ temp_OTORX_alt <-
   set.seed(1)
   LxTxData[1,2:3] <- c(0.5, 0.001)
 
+  SW({
   ##LIN
   expect_s4_class(
     fit_DoseResponseCurve(LxTxData, mode = "alternate", fit.method = "LIN"),
@@ -494,6 +498,7 @@ temp_OTORX_alt <-
   EXP <- expect_s4_class(
     fit_DoseResponseCurve(LxTxData, mode = "alternate", fit.method = "EXP"),
     "RLum.Results")
+  })
 
   ## EXP+LIN
   EXPLIN <- expect_s4_class(

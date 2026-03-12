@@ -14,6 +14,8 @@ test_that("input validation", {
                "'data' should have 2 columns")
   expect_error(calc_HomogeneityTest(data.frame(1:4, letters[1:4])),
                "All columns of 'data' should be of class 'numeric' or 'integer'")
+  expect_error(calc_HomogeneityTest(iris, verbose = NA),
+               "'verbose' should be a single logical value")
 })
 
 test_that("check values from output example", {
@@ -37,10 +39,11 @@ test_that("check values from output example", {
   })
 
   ## negative values in data
-  expect_warning(expect_warning(
+  ## we suppress the NaN warning from log() because we throw our own warning
+  expect_no_warning(expect_warning(
       calc_HomogeneityTest(data.frame(1:5, -1:3), verbose = FALSE),
       "'data' contains negative values and 'log = TRUE'"),
-      "NaNs produced")
+      message = "NaNs produced")
 })
 
 test_that("regression tests", {

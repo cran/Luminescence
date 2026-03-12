@@ -11,7 +11,7 @@
 #' All provided output corresponds to the \eqn{tc} value obtained by this
 #' analysis. Additionally, the g-value normalised to 2-days is provided in the
 #' output object. The output of this function can be passed to the function
-#' [calc_FadingCorr].
+#' [Luminescence::calc_FadingCorr].
 #'
 #' **Fitting and error estimation**
 #'
@@ -56,7 +56,7 @@
 #' inter-aliquot variations in the \eqn{\frac{L_x}{T_x}} values.
 #' If deemed necessary to normalise the \eqn{\frac{L_x}{T_x}} values  of each
 #' aliquot by its individual prompt measurement please do so **before** running
-#' [analyse_FadingMeasurement] and provide the already normalised values for
+#' [Luminescence::analyse_FadingMeasurement] and provide the already normalised values for
 #' `object` instead.
 #'
 #' **Shine-down curve plots**
@@ -64,34 +64,39 @@
 #' a maximum of five pause steps are plotted to avoid graphically overloaded plots.
 #' However, *all* pause times are taken into consideration for the analysis.
 #'
-#' @param object [RLum.Analysis-class], [data.frame] or [list] (**required**):
+#' @param object [Luminescence::RLum.Analysis-class], [data.frame] or [list] (**required**):
 #' input object with the measurement data. Alternatively, a [list] containing
-#' [RLum.Analysis-class] objects or a [data.frame] with three columns
+#' [Luminescence::RLum.Analysis-class] objects or a [data.frame] with three columns
 #' (x = LxTx, y = LxTx error, z = time since irradiation) can be provided.
 #' Can also be a wide table, i.e. a [data.frame] with a number of columns
 #' divisible by 3 and where each triplet has the before mentioned column
 #' structure.
 #'
-#' **Please note: The input object should solely consists of the curve needed
+#' **Note:** The input object should solely consists of the curve needed
 #' for the data analysis, i.e. only IRSL curves representing Lx (and Tx). If
 #' the object originated from an XSYG file, also the irradiation steps must
-#' be preserved in the input object.**
+#' be preserved in the input object.
 #'
-#' If data from multiple aliquots are provided please **see the details below**
-#' with regard to Lx/Tx normalisation. **The function assumes that all your
+#' If data from multiple aliquots are provided, please see the details below
+#' with regard to Lx/Tx normalisation. **Note:** The function assumes that all your
 #' measurements are related to one (comparable) sample. If you have to treat
-#' independent samples, you have use this function in a loop.**
+#' independent samples, you have use this function in a loop.
 #'
 #' @param structure [character] (*with default*):
 #' the structure of the measurement data, one of `'Lx'` or `c('Lx','Tx')`.
 #'
-#' @param signal.integral [vector] (**required**):
+#' @param signal_integral [vector] (**required**):
 #' vector with channels for the signal integral (e.g., `1:10`). It is not
 #' required if a `data.frame` with `LxTx` values is provided.
 #'
-#' @param background.integral [vector] (**required**):
+#' @param background_integral [vector] (**required**):
 #' vector with channels for the background integral (e.g., `90:100`). It is not
 #' required if a `data.frame` with `LxTx` values is provided.
+#'
+#' @param integral_input [character] (*with default*):
+#' input type for `signal_integral`, one of `"channel"` (default) or
+#' `"measurement"`. If set to `"measurement"`, the best matching channels
+#' corresponding to the given time range (in seconds) are selected.
 #'
 #' @param t_star [character], [function] (*with default*):
 #' method for calculating the time elapsed since irradiation if input is
@@ -126,7 +131,7 @@
 #' numerical output of the functions for own plots.
 #'
 #' @return
-#' An [RLum.Results-class] object is returned:
+#' An [Luminescence::RLum.Results-class] object is returned:
 #'
 #' Slot: **@data**
 #'
@@ -146,9 +151,9 @@
 #' `call` \tab `call` \tab the original function call\cr
 #' }
 #'
-#' @section Function version: 0.1.25
+#' @section Function version: 0.1.27
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany) \cr
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
 #' Christoph Burow, University of Cologne (Germany)
 #'
 #' @keywords datagen
@@ -169,8 +174,9 @@
 #' fading correction for feldspar  IRSL dating-tests on samples in field saturation.
 #' Radiation Measurements 43, 786-790. \doi{10.1016/j.radmeas.2008.01.021}
 #'
-#' @seealso [calc_OSLLxTxRatio], [read_BIN2R], [read_XSYG2R],
-#' [extract_IrradiationTimes], [calc_FadingCorr]
+#' @seealso [Luminescence::calc_OSLLxTxRatio], [Luminescence::read_BIN2R],
+#' [Luminescence::read_XSYG2R],
+#' [Luminescence::extract_IrradiationTimes], [Luminescence::calc_FadingCorr]
 #'
 #' @examples
 #'
@@ -198,9 +204,10 @@
 analyse_FadingMeasurement <- function(
   object,
   structure = c("Lx", "Tx"),
-  signal.integral = NULL,
-  background.integral = NULL,
-  t_star = 'half',
+  signal_integral = NULL,
+  background_integral = NULL,
+  integral_input = c("channel", "measurement"),
+  t_star = c("half", "half_complex", "end"),
   n.MC = 100,
   verbose = TRUE,
   plot = TRUE,
@@ -210,9 +217,25 @@ analyse_FadingMeasurement <- function(
   .set_function_name("analyse_FadingMeasurement")
   on.exit(.unset_function_name(), add = TRUE)
 
+  integral_input <- .validate_args(integral_input, c("channel", "measurement"))
+
+  ## deprecated arguments
+  extraArgs <- list(...)
+  if (any(grepl("[signal|background]\\.integral", names(extraArgs)))) {
+    .deprecated(old = c("signal.integral", "background.integral"),
+                new = c("signal_integral", "background_integral"),
+                since = "1.2.0")
+    if (integral_input != "channel") {
+      .throw_error("'integral_input' is not supported with old argument names")
+    }
+    signal_integral <- extraArgs$signal.integral
+    background_integral <- extraArgs$background.integral
+  }
+
   ## Integrity checks -------------------------------------------------------
   .validate_class(object, c("RLum.Analysis", "data.frame", "list"))
   .validate_class(structure, "character")
+  ## signal_integral and background_integral are validated in calc_OSLLxTxRatio()
   .validate_class(plot_singlePanels, c("logical", "integer", "numeric"))
   .validate_positive_scalar(n.MC, int = TRUE)
 
@@ -248,6 +271,9 @@ analyse_FadingMeasurement <- function(
     ##set table and object
     LxTx_table <- data.frame(LxTx = object[[1]], LxTx.Error = object[[2]])
     irradiation_times <- TIMESINCEIRR <- object[[3]]
+    if (any(irradiation_times < 0)) {
+      .throw_error("'object' cannot contain negative irradiation times")
+    }
     object <- NULL
   }
 
@@ -434,22 +460,22 @@ analyse_FadingMeasurement <- function(
     }
 
     ##calculate Lx/Tx table
-    len.Tx <- length(Tx_data)
-    LxTx_table <- merge_RLum(.warningCatcher(lapply(1:length(Lx_data), function(x) {
+    LxTx_table <- merge_RLum(.warningCatcher(
       calc_OSLLxTxRatio(
-        Lx.data = Lx_data[[x]],
-        Tx.data = Tx_data[[x]],
-        signal.integral = signal.integral,
-        background.integral = background.integral,
-        signal.integral.Tx = list(...)$signal.integral.Tx,
-        background.integral.Tx = list(...)$background.integral.Tx,
+        Lx.data = Lx_data,
+        Tx.data = Tx_data,
+        signal_integral = signal_integral,
+        background_integral = background_integral,
+        signal_integral_Tx = list(...)$signal_integral_Tx,
+        background_integral_Tx = list(...)$background_integral_Tx,
+        integral_input = integral_input,
         sigmab = list(...)$sigmab,
         sig0 = list(...)$sig0 %||% formals(calc_OSLLxTxRatio)$sig0,
         background.count.distribution =
           list(...)$background.count.distribution %||%
                    formals(calc_OSLLxTxRatio)$background.count.distribution
       )
-    })))$LxTx.table
+    ))$LxTx.table
   }
 
   ##create unique identifier
@@ -632,8 +658,7 @@ analyse_FadingMeasurement <- function(
     ## deprecated argument
     if ("plot.single" %in% ...names()) {
       plot_singlePanels <- list(...)$plot.single
-      .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
-                     "instead")
+      .deprecated("plot.single", "plot_singlePanels", since = "1.0.0")
     }
 
     ## split the plot area into 4 regions if plot_singlePanels = FALSE (default)
@@ -677,18 +702,18 @@ analyse_FadingMeasurement <- function(
     ## compute integration limits for plots
     if (!is.null(object)) {
       if (length(structure) == 2) {
-        int.limits.lx <- c(object_clean[[1]][range(signal.integral), 1],
-                           object_clean[[1]][range(background.integral), 1])
+        int.limits.lx <- c(object_clean[[1]][range(signal_integral), 1],
+                           object_clean[[1]][range(background_integral), 1])
       } else {
-        int.limits.lx <- c(range(signal.integral), range(background.integral)) *
+        int.limits.lx <- c(range(signal_integral), range(background_integral)) *
           max(as.matrix(object_clean[[1]][, 1])) /
           nrow(as.matrix(object_clean[[1]]))
       }
-      if (is.null(list(...)$signal.integral.Tx)) {
+      if (is.null(list(...)$signal_integral_Tx)) {
         int.limits.tx <- int.limits.lx
       } else {
-        int.limits.tx <- c(range(list(...)$signal.integral.Tx),
-                           range(list(...)$background.integral.Tx)) *
+        int.limits.tx <- c(range(list(...)$signal_integral_Tx),
+                           range(list(...)$background_integral_Tx)) *
           max(as.matrix(object_clean[[1]][, 1])) /
           nrow(as.matrix(object_clean[[1]]))
       }

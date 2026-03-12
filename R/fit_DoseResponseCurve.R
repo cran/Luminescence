@@ -69,23 +69,25 @@
 #' **Keyword: `OTOR`** (former `LambertW`)
 #'
 #' This tries to fit a dose-response curve based on the Lambert W function
-#' and the one trap one recombination centre (OTOR)
-#' model according to Pagonis et al. (2020). The function has the form
+#' and the one trap one recombination centre (OTOR) model according to Pagonis
+#' et al. (2020). The function has the form:
 #'
 #' \deqn{y = (1 + (\mathcal{W}((R - 1) * exp(R - 1 - ((x + D_{int}) / D_{c}))) / (1 - R))) * N}
 #'
-#' with \eqn{W} the Lambert W function, calculated using the package [lamW::lambertW0],
+#' with \eqn{W} the Lambert W function (calculated using [lamW::lambertW0]),
 #' \eqn{R} the dimensionless retrapping ratio, \eqn{N} the total concentration
-#' of trappings states in cm\eqn{^{-3}} and \eqn{D_{c} = N/R} a constant. \eqn{D_{int}} is
-#' the offset on the x-axis. Please note that finding the root in `mode = "extrapolation"`
+#' of trappings states in cm\eqn{^{-3}}, \eqn{D_{c} = N/R} a constant, and
+#' \eqn{D_{int}} is the offset on the x-axis. Note that \eqn{R} and \eqn{D_{c}}
+#' have a valid physical interpretation only when saturation is reached.
+#' Please note that finding the root in `mode = "extrapolation"`
 #' is a non-easy task due to the shape of the function and the results might be
 #' unexpected.
 #'
 #' **Keyword: `OTORX`**
 #'
-#' This adapts extended OTOR (therefore: OTORX) model proposed by Lawless and Timar-Gabor (2024)
-#' accounting for retrapping. Mathematically, the implementation reads (the equation here
-#' as implemented, it is slightly differently written than in the original manuscript):
+#' This adapts extended OTOR (therefore: OTORX) model proposed by Lawless and
+#' Timar-Gabor (2024) accounting for retrapping (the equation implemented here
+#' is slightly differently written than in the original manuscript):
 #'
 #' \deqn{F_{OTORX} = 1 + \left[\mathcal{W}(-Q * exp(-Q-(1-Q*(1-\frac{1}{exp(1)})) * \frac{(D + a)}{D_{63}}))\right] / Q}
 #'
@@ -107,6 +109,9 @@
 #' the regeneration dose points. This value is essential and needs to provided
 #' along with the usual dose and \eqn{\frac{L_x}{T_x}} values (see `object` parameter input
 #' and the example section). For more details see Lawless and Timar-Gabor (2024).
+#'
+#' The fit also returns the parameter \eqn{R} know from `OTOR`, which is derived
+#' as \eqn{R = 1 - Q}.
 #'
 #' *Note: The offset adder \eqn{a} is not part of the formula in Timar-Gabor (2024) and can
 #' be set to zero with the option `fit.force_through_origin = TRUE`*
@@ -157,18 +162,9 @@
 #' as natural dose
 #'
 #' @param fit.method [character] (*with default*):
-#' function used for fitting. Possible options are:
-#' - `LIN`,
-#' - `QDR`,
-#' - `EXP`,
-#' - `EXP OR LIN`,
-#' - `EXP+LIN`,
-#' - `EXP+EXP` (not defined for extrapolation),
-#' - `GOK`,
-#' - `OTOR`,
-#' - `OTORX`
-#'
-#' See details.
+#' function used for fitting. Possible options are: `LIN`, `QDR`, `EXP`,
+#' `EXP OR LIN`, `EXP+LIN`, `EXP+EXP` (not defined for extrapolation), `GOK`,
+#' `OTOR` and `OTORX`. See details.
 #'
 #' @param fit.force_through_origin [logical] (*with default*)
 #' allow to force the fitted function through the origin.
@@ -195,8 +191,8 @@
 #' with the fit methods `EXP`, `EXP+LIN`, `EXP OR LIN`, `GOK`, `OTOR`, `OTORX`
 #' Argument to be inserted for experimental application only!
 #'
-#' @param n.MC [integer] (*with default*):  number of Monte Carlo simulations
-#' for error estimation, see details.
+#' @param n.MC [integer] (*with default*):
+#' number of Monte Carlo simulations for error estimation, see details.
 #'
 #' @param txtProgressBar [logical] (*with default*):
 #' enable/disable the progress bar. If `verbose = FALSE` also no
@@ -208,7 +204,8 @@
 #' @param ... Further arguments to be passed (currently ignored).
 #'
 #' @return
-#' An `RLum.Results` object is returned containing the slot `data` with the
+#' An [Luminescence::RLum.Results-class] object is returned
+#' containing the slot `data` with the
 #' following elements:
 #'
 #' **Overview elements**
@@ -220,10 +217,17 @@
 #' In case of a resulting  linear fit when using `LIN`, `QDR` or `EXP OR LIN` \cr
 #' `..Fit.Args` : \tab `list` \tab Arguments to the function \cr
 #' `..$Formula` : \tab [expression] \tab Fitting formula as R expression \cr
-#' `..$call` : \tab `call` \tab The original function call\cr
 #' }
 #'
-#' If `object` is a list, then the function returns a list of `RLum.Results`
+#' The `@info` slot contains the following elements:
+#' \tabular{lll}{
+#' **DATA.OBJECT** \tab **TYPE** \tab **DESCRIPTION** \cr
+#' `..$fit_messag`: \tab `character` \tab The fit message reported \cr
+#' `..$call` : \tab `call` \tab The original function call \cr
+#' }
+#'
+#' If `object` is a list, then the function returns a list of
+#' [Luminescence::RLum.Results-class]
 #' objects as defined above.
 #'
 #' **Details - `DATA.OBJECT$De`**
@@ -231,10 +235,12 @@
 #' \tabular{lll}{
 #' `De` \tab [numeric] \tab equivalent dose \cr
 #' `De.Error` \tab [numeric] \tab standard error the equivalent dose \cr
-#' `D01` \tab [numeric] \tab D-nought value, curvature parameter of the exponential \cr
-#' `D01.ERROR` \tab [numeric] \tab standard error of the D-nought value\cr
-#' `D02` \tab [numeric] \tab 2nd D-nought value, only for `EXP+EXP`\cr
-#' `D02.ERROR` \tab [numeric] \tab standard error for 2nd D-nought; only for `EXP+EXP`\cr
+#' `D01` \tab [numeric] \tab \eqn{D_0} value, curvature parameter of the exponential \cr
+#' `D01.ERROR` \tab [numeric] \tab standard error of the \eqn{D_0} value\cr
+#' `D02` \tab [numeric] \tab 2nd \eqn{D_0} value, only for `EXP+EXP`\cr
+#' `D02.ERROR` \tab [numeric] \tab standard error for 2nd \eqn{D_0}; only for `EXP+EXP`\cr
+#' `R` \tab [numeric] \tab the material specific parameter \eqn{R}\cr
+#' `R.ERROR` \tab [numeric] \tab the uncertainty of R \eqn{R}\cr
 #' `Dc` \tab [numeric] \tab value indicating saturation level; only for `OTOR` \cr
 #' `D63` \tab [numeric] \tab the specific saturation level; only for `OTORX` \cr
 #' `n_N` \tab [numeric] \tab saturation level of dose-response curve derived via integration from the used function; it compares the full integral of the curves (`N`) to the integral until `De` (`n`) (e.g.,  Guralnik et al., 2015)\cr
@@ -249,10 +255,10 @@
 #' `.De.raw` \tab [numeric] \tab equivalent dose reported 'as is', that is containing infinities and negative values if they could be calculated. Bear in mind that negative values are meaningless and may be arbitrary.\cr
 #' }
 #'
-#' @section Function version: 1.4.3
+#' @section Function version: 1.4.5
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Michael Dietze, GFZ Potsdam (Germany) \cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
@@ -269,7 +275,8 @@
 #' Pagonis, V., Kitis, G., Chen, R., 2020. A new analytical equation for the dose response of dosimetric materials,
 #' based on the Lambert W function. Journal of Luminescence 225, 117333. \doi{10.1016/j.jlumin.2020.117333}
 #'
-#' @seealso [plot_GrowthCurve], [nls], [RLum.Results-class], [get_RLum],
+#' @seealso [Luminescence::plot_DoseResponseCurve], [nls],
+#' [Luminescence::RLum.Results-class], [Luminescence::get_RLum],
 #' [minpack.lm::nlsLM], [lm], [uniroot], [lamW::lambertW0]
 #'
 #' @examples
@@ -338,8 +345,9 @@
 #' @export
 fit_DoseResponseCurve <- function(
   object,
-  mode = "interpolation",
-  fit.method = "EXP",
+  mode = c("interpolation", "extrapolation", "alternate"),
+  fit.method = c("EXP", "LIN", "QDR", "EXP OR LIN", "EXP+LIN", "EXP+EXP",
+                 "GOK", "OTOR", "OTORX"),
   fit.force_through_origin = FALSE,
   fit.weights = TRUE,
   fit.includingRepeatedRegPoints = TRUE,
@@ -396,6 +404,8 @@ fit_DoseResponseCurve <- function(
   .validate_positive_scalar(fit.NumberRegPoints, int = TRUE, null.ok = TRUE)
   .validate_positive_scalar(fit.NumberRegPointsReal, int = TRUE, null.ok = TRUE)
   .validate_positive_scalar(n.MC, int = TRUE)
+  .validate_logical_scalar(txtProgressBar)
+  .validate_logical_scalar(verbose)
 
   ## convert input to data.frame
   switch(
@@ -522,7 +532,7 @@ fit_DoseResponseCurve <- function(
   x.natural <- rep(NA_real_, n.MC)
 
   ##1.4 set initialise variables
-  De <- De.Error <- D01 <-  R <-  Dc <- D63 <- N <- TEST_DOSE <- NA_real_
+  De <- De.Error <- D01 <- R <- R.ERROR <- Dc <- D63 <- N <- TEST_DOSE <- NA_real_
 
   ##1.5 create bindings (we generate this with an internal function klate)
   var.g <- d <- Dint <- Q <- NA_real_
@@ -581,21 +591,20 @@ fit_DoseResponseCurve <- function(
       .throw_message(msg, error = FALSE)
   }
 
-  ## helper to report the fit
+  ## helper to report the fit: this assigns the
+  fit_message <- ""
   .report_fit <- function(De, ...) {
-    if (verbose && mode != "alternate") {
-      writeLines(paste0("[fit_DoseResponseCurve()] Fit: ", fit.method,
-                        " (", mode,") ", "| De = ", round(abs(De), 2),
-                        ...))
-    }
+      fit_message <<- paste0(sprintf("Fit: %s (%s) | De = %.2f",
+                                     fit.method, mode, abs(De)), ...)
+      if (verbose)
+        writeLines(paste("[fit_DoseResponseCurve()]", fit_message))
   }
 
   ## helper to report a failure in the fit
   .report_fit_failure <- function(method, mode, ...) {
-    if (verbose) {
-      writeLines(paste0("[fit_DoseResponseCurve()] Fit failed for ",
-                        fit.method, " (", mode, ")"))
-    }
+    fit_message <<- sprintf("Fit failed for %s (%s)", fit.method, mode)
+    if (verbose)
+      writeLines(paste("[fit_DoseResponseCurve()]", fit_message))
   }
 
   ##START PARAMETER ESTIMATION
@@ -638,7 +647,10 @@ fit_DoseResponseCurve <- function(
       b.MC <- suppressWarnings(rnorm(50, mean = b, sd = b / 100))
     }
 
-    c.MC <- suppressWarnings(rnorm(50, mean = c, sd = c / 100))
+    if(fit.force_through_origin)
+      c.MC <- rep(0, 50)
+    else
+      c.MC <- suppressWarnings(rnorm(50, mean = c, sd = c / 100))
     g.MC <- suppressWarnings(rnorm(50, mean = g, sd = g / 1))
 
     ##set start vector (to avoid errors within the loop)
@@ -724,7 +736,8 @@ fit_DoseResponseCurve <- function(
       ## prepare what we can outside the loop
       a.start <-  b.start <- c.start <- numeric(length(a.MC))
       lower_bounds <- c(a = 0, b = 1e-6, c = 0)
-      control_settings <-  minpack.lm::nls.lm.control(maxiter = 500)
+      control_settings <-  minpack.lm::nls.lm.control(
+        maxiter = 500)
 
       ## loop for better attempt
       for (i in seq_along(a.MC)) {
@@ -755,10 +768,9 @@ fit_DoseResponseCurve <- function(
       a <- median(a.start, na.rm = TRUE)
       b <- median(b.start, na.rm = TRUE)
       c <- median(c.start, na.rm = TRUE)
-
       ## exception: if b is 1 it is likely to be wrong and should be reset
       if(!is.na(b) && b == 1)
-        b <- mean(b.MC)
+        b <- mean(b.MC) # nocov
 
       ## set boundaries
       lower <- if (fit.bounds) c(0, 0, 0) else c(-Inf, -Inf, -Inf)
@@ -1435,7 +1447,7 @@ fit_DoseResponseCurve <- function(
           #	--Fit many curves and calculate a new De +/- De_Error
           #	--take De_Error
           #set variables
-          var.Dc <- vector(mode = "numeric", length = n.MC)
+          var.Dc <- var.R <- vector(mode = "numeric", length = n.MC)
 
           #start loop
           for (i in 1:n.MC) {
@@ -1456,7 +1468,7 @@ fit_DoseResponseCurve <- function(
             if (!inherits(fit.MC, "try-error")) {
               # get parameters out
               parameters <- coef(fit.MC)
-              var.R <- as.numeric(parameters["R"])
+              var.R[i] <- as.numeric(parameters["R"])
               var.Dc[i] <- as.numeric(parameters["Dc"])
               var.N <- as.numeric(parameters["N"])
               var.Dint <- as.numeric(parameters["Dint"])
@@ -1468,7 +1480,7 @@ fit_DoseResponseCurve <- function(
                   f = function(x, R, Dc, N, Dint, LnTn) {
                     fit.functionOTOR(R, Dc, N, Dint, x) - LnTn},
                   interval = c(0, max(object[[1]]) * 1.2),
-                  R = var.R,
+                  R = var.R[i],
                   Dc = var.Dc[i],
                   N = var.N,
                   Dint = var.Dint,
@@ -1481,7 +1493,7 @@ fit_DoseResponseCurve <- function(
                     f = function(x, R, Dc, N, Dint) {
                       fit.functionOTOR(R, Dc, N, Dint, x)},
                     interval = c(-max(object[[1]]), 0),
-                    R = var.R,
+                    R = var.R[i],
                     Dc = var.Dc[i],
                     N = var.N,
                     Dint = var.Dint)$root),
@@ -1492,7 +1504,7 @@ fit_DoseResponseCurve <- function(
                     f = function(x, R, Dc, N, Dint) {
                       fit.functionOTOR(R, Dc, N, Dint, x)},
                     interval = c(-max(object[[1]]), 0),
-                    R = var.R,
+                    R = var.R[i],
                     Dc = var.Dc[i],
                     N = var.N,
                     Dint = var.Dint)$minimum),
@@ -1507,9 +1519,11 @@ fit_DoseResponseCurve <- function(
 
           ##write Dc.ERROR
           Dc.ERROR <- sd(var.Dc, na.rm = TRUE)
+          R.ERROR <- sd(var.R, na.rm = TRUE)
 
           ##remove values
           rm(var.Dc)
+          rm(var.R)
 
     }#endif::try-error fit
 
@@ -1553,6 +1567,9 @@ fit_DoseResponseCurve <- function(
     } else {
       #get parameters out of it
       .get_coef(fit)
+
+      ## get also R, this is not part of the fit
+      R <- 1-Q
 
       #calculate De
       De <- NA
@@ -1598,14 +1615,14 @@ fit_DoseResponseCurve <- function(
 
       if (inherits(De, "try-error")) De <- NA # nocov
 
-      .report_fit(De, " | Q = ", round(Q, 2), " | D63 = ", round(D63, 2))
+      .report_fit(De, " | R = ", round(1-Q, 2), " | D63 = ", round(D63, 2))
 
       #OTORX MC -----
       ##Monte Carlo Simulation
       #	--Fit many curves and calculate a new De +/- De_Error
       #	--take De_Error
       #set variables
-      var.D63 <- vector(mode = "numeric", length = n.MC)
+      var.D63 <- var.Q <- vector(mode = "numeric", length = n.MC)
 
       #start loop
       for (i in 1:n.MC) {
@@ -1626,7 +1643,7 @@ fit_DoseResponseCurve <- function(
         if (!inherits(fit.MC, "try-error")) {
           # get parameters out
           parameters<-coef(fit.MC)
-          var.Q <- as.numeric(parameters["Q"])
+          var.Q[i] <- as.numeric(parameters["Q"])
           var.D63[i] <- as.numeric(parameters["D63"])
           var.c <- as.numeric(parameters["c"])
           var.a <- as.numeric(parameters["a"])
@@ -1638,7 +1655,7 @@ fit_DoseResponseCurve <- function(
                 f = function(x, Q, D63, c, a, LnTn) {
                   fit.functionOTORX(x, Q, D63, c, a) - LnTn},
                 interval = c(0, max(object[[1]]) * 1.2),
-                Q = var.Q,
+                Q = var.Q[i],
                 D63 = var.D63[i],
                 c = var.c,
                 a = var.a,
@@ -1651,7 +1668,7 @@ fit_DoseResponseCurve <- function(
                 f = function(x, Q, D63, c, a, LnTn) {
                   fit.functionOTORX(x, Q, D63, c, a, x)},
                 interval = c(-max(object[[1]]), 0),
-                Q = var.Q,
+                Q = var.Q[i],
                 D63 = var.D63[i],
                 c = var.c,
                 a = var.a)$root),
@@ -1662,8 +1679,8 @@ fit_DoseResponseCurve <- function(
                 f = function(x, Q, D63, c, a) {
                   fit.functionOTOR(x, Q, D63, c, a)},
                 interval = c(-max(object[[1]]), 0),
-                Q = var.R,
-                D63 = var.Dc[i],
+                Q = var.Q[i],
+                D63 = var.D63[i],
                 c = var.c,
                 a = var.a)$minimum),
                 silent = TRUE)
@@ -1676,9 +1693,11 @@ fit_DoseResponseCurve <- function(
 
       ##write Dc.ERROR
       D63.ERROR <- sd(var.D63, na.rm = TRUE)
+      R.ERROR <- sd(1-var.Q, na.rm = TRUE)
 
       ##remove values
       rm(var.D63)
+      rm(var.Q)
 
     }#endif::try-error fit
   }#End if fit.method selection (for all)
@@ -1754,6 +1773,8 @@ fit_DoseResponseCurve <- function(
     D01.ERROR = D01.ERROR,
     D02 = D02,
     D02.ERROR = D02.ERROR,
+    R = R,
+    R.ERROR = R.ERROR,
     Dc = Dc,
     D63 = D63,
     n_N = n_N,
@@ -1791,7 +1812,8 @@ fit_DoseResponseCurve <- function(
       Formula = fit_formula
     ),
     info = list(
-      call = sys.call()
+        fit_message = fit_message,
+        call = sys.call()
     )
   )
 }

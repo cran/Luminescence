@@ -12,13 +12,13 @@ plot_SingleGrainDisc(
   show_positioning_holes = TRUE,
   df_neighbours = NULL,
   ignore_borders = FALSE,
-  str_transform = "sqrt",
+  str_transform = c("sqrt", "lin", "log"),
   ...
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Results} or \link{numeric} (\strong{required}): the values
-to show, should have length 100.}
+\item{object}{\linkS4class{RLum.Results} or \link{numeric} (\strong{required}):
+the values to show, should have length 100.}
 
 \item{show_coordinates}{\link{logical} (\emph{with default}): Show coordinates (1..10)
 in x and in y direction. Defaults to \code{FALSE}.}
@@ -26,7 +26,7 @@ in x and in y direction. Defaults to \code{FALSE}.}
 \item{show_location_ids}{\link{logical} (\emph{with default}): Show id with every
 grain location (1..100). Defaults to \code{FALSE}.}
 
-\item{show_neighbours}{\link{logical}  (\emph{with default}): Show which
+\item{show_neighbours}{\link{logical} (\emph{with default}): Show which
 neighbour connections are taken into account if calculating Moran's I.
 This makes sense when there are \code{NA} observations, or when a non-standard
 neighbour setting is defined.}
@@ -74,14 +74,15 @@ plot_SingleGrainDisc(1:100)
 } 
 
 \section{How to cite}{
-Boer, A.d., Steinbuch, L., 2025. plot_SingleGrainDisc(): Plot a disc with its values. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Boer, A.d., Steinbuch, L., 2026. plot_SingleGrainDisc(): Plot a disc with its values. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
 de Boer, A-M., Steinbuch, L., Heuvelink, G.B.M., Wallinga, J., 2025.
-A novel tool to assess crosstalk in single-grain luminescence detection.
-Submitted.
+A novel method to assess crosstalk in single-grain luminescence detection.
+Radiation Measurements 186, 107459. \doi{10.1016/j.radmeas.2025.107459}
 }
 \author{
-Anna-Maartje de Boer, Luc Steinbuch, Wageningen University & Research, 2025
+Anna-Maartje de Boer, Wageningen University & Research (The Netherlands)\cr
+Luc Steinbuch, Wageningen University & Research (The Netherlands)\cr
 , RLum Developer Team}

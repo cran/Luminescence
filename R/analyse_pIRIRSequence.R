@@ -2,13 +2,13 @@
 #'
 #' @description
 #' The function performs an analysis of post-IR IRSL sequences including curve
-#' fitting on [RLum.Analysis-class] objects.
+#' fitting on [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @details To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement
 #' analyses, this function has been written as extended wrapper for function
-#' [analyse_SAR.CWOSL], thus facilitating an entire sequence analysis in
+#' [Luminescence::analyse_SAR.CWOSL], thus facilitating an entire sequence analysis in
 #' one run. With this, its functionality is strictly limited by the
-#' functionality provided by  [analyse_SAR.CWOSL].
+#' functionality provided by  [Luminescence::analyse_SAR.CWOSL].
 #'
 #' **Defining the sequence structure**
 #'
@@ -22,31 +22,29 @@
 #'
 #' **If the input is a `list`**
 #'
-#' If the input is a list of [RLum.Analysis-class] objects, every argument
+#' If the input is a list of [Luminescence::RLum.Analysis-class] objects, every argument
 #' can be provided as list to allow
 #' for different sets of parameters for every single input element.
-#' For further information see [analyse_SAR.CWOSL].
+#' For further information see [Luminescence::analyse_SAR.CWOSL].
 #'
-#' @param object [RLum.Analysis-class] or [list] of [RLum.Analysis-class] objects (**required**):
+#' @param object [Luminescence::RLum.Analysis-class] or [list] of
+#' [Luminescence::RLum.Analysis-class] objects (**required**):
 #' input object containing data for analysis.
 #' If a [list] is provided the functions tries to iterate over each element
 #' in the list.
 #'
-#' @param signal.integral.min [integer] (**required**):
-#' lower bound of the signal integral. Provide this value as vector for different
-#' integration limits for the different IRSL curves.
+#' @param signal_integral [integer] (**required**):
+#' vector of channels for the signal integral. Provide this value as a list
+#' for different integration limits for the different IRSL curves.
 #'
-#' @param signal.integral.max [integer] (**required**):
-#' upper bound of the signal integral. Provide this value as vector for different
-#' integration limits for the different IRSL curves.
+#' @param background_integral [integer] (**required**):
+#' vector of channels for the background integral. Provide this value as a list
+#' for different integration limits for the different IRSL curves.
 #'
-#' @param background.integral.min [integer] (**required**):
-#' lower bound of the background integral. Provide this value as vector for
-#' different integration limits for the different IRSL curves.
-#'
-#' @param background.integral.max [integer] (**required**):
-#' upper bound of the background integral. Provide this value as vector for
-#' different integration limits for the different IRSL curves.
+#' @param integral_input [character] (*with default*):
+#' input type for `signal_integral`, one of `"channel"` (default) or
+#' `"measurement"`. If set to `"measurement"`, the best matching channels
+#' corresponding to the given time range (in seconds) are selected.
 #'
 #' @param dose.points [numeric] (*optional*):
 #' a numeric vector containing the dose points values. Using this argument overwrites dose point
@@ -67,13 +65,13 @@
 #' Ignored if `plot = FALSE`.
 #'
 #' @param ... further arguments that will be passed to
-#' [analyse_SAR.CWOSL] and [plot_DoseResponseCurve]. Furthermore, the
+#' [Luminescence::analyse_SAR.CWOSL] and [Luminescence::plot_DoseResponseCurve]. Furthermore, the
 #' arguments `main` (headers), `log` (IRSL curves), `cex` (control
 #' the size) and `mtext.outer` (additional text on the plot area) can be passed to influence the plotting. If the input
 #' is a list, `main` can be passed as [vector] or [list].
 #'
 #' @return
-#' Plots (*optional*) and an [RLum.Results-class] object is
+#' Plots (*optional*) and an [Luminescence::RLum.Results-class] object is
 #' returned containing the following elements:
 #'
 #' \tabular{lll}{
@@ -85,7 +83,7 @@
 #' `..$call` : \tab [call] \tab the original function call
 #' }
 #'
-#' The output should be accessed using the function [get_RLum].
+#' The output should be accessed using the function [Luminescence::get_RLum].
 #'
 #' @note
 #' Best graphical output can be achieved by using the function `pdf`
@@ -93,12 +91,14 @@
 #'
 #' `pdf(file = "<YOUR FILENAME>", height = 18, width = 18)`
 #'
-#' @section Function version: 0.2.6
+#' @section Function version: 0.2.8
 #'
-#' @author Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' @author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [analyse_SAR.CWOSL], [calc_OSLLxTxRatio], [plot_GrowthCurve],
-#' [RLum.Analysis-class], [RLum.Results-class] [get_RLum]
+#' @seealso [Luminescence::analyse_SAR.CWOSL], [Luminescence::calc_OSLLxTxRatio],
+#' [Luminescence::plot_DoseResponseCurve], [Luminescence::fit_DoseResponseCurve]
+#' [Luminescence::RLum.Analysis-class], [Luminescence::RLum.Results-class],
+#' [Luminescence::get_RLum]
 #'
 #' @references
 #' Murray, A.S., Wintle, A.G., 2000. Luminescence dating of quartz
@@ -140,10 +140,8 @@
 #' ##(2) Perform pIRIR analysis (for this example with quartz OSL data!)
 #' ## Note: output as single plots to avoid problems with this example
 #' results <- analyse_pIRIRSequence(object,
-#'      signal.integral.min = 1,
-#'      signal.integral.max = 2,
-#'      background.integral.min = 900,
-#'      background.integral.max = 1000,
+#'      signal_integral = 1:2,
+#'      background_integral = 900:1000,
 #'      fit.method = "EXP",
 #'      sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
 #'      main = "Pseudo pIRIR data set based on quartz OSL",
@@ -156,10 +154,8 @@
 #' tempfile <- tempfile(fileext = ".pdf")
 #' pdf(file = tempfile, height = 18, width = 18)
 #'   results <- analyse_pIRIRSequence(object,
-#'          signal.integral.min = 1,
-#'          signal.integral.max = 2,
-#'          background.integral.min = 900,
-#'          background.integral.max = 1000,
+#'          signal_integral = 1:2,
+#'          background_integral = 900:1000,
 #'          fit.method = "EXP",
 #'          main = "Pseudo pIRIR data set based on quartz OSL")
 #'
@@ -169,10 +165,9 @@
 #' @export
 analyse_pIRIRSequence <- function(
   object,
-  signal.integral.min,
-  signal.integral.max,
-  background.integral.min,
-  background.integral.max,
+  signal_integral,
+  background_integral,
+  integral_input = c("channel", "measurement"),
   dose.points = NULL,
   sequence.structure = c("TL", "IR50", "pIRIR225"),
   plot = TRUE,
@@ -188,33 +183,39 @@ analyse_pIRIRSequence <- function(
   par.default <- .par_defaults()
   on.exit(par(par.default), add = TRUE)
 
+  integral_input <- .validate_args(integral_input, c("channel", "measurement"))
+
+  ## deprecated argument
+  if (any(grepl("[signal|background]\\.integral", ...names()))) {
+    .deprecated(old = c("signal.integral", "background.integral"),
+                new = c("signal_integral", "background_integral"),
+                since = "1.2.0")
+    if (integral_input != "channel") {
+      .throw_error("'integral_input' is not supported with old argument names")
+    }
+    signal_integral <- list(...)$signal.integral
+    background_integral <- list(...)$background.integral
+  }
+
   ## Self-call --------------------------------------------------------------
   if (inherits(object, "list")) {
+    .validate_not_empty(object)
     lapply(object, .validate_class, "RLum.Analysis",
            name = "All elements of 'object'")
 
     ## make life easy
-    if(missing("signal.integral.min")){
-      signal.integral.min <- 1
-      .throw_warning("'signal.integral.min' missing, set to 1")
+    if (missing("signal_integral")){
+      signal_integral <- 1:2
+      .throw_warning("'signal_integral' missing, set to 1:2")
     }
 
-    if(missing("signal.integral.max")){
-      signal.integral.max <- signal.integral.min + 1
-      .throw_warning("'signal.integral.max' missing, set to ",
-                     signal.integral.max)
-    }
-
-    .validate_class(background.integral.min, c("integer", "numeric"))
-    .validate_class(background.integral.max, c("integer", "numeric"))
+    .validate_class(background_integral, c("integer", "numeric"))
 
    ## expand input arguments
    rep.length <- length(object)
 
-   signal.integral.min <- .listify(signal.integral.min, rep.length)
-   signal.integral.max <- .listify(signal.integral.max, rep.length)
-   background.integral.min <- .listify(background.integral.min, rep.length)
-   background.integral.max <- .listify(background.integral.max, rep.length)
+   signal_integral <- .listify(signal_integral, rep.length)
+   background_integral <- .listify(background_integral, rep.length)
    sequence.structure <- .listify(sequence.structure, rep.length)
    dose.points <- .listify(dose.points, rep.length)
 
@@ -225,10 +226,9 @@ analyse_pIRIRSequence <- function(
    ## run analysis
    temp <- .warningCatcher(lapply(1:length(object), function(x) {
       analyse_pIRIRSequence(object[[x]],
-                        signal.integral.min = signal.integral.min[[x]],
-                        signal.integral.max = signal.integral.max[[x]],
-                        background.integral.min = background.integral.min[[x]],
-                        background.integral.max = background.integral.max[[x]] ,
+                        signal_integral = signal_integral[[x]],
+                        background_integral = background_integral[[x]],
+                        integral_input = integral_input,
                         dose.points = dose.points[[x]],
                         sequence.structure = sequence.structure[[x]],
                         plot = plot,
@@ -250,12 +250,7 @@ analyse_pIRIRSequence <- function(
   }
 
   ## Integrity checks -------------------------------------------------------
-
   .validate_class(object, "RLum.Analysis", extra = "'list'")
-  .validate_class(signal.integral.min, c("integer", "numeric"))
-  .validate_class(signal.integral.max, c("integer", "numeric"))
-  .validate_class(background.integral.min, c("integer", "numeric"))
-  .validate_class(background.integral.max, c("integer", "numeric"))
   .validate_logical_scalar(plot)
   .validate_logical_scalar(plot_singlePanels)
 
@@ -275,8 +270,7 @@ analyse_pIRIRSequence <- function(
   ## deprecated argument
   if ("plot.single" %in% ...names()) {
     plot_singlePanels <- list(...)$plot.single
-    .throw_warning("'plot.single' is deprecated, use 'plot_singlePanels' ",
-                   "instead")
+    .deprecated("plot.single", "plot_singlePanels", since = "1.0.0")
   }
 
   ## Deal with extra arguments
@@ -385,6 +379,20 @@ analyse_pIRIRSequence <- function(
   pIRIR.curve.names  <- unique(temp.sequence.structure[
     temp.sequence.structure[IRSL.curves.id,"id"],"protocol.step"])
 
+  ## Integrals checks -------------------------------------------------------
+
+  if (integral_input == "measurement") {
+    x.range <- object@records[[IRSL.curves.id[1]]][, 1]
+    unit <- "time"
+    signal_integral <- .convert_to_channels(x.range, signal_integral, unit,
+                                            list.ok = TRUE)
+    background_integral <- .convert_to_channels(x.range, background_integral, unit,
+                                                list.ok = TRUE)
+  }
+  signal_integral <- .validate_integral(signal_integral, list.ok = TRUE)
+  background_integral <- .validate_integral(background_integral, list.ok = TRUE)
+
+
   ##===========================================================================#
   ## set graphic layout using the layout option
   ## unfortunately a little bit more complicated then expected previously due
@@ -456,17 +464,13 @@ analyse_pIRIRSequence <- function(
     temp.curves <- get_RLum(object, record.id = temp.id.sel, drop = FALSE)
 
     ##(b) grep integral limits as they might be different for different curves
-    if(length(signal.integral.min)>1){
-      temp.signal.integral.min <- signal.integral.min[i]
-      temp.signal.integral.max <- signal.integral.max[i]
-      temp.background.integral.min <- background.integral.min[i]
-      temp.background.integral.max <- background.integral.max[i]
+    if (inherits(signal_integral, "list") && length(signal_integral) > 1) {
+      temp.signal_integral <- signal_integral[[i]]
+      temp.background_integral <- background_integral[[i]]
 
     }else{
-      temp.signal.integral.min <- signal.integral.min
-      temp.signal.integral.max <- signal.integral.max
-      temp.background.integral.min <- background.integral.min
-      temp.background.integral.max <- background.integral.max
+      temp.signal_integral <- signal_integral
+      temp.background_integral <- background_integral
     }
 
     ##(c) call analysis sequence and plot
@@ -484,16 +488,14 @@ analyse_pIRIRSequence <- function(
     par(cex = cex)
     temp.results <- analyse_SAR.CWOSL(
       temp.curves,
-      signal.integral.min = temp.signal.integral.min,
-      signal.integral.max = temp.signal.integral.max,
-      background.integral.min = temp.background.integral.min,
-      background.integral.max = temp.background.integral.max,
+      signal_integral = temp.signal_integral,
+      background_integral = temp.background_integral,
       plot = plot,
       dose.points = dose.points,
       plot_singlePanels = temp.plot.single,
       cex = cex,
       ...
-    ) ##TODO should be replaced be useful explicit arguments
+    ) ##TODO should be replaced with useful explicit arguments
 
       ##check whether NULL was return
       if (is.null(temp.results)) {
@@ -551,7 +553,7 @@ if(plot){
   LnLxTnTx.table$LxTx[is.infinite(LnLxTnTx.table$LxTx)] <- NA
   LnLxTnTx.table$LxTx.Error[is.infinite(LnLxTnTx.table$LxTx.Error)] <- NA
 
-  ##plot growth curves
+  ## plot dose response curves
   min.LxTx <- min(LnLxTnTx.table$LxTx, na.rm = TRUE)
   max.LxTx <- max(LnLxTnTx.table$LxTx, na.rm = TRUE)
   max.LxTx.Error <- max(LnLxTnTx.table$LxTx.Error, na.rm = TRUE)

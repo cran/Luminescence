@@ -2,12 +2,12 @@
 #'
 #' @description
 #' The function provides a standardised plot output for spectrum data of an
-#' [RLum.Data.Spectrum-class] class object. The purpose of this function is to
+#' [Luminescence::RLum.Data.Spectrum-class] class object. The purpose of this function is to
 #' provide easy and straightforward spectra plotting, not a fully customised
 #' access to all plot parameters. If this is wanted, standard R plot
 #' functionality should be used instead.
 #'
-#' **Matrix structure** \cr (cf. [RLum.Data.Spectrum-class])
+#' **Matrix structure** \cr (cf. [Luminescence::RLum.Data.Spectrum-class])
 #'
 #' - `rows` (x-values): wavelengths/channels (`xlim`, `xlab`)
 #' - `columns` (y-values): time/temperature (`ylim`, `ylab`)
@@ -85,8 +85,8 @@
 #' `n_breaks` (`"image"`), `legend` (`TRUE`/`FALSE`),
 #' `legend.pos` (`"image"`), `legend.horiz` (`TRUE`/`FALSE` | `"image"`)
 #'
-#' @param object [RLum.Data.Spectrum-class] or [matrix] (**required**):
-#' S4 object of class `RLum.Data.Spectrum` or a `matrix` containing count
+#' @param object [Luminescence::RLum.Data.Spectrum-class] or [matrix] (**required**):
+#' S4 object of class [Luminescence::RLum.Data.Spectrum-class] or a `matrix` containing count
 #' values of the spectrum.\cr
 #' Please note that in case of a matrix row names and col names are set
 #' automatically if not provided.
@@ -106,7 +106,7 @@
 #' you provide already binned spectra, the colour assignment is likely to be
 #' wrong, since the colour gradients are calculated using the bin number.
 #'
-#' @param bg.spectrum [RLum.Data.Spectrum-class] or [matrix] (*optional*):
+#' @param bg.spectrum [Luminescence::RLum.Data.Spectrum-class] or [matrix] (*optional*):
 #' spectrum used for the background subtraction. The background spectrum should
 #' be measured using the same setting as the signal spectrum. The argument
 #' `bg.channels` controls how the subtraction is performed: if `bg.channels`
@@ -133,9 +133,10 @@
 #' e.g. `bin.cols = 2` two channels are summed up.
 #' Binning is applied after the background subtraction.
 #'
-#' @param norm [character] (*optional*):
-#' Normalise data to the maximum (`norm = "max"`) or minimum (`norm = "min"`)
-#' count values. The normalisation is applied after binning.
+#' @param norm [logical], [character] (*optional*):
+#' if logical, whether curve normalisation should occur (`FALSE` by default);
+#' alternatively, one of the values detailed in [Luminescence::plot_RLum.Data.Curve].
+#' The normalisation is applied after binning.
 #'
 #' @param rug [logical] (*with default*):
 #' enable/disable colour rug. Currently only implemented for plot
@@ -147,7 +148,7 @@
 #' especially in case of TL-spectra.
 #'
 #' @param xaxis.energy [logical] (*with default*): enable/disable using energy
-#' instead of wavelength on the x-axis. Function [convert_Wavelength2Energy]
+#' instead of wavelength on the x-axis. Function [Luminescence::convert_Wavelength2Energy]
 #' is used to perform the conversion.
 #'
 #' **Note:** Besides being used in setting the axis, with this option the
@@ -176,9 +177,10 @@
 #' @section Function version: 0.6.13
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [RLum.Data.Spectrum-class], [convert_Wavelength2Energy], [plot_RLum],
+#' @seealso [Luminescence::RLum.Data.Spectrum-class],
+#' [Luminescence::convert_Wavelength2Energy], [Luminescence::plot_RLum],
 #' [graphics::persp], [plotly::plot_ly], [graphics::contour], [graphics::image]
 #'
 #' @keywords aplot
@@ -250,13 +252,14 @@
 plot_RLum.Data.Spectrum <- function(
   object,
   par.local = TRUE,
-  plot.type = "contour",
+  plot.type = c("contour", "persp", "single", "multiple.lines",
+                "image", "transect", "interactive"),
   optical.wavelength.colours = TRUE,
   bg.spectrum = NULL,
   bg.channels = NULL,
   bin.rows = 1,
   bin.cols = 1,
-  norm = NULL,
+  norm = FALSE,
   rug = TRUE,
   limit_counts = NULL,
   xaxis.energy = FALSE,
@@ -286,10 +289,11 @@ plot_RLum.Data.Spectrum <- function(
   if (length(object@data) < 2) {
     .throw_error("'object' contains no data")
   }
+  ## `norm` is not validated here but will be validated by normalise_RLum()
   .validate_class(bg.spectrum, c("RLum.Data.Spectrum", "matrix"), null.ok = TRUE)
-  .validate_args(norm, c("min", "max"), null.ok = TRUE)
-  .validate_args(plot.type, c("contour", "persp", "single", "multiple.lines",
-                              "image", "transect", "interactive"))
+  plot.type <- .validate_args(plot.type, c("contour", "persp", "single",
+                                           "multiple.lines", "image",
+                                           "transect", "interactive"))
   .validate_positive_scalar(bin.rows, int = TRUE)
   .validate_positive_scalar(bin.cols, int = TRUE)
 
@@ -334,7 +338,9 @@ plot_RLum.Data.Spectrum <- function(
   ylab <- extraArgs$ylab %||% ifelse(plot.type %in% c("single", "multiple.lines"),
                                      "Luminescence [cts/channel]", ylab)
   xlim <- extraArgs$xlim %||% range(as.numeric(rownames(object@data)))
+  .validate_class(xlim, "numeric", length = 2)
   ylim <- extraArgs$ylim %||% range(as.numeric(colnames(object@data)))
+  .validate_class(ylim, "numeric", length = 2)
   #for zlim see below
 
   mtext <- extraArgs$mtext %||% ""
@@ -390,7 +396,7 @@ plot_RLum.Data.Spectrum <- function(
     temp.xyz <- temp.xyz[x.vals >= xlim[1] & x.vals <= xlim[2],
                          y.vals >= ylim[1] & y.vals <= ylim[2],
                          drop = FALSE]
-    if (nrow(temp.xyz) == 0 || ncol(temp.xyz) == 0) {
+    if (nrow(temp.xyz) == 0 || ncol(temp.xyz) == 0 || all(is.na(temp.xyz))) {
       .throw_error("No data left after applying 'xlim' and 'ylim'")
     }
   }
@@ -514,16 +520,30 @@ plot_RLum.Data.Spectrum <- function(
     temp.xyz[temp.xyz[] > max(min(temp.xyz), limit_counts[1])] <- limit_counts[1]
   }
 
-  # Normalise if wanted -------------------------------------------------------------------------
-  if(!is.null(norm)){
-    if(norm == "min")
-      temp.xyz <- temp.xyz/min(temp.xyz)
-    else if (norm == "max")
-      temp.xyz <- temp.xyz/max(temp.xyz)
+  ## data normalisation -----------------------------------------------------
+  if (!isFALSE(norm)) {
+    ## this is a bit cumbersome, but we cannot call `normalise_RLum()` directly
+    ## on a matrix (and calling `.normalise_curve()` ourselves means that we
+    ## would have to duplicate the input validation steps here), see #1303
+    temp.spectrum <- set_RLum("RLum.Data.Spectrum", data = temp.xyz)
+    temp.xyz <- normalise_RLum(temp.spectrum, norm)@data
+
+    ## check if all values were replaced by 0 because normalisation produced Inf/Nan
+    if (sum(range(temp.xyz)) == 0) {
+      .throw_message("Insufficient data for plotting, NULL returned")
+      return(NULL)
+    }
+  }
+
+  ## don't apply a logarithmic transformation if non-positive values are present
+  if (grepl("z", log) && any(temp.xyz <= 0)) {
+    .throw_warning("Data contains non-positive values, set to NA")
+    temp.xyz[temp.xyz <= 0] <- NA
   }
 
   ##check for zlim
-  zlim <- extraArgs$zlim %||% range(temp.xyz)
+  zlim <- extraArgs$zlim %||% range(temp.xyz, na.rm = TRUE)
+  .validate_class(zlim, "numeric", length = 2)
 
   # set colour values --------------------------------------------------------
   if (is.null(extraArgs$col) || plot.type %in% c("single", "multiple.lines")) {
@@ -858,10 +878,14 @@ if(plot){
     col <- extraArgs$col %||% "black"
     box <- extraArgs$box[1] %||% TRUE
     frames <- extraArgs$frames %||% 1:length(y)
-
     for(i in frames) {
       if (!"zlim" %in% names(extraArgs))
-        zlim <- range(temp.xyz[, i])
+        zlim <- suppressWarnings(range(temp.xyz[, i], na.rm = TRUE))
+
+      ## we get infinities if all elements in the current frame are NA
+      if (any(is.infinite(zlim)))
+        next
+
       plot(x, temp.xyz[,i],
            xlab = xlab,
            ylab = ylab,
@@ -1029,7 +1053,7 @@ if(plot){
     ## ========================================================================#
 
     ##sum up rows (column sum)
-    temp.xyz <- colSums(temp.xyz)
+    temp.xyz <- colSums(temp.xyz, na.rm = TRUE)
 
     ##consider differences within the arguments
     zlim <- extraArgs$zlim %||% c(0, max(temp.xyz))

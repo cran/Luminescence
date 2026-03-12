@@ -1,7 +1,7 @@
 #' @title Plot function for an RLum.Data.Curve S4 class object
 #'
 #' @description The function provides a standardised plot output for curve data of an
-#' `RLum.Data.Curve` S4-class object.
+#' [Luminescence::RLum.Data.Curve-class] S4-class object.
 #'
 #' @details Only single curve data can be plotted with this function. Arguments
 #' according to [plot].
@@ -13,6 +13,11 @@
 #'
 #' `norm = TRUE` or `norm = "max"`: Curve values are normalised to the highest
 #' count value in the curve
+#'
+#' `norm = "min"`: Curve values are normalised to the smallest count value
+#' in the curve
+#'
+#' `norm = "first"`: Curve values are normalised to the very first count value
 #'
 #' `norm = "last"`: Curve values are normalised to the last count value
 #' (this can be useful in particular for radiofluorescence curves)
@@ -26,8 +31,12 @@
 #' The background of the curve is defined as the last 20% of the count values
 #' of a curve.
 #'
-#' @param object [RLum.Data.Curve-class] (**required**):
-#' S4 object of class `RLum.Data.Curve`
+#' `norm = "intensity"`: Curve values are normalised to the channel length.
+#'
+#' `norm = 2.2`: Curve values are normalised to a positive number (e.g., 2.2).
+#'
+#' @param object [Luminescence::RLum.Data.Curve-class] (**required**):
+#' S4 object of class [Luminescence::RLum.Data.Curve-class]
 #'
 #' @param par.local [logical] (*with default*):
 #' use local graphical parameters for plotting, e.g. the plot is shown in one
@@ -56,9 +65,9 @@
 #' @section Function version: 0.4.0
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 #'
-#' @seealso [plot], [plot_RLum]
+#' @seealso [plot], [Luminescence::plot_RLum]
 #'
 #' @keywords aplot
 #'
@@ -97,12 +106,7 @@ plot_RLum.Data.Curve<- function(
     return(NULL)
   }
 
-  if (is.logical(norm))
-    norm <- norm[1]
-  else
-    norm <- .validate_args(norm, c("max", "last", "huot"),
-                           extra = "a logical value")
-
+  ## `norm` is not validated here but will be validated by normalise_RLum()
   .validate_logical_scalar(par.local)
   .validate_logical_scalar(smooth)
   .validate_logical_scalar(auto_scale)
@@ -116,14 +120,15 @@ plot_RLum.Data.Curve<- function(
 
   ## set labelling unit
   if (!is.na(object@recordType)) {
-      if(object@recordType[1] %in% c("OSL", "IRSL", "RL", "RF", "LM-OSL", "RBR")){
+    recordType.stripped <- gsub(" \\(.*)", "", object@recordType[1])
+    if (recordType.stripped %in% c("OSL", "IRSL", "RL", "RF", "LM-OSL", "RBR")) {
         lab.unit <- "s"
         lab.xlab <- "Stimulation time"
-      } else if(object@recordType[1] == "TL") {
+    } else if (recordType.stripped == "TL") {
         lab.unit <- "\u00B0C"
         lab.xlab <- "Temperature"
-      }
     }
+  }
 
     ##XSYG
     ##check for curveDescripter
@@ -156,7 +161,7 @@ plot_RLum.Data.Curve<- function(
 
   ## curve normalisation
   if (!isFALSE(norm)) {
-    object@data[, 2] <- .normalise_curve(object@data[, 2], norm)
+    object <- normalise_RLum(object, norm)
   }
 
   extraArgs <- list(...)
@@ -257,7 +262,7 @@ plot_RLum.Data.Curve<- function(
     do.call(graphics::plot.default,
             c(list(x = object@data[, 1], y = object@data[, 2]), extraArgs))
 
-        ##plot additional mtext
-        mtext(plot_settings$mtext, side = 3, cex = plot_settings$cex * 0.8)
+    ## plot additional mtext
+    mtext(plot_settings$mtext, side = 3, cex = 0.8 * ifelse(par.local, extraArgs$cex, 1))
   }
 }

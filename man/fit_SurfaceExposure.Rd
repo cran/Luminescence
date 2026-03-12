@@ -82,7 +82,7 @@ Flip the coordinate system.}
 \item{...}{Further parameters passed to \link{plot}.
 Custom parameters include:
 \itemize{
-\item \code{verbose} (\link{logical}): show or hide console output
+\item \code{verbose} (\link{logical}): enable/disable output to the terminal
 \item \code{line_col}: Colour of the fitted line
 \item \code{line_lty}: Type of the fitted line (see \code{lty} in \code{?par})
 \item \code{line_lwd}: Line width of the fitted line (see \code{lwd} in \code{?par})
@@ -142,7 +142,7 @@ numeric values for the dose rate (\code{Ddot}) (in Gy/ka) and the characteristic
 saturation dose (\code{D0}) (in Gy) must be provided. The function will then fit
 equation 12 in Sohbati et al. (2012b) to the data.
 
-\strong{NOTE}: Currently, this function does \strong{not} consider the variability
+\strong{Note:} Currently, this function does \strong{not} consider the variability
 of the dose rate with sample depth (\code{x})! In the original equation the dose
 rate \code{D} is an arbitrary function of \code{x} (term \code{D(x)}), but here \code{D} is assumed
 constant.
@@ -151,7 +151,7 @@ constant.
 If \code{data} is \link{list} of multiple \code{data.frame}s, each representing a separate
 sample, the function automatically performs a global fit to the data. This
 may be useful to better constrain the parameters \code{sigmaphi} or \code{mu} and
-\strong{requires} that known ages for each sample is provided
+\strong{requires} that a known age for each sample
 (e.g., \code{age = c(100, 1000)} if \code{data} is a list with two samples).
 }
 \note{
@@ -177,7 +177,6 @@ results <- fit_SurfaceExposure(
  sigmaphi = 5e-10)
 get_RLum(results)
 
-
 ## Example 2 - Single sample and considering dose rate
 # Known parameters: 10000 a, mu = 0.9, sigmaphi = 5e-10,
 # dose rate = 2.5 Gy/ka, D0 = 40 Gy
@@ -201,7 +200,6 @@ results <- fit_SurfaceExposure(
   sigmaphi = 5e-10)
 get_RLum(results)
 
-
 ## Example 4 - Multiple samples (global fit) and considering dose rate
 # Known parameters: ages = 1e2, 1e3, 1e4, 1e5, 1e6 a, mu = 0.9, sigmaphi = 5e-10,
 # dose rate = 1.0 Ga/ka, D0 = 40 Gy
@@ -218,7 +216,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Burow, C., 2025. fit_SurfaceExposure(): Nonlinear Least Squares Fit for OSL surface exposure data. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., 2025. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.1.2. https://r-lum.github.io/Luminescence/
+Burow, C., 2026. fit_SurfaceExposure(): Nonlinear Least Squares Fit for OSL surface exposure data. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

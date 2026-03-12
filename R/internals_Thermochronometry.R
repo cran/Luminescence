@@ -10,12 +10,12 @@
 #' path to a CSV file; alternatively a [vector] of paths.
 #'
 #' @param output_type [character] (*with default*):
-#' return type for the function, either `"RLum.Results"` (default) or `"list"`
+#' return type for the function, either [Luminescence::RLum.Results-class] (default) or `"list"`
 #' (for a plain R list).
 #'
 #' @returns
 #' Depending on the setting of `output_type` it will be either a plain R [list]
-#' or an [RLum.Results-class] object with the following structure data elements:
+#' or an [Luminescence::RLum.Results-class] object with the following structure data elements:
 #'
 #' `$data:`
 #' `.. $ITL`: data frame with columns `SAMPLE`, `TEMP`, `TIME`, `LxTx`, `LxTx_ERROR`
@@ -26,7 +26,7 @@
 #' `$FAD`: Fading.
 #'
 #' @author
-#' Sebastian Kreutzer, Institute of Geography, Heidelberg University (Germany)\cr
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
 #' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
 #' @noRd
@@ -34,9 +34,6 @@
   file,
   output_type = "RLum.Results"
 ) {
-  .set_function_name(".import_ThermochronometryData")
-  on.exit(.unset_function_name(), add = TRUE)
-
 # Helper functions -------------------------------------------------------
   ## consistently extract numerical data
   .extract_numerics <- function(x) {
@@ -47,16 +44,8 @@
   }
 
   ## Integrity checks -------------------------------------------------------
-  .validate_class(file, "character")
+  file <- .validate_file(file, ext = "csv", scan.dir = FALSE)
   .validate_args(output_type, c("RLum.Results", "list"))
-
-  exists <- file.exists(file)
-  if (!all(exists)) {
-    .throw_error("File '", file[!exists][1], "' does not exist")
-  }
-  if (any(grepl("xlsx?", tools::file_ext(file), ignore.case = TRUE))) {
-    .throw_error("XLS/XLSX format is not supported, use CSV instead")
-  }
 
   ## define variable
   ka <- 1e+3 * .const$year_s # ka in seconds
@@ -64,6 +53,7 @@
   ## Import -----------------------------------------------------------------
   records <- lapply(file, function(x) {
     ## read the files separating header and body
+    .validate_file(x, ext = "csv", scan.dir = FALSE)
     head <- data.table::fread(x, nrows = 3, select = 1:5)
     body <- data.table::fread(x, skip = 3, header = TRUE)
 
