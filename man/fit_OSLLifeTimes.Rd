@@ -26,9 +26,11 @@ set to a value greater than 1)}
 the default value is 0. \code{tp} has the same unit as the measurement data, e.g., µs. Please set this parameter
 carefully, if it all, otherwise you may heavily bias your fit results.}
 
-\item{signal_range}{\link{numeric} (\emph{optional}): allows to set a channel range, by default all channels are used, e.g.
-\code{signal_range = c(2,100)} considers only channels 2 to 100 and \code{signal_range = c(2)} considers only channels
-from channel 2 onwards.}
+\item{signal_range}{\link{numeric} (\emph{optional}):
+set a channel range, either by specifying both extremes, e.g.
+\code{signal_range = c(2, 100)} considers only channels 2 to 100, or only the
+start of the range, e.g. \code{signal_range = 2} considers only channels from
+channel 2 onwards. If \code{NULL} (default) all channels are used.}
 
 \item{n.components}{\link{numeric} (\emph{optional}): Fix the number of components. If set the algorithm will try
 to fit the number of predefined components. If nothing is set, the algorithm will try to find the best number
@@ -125,7 +127,7 @@ contrast to their work, for the optimisation by differential evolution here the 
 
 The function to be optimized has the form:
 
-\deqn{\chi^2 = \sum(w * (n_i/c - \sum(A_i * exp(-x/(tau_i + t_p))))^2)}
+\deqn{\chi^2 = \sum(w * (n_i/c - \sum(A_i * \exp(-x/(tau_i + t_p))))^2)}
 
 with \eqn{w = 1} for unweighted regression analysis (\code{method_control = list(weights = FALSE)}) or
 \eqn{w = c^2/n_i} for weighted regression analysis. The default values is \code{TRUE}.
@@ -150,7 +152,7 @@ The default values is \code{TRUE} \cr
 }
 }
 \section{Function version}{
- 0.1.5
+ 0.1.6
 }
 
 \examples{
@@ -172,7 +174,7 @@ object = ExampleData.TR_OSL)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Schmidt, C., 2026. fit_OSLLifeTimes(): Fitting and Deconvolution of OSL Lifetime Components. Function version 0.1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Schmidt, C., 2026. fit_OSLLifeTimes(): Fitting and Deconvolution of OSL Lifetime Components. Function version 0.1.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

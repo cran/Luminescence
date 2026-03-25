@@ -17,12 +17,12 @@ verify_SingleGrainData(
 )
 }
 \arguments{
-\item{object}{\linkS4class{Risoe.BINfileData} or \linkS4class{RLum.Analysis}
-(\strong{required}):  input object. The function also accepts a list with objects of allowed type.}
+\item{object}{\linkS4class{Risoe.BINfileData} or \linkS4class{RLum.Analysis} (\strong{required}):
+input object. The function also accepts a list with objects of allowed type.}
 
 \item{threshold}{\link{numeric} (\emph{with default}):
 numeric threshold value for the allowed difference between the \code{mean} and
-the \code{var} of the count values (see details)}
+the \code{var} of the count values (see details).}
 
 \item{use_fft}{\link{logical} (\emph{with default}): applies an additional approach based on \link[stats:fft]{stats::fft}.
 The threshold is fixed and cannot be changed.}
@@ -60,7 +60,7 @@ The function returns
 
 \strong{\code{RLum.Results}}-object
 
-\strong{slot:****\verb{@data}}
+\strong{slot:} \verb{@data}
 
 \tabular{lll}{
 \strong{Element} \tab \strong{Type} \tab \strong{Description}\cr
@@ -69,7 +69,7 @@ The function returns
 \verb{$selection_full} \tab \code{data.frame} \tab implemented models used in the baSAR-model core \cr
 }
 
-\strong{slot:****\verb{@info}}
+\strong{slot:} \verb{@info}
 
 The original function call
 
@@ -119,7 +119,7 @@ strongly recommended to use the argument \code{cleanup = TRUE} carefully if
 the cleanup works only on curves.
 }
 \section{Function version}{
- 0.2.6
+ 0.2.7
 }
 
 \examples{
@@ -161,7 +161,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. verify_SingleGrainData(): Verify single grain data sets and check for invalid grains, i.e. zero-light level grains. Function version 0.2.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. verify_SingleGrainData(): Verify single grain data sets and check for invalid grains, i.e. zero-light level grains. Function version 0.2.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

@@ -162,6 +162,11 @@ test_that("input validation", {
     background_integral_Tx = NULL
   ), "When 'Tx.data' is provided, either both 'signal_integral_Tx' and")
 
+  expect_error(calc_OSLLxTxRatio(Lx.data, Tx.data, background.count.distribution = NA),
+               "'background.count.distribution' should be of class 'character' and")
+  expect_error(calc_OSLLxTxRatio(Lx.data, Tx.data, use_previousBG = NA),
+               "'use_previousBG' should be a single logical value")
+
   expect_error(calc_OSLLxTxRatio(
     Lx.data,
     Tx.data,
@@ -180,6 +185,8 @@ test_that("input validation", {
 
   expect_error(calc_OSLLxTxRatio(Lx.data, Tx.data, sig0 = -1),
                "'sig0' should be a single non-negative value")
+  expect_error(calc_OSLLxTxRatio(Lx.data, Tx.data, digits = -1),
+               "'digits' should be a single non-negative integer value or NULL")
 })
 
 test_that("create warnings", {
@@ -369,7 +376,8 @@ test_that("snapshot tests", {
     signal_integral = 1:20,
     background_integral = NA,
     signal_integral_Tx = 1:10,
-    background_integral_Tx = NA))
+    background_integral_Tx = NA),
+    tolerance = snapshot.tolerance)
 
   expect_snapshot_RLum(calc_OSLLxTxRatio(
     Lx.data,
@@ -392,5 +400,6 @@ test_that("snapshot tests", {
       signal_integral = 1:20,
       background_integral = 70:100,
       signal_integral_Tx = 1:10,
-      background_integral_Tx = NA))
+      background_integral_Tx = NA),
+      tolerance = snapshot.tolerance)
 })

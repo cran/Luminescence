@@ -367,12 +367,18 @@ test_that("Test internals", {
   expect_equal(fun1(arg = "val1"), "val1")
   expect_equal(fun1(arg = c("val1", "val2")), "val1")
   expect_equal(fun1(arg = c("val3", "val2")), "val3")
+  expect_equal(.validate_args(matrix(letters), c("reciprocal", "square")),
+               "reciprocal")
   expect_error(fun1(arg = c("error", "val1")),
                "[test()] 'arg' contains multiple values but not all of them",
                fixed = TRUE)
   expect_error(fun1(arg = "error"),
                "[test()] 'arg' should be one of 'val1', 'val2', 'val3' or NULL",
                fixed = TRUE)
+  expect_error(fun1(set_RLum("RLum.Data.Curve")),
+               "'arg' should be one of 'val1', 'val2', 'val3' or NULL")
+  expect_error(fun1(set_RLum("RLum.Data.Curve", data = matrix(1:10, ncol = 2))),
+               "'arg' should be one of 'val1', 'val2', 'val3' or NULL")
 
   fun2 <- function(arg = c("val1", "val2", "val3")) {
     .validate_args(arg, c("val1", "val2", "val3"), name = "'other_name'")

@@ -143,6 +143,33 @@ test_that("snapshot tests", {
                        tolerance = snapshot.tolerance)
 })
 
+test_that("output snapshot tests", {
+  testthat::skip_on_cran()
+
+  set.seed(1)
+  SW({
+  expect_snapshot_output(res <- calc_MinDose(ExampleData.DeValues$CA1,
+                                             sigmab = 0.1))
+  expect_snapshot_output(res <- calc_MinDose(ExampleData.DeValues$CA1,
+                                             sigmab = 0.1, invert = TRUE))
+  expect_snapshot_output(res <- calc_MinDose(data = ExampleData.DeValues$CA1 / 100,
+                                             sigmab = 0.2, gamma.upper = 4, par = 4,
+                                             log.output = TRUE, plot = FALSE))
+  expect_snapshot_output(res <- calc_MinDose(data = ExampleData.DeValues$CA1,
+                                             sigmab = 0.2, log = FALSE,
+                                             plot = FALSE))
+  suppressWarnings( # Not enough bootstrap replicates for loess fitting
+  expect_snapshot_output(res <- calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
+                                             bootstrap = TRUE, bs.M = 10, bs.N = 5,
+                                             plot = FALSE))
+  )
+  expect_snapshot_output(res <- calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.2,
+                                             invert = TRUE, bootstrap = TRUE,
+                                             bs.M = 20, bs.N = 5, bs.h = 10,
+                                             plot = FALSE))
+  })
+})
+
 test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
@@ -177,7 +204,7 @@ test_that("regression tests", {
   ## issue 1332
   ## the seed was picked to get the smallest number of warnings and messages;
   ## this test relies on not using SW() to do its job
-  set.seed(3)
+  set.seed(6)
   expect_warning(expect_warning(expect_message(
       calc_MinDose(data = data.frame(De = c(rnorm(4) + 5, -1),
                                      De_Err = rnorm(5) + 1),

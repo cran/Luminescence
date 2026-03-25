@@ -27,7 +27,7 @@
 #' error value. The input will be treated as factor that is multiplied with
 #' the already calculated `LxTx` and the result is add up by:
 #'
-#' \deqn{se(LxTx) = \sqrt(se(LxTx)^2 + (LxTx * sig0)^2)}
+#' \deqn{se(LxTx) = \sqrt{se(LxTx)^2 + (LxTx * sig0)^2}}
 #'
 #' **`SN_RATIO_LnLx` and `SN_RATIO_TnTx`**
 #'
@@ -46,10 +46,15 @@
 #' standard error is calculated as:
 #'
 #' - `poisson`
-#' \deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2)/Y_{0} - Y_{1}/k}
+#' \deqn{rse(\mu_{S}) \approx \sqrt{Y_{0} + Y_{1}/k^2) / (Y_{0} - Y_{1}/k)} }
 #'
 #' - `non-poisson`
-#' \deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2 + \sigma^2(1+1/k))/Y_{0} - Y_{1}/k}
+#' \deqn{rse(\mu_{S}) \approx \sqrt{Y_{0} + Y_{1}/k^2 + \sigma^2(1+1/k)) / (Y_{0} - Y_{1}/k)} }
+#'
+#' If `background_integral = NA`, then in both cases the relative standard
+#' error simplifies to:
+#'
+#' \deqn{rse(\mu_{S}) \approx \sqrt{Y_{0}} / Y_{0}}
 #'
 #' **Please note** that when using the early background subtraction method in
 #' combination with the 'non-poisson' distribution argument, the corresponding `Lx/Tx` error
@@ -73,8 +78,8 @@
 #'
 #' @param background_integral [integer] (**required**):
 #' vector of channels for the background integral. If set to `NA`, no
-#' background integral is subtracted; in this case, the error calculation and
-#' the signal-to-noise ratio will report `NA` values.
+#' background integral is subtracted; in this case, `sigmab.LnLx` (unless
+#' manually set) and the signal-to-noise ratio for Ln/Lx` will be `NA`.
 #'
 #' @param signal_integral_Tx [integer] (*optional*):
 #' vector of channels for the signal integral for the `Tx` curve.
@@ -83,8 +88,9 @@
 #' @param background_integral_Tx [integer] (*optional*):
 #' vector of channels for the background integral for the `Tx` curve.
 #' If `NULL`, the `background_integral` vector is used. If set to `NA`, no
-#' background integral for the `Tx` curve is subtracted; in this case, the
-#' error calculation and the signal-to-noise ratio will report `NA` values.
+#' background integral for the `Tx` curve is subtracted; in this case,
+#' `sigmab.TxTx` (unless manually set) and the signal-to-noise ratio for
+#' `Tn/Tx` will be `NA`.
 #'
 #' @param integral_input [character] (*with default*):
 #' input type for `signal_integral`, one of `"channel"` (default) or
@@ -136,7 +142,7 @@
 #' .. $ SN_RATIO_TnTx,
 #' .. $ LxTx
 #' .. $ LxTx.Error
-#' $ calc.parameters (list)
+#' $calc.parameters (list)
 #' .. $ sigmab.LnTx
 #' .. $ sigmab.TnTx
 #' .. $ k
@@ -154,7 +160,7 @@
 #' **Caution:** If you are using early light subtraction (EBG), please either provide your
 #' own `sigmab` value or use `background.count.distribution = "poisson"`.
 #'
-#' @section Function version: 0.9.5
+#' @section Function version: 0.9.8
 #'
 #' @author
 #' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
@@ -241,8 +247,11 @@ calc_OSLLxTxRatio <- function(
   .validate_class(Tx.data, valid.classes, null.ok = TRUE,
                   extra = "a list of such objects")
   integral_input <- .validate_args(integral_input, c("channel", "measurement"))
+  .validate_class(background.count.distribution, "character", length = 1)
+  .validate_logical_scalar(use_previousBG)
   .validate_class(sigmab, "numeric", null.ok = TRUE, length = 1:2)
   .validate_nonnegative_scalar(sig0)
+  .validate_nonnegative_scalar(digits, int = TRUE, null.ok = TRUE)
 
   .coerce <- function(data) {
     data <- switch(
@@ -417,8 +426,8 @@ calc_OSLLxTxRatio <- function(
   ## Y.1 (total counts over m later channels)
   Y.0 <- Lx.signal
   Y.0_TnTx <- Tx.signal
-  Y.1 <- sum(Lx.curve[background_integral])
-  Y.1_TnTx <- sum(Tx.curve[background_integral_Tx])
+  Y.1 <- if (.strict_na(background_integral)) 0 else sum(Lx.curve[background_integral])
+  Y.1_TnTx <- if (.strict_na(background_integral_Tx)) 0 else sum(Tx.curve[background_integral_Tx])
 
   ##(b) estimate overdispersion (here called sigmab), see equation (4) in
   ## Galbraith (2002), Galbraith (2014)
@@ -431,12 +440,10 @@ calc_OSLLxTxRatio <- function(
         min.bg.integral + len.sg.integral * (2 + 1) <= length(curve)) {
 
       ## note that m = n*k = multiple of background_integral from signal_integral
-      Y.i <- vapply(0:round(k, digits = 0), function(i) {
+      Y.i <- vapply(0:(floor(k) - 1), function(i) {
         sum(curve[min.bg.integral +
-                     (len.sg.integral * i):(len.sg.integral * (i + 1))])
+                  (len.sg.integral * i):(len.sg.integral * (i + 1) - 1)])
       }, FUN.VALUE = numeric(1))
-
-      Y.i <- na.exclude(Y.i)
       n <- 1
     } else {
       ## warn if m is < 25, as suggested by Rex Galbraith (low number of
@@ -450,8 +457,8 @@ calc_OSLLxTxRatio <- function(
       n <- len.sg.integral
     }
 
-    ## sigmab is denoted as sigma^2 = s.Y^2 - Y.mean, therefore abs() is used
-    abs(stats::var(Y.i) - mean(Y.i)) * n
+    ## sigmab is denoted as sigma^2 = s.Y^2 - Y.mean, provided it's positive
+    max(stats::var(Y.i) - mean(Y.i), 0) * n
   }
 
   ##account for a manually set sigmab value
@@ -474,6 +481,8 @@ calc_OSLLxTxRatio <- function(
 
   ## relative standard error from equation (6)
   ## when sigmab = 0, this reduces to equation (3), valid for poisson
+  ## when background_integral = NA, we have Y1 = 0 and sigmab = 0, and this
+  ## reduces to sqrt(Y0) / Y0
   rse <- function(Y0, Y1, k, sigmab) {
     sqrt(Y0 + Y1 / k^2 + sigmab * (1 + 1 / k)) / (Y0 - Y1 / k)
   }
@@ -485,8 +494,8 @@ calc_OSLLxTxRatio <- function(
       .throw_warning("Unknown method for 'background.count.distribution', ",
                      "a non-poisson distribution is assumed")
     }
-    used.sigmab.LnLx <- sigmab.LnLx
-    used.sigmab.TnTx <- sigmab.TnTx
+    used.sigmab.LnLx <- if (.strict_na(background_integral)) 0 else sigmab.LnLx
+    used.sigmab.TnTx <- if (.strict_na(background_integral_Tx)) 0 else sigmab.TnTx
   }
 
   LnLx.relError <- rse(Y.0, Y.1, k, used.sigmab.LnLx)

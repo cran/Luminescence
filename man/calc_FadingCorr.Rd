@@ -84,13 +84,13 @@ This function solves the equation used for correcting the fading affected age
 including the error for a given \eqn{g}-value according to Huntley & Lamothe (2001):
 
 \deqn{
-\frac{A_{f}}{A} = 1 - \kappa * \Big[ln(\frac{A}{t_c}) - 1\Big]
+\frac{A_{f}}{A} = 1 - \kappa * \Big[\ln(\frac{A}{t_c}) - 1\Big]
 }
 
 with \eqn{\kappa} defined as
 
 \deqn{
-\kappa = \frac{\frac{\mathrm{g\_value}}{ln(10)}}{100}
+\kappa = \frac{\frac{\mathrm{g\_value}}{\ln(10)}}{100}
 }
 
 \eqn{A} and \eqn{A_{f}} are given in ka. \eqn{t_c} is given in s, however, it
@@ -106,11 +106,11 @@ and then the \eqn{g}-value is recalculated
 to \eqn{t_{c}} of the measurement used for estimating the age applying the
 following equation:
 
-\deqn{\kappa_{tc} = \kappa_{tc.g} / (1 - \kappa_{tc.g} * ln(tc/tc.g))}
+\deqn{\kappa_{tc} = \kappa_{tc.g} / (1 - \kappa_{tc.g} * \ln(tc/tc.g))}
 
 where
 
-\deqn{\kappa_{tc.g} = g / 100 / ln(10)}
+\deqn{\kappa_{tc.g} = g / 100 / \ln(10)}
 
 The error of the fading-corrected age is determined using a Monte Carlo
 simulation approach. Solving of the equation is performed using
@@ -207,7 +207,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. calc_FadingCorr(): Fading Correction after Huntley & Lamothe (2001). Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. calc_FadingCorr(): Fading Correction after Huntley & Lamothe (2001). Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

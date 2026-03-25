@@ -58,7 +58,7 @@ count values (CW(t))
 
 (2)
 Calculate t' which is the transformed time:
-\deqn{t' = t-(1/\delta)*log(1+\delta*t)}
+\deqn{t' = t-(1/\delta) * \log(1 + \delta t)}
 
 (3)
 Interpolate CW(t'), i.e. use the log(CW(t)) to obtain the count values
@@ -77,8 +77,8 @@ obtained fit parameters.
 
 (6)
 Transform values using
-\deqn{pHM(t) = (\delta*t/(1+\delta*t))*c*CW(t')}
-\deqn{c = (1+\delta*P)/\delta*P}
+\deqn{pHM(t) = (\delta t / (1 + \delta t))*c*CW(t')}
+\deqn{c = (1 + \delta P)/\delta*P}
 \deqn{P = length(stimulation~period)}
 
 (7) Combine all values and truncate all values for t' > \code{max(t)}
@@ -103,7 +103,7 @@ the values are removed and no further interpolation is attempted.
 In every case a warning message is shown.
 }
 \section{Function version}{
- 0.2.5
+ 0.2.7
 }
 
 \examples{
@@ -180,7 +180,7 @@ text(0.5,6500,"PM", col="blue" ,cex=.8)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. convert_CW2pHMi(): Transform a CW-OSL curve into a pHM-OSL curve via interpolation under hyperbolic modulation conditions. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. convert_CW2pHMi(): Transform a CW-OSL curve into a pHM-OSL curve via interpolation under hyperbolic modulation conditions. Function version 0.2.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

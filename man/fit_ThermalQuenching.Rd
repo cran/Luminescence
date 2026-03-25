@@ -80,10 +80,10 @@ Applying a nls-fitting to thermal quenching data.
 
 The equation used for the fitting is
 
-\deqn{y = A / (1 + C * exp(-W / (kB * x))) + c}
+\deqn{y = A / (1 + C * \exp(-W / (k_B x))) + c}
 
 \emph{W} is the energy depth in eV, \emph{C} is a dimensionless constant, \emph{A} and \emph{c}
-are used to adjust the curve for the given signal, \emph{kB} is the Boltzmann
+are used to adjust the curve for the given signal, \eqn{k_B} is the Boltzmann
 constant in eV/K and \emph{x} is the absolute temperature in K.
 
 \strong{Error estimation}\cr
@@ -136,7 +136,7 @@ fit_ThermalQuenching(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. fit_ThermalQuenching(): Fitting Thermal Quenching Data. Function version 0.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. fit_ThermalQuenching(): Fitting Thermal Quenching Data. Function version 0.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

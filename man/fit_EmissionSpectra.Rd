@@ -109,7 +109,7 @@ The emission spectra (on an energy scale) can be best described as the sum of mu
 Gaussian components:
 
 \deqn{
-y = \sum_i \frac{C_i}{\sigma_{i} \sqrt{2 \pi}} exp(-1/2 ((x - \mu_{i})/\sigma_{i})^2)
+y = \sum_i \frac{C_i}{\sigma_{i} \sqrt{2 \pi}} \exp(-1/2 ((x - \mu_{i})/\sigma_{i})^2)
 }
 
 with the parameters \eqn{\sigma} (peak width) and \eqn{\mu} (peak centre) and \eqn{C}
@@ -195,7 +195,7 @@ Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. fit_EmissionSpectra(): Luminescence Emission Spectra Deconvolution. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

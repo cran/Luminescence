@@ -70,7 +70,7 @@ The net transmission window of two filters is approximated by
 
 \strong{Optical density}
 
-\deqn{OD = -log10(T)}
+\deqn{OD = -\log10(T)}
 
 \strong{Total optical density}
 
@@ -98,7 +98,7 @@ The filter data itself are provided as list element containing a \code{matrix} o
 The given filter data are always considered as standard input and the filter
 thickness value is taken into account by
 
-\deqn{Transmission = Transmission^(d)}
+\deqn{Transmission = Transmission^d}
 
 with d given in the same dimension as the original filter data.
 
@@ -108,7 +108,7 @@ Same as CASE 2 but additionally a reflection factor P is provided, e.g.,
 \code{list(filter1 = list(filter_matrix, d = 2, P = 0.9))}.
 The final transmission becomes:
 
-\deqn{Transmission = Transmission^(d) * P}
+\deqn{Transmission = Transmission^d * P}
 
 \strong{Advanced plotting parameters}
 
@@ -168,7 +168,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

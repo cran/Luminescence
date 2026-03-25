@@ -37,8 +37,8 @@ no integrals are taken into account and their settings are ignored.}
 
 \item{background_integral}{\link{integer} (\strong{required}):
 vector of channels for the background integral. If set to \code{NA}, no
-background integral is subtracted; in this case, the error calculation and
-the signal-to-noise ratio will report \code{NA} values.}
+background integral is subtracted; in this case, \code{sigmab.LnLx} (unless
+manually set) and the signal-to-noise ratio for Ln/Lx\verb{will be}NA`.}
 
 \item{signal_integral_Tx}{\link{integer} (\emph{optional}):
 vector of channels for the signal integral for the \code{Tx} curve.
@@ -47,8 +47,9 @@ If \code{NULL}, the \code{signal_integral} vector is used.}
 \item{background_integral_Tx}{\link{integer} (\emph{optional}):
 vector of channels for the background integral for the \code{Tx} curve.
 If \code{NULL}, the \code{background_integral} vector is used. If set to \code{NA}, no
-background integral for the \code{Tx} curve is subtracted; in this case, the
-error calculation and the signal-to-noise ratio will report \code{NA} values.}
+background integral for the \code{Tx} curve is subtracted; in this case,
+\code{sigmab.TxTx} (unless manually set) and the signal-to-noise ratio for
+\code{Tn/Tx} will be \code{NA}.}
 
 \item{integral_input}{\link{character} (\emph{with default}):
 input type for \code{signal_integral}, one of \code{"channel"} (default) or
@@ -100,7 +101,7 @@ Slot \code{data} contains a \link{list} with the following structure:
 .. $ SN_RATIO_TnTx,
 .. $ LxTx
 .. $ LxTx.Error
-$ calc.parameters (list)
+$calc.parameters (list)
 .. $ sigmab.LnTx
 .. $ sigmab.TnTx
 .. $ k
@@ -138,7 +139,7 @@ This argument allows to add an extra component of error to the final \code{Lx/Tx
 error value. The input will be treated as factor that is multiplied with
 the already calculated \code{LxTx} and the result is add up by:
 
-\deqn{se(LxTx) = \sqrt(se(LxTx)^2 + (LxTx * sig0)^2)}
+\deqn{se(LxTx) = \sqrt{se(LxTx)^2 + (LxTx * sig0)^2}}
 
 \strong{\code{SN_RATIO_LnLx} and \code{SN_RATIO_TnTx}}
 
@@ -157,10 +158,15 @@ normal case) it has to be accounted for the overdispersion by estimating
 standard error is calculated as:
 \itemize{
 \item \code{poisson}
-\deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2)/Y_{0} - Y_{1}/k}
+\deqn{rse(\mu_{S}) \approx \sqrt{Y_{0} + Y_{1}/k^2) / (Y_{0} - Y_{1}/k)} }
 \item \code{non-poisson}
-\deqn{rse(\mu_{S}) \approx \sqrt(Y_{0} + Y_{1}/k^2 + \sigma^2(1+1/k))/Y_{0} - Y_{1}/k}
+\deqn{rse(\mu_{S}) \approx \sqrt{Y_{0} + Y_{1}/k^2 + \sigma^2(1+1/k)) / (Y_{0} - Y_{1}/k)} }
 }
+
+If \code{background_integral = NA}, then in both cases the relative standard
+error simplifies to:
+
+\deqn{rse(\mu_{S}) \approx \sqrt{Y_{0}} / Y_{0}}
 
 \strong{Please note} that when using the early background subtraction method in
 combination with the 'non-poisson' distribution argument, the corresponding \code{Lx/Tx} error
@@ -176,7 +182,7 @@ The results of this function have been cross-checked with the Analyst
 own \code{sigmab} value or use \code{background.count.distribution = "poisson"}.
 }
 \section{Function version}{
- 0.9.5
+ 0.9.8
 }
 
 \examples{
@@ -197,7 +203,7 @@ get_RLum(results)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.9.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. calc_OSLLxTxRatio(): Calculate Lx/Tx ratio for CW-OSL curves. Function version 0.9.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

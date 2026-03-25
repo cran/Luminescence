@@ -9,13 +9,17 @@ test_that("input validation", {
   expect_error(verify_SingleGrainData("test"),
                "'object' should be of class 'Risoe.BINfileData', 'RLum.Analysis'")
   expect_error(verify_SingleGrainData(object, threshold = "error"),
-               "'threshold' should be of class 'numeric' or 'integer'")
+               "'threshold' should be a single positive value")
+  expect_error(verify_SingleGrainData(object, threshold = integer(0)),
+               "'threshold' should be a single positive value")
   expect_error(verify_SingleGrainData(object, use_fft = "error"),
                "'use_fft' should be a single logical value")
   expect_error(verify_SingleGrainData(object, cleanup = "error"),
                "'cleanup' should be a single logical value")
   expect_error(verify_SingleGrainData(object, cleanup_level = "error"),
                "'cleanup_level' should be one of 'aliquot' or 'curve'")
+  expect_error(verify_SingleGrainData(object, verbose = "error"),
+               "'verbose' should be a single logical value")
 
   object@originator <- "error"
   expect_error(verify_SingleGrainData(object),
@@ -115,6 +119,11 @@ test_that("check functionality", {
   expect_s4_class(res <- verify_SingleGrainData(list(), cleanup = TRUE),
                   "RLum.Analysis")
   expect_length(res@records, 0)
+  expect_equal(res@originator, "verify_SingleGrainData")
+
+  expect_s4_class(res <- verify_SingleGrainData(list(), cleanup = NA),
+                  "RLum.Results")
+  expect_length(res@data, 0)
   expect_equal(res@originator, "verify_SingleGrainData")
 
   ## list

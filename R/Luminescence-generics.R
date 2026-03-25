@@ -712,7 +712,7 @@ setMethod("smooth_RLum", signature = "list",
 #' `norm = "huot"`: Curve values are normalised as suggested by Sébastien Huot
 #'  via GitHub:
 #' \deqn{
-#' y = (observed - median(background)) / (max(observed) - median(background))
+#' y = (observed - median(background)) / (\max(observed) - median(background))
 #' }
 #'
 #' The background of the curve is defined as the last 20% of the count values
@@ -725,7 +725,7 @@ setMethod("smooth_RLum", signature = "list",
 #' @return
 #' An object of the same type as the input object provided.
 #'
-#' @section Function version: 0.1.2
+#' @section Function version: 0.1.3
 #'
 #' @author
 #' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
@@ -759,10 +759,11 @@ setGeneric("normalise_RLum", function(object, norm = TRUE, ...) {
 
   ## validation
   .validate_class(norm, c("logical", "character", "numeric"), length = 1)
-
   valid.norms <- c("max", "min", "first", "last", "huot", "intensity")
   if(inherits(norm, "character"))
     .validate_args(norm, valid.norms)
+  else if (inherits(norm, "logical"))
+    .validate_logical_scalar(norm, extra = paste("one of", .collapse(valid.norms)))
   else if (inherits(norm, "numeric"))
     .validate_positive_scalar(norm, extra = paste("one of", .collapse(valid.norms)))
 

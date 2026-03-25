@@ -27,7 +27,7 @@ pseudo linearly modulated (pLM) curve using the equations given in Bulur
 According to Bulur (2000) the curve data are transformed by introducing two
 new parameters \code{P} (stimulation period) and \code{u} (transformed time):
 
-\deqn{P=2*max(t)} \deqn{u=\sqrt{(2*t*P)}}
+\deqn{P=2\max(t)} \deqn{u=\sqrt{(2t*P)}}
 
 The new count values are then calculated by
 \deqn{ctsNEW = cts(u/P)}
@@ -68,7 +68,7 @@ plot(values.transformed)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. convert_CW2pLM(): Transform a CW-OSL curve into a pLM-OSL curve. Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. convert_CW2pLM(): Transform a CW-OSL curve into a pLM-OSL curve. Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -18,7 +18,7 @@
 #'
 #' (2)
 #' Calculate t' which is the transformed time:
-#' \deqn{t' = t-(1/\delta)*log(1+\delta*t)}
+#' \deqn{t' = t-(1/\delta) * \log(1 + \delta t)}
 #'
 #' (3)
 #' Interpolate CW(t'), i.e. use the log(CW(t)) to obtain the count values
@@ -37,8 +37,8 @@
 #'
 #' (6)
 #' Transform values using
-#' \deqn{pHM(t) = (\delta*t/(1+\delta*t))*c*CW(t')}
-#' \deqn{c = (1+\delta*P)/\delta*P}
+#' \deqn{pHM(t) = (\delta t / (1 + \delta t))*c*CW(t')}
+#' \deqn{c = (1 + \delta P)/\delta*P}
 #' \deqn{P = length(stimulation~period)}
 #'
 #' (7) Combine all values and truncate all values for t' > `max(t)`
@@ -90,7 +90,7 @@
 #' the values are removed and no further interpolation is attempted.
 #' In every case a warning message is shown.
 #'
-#' @section Function version: 0.2.5
+#' @section Function version: 0.2.7
 #'
 #' @author
 #' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
@@ -205,6 +205,8 @@ convert_CW2pHMi<- function(
   ## Integrity checks -------------------------------------------------------
   temp.values <- .prepare_CW2pX(object)
   .validate_class(delta, "numeric", null.ok = TRUE)
+  if (length(delta) == 0)
+    delta <- NULL
   if (anyNA(delta)) {
     .throw_error("'delta' cannot contain NA values")
   }
@@ -216,6 +218,9 @@ convert_CW2pHMi<- function(
 
   ##time transformation t >> t'
   t<-temp.values[,1]
+  if (anyDuplicated(t) > 0) {
+    .throw_error("'object' contains duplicated time values")
+  }
 
   ##set delta
   ##if no values for delta is set selected a delta value for a maximum of

@@ -198,7 +198,7 @@ curve is used.
 
 Function used for the fitting (according to Erfurt et al. (2003)):
 
-\deqn{\phi(D) = \phi_{0}-\Delta\phi(1-exp(-\lambda*D))^\beta}
+\deqn{\phi(D) = \phi_{0} - \Delta\phi(1 - \exp(-\lambda D))^\beta}
 
 with
 \eqn{\phi(D)} the dose dependent IR-RF flux,
@@ -210,7 +210,7 @@ with
 To obtain the palaeodose
 \eqn{D_{e}} the function is changed to:
 
-\deqn{D_{e} = ln(-(\phi(D) - \phi_{0})/(-\lambda*\phi)^{1/\beta}+1)/-\lambda}
+\deqn{D_{e} = \ln(-(\phi(D) - \phi_{0})/(-\lambda\phi)^{1/\beta}+1)/-\lambda}
 
 The fitting is done using the \code{port} algorithm of the \link{nls} function.
 
@@ -330,7 +330,7 @@ The corresponding slope can be used to discard values as a high (positive,
 negative) slope may indicate that both curves are fundamentally different
 and the method cannot be applied at all.
 By default, the value of this parameter is calculated but not evaluated.
-\item \code{curves_bounds} (\link{numeric}, default: \eqn{max(RF_{reg_counts})}):
+\item \code{curves_bounds} (\link{numeric}, default: \eqn{\max(RF_{reg_counts})}):
 this measure uses the maximum time (x) value of the regenerated curve.
 The maximum time (x) value of the natural curve cannot be larger than this
 value. However, although this is not recommended the value can be changed
@@ -389,7 +389,7 @@ results <- analyse_IRSAR.RF(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. analyse_IRSAR.RF(): Analyse IRSAR RF measurements. Function version 0.7.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_IRSAR.RF(): Analyse IRSAR RF measurements. Function version 0.7.10. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

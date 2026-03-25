@@ -14,7 +14,7 @@ use_DRAC(
 }
 \arguments{
 \item{file}{\link{character} (\strong{required}):
-name of a CSV file (formatted according to the DRAC v1.2 CSV template) to
+name of a CSV file (formatted according to the DRAC v1.3 CSV template) to
 be sent to the DRAC website for calculation. It can also be a DRAC template
 object obtained from \code{\link[=template_DRAC]{template_DRAC()}}, which supports also import from
 CSV-files.}
@@ -68,7 +68,7 @@ The function provides an interface from R to DRAC. An R-object or a
 CSV file is passed to the DRAC website and results are re-imported into R.
 }
 \section{Function version}{
- 0.17
+ 0.18
 }
 
 \examples{
@@ -124,7 +124,7 @@ output <- use_DRAC(input)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Burow, C., 2026. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Burow, C., 2026. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

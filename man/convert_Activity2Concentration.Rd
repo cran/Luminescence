@@ -50,7 +50,7 @@ and the nuclide data from \verb{https://www.iaea.org/resources/databases/livecha
 
 The factors can be calculated using the equation:
 \deqn{
-A = N_A \frac{N_{abund}}{N_{mol.mass}}  ln(2) / N.half.life
+A = N_A \frac{N_{abund}}{N_{mol.mass}} \ln(2) / N.half.life
 }
 
 to convert in µg/g we further use:
@@ -75,7 +75,7 @@ example for calculating the activity of the radionuclide U-238:
 \item \code{U_abund} = 0.992745 (unitless)
 }
 
-\deqn{A_{U} = N_{A} * U_{abund} / m_{U_238} * ln(2) / T_{1/2} = 2347046} (Bq/kg)
+\deqn{A_{U} = N_{A} * U_{abund} / m_{U_238} * \ln(2) / T_{1/2} = 2347046} (Bq/kg)
 
 \deqn{f.U = A_{U} / 10^6}
 }
@@ -105,7 +105,7 @@ convert_Activity2Concentration(data)
 } 
 
 \section{How to cite}{
-Fuchs, M.C., 2026. convert_Activity2Concentration(): Convert Nuclide Activities to Abundance and Vice Versa. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.0. https://r-lum.github.io/Luminescence/
+Fuchs, M.C., 2026. convert_Activity2Concentration(): Convert Nuclide Activities to Abundance and Vice Versa. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{
