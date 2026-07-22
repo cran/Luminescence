@@ -93,12 +93,12 @@ test_that("get_RLum", {
                "'info.object' should be of class 'character' or NULL and have length 1")
   expect_error(get_RLum(obj, subset = "recordType == 'RF (NA)'", get.index = NA),
                "'get.index' should be a single logical value")
-  SW({
   expect_message(expect_null(get_RLum(obj, subset = (recordType == "RF"))),
                  "Error: 'subset' expression produced an empty selection")
   expect_message(expect_null(get_RLum(obj, subset = "recordType == 'RF'")),
                  "Error: 'subset' expression produced an empty selection")
-  })
+  expect_silent(expect_null(get_RLum(obj, subset = "recordType == 'RF'",
+                                     verbose = FALSE)))
 
   ## check functionality
   expect_length(get_RLum(obj, subset = (recordType == "RF (NA)")), 2)
@@ -132,10 +132,13 @@ test_that("get_RLum", {
   expect_equal(get_RLum(tmp, record.id = c(1, 10, 20), get.index = TRUE),
                1:3)
   expect_message(expect_null(get_RLum(obj, record.id = 99)),
-                 "[get_RLum()] Error: At least one 'record.id' is invalid",
+                 "[get_RLum()] Error: At least one 'record.id' (99) is invalid",
+                 fixed = TRUE)
+  expect_message(expect_null(get_RLum(obj, record.id = 100:110)),
+                 "[get_RLum()] Error: At least one 'record.id' (100, 101, 102, 103, \u2026) is invalid",
                  fixed = TRUE)
   expect_message(expect_null(get_RLum(obj, record.id = 99, get.index = TRUE)),
-                 "[get_RLum()] Error: At least one 'record.id' is invalid",
+                 "[get_RLum()] Error: At least one 'record.id' (99) is invalid",
                  fixed = TRUE)
 
   expect_warning(res <- get_RLum(obj, RLum.type = "error"),
@@ -318,6 +321,11 @@ test_that("structure_RLum", {
 
 test_that("remove_RLum", {
   testthat::skip_on_cran()
+
+  expect_error(remove_RLum(sar, 2),
+               "Unnamed arguments are not supported")
+  expect_error(remove_RLum(sar, recordType = "OSL", 2),
+               "Unnamed arguments are not supported")
 
   ## remove all OSL curves
   t <- expect_s4_class(remove_RLum(sar, recordType = "OSL"), "RLum.Analysis")

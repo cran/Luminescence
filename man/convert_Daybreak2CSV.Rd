@@ -39,7 +39,7 @@ convert_Daybreak2CSV(file)
 
 }
 \seealso{
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Data}, \linkS4class{RLum.Results},
+\link[=RLum.Analysis-class]{RLum.Analysis}, \link[=RLum.Data-class]{RLum.Data}, \link[=RLum.Results-class]{RLum.Results},
 \link[utils:write.table]{utils::write.table}, \link{write_RLum2CSV}, \link{read_Daybreak2R}
 }
 \author{
@@ -47,7 +47,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. convert_Daybreak2CSV(): Export measurement data produced by a Daybreak luminescence reader to CSV-files. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. convert_Daybreak2CSV(): Export measurement data produced by a Daybreak luminescence reader to CSV-files. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

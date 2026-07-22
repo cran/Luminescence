@@ -6,8 +6,8 @@
 \usage{
 analyse_SAR.CWOSL(
   object,
-  signal_integral = NA,
-  background_integral = NA,
+  signal_integral = NULL,
+  background_integral = NULL,
   signal_integral_Tx = NULL,
   background_integral_Tx = NULL,
   integral_input = c("channel", "measurement"),
@@ -27,22 +27,23 @@ analyse_SAR.CWOSL(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} (\strong{required}):
+\item{object}{\link[=RLum.Analysis-class]{RLum.Analysis} (\strong{required}):
 input object containing data for analysis, alternatively a \link{list} of
-\linkS4class{RLum.Analysis} objects can be provided. The object
+\link[=RLum.Analysis-class]{RLum.Analysis} objects can be provided. The object
 should \strong{only} contain curves considered part of the SAR protocol (see
 Details). When \code{OSL.component} is set, the input object must have been
 processed by \code{OSLdecomposition::RLum.OSL_decomposition()}.}
 
 \item{signal_integral}{\link{integer} (\strong{required}):
 vector of channels for the signal integral. It can be a \link{list} of integers,
-if \code{object} is a list. If set to \code{NA}, no integrals are taken into account
-and their settings are ignored.}
+if \code{object} is a list. If set to \code{NULL} (default) or \code{NA}, no integrals are
+taken into account and their settings are ignored.}
 
 \item{background_integral}{\link{integer} (\strong{required}):
 vector of channels for the background integral. It can be a \link{list} of
-integers, if \code{object} is a list. If set to \code{NA}, no background integral is
-subtracted.}
+integers, if \code{object} is a list. If set to \code{NULL} (default), no integrals
+are taken into account and their settings are ignored. If set to \code{NA}, no
+background integral is subtracted.}
 
 \item{signal_integral_Tx}{\link{integer} (\emph{optional}):
 vector of channels for the signal integral for the \code{Tx} curve. It can be a
@@ -64,7 +65,7 @@ corresponding to the given time range (in seconds) are selected.}
 single index or a \link{character} defining the signal component to be evaluated.
 It requires that the object was processed by \code{OSLdecomposition::RLum.OSL_decomposition}.
 This argument can either be the name of the OSL component assigned by
-\code{OSLdecomposition::RLum.OSL_global_fitting} or the index in the descending
+\code{OSLdecomposition::RLum.OSL_global_fitting} or the index in descending
 order of decay rates. Then \code{"1"} selects the fastest decaying component, \code{"2"}
 the second fastest and so on. Can be a \link{list} of \link{integer}s or strings (or mixed)
 If object is a \link{list} and this parameter is provided as \link{list} it alternates over
@@ -87,7 +88,7 @@ Allowed options:
 \item \code{exceed.max.regpoint} \link{logical} (default: \code{FALSE})
 \item \code{consider.uncertainties} \link{logical} (default: \code{FALSE})
 \item \code{recuperation_reference} \link{character} (default: \code{"Natural"}; set to, e.g.,
-\code{"R1"} for other point)
+\code{"R1"} for another point)
 \item \code{sn_reference} \link{character} (default: \code{"Natural"}).
 }
 
@@ -102,7 +103,7 @@ If \code{onlyLxTxTable = TRUE}, the \code{palaeodose.error} and \code{exceed.max
 criteria are not computed.}
 
 \item{dose.points}{\link{numeric} (\emph{optional}):
-a numeric vector containing the dose points values. Using this argument
+a numeric vector containing the dose point values. Using this argument
 overwrites dose point values extracted from other data. Can be a \link{list} of
 \link{numeric} vectors, if \code{object} is of type \link{list}.}
 
@@ -111,8 +112,9 @@ a numeric vector containing the test dose in the same units as \code{dose.points
 If length = 1, the values will be recycled. It has only an effect for
 \code{fit.method = 'OTORX'}.}
 
-\item{dose_rate_source}{\link{numeric} (\emph{optional}): a numerical value for the source dose rate,
-typically Gy/s. If set, the x-axis default for the dose-response curve changes to \code{Dose [Gy]}.}
+\item{dose_rate_source}{\link{numeric} (\emph{optional}):
+numerical value for the source dose rate, typically in Gy/s. If set, the
+x-axis default for the dose-response curve changes to \code{Dose [Gy]}.}
 
 \item{trim_channels}{\link{logical} (\emph{with default}):
 trim channels per record category to the lowest number of channels in the
@@ -126,16 +128,17 @@ if \code{object} is of type \link{list}}
 
 \item{plot}{\link{logical} (\emph{with default}): enable/disable the plot output.}
 
-\item{plot_onePage}{\link{logical} (\emph{with default}): enable/disable one page
-plot output.}
+\item{plot_onePage}{\link{logical} (\emph{with default}):
+enable/disable plotting all subplots on one page.}
 
 \item{plot_singlePanels}{\link{logical} (\emph{with default}) or \link{numeric} (\emph{optional}):
-single plot output (\code{TRUE/FALSE}) to allow for plotting the results in single plot windows.
-If a \link{numeric} vector is provided the plots can be selected individually, i.e.
-\code{plot_singlePanels = c(1,2,3,4)} will plot the TL and Lx, Tx curves but
-not the legend (5) or the
-growth curve (6), (7) and (8) belong to rejection criteria plots. Requires
-\code{plot = TRUE}.}
+control the plotting of subplots in single windows (one subplot per page).
+Using a \link{numeric} vector allows to select the subplots individually;
+setting it to \code{TRUE} corresponds to \code{plot_singlePanels = 1:8}. For example,
+\code{plot_singlePanels = c(1,2,3,4)} will plot the TL and Lx, Tx curves;
+\code{plot_singlePanels = c(5,6,7,8)} will plot the legend (5), the dose-response
+curve (6), the rejection criteria (7), and either the IRSL curve or the
+single grain (8). It is ignored if \code{plot = FALSE} or \code{plot_onePage = TRUE}.}
 
 \item{onlyLxTxTable}{\link{logical} (\emph{with default}):
 If \code{TRUE} the dose response curve fitting and plotting is skipped, and the
@@ -151,16 +154,19 @@ curves with \code{recordType} starting with \verb{_} should be automatically rem
 
 \item{...}{further arguments that will be passed to
 \link{fit_DoseResponseCurve}, \link{plot_DoseResponseCurve}
-or \link{calc_OSLLxTxRatio} (supported:
-\code{background.count.distribution}, \code{sigmab}, \code{sig0}).
-\strong{Note:} if you consider to use the early light subtraction method,
+or \link{calc_OSLLxTxRatio} (the latter only supports
+\code{background.count.distribution}, \code{sigmab}, \code{sig0}, \code{od_rates}).
+Additionally, supported are \code{legend.cex} and \code{legend.pch} to modify the
+legend symbols.
+\strong{Note:} If you consider using the early light subtraction method,
 \code{sigmab} should be provided.
 
-Additionally, supported are \code{legend.cex} and \code{legend.pch} to modify the
-the legend symbols.}
+\strong{Note:} \code{od_rates} can be used to treat uncertainties in Lx/Tx according
+to Bluszcz et al. (2015) instead of the standard approach of Galbraith
+(2002, 2014). See \link{calc_OSLLxTxRatio} for details.}
 }
 \value{
-A plot (\emph{optional}) and an \linkS4class{RLum.Results} object is
+A plot (\emph{optional}) and an \link[=RLum.Results-class]{RLum.Results} object is
 returned containing the following elements:
 
 \item{data}{\link{data.frame} containing De-values, De-error and further parameters}
@@ -169,17 +175,18 @@ background counts and the dose points}
 \item{rejection.criteria}{\link{data.frame} with values that might by used as rejection criteria.
 \code{NA} is produced if no R0 dose point exists.}
 \item{Formula}{\link{formula} formula that have been used for the growth curve fitting}
+\item{.plot.data}{List used internally for plotting.}
 
 The output should be accessed using the function \link{get_RLum}.
 
-\strong{The function currently does support only 'OSL', 'IRSL' and 'POSL' data!}
+\strong{The function currently supports only 'OSL', 'IRSL' and 'POSL' data!}
 }
 \description{
-The function performs a SAR CW-OSL analysis on an \linkS4class{RLum.Analysis}
+The function performs a SAR CW-OSL analysis on an \link[=RLum.Analysis-class]{RLum.Analysis}
 object, including growth curve fitting.
 }
 \details{
-The function performs an analysis for a standard SAR protocol measurements
+The function performs an analysis for standard SAR protocol measurements
 introduced by Murray and Wintle (2000) with CW-OSL curves. For the
 calculation of the \code{Lx/Tx} value the function \link{calc_OSLLxTxRatio} is
 used. To \strong{change the way the Lx/Tx error is calculated} use arguments
@@ -188,28 +195,28 @@ used. To \strong{change the way the Lx/Tx error is calculated} use arguments
 
 \strong{What is part of a SAR sequence?}
 
-The function is rather picky when it comes down to accepted curve input
+The function is rather picky when it comes to accepted curve input
 (OSL, IRSL,...) and structure. A SAR sequence is basically a set of
 \eqn{L_{x}/T_{x}} curves. Hence, every second curve is considered a
 shine-down curve related to the test dose. It also means that the number of
 curves for \eqn{L_{x}} has to be equal to the number of \eqn{T_{x}} curves,
-and that hot-bleach curves \strong{do not} belong into a SAR sequence; at least
+and that hot-bleach curves \strong{do not} belong in a SAR sequence; at least
 not for the analysis. Other curves allowed and processed are preheat curves,
-or preheat curves measured as TL, and irradiation curves. The later one
+or preheat curves measured as TL, and irradiation curves. The latter
 indicates the duration of the irradiation, the dose and test dose points,
 e.g., as part of XSYG files.
 
 \strong{Argument \code{object} is of type \code{list}}
 
 If the argument \code{object} is of type \link{list} containing \strong{only}
-\linkS4class{RLum.Analysis} objects, the function re-calls itself on each element
-in the list. This is useful if to analyse an entire measurement without
-writing separate for-loops. To gain in full control of the parameters (e.g., \code{dose.points}) for
-every aliquot (corresponding to one \linkS4class{RLum.Analysis} object in the list), in
+\link[=RLum.Analysis-class]{RLum.Analysis} objects, the function re-calls itself on each element
+in the list. This is useful for analysing an entire measurement without
+writing separate for-loops. To gain full control of the parameters (e.g., \code{dose.points}) for
+every aliquot (corresponding to one \link[=RLum.Analysis-class]{RLum.Analysis} object in the list), in
 this case the arguments can be provided as \link{list}. This \code{list} should
 be of similar length as the \code{list} provided with the argument \code{object},
 otherwise the function will create an own list of the requested length.
-Function output will be just one single \linkS4class{RLum.Results} object.
+Function output will be just one single \link[=RLum.Results-class]{RLum.Results} object.
 
 Please be careful when using this option. While it may allow for a fast and
 efficient data analysis, the function may break with an unclear error
@@ -220,7 +227,7 @@ message if the input data is misspecified.
 The function was originally designed to work just for 'OSL' curves,
 following the principles of the SAR protocol. An IRSL measurement protocol
 may follow this procedure, e.g., post-IR IRSL protocol (Thomsen et al.,
-2008). Therefore this functions has been enhanced to work with IRSL data,
+2008). Therefore this function has been enhanced to work with IRSL data,
 however, the function is only capable of analysing curves that follow the
 SAR protocol structure, i.e., to analyse a post-IR IRSL protocol, curve data
 have to be pre-selected by the user to fit the standards of the SAR
@@ -245,7 +252,7 @@ default should not exceed 10\%. The test dose error is calculated as
 \code{Tx_net.error/Tx_net}. The calculation of the \eqn{T_{n}} error is detailed
 in \link{calc_OSLLxTxRatio}.
 
-\verb{[palaeodose.error]}: set the allowed error for the De value, which per
+\verb{[palaeodose.error]}: set the allowed error for the De value, which by
 default should not exceed 10\%.
 
 \verb{[sn.ratio]}: set the allowed signal/noise ratio, which by default should
@@ -255,15 +262,15 @@ this can be changed by specifying the \code{sn_reference} option.
 By default, the computed values are compared directly to the corresponding
 thresholds to establish their result status ("OK" or "FAILED"). By setting
 the option \code{consider.uncertainties = TRUE} in the \code{rejection.criteria}
-list, quantified uncertainties are considered into the computation of the
-test value prior before comparing it to the threshold(currently supported
+list, quantified uncertainties are considered in the computation of the
+test value before comparing it to the threshold(currently supported
 only for \code{recycling.ratio}, \code{recuperation.rate} and \code{exceed.max.regpoint}).
 This reduces tests being marked as "FAILED" when the deviation from the
 threshold is smaller than the uncertainty margin.
 
 \strong{Irradiation times}
 
-The function makes two attempts to extra irradiation data (dose points)
+The function makes two attempts to extract irradiation data (dose points)
 automatically from the input object, if the argument \code{dose.points} is not
 set (aka set to \code{NULL}).
 \enumerate{
@@ -275,7 +282,7 @@ function does \strong{not} overwrite values preset in \code{IRR_TIME}.
 }
 }
 \section{Function version}{
- 0.13.8
+ 1.0.0
 }
 
 \examples{
@@ -294,7 +301,7 @@ object = object,
 signal_integral = 1:2,
 background_integral = 900:1000,
 log = "x",
-fit.method = "EXP",
+fit.method = "SSE",
 plot_onePage = TRUE,
 rejection.criteria = list(
   recycling.ratio = 10,
@@ -328,7 +335,7 @@ results <- analyse_SAR.CWOSL(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. analyse_SAR.CWOSL(): Analyse SAR CW-OSL Measurements. Function version 0.13.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. analyse_SAR.CWOSL(): Analyse SAR CW-OSL Measurements. Function version 1.0.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -346,11 +353,16 @@ Thomsen, K.J., Murray, A.S., Jain, M., Boetter-Jensen, L., 2008. Laboratory
 fading rates of various luminescence signals from feldspar-rich sediment
 extracts. Radiation Measurements 43, 1474-1486.
 doi:10.1016/j.radmeas.2008.06.002
+
+Bluszcz, A., Adamiec, G., Herr, A., 2015. Estimation of equivalent dose and
+its uncertainty in the OSL SAR protocol when count numbers do not follow a
+Poisson distribution. Radiation Measurements 81, 46-54.
+doi:10.1016/j.radmeas.2015.01.004
 }
 \seealso{
 \link{calc_OSLLxTxRatio}, \link{fit_DoseResponseCurve},
-\link{plot_DoseResponseCurve}, \linkS4class{RLum.Analysis},
-\linkS4class{RLum.Results}
+\link{plot_DoseResponseCurve}, \link[=RLum.Analysis-class]{RLum.Analysis},
+\link[=RLum.Results-class]{RLum.Results}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr

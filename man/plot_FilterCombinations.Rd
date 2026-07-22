@@ -36,7 +36,7 @@ Supported are \code{main}, \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \
 For non-common plotting parameters, see the details section.}
 }
 \value{
-Returns an S4 object of type \linkS4class{RLum.Results}.
+Returns an S4 object of type \link[=RLum.Results-class]{RLum.Results}.
 
 \strong{@data}
 
@@ -161,14 +161,14 @@ plot_FilterCombinations(filters = list(filter1, filter2), interactive = TRUE)
 
 }
 \seealso{
-\linkS4class{RLum.Results}, \link{approx}
+\link[=RLum.Results-class]{RLum.Results}, \link{approx}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_FilterCombinations(): Plot filter combinations along with the (optional) net transmission window. Function version 0.3.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

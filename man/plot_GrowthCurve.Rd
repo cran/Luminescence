@@ -7,7 +7,7 @@
 plot_GrowthCurve(
   object,
   mode = "interpolation",
-  fit.method = "EXP",
+  fit.method = "SSE",
   output.plot = TRUE,
   output.plotExtended = TRUE,
   plot_singlePanels = FALSE,
@@ -19,10 +19,12 @@ plot_GrowthCurve(
 \arguments{
 \item{object}{\link{data.frame} or a \link{list} of such objects (\strong{required}):
 data frame with columns for \code{Dose}, \code{LxTx}, \code{LxTx.Error} and \code{TnTx}.
+
 The column for the test dose response is optional, but requires \code{'TnTx'} as
 column name if used. For exponential fits at least three dose points
 (including the natural) should be provided. If \code{object} is a list,
 the function is called on each of its elements.
+
 If \code{fit.method = "OTORX"} you have  to provide the test dose in the same unit
 as the dose in a column called \code{Test_Dose}. The function searches explicitly
 for this column name. Only the first value will be used assuming a constant
@@ -38,21 +40,21 @@ selects calculation mode of the function.
 }
 
 Please note that for option \code{"interpolation"} the first point is considered
-as natural dose}
+as natural dose.}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-function used for fitting. Possible options are: \code{LIN}, \code{QDR}, \code{EXP},
-\verb{EXP OR LIN}, \code{EXP+LIN}, \code{EXP+EXP} (not defined for extrapolation), \code{GOK},
+function used for fitting. Possible options are: \code{LIN}, \code{QDR}, \code{SSE},
+\verb{SSE OR LIN}, \code{SSE+LIN}, \code{DSE} (not defined for extrapolation), \code{GOK},
 \code{OTOR} and \code{OTORX}. See details.}
 
 \item{output.plot}{\link{logical} (\emph{with default}):
 enable/disable the plot output.}
 
 \item{output.plotExtended}{\link{logical} (\emph{with default}):
-If \code{TRUE}, 3 plots on one plot area are provided:
+If \code{TRUE} (default), 3 plots on one plot area are provided:
 \enumerate{
-\item growth curve,
-\item histogram from Monte Carlo error simulation and
+\item the dose-response curve,
+\item a histogram from Monte Carlo error simulation and
 \item a test dose response plot.
 }
 
@@ -66,22 +68,25 @@ single plot windows. Requires \code{output.plotExtended = TRUE}.}
 enable/disable output to the terminal.}
 
 \item{n.MC}{\link{integer} (\emph{with default}):
-number of MC runs for error calculation.}
+number of Monte Carlo simulations for error estimation.}
 
-\item{...}{Further arguments to \link{fit_DoseResponseCurve} (\code{fit_weights},
-\code{fit_bounds}, \code{fit.force_through_origin}, \code{fit.includingRepeatedRegPoints},
-\code{fit.NumberRegPoints}, \code{fit.NumberRegPointsReal}, \code{n.MC},
-\code{txtProgressBar}) and graphical parameters to be passed (supported:
-\code{xlim}, \code{ylim}, \code{main}, \code{xlab}, \code{ylab}).}
+\item{...}{Further arguments to \link{fit_DoseResponseCurve}
+(\code{fit.force_through_origin}, \code{fit_weights}, \code{fit.includingRepeatedRegPoints},
+\code{fit.NumberRegPoints}, \code{fit.NumberRegPointsReal}, \code{fit_bounds}, \code{txtProgressBar})
+and to \link{plot_DoseResponseCurve} (\code{xlim}, \code{ylim}, \code{main},
+\code{mtext}, \code{xlab}, \code{ylab}, \code{log}, \code{legend} (\code{TRUE/FALSE}), \code{legend.pos},
+\code{reg_points_pch}, \code{density_polygon} (\code{TRUE/FALSE}), \code{density_polygon_col},
+\code{density_rug} (\code{TRUE}/\code{FALSE}), \code{lwd_drc}, \code{col_drc}, \code{lty_drc},
+\code{box} (\code{TRUE}/\code{FALSE})).}
 }
 \value{
-Along with a plot (if wanted) the \linkS4class{RLum.Results} object produced by
-\link{fit_DoseResponseCurve} is returned.
+Along with a plot (if wanted) the \link[=RLum.Results-class]{RLum.Results} object
+produced by \link{fit_DoseResponseCurve} is returned invisibly.
 }
 \description{
 A dose-response curve is produced for luminescence measurements using a
-regenerative or additive protocol as implemented in \link{fit_DoseResponseCurve}
-and \link{plot_DoseResponseCurve}
+regenerative or additive protocol. This is a wrapper around
+\link{fit_DoseResponseCurve} and \link{plot_DoseResponseCurve}.
 }
 \section{Function version}{
  1.2.3
@@ -126,7 +131,7 @@ print(plot_GrowthCurve(LxTxData, mode = "alternate"))
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2026. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.2.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2026. plot_GrowthCurve(): Fit and plot a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.2.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

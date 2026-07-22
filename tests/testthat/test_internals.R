@@ -196,7 +196,7 @@ test_that("Test internals", {
                "mean = 5.5")
   expect_equal(.create_StatisticalSummaryText(stats,
                                               keywords = "weighted$mean"),
-               "weighted$mean = 1.89")
+               "mean = 1.89")
 
 
   # .unlist_RLum() ------------------------------------------------------------------------------
@@ -502,6 +502,8 @@ test_that("Test internals", {
                1.3)
   expect_equal(.validate_scalar(-2, int = TRUE),
                -2)
+  expect_equal(.validate_scalar(Inf, inf = TRUE),
+               Inf)
   expect_null(.validate_scalar(NULL, int = TRUE, null.ok = TRUE))
 
   expect_error(.validate_scalar(int = TRUE),
@@ -526,7 +528,11 @@ test_that("Test internals", {
                "'NA' should be a single value")
   expect_error(.validate_scalar(-1:2, name = "'var'"),
                "'var' should be a single value")
+  expect_error(.validate_scalar(Inf, name = "'var'"),
+               "'var' should be a single value")
   expect_error(.validate_scalar(Inf, int = TRUE, name = "'var'"),
+               "'var' should be a single integer value")
+  expect_error(.validate_scalar(.Machine$double.xmax, int = TRUE, name = "'var'"),
                "'var' should be a single integer value")
   expect_error(.validate_scalar(1.5, int = TRUE, name = "'var'"),
                "'var' should be a single integer value")
@@ -542,6 +548,8 @@ test_that("Test internals", {
                1.3)
   expect_equal(.validate_positive_scalar(2, int = TRUE),
                2)
+  expect_equal(.validate_positive_scalar(Inf, inf = TRUE),
+               Inf)
   expect_null(.validate_positive_scalar(NULL, int = TRUE, null.ok = TRUE))
 
   expect_error(.validate_positive_scalar(int = TRUE),
@@ -576,6 +584,8 @@ test_that("Test internals", {
                0)
   expect_equal(.validate_nonnegative_scalar(2, int = TRUE),
                2)
+  expect_equal(.validate_nonnegative_scalar(Inf, inf = TRUE),
+               Inf)
   expect_null(.validate_nonnegative_scalar(NULL, int = TRUE, null.ok = TRUE))
 
   expect_error(.validate_nonnegative_scalar(int = TRUE),
@@ -660,11 +670,11 @@ test_that("Test internals", {
                integral)
   expect_warning(expect_equal(.validate_integral(integral <- c(5:1, -3:3)),
                               1:5),
-                 "'integral' out of bounds, reset to be between 1 and 5")
+                 "'integral' contains out of bounds elements, reset to be between 1 and 5")
   expect_warning(expect_equal(.validate_integral(integral <- 1:100,
                                                  min = 5, max = 50),
                               5:50),
-                 "'integral' out of bounds, reset to be between 5 and 50")
+                 "'integral' contains out of bounds elements, reset to be between 5 and 50")
   expect_error(.validate_integral(integral <- "error"),
                "'integral' should be of class 'integer' or 'numeric'")
   expect_error(.validate_integral(integral <- list(NA), na.ok = TRUE),
@@ -672,16 +682,16 @@ test_that("Test internals", {
   expect_error(.validate_integral(integral <- NA, na.ok = FALSE),
                "'integral' should be of class 'integer' or 'numeric'")
   expect_error(.validate_integral(integral <- -9:0),
-               "'integral' is of length 0 after removing values smaller than 1$")
+               "'integral' contains no elements between 1 and Inf")
   expect_error(.validate_integral(integral <- 1:10, min = 50, max = 100),
-               "after removing values smaller than 50 and greater than 100")
+               "'integral' contains no elements between 50 and 100")
   expect_error(.validate_integral(integral <- 1:10, min = 150, max = 100),
                "is expected to be at least 150, but the maximum allowed is 100")
   expect_error(.validate_integral(integral <- 1:5 + 0.1),
                "'integral' should be a vector of integers")
   expect_warning(expect_error(.validate_integral(integral <- c(0, 1.5)),
                               "'integral' should be a vector of integers"),
-                 "'integral' out of bounds, reset to be between 1.5 and 1.5")
+                 "'integral' contains out of bounds elements, reset to be between 1.5 and 1.5")
   expect_error(.validate_integral(list.integral <- list(1:4)),
                "'list.integral' should be of class 'integer' or 'numeric'")
   expect_error(.validate_integral(list.integral <- list("error"), list.ok = TRUE),

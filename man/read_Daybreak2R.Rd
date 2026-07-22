@@ -14,7 +14,7 @@ import all files with \code{.txt} extension.}
 
 \item{raw}{\link{logical} (\emph{with default}):
 if the input is a DAT-file (binary) a \link[data.table:data.table]{data.table::data.table} instead of
-the \linkS4class{RLum.Analysis} object can be returned for debugging purposes.}
+the \link[=RLum.Analysis-class]{RLum.Analysis} object can be returned for debugging purposes.}
 
 \item{verbose}{\link{logical} (\emph{with default}):
 enable/disable output to the terminal.}
@@ -25,7 +25,7 @@ enable/disable \link{txtProgressBar}.}
 \item{...}{not in use, for compatibility reasons only}
 }
 \value{
-A list of \linkS4class{RLum.Analysis} objects (each per position)
+A list of \link[=RLum.Analysis-class]{RLum.Analysis} objects (each per position)
 is returned.
 }
 \description{
@@ -53,7 +53,7 @@ temp <- read_Daybreak2R(file)
 
 }
 \seealso{
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Data.Curve}, \link[data.table:data.table]{data.table::data.table}
+\link[=RLum.Analysis-class]{RLum.Analysis}, \link[=RLum.Data.Curve-class]{RLum.Data.Curve}, \link[data.table:data.table]{data.table::data.table}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
@@ -65,7 +65,7 @@ Andrew Louis Gorin.
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Bluszcz, A., Zink, A., 2026. read_Daybreak2R(): Import measurement data produced by a Daybreak TL/OSL reader into R. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Bluszcz, A., Zink, A., 2026. read_Daybreak2R(): Import measurement data produced by a Daybreak TL/OSL reader into R. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

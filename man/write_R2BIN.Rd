@@ -14,7 +14,7 @@ write_R2BIN(
 )
 }
 \arguments{
-\item{object}{\linkS4class{Risoe.BINfileData} (\strong{required}):
+\item{object}{\link[=Risoe.BINfileData-class]{Risoe.BINfileData} (\strong{required}):
 input object to be stored in a bin file.}
 
 \item{file}{\link{character} (\strong{required}):
@@ -26,7 +26,7 @@ file name and path of the output file
 
 \item{version}{\link{character} (\emph{optional}):
 version number for the output file. If no value is provided, the highest
-version number from the \linkS4class{Risoe.BINfileData} is taken automatically.
+version number from the \link[=Risoe.BINfileData-class]{Risoe.BINfileData} is taken automatically.
 
 \strong{Note:}
 This argument can be used to convert BIN-file versions.}
@@ -48,7 +48,7 @@ enable/disable the progress bar. Ignored if \code{verbose = FALSE}.}
 Write a binary file and returns the name and path of the file as \link{character}.
 }
 \description{
-Exports a \linkS4class{Risoe.BINfileData} object in a \verb{*.bin} or \verb{*.binx} file that can be
+Exports a \link[=Risoe.BINfileData-class]{Risoe.BINfileData} object in a \verb{*.bin} or \verb{*.binx} file that can be
 opened by the Analyst software or other Risø software.
 }
 \details{
@@ -97,7 +97,7 @@ write_R2BIN(temp, file = temp_file)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. write_R2BIN(): Export Risoe.BINfileData into Risø BIN/BINX-file. Function version 0.5.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. write_R2BIN(): Export Risoe.BINfileData into Risø BIN/BINX-file. Function version 0.5.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -105,7 +105,7 @@ DTU Nutech, 2016. The Sequence Editor, Users Manual, February, 2016.
 \url{https://www.fysik.dtu.dk}
 }
 \seealso{
-\link{read_BIN2R}, \linkS4class{Risoe.BINfileData}, \link{writeBin}
+\link{read_BIN2R}, \link[=Risoe.BINfileData-class]{Risoe.BINfileData}, \link{writeBin}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)

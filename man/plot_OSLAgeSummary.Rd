@@ -7,7 +7,7 @@
 plot_OSLAgeSummary(object, level = 0.95, digits = 1L, verbose = TRUE, ...)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Results}, \link{numeric} (\strong{required}):
+\item{object}{\link[=RLum.Results-class]{RLum.Results}, \link{numeric} (\strong{required}):
 an object produced by \link{combine_De_Dr}. Alternatively, a \link{numeric} vector of
 a parameter from an MCMC process.}
 
@@ -25,7 +25,7 @@ terminal.}
 \code{polygon_density}.}
 }
 \value{
-A posterior distribution plot and an \linkS4class{RLum.Results}
+A posterior distribution plot and an \link[=RLum.Results-class]{RLum.Results}
 object with the credible interval.
 }
 \description{
@@ -47,7 +47,7 @@ plot_OSLAgeSummary(object)
 
 }
 \seealso{
-\link{combine_De_Dr}, \link{plot.default}, \link[rjags:rjags-package]{rjags::rjags}
+\link{combine_De_Dr}, \link{plot.default}, \link[rjags:rjags]{rjags::rjags}
 }
 \author{
 Anne Philippe, Université de Nantes (France)\cr
@@ -57,7 +57,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Philippe, A., Galharret, J., Mercier, N., Kreutzer, S., 2026. plot_OSLAgeSummary(): Plot Posterior OSL-Age Summary. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Philippe, A., Galharret, J., Mercier, N., Kreutzer, S., 2026. plot_OSLAgeSummary(): Plot Posterior OSL-Age Summary. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{dplot}

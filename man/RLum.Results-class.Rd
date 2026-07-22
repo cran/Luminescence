@@ -49,7 +49,7 @@ dose.rate
 ##get results
 get_RLum(dose.rate)
 
-##get parameters used for the calcualtion from the same object
+## get parameters used for the calculation from the same object
 get_RLum(dose.rate, data.object = "parameters")
 
 ##alternatively objects can be accessed using S3 generics, such as
@@ -57,7 +57,7 @@ dose.rate$parameters
 
 }
 \seealso{
-\linkS4class{RLum}, \link{plot_RLum}, \link{merge_RLum}
+\link[=RLum-class]{RLum}, \link{plot_RLum}, \link{merge_RLum}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)

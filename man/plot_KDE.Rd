@@ -19,7 +19,7 @@ plot_KDE(
 )
 }
 \arguments{
-\item{data}{\link{data.frame}, \link{vector} or \linkS4class{RLum.Results} object (\strong{required}):
+\item{data}{\link{data.frame}, \link{vector} or \link[=RLum.Results-class]{RLum.Results} object (\strong{required}):
 for \code{data.frame}: either two columns: De (\code{values[,1]}) and De error
 (\code{values[,2]}), or one: De (\code{values[,1]}). If a numeric vector or a
 single-column data frame is provided, De error is assumed to be 10^-9
@@ -90,7 +90,7 @@ one or more of the following keywords:
 \item \code{"median"} (median of the De values)
 \item \code{"sd.rel"} (relative standard deviation in percent)
 \item \code{"sd.abs"} (absolute standard deviation)
-\item \code{"se.rel"} (relative standard error)
+\item \code{"se.rel"} (relative standard error in percent)
 \item \code{"se.abs"} (absolute standard error)
 \item \code{"in.2s"} (percent of samples in 2-sigma range)
 \item \code{"kurtosis"} (kurtosis)
@@ -179,6 +179,6 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2026. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 

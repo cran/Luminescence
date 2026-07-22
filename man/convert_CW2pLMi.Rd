@@ -8,8 +8,8 @@ modulation conditions}
 convert_CW2pLMi(object, P = NULL, ...)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-\linkS4class{RLum.Data.Curve} object or a \code{data.frame} with measured
+\item{object}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve} object or a \code{data.frame} with measured
 curve data of type stimulation time (t) (\code{object[, 1]}) and measured counts
 (cts) (\code{object[, 2]}).}
 
@@ -139,7 +139,7 @@ text(0.5,6500,"PM", col = "blue", cex = .8)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. convert_CW2pLMi(): Transform a CW-OSL curve into a pLM-OSL curve via interpolation under linear modulation conditions. Function version 0.3.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. convert_CW2pLMi(): Transform a CW-OSL curve into a pLM-OSL curve via interpolation under linear modulation conditions. Function version 0.3.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -157,7 +157,7 @@ LM-OSL curves. Radiation Measurements 32, 141-145.
 }
 \seealso{
 \link{convert_CW2pLM}, \link{convert_CW2pHMi}, \link{convert_CW2pPMi},
-\link{fit_LMCurve}, \linkS4class{RLum.Data.Curve}
+\link{fit_LMCurve}, \link[=RLum.Data.Curve-class]{RLum.Data.Curve}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr

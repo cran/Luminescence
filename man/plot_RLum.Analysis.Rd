@@ -18,8 +18,8 @@ plot_RLum.Analysis(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} (\strong{required}):
-S4 object of class \linkS4class{RLum.Analysis}}
+\item{object}{\link[=RLum.Analysis-class]{RLum.Analysis} (\strong{required}):
+S4 object of class \link[=RLum.Analysis-class]{RLum.Analysis}}
 
 \item{subset}{named \link{list} (\emph{optional}):
 subsets elements for plotting. The arguments in the named \link{list} will be
@@ -42,7 +42,7 @@ plots. In contrast \verb{list(v = c(10), v = c(100)} adds a vertical at 10 to
 the first and a vertical line at 100 to the 2nd plot.}
 
 \item{combine}{\link{logical} (\emph{with default}):
-allows to combine all \linkS4class{RLum.Data.Curve} objects in one single plot.}
+allows to combine all \link[=RLum.Data.Curve-class]{RLum.Data.Curve} objects in one single plot.}
 
 \item{records_max}{\link{integer} (\emph{optional}):
 limits number of records shown when \code{combine = TRUE} is used. The first and
@@ -76,7 +76,7 @@ Returns multiple plots.
 }
 \description{
 The function provides a standardised plot output for curve data of an
-\linkS4class{RLum.Analysis} object.
+\link[=RLum.Analysis-class]{RLum.Analysis} object.
 
 The function produces a multiple plot output. A file output is recommended
 (e.g., \link{pdf}).
@@ -140,7 +140,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_RLum.Analysis(): Plot function for an RLum.Analysis S4 class object. Function version 0.3.16. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

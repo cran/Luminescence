@@ -14,7 +14,7 @@ bin_RLum.Data(object, ...)
 \S4method{bin_RLum.Data}{RLum.Data.Spectrum}(object, bin_size.col = 1, bin_size.row = 1)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data} (\strong{required}):
+\item{object}{\link[=RLum.Data-class]{RLum.Data} (\strong{required}):
 S4 object of class \code{RLum.Data}}
 
 \item{...}{further arguments passed to the specific class method}
@@ -38,7 +38,7 @@ An object of the same type as the input provided after binning is applied.
 }
 \description{
 The function provides a generalised access point for specific
-\linkS4class{RLum.Data} objects. Depending on the input object, the corresponding
+\link[=RLum.Data-class]{RLum.Data} objects. Depending on the input object, the corresponding
 function will be selected.
 }
 \section{Functions}{
@@ -50,8 +50,8 @@ x-axis are summed up; for wavelength/energy values, the mean is calculated.
 
 }}
 \note{
-Currently only \code{RLum.Data} objects of class \linkS4class{RLum.Data.Curve}
-and \linkS4class{RLum.Data.Spectrum} are supported.
+Currently only \code{RLum.Data} objects of class \link[=RLum.Data.Curve-class]{RLum.Data.Curve}
+and \link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} are supported.
 }
 \section{Function version}{
  0.2.0
@@ -77,14 +77,14 @@ plot_RLum(bin_RLum.Data(curve, bin_size = 4))
 
 }
 \seealso{
-\linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Data.Spectrum}
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve}, \link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. bin_RLum.Data(): Channel binning for RLum.Data-class objects. Function version 0.2.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. bin_RLum.Data(): Channel binning for RLum.Data-class objects. Function version 0.2.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

@@ -14,11 +14,15 @@ remove_RLum(object, ...)
 \S4method{remove_RLum}{RLum.Analysis}(object, ...)
 }
 \arguments{
-\item{object}{\linkS4class{RLum} (\strong{required}):
+\item{object}{\link[=RLum-class]{RLum} (\strong{required}):
 object with records to be removed.}
 
-\item{...}{parameters to be passed to \link{get_RLum}. The arguments \code{get.index} and
-\code{drop} are preset and have no effect when provided}
+\item{...}{parameters to be passed to \link{get_RLum}. Only the
+following named arguments are supported: \code{record.id}, \code{recordType},
+\code{curveType}, \code{RLum.type}, \code{protocol}, \code{info.object} and \code{subset}.
+Arguments \code{get.index} and \code{drop} are preset to \code{TRUE} and \code{FALSE},
+respectively, and cannot be overridden. Other named arguments are ignored,
+while unnamed arguments are not supported.}
 }
 \value{
 An object of the same type as the input provided with records removed; it
@@ -30,9 +34,9 @@ Remove records from an RLum-class object in a convenient way using
 }
 \section{Functions}{
 \itemize{
-\item \code{remove_RLum(list)}: Returns a list of \linkS4class{RLum} objects where the selected records are stripped
+\item \code{remove_RLum(list)}: Returns a list of \link[=RLum-class]{RLum} objects where the selected records are stripped
 
-\item \code{remove_RLum(RLum.Analysis)}: Method to remove records from an \linkS4class{RLum.Analysis} object.
+\item \code{remove_RLum(RLum.Analysis)}: Method to remove records from an \link[=RLum.Analysis-class]{RLum.Analysis} object.
 
 }}
 \section{Function version}{
@@ -50,14 +54,14 @@ sar
 
 }
 \seealso{
-\linkS4class{RLum.Analysis}
+\link[=RLum.Analysis-class]{RLum.Analysis}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. remove_RLum(): Strips records from RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. remove_RLum(): Strips records from RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

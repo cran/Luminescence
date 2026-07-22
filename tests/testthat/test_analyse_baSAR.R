@@ -2,13 +2,15 @@
 data(ExampleData.BINfileData, envir = environment())
 CWOSL.sub <- subset(CWOSL.SAR.Data,
                     subset = POSITION %in% c(1:3) & LTYPE == "OSL")
+empty <- CWOSL.sub
+empty@METADATA <- empty@METADATA[integer(0), ]
 
 test_that("input validation", {
   skip_on_cran()
 
-  expect_error(analyse_baSAR("error",
+  expect_output(expect_null(analyse_baSAR("error",
                              signal_integral = 1:2, background_integral = 80:100,
-                             verbose = FALSE),
+                             verbose = FALSE)),
                "File '.*error' does not exist") # windows CI needs the regexp
   expect_output(expect_null(analyse_baSAR(list("error"),
                              signal_integral = 1:2, background_integral = 80:100,
@@ -37,7 +39,7 @@ test_that("input validation", {
   expect_error(analyse_baSAR(CWOSL.sub,
                              signal_integral = 1:2, background_integral = 80:100,
                              fit.method = "error"),
-               "'fit.method' should be one of 'EXP', 'EXP+LIN' or 'LIN'",
+               "'fit.method' should be one of 'SSE', 'SSE+LIN' or 'LIN'",
                fixed = TRUE)
   expect_error(analyse_baSAR(CWOSL.sub,
                              background_integral = 80:100,
@@ -117,7 +119,7 @@ test_that("input validation", {
                              signal_integral = 1:2,
                              background_integral = 80:100,
                              CSV_file = data.frame(a = NA, b = 1, c = 2)),
-               "Number of discs/grains = 0")
+               "The BIN-file names provided via 'CSV_file' do not match")
 
   SW({
   obj <- Risoe.BINfileData2RLum.Analysis(CWOSL.sub)
@@ -130,8 +132,6 @@ test_that("input validation", {
                     recordType = "NONE", verbose = TRUE)),
     "No records of the appropriate type found")
 
-  empty <- CWOSL.sub
-  empty@METADATA <- empty@METADATA[integer(0), ]
   expect_error(expect_warning(
       analyse_baSAR(list(empty),
                     source_doserate = c(0.04, 0.001),
@@ -249,7 +249,7 @@ test_that("Full check of analyse_baSAR function", {
       source_doserate = c(0.04, 0.001),
       signal_integral = 1:2,
       background_integral = 80:100,
-      fit.method = "EXP",
+      fit.method = "SSE",
       method_control = list(inits = list(
         list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 1),
         list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 2),
@@ -270,7 +270,7 @@ test_that("Full check of analyse_baSAR function", {
         source_doserate = c(0.04),
         signal_integral = 1:2,
         background_integral = 80:100,
-        fit.method = "EXP",
+        fit.method = "SSE",
         method_control = list(inits = list(
           list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 1),
           list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 2),
@@ -310,7 +310,7 @@ test_that("Full check of analyse_baSAR function", {
       txtProgressBar = FALSE,
       method_control = list(lower_centralD = 0),
       n.MCMC = 100),
-      "You have modified the lower central_D boundary")
+      "You have modified the lower_centralD boundary")
 
   suppressWarnings(expect_warning(analyse_baSAR(
       object = results,
@@ -322,13 +322,13 @@ test_that("Full check of analyse_baSAR function", {
       "Your lower_centralD and/or upper_centralD values seem not to fit",
       fixed = TRUE))
 
-  expect_warning(expect_warning(
+  expect_warning(
     analyse_baSAR(
       object = results,
       plot = TRUE,
       verbose = TRUE,
       txtProgressBar = FALSE,
-      fit.method = "EXP+LIN",
+      fit.method = "SSE+LIN",
       fit.includingRepeatedRegPoints = FALSE,
       fit.force_through_origin = FALSE,
       distribution = "log_normal",
@@ -339,8 +339,7 @@ test_that("Full check of analyse_baSAR function", {
       output.plot = FALSE,
       output.plotExtended = FALSE,
       n.MCMC = 100),
-    "'output.plotExtended' was deprecated in v1.2.0, use 'plot_extended' instead"),
-    "'plot.single' was deprecated in v1.0.0, use 'plot_singlePanels' instead")
+    "'output.plotExtended' was deprecated in v1.2.0, use 'plot_extended' instead")
 
   expect_message(
       analyse_baSAR(
@@ -348,7 +347,7 @@ test_that("Full check of analyse_baSAR function", {
           plot = FALSE,
           verbose = TRUE,
           txtProgressBar = FALSE,
-          fit.method = "EXP",
+          fit.method = "SSE",
           fit.force_through_origin = TRUE,
           distribution = "cauchy",
           aliquot_range = 100:300,
@@ -362,7 +361,7 @@ test_that("Full check of analyse_baSAR function", {
           plot = FALSE,
           verbose = TRUE,
           txtProgressBar = FALSE,
-          fit.method = "EXP",
+          fit.method = "SSE",
           fit.force_through_origin = TRUE,
           distribution = "cauchy",
           aliquot_range = -1:3,
@@ -420,7 +419,7 @@ test_that("Full check of analyse_baSAR function", {
       source_doserate = c(0.04, 0.001),
       signal_integral = 1:2,
       background_integral = 80:99,
-      fit.method = "EXP",
+      fit.method = "SSE",
       n.MCMC = 100, irradiation_times = c(1, 2, 3)),
       "The number of dose points differs across your data set"),
       "Error : [calc_Statistics()] 'data' cannot be an empty data.frame",
@@ -611,6 +610,15 @@ test_that("regression tests", {
       "Only multiple grain data provided, automatic selection skipped"),
       "which may indicate an incorrect 'source_doserate'")
   )
+
+  ## issue 1598
+  SW({
+  expect_error(expect_warning(
+      analyse_baSAR(list(empty, empty), source_doserate = 0.04,
+                    signal_integral = 1:2, background_integral = 80:100),
+      "No data selected from BIN-file 2, BIN-file removed from input"),
+      "All provided objects were removed")
+  })
 
   ## check parameters irradiation times
   SW({

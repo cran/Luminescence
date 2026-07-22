@@ -28,7 +28,7 @@ names_RLum(object)
 \S4method{names_RLum}{RLum.Results}(object)
 }
 \arguments{
-\item{object}{\linkS4class{RLum} (\strong{required}):
+\item{object}{\link[=RLum-class]{RLum} (\strong{required}):
 S4 object of class \code{RLum}}
 }
 \value{
@@ -36,15 +36,15 @@ A \link{character} vector.
 }
 \description{
 The function provides a generalised access point for specific
-\linkS4class{RLum} objects. Depending on the input object, the corresponding
+\link[=RLum-class]{RLum} objects. Depending on the input object, the corresponding
 function will be selected.
 }
 \section{Functions}{
 \itemize{
-\item \code{names_RLum(list)}: Returns a list of names of the \linkS4class{RLum} objects that had been passed to
+\item \code{names_RLum(list)}: Returns a list of names of the \link[=RLum-class]{RLum} objects that had been passed to
 it.
 
-\item \code{names_RLum(RLum.Analysis)}: Returns the names of the \linkS4class{RLum.Data} objects stored in the object.
+\item \code{names_RLum(RLum.Analysis)}: Returns the names of the \link[=RLum.Data-class]{RLum.Data} objects stored in the object.
 
 \item \code{names_RLum(RLum.Data.Curve)}: Returns the names info elements stored in the object.
 
@@ -60,16 +60,16 @@ it.
 }
 
 \seealso{
-\linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Data.Image},
-\linkS4class{RLum.Data.Spectrum}, \linkS4class{RLum.Analysis},
-\linkS4class{RLum.Results}
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve}, \link[=RLum.Data.Image-class]{RLum.Data.Image},
+\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum}, \link[=RLum.Analysis-class]{RLum.Analysis},
+\link[=RLum.Results-class]{RLum.Results}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. names_RLum(): Name retrieval function for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. names_RLum(): Name retrieval function for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

@@ -19,9 +19,9 @@ analyse_FadingMeasurement(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis}, \link{data.frame} or \link{list} (\strong{required}):
+\item{object}{\link[=RLum.Analysis-class]{RLum.Analysis}, \link{data.frame} or \link{list} (\strong{required}):
 input object with the measurement data. Alternatively, a \link{list} containing
-\linkS4class{RLum.Analysis} objects or a \link{data.frame} with three columns
+\link[=RLum.Analysis-class]{RLum.Analysis} objects or a \link{data.frame} with three columns
 (x = LxTx, y = LxTx error, z = time since irradiation) can be provided.
 Can also be a wide table, i.e. a \link{data.frame} with a number of columns
 divisible by 3 and where each triplet has the before mentioned column
@@ -86,7 +86,7 @@ the fading curve plot. For further plot customization please use the
 numerical output of the functions for own plots.}
 }
 \value{
-An \linkS4class{RLum.Results} object is returned:
+An \link[=RLum.Results-class]{RLum.Results} object is returned:
 
 Slot: \strong{@data}
 
@@ -199,7 +199,7 @@ n.MC = 10)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2026. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.27. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Burow, C., 2026. analyse_FadingMeasurement(): Analyse fading measurements and returns the fading rate per decade (g-value). Function version 0.1.27. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

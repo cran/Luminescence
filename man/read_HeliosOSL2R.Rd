@@ -18,12 +18,12 @@ enable/disable output to the terminal.}
 \item{...}{not in use, for compatibility reasons only}
 }
 \value{
-A \linkS4class{RLum.Analysis} object. Results are returned as a
+A \link[=RLum.Analysis-class]{RLum.Analysis} object. Results are returned as a
 list when multiple files are processed or \code{file} is a list.
 }
 \description{
 Import of files with \code{.osl} extension produced by the zero rad Helios
-luminescence reader and conversion to \linkS4class{RLum.Analysis}
+luminescence reader and conversion to \link[=RLum.Analysis-class]{RLum.Analysis}
 objects.
 }
 \note{
@@ -39,14 +39,14 @@ read_HeliosOSL2R(file)
 
 }
 \seealso{
-\linkS4class{RLum.Data.Curve}, \linkS4class{RLum.Analysis}
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve}, \link[=RLum.Analysis-class]{RLum.Analysis}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. read_HeliosOSL2R(): Import Luminescence Data from Helios Luminescence Reader. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. read_HeliosOSL2R(): Import Luminescence Data from Helios Luminescence Reader. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

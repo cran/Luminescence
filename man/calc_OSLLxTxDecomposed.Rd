@@ -37,7 +37,7 @@ to the final \code{Lx/Tx} error value (e.g., instrumental error).}
 If digits is set to \code{NULL} nothing is rounded.}
 }
 \value{
-Returns an S4 object of type \linkS4class{RLum.Results}.
+Returns an S4 object of type \link[=RLum.Results-class]{RLum.Results}.
 
 Slot \code{data} contains a \link{list} with the following structure:
 
@@ -64,7 +64,7 @@ CW-OSL curves decomposed by \code{OSLdecomposition::RLum.OSL_decomposition}.
  
 
 \section{How to cite}{
-Mittelstrass, D., 2026. calc_OSLLxTxDecomposed(): Calculate Lx/Tx ratio for decomposed CW-OSL signal components. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Mittelstrass, D., 2026. calc_OSLLxTxDecomposed(): Calculate Lx/Tx ratio for decomposed CW-OSL signal components. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -74,7 +74,7 @@ talk presented at DLED 2019, Bingen, Germany
 \url{http://luminescence.de/OSLdecomp_talk.pdf}\cr
 }
 \seealso{
-\linkS4class{RLum.Data.Curve}, \link{fit_DoseResponseCurve},
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve}, \link{fit_DoseResponseCurve},
 \link{analyse_SAR.CWOSL}
 }
 \author{

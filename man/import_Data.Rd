@@ -12,14 +12,14 @@ import_Data(file, ..., fastForward = TRUE, verbose = FALSE)
 \item{...}{arguments to be further passed down to supported functions (please check the functions
 to determine the correct arguments)}
 
-\item{fastForward}{\link{logical} (\emph{with default}): option to create \linkS4class{RLum} objects
+\item{fastForward}{\link{logical} (\emph{with default}): option to create \link[=RLum-class]{RLum} objects
 during import or a \link{list} of such objects}
 
 \item{verbose}{\link{logical} (\emph{with default}): enable/disable output to the
 terminal.}
 }
 \value{
-Always returns a \link{list}; empty or filled with \linkS4class{RLum.Analysis} objects
+Always returns a \link{list}; empty or filled with \link[=RLum.Analysis-class]{RLum.Analysis} objects
 }
 \description{
 Convenience wrapper function to provide a quicker and more standardised way of
@@ -49,7 +49,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. import_Data(): Import Luminescence Data into R. Function version 0.1.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. import_Data(): Import Luminescence Data into R. Function version 0.1.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

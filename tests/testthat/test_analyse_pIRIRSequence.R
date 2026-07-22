@@ -24,7 +24,7 @@ results <- analyse_pIRIRSequence(
   object,
   signal_integral = 1:2,
   background_integral = 900:1000,
-  fit.method = "EXP",
+  fit.method = "SSE",
   sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
   main = "Pseudo pIRIR data set based on quartz OSL",
   plot = TRUE,
@@ -44,7 +44,7 @@ test_that("check plot stuff", {
     object,
     signal_integral = 1:2,
     background_integral = 900:1000,
-    fit.method = "EXP",
+    fit.method = "SSE",
     sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
     main = "Pseudo pIRIR data set based on quartz OSL",
     plot = TRUE,
@@ -60,7 +60,7 @@ test_that("check plot stuff", {
     object,
     signal_integral = 1:2,
     background_integral = 900:1000,
-    fit.method = "EXP",
+    fit.method = "SSE",
     sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
     main = "Pseudo pIRIR data set based on quartz OSL",
     plot = TRUE,
@@ -74,7 +74,7 @@ test_that("check plot stuff", {
       object,
       signal_integral = 1:2,
       background_integral = 900:1000,
-      fit.method = "EXP",
+      fit.method = "SSE",
       sequence.structure = c("TL", paste0("pseudoIRSL", 1:6)),
       main = "Pseudo pIRIR data set based on quartz OSL",
       cex = 0.5,
@@ -88,24 +88,12 @@ test_that("check plot stuff", {
     object,
     signal_integral = 1:2,
     background_integral = 900:1000,
-    fit.method = "EXP",
+    fit.method = "SSE",
     sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
     main = "Pseudo pIRIR data set based on quartz OSL",
     plot = TRUE,
     plot_singlePanels = TRUE,
     verbose = FALSE))
-
-  suppressWarnings( # duplicated plot.single warnings from sanalyse_SAR.CWOSL()
-  expect_warning(analyse_pIRIRSequence(
-    object,
-    signal_integral = 1:2,
-    background_integral = 900:1000,
-    fit.method = "EXP",
-    plot = TRUE,
-    plot.single = TRUE,
-    verbose = FALSE),
-    "'plot.single' was deprecated in v1.0.0, use 'plot_singlePanels' instead")
-  )
 
   ## integral_input
   set.seed(1)
@@ -113,7 +101,7 @@ test_that("check plot stuff", {
                                 signal_integral = c(0.04, 0.16),
                                 background_integral = 34:40,
                                 integral_input = "measurement",
-                                fit.method = "EXP",
+                                fit.method = "SSE",
                                 plot = FALSE,
                                 verbose = FALSE)
   set.seed(1)
@@ -121,7 +109,7 @@ test_that("check plot stuff", {
                                 signal_integral = 1:4,
                                 background_integral = 850:1000,
                                 integral_input = "channel",
-                                fit.method = "EXP",
+                                fit.method = "SSE",
                                 plot = FALSE,
                                 verbose = FALSE)
   res1@info <- res2@info <- list() # remove $call
@@ -207,7 +195,8 @@ test_that("input validation", {
                                        signal_integral = 1:2,
                                        background_integral = 900:1000,
                                        plot = FALSE),
-                 "Your sequence does not contain 'TL' curves")
+                 "'sequence.structure' changed to c('IR50', 'pIRIR225')",
+                 fixed = TRUE)
   })
 })
 
@@ -219,8 +208,8 @@ test_that("check class and length of output", {
     expect_s3_class(results$LnLxTnTx.table, "data.frame")
     expect_s3_class(results$rejection.criteria, "data.frame")
 
-   expect_equal(round(sum(results$data[1:2, 1:4]), 0), 7583)
-   expect_equal(round(sum(results$rejection.criteria$Value), 2), 4016.66)
+   expect_equal(round(sum(results$data[1:2, 1:4]), 0), 7473)
+   expect_equal(round(sum(results$rejection.criteria$Value), 0), 4012)
 })
 
 test_that("regression tests", {
@@ -251,7 +240,7 @@ test_that("graphical snapshot tests", {
                                   object,
                                   signal_integral = 1:2,
                                   background_integral = 900:1000,
-                                  fit.method = "EXP",
+                                  fit.method = "SSE",
                                   sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
                                   main = "Pseudo pIRIR data set based on quartz OSL",
                                   plot = TRUE,
@@ -262,7 +251,7 @@ test_that("graphical snapshot tests", {
                                     object,
                                     signal_integral = list(1:2, 2:3),
                                     background_integral = list(900:1000, 800:1000),
-                                    fit.method = "EXP",
+                                    fit.method = "SSE",
                                     sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
                                     plot = TRUE,
                                     plot_singlePanels = FALSE,

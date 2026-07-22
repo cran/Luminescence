@@ -48,7 +48,7 @@
 #' ##get results
 #' get_RLum(dose.rate)
 #'
-#' ##get parameters used for the calcualtion from the same object
+#' ## get parameters used for the calculation from the same object
 #' get_RLum(dose.rate, data.object = "parameters")
 #'
 #' ##alternatively objects can be accessed using S3 generics, such as
@@ -66,20 +66,6 @@ setClass(
 ## as() ---------------------------------------------------------------------
 ##LIST
 ##COERCE RLum.Results >> list AND list >> RLum.Results
-#' as() - RLum-object coercion
-#'
-#' for `[RLum.Results-class]`
-#'
-#' **[Luminescence::RLum.Results-class]**
-#'
-#' \tabular{ll}{
-#'  **from** \tab **to**\cr
-#'   `list` \tab `list`\cr
-#' }
-#'
-#' Given that the [list] consists of [Luminescence::RLum.Results-class] objects.
-#'
-#' @name as
 setAs("list", "RLum.Results",
       function(from,to){
         new(to,
@@ -132,16 +118,16 @@ setMethod("set_RLum",
                    info = list()) {
 
             ##create new class
-            newRLumReuslts <- new("RLum.Results")
+            newRLumResults <- new("RLum.Results")
 
             ##fill object
-            newRLumReuslts@originator <- originator
-            newRLumReuslts@data <- data
-            newRLumReuslts@info <- info
-            newRLumReuslts@.uid <- .uid
-            newRLumReuslts@.pid <- .pid
+            newRLumResults@originator <- originator
+            newRLumResults@data <- data
+            newRLumResults@info <- info
+            newRLumResults@.uid <- .uid
+            newRLumResults@.pid <- .pid
 
-            return(newRLumReuslts)
+            return(newRLumResults)
           })
 
 

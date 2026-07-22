@@ -2,7 +2,6 @@ AEQUIVAL
 ANR
 Abanico
 Aberystwyth
-Accessor
 Acknowledgements
 Acta
 Adamiec
@@ -75,6 +74,7 @@ Carstensen
 Centre
 Chapot
 Characterisation
+Chauhan
 CobbleDoseRate
 Colour
 Combès
@@ -89,6 +89,7 @@ DOI
 DRAC
 DRC
 DRCs
+DSE
 DTU
 DTYPE
 Dau
@@ -124,6 +125,7 @@ FFM
 FI
 FLConsole
 FMM
+FWHM
 Freiberg
 Frouin
 Furetta
@@ -180,6 +182,7 @@ Institut
 Ioannides
 Isothermal
 Jacobian
+Jaiwal
 Jakob
 Jinmium
 Jokisch
@@ -189,6 +192,7 @@ Kadereit
 Kambhampati
 Kars
 Karsten
+Kaushal
 Kehl
 Kenzler
 Kinahan
@@ -235,6 +239,7 @@ MCMC
 MDM
 MERCHANTABILITY
 Maartje
+MacOS
 Madsen
 Marquardt
 MatLab
@@ -252,10 +257,12 @@ Multicore
 Mungo
 Murari
 Médoc
+NCF
 NCL
 NIR
 NNDC
 NUTECH
+Nagar
 Namche
 Nanni
 Neudorf
@@ -312,6 +319,7 @@ RNG
 ROI
 ROIs
 RStudio
+RWTH
 Radionukliden
 Rainer
 Ramped
@@ -341,6 +349,7 @@ Sandur
 Sauer
 Schlunegger
 Schoorl
+SciPy
 Selva
 Semrock
 Silesian
@@ -416,7 +425,6 @@ Wallinga
 Weniger
 Wickham
 Wiechen
-Willian
 Wintle
 Wissenschaftsnetzwerk
 Woda
@@ -433,7 +441,6 @@ Zeuchfeld
 Zilhao
 abanico
 absorber
-accessor
 al
 aliquot
 aliquots
@@ -443,7 +450,6 @@ analyse
 analysed
 analysing
 anhand
-arbitary
 artefact
 astr
 athermal
@@ -473,8 +479,10 @@ contrib
 crosstalk
 cts
 curveType
+customisation
 customise
 customised
+cutheat
 data's
 dataset
 datasets
@@ -497,6 +505,7 @@ eV
 eq
 et
 ethz
+favour
 fc
 feldspars
 frequentist
@@ -517,6 +526,7 @@ html
 http
 https
 initialisation
+initialised
 interquartile
 irradiations
 isochrons
@@ -534,7 +544,6 @@ lossy
 mGy
 mJ
 mW
-macOS
 massebezogenen
 minimisation
 misspecified
@@ -558,7 +567,6 @@ normalisation
 normalise
 normalised
 normalises
-nought
 ns
 nuclide
 onwards
@@ -574,6 +582,8 @@ pLM
 pPM
 packings
 palaeodose
+palaeodoses
+paleodoses
 pandoc
 parallelize
 pch
@@ -583,6 +593,7 @@ photomultipliers
 physica
 pipermail
 plotly
+png
 poisson
 polymineral
 portableOSL
@@ -615,6 +626,7 @@ scatterplot
 serialised
 sigmab
 skewness
+specialised
 sqrt
 standardisation
 standardised
@@ -637,6 +649,7 @@ un
 unfaded
 unitless
 univocally
+unlogged
 unrecognised
 utilised
 utilises

@@ -15,7 +15,7 @@ calc_AverageDose(
 )
 }
 \arguments{
-\item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
+\item{data}{\link[=RLum.Results-class]{RLum.Results} or \link{data.frame} (\strong{required}):
 for \link{data.frame}: two columns with \code{De} \code{(data[,1])} and \verb{De error} \code{(values[,2])}}
 
 \item{sigma_m}{\link{numeric} (\strong{required}):
@@ -46,7 +46,7 @@ Further supported arguments: \code{mtext} (\link{character}), \code{rug} (\code{
 }
 \value{
 The function produces numerical output and an optional plot. In addition,
-an \linkS4class{RLum.Results} object containing the following
+an \link[=RLum.Results-class]{RLum.Results} object containing the following
 elements is returned:
 
 \item{$summary}{\link{data.frame} summary of all relevant model results.}
@@ -112,7 +112,7 @@ plot_AbanicoPlot(AD, z.0 = AD$summary$de)
 } 
 
 \section{How to cite}{
-Christophe, C., Philippe, A., Guérin, G., Kreutzer, S., 2026. calc_AverageDose(): Calculate the Average Dose and the dose rate dispersion. Function version 0.1.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Christophe, C., Philippe, A., Guérin, G., Kreutzer, S., 2026. calc_AverageDose(): Calculate the Average Dose and the dose rate dispersion. Function version 0.1.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

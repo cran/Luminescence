@@ -76,20 +76,6 @@ setClass("RLum.Analysis",
 ## as() ---------------------------------------------------------------------
 ##LIST
 ##COERCE RLum.Analyse >> list AND list >> RLum.Analysis
-#' as() - RLum-object coercion
-#'
-#' for `[RLum.Analysis-class]`
-#'
-#' **[Luminescence::RLum.Analysis-class]**
-#'
-#' \tabular{ll}{
-#'  **from** \tab **to**\cr
-#'   `list` \tab `list`\cr
-#' }
-#'
-#' Given that the [list] consists of [Luminescence::RLum.Analysis-class] objects.
-#'
-#' @name as
 setAs("list", "RLum.Analysis",
       function(from,to){
         new(to,
@@ -308,12 +294,15 @@ setMethod(
 #' An environment passed to [eval] as the enclosure. This argument is only
 #' relevant when subsetting the object and should not be used manually.
 #'
+#' @param verbose [logical] (*with default*):
+#' Enable/disable output to the terminal.
+#'
 #' @export
 setMethod("get_RLum",
           signature = ("RLum.Analysis"),
           function(object, record.id = NULL, recordType = NULL, curveType = NULL, RLum.type = NULL,
                    protocol = "UNKNOWN", get.index = FALSE, drop = TRUE, recursive = TRUE,
-                   info.object = NULL, subset = NULL, env = parent.frame(2)) {
+                   info.object = NULL, subset = NULL, env = parent.frame(2), verbose = TRUE) {
             .set_function_name("get_RLum")
             on.exit(.unset_function_name(), add = TRUE)
 
@@ -367,11 +356,15 @@ setMethod("get_RLum",
                 object@records <- object@records[sel]
                 return(object)
               } else {
-                mapply(function(name, op) {
-                  message("  ", name, ": ", .collapse(unique(op), quote = FALSE))
-                }, names(envir), envir)
-                .throw_message("'subset' expression produced an ",
-                               "empty selection, NULL returned")
+                if (verbose) {
+                  msg <- paste("The following fields and values are available",
+                               "(set 'verbose = FALSE' to suppress this message):")
+                  vals <- mapply(function(name, op) {
+                    sprintf("\n  %s: %s", name, .collapse(unique(op), quote = FALSE))
+                  }, names(envir), envir)
+                  .throw_message(msg, vals, "\nError: 'subset' expression ",
+                                 "produced an empty selection, NULL returned")
+                }
                 return(NULL)
               }
             }
@@ -416,9 +409,14 @@ setMethod("get_RLum",
               }
 
               ##check if record.id exists
-              if (!all(abs(record.id) %in% (1:length(object@records)))) {
-                .throw_message("At least one 'record.id' is invalid, ",
-                               "NULL returned")
+              invalid.ids <- setdiff(abs(record.id), seq_along(object@records))
+              if (length(invalid.ids) > 0) {
+                ## don't show more than 5 invalid ids (or 4 with ellipsis)
+                if (length(invalid.ids) > 5)
+                  invalid.ids <- c(invalid.ids[1:4], "\u2026") # "..."
+                .throw_message("At least one 'record.id' (",
+                               .collapse(invalid.ids, quote = FALSE),
+                               ") is invalid, NULL returned")
                 return(NULL)
               }
 
@@ -512,8 +510,12 @@ setMethod("get_RLum",
 #' @describeIn remove_RLum
 #' Method to remove records from an [Luminescence::RLum.Analysis-class] object.
 #'
-#' @param ... parameters to be passed to [Luminescence::get_RLum]. The arguments `get.index` and
-#' `drop` are preset and have no effect when provided
+#' @param ... parameters to be passed to [Luminescence::get_RLum]. Only the
+#' following named arguments are supported: `record.id`, `recordType`,
+#' `curveType`, `RLum.type`, `protocol`, `info.object` and `subset`.
+#' Arguments `get.index` and `drop` are preset to `TRUE` and `FALSE`,
+#' respectively, and cannot be overridden. Other named arguments are ignored,
+#' while unnamed arguments are not supported.
 #'
 #' @export
 setMethod("remove_RLum",
@@ -528,8 +530,12 @@ setMethod("remove_RLum",
     get.index = TRUE,
     drop = FALSE
   )
+
   ## we do not support all arguments; therefore we make a positive list
   args <- list(...)
+  if (is.null(names(args)) || any(names(args) == "")) {
+    .throw_error("Unnamed arguments are not supported")
+  }
   args[!names(args) %in% c(
     "record.id",
     "recordType",

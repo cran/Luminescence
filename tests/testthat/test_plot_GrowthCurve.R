@@ -14,7 +14,7 @@ test_that("input validation", {
       fixed = TRUE)
   expect_error(
       plot_GrowthCurve(LxTxData, fit.method = "error"),
-      "'fit.method' should be one of 'LIN', 'QDR', 'EXP', 'EXP OR LIN'")
+      "'fit.method' should be one of 'LIN', 'QDR', 'SSE', 'SSE OR LIN'")
   expect_error(
       plot_GrowthCurve(LxTxData, output.plotExtended = "error"),
       "'output.plotExtended' should be a single logical value")
@@ -49,7 +49,7 @@ test_that("input validation", {
   ## only two columns
   expect_warning(
       plot_GrowthCurve(LxTxData[, 1:2], verbose = FALSE),
-      "Error column invalid or 0, 'fit.weights' ignored")
+      "Error column invalid, infinite, or contains 0, 'fit.weights' reset to NULL")
 
   ## test case with all NA
   tmp_LxTx <- LxTxData
@@ -76,10 +76,6 @@ test_that("input validation", {
 
   ## deprecated option
   expect_warning(
-      plot_GrowthCurve(LxTxData, verbose = FALSE,
-                       output.plotExtended.single = TRUE),
-      "'output.plotExtended.single' was deprecated in v1.0.0, use 'plot_singlePanels'")
-  expect_warning(
       plot_GrowthCurve(sample = LxTxData, verbose = FALSE),
       "'sample' was deprecated in v1.2.0, use 'object' instead")
 })
@@ -88,16 +84,16 @@ test_that("main tests", {
   testthat::skip_on_cran()
 
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP",
+                                 fit.method = "SSE",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
                                  fit.method = "LIN",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP+LIN",
+                                 fit.method = "SSE+LIN",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP+EXP",
+                                 fit.method = "DSE",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
                                  fit.method = "QDR",
@@ -111,7 +107,7 @@ test_that("main tests", {
 
   ## force through the origin
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP+LIN",
+                                 fit.method = "SSE+LIN",
                                  fit.bounds = FALSE,
                                  fit.force_through_origin = TRUE,
                                  n.MC = 10))
@@ -134,11 +130,11 @@ test_that("additional tests", {
                                  mode = "extrapolation",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP",
+                                 fit.method = "SSE",
                                  mode = "extrapolation",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP+LIN",
+                                 fit.method = "SSE+LIN",
                                  mode = "extrapolation",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
@@ -168,11 +164,11 @@ test_that("additional tests", {
                                  mode = "alternate",
                                  n.MC = 10))
   expect_output(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP",
+                                 fit.method = "SSE",
                                  mode = "alternate",
                                  n.MC = 10))
   expect_silent(plot_GrowthCurve(LxTxData,
-                                 fit.method = "EXP+LIN",
+                                 fit.method = "SSE+LIN",
                                  mode = "alternate",
                                  verbose = FALSE,
                                  n.MC = 10))
@@ -198,7 +194,5 @@ test_that("additional tests", {
   expect_match(warnings, "1 NA values removed",
                all = FALSE, fixed = TRUE)
   expect_match(warnings, "Fitting a non-linear least-squares model requires",
-               all = FALSE, fixed = TRUE)
-  expect_match(warnings, "'NumberIterations.MC' was deprecated in v1.0.0, use 'n.MC'",
                all = FALSE, fixed = TRUE)
 })

@@ -26,7 +26,7 @@ specify unit of input data given in the dose rate data frame, one of
 enable/disable output to the terminal.}
 }
 \value{
-Returns an \linkS4class{RLum.Results} object with a \link{data.frame} containing
+Returns an \link[=RLum.Results-class]{RLum.Results} object with a \link{data.frame} containing
 input and newly calculated values. Please not that in the column header µg/g
 is written as \code{mug/g} due to the R requirement to maintain packages portable using
 ASCII characters only.
@@ -105,7 +105,7 @@ convert_Activity2Concentration(data)
 } 
 
 \section{How to cite}{
-Fuchs, M.C., 2026. convert_Activity2Concentration(): Convert Nuclide Activities to Abundance and Vice Versa. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Fuchs, M.C., 2026. convert_Activity2Concentration(): Convert Nuclide Activities to Abundance and Vice Versa. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

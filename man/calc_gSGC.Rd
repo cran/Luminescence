@@ -43,7 +43,7 @@ enable/disable the plot output.}
 \item{...}{parameters will be passed to the plot output}
 }
 \value{
-Returns an S4 object of type \linkS4class{RLum.Results}.
+Returns an S4 object of type \link[=RLum.Results-class]{RLum.Results}.
 
 \strong{\verb{@data}}\cr
 \verb{$ De.value} (\link{data.frame}) \cr
@@ -82,7 +82,7 @@ get_RLum(results, data.object = "De")
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. calc_gSGC(): Calculate De value based on the gSGC by Li et al., 2015. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. calc_gSGC(): Calculate De value based on the gSGC by Li et al., 2015. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -91,7 +91,7 @@ a 'global standardised growth curve' (gSGC) for optical dating of quartz from se
 Quaternary Geochronology 27, 94-104. doi:10.1016/j.quageo.2015.02.011
 }
 \seealso{
-\linkS4class{RLum.Results}, \link{get_RLum}, \link{uniroot}
+\link[=RLum.Results-class]{RLum.Results}, \link{get_RLum}, \link{uniroot}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)

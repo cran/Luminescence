@@ -21,15 +21,15 @@
 #' In the original version of the minimum dose model, which is applied if
 #' `log = TRUE` (default), the basic data are the natural
 #' logarithms of the De estimates and relative standard errors of the De
-#' estimates. The value for `sigmab` must be provided as a ratio
-#' (e.g, 0.2 for 20 %).
+#' estimates.
 #'
 #' If `log=FALSE`, the modified un-logged model will be applied instead. This
 #' has essentially the same form as the original version, but  `gamma` and
 #' `sigma` are in Gy and `gamma` becomes the minimum true dose in the
 #' population.
-#' **Note:** the un-logged model requires `sigmab` to be in the same
-#' absolute unit as the provided De values (seconds or Gray).
+#'
+#' In either case, the value for `sigmab` must be provided as a ratio
+#' (e.g, 0.2 for 20 %).
 #'
 #' While the original (logged) version of the minimum dose
 #' model may be appropriate for most samples (i.e. De distributions), the
@@ -63,7 +63,7 @@
 #' respectively. The bandwidth of the kernel density estimate can be specified
 #' with `bs.h`. By default, this is calculated as:
 #'
-#' \deqn{h = (2*\sigma_{DE})/\sqrt{n}}
+#' \deqn{h = 2\sigma_{DE} / \sqrt{n}}
 #'
 #' **Multicore support**
 #'
@@ -89,7 +89,7 @@
 #'
 #' For more details on the profile likelihood
 #' calculations and plots please see the vignettes of the `bbmle` package
-#' (also available here: [https://CRAN.R-project.org/package=bbmle]().
+#' (also available at [https://CRAN.R-project.org/package=bbmle]()).
 #'
 #' @param data [Luminescence::RLum.Results-class] or [data.frame] (**required**):
 #' for [data.frame]: two columns with `(data[, 1])` and De error `(data[, 2])`.
@@ -97,10 +97,13 @@
 #' @param sigmab [numeric] (**required**):
 #' additional spread in De values, representing the expected overdispersion in
 #' the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-#' **Note:** For the logged model (`log = TRUE`) this value must be
-#' a fraction, e.g. 0.2 (= 20 %). If the un-logged model is used (`log = FALSE`),
-#' `sigmab` must be provided in the same absolute units of the De values (seconds or Gray).
-#' See details.
+#' This value must be expressed as a ratio, e.g. 0.2 (for 20 %), independently
+#' of the `log` argument.
+#'
+#' **Note:** Up to v1.2.1, it was required that the unlogged model specified
+#' `sigmab` in the same absolute units of the De values (seconds or Gray). This
+#' is no longer the case, and an error will be thrown if values of `sigmab`
+#' greater than 1 are assigned.
 #'
 #' @param log [logical] (*with default*):
 #' whether the logged minimum dose model should be fit to De data (`TRUE` by
@@ -110,7 +113,8 @@
 #' number of parameters in the minimum age model, either 3 (default) or 4.
 #'
 #' @param bootstrap [logical] (*with default*):
-#' apply the recycled bootstrap approach of Cunningham & Wallinga (2012).
+#' apply the recycled bootstrap approach of Cunningham & Wallinga 2012. See
+#' details for default values and options to modify them.
 #'
 #' @param init.values [numeric] (*optional*):
 #' a named list with starting values for `gamma`, `sigma`, `p0` and `mu`
@@ -169,7 +173,7 @@
 #' model with `debug=TRUE` which provides extended console output and
 #' forwards all internal warning messages.
 #'
-#' @section Function version: 0.5.0
+#' @section Function version: 0.6.0
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany) \cr
@@ -354,13 +358,18 @@ calc_MinDose <- function(
   }
 
   .validate_positive_scalar(sigmab)
+  .validate_logical_scalar(log)
+  if (sigmab > 1) {
+    .throw_error("'sigmab' should be expressed as a ratio (e.g. 0.2 for 20 %)",
+                 if (!log) " also if 'log = FALSE'")
+  }
+  .validate_class(init.values, "list", null.ok = TRUE)
   if (!is.null(init.values)) {
-    .validate_class(init.values, "list")
     exp.names <- c("gamma", "sigma", "p0", "mu")
     mis.names <- setdiff(exp.names, names(init.values))
     if (length(init.values) < length(exp.names) || length(mis.names) > 0) {
-      .throw_error("Please provide initial values for all model parameters. ",
-                   "\nMissing parameters: ",
+      .throw_error("Please provide named values for all model parameters ",
+                   "in 'init.values'. Missing parameters: ",
                    toString(mis.names))
     }
   }
@@ -372,7 +381,6 @@ calc_MinDose <- function(
   }
 
   .validate_positive_scalar(level)
-  .validate_logical_scalar(log)
   .validate_logical_scalar(bootstrap)
   .validate_logical_scalar(log.output)
   .validate_logical_scalar(plot)
@@ -467,13 +475,14 @@ calc_MinDose <- function(
   if (is.null(init.values)) {
     start <- list(gamma = ifelse(log, log(quantile(data[ ,1], probs = 0.25, na.rm = TRUE)),
                                  quantile(data[ ,1], probs = 0.25, na.rm = TRUE)),
-                  sigma = 1.2,
-                  p0 = 0.01,
+                  sigma = ifelse(log, sd(data[, 1], na.rm = TRUE) / mean(data[, 1], na.rm = TRUE),
+                                 sd(data[, 1], na.rm = TRUE)),
+                  p0 = 0.5,
                   mu = ifelse(log, log(quantile(data[ ,1], probs = 0.25, na.rm = TRUE)),
                               mean(data[ ,1])))
   } else {
     start <- list(gamma = ifelse(log, log(init.values$gamma), init.values$gamma),
-                  sigma = ifelse(log, log(init.values$sigma), init.values$sigma),
+                  sigma = ifelse(log, init.values$sigma / init.values$mu, init.values$sigma),
                   p0 = init.values$p0,
                   mu = ifelse(log, log(init.values$mu), init.values$mu))
   }
@@ -566,7 +575,7 @@ calc_MinDose <- function(
 
   ## Function to extract the estimate of gamma from mle2 objects and converting
   ## it back to the 'normal' scale
-  save_Gamma <- function(ests) {
+  save_Gamma <- function(ests, log) {
     m <- bbmle::coef(ests)[["gamma"]]
     if (invert)
       m <- -1 * (m - x.offset)
@@ -586,8 +595,8 @@ calc_MinDose <- function(
 
   ## Collect the parameter estimates from mle2 objects, converting back
   ## log-transformed values to the normal scale
-  extract_estimates <- function(ests) {
-    res <- data.frame(gamma = save_Gamma(ests),
+  extract_estimates <- function(ests, log) {
+    res <- data.frame(gamma = save_Gamma(ests, log),
                       sigma = bbmle::coef(ests)[["sigma"]],
                       p0 = bbmle::coef(ests)[["p0"]],
                       mu = if (par == 4) bbmle::coef(ests)[["mu"]] else NA,
@@ -605,16 +614,16 @@ calc_MinDose <- function(
   ##============================================================================##
 
   ## adds the sigmab error to each individual De error
-  combine_Errors <- function(data, err) {
+  combine_Errors <- function(data, sigmab) {
     if (log) {
       lcd  <- log(data[, 1]) * ifelse(invert, -1, 1)
       if (invert) {
         lcd <- lcd + x.offset
       }
-      lse <- sqrt((data[, 2] / data[, 1])^2 + err^2)
+      lse <- sqrt((data[, 2] / data[, 1])^2 + sigmab^2)
     } else {
       lcd <- data[, 1]
-      lse <- sqrt(data[, 2]^2 + err^2)
+      lse <- abs(lcd * sqrt((data[, 2] / data[, 1])^2 + sigmab^2))
     }
     cbind(lcd, lse)
   }
@@ -655,47 +664,35 @@ calc_MinDose <- function(
   prof.upper <- c(gamma = Inf, sigma = Inf, p0 = 1, mu = Inf)
 
   # calculate profile log likelihoods
-  prof <- suppressWarnings(
+  .fit_profile <- function(maxsteps) {
     bbmle::profile(ests,
                    which = which,
                    std.err = as.vector(coef_err),
                    #try_harder = TRUE,
                    quietly = TRUE,
+                   maxsteps = maxsteps,
                    tol.newmin = Inf,
                    skiperrs = TRUE,
                    prof.lower = prof.lower,
                    prof.upper = prof.upper)
-  )
-  # Fallback when profile() returns a 'better' fit
-  maxsteps <- 100
-  cnt <- 1
-  while (!inherits(prof, "profile.mle2")) {
-    if (maxsteps == 0L)
-      .throw_error("Couldn't find a converging fit for the profile log-likelihood")
-    if (verbose)
-      message("## Trying to find a better fit (", cnt, "/10) ##")
-    prof <- suppressWarnings(
-      bbmle::profile(ests,
-                     which = which,
-                     std.err = as.vector(coef_err),
-                     # try_harder = TRUE,
-                     quietly = TRUE,
-                     maxsteps = maxsteps,
-                     tol.newmin = Inf,
-                     skiperrs = TRUE,
-                     prof.lower = prof.lower,
-                     prof.upper = prof.upper)
-    )
-    maxsteps <- maxsteps - 10
-    cnt <- cnt + 1
+  }
+
+  prof <- suppressWarnings(.fit_profile(maxsteps = 100))
+  if (!inherits(prof, "profile.mle2")) {
+    cnt <- 1
+    while (!inherits(prof, "profile.mle2")) {
+      if (cnt > 10)
+        .throw_error("Couldn't find a converging fit for the profile log-likelihood")
+      if (verbose)
+        message("## Trying to find a better fit (", cnt, "/10) ##")
+      prof <- suppressWarnings(.fit_profile(maxsteps = 100 - (cnt - 1) * 10))
+      cnt <- cnt + 1
+    }
   }
 
   ## delete rows where z = -Inf/Inf or NaN
-  prof@profile$gamma <- prof@profile$gamma[is.finite(prof@profile$gamma$z), ]
-  prof@profile$sigma <- prof@profile$sigma[is.finite(prof@profile$sigma$z), ]
-  prof@profile$p0 <- prof@profile$p0[is.finite(prof@profile$p0$z), ]
-  if (par == 4) {
-    prof@profile$mu <- prof@profile$mu[is.finite(prof@profile$mu$z), ]
+  for (p in c("gamma", "sigma", "p0", if (par == 4) "mu")) {
+    prof@profile[[p]] <- prof@profile[[p]][is.finite(prof@profile[[p]]$z), ]
   }
 
   ## calculate Bayesian Information Criterion (BIC)
@@ -716,9 +713,6 @@ calc_MinDose <- function(
   if (invert) {
     conf <- undo_invert(conf)
   }
-
-  ## keep a copy of the original conf object to be returned at the end
-  conf.orig <- conf
   if (log) {
     logged.rows <- row.names(conf) != "p0"
     conf[logged.rows, ] <- exp(conf[logged.rows, ])
@@ -727,7 +721,7 @@ calc_MinDose <- function(
   gamma_err <- (conf["gamma", 2] - conf["gamma", 1]) / 3.92
 
   ## retrieve results from mle2 object
-  res <- extract_estimates(ests)
+  res <- extract_estimates(ests, log)
 
   ##============================================================================##
   ## BOOTSTRAP
@@ -740,20 +734,6 @@ calc_MinDose <- function(
     create_Replicates <- function(R, e) {
       d <- apply(R, 1, function(x) data[x, ])
       mapply(function(x, y) combine_Errors(x, y), d, e, SIMPLIFY = FALSE)
-    }
-
-    # Function that takes each of the N replicates and produces a kernel density
-    # estimate of length n.
-    get_KDE <- function(d) {
-      f <- approx(density(x = d[, 1], kernel = "gaussian", bw = h, na.rm = TRUE),
-                  xout = d[, 1])
-      pStarTheta <- as.vector(f$y / sum(f$y))
-      pStarTheta / (1 / n)
-    }
-
-    # Function that calculates the product term of the recycled bootstrap
-    get_ProductTerm <- function(Pmat, freq) {
-      apply(Pmat^freq, 1, prod)
     }
 
     # Function that calculates the pseudo likelihoods for M replicates and
@@ -812,11 +792,11 @@ calc_MinDose <- function(
     if (verbose)
       message(msg)
 
-    n <- length(data[ ,1])
     # Draw N+M samples from a normally distributed sigmab
     sigmab.bs <- rnorm(N + M, sigmab, sigmab.sd)
 
     ## Draw N+M random indices of size n
+    n <- length(data[, 1])
     indices <- matrix(sample(n, size = n * (N + M), replace = TRUE),
                       nrow = N + M, ncol = n, byrow = TRUE)
 
@@ -842,14 +822,21 @@ calc_MinDose <- function(
     # Final bootstrap calculations
     if (verbose)
       message("Calculating likelihoods...")
-    # Save 2nd- and 1st-level bootstrap results (i.e. estimates of gamma)
-    b2mam <- sapply(mle[1:N], save_Gamma)
-    theta <- sapply(mle[c(N+1):c(N+M)], save_Gamma)
+
+    ## Save 2nd- and 1st-level bootstrap results (i.e. estimates of gamma) in
+    ## the normal scale
+    b2mam <- sapply(mle[1:N], save_Gamma, log = log)
+    theta <- sapply(mle[c(N+1):c(N+M)], save_Gamma, log = log)
 
     # Calculate the probability/pseudo-likelihood
-    Pmat <- lapply(replicates[c(N+1):c(N+M)], get_KDE)
+    Pmat <- lapply(replicates[(N + 1):(N + M)], function(d) {
+      f <- approx(density(x = d[, 1], kernel = "gaussian", bw = h, na.rm = TRUE),
+                  xout = d[, 1])
+      pStarTheta <- as.vector(f$y / sum(f$y))
+      pStarTheta / (1 / n)
+    })
     freq <- t(apply(indices[1:N, ], 1, tabulate, n))
-    prodterm <- vapply(Pmat, get_ProductTerm, freq, FUN.VALUE = numeric(N))
+    prodterm <- vapply(Pmat, function(P) apply(P^freq, 1, prod), FUN.VALUE = numeric(N))
 
     # Save the bootstrap results as dose-likelihood pairs
     pairs <- make_Pairs(theta, b2mam, prodterm)
@@ -864,10 +851,10 @@ calc_MinDose <- function(
     is.inf <- is.infinite(pairs[, 2])
     if (any(is.inf)) {
       # nocov start
-      .throw_warning("Inf values produced by bootstrapping removed for loess ",
+      .throw_warning("Inf values produced by bootstrapping removed for polynomial ",
                      "fitting (", round(sum(is.inf) / nrow(pairs) * 100, 2),
-                     "% of the total dataset). This message usually indicates ",
-                     "that your values are close to 0.")
+                     "% of the total samples). This message usually indicates ",
+                     "that your inputs are close to 0.")
       pairs <- pairs[!is.inf, ]
       # nocov end
     }
@@ -893,7 +880,7 @@ calc_MinDose <- function(
     }
 
     ## extract the parameters from the bootstrap replicates
-    mle <- rbindlist(lapply(mle[N + 1:M], extract_estimates))
+    mle <- rbindlist(lapply(mle[N + 1:M], extract_estimates, log = log))
 
     ## compute the mean of each parameter
     res <- data.frame(apply(mle, 2, mean, simplify = FALSE))
@@ -904,14 +891,6 @@ calc_MinDose <- function(
     conf <- data.frame(t(apply(mle[, 1:par], 2, quantile,
                                na.rm = TRUE, probs = prob)))
     colnames(conf) <- paste(prob * 100, "%")
-
-    ## keep a copy of the conf object in the scale in which the models were
-    ## fitted
-    conf.orig <- conf
-    if (log) {
-      logged.rows <- row.names(conf.orig) != "p0"
-      conf.orig[logged.rows, ] <- log(conf.orig[logged.rows, ])
-    }
 
     ## standard deviation over the De values from the bootstrap replicates
     gamma_err <- sd(pairs[, "theta"])
@@ -1023,7 +1002,7 @@ calc_MinDose <- function(
                 call = call,
                 mle = ests,
                 BIC = BIC,
-                confint = conf.orig,
+                confint = conf,
                 profile = prof,
                 bootstrap = list(
                   pairs = list(gamma=pairs),

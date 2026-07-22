@@ -34,7 +34,7 @@ Smoothing is encouraged if you see random signal drops within the decay curves r
 to hardware errors.}
 
 \item{merge}{\link{logical} (\emph{with default}):
-\code{TRUE} to merge all \linkS4class{RLum.Analysis} objects. Only applicable if multiple
+\code{TRUE} to merge all \link[=RLum.Analysis-class]{RLum.Analysis} objects. Only applicable if multiple
 files are imported.}
 
 \item{pattern}{\link{character} (\emph{with default}):
@@ -47,8 +47,8 @@ enable/disable output to the terminal.}
 \item{...}{currently not used.}
 }
 \value{
-Returns an S4 \linkS4class{RLum.Analysis} object containing
-\linkS4class{RLum.Data.Curve} objects for each curve. Results are
+Returns an S4 \link[=RLum.Analysis-class]{RLum.Analysis} object containing
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve} objects for each curve. Results are
 returned as a list when multiple files are processed or \code{file} is a list.
 }
 \description{
@@ -79,8 +79,8 @@ plot(psl, combine = TRUE)
 
 }
 \seealso{
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Data.Curve},
-\linkS4class{RLum.Data.Curve}
+\link[=RLum.Analysis-class]{RLum.Analysis}, \link[=RLum.Data.Curve-class]{RLum.Data.Curve},
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve}
 }
 \author{
 Christoph Burow, University of Cologne (Germany)\cr
@@ -88,7 +88,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Burow, C., Kreutzer, S., 2026. read_PSL2R(): Import SUERC portable OSL Reader PSL files into R. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Burow, C., Kreutzer, S., 2026. read_PSL2R(): Import SUERC portable OSL Reader PSL files into R. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

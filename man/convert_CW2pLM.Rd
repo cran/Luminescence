@@ -7,8 +7,8 @@
 convert_CW2pLM(object, ...)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
-\linkS4class{RLum.Data.Curve} object or a \code{data.frame} with measured
+\item{object}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve} object or a \code{data.frame} with measured
 curve data of type stimulation time (t) (\code{object[, 1]}) and measured counts
 (cts) (\code{object[, 2]}).}
 
@@ -16,7 +16,7 @@ curve data of type stimulation time (t) (\code{object[, 1]}) and measured counts
 }
 \value{
 The function returns the same data type as the input data type with
-the transformed curve values (\link{data.frame} or \linkS4class{RLum.Data.Curve}).
+the transformed curve values (\link{data.frame} or \link[=RLum.Data.Curve-class]{RLum.Data.Curve}).
 }
 \description{
 Transforms a conventionally measured continuous-wave (CW) curve into a
@@ -68,7 +68,7 @@ plot(values.transformed)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. convert_CW2pLM(): Transform a CW-OSL curve into a pLM-OSL curve. Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. convert_CW2pLM(): Transform a CW-OSL curve into a pLM-OSL curve. Function version 0.4.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -82,7 +82,7 @@ Luminescence (OSL) Experiment. Radiation Measurements 26, 701-709.
 }
 \seealso{
 \link{convert_CW2pHMi}, \link{convert_CW2pLMi}, \link{convert_CW2pPMi},
-\link{fit_LMCurve}, \link{lm}, \linkS4class{RLum.Data.Curve}
+\link{fit_LMCurve}, \link{lm}, \link[=RLum.Data.Curve-class]{RLum.Data.Curve}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr

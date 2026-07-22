@@ -5,7 +5,7 @@
 #' fitting on [Luminescence::RLum.Analysis-class] objects.
 #'
 #' @details To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement
-#' analyses, this function has been written as extended wrapper for function
+#' analyses, this function has been written as an extended wrapper for
 #' [Luminescence::analyse_SAR.CWOSL], thus facilitating an entire sequence analysis in
 #' one run. With this, its functionality is strictly limited by the
 #' functionality provided by  [Luminescence::analyse_SAR.CWOSL].
@@ -30,7 +30,7 @@
 #' @param object [Luminescence::RLum.Analysis-class] or [list] of
 #' [Luminescence::RLum.Analysis-class] objects (**required**):
 #' input object containing data for analysis.
-#' If a [list] is provided the functions tries to iterate over each element
+#' If a [list] is provided the function tries to iterate over each element
 #' in the list.
 #'
 #' @param signal_integral [integer] (**required**):
@@ -47,8 +47,8 @@
 #' corresponding to the given time range (in seconds) are selected.
 #'
 #' @param dose.points [numeric] (*optional*):
-#' a numeric vector containing the dose points values. Using this argument overwrites dose point
-#' values in the signal curves.
+#' a numeric vector containing the dose point values. Using this argument
+#' overwrites dose point values in the signal curves.
 #'
 #' @param sequence.structure [vector] [character] (*with default*):
 #' specifies the general sequence structure. Allowed values are `"TL"` and
@@ -61,7 +61,7 @@
 #' enable/disable the plot output.
 #'
 #' @param plot_singlePanels [logical] (*with default*):
-#' enable/disable plotting of the results in a single windows for each plot.
+#' enable/disable plotting of the results in a single window for each plot.
 #' Ignored if `plot = FALSE`.
 #'
 #' @param ... further arguments that will be passed to
@@ -142,7 +142,7 @@
 #' results <- analyse_pIRIRSequence(object,
 #'      signal_integral = 1:2,
 #'      background_integral = 900:1000,
-#'      fit.method = "EXP",
+#'      fit.method = "SSE",
 #'      sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
 #'      main = "Pseudo pIRIR data set based on quartz OSL",
 #'      plot_singlePanels = TRUE)
@@ -156,7 +156,7 @@
 #'   results <- analyse_pIRIRSequence(object,
 #'          signal_integral = 1:2,
 #'          background_integral = 900:1000,
-#'          fit.method = "EXP",
+#'          fit.method = "SSE",
 #'          main = "Pseudo pIRIR data set based on quartz OSL")
 #'
 #'   dev.off()
@@ -237,13 +237,8 @@ analyse_pIRIRSequence <- function(
                         ...)
     }))
 
-    ##combine everything to one RLum.Results object as this as what was written ... only
-    ##one object
-
     ##merge results and check if the output became NULL
     results <- merge_RLum(temp)
-
-    ##DO NOT use invisible here, this will stop the function from stopping
     if(length(results) == 0)
       return(NULL)
     return(results)
@@ -267,12 +262,6 @@ analyse_pIRIRSequence <- function(
     .throw_error(invalid.terms, " not allowed in 'sequence.structure'")
   }
 
-  ## deprecated argument
-  if ("plot.single" %in% ...names()) {
-    plot_singlePanels <- list(...)$plot.single
-    .deprecated("plot.single", "plot_singlePanels", since = "1.0.0")
-  }
-
   ## Deal with extra arguments
   extraArgs <- list(...)
   main <- extraArgs$main %||% "MEASUREMENT INFO"
@@ -290,7 +279,7 @@ analyse_pIRIRSequence <- function(
     msg <- paste0("Argument 'plot' reset to 'FALSE': the smallest plot ",
                   "size required is IN x IN in (at cex = ", cex, "). ",
                   "Consider plotting via `pdf(..., width = IN, height = IN)` ",
-                  "or setting `plot_singlePanels = TRUE`. ")
+                  "or setting `plot_singlePanels = TRUE`.")
     .throw_warning(gsub(x = msg, "IN", min.size))
   }
 
@@ -319,25 +308,25 @@ analyse_pIRIRSequence <- function(
   ##(2) Apply user sequence structure
   temp.sequence.structure  <- structure_RLum(object)
 
-    ##try to account for a very common mistake
-    if(any(grepl(sequence.structure, pattern = "TL", fixed = TRUE)) && !any(grepl(temp.sequence.structure[["recordType"]], pattern = "TL", fixed = TRUE))){
-      .throw_warning("Your sequence does not contain 'TL' curves, trying ",
-                     "to adapt 'sequence.structure' for you ...")
-      sequence.structure <- sequence.structure[!grepl(sequence.structure, pattern = "TL", fixed = TRUE)]
-    }
+  ## try to account for a very common mistake
+  idx.TL <- grepl("TL", sequence.structure, fixed = TRUE)
+  if (length(idx.TL) > 0 &&
+      !any(grepl("TL", temp.sequence.structure$recordType, fixed = TRUE))) {
+    sequence.structure <- sequence.structure[-idx.TL]
+    .throw_warning("'sequence.structure' contains 'TL' but your sequence does ",
+                   "not contain 'TL' curves, 'sequence.structure' changed to c(",
+                   .collapse(sequence.structure), ")")
+  }
 
-  ##set values to structure data.frame
-  ##but check first
-  if(2 * length(
-    rep(sequence.structure, nrow(temp.sequence.structure)/2/length(sequence.structure))) == length(temp.sequence.structure[["protocol.step"]])){
-    temp.sequence.structure[["protocol.step"]] <- rep(
-      sequence.structure, nrow(temp.sequence.structure)/2/length(sequence.structure))
+  num.protocol.steps <- length(temp.sequence.structure$protocol.step)
+  num.cycles <- num.protocol.steps / 2 / length(sequence.structure)
 
-  }else{
+  if (2 * length(rep(sequence.structure, num.cycles)) != num.protocol.steps) {
     .throw_message("The number of records is not a multiple of the defined ",
                    "sequence structure, NULL returned")
     return(NULL)
   }
+  temp.sequence.structure$protocol.step <- rep(sequence.structure, num.cycles)
 
   ##remove values that have been excluded
   rm.id <- temp.sequence.structure$id[temp.sequence.structure$protocol.step == "EXCLUDE"]
@@ -350,10 +339,9 @@ analyse_pIRIRSequence <- function(
     sequence.structure  <- sequence.structure[sequence.structure != "EXCLUDE"]
 
     ##set new structure
-    temp.sequence.structure  <- structure_RLum(object)
-
-    temp.sequence.structure[, "protocol.step"] <- rep(
-      sequence.structure, nrow(temp.sequence.structure)/2/length(temp.sequence.structure))
+    temp.sequence.structure <- structure_RLum(object)
+    num.cycles <- nrow(temp.sequence.structure) / 2 / length(sequence.structure)
+    temp.sequence.structure$protocol.step <- rep(sequence.structure, num.cycles)
 
     .throw_warning(length(rm.id), " records have been removed due to EXCLUDE")
   }
@@ -376,8 +364,7 @@ analyse_pIRIRSequence <- function(
     grepl("IR", temp.sequence.structure[,"protocol.step"]),"id"]
 
   ##grep information on the names of the IR curves, we need them later on
-  pIRIR.curve.names  <- unique(temp.sequence.structure[
-    temp.sequence.structure[IRSL.curves.id,"id"],"protocol.step"])
+  pIRIR.curve.names <- unique(temp.sequence.structure[IRSL.curves.id, "protocol.step"])
 
   ## Integrals checks -------------------------------------------------------
 
@@ -455,6 +442,7 @@ analyse_pIRIRSequence <- function(
   }
 
   ##(2) set loop
+  temp.results.final <- NULL
   for(i in 1:n.loops){
     ##compile record ids
     temp.id.sel <-
@@ -535,10 +523,10 @@ analyse_pIRIRSequence <- function(
       )
 
       ##merge results
-      if (exists("temp.results.final")) {
-        temp.results.final <- merge_RLum(list(temp.results.final, temp.results))
-      } else{
+      if (is.null(temp.results.final)) {
         temp.results.final <- temp.results
+      } else {
+        temp.results.final <- merge_RLum(list(temp.results.final, temp.results))
       }
   }
 
@@ -616,10 +604,7 @@ if(plot){
 
     ##calculate normalised values
     for(j in 1:length(pIRIR.curve.names)){
-      temp.curve.TnTx.sel <- temp.curve.TnTx[
-        temp.curve.TnTx[,"Signal"] == pIRIR.curve.names[j]
-        , "TnTx"]
-
+      temp.curve.TnTx.sel <- temp.curve.TnTx$TnTx[temp.curve.TnTx$Signal == pIRIR.curve.names[j]]
       temp.curve.TnTx.matrix[,j] <- temp.curve.TnTx.sel/temp.curve.TnTx.sel[1]
     }
 

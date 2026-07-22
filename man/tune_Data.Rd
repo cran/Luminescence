@@ -8,17 +8,17 @@ tune_Data(data, decrease.error = 0, increase.data = 0)
 }
 \arguments{
 \item{data}{\link{data.frame} (\strong{required}):
-input values, structure: data (\code{values[,1]}) and data error (\code{values [,2]})
-are required}
+input values, structure: values (\code{data[, 1]}) and error (\code{data[, 2]})
+are required.}
 
 \item{decrease.error}{\link{numeric}:
 factor by which the error is decreased, ranges between 0 and 1.}
 
 \item{increase.data}{\link{numeric}:
-factor by which the error is decreased, ranges between 0 and \code{Inf}.}
+factor by which the error is decreased, ranges between 0 and 1000.}
 }
 \value{
-Returns a \link{data.frame} with tuned values.
+Returns a 2-column \link{data.frame} with tuned values.
 }
 \description{
 The error can be reduced and sample size increased for specific purpose.
@@ -27,7 +27,7 @@ The error can be reduced and sample size increased for specific purpose.
 You should not use this function to improve your poor data set!
 }
 \section{Function version}{
- 0.5.0
+ 0.5.1
 }
 
 \examples{
@@ -54,7 +54,7 @@ Michael Dietze, GFZ Potsdam (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., 2026. tune_Data(): Tune data for experimental purpose. Function version 0.5.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Dietze, M., 2026. tune_Data(): Tune data for experimental purpose. Function version 0.5.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{manip}

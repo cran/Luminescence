@@ -7,27 +7,29 @@
 apply_EfficiencyCorrection(object, spectral.efficiency)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Spectrum} or \linkS4class{RLum.Analysis} (\strong{required}):
+\item{object}{\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} or \link[=RLum.Analysis-class]{RLum.Analysis} (\strong{required}):
 object of class \code{RLum.Data.Spectrum}, \code{RLum.Analysis}or a \link{list} of such
 objects. Other objects in the list are skipped.}
 
-\item{spectral.efficiency}{\link{data.frame} (\strong{required}):
-data frame with 2 columns containing wavelengths and relative spectral
-response values (values between 0 and 1). The provided data will be used to
-correct all spectra if \code{object} is a \link{list}.}
+\item{spectral.efficiency}{\link{data.frame} or \link{character} (\strong{required}):
+either a data frame with 2 columns containing wavelengths and relative
+spectral response values (values between 0 and 1); or a character string
+specifying the path to a CSV file (with a header row), which the function
+will attempt to import via \link[utils:read.csv]{utils::read.csv}. When \code{object} is a \link{list},
+the provided data will be used to correct all spectra.}
 }
 \value{
 Returns same object as provided as input
 }
 \description{
 The function applies spectral efficiency correction to
-\linkS4class{RLum.Data.Spectrum} objects.
+\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} objects.
 }
 \details{
 The efficiency correction is based on a spectral response dataset provided
 by the user. Usually the data set for the quantum efficiency is of lower
 resolution and values are interpolated for the required spectral resolution using
-function \link[stats:approxfun]{stats::approx}.
+function \link[stats:approx]{stats::approx}.
 
 If the energy calibration differs for both data set \code{NA} values are produces that
 will be removed from the matrix.
@@ -38,7 +40,7 @@ sufficiently correct for spectral efficiency of the entire optical system
 (e.g., spectrometer, camera ...).
 }
 \section{Function version}{
- 0.2.1
+ 0.3.0
 }
 
 \examples{
@@ -50,7 +52,7 @@ sufficiently correct for spectral efficiency of the entire optical system
 
 }
 \seealso{
-\linkS4class{RLum.Data.Spectrum}, \linkS4class{RLum.Analysis}
+\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum}, \link[=RLum.Analysis-class]{RLum.Analysis}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
@@ -58,7 +60,7 @@ Johannes Friedrich, University of Bayreuth (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Friedrich, J., 2026. apply_EfficiencyCorrection(): Apply spectral efficiency correction to RLum.Data.Spectrum objects. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Friedrich, J., 2026. apply_EfficiencyCorrection(): Apply spectral efficiency correction to RLum.Data.Spectrum objects. Function version 0.3.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{manip}

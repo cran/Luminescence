@@ -15,17 +15,17 @@ calc_TLLxTxRatio(
 )
 }
 \arguments{
-\item{Lx.data.signal}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\item{Lx.data.signal}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
 TL data (x = temperature, y = counts) (TL signal).}
 
-\item{Lx.data.background}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
+\item{Lx.data.background}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
 TL data (x = temperature, y = counts).
 If no data are provided no background subtraction is performed.}
 
-\item{Tx.data.signal}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\item{Tx.data.signal}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
 TL data (x = temperature, y = counts) (TL test signal).}
 
-\item{Tx.data.background}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
+\item{Tx.data.background}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
 TL data (x = temperature, y = counts).
 If no data are provided no background subtraction is performed.}
 
@@ -40,7 +40,7 @@ corresponding to the given temperature range are selected.}
 \item{...}{currently not used.}
 }
 \value{
-Returns an S4 object of type \linkS4class{RLum.Results}.
+Returns an S4 object of type \link[=RLum.Results-class]{RLum.Results}.
 Slot \code{data} contains a \link{list} with the following structure:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{$ LxTx.table
@@ -102,7 +102,7 @@ get_RLum(output)
 
 }
 \seealso{
-\linkS4class{RLum.Results}, \link{analyse_SAR.TL}
+\link[=RLum.Results-class]{RLum.Results}, \link{analyse_SAR.TL}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
@@ -110,7 +110,7 @@ Christoph Schmidt, University of Bayreuth (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Schmidt, C., 2026. calc_TLLxTxRatio(): Calculate the Lx/Tx ratio for a given set of TL curves -beta version-. Function version 0.3.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Schmidt, C., 2026. calc_TLLxTxRatio(): Calculate the Lx/Tx ratio for a given set of TL curves -beta version-. Function version 0.3.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

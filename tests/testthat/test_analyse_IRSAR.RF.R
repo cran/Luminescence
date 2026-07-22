@@ -45,12 +45,20 @@ test_that("input validation", {
   ## RF_nat.lim
   expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_nat.lim = "error"),
                "'RF_nat.lim' should be of class 'numeric', 'integer' or NULL")
+  expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_nat.lim = 1:5),
+               "'RF_nat.lim' should be of class 'numeric', 'integer' or NULL and")
+  expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_nat.lim = numeric()),
+               "'RF_nat.lim' should be of class 'numeric', 'integer' or NULL and")
   expect_warning(analyse_IRSAR.RF(IRSAR.RF.Data, RF_nat.lim = 6),
                  "'RF_nat.lim' out of bounds, reset to c(1, 5)", fixed = TRUE)
 
   ## RF_reg.lim
   expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = "error"),
                "'RF_reg.lim' should be of class 'numeric', 'integer' or NULL")
+  expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = 1:20),
+               "'RF_reg.lim' should be of class 'numeric', 'integer' or NULL and")
+  expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = integer()),
+               "'RF_reg.lim' should be of class 'numeric', 'integer' or NULL and")
   expect_warning(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = 2000),
                  "'RF_reg.lim' out of bounds, reset to c(1, 524)", fixed = TRUE)
   expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, RF_reg.lim = 521),
@@ -111,11 +119,6 @@ test_that("input validation", {
                                   method_control = list(cores = "4")),
                  "Invalid value for control argument 'cores'")
   })
-
-  ## deprecated option
-  expect_warning(analyse_IRSAR.RF(IRSAR.RF.Data, verbose = FALSE,
-                                  method.control = list(cores = 1)),
-                 "'method.control' was deprecated in v1.0.0, use 'method_control'")
 })
 
 test_that("snapshot tests", {
@@ -286,6 +289,7 @@ test_that("test edge cases", {
   expect_s4_class(analyse_IRSAR.RF(
       tmp,
       method = "SLIDE",
+      test_parameters = list(beta = NULL),
       verbose = FALSE),
       "RLum.Results")
 })

@@ -10,8 +10,8 @@ replicate_RLum(object, times = 1)
 \S4method{replicate_RLum}{RLum}(object, times = 1)
 }
 \arguments{
-\item{object}{\linkS4class{RLum} (\strong{required}):
-an \linkS4class{RLum} object}
+\item{object}{\link[=RLum-class]{RLum} (\strong{required}):
+an \link[=RLum-class]{RLum} object}
 
 \item{times}{\link{integer} (\emph{optional}):
 number for times each element should be repeated.}
@@ -20,12 +20,12 @@ number for times each element should be repeated.}
 A \link{list} with the object repeated.
 }
 \description{
-The function replicates \linkS4class{RLum} objects and returns a list of such
+The function replicates \link[=RLum-class]{RLum} objects and returns a list of such
 objects.
 }
 \section{Functions}{
 \itemize{
-\item \code{replicate_RLum(RLum)}: Replication method for \linkS4class{RLum} objects.
+\item \code{replicate_RLum(RLum)}: Replication method for \link[=RLum-class]{RLum} objects.
 
 }}
 \section{Function version}{
@@ -33,14 +33,14 @@ objects.
 }
 
 \seealso{
-\linkS4class{RLum}
+\link[=RLum-class]{RLum}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. replicate_RLum(): General replication function for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. replicate_RLum(): General replication function for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

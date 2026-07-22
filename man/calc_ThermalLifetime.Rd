@@ -61,7 +61,7 @@ enable/disable the plot output, currently only in combination with
 Standard plot parameters are supported (\link{plot.default})}
 }
 \value{
-A \linkS4class{RLum.Results} object is returned a along with a plot (for
+A \link[=RLum.Results-class]{RLum.Results} object is returned a along with a plot (for
 \code{profiling = TRUE}). The output object contain the following slots:
 
 \strong{\verb{@data}}
@@ -152,7 +152,7 @@ calc_ThermalLifetime(
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. calc_ThermalLifetime(): Calculates the Thermal Lifetime using the Arrhenius equation. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. calc_ThermalLifetime(): Calculates the Thermal Lifetime using the Arrhenius equation. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

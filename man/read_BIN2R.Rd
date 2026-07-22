@@ -54,8 +54,8 @@ Can be provided as \code{list} if \code{file} is a \code{list}.}
 
 \item{fastForward}{\link{logical} (\emph{with default}):
 if \code{TRUE} for a more efficient data processing only a list of
-\linkS4class{RLum.Analysis}
-objects is returned instead of a \linkS4class{Risoe.BINfileData} object.
+\link[=RLum.Analysis-class]{RLum.Analysis}
+objects is returned instead of a \link[=Risoe.BINfileData-class]{Risoe.BINfileData} object.
 Can be provided as \code{list} if \code{file} is a \code{list}.}
 
 \item{show.record.number}{\link{logical} (\emph{with default}):
@@ -91,14 +91,14 @@ enable/disable output to the terminal.}
 automatically sets \code{fastForward = TRUE}}
 }
 \value{
-Returns an S4 \linkS4class{Risoe.BINfileData} object containing two
+Returns an S4 \link[=Risoe.BINfileData-class]{Risoe.BINfileData} object containing two
 slots:
 
 \item{METADATA}{A \link{data.frame} containing all variables stored in the BIN-file.}
 \item{DATA}{A \link{list} containing a numeric \link{vector} of the measured data.
 The ID corresponds to the record ID in METADATA.}
 
-If \code{fastForward = TRUE} an \linkS4class{RLum.Analysis} object is
+If \code{fastForward = TRUE} an \link[=RLum.Analysis-class]{RLum.Analysis} object is
 returned (coerced by \link{Risoe.BINfileData2RLum.Analysis}).
 
 Results are returned as a list when multiple files are processed or \code{file}
@@ -132,7 +132,7 @@ temp
 } 
 
 \section{How to cite}{
-Kreutzer, S., Fuchs, M.C., Colombo, M., 2026. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.19. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Fuchs, M.C., Colombo, M., 2026. read_BIN2R(): Import Risø BIN/BINX-files into R. Function version 0.19. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -140,8 +140,8 @@ DTU Nutech, 2016. The Sequence Editor, Users Manual, February, 2016.
 \url{https://www.fysik.dtu.dk}
 }
 \seealso{
-\link{write_R2BIN}, \linkS4class{Risoe.BINfileData},
-\link[base:readBin]{base::readBin}, \link{merge_Risoe.BINfileData}, \linkS4class{RLum.Analysis}
+\link{write_R2BIN}, \link[=Risoe.BINfileData-class]{Risoe.BINfileData},
+\link[base:readBin]{base::readBin}, \link{merge_Risoe.BINfileData}, \link[=RLum.Analysis-class]{RLum.Analysis}
 \link[utils:txtProgressBar]{utils::txtProgressBar}, \link{list.files}
 }
 \author{

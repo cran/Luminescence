@@ -56,7 +56,7 @@ particular, \code{MC.iter} to control the number of Monte Carlo iterations,
 }
 \value{
 Returns a terminal output. In addition an
-\linkS4class{RLum.Results} object is returned containing the
+\link[=RLum.Results-class]{RLum.Results} object is returned containing the
 following element:
 
 \item{.$summary}{\link{data.frame} summary of all relevant calculation results.}
@@ -142,7 +142,7 @@ calc_AliquotSize(grain.size = c(100,200), sample.diameter = 8,
 } 
 
 \section{How to cite}{
-Burow, C., Colombo, M., 2026. calc_AliquotSize(): Estimate the amount of grains on an aliquot. Function version 0.33. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Burow, C., Colombo, M., 2026. calc_AliquotSize(): Estimate the amount of grains on an aliquot. Function version 0.33. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

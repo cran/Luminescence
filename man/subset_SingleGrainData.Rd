@@ -7,14 +7,14 @@
 subset_SingleGrainData(object, selection)
 }
 \arguments{
-\item{object}{\linkS4class{Risoe.BINfileData} (\strong{required}):
+\item{object}{\link[=Risoe.BINfileData-class]{Risoe.BINfileData} (\strong{required}):
 input object with the data to subset.}
 
 \item{selection}{\link{data.frame}, \link{matrix} (\strong{required}):
 selection table with two columns for position and grain, respectively.}
 }
 \value{
-A subset \linkS4class{Risoe.BINfileData} object
+A subset \link[=Risoe.BINfileData-class]{Risoe.BINfileData} object
 }
 \description{
 Most measured single grains do not exhibit light and it usually makes sense
@@ -37,7 +37,7 @@ subset_SingleGrainData(object = CWOSL.SAR.Data, selection = selection)
 
 }
 \seealso{
-\linkS4class{Risoe.BINfileData}, \link{read_BIN2R},
+\link[=Risoe.BINfileData-class]{Risoe.BINfileData}, \link{read_BIN2R},
 \link{verify_SingleGrainData}
 }
 \author{
@@ -45,7 +45,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. subset_SingleGrainData(): Simple Subsetting of Single Grain Data from Risø BIN/BINX files. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. subset_SingleGrainData(): Simple Subsetting of Single Grain Data from Risø BIN/BINX files. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{datagen}

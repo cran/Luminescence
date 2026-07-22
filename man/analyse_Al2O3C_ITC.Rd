@@ -17,9 +17,9 @@ analyse_Al2O3C_ITC(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} or \link{list} (\strong{required}):
+\item{object}{\link[=RLum.Analysis-class]{RLum.Analysis} or \link{list} (\strong{required}):
 results obtained from the measurement.
-Alternatively a list of \linkS4class{RLum.Analysis} objects can be provided to allow an automatic analysis}
+Alternatively a list of \link[=RLum.Analysis-class]{RLum.Analysis} objects can be provided to allow an automatic analysis}
 
 \item{signal_integral}{\link{numeric} (\emph{optional}):
 signal integral, used for the signal and the background.
@@ -121,7 +121,7 @@ analyse_Al2O3C_ITC(data_ITC)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -16,11 +16,11 @@ apply_CosmicRayRemoval(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Spectrum} or
-\linkS4class{RLum.Analysis} (\strong{required}):
+\item{object}{\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} or
+\link[=RLum.Analysis-class]{RLum.Analysis} (\strong{required}):
 input object to be treated, which can be also provided as \link{list}. If an
-\linkS4class{RLum.Analysis} object is provided, only its
-\linkS4class{RLum.Data.Spectrum}
+\link[=RLum.Analysis-class]{RLum.Analysis} object is provided, only its
+\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum}
 objects are treated. Please note: this mixing of objects does not work for
 a list of \code{RLum.Data} objects.}
 
@@ -65,8 +65,8 @@ Returns same object as input.
 }
 \description{
 The function provides several methods for cosmic-ray removal and spectrum
-smoothing for \linkS4class{RLum.Data.Spectrum} objects, and those embedded in
-\link{list} or \linkS4class{RLum.Analysis} objects.
+smoothing for \link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} objects, and those embedded in
+\link{list} or \link[=RLum.Analysis-class]{RLum.Analysis} objects.
 }
 \details{
 \strong{\code{method = "Pych"}}
@@ -124,7 +124,7 @@ dataset (see example).
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. apply_CosmicRayRemoval(): Cosmic-ray removal and spectrum smoothing for RLum.Data.Spectrum objects. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. apply_CosmicRayRemoval(): Cosmic-ray removal and spectrum smoothing for RLum.Data.Spectrum objects. Function version 0.4.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -133,7 +133,7 @@ Single Images. The Astronomical Society of the Pacific 116 (816), 148-153.
 \doi{10.1086/381786}
 }
 \seealso{
-\linkS4class{RLum.Data.Spectrum}, \linkS4class{RLum.Analysis},
+\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum}, \link[=RLum.Analysis-class]{RLum.Analysis},
 \link[stats:smooth]{stats::smooth}, \link[stats:smooth.spline]{stats::smooth.spline}, \link{smooth_RLum}
 }
 \author{

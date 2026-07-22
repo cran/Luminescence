@@ -20,7 +20,7 @@ plot_Histogram(
 )
 }
 \arguments{
-\item{data}{\link{data.frame} or \linkS4class{RLum.Results} object (\strong{required}):
+\item{data}{\link{data.frame} or \link[=RLum.Results-class]{RLum.Results} object (\strong{required}):
 for \code{data.frame}: two columns: De (\code{data[,1]}) and De error (\code{data[,2]}).
 If the error column is missing or only contains \code{NA} values, then the error
 at each measurement is assumed to be 10^-9.}
@@ -89,14 +89,14 @@ one or more of the following keywords:
 \item \code{"mean.weighted"} (error-weighted mean),
 \item \code{"median"} (median of the De values),
 \item \code{"median.weighted"} (error-weighted median),
-\item \code{"sdrel"} (relative standard deviation in percent),
-\item \code{"sdrel.weighted"} (error-weighted relative standard deviation in percent),
-\item \code{"sdabs"} (absolute standard deviation),
-\item \code{"sdabs.weighted"} (error-weighted absolute standard deviation),
-\item \code{"serel"} (relative standard error),
-\item \code{"serel.weighted"} (error-weighted relative standard error),
-\item \code{"seabs"} (absolute standard error),
-\item \code{"seabs.weighted"} (error-weighted absolute standard error),
+\item \code{"sd.rel"} (relative standard deviation in percent),
+\item \code{"sd.rel.weighted"} (error-weighted relative standard deviation in percent),
+\item \code{"sd.abs"} (absolute standard deviation),
+\item \code{"sd.abs.weighted"} (error-weighted absolute standard deviation),
+\item \code{"se.rel"} (relative standard error in percent),
+\item \code{"se.rel.weighted"} (error-weighted relative standard error in percent),
+\item \code{"se.abs"} (absolute standard error),
+\item \code{"se.abs.weighted"} (error-weighted absolute standard error),
 \item \code{"kurtosis"} (kurtosis) and
 \item \code{"skewness"} (skewness).
 }
@@ -125,7 +125,7 @@ plot_Histogram(ExampleData.DeValues,
                cex.global = 0.9,
                pch = 2,
                colour = c("grey", "black", "blue", "green"),
-               summary = c("n", "mean", "sdrel"),
+               summary = c("n", "mean", "sd.rel"),
                summary.pos = "topleft",
                main = "Histogram of De-values",
                mtext = "Example data set",
@@ -144,6 +144,6 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2026. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 

@@ -26,14 +26,14 @@
 #' - `"mean.weighted"` (error-weighted mean),
 #' - `"median"` (median of the De values),
 #' - `"median.weighted"` (error-weighted median),
-#' - `"sdrel"` (relative standard deviation in percent),
-#' - `"sdrel.weighted"` (error-weighted relative standard deviation in percent),
-#' - `"sdabs"` (absolute standard deviation),
-#' - `"sdabs.weighted"` (error-weighted absolute standard deviation),
-#' - `"serel"` (relative standard error),
-#' - `"serel.weighted"` (error-weighted relative standard error),
-#' - `"seabs"` (absolute standard error),
-#' - `"seabs.weighted"` (error-weighted absolute standard error),
+#' - `"sd.rel"` (relative standard deviation in percent),
+#' - `"sd.rel.weighted"` (error-weighted relative standard deviation in percent),
+#' - `"sd.abs"` (absolute standard deviation),
+#' - `"sd.abs.weighted"` (error-weighted absolute standard deviation),
+#' - `"se.rel"` (relative standard error in percent),
+#' - `"se.rel.weighted"` (error-weighted relative standard error in percent),
+#' - `"se.abs"` (absolute standard error),
+#' - `"se.abs.weighted"` (error-weighted absolute standard error),
 #' - `"in.2s"` (percent of samples in 2-sigma range),
 #' - `"kurtosis"` (kurtosis) and
 #' - `"skewness"` (skewness).
@@ -61,8 +61,9 @@
 #' - `"mean"`,
 #' - `"median"`,
 #' - `"mean.weighted"` and
-#' - `"median.weighted"` or a
-#' - numeric value used for the standardisation.
+#' - `"median.weighted"`, or a
+#' - numeric value used for the standardisation of the same length as the number
+#' of input data sets (it is ignored otherwise).
 #'
 #' @param mtext [character] (*with default*):
 #' additional text below the plot title.
@@ -172,7 +173,7 @@
 #'   data = ExampleData.DeValues,
 #'   log.z = FALSE)
 #'
-#' ## store the the plot parameters
+#' ## store the plot parameters
 #' plot1 <- plot_RadialPlot(
 #'   data = ExampleData.DeValues,
 #'   log.z = FALSE)
@@ -290,10 +291,13 @@ plot_RadialPlot <- function(
 
   .validate_not_empty(data)
   .validate_logical_scalar(log.z)
+  .validate_positive_scalar(central.value, null.ok = TRUE)
   .validate_class(centrality, c("character", "numeric"))
   if (is.character(centrality)) {
     centrality <- .validate_args(centrality, c("mean", "mean.weighted",
                                                "median", "median.weighted"))
+  } else if (anyNA(centrality)) {
+    .throw_error("'centrality' cannot contain missing values")
   }
 
   ## Homogenise input data format
@@ -346,6 +350,8 @@ plot_RadialPlot <- function(
   .validate_class(summary, "character")
   if (is.numeric(summary.pos)) {
     .validate_length(summary.pos, 2)
+    if (anyNA(summary.pos))
+      .throw_error("'summary.pos' cannot contain missing values")
   }
   else {
     summary.pos <- .validate_args(summary.pos, c("sub", valid.pos))
@@ -353,6 +359,8 @@ plot_RadialPlot <- function(
   .validate_class(legend, "character", null.ok = TRUE)
   if (is.numeric(legend.pos)) {
     .validate_length(legend.pos, 2)
+    if (anyNA(legend.pos))
+      .throw_error("'legend.pos' cannot contain missing values")
   } else {
     legend.pos <- .validate_args(legend.pos, valid.pos)
   }
@@ -422,44 +430,36 @@ plot_RadialPlot <- function(
 
   ## calculate and append statistical measures --------------------------------
 
-  ## z-values and se based on log-option
-  data <- lapply(data, function(x, De.add) {
-    cbind(x,
-          z = if (log.z) log(x[, 1]) else x[, 1],
-          se = if (log.z) x[, 2] / (x[, 1] + De.add) else x[, 2])
-  }, De.add = De.add)
+  data <- lapply(seq_along(data), function(i) {
+    x <- data[[i]]
+    z <- if (log.z) log(x[, 1]) else x[, 1]
+    se <- if (log.z) x[, 2] / (x[, 1] + De.add) else x[, 2]
 
-  ## calculate central values
-  data <- lapply(data, function(x) {
-    cbind(x,
-          z.central = switch(
-            as.character(centrality[1]),
-            mean = rep(mean(x[, 3], na.rm = TRUE), nrow(x)),
-            median = rep(median(x[, 3], na.rm = TRUE), nrow(x)),
-            mean.weighted = rep(stats::weighted.mean(x[, 3], w = 1 / x[, 4]^2), nrow(x)),
-            median.weighted = rep(.weighted.median(x[, 3], w = 1 / x[, 4]^2), nrow(x)),
-            if (is.numeric(centrality) && length(centrality) >= length(data)) {
-             rep(median(x[, 3], na.rm = TRUE), nrow(x))
-            } else NA)
-          )
-  })
+    z.central <- switch(
+      as.character(centrality[1]),
+      mean = rep(mean(z, na.rm = TRUE), nrow(x)),
+      median = rep(median(z, na.rm = TRUE), nrow(x)),
+      mean.weighted = rep(stats::weighted.mean(z, w = 1 / se^2), nrow(x)),
+      median.weighted = rep(.weighted.median(z, w = 1 / se^2), nrow(x)),
+      if (is.numeric(centrality)) {
+        if (length(centrality) == length(data)) {
+          z.raw <- centrality[i] + De.add
+          z.central <- rep(if (log.z) log(z.raw) else z.raw,
+                           nrow(x))
+        } else {
+          rep(median(z, na.rm = TRUE), nrow(x))
+        }
+      })
 
-  if (is.numeric(centrality) && length(centrality) == length(data)) {
-    ## compute z.central, as this could not be done in the lapply before
-    z.central.raw <- if (log.z) log(centrality + De.add) else centrality + De.add
-    lapply(1:length(data), function(x) data[[x]][, 5] <<- rep(z.central.raw[x], nrow(data[[x]])))
-  }
-
-  ## calculate precision and standard estimate
-  idx <- 0
-  data <- lapply(data, function(x) {
-    idx <<- idx + 1
-    colnames(x) <- c("De", "error", "z", "se", "z.central")
+    colnames(x) <- c("De", "error")
     cbind(x,
-          precision = 1 / x[, 4],
-          std.estimate = (x[, 3] - x[, 5]) / x[, 4],
+          z = z,
+          se = se,
+          z.central = z.central,
+          precision = 1 / se,
+          std.estimate = (z - z.central[1]) / se,
           std.estimate.plot = NA, # will be filled in further down
-          .id = idx)
+          .id = i)
   })
 
   ## generate global data set
@@ -472,16 +472,14 @@ plot_RadialPlot <- function(
                              mean.weighted = stats::weighted.mean(data.global[, 3], w = 1 / data.global[, 4]^2),
                              median.weighted = .weighted.median(data.global[, 3],
                                                                 w = 1 / data.global[, 4]^2),
-                             if (is.numeric(centrality) && length(centrality) >= length(data)) {
-                               mean(data.global[, 3], na.rm = TRUE)
-                             } else NA)
+                             if (is.numeric(centrality)) {
+                               median(data.global[, 3], na.rm = TRUE)
+                             })
 
   ## optionally adjust central value by user-defined value
   if (!is.null(central.value)) {
     # ## adjust central value for De.add
     central.value <- central.value + De.add
-    if (log.z)
-      .validate_positive_scalar(central.value)
     z.central.global <- ifelse(log.z,
                                log(central.value),
                                central.value)
@@ -743,6 +741,10 @@ plot_RadialPlot <- function(
     "kurtosis", "sd.abs.weighted", "sd.rel.weighted", "se.abs.weighted",
     "se.rel.weighted")
 
+  ## placeholder for the summary label text
+  label.text <- list()
+  is.sub <- summary.pos[1] == "sub"
+
   for(i in 1:length(data)) {
     data_to_stats <- data[[i]][,1:2]
 
@@ -779,77 +781,22 @@ plot_RadialPlot <- function(
     if(!inherits(De.density, "try-error")) {
       De.stats[i,6] <- De.density$x[which.max(De.density$y)]
     }
-  }
 
-  ## helper to generate an element of the statistical summary
-  .summary_line <- function(keyword, summary, val, label = keyword,
-                            percent = FALSE, sep = FALSE, digits = 2) {
-    ifelse(keyword %in% summary,
-           paste0(label, " = ", round(val, digits),
-                  if (percent) " %" else NULL, if (sep) " | " else "\n"),
-           "")
-  }
+    ## convert to a list of lists, like the object produced by calc_Statistics
+    De.stats.list <- list(as.list(De.stats[i, ]))
+    names(De.stats.list) <- "unweighted" # dummy placeholder
 
-  ## initialize list with a dummy element, it will be removed afterwards
-  label.text <- list(NA)
+    ## compute the percent of samples in a 2-sigma range
+    De.stats.list[["unweighted"]]["in.2s"] <-
+      round(sum(data[[i]][,7] > -2 & data[[i]][, 7] < 2) / nrow(data[[i]]) * 100, 1)
 
-  is.sub <- summary.pos[1] == "sub"
-  stops <- NULL
-  for (i in 1:length(data)) {
-    if (!is.sub)
-      stops <- strrep("\n", (i - 1) * length(summary))
-
-    summary.text <- character(0)
-    for (j in 1:length(summary)) {
-      summary.text <-
-        c(summary.text,
-          .summary_line("n", summary[j], De.stats[i, 1], sep = is.sub),
-          .summary_line("mean", summary[j], De.stats[i, 2], sep = is.sub),
-          .summary_line("mean.weighted", summary[j], De.stats[i, 3], sep = is.sub,
-                        label = "weighted mean"),
-          .summary_line("median", summary[j], De.stats[i, 4], sep = is.sub),
-          .summary_line("median.weighted", summary[j], De.stats[i, 5], sep = is.sub,
-                        label = "weighted median"),
-          .summary_line("kdemax", summary[j], De.stats[i, 6], sep = is.sub),
-          .summary_line("sdabs", summary[j], De.stats[i, 7], sep = is.sub,
-                        label = "sd"),
-          .summary_line("sdrel", summary[j], De.stats[i, 8], sep = is.sub,
-                        label = "rel. sd", percent = TRUE),
-          .summary_line("seabs", summary[j], De.stats[i, 9], sep = is.sub,
-                        label = "se"),
-          .summary_line("serel", summary[j], De.stats[i, 10], sep = is.sub,
-                        label = "rel. se", percent = TRUE),
-          .summary_line("skewness", summary[j], De.stats[i, 13], sep = is.sub),
-          .summary_line("kurtosis", summary[j], De.stats[i, 14], sep = is.sub),
-          .summary_line("in.2s", summary[j],
-                        sum(data[[i]][,7] > -2 & data[[i]][,7] < 2) /
-                        nrow(data[[i]]) * 100, sep = is.sub,
-                        label = "in 2 sigma", percent = TRUE, digits = 1),
-          .summary_line("sdabs.weighted", summary[j], De.stats[i, 15], sep = is.sub,
-                        label = "abs. weighted sd"),
-          .summary_line("sdrel.weighted", summary[j], De.stats[i, 16], sep = is.sub,
-                        label = "rel. weighted sd"),
-          .summary_line("seabs.weighted", summary[j], De.stats[i, 17], sep = is.sub,
-                        label = "abs. weighted se"),
-          .summary_line("serel.weighted", summary[j], De.stats[i, 18], sep = is.sub,
-                        label = "rel. weighted se"))
-    }
-    label.text[[length(label.text) + 1]] <- paste0(
-        if (is.sub ) "" else stops,
-        paste(summary.text, collapse = ""),
-        stops)
-  }
-
-  ## remove dummy list element
-  label.text[[1]] <- NULL
-
-  ## remove outer vertical lines from string
-  if (is.sub) {
-    for (i in seq_along(label.text)) {
-      label.text[[i]] <- substr(x = label.text[[i]],
-                                start = 1,
-                                stop = nchar(label.text[[i]]) - 3)
-    }
+    ## generate the summary label text
+    label.text[[i]] <- .create_StatisticalSummaryText(
+        De.stats.list,
+        keywords = summary,
+        sep = ifelse(is.sub, " | ", "\n"),
+        prefix = if (!is.sub) strrep("\n", (i - 1) * length(summary)) else ""
+    )
   }
 
   ## convert keywords into summary and legend placement coordinates

@@ -11,7 +11,7 @@ calc_Huntley2006(
   ddot = NULL,
   readerDdot = NULL,
   normalise = TRUE,
-  fit.method = c("EXP", "GOK"),
+  fit.method = c("SSE", "GOK"),
   lower.bounds = c(-Inf, -Inf, -Inf, -Inf),
   cores = 1,
   summary = TRUE,
@@ -89,8 +89,8 @@ measured and computed \eqn{\frac{L_x}{T_x}} values are normalised by the
 pre-exponential factor \code{A} (see details).}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-Fit function of the dose response curve. Can either be \code{"EXP"} (default) or
-\code{"GOK"}. Note that \code{"EXP"} (single saturating exponential) is the original
+Fit function of the dose response curve. Can either be \code{"SSE"} (default) or
+\code{"GOK"}. Note that \code{"SSE"} (single saturating exponential) is the original
 function the model after Huntley (2006) and Kars et al. (2008) was
 designed to use. The use of a general-order kinetics function (\code{"GOK"})
 is an experimental adaptation of the model and should be used
@@ -103,7 +103,7 @@ default values (\code{c(-Inf, -Inf, -Inf, -Inf)}) are appropriate for finding
 a best fit, but sometimes it may be useful to restrict the lower bounds to
 e.g. \code{c(0, 0, 0, 0)}. The values of the vectors are, respectively, for
 parameters \code{a}, \code{D0}, \code{c} and \code{d} in that order (parameter \code{d} is ignored
-when \code{fit.method = "EXP"}). More details can be found in
+when \code{fit.method = "SSE"}). More details can be found in
 \link{fit_DoseResponseCurve}.}
 
 \item{cores}{\link{integer} (\emph{with default}):
@@ -135,7 +135,7 @@ particular \code{mode} for the De calculation mode, \code{fit.force_through_orig
 and \code{fit.bounds}).}
 }
 \value{
-An \linkS4class{RLum.Results} object is returned:
+An \link[=RLum.Results-class]{RLum.Results} object is returned:
 
 Slot: \strong{@data}\cr
 
@@ -174,7 +174,7 @@ can be used to calculate the sample specific \eqn{\rho}' value.
 
 \strong{Kars et al. (2008) -- Single saturating exponential}
 
-To apply the approach after Kars et al. (2008), use \code{fit.method = "EXP"}.
+To apply the approach after Kars et al. (2008), use \code{fit.method = "SSE"}.
 
 Firstly, the unfaded \eqn{D_0} value is determined through applying equation 5 of
 Kars et al. (2008) to the measured \eqn{\frac{L_x}{T_x}} data as a function of irradiation
@@ -300,7 +300,7 @@ kars <- calc_Huntley2006(
 } 
 
 \section{How to cite}{
-King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2026. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2026. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

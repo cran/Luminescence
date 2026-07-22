@@ -21,17 +21,17 @@ test_that("input validation", {
                "All elements of 'object' should be of class 'RLum.Analysis'")
   expect_error(analyse_Al2O3C_ITC(data_ITC, recordType = NA),
                "'recordType' should be of class 'character' or NULL")
-  expect_error(expect_warning(analyse_Al2O3C_ITC(data_ITC, recordType = "EXP"),
+  expect_error(expect_warning(analyse_Al2O3C_ITC(data_ITC, recordType = "SSE"),
                               "This request produced an empty list of records"),
                "'recordType' produced an empty object")
-  expect_error(analyse_Al2O3C_ITC(data_ITC, method_control = "EXP"),
+  expect_error(analyse_Al2O3C_ITC(data_ITC, method_control = "SSE"),
                "'method_control' should be of class 'list'")
   expect_error(analyse_Al2O3C_ITC(data_ITC, dose_points = NA),
                "'dose_points' should be of class 'numeric' or 'list'")
   expect_error(analyse_Al2O3C_ITC(data_ITC, dose_points = list(NA)),
                "All elements of 'dose_points' should be of class 'numeric'")
   expect_error(analyse_Al2O3C_ITC(data_ITC, signal_integral = 0),
-               "'signal_integral' is of length 0 after removing values smaller")
+               "'signal_integral' contains no elements between 1 and 99")
 })
 
 test_that("check functionality", {
@@ -72,7 +72,7 @@ test_that("snapshot tests", {
                        tolerance = snapshot.tolerance)
   expect_snapshot_RLum(analyse_Al2O3C_ITC(list(data_ITC),
                                           signal_integral = 2,
-                                          method_control = list(fit.method = "EXP")),
+                                          method_control = list(fit.method = "SSE")),
                        tolerance = snapshot.tolerance)
   })
 })

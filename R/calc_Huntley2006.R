@@ -17,7 +17,7 @@
 #'
 #' **Kars et al. (2008) -- Single saturating exponential**
 #'
-#' To apply the approach after Kars et al. (2008), use `fit.method = "EXP"`.
+#' To apply the approach after Kars et al. (2008), use `fit.method = "SSE"`.
 #'
 #' Firstly, the unfaded \eqn{D_0} value is determined through applying equation 5 of
 #' Kars et al. (2008) to the measured \eqn{\frac{L_x}{T_x}} data as a function of irradiation
@@ -153,8 +153,8 @@
 #' pre-exponential factor `A` (see details).
 #'
 #' @param fit.method [character] (*with default*):
-#' Fit function of the dose response curve. Can either be `"EXP"` (default) or
-#' `"GOK"`. Note that `"EXP"` (single saturating exponential) is the original
+#' Fit function of the dose response curve. Can either be `"SSE"` (default) or
+#' `"GOK"`. Note that `"SSE"` (single saturating exponential) is the original
 #' function the model after Huntley (2006) and Kars et al. (2008) was
 #' designed to use. The use of a general-order kinetics function (`"GOK"`)
 #' is an experimental adaptation of the model and should be used
@@ -167,7 +167,7 @@
 #' a best fit, but sometimes it may be useful to restrict the lower bounds to
 #' e.g. `c(0, 0, 0, 0)`. The values of the vectors are, respectively, for
 #' parameters `a`, `D0`, `c` and `d` in that order (parameter `d` is ignored
-#' when `fit.method = "EXP"`). More details can be found in
+#' when `fit.method = "SSE"`). More details can be found in
 #' [Luminescence::fit_DoseResponseCurve].
 #'
 #' @param cores [integer] (*with default*):
@@ -309,7 +309,7 @@ calc_Huntley2006 <- function(
     ddot = NULL,
     readerDdot = NULL,
     normalise = TRUE,
-    fit.method = c("EXP", "GOK"),
+    fit.method = c("SSE", "GOK"),
     lower.bounds = c(-Inf, -Inf, -Inf, -Inf),
     cores = 1,
     summary = TRUE,
@@ -322,9 +322,8 @@ calc_Huntley2006 <- function(
   ## Integrity checks -------------------------------------------------------
 
   .validate_class(data, "data.frame")
-  .validate_not_empty(data)
   .validate_class(LnTn, "data.frame", null.ok = TRUE)
-  fit.method <- .validate_args(fit.method, c("EXP", "GOK"))
+  fit.method <- .validate_args(fit.method, c("SSE", "GOK"))
   .validate_class(lower.bounds, "numeric", length = 4)
   .validate_logical_scalar(summary)
   .validate_logical_scalar(plot)
@@ -339,6 +338,8 @@ calc_Huntley2006 <- function(
                      "if you wish to use actually measured LxTx errors.")
       data[ ,3] <- data[ ,2] * 0.05
   }
+  if (nrow(data) < 4)
+    .throw_error("'data' should contain at least 4 dose points")
 
   ## Check if 'LnTn' is used and overwrite 'data'
   if (!is.null(LnTn)) {
@@ -366,19 +367,13 @@ calc_Huntley2006 <- function(
     if (ncol(data) %% 3 != 0) {
       .throw_error("The number of columns in 'data' must be a multiple of 3.")
     } else {
-      # extract all LxTx values
-      data_tmp <- do.call(rbind,
-                          lapply(seq(1, ncol(data), 3), function(col) {
-                            setNames(data[2:nrow(data), col:c(col+2)], c("dose", "LxTx", "LxTxError"))
-                          })
-      )
+      .extract <- function(row_idx) {
+        do.call(rbind, lapply(seq(1, ncol(data), 3), function(col)
+          setNames(data[row_idx, col:c(col+2)], c("dose", "LxTx", "LxTxError"))))
+      }
 
-      # extract the LnTn values (assumed to be the first row) and calculate the column mean
-      LnTn_tmp <- do.call(rbind,
-                          lapply(seq(1, ncol(data), 3), function(col) {
-                            setNames(data[1, col:c(col+2)], c("dose", "LxTx", "LxTxError"))
-                          })
-      )
+      ## extract the LnTn values (assumed to be in the first row)
+      LnTn_tmp <- .extract(1)
 
       # check whether the standard deviation of LnTn estimates or the largest
       # individual error is highest, and take the larger one
@@ -386,7 +381,7 @@ calc_Huntley2006 <- function(
       LnTn_tmp <- colMeans(LnTn_tmp)
 
       # re-bind the data frame
-      data <- rbind(LnTn_tmp, data_tmp)
+      data <- rbind(LnTn_tmp, .extract(2:nrow(data)))
       data[1, 3] <- LnTn_error_tmp
       data <- data[stats::complete.cases(data), ]
   }
@@ -416,8 +411,7 @@ calc_Huntley2006 <- function(
 
   ## set up the parallel cluster
   .validate_positive_scalar(cores, int = TRUE)
-  available.cores <- parallel::detectCores()
-  cores <- min(cores, available.cores)
+  cores <- min(cores, parallel::detectCores())
   cl <- parallel::makeCluster(cores)
   on.exit(parallel::stopCluster(cl), add = TRUE)
 
@@ -518,22 +512,24 @@ calc_Huntley2006 <- function(
   De.measured.error <- GC.results$De.Error
   D0.measured <- GC.results$D01
   D0.measured.error <- GC.results$D01.ERROR
+  .age_err <- function(val, x, x.err) {
+    val * sqrt((x.err / x)^2 + (readerDdot.error / readerDdot)^2 + (ddot.error / ddot)^2)
+  }
+
   Age.measured <- De.measured/ ddot
-  Age.measured.error <- Age.measured * sqrt( (De.measured.error / De.measured)^2 +
-                                               (readerDdot.error / readerDdot)^2 +
-                                               (ddot.error / ddot)^2)
+  Age.measured.error <- .age_err(Age.measured, De.measured, De.measured.error)
 
 
   ## (2) SIMULATED -----------------------------------------------------
   # create MC samples
   rhop_MC <- rnorm(n = settings$n.MC, mean = rhop[1], sd = rhop[2])
 
-  if (fit.method == "EXP") {
+  if (fit.method == "SSE") {
     model <- LxTx.measured ~ a * theta(dosetime, rhop_i) *
       (1 - exp(-(dosetime + c) / D0))
-    start <- list(a = coef(fit_measured)[["a"]],
+    start <- list(a = coef(fit_measured)[["N"]],
                   D0 = D0.measured / readerDdot,
-                  c = coef(fit_measured)[["c"]])
+                  c = coef(fit_measured)[["Di"]])
     lower.bounds <- lower.bounds[1:3]
 
     ## c = 0 if force_through_origin
@@ -669,13 +665,12 @@ calc_Huntley2006 <- function(
   scaled.ddots <- ddots / (ddots + UFD0 * K)
   A.pr.ddots <- A * pr * scaled.ddots
   inv.UFD0.K <- 1 / scaled.ddots / UFD0
-  if (fit.method == "EXP") {
-    fun <- function(k) A.pr.ddots[k] *
-        (1 - exp(-(natdosetime + c_val) * inv.UFD0.K[k]))
-  } else if (fit.method == "GOK") {
-    fun <- function(k) A.pr.ddots[k] *
-        (d_gok - (1 + inv.UFD0.K[k] * natdosetime * c_val)^(-1 / c_val))
-  }
+  fun <- list(
+    SSE = function(k) A.pr.ddots[k] *
+        (1 - exp(-(natdosetime + c_val) * inv.UFD0.K[k])),
+    GOK = function(k) A.pr.ddots[k] *
+        (d_gok - (1 + inv.UFD0.K[k] * natdosetime * c_val)^(-1 / c_val)))
+  fun <- fun[[fit.method]]
   TermA <- t(vapply(seq_along(rprime), fun, USE.NAMES = FALSE,
                     FUN.VALUE = numeric(length(natdosetime))))
 
@@ -721,14 +716,10 @@ calc_Huntley2006 <- function(
     D0.sim.Gy.error <- GC.simulated.results$D01.ERROR
 
     Age.sim <- De.sim / ddot
-    Age.sim.error <- Age.sim * sqrt( ( De.error.sim/ De.sim)^2 +
-                                       (readerDdot.error / readerDdot)^2 +
-                                       (ddot.error / ddot)^2)
+    Age.sim.error <- .age_err(Age.sim, De.sim, De.error.sim)
 
     Age.sim.2D0 <- 2 * D0.sim.Gy / ddot
-    Age.sim.2D0.error <- Age.sim.2D0 * sqrt( ( D0.sim.Gy.error / D0.sim.Gy)^2 +
-                                               (readerDdot.error / readerDdot)^2 +
-                                               (ddot.error / ddot)^2)
+    Age.sim.2D0.error <- .age_err(Age.sim.2D0, D0.sim.Gy, D0.sim.Gy.error)
   }
 
   if (Ln > max(LxTx.sim) * 1.1)
@@ -800,12 +791,14 @@ calc_Huntley2006 <- function(
 
   ## run this first model also for GOK as in general it provides more
   ## stable estimates that can be used as starting point for GOK
+  var.name.a <- if (fit.method == "SSE") "N" else "a"
+  var.name.c <- if (fit.method == "SSE") "Di" else "c"
   fit_unfaded <- try(minpack.lm::nlsLM(
       LxTx.unfaded ~ a * (1 - exp(-(dosetimeGray + c) / D0)),
       start = list(
-        a = coef(fit_simulated)[["a"]],
+        a = coef(fit_simulated)[[var.name.a]],
         D0 = D0.measured / readerDdot,
-        c = coef(fit_simulated)[["c"]]),
+        c = coef(fit_simulated)[[var.name.c]]),
         upper = if(force_through_origin) {
            c(a = Inf, D0 = max(dosetimeGray), c = 0)
           } else {
@@ -816,8 +809,8 @@ calc_Huntley2006 <- function(
       control = list(maxiter = settings$maxiter)), silent = TRUE)
 
   ## if this fit has failed, what we do depends on fit.method:
-  ## - for EXP, this error is irrecoverable
-  if (inherits(fit_unfaded, "try-error") && fit.method == "EXP") {
+  ## - for SSE, this error is irrecoverable
+  if (inherits(fit_unfaded, "try-error") && fit.method == "SSE") {
     .throw_error("Could not fit unfaded curve, check suitability of ",
                  "model and parameters")
   }
@@ -863,20 +856,12 @@ calc_Huntley2006 <- function(
   }
 
   # combine all computed LxTx values
-  LxTx_measured <- data.frame(
-    dose = dosetimeGray,
-    LxTx = LxTx.measured,
-    LxTx.Error = LxTx.measured.error)
-
-  LxTx_simulated <- data.frame(
-    dose = natdosetimeGray,
-    LxTx = LxTx.sim,
-    LxTx.Error = LxTx.sim * A.error / A)
-
-  LxTx_unfaded <- data.frame(
-    dose = dosetimeGray,
-    LxTx = LxTx.unfaded,
-    LxTx.Error = LxTx.unfaded * A.error / A)
+  .make_lx_table <- function(dose, LxTx, LxTx.err) {
+    data.frame(dose = dose, LxTx = LxTx, LxTx.Error = LxTx.err)
+  }
+  LxTx_measured <- .make_lx_table(dosetimeGray, LxTx.measured, LxTx.measured.error)
+  LxTx_simulated <- .make_lx_table(natdosetimeGray, LxTx.sim, LxTx.sim * A.error / A)
+  LxTx_unfaded <- .make_lx_table(dosetimeGray, LxTx.unfaded, LxTx.unfaded * A.error / A)
 
   ## Plot settings -------------------------------------------------------------
   plot.settings <- modifyList(list(
@@ -913,7 +898,7 @@ calc_Huntley2006 <- function(
       xlab = plot.settings$xlab,
       ylab = plot.settings$ylab,
       pch = 16,
-      ylim = c(0, max(do.call(rbind, list(LxTx_measured, LxTx_unfaded))[["LxTx"]])),
+      ylim = c(0, max(LxTx_measured[["LxTx"]], LxTx_unfaded[["LxTx"]])),
       xlim = xlim
     )
 
@@ -1114,11 +1099,14 @@ calc_Huntley2006 <- function(
     cat("\n D0 [Gy]:\t",
         round(results@data$results$Meas_D0, 2), "\u00b1",
         round(results@data$results$Meas_D0.error, 2))
-    if (fit.method[1] == "GOK") {
-      cat("\n c [-]:\t\t",
-          round(summary(fit_measured)$coefficients["c", "Estimate"], 2), "\u00b1",
-          round(summary(fit_measured)$coefficients["c", "Std. Error"], 2))
+    .cat_gok_c <- function(fit) {
+      if (fit.method[1] == "GOK") {
+        cat("\n c [-]:\t\t",
+            round(summary(fit)$coefficients["c", "Estimate"], 2), "\u00b1",
+            round(summary(fit)$coefficients["c", "Std. Error"], 2))
+      }
     }
+    .cat_gok_c(fit_measured)
     cat("\n Age [ka]:\t",
         round(results@data$results$Meas_Age, 2), "\u00b1",
         round(results@data$results$Meas_Age.error, 2))
@@ -1126,11 +1114,7 @@ calc_Huntley2006 <- function(
     cat("\n D0 [Gy]:\t",
         round(results@data$results$Unfaded_D0, 2), "\u00b1",
         round(results@data$results$Unfaded_D0.error, 2))
-    if (fit.method[1] == "GOK") {
-      cat("\n c [-]:\t\t",
-          round(summary(fit_unfaded)$coefficients["c", "Estimate"], 2), "\u00b1",
-          round(summary(fit_unfaded)$coefficients["c", "Std. Error"], 2))
-    }
+    .cat_gok_c(fit_unfaded)
     cat("\n\n ---------- Simulated ----------")
     cat("\n DE [Gy]:\t",
         round(results@data$results$Sim_De, 2), "\u00b1",
@@ -1138,11 +1122,7 @@ calc_Huntley2006 <- function(
     cat("\n D0 [Gy]:\t",
         round(results@data$results$Sim_D0, 2), "\u00b1",
         round(results@data$results$Sim_D0.error, 2))
-    if (fit.method[1] == "GOK") {
-      cat("\n c [-]:\t\t",
-          round(summary(fit_simulated)$coefficients["c", "Estimate"], 2), "\u00b1",
-          round(summary(fit_simulated)$coefficients["c", "Std. Error"], 2))
-    }
+    .cat_gok_c(fit_simulated)
     cat("\n Age [ka]:\t",
         round(results@data$results$Sim_Age, 2), "\u00b1",
         round(results@data$results$Sim_Age.error, 2))

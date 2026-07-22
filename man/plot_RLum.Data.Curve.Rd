@@ -15,8 +15,8 @@ plot_RLum.Data.Curve(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Curve} (\strong{required}):
-S4 object of class \linkS4class{RLum.Data.Curve}}
+\item{object}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} (\strong{required}):
+S4 object of class \link[=RLum.Data.Curve-class]{RLum.Data.Curve}}
 
 \item{par.local}{\link{logical} (\emph{with default}):
 use local graphical parameters for plotting, e.g. the plot is shown in one
@@ -43,7 +43,7 @@ Returns a plot.
 }
 \description{
 The function provides a standardised plot output for curve data of an
-\linkS4class{RLum.Data.Curve} S4-class object.
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve} S4-class object.
 }
 \details{
 Only single curve data can be plotted with this function. Arguments
@@ -107,7 +107,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_RLum.Data.Curve(): Plot function for an RLum.Data.Curve S4 class object. Function version 0.4.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

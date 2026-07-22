@@ -48,7 +48,7 @@ test_that("input validation", {
 
   expect_error(analyse_FadingMeasurement(object, signal_integral = 1:2,
                                          background_integral = 2),
-               "'background_integral' is of length 0 after removing values smaller than 3")
+               "'background_integral' contains no elements between 3 and 40")
   expect_error(analyse_FadingMeasurement(object[-3], signal_integral = 1:2,
                                          background_integral = 3:40,
                                          structure = c("Lx", "Tx")),
@@ -105,12 +105,6 @@ test_that("check functionality", {
       plot = FALSE,
       verbose = FALSE,
       n.MC = 10))), "RLum.Results")
-
-  expect_warning(analyse_FadingMeasurement(fading_data,
-                                           plot = TRUE, plot.single = TRUE,
-                                           verbose = FALSE,
-                                           n.MC = 10),
-                 "'plot.single' was deprecated in v1.0.0, use 'plot_singlePanels'")
 
   ## more coverage
   data.inf <- fading_data
@@ -231,6 +225,8 @@ test_that("test BIN file while fading data", {
   res1@info <- res2@info <- list() # remove $call
   res1@.uid <- res2@.uid <- NA_character_
   res1@data$fit <- res2@data$fit <- NULL
+  res1@data$fading_results$UID <- res2@data$fading_results$UID <- NULL
+  res1@data$LxTx_table$UID <- res2@data$LxTx_table$UID <- NULL
   expect_equal(res1, res2)
 
   ## more coverage

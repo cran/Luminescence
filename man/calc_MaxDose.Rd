@@ -16,16 +16,19 @@ calc_MaxDose(
 )
 }
 \arguments{
-\item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
+\item{data}{\link[=RLum.Results-class]{RLum.Results} or \link{data.frame} (\strong{required}):
 for \link{data.frame}: two columns with \code{(data[, 1])} and De error \code{(data[, 2])}.}
 
 \item{sigmab}{\link{numeric} (\strong{required}):
 additional spread in De values, representing the expected overdispersion in
 the data should the sample be well-bleached (Cunningham & Wallinga 2012, p. 100).
-\strong{Note:} For the logged model (\code{log = TRUE}) this value must be
-a fraction, e.g. 0.2 (= 20 \%). If the un-logged model is used (\code{log = FALSE}),
-\code{sigmab} must be provided in the same absolute units of the De values (seconds or Gray).
-See details.}
+This value must be expressed as a ratio, e.g. 0.2 (for 20 \%), independently
+of the \code{log} argument.
+
+\strong{Note:} Up to v1.2.1, it was required that the unlogged model specified
+\code{sigmab} in the same absolute units of the De values (seconds or Gray). This
+is no longer the case, and an error will be thrown if values of \code{sigmab}
+greater than 1 are assigned.}
 
 \item{log}{\link{logical} (\emph{with default}):
 whether the logged minimum dose model should be fit to De data (\code{TRUE} by
@@ -35,7 +38,8 @@ default).}
 number of parameters in the minimum age model, either 3 (default) or 4.}
 
 \item{bootstrap}{\link{logical} (\emph{with default}):
-apply the recycled bootstrap approach of Cunningham & Wallinga (2012).}
+apply the recycled bootstrap approach of Cunningham & Wallinga 2012. See
+details for default values and options to modify them.}
 
 \item{init.values}{\link{numeric} (\emph{optional}):
 a named list with starting values for \code{gamma}, \code{sigma}, \code{p0} and \code{mu}
@@ -100,7 +104,7 @@ calc_MaxDose(ExampleData.DeValues$CA1, sigmab = 0.2, par = 3)
 } 
 
 \section{How to cite}{
-Burow, C., 2026. calc_MaxDose(): Apply the maximum age model to a given De distribution. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Burow, C., 2026. calc_MaxDose(): Apply the maximum age model to a given De distribution. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

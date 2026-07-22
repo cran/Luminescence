@@ -8,7 +8,7 @@ De distribution}
 calc_CentralDose(data, sigmab = 0, log = TRUE, plot = TRUE, ...)
 }
 \arguments{
-\item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
+\item{data}{\link[=RLum.Results-class]{RLum.Results} or \link{data.frame} (\strong{required}):
 for \link{data.frame}: two columns with De \code{(data[,1])} and De error \code{(data[,2])}.
 Records containing missing values will be removed.}
 
@@ -30,7 +30,7 @@ enable/disable the plot output.}
 }
 \value{
 Returns a plot (\emph{optional}) and terminal output. In addition an
-\linkS4class{RLum.Results} object is returned containing the following elements:
+\link[=RLum.Results-class]{RLum.Results} object is returned containing the following elements:
 
 \item{.$summary}{\link{data.frame} summary of all relevant model results.}
 \item{.$data}{\link{data.frame} original input data}
@@ -70,7 +70,7 @@ calc_CentralDose(ExampleData.DeValues$CA1)
 } 
 
 \section{How to cite}{
-Burow, C., 2026. calc_CentralDose(): Apply the central age model (CAM) after Galbraith et al. (1999) to a given De distribution. Function version 1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Burow, C., 2026. calc_CentralDose(): Apply the central age model (CAM) after Galbraith et al. (1999) to a given De distribution. Function version 1.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

@@ -24,8 +24,8 @@ plot_RLum.Data.Spectrum(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Spectrum} or \link{matrix} (\strong{required}):
-S4 object of class \linkS4class{RLum.Data.Spectrum} or a \code{matrix} containing count
+\item{object}{\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} or \link{matrix} (\strong{required}):
+S4 object of class \link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} or a \code{matrix} containing count
 values of the spectrum.\cr
 Please note that in case of a matrix row names and col names are set
 automatically if not provided.}
@@ -45,7 +45,7 @@ limited: \code{c(350,750)}. Own colours can be set with the argument \code{col}.
 you provide already binned spectra, the colour assignment is likely to be
 wrong, since the colour gradients are calculated using the bin number.}
 
-\item{bg.spectrum}{\linkS4class{RLum.Data.Spectrum} or \link{matrix} (\emph{optional}):
+\item{bg.spectrum}{\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} or \link{matrix} (\emph{optional}):
 spectrum used for the background subtraction. The background spectrum should
 be measured using the same setting as the signal spectrum. The argument
 \code{bg.channels} controls how the subtraction is performed: if \code{bg.channels}
@@ -113,12 +113,12 @@ useful attributes such as \code{colour} and \code{pmat} (the transpose matrix fr
 }
 \description{
 The function provides a standardised plot output for spectrum data of an
-\linkS4class{RLum.Data.Spectrum} class object. The purpose of this function is to
+\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum} class object. The purpose of this function is to
 provide easy and straightforward spectra plotting, not a fully customised
 access to all plot parameters. If this is wanted, standard R plot
 functionality should be used instead.
 
-\strong{Matrix structure} \cr (cf. \linkS4class{RLum.Data.Spectrum})
+\strong{Matrix structure} \cr (cf. \link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum})
 \itemize{
 \item \code{rows} (x-values): wavelengths/channels (\code{xlim}, \code{xlab})
 \item \code{columns} (y-values): time/temperature (\code{ylim}, \code{ylab})
@@ -189,6 +189,12 @@ time/temperature (y-axis) will be plotted along the wavelength/channels
 summed up. To select a transect use the \code{xlim} argument, e.g.
 \code{xlim = c(300,310)} plot along the summed up count values of channel
 300 to 310.
+\itemize{
+\item \code{add}: default is \code{FALSE}: adds the plot to an existing plot
+\item \code{smooth}: default is \code{FALSE}: performs a simple curve smoothing
+\item \code{transect_mode}: default is \code{sum}: sets the integration mode for the transect along the
+wavelength axis. Other allowed values are \code{mean}, \code{mean}, \code{min}, \code{max}
+}
 
 \strong{Further arguments that will be passed (depending on the plot type)}
 
@@ -203,7 +209,7 @@ summed up. To select a transect use the \code{xlim} argument, e.g.
 Not all additional arguments (\code{...}) will be passed similarly!
 }
 \section{Function version}{
- 0.6.13
+ 0.6.17
 }
 
 \examples{
@@ -271,7 +277,7 @@ plot_RLum.Data.Spectrum(
 
 }
 \seealso{
-\linkS4class{RLum.Data.Spectrum},
+\link[=RLum.Data.Spectrum-class]{RLum.Data.Spectrum},
 \link{convert_Wavelength2Energy}, \link{plot_RLum},
 \link[graphics:persp]{graphics::persp}, \link[plotly:plot_ly]{plotly::plot_ly}, \link[graphics:contour]{graphics::contour}, \link[graphics:image]{graphics::image}
 }
@@ -280,7 +286,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.6.13. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. plot_RLum.Data.Spectrum(): Plot function for an RLum.Data.Spectrum S4 class object. Function version 0.6.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{aplot}

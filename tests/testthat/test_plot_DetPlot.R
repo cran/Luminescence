@@ -103,7 +103,7 @@ test_that("plot_DetPlot", {
     signal_integral = 1:3,
     background_integral = 900:1000,
     analyse_function.control = list(
-      fit.method = "EXP"),
+      fit.method = "SSE"),
     verbose = FALSE,
     n.channels = 1)),
     "RLum.Results")
@@ -132,15 +132,6 @@ test_that("plot_DetPlot", {
           fit.method = "LIN"),
       respect_RC.Status = TRUE,
       n.channels = 2)
-
-  expect_warning(plot_DetPlot(
-      tmp,
-      method = "expansion",
-      signal_integral = 1:2,
-      background_integral = 900:1000,
-      plot.single = TRUE,
-      n.channels = 2),
-      "'plot.single' was deprecated in v1.0.0, use 'plot_singlePanels' instead")
 
   ## analyse_pIRIRSequence on an inconsistent object
   suppressWarnings( # ignore additional warnings from fit_DoseResponseCurve()
@@ -234,5 +225,14 @@ test_that("graphical snapshot tests", {
                                            analyse_function.control = list(
                                                fit.method = "LIN"),
                                            n.channels = 2))
+  vdiffr::expect_doppelganger("dose rate source",
+                              plot_DetPlot(object,
+                                           method = "shift",
+                                           signal_integral = 1:3,
+                                           background_integral = 900:1000,
+                                           analyse_function.control = list(
+                                               dose_rate_source = 4.07
+                                           ),
+                                           n.channels = 4))
   })
 })

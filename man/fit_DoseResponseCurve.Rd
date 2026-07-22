@@ -7,10 +7,10 @@
 fit_DoseResponseCurve(
   object,
   mode = c("interpolation", "extrapolation", "alternate"),
-  fit.method = c("EXP", "LIN", "QDR", "EXP OR LIN", "EXP+LIN", "EXP+EXP", "GOK", "OTOR",
+  fit.method = c("SSE", "LIN", "QDR", "SSE OR LIN", "SSE+LIN", "DSE", "GOK", "OTOR",
     "OTORX"),
   fit.force_through_origin = FALSE,
-  fit.weights = TRUE,
+  fit.weights = c("inverse_var", "inverse_std", "norm_inverse_std"),
   fit.includingRepeatedRegPoints = TRUE,
   fit.NumberRegPoints = NULL,
   fit.NumberRegPointsReal = NULL,
@@ -24,10 +24,12 @@ fit_DoseResponseCurve(
 \arguments{
 \item{object}{\link{data.frame} or a \link{list} of such objects (\strong{required}):
 data frame with columns for \code{Dose}, \code{LxTx}, \code{LxTx.Error} and \code{TnTx}.
+
 The column for the test dose response is optional, but requires \code{'TnTx'} as
 column name if used. For exponential fits at least three dose points
 (including the natural) should be provided. If \code{object} is a list,
 the function is called on each of its elements.
+
 If \code{fit.method = "OTORX"} you have  to provide the test dose in the same unit
 as the dose in a column called \code{Test_Dose}. The function searches explicitly
 for this column name. Only the first value will be used assuming a constant
@@ -43,20 +45,23 @@ selects calculation mode of the function.
 }
 
 Please note that for option \code{"interpolation"} the first point is considered
-as natural dose}
+as natural dose.}
 
 \item{fit.method}{\link{character} (\emph{with default}):
-function used for fitting. Possible options are: \code{LIN}, \code{QDR}, \code{EXP},
-\verb{EXP OR LIN}, \code{EXP+LIN}, \code{EXP+EXP} (not defined for extrapolation), \code{GOK},
+function used for fitting. Possible options are: \code{LIN}, \code{QDR}, \code{SSE},
+\verb{SSE OR LIN}, \code{SSE+LIN}, \code{DSE} (not defined for extrapolation), \code{GOK},
 \code{OTOR} and \code{OTORX}. See details.}
 
 \item{fit.force_through_origin}{\link{logical} (\emph{with default})
 allow to force the fitted function through the origin.
-For \code{method = "EXP+EXP"} the function will be fixed through
+For \code{method = "DSE"} the function will be fixed through
 the origin in either case, so this option will have no effect.}
 
-\item{fit.weights}{\link{logical} (\emph{with default}):
-option whether the fitting is done with or without weights. See details.}
+\item{fit.weights}{\link{character} \link{numeric} (\emph{with default}):
+weighting approach to be used for the fitting. Options are \code{inverse_var}
+(default), \code{inverse_std}, \code{norm_inverse_std}, a \link{numeric} vector, or \code{NULL}
+(no weighting). If the input is a numeric vector, it must have length equal
+to the number of data points to fit (usually the \code{LxTx} values). See details.}
 
 \item{fit.includingRepeatedRegPoints}{\link{logical} (\emph{with default}):
 includes repeated points for fitting (\code{TRUE}/\code{FALSE}).}
@@ -71,12 +76,12 @@ real, regeneration points = all points (repeated points) including reg 0,
 has to be inserted.}
 
 \item{fit.bounds}{\link{logical} (\emph{with default}):
-set lower fit bounds for all fitting parameters to 0. Limited for the use
-with the fit methods \code{EXP}, \code{EXP+LIN}, \verb{EXP OR LIN}, \code{GOK}, \code{OTOR}, \code{OTORX}
+set lower fit bounds for all fitting parameters to 0. Limited to use
+with the fit methods \code{SSE}, \code{SSE+LIN}, \verb{SSE OR LIN}, \code{GOK}, \code{OTOR}, \code{OTORX}
 Argument to be inserted for experimental application only!}
 
 \item{n.MC}{\link{integer} (\emph{with default}):
-number of Monte Carlo simulations for error estimation, see details.}
+number of Monte Carlo simulations for error estimation.}
 
 \item{txtProgressBar}{\link{logical} (\emph{with default}):
 enable/disable the progress bar. If \code{verbose = FALSE} also no
@@ -88,7 +93,7 @@ enable/disable output to the terminal.}
 \item{...}{Further arguments to be passed (currently ignored).}
 }
 \value{
-An \linkS4class{RLum.Results} object is returned
+An \link[=RLum.Results-class]{RLum.Results} object is returned
 containing the slot \code{data} with the
 following elements:
 
@@ -97,8 +102,8 @@ following elements:
 \strong{DATA.OBJECT} \tab \strong{TYPE} \tab \strong{DESCRIPTION} \cr
 \code{..$De} : \tab  \code{data.frame} \tab Table with De values \cr
 \code{..$De.MC} : \tab \code{numeric} \tab Table with De values from MC runs \cr
-\code{..$Fit} : \tab \link{nls} or \link{lm} \tab object from the fitting for \code{EXP}, \code{EXP+LIN} and \code{EXP+EXP}.
-In case of a resulting  linear fit when using \code{LIN}, \code{QDR} or \verb{EXP OR LIN} \cr
+\code{..$Fit} : \tab \link{nls} or \link{lm} \tab object from the fitting for \code{SSE}, \code{SSE+LIN} and \code{DSE}.
+In case of a resulting  linear fit when using \code{LIN}, \code{QDR} or \verb{SSE OR LIN} \cr
 \code{..Fit.Args} : \tab \code{list} \tab Arguments to the function \cr
 \code{..$Formula} : \tab \link{expression} \tab Fitting formula as R expression \cr
 }
@@ -106,12 +111,12 @@ In case of a resulting  linear fit when using \code{LIN}, \code{QDR} or \verb{EX
 The \verb{@info} slot contains the following elements:
 \tabular{lll}{
 \strong{DATA.OBJECT} \tab \strong{TYPE} \tab \strong{DESCRIPTION} \cr
-\code{..$fit_messag}: \tab \code{character} \tab The fit message reported \cr
+\code{..$fit_message}: \tab \code{character} \tab The fit message reported \cr
 \code{..$call} : \tab \code{call} \tab The original function call \cr
 }
 
 If \code{object} is a list, then the function returns a list of
-\linkS4class{RLum.Results}
+\link[=RLum.Results-class]{RLum.Results}
 objects as defined above.
 
 \strong{Details - \code{DATA.OBJECT$De}}
@@ -121,22 +126,30 @@ This object is a \link{data.frame} with the following columns
 \code{De.Error} \tab \link{numeric} \tab standard error the equivalent dose \cr
 \code{D01} \tab \link{numeric} \tab \eqn{D_0} value, curvature parameter of the exponential \cr
 \code{D01.ERROR} \tab \link{numeric} \tab standard error of the \eqn{D_0} value\cr
-\code{D02} \tab \link{numeric} \tab 2nd \eqn{D_0} value, only for \code{EXP+EXP}\cr
-\code{D02.ERROR} \tab \link{numeric} \tab standard error for 2nd \eqn{D_0}; only for \code{EXP+EXP}\cr
-\code{R} \tab \link{numeric} \tab the material specific parameter \eqn{R}\cr
-\code{R.ERROR} \tab \link{numeric} \tab the uncertainty of R \eqn{R}\cr
+\code{D02} \tab \link{numeric} \tab 2nd \eqn{D_0} value, only for \code{DSE}\cr
+\code{D02.ERROR} \tab \link{numeric} \tab standard error for 2nd \eqn{D_0}; only for \code{DSE}\cr
+\code{R} \tab \link{numeric} \tab the material specific parameter \eqn{R} (only \code{OTOR} and \code{OTORX})\cr
+\code{R.LOWER} \tab \link{numeric} \tab lower 25\% quantile of \eqn{R}\cr
+\code{R.UPPER} \tab \link{numeric} \tab upper 75\% quantile of \eqn{R}\cr
 \code{Dc} \tab \link{numeric} \tab value indicating saturation level; only for \code{OTOR} \cr
-\code{D63} \tab \link{numeric} \tab the specific saturation level; only for \code{OTORX} \cr
+\code{Dc.LOWER} \tab \link{numeric} \tab lower 25\% quantile for \code{Dc}; only for \code{OTOR} \cr
+\code{Dc.UPPER} \tab \link{numeric} \tab upper 75\% quantile for \code{Dc}; only for \code{OTOR} \cr
+\code{D63} \tab \link{numeric} \tab the specific saturation level; only for \code{OTOR}, \code{OTORX} \cr
+\code{D63.LOWER} \ tab \link{numeric} \tab lower 25\% quantile of \code{D63}; only for \code{OTOR}, \code{OTORX} \cr
+\code{D63.UPPER} \ tab \link{numeric} \tab upper 75\% quantile of \code{D63}; only for \code{OTOR}, \code{OTORX} \cr
+\code{D80} \tab \link{numeric} \tab the specific saturation level; only for \code{SSE}, \code{OTOR}, \code{OTORX} \cr
+\code{D80.LOWER} \ tab \link{numeric} \tab lower 25\% quantile of \code{D80}; only for \code{OTOR}, \code{OTORX} \cr
+\code{D80.UPPER} \ tab \link{numeric} \tab upper 75\% quantile of \code{D80}; only for \code{OTOR}, \code{OTORX} \cr
 \code{n_N} \tab \link{numeric} \tab saturation level of dose-response curve derived via integration from the used function; it compares the full integral of the curves (\code{N}) to the integral until \code{De} (\code{n}) (e.g.,  Guralnik et al., 2015)\cr
 \code{De.MC} \tab \link{numeric} \tab equivalent dose derived by Monte-Carlo simulation; ideally identical to \code{De}\cr
 \code{Fit} \tab \link{character} \tab applied fit function \cr
 \code{Mode} \tab \link{character} \tab mode used in fitting \cr
-\code{HPDI68_L} \tab \link{numeric} \tab highest probability density of approximated equivalent dose probability curve representing the lower boundary of 68\% probability \cr
+\code{HPDI68_L} \tab \link{numeric} \tab highest probability density of the approximated equivalent dose probability curve representing the lower boundary of 68\% probability \cr
 \code{HPDI68_U} \tab \link{numeric} \tab same as \code{HPDI68_L} for the upper bound \cr
 \code{HPDI95_L} \tab \link{numeric} \tab same as \code{HPDI68_L} but for 95\% probability \cr
 \code{HPDI95_U} \tab \link{numeric} \tab same as \code{HPDI95_L} but for the upper bound \cr
 \code{.De.plot} \tab \link{numeric} \tab equivalent dose used internally for plotting \cr
-\code{.De.raw} \tab \link{numeric} \tab equivalent dose reported 'as is', that is containing infinities and negative values if they could be calculated. Bear in mind that negative values are meaningless and may be arbitrary.\cr
+\code{.De.raw} \tab \link{numeric} \tab equivalent dose reported 'as is', that is, containing infinities and negative values if they could be calculated. Bear in mind that negative values are meaningless and may be arbitrary.\cr
 }
 }
 \description{
@@ -147,7 +160,7 @@ extrapolation to calculate the equivalent dose.
 \details{
 \subsection{Implemented fitting methods}{
 
-For all options (except for the \code{LIN}, \code{QDR} and the \verb{EXP OR LIN}),
+For all options (except for the \code{LIN}, \code{QDR} and the \verb{SSE OR LIN}),
 the \link[minpack.lm:nlsLM]{minpack.lm::nlsLM} function with the \code{LM} (Levenberg-Marquardt algorithm)
 algorithm is used. Note: For historical reasons for the Monte Carlo
 simulations partly the function \link{nls} using the \code{port} algorithm.
@@ -157,40 +170,40 @@ The solution is found by transforming the function or using \link[stats:uniroot]
 \strong{Keyword: \code{LIN}}
 
 Fits a linear function to the data using \link{lm}:
-\deqn{y = mx + n}
+\deqn{y = mx + D_i}
 
 \strong{Keyword: \code{QDR}}
 
 Fits a linear function with a quadratic term to the data using  \link{lm}:
 \deqn{y = a + bx + cx^2}
 
-\strong{Keyword: \code{EXP}}
+\strong{Keyword: \code{SSE} (formerly \code{EXP})}
 
-Adapts a function of the form
-\deqn{y = a(1 - \exp(-\frac{(x+c)}{b}))}
+Fits a single saturating exponential function of the form
+\deqn{y = N (1 - \exp(-\frac{x + D_i}{D_0}))}
 
-Parameters b and c are approximated by a linear fit using \link{lm}. Note: \eqn{b = D0}
+Parameters \eqn{D_0} and \eqn{D_i} are approximated by a linear fit using \link{lm}.
 
-\strong{Keyword: \verb{EXP OR LIN}}
+\strong{Keyword: \verb{SSE OR LIN} (formerly \verb{EXP OR LIN})}
 
-Works for some cases where an \code{EXP} fit fails. If the \code{EXP} fit fails,
+Works for some cases where an \code{SSE} fit fails. If the \code{SSE} fit fails,
 a \code{LIN} fit is done instead, which always works.
 
-\strong{Keyword: \code{EXP+LIN}}
+\strong{Keyword: \code{SSE+LIN} (formerly \code{EXP+LIN})}
 
 Tries to fit an exponential plus linear function of the form:
 
-\deqn{y = a(1 - \exp(-\frac{x + c}{b}) + (gx))}
+\deqn{y = N(1 - \exp(-\frac{x + D_i}{D_0}) + gx)}
 The \eqn{D_e} is calculated by iteration.
 
 \strong{Note:} In the context of luminescence dating, this function has no physical meaning.
 Therefore, no \eqn{D_0} value is returned.
 
-\strong{Keyword: \code{EXP+EXP}}
+\strong{Keyword: \code{DSE} (formerly \code{EXP+EXP})}
 
 Tries to fit a double exponential function of the form
 
-\deqn{y = (a_1 (1 - \exp(-\frac{x}{b_1}))) + (a_2 (1 - \exp(-\frac{x}{b_2})))}
+\deqn{y = N_1 (1 - \exp(-\frac{x + D_i}{D0_1})) + N_2 (1 - \exp(-\frac{x + D_i}{D0_2}))}
 
 \emph{This fitting procedure is not really robust against wrong start parameters.}
 
@@ -199,23 +212,23 @@ Tries to fit a double exponential function of the form
 Tries to fit the general-order kinetics function following Guralnik et al. (2015)
 of the form
 
-\deqn{y = a (d - (1 + (\frac{1}{b}) x c)^{(-1/c)})}
+\deqn{y = a (d - (1 + \frac{1}{D_0} x c)^{-1 / c})}
 
-where \eqn{c > 0} is a kinetic order modifier
-(not to be confused with \strong{c} in \code{EXP} or \code{EXP+LIN}!).
+where \eqn{c > 0} is a kinetic order modifier.
 
-\strong{Keyword: \code{OTOR}} (former \code{LambertW})
+\strong{Keyword: \code{OTOR}} (formerly \code{LambertW})
 
 This tries to fit a dose-response curve based on the Lambert W function
 and the one trap one recombination centre (OTOR) model according to Pagonis
 et al. (2020). The function has the form:
 
-\deqn{y = (1 + (\mathcal{W}((R - 1) * \exp(R - 1 - ((x + D_{int}) / D_{c}))) / (1 - R))) * N}
+\deqn{y = (1 + (\mathcal{W}((R - 1) * \exp(R - 1 - (x + D_i) / D_c)) / (1 - R))) * N}
 
-with \eqn{W} the Lambert W function (calculated using \link[lamW:lamW]{lamW::lambertW0}),
+with \eqn{W} the Lambert-W function (calculated using \link[lamW:lambertW0]{lamW::lambertW0}),
 \eqn{R} the dimensionless retrapping ratio, \eqn{N} the total concentration
 of trappings states in cm\eqn{^{-3}}, \eqn{D_{c} = N/R} a constant, and
-\eqn{D_{int}} is the offset on the x-axis. Note that \eqn{R} and \eqn{D_{c}}
+\eqn{D_{i}} is the offset on the x-axis (not part of the original formula in
+Pagonis et al. 2020). Note that \eqn{R} and \eqn{D_{c}}
 have a valid physical interpretation only when saturation is reached.
 Please note that finding the root in \code{mode = "extrapolation"}
 is a non-easy task due to the shape of the function and the results might be
@@ -227,7 +240,7 @@ This adapts extended OTOR (therefore: OTORX) model proposed by Lawless and
 Timar-Gabor (2024) accounting for retrapping (the equation implemented here
 is written slightly differently than in the original manuscript):
 
-\deqn{F_{OTORX} = 1 + \left[\mathcal{W}\left(-Q * \exp\left(-Q-(1-Q(1-\frac{1}{\exp(1)})) \frac{(D + a)}{D_{63}}\right)\right)\right] / Q}
+\deqn{F_{OTORX} = 1 + \left[\mathcal{W}\left(-Q * \exp\left(-Q-(1-Q(1-\frac{1}{\exp(1)})) \frac{D + D_i}{D_{63}}\right)\right)\right] / Q}
 
 with
 
@@ -235,13 +248,13 @@ with
 
 where \eqn{A_m} and \eqn{A_n} are rate constants for the recombination and
 the trapping of electrons (\eqn{N}), respectively. \eqn{D_{63}} corresponds to
-the value at which the trap occupation corresponds to the 63\% of the saturation value.
-\eqn{a} is in an offset. If set to zero, the curve will be forced through the origin
-as in the original publication.
+the value at which the trap occupation corresponds to 63\% of the saturation
+value. \eqn{D_i} is an offset: if set to zero, the curve will be forced
+through the origin as in the original publication.
 
 For the implementation the calculation reads further
 
-\deqn{y = \frac{F_{OTORX}(((D + a)/D_{63}), Q)}{F_{OTORX}((D_{test} + a)/D_{63}, Q)}}
+\deqn{y = \frac{F_{OTORX}(((D + D_i)/D_{63}), Q)}{F_{OTORX}((D_{test} + D_i)/D_{63}, Q)}}
 
 with \eqn{D_{test}} being the test dose in the same unit (usually s or Gy) as
 the regeneration dose points. This value is essential and needs to provided
@@ -251,35 +264,48 @@ and the example section). For more details see Lawless and Timar-Gabor (2024).
 The fit also returns the parameter \eqn{R} know from \code{OTOR}, which is derived
 as \eqn{R = 1 - Q}.
 
-\emph{Note: The offset adder \eqn{a} is not part of the formula in Timar-Gabor (2024) and can
+\emph{Note: The offset adder \eqn{D_i} is not part of the formula in Timar-Gabor (2024) and can
 be set to zero with the option \code{fit.force_through_origin = TRUE}}
 
 \strong{Fit weighting}
+\itemize{
+\item \code{"inverse_var"} (inverse variance weighting - current default)
+\deqn{w_i = \frac{1}{\sigma_i^2}}
+\item \code{"inverse_std"} (inverse standard error)
+\deqn{w_i = \frac{1}{\sigma_i}}
+\item \code{"norm_inverse_std"} (normalised inverse standard error weighting - default up to v1.2.1)
+\deqn{w_i = \frac{\frac{1}{\sigma_i}}{\Sigma{\frac{1}{\sigma_i}}}}
+\emph{Although used until Luminescence v1.2.1, this method is no longer
+recommended, as it does not align with the mathematical approach used in
+common nls fitting methods.}
+}
 
-If the option \code{fit.weights =  TRUE} is chosen, weights are calculated using
-provided signal errors (\eqn{\frac{L_x}{T_x}} error):
-\deqn{fit.weights = \frac{\frac{1}{error}}{\Sigma{\frac{1}{error}}}}
+If the option \code{fit.weights =  NULL} all weights are set to 1, which disables
+weighting altogether. If \code{fit.weights} is a \link{numeric} vector of correct length
+(same number of rows as the input \code{LxTx}), then those fit weights are used.
+This may be helpful to compare different fitting algorithms that have
+implemented fit weights differently.
 
 \strong{Error estimation using Monte Carlo simulation}
 
-Error estimation is done using a parametric bootstrapping approach. A set of
-\eqn{\frac{L_x}{T_x}} values is constructed by randomly drawing curve data sampled from normal
-distributions. The normal distribution is defined by the input values (\code{mean = value}, \code{sd = value.error}). Then, a dose-response curve fit is attempted for each
-dataset resulting in a new distribution of single \code{De} values. The standard
-deviation of this distribution becomes then the error of the \code{De}. With increasing
-iterations, the error value becomes more stable. However, naturally the error
-will not decrease with more MC runs.
+Error estimation is done using a parametric bootstrap. A set of
+\eqn{\frac{L_x}{T_x}} values is constructed by randomly drawing curve data
+from normal distributions defined by the input values (\code{mean = value},
+\code{sd = value.error}). A dose-response curve is then fitted for each sampled
+dataset using the chosen fitting method, producing a distribution of single
+\code{De} values. The standard deviation of this distribution is taken as the
+error of the \code{De}. With more iterations (\code{n.MC}) the error estimate
+stabilizes. However, naturally the error will not decrease with more MC runs.
 
 Alternatively, the function returns highest probability density interval
 estimates as output, users may find more useful under certain circumstances.
 
 \strong{Note:} It may take some calculation time with increasing MC runs,
-especially for the composed functions (\code{EXP+LIN} and \code{EXP+EXP}).\cr
-Each error estimation is done with the function of the chosen fitting method.
+especially for the composed functions (\code{SSE+LIN} and \code{DSE}).
 }
 }
 \section{Function version}{
- 1.4.5
+ 1.7
 }
 
 \examples{
@@ -348,7 +374,7 @@ print(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Colombo, M., 2026. fit_DoseResponseCurve(): Fit a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Colombo, M., 2026. fit_DoseResponseCurve(): Fit a dose-response curve for luminescence data (Lx/Tx against dose). Function version 1.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -365,11 +391,11 @@ based on the Lambert W function. Journal of Luminescence 225, 117333. \doi{10.10
 }
 \seealso{
 \link{plot_DoseResponseCurve}, \link{nls},
-\linkS4class{RLum.Results}, \link{get_RLum},
-\link[minpack.lm:nlsLM]{minpack.lm::nlsLM}, \link{lm}, \link{uniroot}, \link[lamW:lamW]{lamW::lambertW0}
+\link[=RLum.Results-class]{RLum.Results}, \link{get_RLum},
+\link[minpack.lm:nlsLM]{minpack.lm::nlsLM}, \link{lm}, \link{uniroot}, \link[lamW:lambertW0]{lamW::lambertW0}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
-Michael Dietze, GFZ Potsdam (Germany) \cr
+Michael Dietze, RWTH Aachen (Germany) \cr
 Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}

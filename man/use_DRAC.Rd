@@ -42,7 +42,7 @@ if the version has changed, but not the column order
 }}
 }
 \value{
-Returns an \linkS4class{RLum.Results} object containing the following elements:
+Returns an \link[=RLum.Results-class]{RLum.Results} object containing the following elements:
 
 \item{DRAC}{\link{list}: a named list containing the following elements in slot \verb{@data}:
 
@@ -124,7 +124,7 @@ output <- use_DRAC(input)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Burow, C., 2026. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Burow, C., 2026. use_DRAC(): Use DRAC to calculate dose rate data. Function version 0.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

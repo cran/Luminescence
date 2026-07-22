@@ -29,10 +29,10 @@ fit_LMCurve(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\item{object}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
 x,y data of measured values (time and counts).}
 
-\item{object.bg}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
+\item{object.bg}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\emph{optional}):
 x,y data of measured values (time and counts) for background subtraction.}
 
 \item{n.components}{\link{integer} (\emph{with default}):
@@ -251,7 +251,7 @@ fit_LMCurve(values.curve,
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. fit_LMCurve(): Non-linear Least Squares Fit for LM-OSL curves. Function version 0.3.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. fit_LMCurve(): Non-linear Least Squares Fit for LM-OSL curves. Function version 0.3.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

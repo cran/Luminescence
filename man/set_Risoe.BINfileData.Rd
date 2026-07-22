@@ -18,28 +18,28 @@ set_Risoe.BINfileData(
 \item{.RESERVED}{x}
 }
 \value{
-A \linkS4class{Risoe.BINfileData} object.
+A \link[=Risoe.BINfileData-class]{Risoe.BINfileData} object.
 }
 \description{
 The function provides a generalised access point for specific
-\linkS4class{Risoe.BINfileData} objects. Depending on the input object, the
+\link[=Risoe.BINfileData-class]{Risoe.BINfileData} objects. Depending on the input object, the
 corresponding function will be selected.
 Allowed arguments can be found in the documentations of the corresponding
-\linkS4class{Risoe.BINfileData} class.
+\link[=Risoe.BINfileData-class]{Risoe.BINfileData} class.
 }
 \section{Function version}{
  0.1
 }
 
 \seealso{
-\linkS4class{Risoe.BINfileData}
+\link[=Risoe.BINfileData-class]{Risoe.BINfileData}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. set_Risoe.BINfileData(): General setter function for Risoe.BINfileData objects. Function version 0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. set_Risoe.BINfileData(): General setter function for Risoe.BINfileData objects. Function version 0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

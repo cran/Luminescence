@@ -20,7 +20,7 @@ enable/disable output to the terminal.}
 \item{...}{not in use, for compatibility reasons only}
 }
 \value{
-Returns an \linkS4class{RLum.Data.Image} object. Results are
+Returns an \link[=RLum.Data.Image-class]{RLum.Data.Image} object. Results are
 returned as a list when multiple files are processed or \code{file} is a list.
 }
 \description{
@@ -41,14 +41,14 @@ image <- read_TIFF2R(file)
 
 }
 \seealso{
-\link[tiff:readTIFF]{tiff::readTIFF}, \linkS4class{RLum.Data.Image}
+\link[tiff:readTIFF]{tiff::readTIFF}, \link[=RLum.Data.Image-class]{RLum.Data.Image}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. read_TIFF2R(): Import TIFF Image Data into R. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. read_TIFF2R(): Import TIFF Image Data into R. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

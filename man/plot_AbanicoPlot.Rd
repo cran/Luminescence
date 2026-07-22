@@ -8,7 +8,7 @@ plot_AbanicoPlot(
   data,
   na.rm = TRUE,
   log.z = TRUE,
-  z.0 = c("mean.weighted", "mean.weighted", "median"),
+  z.0 = c("mean.weighted", "mean", "median"),
   dispersion = c("qr", "sd", "2sd"),
   plot.ratio = 0.75,
   rotate = FALSE,
@@ -41,11 +41,11 @@ plot_AbanicoPlot(
 )
 }
 \arguments{
-\item{data}{\link{data.frame} or \linkS4class{RLum.Results} object (\strong{required}):
+\item{data}{\link{data.frame} or \link[=RLum.Results-class]{RLum.Results} object (\strong{required}):
 for \code{data.frame} two columns: De (\code{data[,1]}) and De error (\code{data[,2]}).
 To plot several data sets in one plot the data sets must be provided as
 \code{list}, e.g. \code{list(data.1, data.2)}.\cr
-For some \linkS4class{RLum.Results} objects, one or more lines (and
+For some \link[=RLum.Results-class]{RLum.Results} objects, one or more lines (and
 corresponding labels) are drawn automatically:
 \itemize{
 \item \link{calc_AverageDose} (ADM)
@@ -64,19 +64,19 @@ exclude \code{NA} values from the data set prior to any further operations.}
 Option to display the z-axis in logarithmic scale. Default is \code{TRUE}.}
 
 \item{z.0}{\link{character} or \link{numeric} (\emph{with default}):
-User-defined central value, used for centring of data. One out of \code{"mean"},
-\code{"mean.weighted"} and \code{"median"} or a numeric value (not its logarithm).
-Default is \code{"mean.weighted"}.}
+User-defined central value used for centring of data. One of \code{"mean.weighted"}
+(default), \code{"mean"}and \code{"median"}, or a single numeric value (not its
+logarithm).}
 
 \item{dispersion}{\link{character} (\emph{with default}):
 measure of dispersion, used for drawing the scatter polygon. One out of
 \itemize{
-\item \code{"qr"} (quartile range, default),
-\item \code{"pnn"} (symmetric percentile range with \code{nn} the lower percentile, e.g.
-\code{"p05"} indicating the range between 5 and 95 \%, or \code{"p10"} indicating
-the range between 10 and 90 \%), or
-\item \code{"sd"} (standard deviation) and
-\item \code{"2sd"} (2 standard deviations),
+\item \code{"qr"} (quartile range, default)
+\item \code{"sd"} (standard deviation)
+\item \code{"2sd"} (2 standard deviations)
+\item \code{"pNN"} (symmetric percentile range, with \code{NN} being the lower percentile,
+e.g. \code{"p05"} indicates the range between 5 and 95 \%, or \code{"p10"} indicates
+the range between 10 and 90 \%)
 }
 
 The default is \code{"qr"}. Note that \code{"sd"} and \code{"2sd"} are only meaningful in
@@ -164,7 +164,7 @@ colour of the polygon showing the data scatter. Sometimes this
 polygon may be omitted for clarity. To disable it use \code{FALSE} or
 \code{polygon = FALSE}. Default is \code{"grey80"}.}
 
-\item{line}{\link{numeric} or \linkS4class{RLum.Results}:
+\item{line}{\link{numeric} or \link[=RLum.Results-class]{RLum.Results}:
 numeric values of the additional lines to be added. This can be set to \code{NA}
 to suppress the line added automatically by some \code{RLum.Results} objects.}
 
@@ -471,7 +471,7 @@ points(x = AP$data[[1]]$precision[!in_2sigma],
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., Colombo, M., 2026. plot_AbanicoPlot(): Function to create an Abanico Plot.. Function version 0.1.21. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., Colombo, M., 2026. plot_AbanicoPlot(): Function to create an Abanico Plot.. Function version 0.1.21. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

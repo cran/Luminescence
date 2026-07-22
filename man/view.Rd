@@ -37,13 +37,13 @@ If started from RStudio, it uses the RStudio viewer.
 }
 \section{Functions}{
 \itemize{
-\item \code{view(RLum.Analysis)}: View method for \linkS4class{RLum.Analysis} objects.
+\item \code{view(RLum.Analysis)}: View method for \link[=RLum.Analysis-class]{RLum.Analysis} objects.
 
-\item \code{view(RLum.Data)}: View method for \linkS4class{RLum.Data} objects.
+\item \code{view(RLum.Data)}: View method for \link[=RLum.Data-class]{RLum.Data} objects.
 
-\item \code{view(RLum.Results)}: View method for \linkS4class{RLum.Results} objects.
+\item \code{view(RLum.Results)}: View method for \link[=RLum.Results-class]{RLum.Results} objects.
 
-\item \code{view(Risoe.BINfileData)}: View method for \linkS4class{Risoe.BINfileData} objects.
+\item \code{view(Risoe.BINfileData)}: View method for \link[=Risoe.BINfileData-class]{Risoe.BINfileData} objects.
 
 }}
 \seealso{
@@ -54,7 +54,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. view(): Convenience data visualisation function. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. view(): Convenience data visualisation function. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

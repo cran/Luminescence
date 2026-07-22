@@ -20,7 +20,7 @@ For accepted values see \link{BaseDataSet.ConversionFactors}.}
 \item{...}{currently not used.}
 }
 \value{
-The function returns an \linkS4class{RLum.Results} object for which
+The function returns an \link[=RLum.Results-class]{RLum.Results} object for which
 the first element is a \link{matrix} with the converted values. If no input is
 provided, the function returns a template \link{data.frame} that can be used as
 input.
@@ -93,7 +93,7 @@ convert_Concentration2DoseRate(input)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., 2026. convert_Concentration2DoseRate(): Dose-rate conversion function. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., 2026. convert_Concentration2DoseRate(): Dose-rate conversion function. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

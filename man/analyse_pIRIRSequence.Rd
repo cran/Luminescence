@@ -17,10 +17,10 @@ analyse_pIRIRSequence(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} or \link{list} of
-\linkS4class{RLum.Analysis} objects (\strong{required}):
+\item{object}{\link[=RLum.Analysis-class]{RLum.Analysis} or \link{list} of
+\link[=RLum.Analysis-class]{RLum.Analysis} objects (\strong{required}):
 input object containing data for analysis.
-If a \link{list} is provided the functions tries to iterate over each element
+If a \link{list} is provided the function tries to iterate over each element
 in the list.}
 
 \item{signal_integral}{\link{integer} (\strong{required}):
@@ -37,8 +37,8 @@ input type for \code{signal_integral}, one of \code{"channel"} (default) or
 corresponding to the given time range (in seconds) are selected.}
 
 \item{dose.points}{\link{numeric} (\emph{optional}):
-a numeric vector containing the dose points values. Using this argument overwrites dose point
-values in the signal curves.}
+a numeric vector containing the dose point values. Using this argument
+overwrites dose point values in the signal curves.}
 
 \item{sequence.structure}{\link{vector} \link{character} (\emph{with default}):
 specifies the general sequence structure. Allowed values are \code{"TL"} and
@@ -51,7 +51,7 @@ preheat as none TL, remove the TL step.)}
 enable/disable the plot output.}
 
 \item{plot_singlePanels}{\link{logical} (\emph{with default}):
-enable/disable plotting of the results in a single windows for each plot.
+enable/disable plotting of the results in a single window for each plot.
 Ignored if \code{plot = FALSE}.}
 
 \item{...}{further arguments that will be passed to
@@ -61,7 +61,7 @@ the size) and \code{mtext.outer} (additional text on the plot area) can be passe
 is a list, \code{main} can be passed as \link{vector} or \link{list}.}
 }
 \value{
-Plots (\emph{optional}) and an \linkS4class{RLum.Results} object is
+Plots (\emph{optional}) and an \link[=RLum.Results-class]{RLum.Results} object is
 returned containing the following elements:
 
 \tabular{lll}{
@@ -77,11 +77,11 @@ The output should be accessed using the function \link{get_RLum}.
 }
 \description{
 The function performs an analysis of post-IR IRSL sequences including curve
-fitting on \linkS4class{RLum.Analysis} objects.
+fitting on \link[=RLum.Analysis-class]{RLum.Analysis} objects.
 }
 \details{
 To allow post-IR IRSL protocol (Thomsen et al., 2008) measurement
-analyses, this function has been written as extended wrapper for function
+analyses, this function has been written as an extended wrapper for
 \link{analyse_SAR.CWOSL}, thus facilitating an entire sequence analysis in
 one run. With this, its functionality is strictly limited by the
 functionality provided by  \link{analyse_SAR.CWOSL}.
@@ -98,7 +98,7 @@ additional hotbleach) such curves must be removed before using the function.
 
 \strong{If the input is a \code{list}}
 
-If the input is a list of \linkS4class{RLum.Analysis} objects, every argument
+If the input is a list of \link[=RLum.Analysis-class]{RLum.Analysis} objects, every argument
 can be provided as list to allow
 for different sets of parameters for every single input element.
 For further information see \link{analyse_SAR.CWOSL}.
@@ -143,7 +143,7 @@ object <- set_RLum(class = "RLum.Analysis", records = object, protocol = "pIRIR"
 results <- analyse_pIRIRSequence(object,
      signal_integral = 1:2,
      background_integral = 900:1000,
-     fit.method = "EXP",
+     fit.method = "SSE",
      sequence.structure = c("TL", "pseudoIRSL1", "pseudoIRSL2"),
      main = "Pseudo pIRIR data set based on quartz OSL",
      plot_singlePanels = TRUE)
@@ -157,7 +157,7 @@ pdf(file = tempfile, height = 18, width = 18)
   results <- analyse_pIRIRSequence(object,
          signal_integral = 1:2,
          background_integral = 900:1000,
-         fit.method = "EXP",
+         fit.method = "SSE",
          main = "Pseudo pIRIR data set based on quartz OSL")
 
   dev.off()
@@ -166,7 +166,7 @@ pdf(file = tempfile, height = 18, width = 18)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_pIRIRSequence(): Analyse post-IR IRSL measurement sequences. Function version 0.2.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -182,7 +182,7 @@ extracts. Radiation Measurements 43, 1474-1486.
 \seealso{
 \link{analyse_SAR.CWOSL}, \link{calc_OSLLxTxRatio},
 \link{plot_DoseResponseCurve}, \link{fit_DoseResponseCurve}
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Results},
+\link[=RLum.Analysis-class]{RLum.Analysis}, \link[=RLum.Results-class]{RLum.Results},
 \link{get_RLum}
 }
 \author{

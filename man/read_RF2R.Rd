@@ -18,14 +18,14 @@ enable/disable output to the terminal.}
 \item{...}{not used, only for compatible reasons}
 }
 \value{
-Returns an S4 \linkS4class{RLum.Analysis} object containing
-\linkS4class{RLum.Data.Curve} objects for each curve. Results are
+Returns an S4 \link[=RLum.Analysis-class]{RLum.Analysis} object containing
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve} objects for each curve. Results are
 returned as a list when multiple files are processed or \code{file} is a list.
 }
 \description{
 Import files produced by the IR-RF 'ImageJ' macro (\code{SR-RF.ijm};
 Mittelstraß and Kreutzer, 2021) into R and create a list of
-\linkS4class{RLum.Analysis} objects
+\link[=RLum.Analysis-class]{RLum.Analysis} objects
 }
 \details{
 The results of spatially resolved IR-RF data are summarised in
@@ -46,7 +46,7 @@ temp <- read_RF2R(file)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. read_RF2R(): Import RF-files to R. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. read_RF2R(): Import RF-files to R. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -54,7 +54,7 @@ Mittelstraß, D., Kreutzer, S., 2021. Spatially resolved infrared radiofluoresce
 single-grain K-feldspar dating using CCD imaging. Geochronology 3, 299–319. \doi{10.5194/gchron-3-299-2021}
 }
 \seealso{
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Data.Curve},
+\link[=RLum.Analysis-class]{RLum.Analysis}, \link[=RLum.Data.Curve-class]{RLum.Data.Curve},
 \link{analyse_IRSAR.RF}
 }
 \author{

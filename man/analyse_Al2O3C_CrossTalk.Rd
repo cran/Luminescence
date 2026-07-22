@@ -17,7 +17,7 @@ analyse_Al2O3C_CrossTalk(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} or \link{list} (\strong{required}):
+\item{object}{\link[=RLum.Analysis-class]{RLum.Analysis} or \link{list} (\strong{required}):
 measurement input}
 
 \item{signal_integral}{\link{numeric} (\emph{optional}):
@@ -38,7 +38,7 @@ made by Kreutzer et al., 2018.}
 input curve selection, which is passed to \link{get_RLum}. To deactivate the
 automatic selection set the argument to \code{NULL}.}
 
-\item{irradiation_time_correction}{\link{numeric} or \linkS4class{RLum.Results} (\emph{optional}):
+\item{irradiation_time_correction}{\link{numeric} or \link[=RLum.Results-class]{RLum.Results} (\emph{optional}):
 information on the used irradiation time correction obtained by another
 experiment.}
 
@@ -100,7 +100,7 @@ analyse_Al2O3C_CrossTalk(data_CrossTalk)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. analyse_Al2O3C_CrossTalk(): Al2O3:C Reader Cross-Talk Analysis. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_Al2O3C_CrossTalk(): Al2O3:C Reader Cross-Talk Analysis. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

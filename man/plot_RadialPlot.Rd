@@ -28,7 +28,7 @@ plot_RadialPlot(
 )
 }
 \arguments{
-\item{data}{\link{data.frame} or \linkS4class{RLum.Results} object (\strong{required}):
+\item{data}{\link{data.frame} or \link[=RLum.Results-class]{RLum.Results} object (\strong{required}):
 for \code{data.frame}: either two columns: De (\code{data[,1]}) and De error
 (\code{data[,2]}), or one: De (\code{values[,1]}). If a single-column data frame
 is provided, De error is assumed to be 10^-9 for all measurements.
@@ -52,8 +52,9 @@ the central line. Can either be one out of
 \item \code{"mean"},
 \item \code{"median"},
 \item \code{"mean.weighted"} and
-\item \code{"median.weighted"} or a
-\item numeric value used for the standardisation.
+\item \code{"median.weighted"}, or a
+\item numeric value used for the standardisation of the same length as the number
+of input data sets (it is ignored otherwise).
 }}
 
 \item{mtext}{\link{character} (\emph{with default}):
@@ -144,14 +145,14 @@ one or more of the following keywords:
 \item \code{"mean.weighted"} (error-weighted mean),
 \item \code{"median"} (median of the De values),
 \item \code{"median.weighted"} (error-weighted median),
-\item \code{"sdrel"} (relative standard deviation in percent),
-\item \code{"sdrel.weighted"} (error-weighted relative standard deviation in percent),
-\item \code{"sdabs"} (absolute standard deviation),
-\item \code{"sdabs.weighted"} (error-weighted absolute standard deviation),
-\item \code{"serel"} (relative standard error),
-\item \code{"serel.weighted"} (error-weighted relative standard error),
-\item \code{"seabs"} (absolute standard error),
-\item \code{"seabs.weighted"} (error-weighted absolute standard error),
+\item \code{"sd.rel"} (relative standard deviation in percent),
+\item \code{"sd.rel.weighted"} (error-weighted relative standard deviation in percent),
+\item \code{"sd.abs"} (absolute standard deviation),
+\item \code{"sd.abs.weighted"} (error-weighted absolute standard deviation),
+\item \code{"se.rel"} (relative standard error in percent),
+\item \code{"se.rel.weighted"} (error-weighted relative standard error in percent),
+\item \code{"se.abs"} (absolute standard error),
+\item \code{"se.abs.weighted"} (error-weighted absolute standard error),
 \item \code{"in.2s"} (percent of samples in 2-sigma range),
 \item \code{"kurtosis"} (kurtosis) and
 \item \code{"skewness"} (skewness).
@@ -176,7 +177,7 @@ plot_RadialPlot(
   data = ExampleData.DeValues,
   log.z = FALSE)
 
-## store the the plot parameters
+## store the plot parameters
 plot1 <- plot_RadialPlot(
   data = ExampleData.DeValues,
   log.z = FALSE)
@@ -267,7 +268,7 @@ plot_RadialPlot(
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2026. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.11. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.11. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

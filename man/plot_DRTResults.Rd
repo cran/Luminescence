@@ -21,7 +21,7 @@ plot_DRTResults(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
+\item{object}{\link[=RLum.Results-class]{RLum.Results} or \link{data.frame} (\strong{required}):
 input values containing at least De and De error. To plot
 more than one data set in one figure, a \code{list} of the individual data
 sets must be provided (e.g. \code{list(dataset.1, dataset.2)}).}
@@ -56,12 +56,12 @@ adds numerical output to the plot.  Can be one or more out of:
 \itemize{
 \item \code{"n"} (number of samples),
 \item \code{"mean"} (mean De value),
-\item \code{"weighted$mean"} (error-weighted mean),
+\item \code{"mean.weighted"} (error-weighted mean),
 \item \code{"median"} (median of the De values),
-\item \code{"weighted$median"} (error-weighted median),
+\item \code{"median.weighted"} (error-weighted median),
 \item \code{"sd.rel"} (relative standard deviation in percent),
 \item \code{"sd.abs"} (absolute standard deviation),
-\item \code{"se.rel"} (relative standard error) and
+\item \code{"se.rel"} (relative standard error in percent) and
 \item \code{"se.abs"} (absolute standard error)
 }
 
@@ -155,13 +155,13 @@ plot_DRTResults(
 plot_DRTResults(
   list(x.1, x.2),
   given.dose = 2800,
-  summary = c("n", "weighted$mean", "sd.abs"))
+  summary = c("n", "mean.weighted", "sd.abs"))
 
 ## plot the data with user-defined statistical measures as sub-header
 plot_DRTResults(
   list(x.1, x.2),
   given.dose = 2800,
-  summary = c("n", "weighted$mean", "sd.abs"),
+  summary = c("n", "mean.weighted", "sd.abs"),
   summary.pos = "sub")
 
 ## plot the data grouped by preheat temperatures
@@ -195,7 +195,7 @@ plot_DRTResults(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., 2026. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., 2026. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

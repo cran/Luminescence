@@ -1,8 +1,8 @@
 Package: Luminescence
 Type: Package
 Title: Comprehensive Luminescence Dating Data Analysis
-Version: 1.2.1
-Date: 2026-03-25
+Version: 1.3.0
+Date: 2026-07-22
 Authors@R: c(
     person("Sebastian", "Kreutzer", role = c("aut", "trl", "cre", "dtc"), email = "maintainer_luminescence@r-luminescence.org", comment = c(ORCID = "0000-0002-0734-2199")),
     person("Christoph", "Burow", role = c("aut", "trl", "dtc"), comment = c(ORCID = "0000-0002-5023-4046")),
@@ -40,25 +40,25 @@ License: GPL-3
 URL: https://r-lum.github.io/Luminescence/
 BugReports: https://github.com/R-Lum/Luminescence/issues
 Depends: R (>= 4.4), utils
-LinkingTo: Rcpp (>= 1.1.0)
+LinkingTo: Rcpp (>= 1.1.1)
 Imports: bbmle (>= 1.0.25.1), data.table (>= 1.18.2.1), DEoptim (>=
-        2.2-8), httr (>= 1.4.7), interp (>= 1.1-6), lamW (>= 2.2.3),
-        matrixStats (>= 1.3.0), methods, minpack.lm (>= 1.2-4), mclust
-        (>= 6.1), Rcpp (>= 1.0.12), shape (>= 1.4.6), parallel, XML (>=
-        3.99-0.16),
-Suggests: spelling (>= 2.3.0), plotly (>= 4.10.4), rmarkdown (>= 2.27),
-        rstudioapi (>= 0.16.0), rjags (>= 4-15), coda (>= 0.19-4),
-        knitr, pander (>= 0.6.5), testthat (>= 3.2.1), vdiffr (>=
-        1.0.0), tiff (>= 0.1-12), devtools (>= 2.4.5), R.rsp (>=
+        2.2-8), httr (>= 1.4.8), interp (>= 1.1-6), lamW (>= 2.2.7),
+        matrixStats (>= 1.5.0), methods, minpack.lm (>= 1.2-4), mclust
+        (>= 6.1.2), Rcpp (>= 1.1.1), shape (>= 1.4.6), parallel, XML
+        (>= 3.99-0.23),
+Suggests: spelling (>= 2.3.2), plotly (>= 4.12.0), rmarkdown (>= 2.31),
+        rstudioapi (>= 0.18.0), rjags (>= 4-17), coda (>= 0.19-4),
+        knitr, pander (>= 0.6.6), testthat (>= 3.3.2), vdiffr (>=
+        1.0.9), tiff (>= 0.1-12), devtools (>= 2.5.0), R.rsp (>=
         0.46.0)
 VignetteBuilder: R.rsp, knitr
 Encoding: UTF-8
 Language: en-US
-RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 Config/testthat/parallel: TRUE
+Config/roxygen2/version: 8.0.0
 NeedsCompilation: yes
-Packaged: 2026-03-25 08:55:44 UTC; marco
+Packaged: 2026-07-22 13:19:11 UTC; marco
 Author: Sebastian Kreutzer [aut, trl, cre, dtc] (ORCID:
     <https://orcid.org/0000-0002-0734-2199>),
   Christoph Burow [aut, trl, dtc] (ORCID:
@@ -95,4 +95,4 @@ Author: Sebastian Kreutzer [aut, trl, cre, dtc] (ORCID:
   Andrzej Bluszcz [aut] (ORCID: <https://orcid.org/0000-0002-8027-6941>),
   Markus Fuchs [ths] (ORCID: <https://orcid.org/0000-0003-4669-6528>)
 Repository: CRAN
-Date/Publication: 2026-03-25 10:40:08 UTC
+Date/Publication: 2026-07-22 15:40:13 UTC

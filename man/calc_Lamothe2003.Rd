@@ -17,10 +17,10 @@ calc_Lamothe2003(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Results} \link{data.frame} (\strong{required}):
+\item{object}{\link[=RLum.Results-class]{RLum.Results} \link{data.frame} (\strong{required}):
 Input data for applying the fading correction, can be (1) a \link{data.frame}
 with three columns (\code{dose}, \code{LxTx}, \verb{LxTx error}; see details), or (2) an
-\linkS4class{RLum.Results} object created by \link{analyse_SAR.CWOSL} or
+\link[=RLum.Results-class]{RLum.Results} object created by \link{analyse_SAR.CWOSL} or
 \link{analyse_pIRIRSequence}.}
 
 \item{dose_rate.envir}{\link{numeric} vector of length 2 (\strong{required}):
@@ -60,7 +60,7 @@ terminal.}
 \item{...}{further arguments passed to \link{plot_DoseResponseCurve}.}
 }
 \value{
-The function returns an \linkS4class{RLum.Results} object and the graphical
+The function returns an \link[=RLum.Results-class]{RLum.Results} object and the graphical
 output produced by \link{plot_DoseResponseCurve}.
 
 -----------------------------------\cr
@@ -148,13 +148,13 @@ results_corr <- calc_Lamothe2003(
   dose_rate.source = c(0.184, 0.003),
   g_value =  c(2.36, 0.6),
   plot = TRUE,
-  fit.method = "EXP")
+  fit.method = "SSE")
 
 
 } 
 
 \section{How to cite}{
-Kreutzer, S., Mercier, N., 2026. calc_Lamothe2003(): Apply fading correction after Lamothe et al., 2003. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Mercier, N., 2026. calc_Lamothe2003(): Apply fading correction after Lamothe et al., 2003. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

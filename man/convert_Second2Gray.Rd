@@ -15,9 +15,9 @@ convert_Second2Gray(
 input values, structure: data (\code{values[,1]}) and data error (\code{values [,2]})
 are required.}
 
-\item{dose.rate}{\linkS4class{RLum.Results}, \link{data.frame} or \link{numeric} (\strong{required}):
-\code{RLum.Results} needs to be originated from the function \link{calc_SourceDoseRate},
-for \code{vector} dose rate in Gy/s and dose rate error in Gy/s.}
+\item{dose.rate}{\link[=RLum.Results-class]{RLum.Results}, \link{data.frame} or \link{numeric} (\strong{required}):
+for \code{RLum.Results}, it needs to be originated from \link{calc_SourceDoseRate};
+for \code{vector}, dose rate and dose rate error (in Gy/s).}
 
 \item{error.propagation}{\link{character} (\emph{with default}):
 error propagation method used for error calculation (\code{omit}, \code{gaussian} or
@@ -71,13 +71,12 @@ be of the same length as the data frame provided with the argument \code{data}
 }
 
 \examples{
+## load De data from the example data help file
+data(ExampleData.DeValues, envir = environment())
 
 ##(A) for known source dose rate at date of measurement
-## - load De data from the example data help file
-data(ExampleData.DeValues, envir = environment())
 ## - convert De(s) to De(Gy)
-convert_Second2Gray(ExampleData.DeValues$BT998, c(0.0438,0.0019))
-
+convert_Second2Gray(ExampleData.DeValues$BT998, c(0.0438, 0.0019))
 
 ##(B) for source dose rate calibration data
 ## - calculate source dose rate first
@@ -94,7 +93,7 @@ convert_Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Fuchs, M.C., 2026. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Fuchs, M.C., 2026. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

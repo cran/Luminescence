@@ -8,7 +8,7 @@
 calc_IEU(data, a, b, interval, decimal.point = 2, plot = TRUE, ...)
 }
 \arguments{
-\item{data}{\linkS4class{RLum.Results} or \link{data.frame} (\strong{required}):
+\item{data}{\link[=RLum.Results-class]{RLum.Results} or \link{data.frame} (\strong{required}):
 for \link{data.frame}: two columns with De \code{(data[,1])} and
 De error \code{(values[,2])}}
 
@@ -22,7 +22,7 @@ intercept}
 fixed interval (e.g. 5 Gy) used for iteration of \code{Dbar}, from the mean to
 Lowest.De used to create Graph.IEU \verb{[Dbar.Fixed vs Z]}}
 
-\item{decimal.point}{\link{numeric} (\emph{with default}):
+\item{decimal.point}{\link{integer} (\emph{with default}):
 number of decimal points for rounding calculations (e.g. 2)}
 
 \item{plot}{\link{logical} (\emph{with default}):
@@ -32,7 +32,7 @@ enable/disable the plot output.}
 }
 \value{
 Returns a plot (\emph{optional}) and terminal output. In addition an
-\linkS4class{RLum.Results} object is returned containing the
+\link[=RLum.Results-class]{RLum.Results} object is returned containing the
 following elements:
 
 \item{.$summary}{\link{data.frame} summary of all relevant model results.}
@@ -65,7 +65,7 @@ ieu <- calc_IEU(ExampleData.DeValues$CA1, a = 0.2, b = 1.9, interval = 1)
 } 
 
 \section{How to cite}{
-Smedley, R.K., Colombo, M., 2026. calc_IEU(): Apply the internal-external-uncertainty (IEU) model after Thomsen et al. (2007) to a given De distribution. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Smedley, R.K., Colombo, M., 2026. calc_IEU(): Apply the internal-external-uncertainty (IEU) model after Thomsen et al. (2007) to a given De distribution. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

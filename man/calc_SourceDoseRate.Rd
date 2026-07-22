@@ -40,10 +40,13 @@ Gy/s as valid for the function \link{convert_Second2Gray}.}
 option allowing to predict the dose rate of the source over time in days
 set by the provided value. Starting date is the value set with
 \code{measurement.date}, e.g., \code{calc_SourceDoseRate(..., predict = 100)} calculates
-the source dose rate for the next 100 days.}
+the source dose rate for the next 100 days. If predict is of length two, this
+will be used to calculate the value per days backwards and forward.
+For instance: \code{predict = c(-100, 100)} will calculate 100 days backwards and
+100 days forward.}
 }
 \value{
-Returns an S4 object of type \linkS4class{RLum.Results}.
+Returns an S4 object of type \link[=RLum.Results-class]{RLum.Results}.
 Slot \code{data} contains a \link{list} with the following structure:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{$ dose.rate (data.frame)
@@ -92,24 +95,22 @@ original .BIN file (using e.g., \code{BINfile <- Luminescence::read_BIN2R()} and
 Please be careful when using the option \code{predict}, especially when a
 multiple set for \code{measurement.date} and \code{calib.date} is provided. For the
 source dose rate prediction, the function takes the last \code{measurement.date}
-value and predicts from that the source dose rate for the number of days
+and \code{calib.date} values and predicts from that the source dose rate for the number of days
 requested, that is: the (multiple) original input will be replaced.
-However, the function does not change entries for the calibration dates,
-but mixes them up. Therefore, it is not recommended to use this option
-when multiple calibration dates (\code{calib.date}) are provided.
 }
 \section{Function version}{
- 0.3.4
+ 0.3.6
 }
 
 \examples{
 
 ##(1) Simple function usage
 ##Basic calculation of the dose rate for a specific date
-dose.rate <-  calc_SourceDoseRate(measurement.date = "2012-01-27",
-                                  calib.date = "2014-12-19",
-                                  calib.dose.rate = 0.0438,
-                                  calib.error = 0.0019)
+dose.rate <-  calc_SourceDoseRate(
+ measurement.date = "2012-01-27",
+ calib.date = "2014-12-19",
+ calib.dose.rate = 0.0438,
+ calib.error = 0.0019)
 
 ##show results
 get_RLum(dose.rate)
@@ -123,12 +124,13 @@ data(ExampleData.DeValues, envir = environment())
 convert_Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 
 ##(3) source rate prediction and plotting
-dose.rate <-  calc_SourceDoseRate(measurement.date = "2012-01-27",
-                                  calib.date = "2014-12-19",
-                                  calib.dose.rate = 0.0438,
-                                  calib.error = 0.0019,
-                                  predict = 1000)
-plot_RLum(dose.rate)
+dose.rate <-  calc_SourceDoseRate(
+ measurement.date = "2012-01-27",
+ calib.date = "2014-12-19",
+ calib.dose.rate = 0.0438,
+ calib.error = 0.0019,
+ predict = c(-1000,1000))
+plot(dose.rate, type = "l")
 
 ##(4) export output to a LaTeX table (example using the package 'xtable')
 \dontrun{
@@ -138,11 +140,11 @@ xtable::xtable(get_RLum(dose.rate))
 } 
 
 \section{How to cite}{
-Fuchs, M.C., Kreutzer, S., 2026. calc_SourceDoseRate(): Calculation of the source dose rate via the date of measurement. Function version 0.3.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Fuchs, M.C., Kreutzer, S., 2026. calc_SourceDoseRate(): Calculation of the source dose rate via the date of measurement. Function version 0.3.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
-NNDC, Brookhaven National Laboratory \verb{http://www.nndc.bnl.gov/}
+NNDC, Brookhaven National Laboratory \verb{https://www.nndc.bnl.gov/}
 }
 \seealso{
 \link{convert_Second2Gray}, \link{get_RLum}, \link{plot_RLum}

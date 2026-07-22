@@ -23,7 +23,7 @@ fit_CWCurve(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
+\item{object}{\link[=RLum.Data.Curve-class]{RLum.Data.Curve} or \link{data.frame} (\strong{required}):
 x, y data of measured values (time and counts).}
 
 \item{n.components.max}{\link{vector} (\emph{optional}):
@@ -83,7 +83,7 @@ the fitted CW-OSL curves are returned as plot.
 
 \strong{RLum.Results object}
 
-Beside the plot and table output options, an \linkS4class{RLum.Results} object is
+Beside the plot and table output options, an \link[=RLum.Results-class]{RLum.Results} object is
 returned.
 
 \code{fit}:
@@ -178,7 +178,7 @@ fit <- fit_CWCurve(ExampleData.CW_OSL_Curve,
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. fit_CWCurve(): Non-linear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. fit_CWCurve(): Non-linear Least Squares Fit for CW-OSL curves -beta version-. Function version 0.5.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -192,8 +192,8 @@ Ritz, C. & Streibig, J.C., 2008. Nonlinear Regression with R. In: R.
 Gentleman, K. Hornik, G. Parmigiani, eds., Springer, p. 150.
 }
 \seealso{
-\link{fit_LMCurve}, \link{plot},\link{nls}, \linkS4class{RLum.Data.Curve},
-\linkS4class{RLum.Results}, \link{get_RLum}, \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}
+\link{fit_LMCurve}, \link{plot},\link{nls}, \link[=RLum.Data.Curve-class]{RLum.Data.Curve},
+\link[=RLum.Results-class]{RLum.Results}, \link{get_RLum}, \link[minpack.lm:nlsLM]{minpack.lm::nlsLM}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)

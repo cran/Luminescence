@@ -5,8 +5,8 @@
 #' Set unique id of the RLum.Analysis object as parent id for each RLum.Data
 #' object in the record list
 #'
-#' This function only applies on RLum.Analysis objects and was written for performance not
-#' usability, means the functions runs without any checks and is for internal usage only.
+#' This function only applies to RLum.Analysis objects and was written for
+#' performance not usability.
 #'
 #' @param [Luminescence::RLum.Analysis-class] (**required**):
 #' input object where the function should be applied on
@@ -385,10 +385,11 @@ fancy_scientific <- function(l) {
 
 #'Add fancy log axis with minor ticks the fancy axis labelling
 #'
-#'@param side [numeric] (**required**): the side where to plot the axis
+#' @param side [numeric] (**required**):
+#' side of the plot where the axis is to be drawn.
 #'
-#'@param ... extra arguments to be passed to [graphics::axis], `side`, `at`and `labels`
-#'are pre-defined and cannot be modified
+#' @param ... extra arguments to be passed to [graphics::axis]. `at` and
+#' `labels` are pre-defined and cannot be modified.
 #'
 #'@return
 #'Returns fancy log axis
@@ -403,7 +404,7 @@ fancy_scientific <- function(l) {
 #'
 #'@noRd
 .add_fancy_log_axis <- function(side, ...){
-  ## do just nothing if it would cause an error
+  ## do nothing if it would cause an error
   if(!(par()$xlog && any(c(1,3) %in% side[1])) && !(par()$ylog && any(c(2,4) %in% side[1])))
     return(NULL)
 
@@ -516,13 +517,13 @@ fancy_scientific <- function(l) {
     adj <- c(1, 1)
   } else if (pos[1] == "left") {
     pos <- c(xlim[1], mean(ylim))
-    adj <- c(0, 0.5)
+    adj <- c(0, 1)
   } else if (pos[1] == "center") {
     pos <- c(mean(xlim), mean(ylim))
-    adj <- c(0.5, 0.5)
+    adj <- c(0.5, 1)
   } else if (pos[1] == "right") {
     pos <- c(xlim[2], mean(ylim))
-    adj <- c(1, 0.5)
+    adj <- c(1, 1)
   }else if (pos[1] == "bottomleft") {
     pos <- c(xlim[1], ylim[1])
     adj <- c(0, 0)
@@ -537,36 +538,51 @@ fancy_scientific <- function(l) {
   list(pos = pos, adj = adj)
 }
 
+#' Convert font-style keyword to integer.
+#'
+#' @param style [character] (**required**):
+#' One of "normal", "bold", "italic" or "bold italic".
+#'
+#' @return
+#' An integer specifying the font to use (see the `font` entry in `?par`).
+#'
+#' @noRd
+.font_style <- function(style) {
+  match(style, c("normal", "bold", "italic", "bold italic"))
+}
+
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+ Statistical Summary for Plot functions
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #' Create Statistical Summary Character Vector for Plot functions
 #'
-#' This function automatically generates the statistical summary for the plot functions within
-#' the package. This should unify the approach how such things are created and support, theoretically
-#' all keywords for all plot functions in a similar way.
+#' This function automatically generates the statistical summary text for the
+#' plot functions within the package.
 #'
-#' @param summary [data.frame] (**required**):
-#' output from function `calc_Statistics()`.
+#' @param summary [list] (**required**):
+#' a list of lists, as produced by `calc_Statistics()`.
 #'
-#' @param keywords[character] (*with default*): keywords supported by function
-#' `calc_Statistics()`.
+#' @param keywords [character] (*with default*):
+#' keywords supported by function `calc_Statistics()`.
 #'
-#' @param digits [numeric] (*with default*): modifiy the digits independently
-#' for the plot output.
+#' @param digits [numeric] (*with default*):
+#' number of digits used in rounding the results.
 #'
-#' @param sep [character] (*with default*): separator used for the creation of
-#' the output of the plot.
+#' @param sep [character] (*with default*):
+#' separator used between each keyword found.
 #'
-#'@param prefix [character] (*with default*): prefix to add to the string
+#' @param prefix [character] (*with default*):
+#' prefix to add to the string.
 #'
-#'@param suffix [character] (*with default*): suffix to add to the string
+#' @param suffix [character] (*with default*):
+#' suffix to add to the string.
 #'
-#'@author Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
+#' @author
+#' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
+#' Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 #'
-#'@section Version: 0.1.0
-#'
+#' @section Function version: 0.1.0
 #'
 #'@noRd
 .create_StatisticalSummaryText <- function(
@@ -595,9 +611,17 @@ fancy_scientific <- function(l) {
     if (is.null(value))
       return(NULL)
 
-    ## construct string
-    paste(if (keywords_prefix == "unweighted") k_strip else k,
-          "=", round(value, digits))
+    ## improve label appearance
+    k_out <- k_strip
+    k_out <- gsub("in.2s", "in 2 sigma", k_out, fixed = TRUE)
+    k_out <- gsub("(.*)\\.weighted$", "weighted \\1", k_out)
+    k_out <- gsub("(.*)\\.abs$", "\\1", k_out)
+    k_out <- gsub("(.*)\\.rel$", "rel. \\1", k_out)
+
+    ## construct string and append the % sign to the relative measures
+    paste0(k_out, " = ", round(value, digits),
+           if (k_strip %in% c("sd.rel", "sd.rel.weighted",
+                              "se.rel", "se.rel.weighted", "in.2s")) " %")
   })
 
   ##remove NULL entries
@@ -816,8 +840,8 @@ fancy_scientific <- function(l) {
 #' repeated in every function using the self-call. This functions
 #' does it once and for all similar in all functions.
 #'
-#' **Note:** the first argument is never extended due to performance reasons,
-#' it might be a very large object
+#' **Note:** the first argument is never extended for performance reasons, as
+#' it might be a very large object.
 #'
 #' @param len [numeric] (**required**): length of the parameter expansion
 #'
@@ -873,10 +897,10 @@ fancy_scientific <- function(l) {
   ##expand all arguments
   ##we have two conditions and three cases
   ##1:  the argument is a list AND the list itself is not named
-  ##    ... the case when the user what to use different values for the objects
+  ##    ... the case when the user wants to use different values for the objects
   ##2:  the argument is no list ...
   ##    ... the standard automated expansion
-  ##    ... OR it is a list with names (e.g., rejection.criteria = list(recycling.ration = 10))
+  ##    ... OR it is a list with names (e.g., rejection.criteria = list(recycling.ratio = 10))
   for(i in 1:length(args)){
     if(inherits(args[[i]], "list") & is.null(names(args[[i]]))){
       args[[i]] <- rep(args[[i]], length = len[1])
@@ -898,7 +922,7 @@ fancy_scientific <- function(l) {
 #' method to calculate the highest probability density intervals for
 #' sets of data. This function might be exported later
 #' Currently it follows roughly the idea of what is implemented
-#' in `code` and `hdrcde`. If the results has more than one peak,
+#' in `coda` and `hdrcde`. If the result has more than one peak,
 #' also this is shown, therefore the output is a matrix
 #'
 #' @param object [numeric] (**required**): numeric object with input data
@@ -965,7 +989,7 @@ fancy_scientific <- function(l) {
 #'
 #' @description
 #' For file imports using function commencing with `read_` the file download
-#' was little consistent and surprisingly error-prone. This function should
+#' was inconsistent and surprisingly error-prone. This function should
 #' keep the callers more consistent.
 #'
 #' @param url [character] (**required**):
@@ -978,7 +1002,7 @@ fancy_scientific <- function(l) {
 #' @param verbose [logical] (*with default*):
 #' enable/disable output to the terminal.
 #'
-#' @returns
+#' @return
 #' Returns the file path of the downloaded file, or `NULL` if `url` is not
 #' valid, or `NA` in case of failure during download.
 #'
@@ -1186,7 +1210,7 @@ SW <- function(expr) {
 #' @title Validate a character argument from a list of choices
 #'
 #' @description
-#' This is inspired by [base::match.arg], but is has a more user-friendly
+#' This is inspired by [base::match.arg], but it has a more user-friendly
 #' error message as it reports the exact name of the argument that is being
 #' validated. This function always requires the choices to be specified: this
 #' better fits with the current state of the Luminescence package, which only
@@ -1294,7 +1318,7 @@ SW <- function(expr) {
 #'
 #' @param what [character] (**required**): the type of the variable, used
 #'        only in the message reported; if not specified it's inferred from
-#'        they type of the variable tested.
+#'        the type of the variable tested.
 #' @param throw.error [logical] (*with default*): whether an error should be
 #'        thrown in case of failed validation (`TRUE` by default). If `FALSE`,
 #'        the function raises a warning and proceeds.
@@ -1362,6 +1386,8 @@ SW <- function(expr) {
 #'        (`FALSE` by default).
 #' @param log [logical] (*with default*): whether the value has to be logical
 #'        (`FALSE` by default).
+#' @param inf [logical] (*with default*): whether infinite values are allowed
+#'        (`FALSE` by default).
 #' @inheritParams .validate_args
 #'
 #' @return
@@ -1369,12 +1395,13 @@ SW <- function(expr) {
 #'
 #' @noRd
 .validate_scalar <- function(val, int = FALSE, pos = FALSE, nng = FALSE, log = FALSE,
-                             null.ok = FALSE, name = NULL, extra = NULL) {
+                             inf = FALSE, null.ok = FALSE, name = NULL, extra = NULL) {
   if (!missing(val) && is.null(val) && null.ok)
     return(NULL)
   if (missing(val) || NROW(val) != 1 || NCOL(val) != 1 || !is.null(dim(val)) || is.na(val) ||
       (!log && !is.numeric(val)) || (log && !is.logical(val)) ||
-      (int && (is.infinite(val) || val != as.integer(val))) ||
+      (!inf && val >= .Machine$double.xmax) ||
+      (int && val %% 1 != 0) ||
       (pos && val <= 0) || (nng && val < 0)) {
     ## additional text to append for extra options that cannot be validated
     ## but we want to report
@@ -1395,9 +1422,9 @@ SW <- function(expr) {
 #' @inheritParams .validate_scalar
 #'
 #' @noRd
-.validate_positive_scalar <- function(val, int = FALSE, null.ok = FALSE,
+.validate_positive_scalar <- function(val, int = FALSE, inf = FALSE, null.ok = FALSE,
                                       name = NULL, extra = NULL) {
-  .validate_scalar(val, int = int, pos = TRUE, null.ok = null.ok,
+  .validate_scalar(val, int = int, pos = TRUE, inf = inf, null.ok = null.ok,
                    name = name %||% .first_argument(), extra = extra)
 }
 
@@ -1406,9 +1433,9 @@ SW <- function(expr) {
 #' @inheritParams .validate_scalar
 #'
 #' @noRd
-.validate_nonnegative_scalar <- function(val, int = FALSE, null.ok = FALSE,
+.validate_nonnegative_scalar <- function(val, int = FALSE, inf = FALSE, null.ok = FALSE,
                                          name = NULL, extra = NULL) {
-  .validate_scalar(val, int = int, nng = TRUE, null.ok = null.ok,
+  .validate_scalar(val, int = int, nng = TRUE, inf = inf, null.ok = null.ok,
                    name = name %||% .first_argument(), extra = extra)
 }
 
@@ -1439,7 +1466,7 @@ SW <- function(expr) {
 #' found. It is considered only when `file` is a path to a directory.
 #'
 #' @param scan.dir [logical] (*with default*):
-#' Whether directories should be scanned for filed (`TRUE` by default).
+#' Whether directories should be scanned for files (`TRUE` by default).
 #'
 #' @param recursive [logical] (*with default*):
 #' Whether the scan of a path for files should be done recursively (`FALSE`
@@ -1615,7 +1642,7 @@ SW <- function(expr) {
 #'
 #' @return
 #' A vector with negative elements and `NA` values removed, sorted and without
-#' duplicates, unless the validation failed with an error thrown. If `max.value`
+#' duplicates, unless the validation failed with an error thrown. If `max`
 #' is not `NULL`, then the integral is capped to the value specified.
 #'
 #' @noRd
@@ -1637,11 +1664,10 @@ SW <- function(expr) {
                  ", but the maximum allowed is ", max)
   integral <- integral[!is.na(integral) & between(integral, min, max)]
   if (length(integral) == 0)
-    .throw_error(name, " is of length 0 after removing values smaller than ",
-                 min, if (!is.infinite(max)) paste(" and greater than", max))
+    .throw_error(name, " contains no elements between ", min, " and ", max)
   else if (length(integral) != orig.length)
-    .throw_warning(name, " out of bounds, reset to be between ", min(integral),
-                   " and ", max(integral))
+    .throw_warning(name, " contains out of bounds elements, reset to be between ",
+                   min(integral), " and ", max(integral))
   if (int && any(integral != as.integer(integral)))
     .throw_error(name, " should be a vector of integers")
   if (length(integral) == 2 && diff(integral) > 1 && int)
@@ -1745,7 +1771,7 @@ SW <- function(expr) {
 
 #' Check that a given object is exactly `NA`
 #'
-#' @param x (**required): The object to check.
+#' @param x (**required**): The object to check.
 #'
 #' @return
 #' Whether the object is exactly `NA`.
@@ -1853,7 +1879,8 @@ SW <- function(expr) {
 #'
 #'@param range_new [numeric] (*required*): new scale limits
 #'
-#'@returns rescaled values values
+#' @return
+#' Rescaled values.
 #'
 #'@examples
 #'

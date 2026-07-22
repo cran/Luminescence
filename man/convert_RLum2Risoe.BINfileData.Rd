@@ -7,26 +7,26 @@
 convert_RLum2Risoe.BINfileData(object, keep.position.number = FALSE)
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Analysis} or \linkS4class{RLum.Data.Curve} (\strong{required}): input object to
+\item{object}{\link[=RLum.Analysis-class]{RLum.Analysis} or \link[=RLum.Data.Curve-class]{RLum.Data.Curve} (\strong{required}): input object to
 be converted}
 
 \item{keep.position.number}{\link{logical} (\emph{with default}): keeps the original
 position number or re-calculate the numbers to avoid doubling}
 }
 \value{
-The function returns a \linkS4class{Risoe.BINfileData} object.
+The function returns a \link[=Risoe.BINfileData-class]{Risoe.BINfileData} object.
 }
 \description{
-The functions converts \linkS4class{RLum.Analysis} and
-\linkS4class{RLum.Data.Curve} objects (or a \link{list} of such objects) to
-\linkS4class{Risoe.BINfileData} objects. The function intends to provide a
+The functions converts \link[=RLum.Analysis-class]{RLum.Analysis} and
+\link[=RLum.Data.Curve-class]{RLum.Data.Curve} objects (or a \link{list} of such objects) to
+\link[=Risoe.BINfileData-class]{Risoe.BINfileData} objects. The function intends to provide a
 minimum of compatibility between both formats. The created
-\linkS4class{RLum.Analysis} object can be later exported to a BIN-file using
+\link[=RLum.Analysis-class]{RLum.Analysis} object can be later exported to a BIN-file using
 function \link{write_R2BIN}.
 }
 \note{
 The conversion can be never perfect. The \code{RLum} objects may contain information which are
-not part of the \linkS4class{Risoe.BINfileData} definition.
+not part of the \link[=Risoe.BINfileData-class]{Risoe.BINfileData} definition.
 }
 \section{Function version}{
  0.1.4
@@ -40,14 +40,14 @@ convert_RLum2Risoe.BINfileData(IRSAR.RF.Data)
 
 }
 \seealso{
-\linkS4class{RLum.Analysis}, \linkS4class{RLum.Data.Curve}, \link{write_R2BIN}
+\link[=RLum.Analysis-class]{RLum.Analysis}, \link[=RLum.Data.Curve-class]{RLum.Data.Curve}, \link{write_R2BIN}
 }
 \author{
 Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. convert_RLum2Risoe.BINfileData(): Converts RLum.Analysis and RLum.Data.Curve objects to RLum2Risoe.BINfileData objects. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. convert_RLum2Risoe.BINfileData(): Converts RLum.Analysis and RLum.Data.Curve objects to RLum2Risoe.BINfileData objects. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{IO}

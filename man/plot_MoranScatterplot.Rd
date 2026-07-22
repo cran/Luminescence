@@ -12,7 +12,7 @@ plot_MoranScatterplot(
 )
 }
 \arguments{
-\item{object}{\linkS4class{RLum.Results} or \link{numeric} (\strong{required}):
+\item{object}{\link[=RLum.Results-class]{RLum.Results} or \link{numeric} (\strong{required}):
 containing a numerical vector of length 100,
 representing one or more measurement discs ("positions") in a reader.
 Each element in the vector represents one grain hole location on a disc.}
@@ -66,7 +66,7 @@ plot_MoranScatterplot(1:100)
 } 
 
 \section{How to cite}{
-Boer, A.d., Steinbuch, L., 2026. plot_MoranScatterplot(): Moran Scatter Plot: Visualizing Spatial Dependency. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Boer, A.d., Steinbuch, L., 2026. plot_MoranScatterplot(): Moran Scatter Plot: Visualizing Spatial Dependency. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{

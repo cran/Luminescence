@@ -17,7 +17,7 @@ to use, see \link{BaseDataSet.ConversionFactors} for the accepted values.}
 \item{...}{currently not used.}
 }
 \value{
-The function returns an \linkS4class{RLum.Results} object for which
+The function returns an \link[=RLum.Results-class]{RLum.Results} object for which
 the first element is a \link{matrix} (\code{DataIndividual}) that gives the dose rate
 results for each slice for each decay chain individually, for both, the
 cobble dose rate and the sediment dose rate. The second element is also a
@@ -82,7 +82,7 @@ calc_CobbleDoseRate(ExampleData.CobbleData)
 } 
 
 \section{How to cite}{
-Riedesel, S., Autzen, M., 2026. calc_CobbleDoseRate(): Calculate dose rate of slices in a spherical cobble. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.2.1. https://r-lum.github.io/Luminescence/
+Riedesel, S., Autzen, M., 2026. calc_CobbleDoseRate(): Calculate dose rate of slices in a spherical cobble. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
 }
 
 \references{
