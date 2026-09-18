@@ -45,12 +45,10 @@
 #' for `data.frame`: either two columns: De (`values[,1]`) and De error
 #' (`values[,2]`), or one: De (`values[,1]`). If a numeric vector or a
 #' single-column data frame is provided, De error is assumed to be 10^-9
-#' for all measurements and error bars are not drawn.
+#' for all measurements and error bars are not drawn. Rows with `NA` values
+#' will be removed prior to plotting.
 #' For plotting multiple data sets, these must be provided as
 #' `list` (e.g. `list(dataset1, dataset2)`).
-#'
-#' @param na.rm [logical] (*with default*):
-#' exclude `NA` values from the data set prior to any further operation.
 #'
 #' @param values.cumulative [logical] (*with default*):
 #' show cumulative individual data.
@@ -85,13 +83,16 @@
 #' @param bw [character], [numeric] (*with default*):
 #' bin-width, chose a numeric value for manual setting.
 #'
-#' @param ... further arguments and graphical parameters passed to [plot].
+#' @param ... further arguments and graphical parameters to control the plot
+#' output (see [plot]). Supported are: `main`, `sub`, `mtext`, `layout`, `xlab`,
+#' `ylab`, `xlim`, `ylim`, `log`, `cex`, `pt.cex` (point size), `lty`, `lwd`, `col`, and
+#' `fun`.
 #'
 #' @note
 #' The plot output is no 'probability density' plot (cf. the discussion
 #' of Berger and Galbraith in Ancient TL; see references)!
 #'
-#' @section Function version: 3.6.1
+#' @section Function version: 3.6.2
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
@@ -155,7 +156,6 @@
 #' @export
 plot_KDE <- function(
   data,
-  na.rm = TRUE,
   values.cumulative = TRUE,
   order = TRUE,
   boxplot = TRUE,
@@ -187,7 +187,7 @@ plot_KDE <- function(
 
     ## extract RLum.Results
     if (inherits(data[[i]], "RLum.Results")) {
-      data[[i]] <- get_RLum(data[[i]], "data")[,1:2]
+      data[[i]] <- get_RLum(data[[i]], "data")
     }
 
       ## ensure that the dataset it not degenerate
@@ -228,31 +228,17 @@ plot_KDE <- function(
   if(length(data) == 0)
     .throw_error("Your input is empty due to Inf removal")
 
-  .validate_logical_scalar(na.rm)
   .validate_logical_scalar(values.cumulative)
   .validate_logical_scalar(order)
   .validate_logical_scalar(boxplot)
   .validate_logical_scalar(rug)
   summary.method <- .validate_args(summary.method, c("MCM", "weighted", "unweighted"))
   .validate_class(summary, "character")
-  if (is.numeric(summary.pos)) {
-    .validate_length(summary.pos, 2)
-  }
-  else {
-    summary.pos <- .validate_args(summary.pos,
-                                  c("sub", "left", "center", "right",
-                                    "topleft", "top", "topright",
-                                    "bottomleft", "bottom", "bottomright"))
-  }
+  summary.pos <- .validate_position(summary.pos, sub = TRUE)
+
   .validate_class(bw, c("character", "numeric"), length = 1)
   if (is.numeric(bw))
     .validate_positive_scalar(bw)
-
-  ## set mtext output
-  mtext <- list(...)$mtext %||% ""
-
-  ## check/set layout definitions
-  layout <- get_Layout(layout = list(...)$layout %||% "default")
 
   ## data preparation steps ---------------------------------------------------
 
@@ -280,8 +266,7 @@ plot_KDE <- function(
 
   ## loop through all data sets
   for(i in 1:length(data)) {
-    ## optionally, remove NA values
-    if (na.rm) {
+    ## remove NA values
       na.idx <- which(is.na(data[[i]][, 1]))
       n.NA <- length(na.idx)
       if (n.NA > 0) {
@@ -289,7 +274,6 @@ plot_KDE <- function(
                         n.NA, ifelse(n.NA > 1, "s", ""), i))
         data[[i]] <- data[[i]][-na.idx, ]
       }
-    }
 
     ## optionally, order data ascending
     if (order) {
@@ -297,7 +281,7 @@ plot_KDE <- function(
     }
 
     ## calculate statistics
-    statistics <- calc_Statistics(data[[i]], na.rm = na.rm)[[summary.method]]
+    statistics <- calc_Statistics(data[[i]])[[summary.method]]
 
     De.stats[i,1] <- statistics$n
     De.stats[i,2] <- statistics$mean
@@ -359,11 +343,14 @@ plot_KDE <- function(
                         max(De.density.range[,4]))
 
   ## read out additional parameters -------------------------------------------
-  main <- list(...)$main %||% expression(bold(paste(D[e], " distribution")))
-  sub <- list(...)$sub
-  xlab <- list(...)$xlab %||% expression(paste(D[e], " [Gy]"))
-  ylab <- list(...)$ylab %||% c("Density", "Cumulative frequency")
-  xlim.plot <- list(...)$xlim %||% c(min(c(De.global - De.error.global),
+  extraArgs <- list(...)
+  mtext <- extraArgs$mtext %||% ""
+  layout <- get_Layout(layout = extraArgs$layout %||% "default")
+  main <- extraArgs$main %||% expression(D[e] * " " * "distribution")
+  sub <- extraArgs$sub
+  xlab <- extraArgs$xlab %||% expression(D[e] * " " * "[Gy]")
+  ylab <- extraArgs$ylab %||% c("Density", "Cumulative frequency")
+  xlim.plot <- extraArgs$xlim %||% c(min(c(De.global - De.error.global),
                                          De.density.range[1],
                                          na.rm = TRUE),
                                      max(c(De.global + De.error.global),
@@ -371,7 +358,7 @@ plot_KDE <- function(
                                          na.rm = TRUE))
 
   if ("ylim" %in% ...names()) {
-    ylim.plot <- list(...)$ylim
+    ylim.plot <- extraArgs$ylim
     .validate_class(ylim.plot, "numeric", length = 4, name = "'ylim'")
   } else if (!is.na(De.density.range[1])) {
       ylim.plot <- c(De.density.range[3],
@@ -385,20 +372,21 @@ plot_KDE <- function(
                      max(De.stats[,1]))
   }
 
-  log.option <- list(...)$log %||% ""
-  lty <- list(...)$lty %||% rep(1, length(data))
-  lwd <- list(...)$lwd %||% rep(1, length(data))
-  cex <- list(...)$cex %||% 1
-  fun <- isTRUE(list(...)$fun)
+  log.option <- extraArgs$log %||% ""
+  lty <- extraArgs$lty %||% rep(1, length(data))
+  lwd <- extraArgs$lwd %||% rep(1, length(data))
+  cex <- extraArgs$cex %||% 1
+  pt.cex <- extraArgs$pt.cex %||% 1
+  fun <- isTRUE(extraArgs$fun)
 
   if ("col" %in% ...names()) {
-    col.stats <- list(...)$col
-    col.kde.line <- list(...)$col
+    col.stats <- extraArgs$col
+    col.kde.line <- extraArgs$col
     col.kde.fill <- NA
-    col.value.dot <- list(...)$col
-    col.value.bar <- list(...)$col
-    col.value.rug <- list(...)$col
-    col.boxplot.line <- list(...)$col
+    col.value.dot <- extraArgs$col
+    col.value.bar <- extraArgs$col
+    col.value.rug <- extraArgs$col
+    col.boxplot.line <- extraArgs$col
     col.boxplot.fill <- NA
   } else {
     .set_colour_value <- function(layout_value) {
@@ -704,7 +692,8 @@ plot_KDE <- function(
       ## add De measurements
       points(data[[i]][,1], 1:De.stats[i,1],
              col = col.value.dot[i],
-             pch = 20)
+             pch = 20,
+             cex = pt.cex)
     }
   }
 

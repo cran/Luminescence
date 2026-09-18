@@ -78,9 +78,9 @@
 #' @param na.rm [logical] (*with default*):
 #' whether `NA` values should be removed from the input data before plotting.
 #'
-#' @param ... further arguments and graphical parameters passed to [plot],
-#' supported are:
-#' `xlab`, `ylab`, `xlim`, `ylim`, `main`, `cex`, `las` and `pch`.
+#' @param ... further arguments and graphical parameters to control the plot
+#' output (see [plot]). Supported are: `xlab`, `ylab`, `xlim`, `ylim`, `main`,
+#' `cex`, `pt.cex` (point size), `las`, and `pch`.
 #'
 #' @return A plot is returned.
 #'
@@ -88,7 +88,7 @@
 #' Further data and plot arguments can be added by using the appropriate R
 #' commands.
 #'
-#' @section Function version: 0.1.17
+#' @section Function version: 0.1.18
 #'
 #' @author
 #' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)\cr
@@ -218,22 +218,10 @@ plot_DRTResults <- function(
   }
 
   .validate_class(mtext, "character", length = 1)
-  valid.pos <- c("left", "center", "right", "topleft", "top", "topright",
-                 "bottomleft", "bottom", "bottomright")
   .validate_class(summary, "character")
-  if (is.numeric(summary.pos)) {
-    .validate_length(summary.pos, 2)
-  }
-  else {
-    summary.pos <- .validate_args(summary.pos, c("sub", valid.pos))
-  }
+  summary.pos <- .validate_position(summary.pos, sub = TRUE)
   .validate_class(legend, "character", null.ok = TRUE)
-  if (is.numeric(legend.pos)) {
-    .validate_length(legend.pos, 2)
-  }
-  else {
-    legend.pos <- .validate_args(legend.pos, valid.pos)
-  }
+  legend.pos <- .validate_position(legend.pos)
   .validate_logical_scalar(par.local)
   .validate_logical_scalar(na.rm)
 
@@ -246,9 +234,10 @@ plot_DRTResults <- function(
     .validate_class(values[[i]], c("data.frame", "RLum.Results"),
                     name = "'object'")
     if (inherits(values[[i]], "RLum.Results")) {
-      val <- get_RLum(values[[i]])[, 1:2] %||% NA
+      val <- get_RLum(values[[i]]) %||% NA
       values[[i]] <- val
-    } else if (ncol(values[[i]]) < 2) {
+    }
+    if (NCOL(values[[i]]) < 2) {
       .throw_error("'object' should have 2 columns")
     } else {
       ## mark for removal if all De values are missing
@@ -316,6 +305,7 @@ plot_DRTResults <- function(
   xlim <- extraArgs$xlim %||% (c(0, max(n.values)) + 0.5)
   ylim <- extraArgs$ylim %||% c(0.75, 1.25) # check below for further corrections if boundaries exceed set range
   cex <- extraArgs$cex %||% 1
+  pt.cex <- extraArgs$pt.cex %||% 1.2
   pch <- extraArgs$pch %||% abs(seq(from = 20, to = -100))
   las <- extraArgs$las %||% 0
   fun <- isTRUE(extraArgs$fun)
@@ -342,16 +332,19 @@ plot_DRTResults <- function(
     }
   }
 
+  ## find ranges of x values across all datasets
+  ## x_range[1, ] contains the minima, x_range[2, ] the maxima
+  x.range <- vapply(values, function(x) {
+    range(x[is.finite(x[, 1]), 1], na.rm = TRUE)
+  }, numeric(2))
+
   ##correct ylim for data set which exceed boundaries
-  if ((max(sapply(values, function(x) max(x[, 1], na.rm = TRUE))) > 1.25 ||
-       min(sapply(values, function(x) min(x[, 1], na.rm = TRUE))) < 0.75) &&
-       (!"ylim" %in% names(extraArgs))) {
-    ylim <- c(
-        ## append a 0 element to the errors to avoid crashing if all errors are NA
-        min(sapply(values, function(x) min(x[, 1], na.rm = TRUE) -
-                                       max(c(x[, 2], 0), na.rm = TRUE))),
-        max(sapply(values, function(x) max(x[, 1], na.rm = TRUE) +
-                                       max(c(x[, 2], 0), na.rm = TRUE))))
+  if (!"ylim" %in% names(extraArgs) &&
+      (max(x.range[2, ]) > 1.25 || min(x.range[1, ]) < 0.75)) {
+    err <- vapply(values, function(x) {
+      max(c(x[is.finite(x[, 2]), 2], 0), na.rm = TRUE)
+    }, numeric(1))
+    ylim <- c(min(x.range[1, ] - err), max(x.range[2, ] + err))
   }
 
   ## optionally group data by preheat temperature
@@ -454,7 +447,7 @@ plot_DRTResults <- function(
                y = values[[i]][,1],
                pch = if (oneinput && nrow(values[[i]]) == length(pch)) pch else pch[i],
                col = if (multicol) col else col[i],
-               cex = 1.2)
+               cex = pt.cex)
 
         suppressWarnings( # zero-length arrow is of indeterminate angle and so skipped
         graphics::arrows(1:nrow(values[[i]]),
@@ -479,7 +472,7 @@ plot_DRTResults <- function(
                y = values.preheat[[i]][,1],
                pch = pch[i],
                col = col[i],
-               cex = 1.2)
+               cex = pt.cex)
 
         suppressWarnings( # zero-length arrow is of indeterminate angle and so skipped
         graphics::arrows(values.preheat[[i]][,3],

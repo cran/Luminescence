@@ -8,9 +8,11 @@
 #' [Luminescence::RLum.Data.Spectrum-class] and
 #' [Luminescence::RLum.Data.Image-class].
 #'
-#' @param objects [list] of [Luminescence::RLum.Analysis-class] (**required**):
+#' @param object [list] of [Luminescence::RLum.Analysis-class] (**required**):
 #' list of S4 objects of class `RLum.Analysis`. Furthermore other objects of
 #' class [Luminescence::RLum-class] can be added, see details.
+#'
+#' @param ... currently not used.
 #'
 #' @return
 #' Returns an [Luminescence::RLum.Analysis-class] object ordered according to the order
@@ -21,7 +23,7 @@
 #' [Luminescence::RLum.Analysis-class] object in the input list. Therefore at
 #' least one object of type [Luminescence::RLum.Analysis-class] has to be provided.
 #'
-#' @section Function version: 0.2.1
+#' @section Function version: 0.2.4
 #'
 #' @author
 #' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany)
@@ -46,17 +48,18 @@
 #'
 #' @export
 merge_RLum.Analysis<- function(
-  objects
+  object,
+  ...
 ) {
   .set_function_name("merge_RLum.Analysis")
   on.exit(.unset_function_name(), add = TRUE)
 
   ## Integrity checks -------------------------------------------------------
-  .validate_class(objects, "list")
-  .validate_not_empty(objects)
+  .validate_class(object, "list")
+  .validate_not_empty(object)
 
   ##check if object is of class RLum
-  temp.class.test <- sapply(objects, function(x) {
+  temp.class.test <- sapply(object, function(x) {
     .validate_class(x, c("RLum.Analysis", "RLum.Data"),
                     name = "All elements of 'object'")
     class(x)[1]
@@ -76,7 +79,7 @@ merge_RLum.Analysis<- function(
   temp.meta.data.first <- NULL
 
   ##(1) collect all elements in a list
-  temp.element.list <- unlist(lapply(objects, function(x) {
+  temp.element.list <- unlist(lapply(object, function(x) {
     if (inherits(x, "RLum.Data"))
       return(x)
 
@@ -93,12 +96,12 @@ merge_RLum.Analysis<- function(
   set_RLum(
     class = "RLum.Analysis",
     originator = "merge_RLum.Analysis",
-    records = temp.element.list,
+    records = temp.element.list %||% list(),
     protocol = temp.meta.data.first,
-    info = unlist(lapply(objects, function(x) {
+    info = unlist(lapply(object, function(x) {
       x@info
     }), recursive = FALSE),
-    .pid = unlist(lapply(objects, function(x) {
+    .pid = unlist(lapply(object, function(x) {
       x@.uid
     }))
   )

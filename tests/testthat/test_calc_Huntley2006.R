@@ -77,7 +77,7 @@ test_that("input validation", {
   SW({
   expect_warning(calc_Huntley2006(data[, 1:2], rhop = rhop, n.MC = 2,
                                   ddot = ddot, readerDdot = readerDdot,
-                                  fit.method = "GOK"),
+                                  fit.method = "GOK", plot = FALSE),
                  "'data' has only two columns: we assume that the errors")
   })
 
@@ -95,7 +95,7 @@ test_that("input validation", {
                "Could not fit simulated curve, check suitability of model")
 })
 
-test_that("Further tests calc_Huntley2006", {
+test_that("snapshot tests", {
   testthat::skip_on_cran()
 
   os <- tolower(Sys.info()[["sysname"]])
@@ -105,7 +105,6 @@ test_that("Further tests calc_Huntley2006", {
                                "windows" = 8.0e-2)
 
   ## check extrapolation
-  set.seed(1)
   expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
@@ -115,11 +114,11 @@ test_that("Further tests calc_Huntley2006", {
         n.MC = 100,
         fit.method = "GOK",
         mode = "extrapolation",
-        plot = TRUE, verbose = FALSE),
+        plot = FALSE),
+      expect_snapshot_output = TRUE,
       tolerance = snapshot.tolerance)
 
   ## check force through origin SSE with wrong mode settings
-  set.seed(1)
   expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
@@ -130,12 +129,11 @@ test_that("Further tests calc_Huntley2006", {
         fit.method = "SSE",
         fit.force_through_origin = TRUE,
         mode = "extrapolation",
-        plot = FALSE,
-        verbose = FALSE),
+        plot = FALSE),
+      expect_snapshot_output = TRUE,
       tolerance = max(snapshot.tolerance, 1.0e-2))
 
   ## SSE ... normal
-  set.seed(1)
   expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
@@ -146,12 +144,11 @@ test_that("Further tests calc_Huntley2006", {
         fit.method = "SSE",
         fit.force_through_origin = TRUE,
         mode = "interpolation",
-        plot = FALSE,
-        verbose = FALSE),
+        plot = FALSE),
+      expect_snapshot_output = TRUE,
       tolerance = snapshot.tolerance)
 
   ## GOK normal
-  set.seed(1)
   expect_snapshot_RLum(
       calc_Huntley2006(
         data = data,
@@ -162,9 +159,41 @@ test_that("Further tests calc_Huntley2006", {
         fit.method = "GOK",
         fit.force_through_origin = TRUE,
         mode = "interpolation",
-        plot = FALSE,
-        verbose = FALSE),
+        plot = FALSE),
+      expect_snapshot_output = TRUE,
       tolerance = if (os == "darwin") 1.7e-1 else max(snapshot.tolerance, 1.5e-3))
+})
+
+test_that("graphical snapshot tests", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("vdiffr")
+
+  set.seed(1)
+
+  SW({
+  vdiffr::expect_doppelganger("interpolation SSE",
+                              calc_Huntley2006(data = data,
+                                               rhop = rhop,
+                                               ddot = ddot,
+                                               readerDdot = readerDdot,
+                                               fit.method = "SSE",
+                                               mode = "interpolation",
+                                               plot_all_DRC = FALSE,
+                                               n.MC = 50))
+  vdiffr::expect_doppelganger("extrapolation GOK",
+                              calc_Huntley2006(data = data,
+                                               rhop = rhop,
+                                               ddot = ddot,
+                                               readerDdot = readerDdot,
+                                               fit.method = "GOK",
+                                               mode = "extrapolation",
+                                               plot_all_DRC = FALSE,
+                                               n.MC = 50))
+  })
+})
+
+test_that("further tests", {
+  testthat::skip_on_cran()
 
   ## check warning for failed fits
   ## dataset provided by Christine Neudorf
@@ -276,7 +305,7 @@ test_that("regression tests", {
   expect_s4_class(
       calc_Huntley2006(data, rhop = c(4e-6, 5e-7), ddot = c(7, 0.004),
                        readerDdot = c(0.134, 0.0067), n.MC = 1,
-                       mode = "extrapolation", verbose = FALSE),
+                       mode = "extrapolation", plot = FALSE, verbose = FALSE),
       "RLum.Results")
 
   ## issue 1048
@@ -285,5 +314,20 @@ test_that("regression tests", {
       calc_Huntley2006(data, rhop = c(1e-7, 5e-7), ddot = c(7, 0.004),
                        readerDdot = c(0.134, 0.0067), n.MC = 1,
                        mode = "extrapolation", verbose = FALSE,
-                       plot_all_DRC = FALSE))
+                       plot_all_DRC = FALSE, plot = TRUE))
+
+  ## issue 1672
+  df <- data.frame(dose = c(151.4, 152.0, 165.8, 136.1, 144.4, 123.4, 123.6, 127.0,
+                          124.4, 118.6, 128.0, 110.7, 121.0, 124.0, 124.7, 123.6,
+                          128.5, 131.4, 127.7, 131.0, 126.3, 115.4, 119.5, 331.6),
+                 LxTx = c(5.334, 5.144, 6.805, 4.608, 4.642, 4.471, 4.227, 4.396,
+                          4.256, 4.049, 4.408, 3.701, 4.187, 4.129, 4.043, 4.262,
+                          4.254, 4.448, 4.330, 5.023, 4.317, 3.479, 3.815, 13.61),
+                 LxTx.error = 0.5)
+  set.seed(1)
+  expect_s4_class(suppressWarnings(
+      calc_Huntley2006(df, rhop = c(4e-5, 5e-7),
+                       ddot = c(8, 0.04), readerDdot = c(0.01, 0.06),
+                       mode = "extrapolation", n.MC = 1, verbose = FALSE)),
+      "RLum.Results")
 })

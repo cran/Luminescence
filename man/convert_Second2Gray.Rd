@@ -93,7 +93,7 @@ convert_Second2Gray(ExampleData.DeValues$BT998, dose.rate)
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., Fuchs, M.C., 2026. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., Fuchs, M.C., 2026. convert_Second2Gray(): Converting equivalent dose values from seconds (s) to Gray (Gy). Function version 0.6.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

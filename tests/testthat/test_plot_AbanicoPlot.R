@@ -21,13 +21,6 @@ test_that("input validation", {
   expect_message(expect_null(plot_AbanicoPlot(ExampleData.DeValues[0, ])),
                  "Error: 'data' is empty, nothing plotted")
 
-  expect_warning(expect_message(
-      expect_null(plot_AbanicoPlot(ExampleData.DeValues[1, ])),
-      "Error: After removing invalid entries, nothing is plotted"),
-      "Data set 1 empty or consisting of only 1 row, removed")
-
-  expect_error(plot_AbanicoPlot(ExampleData.DeValues, na.rm = "error"),
-               "'na.rm' should be a single logical value")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, plot = FALSE),
                "'plot.ratio' should be a single positive value")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, xlab = "x"),
@@ -58,12 +51,16 @@ test_that("input validation", {
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, summary.pos = "error"),
                "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
+  expect_error(plot_AbanicoPlot(data = CAM, summary.pos = iris),
+               "'summary.pos' should be one of 'sub', 'left', 'center', 'right'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, legend = 5),
                "'legend' should be of class 'character'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, legend.pos = 5),
                "'legend.pos' should have length 2")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, legend.pos = c(5, NA)),
                "'legend.pos' cannot contain missing values")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, stats = NA),
+               "'stats' should be of class 'character' or NULL and have length")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, frame = NULL),
                "'frame' should be one of '0', '1', '2' or '3'")
 
@@ -75,6 +72,12 @@ test_that("input validation", {
                "'zlim' should be of class 'numeric'")
   expect_error(plot_AbanicoPlot(ExampleData.DeValues, zlim = c(-10, 10)),
                "'zlim' should only contain positive values when 'log.z = TRUE'")
+  expect_error(plot_AbanicoPlot(ExampleData.DeValues, bw = iris),
+               "'bw' should be of class 'numeric' or 'character'")
+
+  ## zero-rows dataset
+  expect_warning(plot_AbanicoPlot(list(iris[0, ], iris[1:2])),
+                 "Data set 1 empty, removed")
 
   ## zero-error values
   data.zeros <- ExampleData.DeValues
@@ -83,10 +86,14 @@ test_that("input validation", {
                  "Values with zero errors cannot be displayed and were removed")
   data.zeros[, 2] <- 0
   expect_error(plot_AbanicoPlot(data.zeros),
-               "Data set contains only values with zero errors")
+               "Data set 1 contains only values with zero errors")
 
   expect_warning(plot_AbanicoPlot(ExampleData.DeValues, xlim = c(2, 12)),
                  "Lower x-axis limit was 2, reset to zero")
+
+  ## infinite values
+  expect_warning(plot_AbanicoPlot(data.frame(c(1:3, Inf), c(Inf, 1:3))),
+                 "Inf values found in data set 1, removed")
 })
 
 test_that("Test examples from the example page", {
@@ -180,10 +187,6 @@ test_that("Test examples from the example page", {
                             "Data precision"),
                    ylab = "Scatter",
                    zlab = "Equivalent dose [Gy]"))
-
-  ## now with minimum, maximum and median value indicated
-  expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
-                   stats = c("min", "max", "median")))
 
   ## now with another statistical summary
   expect_silent(plot_AbanicoPlot(data = ExampleData.DeValues,
@@ -291,7 +294,7 @@ test_that("more coverage", {
   ## further edge tests ... check for wrong bw parameter
   expect_warning(
     object = plot_AbanicoPlot(data = ExampleData.DeValues, bw = "tests"),
-    regexp = "Option for 'bw' not valid, reset to 'nrd0'")
+    regexp = "Option for 'bw' not valid, reset to 'SJ'")
 
   ## negative values
   df <-  ExampleData.DeValues
@@ -304,7 +307,7 @@ test_that("more coverage", {
   expect_warning(
     object = plot_AbanicoPlot(
     data = data.frame(x = c(0,1), y = c(0.1, 0.1))),
-    "Found zero values in x-column of dataset 1, 'log.z' set to FALSE")
+    "Zeros found in x-column of dataset 1, 'log.z' set to FALSE")
 
   ## handling of negative values; before it produced wrong plots
  expect_silent(plot_AbanicoPlot(data = data.frame(
@@ -371,14 +374,28 @@ test_that("Test graphical snapshot", {
                                                  summary.method = "weighted",
                                                  summary = c("sd.abs", "se.abs",
                                                              "median")))
+    expect_warning(
+    vdiffr::expect_doppelganger("single value",
+                                plot_AbanicoPlot(ExampleData.DeValues[1, ])),
+                   "Data set 1 contains a single point, its density curve cannot")
+    vdiffr::expect_doppelganger("single value list",
+                                plot_AbanicoPlot(list(ExampleData.DeValues[1, ],
+                                                      iris[1:3, ])))
     vdiffr::expect_doppelganger("plot ratio",
                                 plot_AbanicoPlot(ExampleData.DeValues,
                                                  plot.ratio = 0.1))
+    vdiffr::expect_doppelganger("boxplot issue 1713",
+                                plot_AbanicoPlot(list(data.frame(De = c(7.25, 2.11),
+                                                                 err = c(1.46, 0.95)),
+                                                      data.frame(De = c(7.27, 6.94),
+                                                                 err = c(1.52, 0.83))),
+                                                 boxplot = TRUE))
 
     data.list <- list(ExampleData.DeValues[1:30,],
                       ExampleData.DeValues[31:62,] * 1.3)
     vdiffr::expect_doppelganger("summary top",
                                 plot_AbanicoPlot(data = data.list,
+                                                 stats = "median",
                                                  summary.pos = "top",
                                                  summary = c("n", "in.2s", "median")))
     vdiffr::expect_doppelganger("line frame legend",
@@ -396,6 +413,7 @@ test_that("Test graphical snapshot", {
                                                  polygon.col = c("steelblue1", "orange1"),
                                                  pch = c(2, 6),
                                                  angle = c(30, 50),
+                                                 stats = c("min", "max", "median"),
                                                  summary = c("n", "in.2s", "median")))
     vdiffr::expect_doppelganger("line frame legend rotated",
                                 plot_AbanicoPlot(data = data.list,
@@ -410,11 +428,20 @@ test_that("Test graphical snapshot", {
                                                  z.0 = "mean",
                                                  pch = c(2, 6),
                                                  angle = c(30, 50),
+                                                 stats = c("min", "max", "other"),
                                                  summary.pos = "right",
                                                  summary = c("sd.rel", "sd.abs")))
+    vdiffr::expect_doppelganger("removed lty lwd pch",
+                                plot_AbanicoPlot(list(iris[0, ],
+                                                      ExampleData.DeValues[1:9, ]),
+                                                 pt.cex = 2,
+                                                 lty = c(2, 3),
+                                                 lwd = c(1, 3),
+                                                 pch = c(20, 3)))
     vdiffr::expect_doppelganger("CAM",
                                 plot_AbanicoPlot(data = CAM,
                                                  line.col = "darkseagreen",
+                                                 stats = "nonexistent",
                                                  summary.pos = "bottomleft"))
     vdiffr::expect_doppelganger("CAM cex",
                                 plot_AbanicoPlot(data = CAM, cex = 2))
@@ -426,4 +453,11 @@ test_that("Test graphical snapshot", {
                                                  cex = 2,
                                                  frame = 0))
   })
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 1705
+  expect_silent(plot_AbanicoPlot(list(ExampleData.DeValues, iris[1:10, ])))
 })

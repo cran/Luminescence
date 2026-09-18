@@ -274,12 +274,13 @@ analyse_pIRIRSequence <- function(
   ## trigger our check
   min.size <- ceiling(11 * cex)
   dev.size <- round(grDevices::dev.size("in"), 5)
-  if (plot && !plot_singlePanels && any(dev.size < min.size)) {
+  if (plot && any(dev.size < min.size)) {
     plot <- FALSE
     msg <- paste0("Argument 'plot' reset to 'FALSE': the smallest plot ",
                   "size required is IN x IN in (at cex = ", cex, "). ",
-                  "Consider plotting via `pdf(..., width = IN, height = IN)` ",
-                  "or setting `plot_singlePanels = TRUE`.")
+                  "Consider plotting via `pdf(..., width = IN, height = IN)`",
+                  if (!plot_singlePanels) " or setting `plot_singlePanels = TRUE`",
+                  ".")
     .throw_warning(gsub(x = msg, "IN", min.size))
   }
 
@@ -310,7 +311,7 @@ analyse_pIRIRSequence <- function(
 
   ## try to account for a very common mistake
   idx.TL <- grepl("TL", sequence.structure, fixed = TRUE)
-  if (length(idx.TL) > 0 &&
+  if (sum(idx.TL) > 0 &&
       !any(grepl("TL", temp.sequence.structure$recordType, fixed = TRUE))) {
     sequence.structure <- sequence.structure[-idx.TL]
     .throw_warning("'sequence.structure' contains 'TL' but your sequence does ",
@@ -344,6 +345,11 @@ analyse_pIRIRSequence <- function(
     temp.sequence.structure$protocol.step <- rep(sequence.structure, num.cycles)
 
     .throw_warning(length(rm.id), " records have been removed due to EXCLUDE")
+  }
+
+  if (length(object) == 0) {
+    .throw_message("'object' contains no records, NULL returned")
+    return(NULL)
   }
 
 ##============================================================================##

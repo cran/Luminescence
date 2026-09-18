@@ -3,7 +3,10 @@
 ##
 
 ## the ... can be used to set the tolerance
-expect_snapshot_RLum <- function(object, ...) {
+expect_snapshot_RLum <- function(object, ..., expect_snapshot_output = FALSE) {
+  set.seed(list(...)$seed %||% 1)
+  if (expect_snapshot_output)
+    expect_snapshot_output(ignore <- object)
   if (inherits(object, "list")) {
     for (idx in seq_along(object))
       expect_snapshot_RLum(object[[idx]], ...)
@@ -45,9 +48,18 @@ expect_snapshot_RLum <- function(object, ...) {
       if ("UID" %in% names(object@data$data))
         object@data$data$UID <- NULL
     }
+    if ("data_table" %in% names(object@data)) { # analyse_Al2O3C_Measurement()
+      object@data$data_table$UID <- NULL
+    }
     if ("data_uncor" %in% names(object@data)) { # analyse_SAR.NCF()
       object@data$data_uncor$UID <- NULL
       object@data$LnLxTnTx.table_uncor$UID <- NULL
+    }
+    if ("fading_results" %in% names(object@data)) { # analyse_FadingMeasurement()
+      object@data$fading_results$UID <- NULL
+    }
+    if ("LxTx_table" %in% names(object@data)) { # analyse_FadingMeasurement()
+      object@data$LxTx_table$UID <- NULL
     }
     if ("Fit" %in% names(object@data))
       object@data$Fit <- NULL
@@ -91,11 +103,13 @@ expect_snapshot_RLum <- function(object, ...) {
 
 ## wrapper for Risoe.BINfileData objects
 expect_snapshot_Risoe <- function(object, ...) {
+  set.seed(list(...)$seed %||% 1)
   attr(object, ".S3Class") <- NULL
   expect_snapshot_value(object, style = "json2", ...)
 }
 
 ## wrapper for plain R objects, such as lists, data.frames, etc
 expect_snapshot_plain <- function(object, ...) {
+  set.seed(list(...)$seed %||% 1)
   expect_snapshot_value(object, style = "json2", ...)
 }

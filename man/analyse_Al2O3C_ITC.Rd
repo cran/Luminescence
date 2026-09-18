@@ -48,7 +48,9 @@ enable/disable output to the terminal.}
 \item{plot}{\link{logical} (\emph{with default}):
 enable/disable the plot output.}
 
-\item{...}{further arguments that can be passed to the plot output}
+\item{...}{further arguments and graphical parameters to control the plot
+output. Supported are: \code{xlab}, \code{ylab}, \code{main}, \code{xlim}, \code{ylim}, \code{pt.cex} (point size),
+\code{legend.pos}, \code{legend.text}, and \code{mtext}.}
 }
 \value{
 Function returns results numerically and graphically:
@@ -107,7 +109,7 @@ handled using the argument \code{method_control} only, e.g.,
 }
 }
 \section{Function version}{
- 0.1.2
+ 0.1.3
 }
 
 \examples{
@@ -121,7 +123,7 @@ analyse_Al2O3C_ITC(data_ITC)
 } 
 
 \section{How to cite}{
-Kreutzer, S., 2026. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. analyse_Al2O3C_ITC(): Al2O3 Irradiation Time Correction Analysis. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

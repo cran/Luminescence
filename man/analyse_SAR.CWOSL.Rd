@@ -88,7 +88,8 @@ Allowed options:
 \item \code{exceed.max.regpoint} \link{logical} (default: \code{FALSE})
 \item \code{consider.uncertainties} \link{logical} (default: \code{FALSE})
 \item \code{recuperation_reference} \link{character} (default: \code{"Natural"}; set to, e.g.,
-\code{"R1"} for another point)
+\code{"R1"} for another point; use \code{"Rmax"} to select the point with highest
+dose as reference)
 \item \code{sn_reference} \link{character} (default: \code{"Natural"}).
 }
 
@@ -245,7 +246,8 @@ curves. Only one curve type can be analysed at the same time: either the
 \code{Lx/Tx} values of the zero regeneration point with the \code{Ln/Tn} value (the
 \code{Lx/Tx} ratio of the natural signal). For methodological background see
 Aitken and Smith (1988). As a variant, \code{recuperation_reference} can be
-specified to select another dose point as reference instead of \code{Ln/Tn}.
+specified to select another dose point as reference instead of \code{Ln/Tn}
+(e.g. \code{"R1"}; \code{"Rmax"} selects the point with highest dose as reference).
 
 \verb{[testdose.error]}: set the allowed error for the test dose, which by
 default should not exceed 10\%. The test dose error is calculated as
@@ -282,7 +284,7 @@ function does \strong{not} overwrite values preset in \code{IRR_TIME}.
 }
 }
 \section{Function version}{
- 1.0.0
+ 1.0.1
 }
 
 \examples{
@@ -335,7 +337,7 @@ results <- analyse_SAR.CWOSL(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. analyse_SAR.CWOSL(): Analyse SAR CW-OSL Measurements. Function version 1.0.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. analyse_SAR.CWOSL(): Analyse SAR CW-OSL Measurements. Function version 1.0.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

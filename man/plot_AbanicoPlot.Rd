@@ -2,11 +2,10 @@
 % Please edit documentation in R/plot_AbanicoPlot.R
 \name{plot_AbanicoPlot}
 \alias{plot_AbanicoPlot}
-\title{Function to create an Abanico Plot.}
+\title{Function to create an abanico plot}
 \usage{
 plot_AbanicoPlot(
   data,
-  na.rm = TRUE,
   log.z = TRUE,
   z.0 = c("mean.weighted", "mean", "median"),
   dispersion = c("qr", "sd", "2sd"),
@@ -35,7 +34,6 @@ plot_AbanicoPlot(
   line.label = NULL,
   grid.col = NULL,
   frame = 1,
-  bw = "SJ",
   interactive = FALSE,
   ...
 )
@@ -44,7 +42,8 @@ plot_AbanicoPlot(
 \item{data}{\link{data.frame} or \link[=RLum.Results-class]{RLum.Results} object (\strong{required}):
 for \code{data.frame} two columns: De (\code{data[,1]}) and De error (\code{data[,2]}).
 To plot several data sets in one plot the data sets must be provided as
-\code{list}, e.g. \code{list(data.1, data.2)}.\cr
+\code{list}, e.g. \code{list(data.1, data.2)}. Rows with \code{NA} values will be removed
+prior to plotting.\cr
 For some \link[=RLum.Results-class]{RLum.Results} objects, one or more lines (and
 corresponding labels) are drawn automatically:
 \itemize{
@@ -57,11 +56,9 @@ Alternative labels can be set via the \code{line.label} option. This behaviour
 can be suppressed altogether by setting \code{line = NA}.
 }}
 
-\item{na.rm}{\link{logical} (\emph{with default}):
-exclude \code{NA} values from the data set prior to any further operations.}
-
 \item{log.z}{\link{logical} (\emph{with default}):
-Option to display the z-axis in logarithmic scale. Default is \code{TRUE}.}
+display the z-axis in logarithmic scale (\code{TRUE} by default). The setting is
+automatically reset to \code{FALSE} if any zero values appear in the De column.}
 
 \item{z.0}{\link{character} or \link{numeric} (\emph{with default}):
 User-defined central value used for centring of data. One of \code{"mean.weighted"}
@@ -69,7 +66,8 @@ User-defined central value used for centring of data. One of \code{"mean.weighte
 logarithm).}
 
 \item{dispersion}{\link{character} (\emph{with default}):
-measure of dispersion, used for drawing the scatter polygon. One out of
+measure of dispersion used to draw the scatter polygon. Can be one of the
+following:
 \itemize{
 \item \code{"qr"} (quartile range, default)
 \item \code{"sd"} (standard deviation)
@@ -117,23 +115,27 @@ optional position coordinates or keyword (e.g. \code{"topright"})
 for the legend to be plotted.}
 
 \item{stats}{\link{character}:
-additional labels of statistically important values in the plot.
-One or more out of the following:
+additional labels of statistically important values in the plot. Can be one
+or more of the following:
 \itemize{
-\item \code{"min"},
-\item \code{"max"},
-\item \code{"median"}.
+\item \code{"min"}
+\item \code{"max"}
+\item \code{"median"}
 }}
 
 \item{rug}{\link{logical} (\emph{with default}):
 Option to add a rug to the KDE part, to indicate the location of individual values.}
 
 \item{kde}{\link{logical} (\emph{with default}):
-Option to add a KDE plot to the dispersion part, default is \code{TRUE}.}
+Option to add a KDE plot to the dispersion part (\code{TRUE} by default). The
+smoothing bandwidth can be controlled by setting the \code{bw} argument (\code{"SJ"}
+by default; see \link[stats:density]{stats::density} for details).}
 
 \item{hist}{\link{logical} (\emph{with default}):
-Option to add a histogram to the dispersion part. Only meaningful when not
-more than one data set is plotted.}
+Option to add a histogram to the dispersion part. Only meaningful when only
+one data set is plotted. The number of cells in the histogram can be
+controlled by setting the \code{breaks} argument (see \link[graphics:hist]{graphics::hist} for
+details).}
 
 \item{dots}{\link{logical} (\emph{with default}):
 Option to add a dot plot to the dispersion part. If number of dots exceeds
@@ -142,16 +144,16 @@ space in the dispersion part, a square indicates this.}
 \item{boxplot}{\link{logical} (\emph{with default}):
 Option to add a boxplot to the dispersion part, default is \code{FALSE}.}
 
-\item{y.axis}{\link{logical} (\emph{with default}): Option to hide standard y-axis
-labels and show 0 only.
-Useful for data with small scatter. If you want to suppress the y-axis entirely
-please use \code{yaxt == 'n'} (the standard \link[graphics:par]{graphics::par} setting) instead.}
+\item{y.axis}{\link{logical} (\emph{with default}):
+option to hide standard y-axis labels and show 0 only, useful for data with
+small scatter. To suppress the y-axis entirely, use \code{yaxt == 'n'} (the
+standard \link[graphics:par]{graphics::par} setting) instead.}
 
 \item{error.bars}{\link{logical} (\emph{with default}):
 Option to show De-errors as error bars on De-points. Useful in combination
-with \verb{y.axis = FALSE, bar.col = "none"}.}
+with \verb{y.axis = FALSE, bar = FALSE}.}
 
-\item{bar}{\link{numeric} (\emph{with default}):
+\item{bar}{\link{numeric} or \link{logical} (\emph{with default}):
 option to add one or more dispersion bars (i.e., bar showing the 2-sigma range)
 centred at the defined values. By default a bar is drawn according to \code{"z.0"}.
 To omit the bar set \code{"bar = FALSE"}.}
@@ -182,37 +184,36 @@ colour of the grid lines (originating at \verb{[0,0]} and stretching to
 the z-scale). To disable grid lines use \code{FALSE}. Default is \code{"grey"}.}
 
 \item{frame}{\link{numeric} (\emph{with default}):
-option to modify the plot frame type. Can be one out of
+the plot frame type, one of the following:
 \itemize{
-\item \code{0} (no frame),
-\item \code{1} (frame originates at 0,0 and runs along min/max isochrons),
-\item \code{2} (frame embraces the 2-sigma bar),
-\item \code{3} (frame embraces the entire plot as a rectangle).
-}
-
-Default is \code{1}.}
-
-\item{bw}{\link{character} (\emph{with default}):
-bin-width for KDE, choose a numeric value for manual setting.}
+\item 0: no frame
+\item 1: frame originates at 0,0 and runs along min/max isochrons (default)
+\item 2: frame embraces the 2-sigma bar
+\item 3: frame embraces the entire plot as a rectangle
+}}
 
 \item{interactive}{\link{logical} (\emph{with default}):
-create an interactive abanico plot (requires the \code{'plotly'} package)}
+create an interactive abanico plot (requires the \code{'plotly'} package).}
 
-\item{...}{Further plot arguments to pass (see \link[graphics:plot.default]{graphics::plot.default}).
-Supported are: \code{main}, \code{sub}, \code{ylab}, \code{xlab}, \code{zlab}, \code{zlim}, \code{ylim}, \code{cex},
-\code{lty}, \code{lwd}, \code{pch}, \code{col}, \code{at}, \code{breaks}. \code{xlab} must be
-a vector of length two, specifying the upper and lower x-axis labels.}
+\item{...}{further arguments and graphical parameters to control the plot
+output. Supported are: \code{main}, \code{sub}, \code{ylab}, \code{xlab}, \code{zlab}, \code{xlim},
+\code{ylim}, \code{zlim}, \code{cex}, \code{pt.cex} (point size), \code{lty}, \code{lwd}, \code{pch}, \code{col},
+\code{at}, \code{bw}, and \code{breaks}. \code{xlab} must be a vector of length two, specifying
+the upper and lower x-axis labels.
+
+Please note that in the interactive mode, if you are using an expression,
+the \code{zlab} must use HTML tags, such as \verb{D<sub>e</sub>} for \code{D[e]}.}
 }
 \value{
 Returns a plot object and, optionally, a list with plot calculus data.
 }
 \description{
-A plot is produced which allows comprehensive presentation of data precision
-and its dispersion around a central value as well as illustration of a
+The abanico plot provides a comprehensive presentation of data precision
+and its dispersion around a central value, and can also display a
 kernel density estimate, histogram and/or dot plot of the dose values.
 }
 \details{
-The Abanico Plot is a combination of the classic Radial Plot
+The abanico plot is a combination of the classic radial plot
 \link{plot_RadialPlot} and a kernel density estimate plot (e.g
 \link{plot_KDE}. It allows straightforward visualisation of data precision,
 error scatter around a user-defined central value and the combined
@@ -221,21 +222,26 @@ seconds, equivalent dose, years). The principle of the plot is shown in
 Galbraith & Green (1990). The function authors are thankful for the
 thought-provoking figure in this article.
 
-The semi circle (z-axis) of the classic Radial Plot is bent to a straight
+The semi circle (z-axis) of the classic radial plot is bent to a straight
 line here, which actually is the basis for combining this polar (radial)
 part of the plot with any other Cartesian visualisation method
 (KDE, histogram, PDF and so on). Note that the plot allows displaying
 two measures of distribution. One is the 2-sigma
 bar, which illustrates the spread in value errors, and the other is the
-polygon, which stretches over both parts of the Abanico Plot (polar and
+polygon, which stretches over both parts of the abanico plot (polar and
 Cartesian) and illustrates the actual spread in the values themselves.
 
 Since the 2-sigma-bar is a polygon, it can be (and is) filled with shaded
 lines. To change density (lines per inch, default is 15) and angle (default
 is 45 degrees) of the shading lines, specify these parameters. See
-\code{?polygon()} for further help.
+\link[graphics:polygon]{graphics::polygon} for further help.
 
-The Abanico Plot supports other than the weighted mean as measure of
+The proportion of the polar part and the cartesian part of the abanico plot
+can be modified for display reasons (\code{plot.ratio = 0.75}). By default,
+the polar part spreads over 75 \% and leaves 25 \% for the part that
+shows the KDE graph.
+
+The abanico plot supports other than the weighted mean as measure of
 centrality. When it is obvious that the data
 is not (log-)normally distributed, the mean (weighted or not) cannot be a
 valid measure of centrality and hence central dose. Accordingly, the median
@@ -243,26 +249,24 @@ and the weighted median can be chosen as well to represent a proper measure
 of centrality (e.g. \code{centrality = "median.weighted"}). Also
 user-defined numeric values (e.g. from the central age model) can be used if
 this appears appropriate.
-
-The proportion of the polar part and the cartesian part of the Abanico Plot
-can be modified for display reasons (\code{plot.ratio = 0.75}). By default,
-the polar part spreads over 75 \% and leaves 25 \% for the part that
-shows the KDE graph.
+\subsection{Statistics summary}{
 
 A statistic summary, i.e. a collection of statistic measures of
 centrality and dispersion (and further measures) can be added by specifying
-one or more of the following keywords:
+one or more of the following keywords in the \code{summary} argument:
 \itemize{
 \item \code{"n"} (number of samples)
 \item \code{"mean"} (mean De value)
 \item \code{"median"} (median of the De values)
-\item \code{"sd.rel"} (relative standard deviation in percent)
 \item \code{"sd.abs"} (absolute standard deviation)
-\item \code{"se.rel"} (relative standard error)
+\item \code{"sd.rel"} (relative standard deviation in percent)
 \item \code{"se.abs"} (absolute standard error)
+\item \code{"se.rel"} (relative standard error)
 \item \code{"in.2s"} (percent of samples in 2-sigma range)
-\item \code{"kurtosis"} (kurtosis)
+\item \code{"q.25"} (25\% percentile)
+\item \code{"q.75"} (75\% percentile)
 \item \code{"skewness"} (skewness)
+\item \code{"kurtosis"} (kurtosis)
 }
 
 \strong{Note:} the input data for the statistic summary is sent to the function
@@ -275,6 +279,9 @@ measures in three different ways: \code{unweighted}, \code{weighted} and
 \code{MCM-based} (i.e., based on Monte Carlo Methods). By default, the
 MCM-based version is used. If you wish to use another method, indicate this
 with the appropriate keyword using the argument \code{summary.method}.
+}
+
+\subsection{Other arguments}{
 
 The optional parameter \code{layout} allows more sophisticated ways to modify
 the entire plot. Each element of the plot can be addressed and its properties
@@ -289,8 +296,9 @@ by using the parameter \code{at}, e.g. \code{at = seq(80, 200, 20)}, cf. functio
 documentation of \code{axis}. Specifying tick positions manually overrides a
 \code{zlim}-definition.
 }
+}
 \section{Function version}{
- 0.1.21
+ 0.1.25
 }
 
 \examples{
@@ -471,7 +479,7 @@ points(x = AP$data[[1]]$precision[!in_2sigma],
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., Colombo, M., 2026. plot_AbanicoPlot(): Function to create an Abanico Plot.. Function version 0.1.21. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., Colombo, M., 2026. plot_AbanicoPlot(): Function to create an abanico plot. Function version 0.1.25. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

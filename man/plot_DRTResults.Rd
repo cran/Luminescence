@@ -88,9 +88,9 @@ i.e. parameters provided via \code{par()} work.}
 \item{na.rm}{\link{logical} (\emph{with default}):
 whether \code{NA} values should be removed from the input data before plotting.}
 
-\item{...}{further arguments and graphical parameters passed to \link{plot},
-supported are:
-\code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{main}, \code{cex}, \code{las} and \code{pch}.}
+\item{...}{further arguments and graphical parameters to control the plot
+output (see \link{plot}). Supported are: \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{main},
+\code{cex}, \code{pt.cex} (point size), \code{las}, and \code{pch}.}
 }
 \value{
 A plot is returned.
@@ -113,7 +113,7 @@ Further data and plot arguments can be added by using the appropriate R
 commands.
 }
 \section{Function version}{
- 0.1.17
+ 0.1.18
 }
 
 \examples{
@@ -195,7 +195,7 @@ plot_DRTResults(
 } 
 
 \section{How to cite}{
-Kreutzer, S., Dietze, M., 2026. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.17. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Dietze, M., 2026. plot_DRTResults(): Visualise dose recovery test results. Function version 0.1.18. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

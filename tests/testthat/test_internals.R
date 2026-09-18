@@ -81,6 +81,10 @@ test_that("Test internals", {
   ## .weighted.median() -----------------------------------------------------
   expect_equal(.weighted.median(1:10, w = rep(1, 10)),
                median(1:10))
+  expect_equal(.weighted.median(1:10, w = c(1:9, Inf)),
+               NA_real_)
+  expect_equal(.weighted.median(1:10, w = c(NaN, 2:10)),
+               NA_real_)
   expect_equal(.weighted.median(1:5, w = c(0.15, 0.1, 0.2, 0.3, 0.25)),
                4)
   expect_equal(.weighted.median(c(1:5, NA), w = c(0.15, 0.1, 0.2, 0.3, 0.25, 1)),
@@ -641,6 +645,26 @@ test_that("Test internals", {
   expect_error(.validate_logical_scalar(NA, name = "The variable"),
                "The variable should be a single logical value")
 
+  ## .validate_position() ---------------------------------------------------
+  expect_equal(.validate_position("topleft"),
+               "topleft")
+  expect_equal(.validate_position(c("left", "right")),
+               "left")
+  expect_equal(.validate_position("sub", sub = TRUE),
+               "sub")
+  expect_equal(.validate_position(c(1, 2)),
+               c(1, 2))
+  expect_error(.validate_position("sub"),
+               "'NA' should be one of 'left', 'center', 'right', 'topleft'")
+  expect_error(.validate_position(c("left", "error")),
+               "contains multiple values but not all of them match 'choices'")
+  expect_error(.validate_position(summary.pos <- 1),
+               "'summary.pos' should have length 2")
+  expect_error(.validate_position(1, name = "'summary.pos'"),
+               "'summary.pos' should have length 2")
+  expect_error(.validate_position(c(NA, 5), name = "A position"),
+               "A position cannot contain missing values")
+
   ## .validate_originator() ----------------------------------------------------
   expect_error(.validate_originator(set_RLum("RLum.Analysis"), "orig"),
                "'NA' has an unsupported originator (expected 'orig', but found",
@@ -681,6 +705,8 @@ test_that("Test internals", {
                "'integral' should be of class 'integer', 'numeric' or NA")
   expect_error(.validate_integral(integral <- NA, na.ok = FALSE),
                "'integral' should be of class 'integer' or 'numeric'")
+  expect_error(.validate_integral(integral <- NA_real_, na.ok = TRUE),
+               "'integral' contains no elements between 1 and Inf")
   expect_error(.validate_integral(integral <- -9:0),
                "'integral' contains no elements between 1 and Inf")
   expect_error(.validate_integral(integral <- 1:10, min = 50, max = 100),
@@ -731,6 +757,9 @@ test_that("Test internals", {
                "'integral' should be of class 'integer' or 'numeric'")
   expect_error(.convert_to_channels(tl, integral <- NA),
                "'integral' should be of class 'integer' or 'numeric'")
+  expect_error(.convert_to_channels(tl, integral <- NA_real_, na.ok = TRUE,
+                                    unit = "temperature"),
+               "'integral' contains no elements in 1.8:450.0")
   expect_error(.convert_to_channels(tl, integral <- list(200:210, NA), list.ok = FALSE),
                "'integral' should be of class 'integer' or 'numeric'")
   expect_error(.convert_to_channels(tl, integral <- list(200:210, NA), list.ok = TRUE),
@@ -784,6 +813,19 @@ test_that("Test internals", {
                                             ext = c("e1", "e2", "e3"), throw.error = FALSE)),
                  "File extension 'R' is not supported, only 'e1', 'e2' and 'e3'")
 
+  ## .validate_cores() ------------------------------------------------------
+  expect_equal(.validate_cores(NULL),
+               max(parallel::detectCores() - 2, 1))
+  expect_equal(.validate_cores(2),
+               2)
+  expect_warning(expect_equal(.validate_cores(2000),
+                              parallel::detectCores()),
+                 "Number of cores limited to the maximum available")
+  expect_error(.validate_cores(-1),
+               "'cores' should be a single positive integer value")
+  expect_error(.validate_cores(c(2, 3)),
+               "'cores' should be a single positive integer value")
+
   ## .require_suggested_package() -------------------------------------------
   expect_true(.require_suggested_package("utils"))
   expect_error(.require_suggested_package("error"),
@@ -800,16 +842,6 @@ test_that("Test internals", {
                list(1, 1, 1))
   expect_equal(.listify(letters, length = 5),
                .listify(list(letters), length = 5))
-
-
-  ## .strict_na() -----------------------------------------------------------
-  expect_true(.strict_na(NA))
-  expect_true(.strict_na(NA_real_))
-  expect_false(.strict_na(NULL))
-  expect_false(.strict_na(c(1, NA)))
-  expect_false(.strict_na(c(NA, NA)))
-  expect_false(.strict_na(matrix()))
-  expect_false(.strict_na(set_RLum("RLum.Data.Curve")))
 
   ## .collapse() ------------------------------------------------------------
   expect_equal(.collapse(1:3),
@@ -842,6 +874,18 @@ test_that("Test internals", {
                "0.53:1.39")
   expect_equal(.format_range(c(0.53, 1.39, 1.14), nsmall = 3),
                "0.530:1.390")
+
+  ## .compress_ranges() _____________________________________________________
+  expect_equal(.compress_ranges(1),
+               "1")
+  expect_equal(.compress_ranges(c(1, NA)),
+               "1")
+  expect_equal(.compress_ranges(c(-1, 0, 1)),
+               "-1:1")
+  expect_equal(.compress_ranges(c(1, 3, 4)),
+               c("1", "3:4"))
+  expect_equal(.compress_ranges(c(1, 3, 5)),
+               c("1", "3", "5"))
 
   ## .shorten_filename() ----------------------------------------------------
   expect_equal(.shorten_filename("/path/to/filename"),

@@ -81,7 +81,6 @@ test_that("input validation", {
 test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  set.seed(1)
   snapshot.tolerance <- 1.5e-6
 
   SW({
@@ -93,6 +92,7 @@ test_that("snapshot tests", {
     g_value =  c(2.36, 0.6),
     plot = TRUE,
     fit.method = "EXP"),
+    expect_snapshot_output = TRUE,
     tolerance = snapshot.tolerance)
 
   ##run fading correction
@@ -105,6 +105,7 @@ test_that("snapshot tests", {
     tc.g_value = 1200,
     plot = TRUE,
     fit.method = "EXP"),
+    expect_snapshot_output = TRUE,
     tolerance = snapshot.tolerance)
   })
 })

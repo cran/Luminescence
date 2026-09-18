@@ -6,7 +6,6 @@
 \usage{
 plot_RadialPlot(
   data,
-  na.rm = TRUE,
   log.z = TRUE,
   central.value = NULL,
   centrality = c("mean.weighted", "mean.weighted", "median", "median.weighted"),
@@ -31,12 +30,11 @@ plot_RadialPlot(
 \item{data}{\link{data.frame} or \link[=RLum.Results-class]{RLum.Results} object (\strong{required}):
 for \code{data.frame}: either two columns: De (\code{data[,1]}) and De error
 (\code{data[,2]}), or one: De (\code{values[,1]}). If a single-column data frame
-is provided, De error is assumed to be 10^-9 for all measurements.
+is provided, De error is assumed to be 10^-9 for all measurements, and
+\code{y.ticks} is silently reset to \code{FALSE}. Rows with \code{NA} values will be
+removed prior to plotting.
 To plot several data sets in one plot, the data sets must be provided as
 \code{list}, e.g. \code{list(data.1, data.2)}.}
-
-\item{na.rm}{\link{logical} (\emph{with default}):
-excludes \code{NA} values from the data set prior to any further operations.}
 
 \item{log.z}{\link{logical} (\emph{with default}):
 Option to display the z-axis in logarithmic scale. Default is \code{TRUE}.}
@@ -110,8 +108,11 @@ colour of the additional lines.}
 \item{line.label}{\link{character}:
 labels for the additional lines.}
 
-\item{...}{Further plot arguments to pass. \code{xlab} must be a vector of
-length 2, specifying the upper and lower x-axes labels.}
+\item{...}{further arguments and graphical parameters to control the plot
+output. Supported are: \code{main}, \code{sub}, \code{xlab}, \code{ylab}, \code{zlab}, \code{xlim}, \code{ylim},
+\code{zlim}, \code{cex}, \code{pt.cex} (point size), \code{lty}, \code{lwd}, \code{pch}, \code{col}, \code{tcl}, \code{show}, and
+\code{fun}. \code{xlab} must be a vector of length 2, specifying the upper and lower
+x-axes labels.}
 }
 \value{
 Returns a plot object.
@@ -159,7 +160,7 @@ one or more of the following keywords:
 }
 }
 \section{Function version}{
- 0.5.11
+ 0.5.12
 }
 
 \examples{
@@ -268,7 +269,7 @@ plot_RadialPlot(
 } 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2026. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.11. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_RadialPlot(): Function to create a Radial Plot. Function version 0.5.12. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

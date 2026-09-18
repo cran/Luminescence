@@ -4,14 +4,16 @@
 \alias{merge_RLum.Results}
 \title{Merge function for RLum.Results S4-class objects}
 \usage{
-merge_RLum.Results(objects, flatten = TRUE)
+merge_RLum.Results(object, flatten = TRUE, ...)
 }
 \arguments{
-\item{objects}{\link{list} (\strong{required}):
+\item{object}{\link{list} (\strong{required}):
 a list of \link[=RLum.Results-class]{RLum.Results} objects}
 
 \item{flatten}{\link{logical} (\emph{with default}):
 whether list elements should be flattened before merging.}
+
+\item{...}{currently not used.}
 }
 \description{
 Function merges objects of class \link[=RLum.Results-class]{RLum.Results}. The slots in the objects
@@ -26,7 +28,7 @@ not of similar name as the default attributes of, e.g., a \link{data.frame}
 The \code{originator} is taken from the first element and not reset to \link{merge_RLum}
 }
 \section{Function version}{
- 0.3
+ 0.3.2
 }
 
 \author{
@@ -34,7 +36,8 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. merge_RLum.Results(): Merge function for RLum.Results S4-class objects. Function version 0.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. merge_RLum.Results(): Merge function for RLum.Results S4-class objects. Function version 0.3.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{internal}
+\keyword{utilities}

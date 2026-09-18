@@ -4,10 +4,10 @@
 \alias{merge_RLum}
 \title{General merge function for RLum-class objects}
 \usage{
-merge_RLum(objects, ...)
+merge_RLum(object, ...)
 }
 \arguments{
-\item{objects}{\link{list} of \link[=RLum-class]{RLum} (\strong{required}):
+\item{object}{\link{list} of \link[=RLum-class]{RLum} (\strong{required}):
 list of S4 object of class \code{RLum}.}
 
 \item{...}{further arguments that one might want to pass to the specific merge function}
@@ -36,7 +36,7 @@ Empty list elements (\code{NULL}) are automatically removed from the input list.
 So far merging of \link[=RLum.Data.Image-class]{RLum.Data.Image} objects is not supported.
 }
 \section{Function version}{
- 0.1.3
+ 0.1.4
 }
 
 \examples{
@@ -53,7 +53,7 @@ temp1 <- calc_CentralDose(ExampleData.DeValues$CA1)
 temp2 <- calc_CentralDose(ExampleData.DeValues$CA1)
 
 ##merge the results and store them in a new object
-temp.merged <- get_RLum(merge_RLum(objects = list(temp1, temp2)))
+temp.merged <- get_RLum(merge_RLum(object = list(temp1, temp2)))
 
 }
 \seealso{
@@ -66,7 +66,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. merge_RLum(): General merge function for RLum-class objects. Function version 0.1.3. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. merge_RLum(): General merge function for RLum-class objects. Function version 0.1.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

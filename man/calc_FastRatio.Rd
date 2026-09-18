@@ -96,7 +96,7 @@ required to reduce the fast and medium quartz OSL components to \code{x} and
 and end). The fast ratio is then calculated from: \eqn{(L1-L3)/(L2-L3)}.
 }
 \section{Function version}{
- 0.1.1
+ 0.1.2
 }
 
 \examples{
@@ -112,7 +112,7 @@ get_RLum(res)
 } 
 
 \section{How to cite}{
-King, G.E., Durcan, J., Burow, C., 2026. calc_FastRatio(): Calculate the Fast Ratio for CW-OSL curves. Function version 0.1.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+King, G.E., Durcan, J., Burow, C., Colombo, M., 2026. calc_FastRatio(): Calculate the Fast Ratio for CW-OSL curves. Function version 0.1.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{
@@ -136,5 +136,6 @@ due to unstable signal components. Quaternary Geochronology 4, 353-362.
 \author{
 Georgina E. King, University of Bern (Switzerland) \cr
 Julie A. Durcan, University of Oxford (United Kingdom) \cr
-Christoph Burow, University of Cologne (Germany)
+Christoph Burow, University of Cologne (Germany) \cr
+Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team}

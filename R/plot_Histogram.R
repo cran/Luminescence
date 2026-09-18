@@ -28,11 +28,9 @@
 #'
 #' @param data [data.frame] or [Luminescence::RLum.Results-class] object (**required**):
 #' for `data.frame`: two columns: De (`data[,1]`) and De error (`data[,2]`).
-#' If the error column is missing or only contains `NA` values, then the error
-#' at each measurement is assumed to be 10^-9.
-#'
-#' @param na.rm [logical] (*with default*):
-#' excludes `NA` values from the data set prior to any further operations.
+#' If the error column is missing or only contains `NA` values, then `se` is
+#' set to `FALSE`, and the weighted statistics will match the unweighted ones.
+#' In any other case, rows with `NA` values will be removed prior to plotting.
 #'
 #' @param mtext [character] (*optional*):
 #' further sample information ([mtext]).
@@ -41,7 +39,9 @@
 #' global scaling factor.
 #'
 #' @param se [logical] (*with default*):
-#' plots standard error points over the histogram, default is `TRUE`.
+#' plots standard error points over the histogram, default is `TRUE`. It is
+#' silently reset to `FALSE` if the error column in `data` is missing or only
+#' contains `NA` values.
 #'
 #' @param rug [logical] (*with default*):
 #' adds rugs to the histogram, default is `TRUE`.
@@ -71,17 +71,16 @@
 #' @param interactive [logical] (*with default*):
 #' create an interactive histogram plot (requires the 'plotly' package)
 #'
-#' @param ... further arguments and graphical parameters passed to [plot] or
-#' [hist]. If y-axis labels are provided, these must be specified as a vector
-#' of length 2 since the plot features two axes
-#' (e.g. `ylab = c("axis label 1", "axis label 2")`). Y-axes limits
-#' (`ylim`) must be provided as vector of length four, with the first two
+#' @param ... further arguments and graphical parameters to control the plot
+#' output (see [plot] and [hist]). Supported are: `main`, `xlab`, `ylab`,
+#' `xlim`, `ylim`, `breaks`, `pch`, `pt.cex` (point size), and `fun`. If y-axis labels are
+#' provided, these must be specified as a vector of length 2 since the plot
+#' features two axes (e.g. `ylab = c("axis label 1", "axis label 2")`). Y-axes
+#' limits (`ylim`) must be provided as vector of length four, with the first two
 #' elements specifying the left axes limits and the latter two elements giving
 #' the right axis limits.
 #'
-#' @note The input data is not restricted to a special type.
-#'
-#' @section Function version: 0.4.5
+#' @section Function version: 0.4.6
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
@@ -119,7 +118,6 @@
 #' @export
 plot_Histogram <- function(
   data,
-  na.rm = TRUE,
   mtext = "",
   cex.global = 1,
   se = TRUE,
@@ -139,7 +137,7 @@ plot_Histogram <- function(
   .validate_class(data, c("data.frame", "RLum.Results"))
   .validate_not_empty(data)
   if (inherits(data, "RLum.Results")) {
-    data <- get_RLum(data)[,1:2]
+    data <- get_RLum(data)
   }
 
   ## we don't check the second column, as that can be NA
@@ -149,16 +147,7 @@ plot_Histogram <- function(
   .validate_class(mtext, "character", length = 1)
   .validate_class(cex.global, "numeric")
   .validate_class(summary, "character")
-  if (is.numeric(summary.pos)) {
-    .validate_length(summary.pos, 2)
-  }
-  else {
-    summary.pos <- .validate_args(summary.pos,
-                                  c("sub", "left", "center", "right",
-                                    "topleft", "top", "topright",
-                                    "bottomleft", "bottom", "bottomright"))
-  }
-  .validate_logical_scalar(na.rm)
+  summary.pos <- .validate_position(summary.pos, sub = TRUE)
   .validate_logical_scalar(se)
   .validate_logical_scalar(rug)
   .validate_logical_scalar(normal_curve)
@@ -166,7 +155,7 @@ plot_Histogram <- function(
 
   ## handle error-free data sets
   if (length(data) < 2 || all(is.na(data[, 2]))) {
-    data[, 2] <- 1e-9
+    data[, 2] <- 1
     se <- FALSE
   }
 
@@ -175,15 +164,13 @@ plot_Histogram <- function(
   ## read out additional arguments list
   extraArgs <- list(...)
 
-  ## optionally, count and exclude NA values and print result
-  if (na.rm) {
-    n.NA <- sum(is.na(data[,1]))
-    if (n.NA > 0) {
+  ## count and remove NA values
+  n.NA <- sum(is.na(data[,1]))
+  if (n.NA > 0) {
       .throw_message(sprintf("%d NA value%s excluded\n",
                              n.NA, ifelse(n.NA > 1, "s", "")),
                      error = FALSE)
       data <- data[!is.na(data[, 1]), ]
-    }
   }
 
   if("breaks" %in% names(extraArgs)) {
@@ -218,6 +205,7 @@ plot_Histogram <- function(
       ylab = c("Frequency", "Standard error"),
       xlim = range(breaks_calc),
       pch = 1,
+      pt.cex = 1,
       fun = FALSE
   ), extraArgs)
 
@@ -365,6 +353,7 @@ plot_Histogram <- function(
          ylim = ylim.plot[3:4],
          pch = settings$pch,
          col = colour[4],
+         cex = settings$pt.cex,
          main = "",
          xlab = "",
          ylab = "",

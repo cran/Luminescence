@@ -280,12 +280,16 @@ analyse_Al2O3C_Measurement <- function(
                   extra = "a 'list' of such objects")
   .validate_not_empty(object)
   integral_input <- .validate_args(integral_input, c("channel", "measurement"))
+  .validate_class(dose_points, "numeric")
   .validate_class(irradiation_time_correction, c("RLum.Results", "numeric"),
                   null.ok = TRUE)
   .validate_class(cross_talk_correction, c("numeric", "RLum.Results"),
                   null.ok = TRUE)
   .validate_class(travel_dosimeter, c("numeric", "integer"), null.ok = TRUE)
   .validate_class(test_parameters, "list", null.ok = TRUE)
+  .validate_logical_scalar(calculate_TL_dose)
+  .validate_logical_scalar(verbose)
+  .validate_logical_scalar(plot)
 
   ## Preparation ------------------------------------------------------------
 
@@ -350,7 +354,7 @@ analyse_Al2O3C_Measurement <- function(
       ## carousel position
       interval <- ifelse(length(POSITION) > 1, "confidence", "none")
       cross_talk_correction <-
-        as.numeric(predict(cross_talk_correction$fit,
+        as.numeric(stats::predict(cross_talk_correction$fit,
                            newdata = data.frame(x = POSITION),
                            interval = interval))
 

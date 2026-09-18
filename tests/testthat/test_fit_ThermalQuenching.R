@@ -58,21 +58,23 @@ test_that("check functionality", {
 test_that("add snapshot tests", {
   testthat::skip_on_cran()
 
-  set.seed(1)
   snapshot.tolerance <- 1.5e-6
 
   SW({
   expect_snapshot_RLum(fit_ThermalQuenching(data = data, n.MC = NULL),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
 
   ## switch off weights
   expect_snapshot_RLum(fit_ThermalQuenching(data = data, n.MC = NULL,
                                             method_control = list(weights = NULL)),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
   })
 
   ## with Monte Carlo
   expect_snapshot_RLum(fit_ThermalQuenching(data = data, n.MC = 10,
-                                            verbose = FALSE, plot = TRUE),
+                                            plot = TRUE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
 })

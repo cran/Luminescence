@@ -14,9 +14,9 @@ according to its \code{RLum} class, after removing non-RLum objects.}
 
 \item{...}{further arguments and graphical parameters to pass to the
 specific plot functions. The only arguments that are supported directly are
-\code{main} (plot title) and \code{mtext} (plot subtitle). Here \code{main} can be provided
-as a list and the arguments in the
-list will dispatched to the plots if \code{object} is of type \code{list} as well.}
+\code{main} (plot title) and \code{mtext} (subtitle). They may be lists, in which
+case each element is dispatched to the plots (with recycling )if \code{object}
+is also a list.}
 }
 \value{
 Produces a plot depending on the input object.
@@ -40,7 +40,7 @@ found in the documentations of each plot function.
 }
 }
 \section{Function version}{
- 0.5
+ 0.6
 }
 
 \examples{
@@ -67,7 +67,7 @@ Marco Colombo, Institute of Geography, Heidelberg University (Germany)\cr
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Colombo, M., 2026. plot_RLum(): General plot function for RLum S4 class objects. Function version 0.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Colombo, M., 2026. plot_RLum(): General plot function for RLum S4 class objects. Function version 0.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{dplot}

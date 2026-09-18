@@ -76,6 +76,22 @@ setClass("RLum.Analysis",
 ## as() ---------------------------------------------------------------------
 ##LIST
 ##COERCE RLum.Analyse >> list AND list >> RLum.Analysis
+#' as() - RLum-object coercion
+#'
+#' for `[RLum.Analysis-class]`
+#'
+#' **[Luminescence::RLum.Analysis-class]**
+#'
+#' \tabular{ll}{
+#'  **from** \tab **to**\cr
+#'   `list` \tab `list`\cr
+#' }
+#'
+#' Given that the [list] consists of [Luminescence::RLum.Analysis-class] objects.
+#'
+#' @param strict Unused.
+#' @name as
+#' @aliases coerce,list,RLum.Analysis-method
 setAs("list", "RLum.Analysis",
       function(from,to){
         new(to,
@@ -131,11 +147,11 @@ setMethod("show",
                   vapply(seq_along(object@records),  function(i) {
                     ## take care of NULL objects and keep this output the rest
                     o <- object@records[[i]] %||% return("<NULL object>")
-                    
+
                     if (inherits(object@records[[i]], x)) {
-                      if (i %% temp.width == 0 & i != length(object@records)) 
+                      if (i %% temp.width == 0 & i != length(object@records))
                         assign(x = "linebreak", value = TRUE, envir = env)
-              
+
                       ##FIRST
                       first <-  paste0("#", i, " ", object@records[[i]]@recordType)
 
@@ -317,7 +333,7 @@ setMethod("get_RLum",
                   # add missing info elements and set NA
                   if (!all(info_el %in% names(val))) {
                     new <- info_el[!info_el %in% names(val)]
-                    val <- c(val, setNames(rep("", length(new)), new))
+                    val <- c(val, stats::setNames(rep("", length(new)), new))
                   }
 
                  # order the named char vector by its names so we don't mix up the columns
@@ -834,12 +850,13 @@ setMethod(
     .validate_class(slot, "character", null.ok = TRUE)
     if (!is.null(slot)) {
       valid.names <- slotNames(object@records[[1]])
-      if (!all(slot %in% valid.names)) {
+      if (length(slot) == 0 || !all(slot %in% valid.names)) {
         .throw_error("Invalid 'slot' name, valid names are: ",
                      .collapse(valid.names))
       }
       if (length(slot) > 1) {
-        message("[sort_RLum()]: Only the first 'slot' field will be used in sorting")
+        .throw_message("Only the first 'slot' field will be used in sorting",
+                       error = FALSE)
         slot <- slot[1]
       }
     }
@@ -849,7 +866,7 @@ setMethod(
       valid.names <- c(
         "XY_LENGTH", "NCOL", "X_MIN", "X_MAX", "Y_MIN", "Y_MAX",
         names(object@records[[1]]@info))
-      if (!all(info_element %in% valid.names)) {
+      if (length(info_element) == 0 || !all(info_element %in% valid.names)) {
         .throw_error("Invalid 'info_element' name, valid names are: ",
                      .collapse(valid.names))
       }

@@ -5,12 +5,16 @@ ncf <- read_BIN2R(file, fastForward = TRUE, verbose = FALSE)
 test_that("input validation", {
   testthat::skip_on_cran()
 
+  expect_error(analyse_SAR.NCF(iris),
+               "'object' should be of class 'RLum.Analysis' or a 'list' of such")
+  expect_error(analyse_SAR.NCF(set_RLum("RLum.Analysis")),
+               "'object' cannot be an empty RLum.Analysis")
+
   data(ExampleData.BINfileData, envir = environment())
   object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1:2)
   expect_error(analyse_SAR.NCF(object, signal_integral = 1:2,
                                background_integral = 100:250),
                "No additional dose point found, check that the NCF-SAR protocol")
-
 
   expect_message(expect_message(expect_null(
       analyse_SAR.NCF(set_RLum("RLum.Analysis",
@@ -42,7 +46,6 @@ test_that("check functionality", {
 test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  set.seed(1)
   snapshot.tolerance <- 1.5e-5
 
   SW({

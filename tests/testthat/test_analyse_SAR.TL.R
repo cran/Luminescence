@@ -23,6 +23,8 @@ test_that("input validation", {
   expect_error(analyse_SAR.TL(object, signal_integral = 1:2,
                               sequence.structure = "EXCLUDE"),
                "'sequence.structure' contains no 'SIGNAL' entry")
+  expect_error(analyse_SAR.TL(set_RLum("RLum.Analysis"), signal_integral = 1:3),
+               "'object' contains no TL curves")
   expect_error(analyse_SAR.TL(object, dose.points = c(2, 2),
                               signal_integral = 210:220,
                               sequence.structure = c("SIGNAL", "BACKGROUND")),
@@ -80,7 +82,8 @@ test_that("snapshot tests", {
         signal_integral = 210:220,
         dose.points = 1:7,
         integral_input = "measurement",
-        sequence.structure = c("SIGNAL", "BACKGROUND"))
+        sequence.structure = c("SIGNAL", "BACKGROUND")),
+    expect_snapshot_output = TRUE
   )
 
   expect_warning(
@@ -90,8 +93,8 @@ test_that("snapshot tests", {
         signal_integral = 210:220,
         dose.points = 1:7,
         log = "x",
-        sequence.structure = c("SIGNAL", "BACKGROUND"))
-    ),
+        sequence.structure = c("SIGNAL", "BACKGROUND")),
+    expect_snapshot_output = TRUE),
     "Non-positive values detected, log-scale disabled"
   )
 
@@ -104,8 +107,8 @@ test_that("snapshot tests", {
   expect_warning(
   expect_snapshot_RLum(
     analyse_SAR.TL(object, signal_integral = 2:3,
-                   sequence.structure = c("SIGNAL", "EXCLUDE"))
-    ),
+                   sequence.structure = c("SIGNAL", "EXCLUDE")),
+    expect_snapshot_output = TRUE),
   "Error column invalid, infinite, or contains 0, 'fit.weights' reset to NULL")
   })
 })
@@ -128,7 +131,6 @@ test_that("regression tests", {
   ## issue 147 --------------------------------------------------------------
 
   SW({
-  set.seed(1)
   expect_snapshot_RLum(
     analyse_SAR.TL(object, sequence.structure = c("SIGNAL", "BACKGROUND"),
                    signal_integral = 2:3),

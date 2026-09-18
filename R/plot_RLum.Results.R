@@ -115,6 +115,7 @@ plot_RLum.Results<- function(
       if (object@data$args$par == 4)
         profiles@profile$mu$par.vals[ ,"mu"] <- exp(profiles@profile$mu$par.vals[ ,"mu"])
     }
+    N <- object@data$args$bs.N
 
     if (single)
       par(mfrow=c(2, 2))
@@ -161,6 +162,10 @@ plot_RLum.Results<- function(
       # get De-llik pairs
       pairs<- object@data$bootstrap$pairs$gamma
 
+      ## sort De and likelihoods by De (increasing) and remove NAs
+      if (!is.null(pairs))
+        pairs <- stats::na.omit(pairs[order(pairs[, 1]), ])
+
       # get polynomial fit objects
       poly.fits <- list(three = object@data$bootstrap$poly.fits$poly.three,
                         four = object@data$bootstrap$poly.fits$poly.four,
@@ -187,16 +192,13 @@ plot_RLum.Results<- function(
       }
 
       for (i in 1:length(poly.fits)) {
+        if (is.null(poly.fits[[i]]))
+          next
+
         ## ----- LIKELIHOODS
 
         # set margins (bottom, left, top, right)
         par(mar=c(0,5,5,3))
-
-        # sort De and likelihoods by De (increasing)
-        pairs<- pairs[order(pairs[,1]),]
-
-        # remove invalid NA values
-        pairs <- stats::na.omit(pairs)
 
         plot(x=pairs[,1],
              y=pairs[,2],
@@ -248,10 +250,11 @@ plot_RLum.Results<- function(
         # set margins (bottom, left, top, right)
         par(mar=c(5,5,0,3))
 
+        resids <- stats::residuals(poly.fits[[i]])
         plot(x = pairs[,1],
-             y = residuals(poly.fits[[i]]),
-             ylim = c(min(residuals(poly.fits[[i]])) * 1.2,
-                      as.double(quantile(residuals(poly.fits[[i]]), probs = 0.99))),
+             y = resids,
+             ylim = c(min(resids) * 1.2,
+                      as.double(stats::quantile(resids, probs = 0.99))),
              xlim=range(pretty(pairs[,1])),
              xaxt = "n",
              bty = "l",
@@ -266,7 +269,7 @@ plot_RLum.Results<- function(
         abline(h = 0, lty=2)
 
         # calculate residual sum of squares (RSS) and add to plot
-        rss<- sum(residuals(poly.fits[[i]])^2)
+        rss <- sum(resids^2)
         mtext(text = paste("RSS =",round(rss,3)), adj = 1,
               side = 3, line = -2,
               cex = if (single) 0.6 else 0.8)
@@ -284,7 +287,7 @@ plot_RLum.Results<- function(
       ### LOESS PLOT
       if (!anyNA(object@data$bootstrap$loess.fit)) {
       pairs<- object@data$bootstrap$pairs$gamma
-      pred<- predict(object@data$bootstrap$loess.fit)
+      pred <- stats::predict(object@data$bootstrap$loess.fit)
       loess<- cbind(pairs[,1], pred)
       loess<- loess[order(loess[,1]),]
 
@@ -325,6 +328,7 @@ plot_RLum.Results<- function(
 
       mtext(text = "Normalised likelihood / density", side = 2, line = 2.5, adj = 0)
 
+      if (N > 0) {
       # set the polynomial to plot
       poly.curve<- poly.curves[[1]] # three degree poly
 
@@ -348,14 +352,13 @@ plot_RLum.Results<- function(
 
       if (all(x > max(xlim)) || all(x < min(xlim)))
         .throw_warning("Bootstrap estimates out of x-axis range")
-
+      } # end if (N > 0)
 
       ### ----- PLOT MAM SINGLE ESTIMATE
 
       # symmetric errors, might not be appropriate
       mean<- object@data$summary$de
       sd<- object@data$summary$de_err
-
 
       if (anyNA(c(mean, sd))) {
         ## no longer reachable since #1353
@@ -364,8 +367,8 @@ plot_RLum.Results<- function(
         # nocov end
       } else {
 
-        x<- seq(mean-5*sd, mean+5*sd, 0.001)
-        y<- dnorm(seq(mean-5*sd, mean+5*sd, 0.001), mean, sd)
+        x <- seq(mean - 5 * sd, mean + 5 * sd, length.out = 1000)
+        y <- dnorm(x, mean, sd)
         # normalise y-values
         if (max(y) != 0)
           y <- y / max(y)
@@ -434,13 +437,13 @@ plot_RLum.Results<- function(
       # add legend
       legend("bottomright",
              bty = "n",
-             col = c("grey80", "red", "blue", "black"),
+             col = c(ifelse(N > 0, "grey80", NA), "red", "blue", "black"),
              pch = c(NA,NA,NA,16),
              lty = c(1,1,1,1),
              lwd=c(10,2,2,2),
-             legend = c("Bootstrap likelihood", "Profile likelihood (gaussian fit)",
-                        "Profile likelihood", "Grain / aliquot")
-      )
+             legend = c(ifelse(N > 0, "Bootstrap likelihood", ""),
+                        "Profile likelihood (gaussian fit)",
+                        "Profile likelihood", "Grain / aliquot"))
     }##EndOf::Bootstrap_plotting
   }#EndOf::CASE1_MinimumAgeModel-3
 
@@ -679,7 +682,7 @@ plot_RLum.Results<- function(
       nls.fit <- get_RLum(fit, "fit")
       if (!inherits(fit, "try-error") && isTRUE(object@data$args$fitCW.curve)) {
           lines(curve[(res$dead.channels.start + 1):(nrow(curve) - res$dead.channels.end), 1],
-                predict(nls.fit), col = "red", lty = 1)
+                stats::predict(nls.fit), col = "red", lty = 1)
 
           ##plot curve for additional parameters
           col_components <- c("red", "green", "blue")

@@ -82,7 +82,11 @@ test_that("input validation", {
                  "Fitting a non-linear least-squares model requires at least 3")
   expect_warning(fit_DoseResponseCurve(LxTxData[1:3, ], fit.method = "GOK",
                                        verbose = FALSE),
-                 "Fitting a non-linear least-squares model requires at least 4")
+                 "requires at least 4 dose points besides the natural, 'fit.method'")
+  expect_warning(fit_DoseResponseCurve(LxTxData[1:3, ], fit.method = "GOK",
+                                       mode = "extrapolation",
+                                       verbose = FALSE),
+                 "requires at least 4 dose points, 'fit.method' changed to")
 
   ## wrong combination of fit.method and mode
   expect_error(
@@ -183,7 +187,6 @@ test_that("snapshot tests", {
 
   snapshot.tolerance <- 1.5e-6
 
-  set.seed(1)
   SW({
   expect_snapshot_RLum(fit_DoseResponseCurve(
       LxTxData,
@@ -237,6 +240,7 @@ test_that("snapshot tests", {
       LxTxData,
       fit.method = "DSE",
       verbose = TRUE,
+      txtProgressBar = FALSE,
       n.MC = 10
   ), tolerance = snapshot.tolerance)
 
@@ -244,6 +248,7 @@ test_that("snapshot tests", {
       LxTxData,
       fit.method = "QDR",
       verbose = TRUE,
+      txtProgressBar = FALSE,
       n.MC = 10
   ), tolerance = snapshot.tolerance)
 
@@ -266,6 +271,7 @@ test_that("snapshot tests", {
       fit.method = "QDR",
       mode = "extrapolation",
       verbose = TRUE,
+      txtProgressBar = FALSE,
       n.MC = 10
   ), tolerance = 2.0e-5)
 
@@ -275,6 +281,7 @@ test_that("snapshot tests", {
       mode = "extrapolation",
       fit.force_through_origin = TRUE,
       verbose = TRUE,
+      txtProgressBar = FALSE,
       n.MC = 10
   ), tolerance = 5.0e-5)
 
@@ -435,6 +442,12 @@ temp_OTORX <-
     verbose = FALSE,
     n.MC = 10
   )
+
+  ## TnTx column containing only NAs
+  LxTxData$TnTx <- NA
+  expect_s4_class(fit_DoseResponseCurve(LxTxData),
+                  "RLum.Results")
+
 ## test reference dataset from
 ## (https://raw.githubusercontent.com/jll2/LumDRC/refs/heads/main/otorx.py)
 LxTxData_alt <- data.frame(
@@ -751,6 +764,8 @@ temp_OTORX_alt <-
                    LxTx_X = c(2, 1, 1, 10, 1))
   expect_output(fit_DoseResponseCurve(df, fit.method = "SSE"),
                 "De = NaN")
+  expect_output(fit_DoseResponseCurve(rbind(df, c(3, 2, 3)), fit.method = "DSE"),
+                "Fit failed for DSE")
 })
 
 test_that("regression tests", {
@@ -861,6 +876,23 @@ test_that("regression tests", {
     object = fit_DoseResponseCurve(results$LnLxTnTx.table, verbose = FALSE),
     class = "RLum.Results")
   expect_equal(results$data$De, t$De$De)
+
+  ## issue 1634
+  expect_warning(fit_DoseResponseCurve(LxTxData[1:5, ], fit.method = "DSE",
+                                       verbose = FALSE),
+                 "requires at least 5 dose points besides the natural, 'fit.method'")
+
+  ## issue 1636
+  expect_warning(fit_DoseResponseCurve(LxTxData[1:3, ], fit.method = "QDR",
+                                       verbose = FALSE),
+                 "requires at least 3 dose points besides the natural, 'fit.method'")
+
+  ## issue 1730
+  set.seed(2)
+  fit <- fit_DoseResponseCurve(df_odd, mode = "interpolation",
+                               verbose = FALSE, n.MC = 10)
+  expect_equal(sum(is.na(fit$De.MC)), 6)
+  expect_equal(fit$De$D01.ERROR, 1.369969, tolerance = 5.0e-3)
 })
 
 test_that("test internal functions", {

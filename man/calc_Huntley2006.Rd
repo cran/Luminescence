@@ -106,9 +106,11 @@ parameters \code{a}, \code{D0}, \code{c} and \code{d} in that order (parameter \
 when \code{fit.method = "SSE"}). More details can be found in
 \link{fit_DoseResponseCurve}.}
 
-\item{cores}{\link{integer} (\emph{with default}):
-The number of cores to use. This will be capped to the number of available
-cores if set to too high.}
+\item{cores}{\link{integer}, \link{numeric} (\emph{with default}):
+number of cores allocated for parallel processing of the Monte-Carlo runs.
+The default value corresponds to single-threaded computation; the
+recommended values is \code{NULL}, which assigns all but two of the available
+logical CPU cores.}
 
 \item{summary}{\link{logical} (\emph{with default}):
 If \code{TRUE} (the default) various parameters provided by the user
@@ -247,7 +249,7 @@ This function has BETA status, in particular for the GOK implementation. Please 
 your results carefully.
 }
 \section{Function version}{
- 0.4.7
+ 0.4.8
 }
 
 \examples{
@@ -300,7 +302,7 @@ kars <- calc_Huntley2006(
 } 
 
 \section{How to cite}{
-King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2026. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.7. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+King, G.E., Burow, C., Kreutzer, S., Colombo, M., 2026. calc_Huntley2006(): Apply the Huntley (2006) model. Function version 0.4.8. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

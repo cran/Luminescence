@@ -230,6 +230,8 @@
   x <- x[ox]
   w <- w[ox]
   p <- cumsum(w) / sum(w)
+  if (any(is.nan(p)))
+    return(NA_real_)
   n <- sum(p < 0.5)
   if (p[n + 1] > 0.5)
     return(x[n + 1])
@@ -1450,6 +1452,34 @@ SW <- function(expr) {
                    name = name %||% .first_argument(), extra = extra)
 }
 
+#' @title Validate a plot position (keyword or coordinates)
+#'
+#' @param pos [character] or [numeric] (**required**):
+#' The position to validate, either a keyword or a vector of length two.
+#'
+#' @param sub [logical] (*with default*):
+#' Whether the keyword `"sub"` is a valid choice (`FALSE` by default).
+#'
+#' @return
+#' The validated position.
+#'
+#' @inheritParams .validate_args
+#'
+#' @noRd
+.validate_position <- function(pos, sub = FALSE, name = NULL) {
+  valid.pos <- c("left", "center", "right", "topleft", "top", "topright",
+                 "bottomleft", "bottom", "bottomright")
+  name <- name %||% .first_argument()
+  if (is.numeric(pos)) {
+    .validate_length(pos, 2, name = name)
+    if (anyNA(pos))
+      .throw_error(name, " cannot contain missing values")
+  } else {
+    pos <- .validate_args(pos, c(if (sub) "sub", valid.pos), name = name)
+  }
+  pos
+}
+
 #' @title Validate a filename
 #'
 #' @param file [character], [list] (**required**):
@@ -1515,7 +1545,7 @@ SW <- function(expr) {
   ## - else: the download was successful, so we continue with `url_file`
   url_file <- tempfile("url_file_", fileext = paste0(".", ext[1]))
   url_file <- .download_file(file, destfile = url_file, verbose = verbose)
-  if (.strict_na(url_file)) {
+  if (identical(url_file, NA)) {
     return(NULL)
   }
   if (!is.null(url_file)) {
@@ -1586,9 +1616,8 @@ SW <- function(expr) {
 
 #' @title Validate the originator of an RLum object
 #'
-#' @param object [Luminescence::RLum-class] (**required**): object whose
-#' originator should be
-#'        checked.
+#' @param object [Luminescence::RLum-class] (**required**):
+#' object whose originator should be checked.
 #' @inheritParams .validate_args
 #'
 #' @return
@@ -1613,6 +1642,31 @@ SW <- function(expr) {
 #' @noRd
 .check_originator <- function(object, choices) {
   .hasSlot(object, "originator") && object@originator %in% choices
+}
+
+#' @title Validate and compute the number of cores to use
+#'
+#' @param cores [integer], [numeric] (**required**):
+#' Number of cores or `NULL`.
+#'
+#' @return
+#' An integer value corresponding to the minimum between the requested and the
+#' available cores, or the number of available cores - 2 if `cores = NULL`.
+#'
+#' @noRd
+.validate_cores <- function(cores) {
+  .validate_positive_scalar(cores, int = TRUE, null.ok = TRUE, name = "'cores'")
+  available.cores <- parallel::detectCores()
+
+  if (is.null(cores))
+    return(max(available.cores - 2, 1))
+
+  ## numeric input
+  if (cores > available.cores) {
+    .throw_warning("Number of cores limited to the maximum ",
+                   "available (", available.cores, ")")
+  }
+  min(cores, available.cores)
 }
 
 #' Validate a vector used for signal and background integrals
@@ -1649,7 +1703,7 @@ SW <- function(expr) {
 .validate_integral <- function(integral, int = TRUE, min = ifelse(int, 1, 0), max = Inf,
                                null.ok = FALSE, list.ok = FALSE, na.ok = FALSE,
                                name = NULL) {
-  if (null.ok && is.null(integral) || na.ok && .strict_na(integral))
+  if (null.ok && is.null(integral) || na.ok && identical(integral, NA))
     return(integral)
   name <- name %||% .first_argument()
   .validate_class(integral, c("integer", "numeric", if (list.ok) "list"),
@@ -1700,7 +1754,7 @@ SW <- function(expr) {
 .convert_to_channels <- function(x.range, integral, unit,
                                  null.ok = FALSE, na.ok = FALSE,
                                  list.ok = FALSE, name = NULL) {
-  if (null.ok && is.null(integral) || na.ok && .strict_na(integral))
+  if (null.ok && is.null(integral) || na.ok && identical(integral, NA))
     return(integral)
 
   name <- name %||% .first_argument(idx = 2)
@@ -1714,6 +1768,8 @@ SW <- function(expr) {
   }
 
   integral <- integral[!is.na(integral)]
+  if (length(integral) == 0)
+    .throw_error(name, " contains no elements in ", .format_range(x.range))
   if (min(integral) > max(x.range) || max(integral) < min(x.range))
     .throw_warning("Conversion of ", name, " from ", unit,
                    " to channels failed: expected values in ",
@@ -1769,20 +1825,6 @@ SW <- function(expr) {
   rep(x, length = length)
 }
 
-#' Check that a given object is exactly `NA`
-#'
-#' @param x (**required**): The object to check.
-#'
-#' @return
-#' Whether the object is exactly `NA`.
-#'
-#' @noRd
-.strict_na <- function(x) {
-  if (length(x) != 1 || is.recursive(x) || is.array(x))
-    return(FALSE)
-  is.na(x)
-}
-
 #' Comma-separated string concatenation
 #'
 #' Collapse the elements of a vector into a comma-separated string, with
@@ -1825,6 +1867,22 @@ SW <- function(expr) {
   rng <- tryCatch(range(vals, na.rm = TRUE),
                   warning = function(w) c(NA, NA))
   paste(format(rng, nsmall = nsmall, trim = TRUE), collapse = sep)
+}
+
+#' Compress consecutive values of an integer vector into ranges
+#'
+#' @param vals [integer] (**required**): An integer vector.
+#'
+#' @return
+#' A character vector, where each element is a range over consecutive values.
+#'
+#' @noRd
+.compress_ranges <- function(vals) {
+  runs <- split(vals, cumsum(c(1, diff(vals) != 1)))
+  unname(vapply(runs, function(r) {
+    if (length(r) == 1) as.character(r)
+    else .format_range(r)
+  }, character(1)))
 }
 
 #' Shorten a filename

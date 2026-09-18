@@ -64,7 +64,8 @@
 #' `Lx/Tx` values of the zero regeneration point with the `Ln/Tn` value (the
 #' `Lx/Tx` ratio of the natural signal). For methodological background see
 #' Aitken and Smith (1988). As a variant, `recuperation_reference` can be
-#' specified to select another dose point as reference instead of `Ln/Tn`.
+#' specified to select another dose point as reference instead of `Ln/Tn`
+#' (e.g. `"R1"`; `"Rmax"` selects the point with highest dose as reference).
 #'
 #' `[testdose.error]`: set the allowed error for the test dose, which by
 #' default should not exceed 10%. The test dose error is calculated as
@@ -160,7 +161,8 @@
 #' * `exceed.max.regpoint` [logical] (default: `FALSE`)
 #' * `consider.uncertainties` [logical] (default: `FALSE`)
 #' * `recuperation_reference` [character] (default: `"Natural"`; set to, e.g.,
-#'   `"R1"` for another point)
+#'   `"R1"` for another point; use `"Rmax"` to select the point with highest
+#'   dose as reference)
 #' * `sn_reference` [character] (default: `"Natural"`).
 #'
 #' Example: `rejection.criteria = list(recycling.ratio = 10)`.
@@ -253,7 +255,7 @@
 #'
 #' **The function currently supports only 'OSL', 'IRSL' and 'POSL' data!**
 #'
-#' @section Function version: 1.0.0
+#' @section Function version: 1.0.1
 #'
 #' @author
 #' Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Institute for Applied Geophysics (Germany) \cr
@@ -591,7 +593,7 @@ analyse_SAR.CWOSL<- function(
     }
   }
 
-  if (is.null(signal_integral) || .strict_na(signal_integral) ||
+  if (is.null(signal_integral) || identical(signal_integral, NA) ||
       is.null(background_integral)) {
     signal_integral <- background_integral <- NA
     signal_integral_Tx <- background_integral_Tx <- NULL
@@ -622,7 +624,7 @@ analyse_SAR.CWOSL<- function(
                                               min = max(signal_integral) + 1,
                                               max = channel.length)
 
-    if (length(background_integral) == 1 && !.strict_na(background_integral)) {
+    if (length(background_integral) == 1 && !identical(background_integral, NA)) {
       ## we subtract 25 to avoid warnings from calc_OSLLxTxRatio()
       background_integral <- background_integral - 25:0
       .throw_warning("Background integral should contain at least two values, reset to ",
@@ -647,10 +649,10 @@ analyse_SAR.CWOSL<- function(
     if (!is.null(signal_integral_Tx) && is.null(background_integral_Tx)) {
       background_integral_Tx <- background_integral
       .throw_warning("'background_integral_Tx' set automatically to ",
-                     if (.strict_na(background_integral_Tx)) NA
+                     if (identical(background_integral_Tx, NA)) NA
                      else .format_range(background_integral_Tx))
     }
-    if (length(background_integral_Tx) == 1 && !.strict_na(background_integral_Tx)) {
+    if (length(background_integral_Tx) == 1 && !identical(background_integral_Tx, NA)) {
       background_integral_Tx <- background_integral_Tx - 25:0
       .throw_warning("Background integral limits for Tx curves cannot be equal, reset to ",
                      .format_range(background_integral_Tx))
@@ -852,7 +854,7 @@ analyse_SAR.CWOSL<- function(
 
     ## calculate value and set names
     RecyclingRatio <- t(
-        setNames(round(ratio, 4),
+        stats::setNames(round(ratio, 4),
           nm = paste0("Recycling ratio (", repeated$Name, "/", previous$Name, ")")))
   }
 
@@ -875,15 +877,26 @@ analyse_SAR.CWOSL<- function(
 
   ## Calculate Recuperation Rate --------------------------------------------
   Recuperation <- NA
-  if (!recuperation_reference %in% LnLxTnTx$Name) {
-      .throw_error("Recuperation reference invalid, valid values are: ",
-                   .collapse(LnLxTnTx[, "Name"]))
+  valid.references <- c(LnLxTnTx$Name, "Rmax")
+  if (!recuperation_reference %in% valid.references) {
+    .throw_error("Invalid 'recuperation_reference', valid values are: ",
+                 .collapse(valid.references))
   }
 
   ## Recuperation Rate (capable of handling multiple type of recuperation values)
   if ("R0" %in% LnLxTnTx$Name) {
     idx.R0 <- LnLxTnTx$Name == "R0"
-    idx.Rref <- LnLxTnTx$Name == recuperation_reference
+    if (recuperation_reference == "Rmax") {
+      idx.Rref <- which(LnLxTnTx$Dose == max(LnLxTnTx$Dose))
+      if (length(idx.Rref) > 1) {
+        idx.Rref <- idx.Rref[1]
+        .throw_warning("'recuperation_reference = \"Rmax\"' matched multiple curve, ",
+                       "the first will be used (", LnLxTnTx$Name[idx.Rref], ")")
+      }
+    } else {
+      idx.Rref <- LnLxTnTx$Name == recuperation_reference
+    }
+
     R0 <- LnLxTnTx$LxTx[idx.R0]
     Rref <- LnLxTnTx$LxTx[idx.Rref]
     ratio <- R0 / Rref
@@ -894,7 +907,7 @@ analyse_SAR.CWOSL<- function(
     }
     labels <- paste0("Recuperation rate (", recuperation_reference, ") ",
                      seq_along(R0))
-    Recuperation <- t(setNames(ratio, labels))
+    Recuperation <- t(stats::setNames(ratio, labels))
   }
 
   recuperation.threshold <- rep(rejection.criteria$recuperation.rate / 100,
@@ -966,7 +979,6 @@ analyse_SAR.CWOSL<- function(
       HPDI68_U = NA,
       HPDI95_L = NA,
       HPDI95_U = NA,
-      RC.Status = NA,
       .De.plot = NA,
       .De.raw = NA)
 
@@ -1031,12 +1043,22 @@ analyse_SAR.CWOSL<- function(
 
   ## get position numbers
   POSITION <- unique(vapply(object@records,
-                            function(x) x@info$POSITION %||% NA,
+                            function(x) {
+                              ## case insensitive matching
+                              idx <- match("position", tolower(names(x@info)))
+                              if (is.na(idx)) return(NA)
+                              x@info[[idx]]
+                            },
                             FUN.VALUE = numeric(1)))[1]
 
   ## get grain numbers
   GRAIN <- unique(vapply(object@records,
-                         function(x) x@info$GRAIN %||% NA,
+                         function(x) {
+                              ## case insensitive matching
+                              idx <- match("grain", tolower(names(x@info)))
+                              if (is.na(idx)) return(NA)
+                              x@info[[idx]]
+                            },
                          FUN.VALUE = numeric(1)))[1]
 
   ## Results object ---------------------------------------------------------

@@ -41,12 +41,11 @@
 #' @param data [data.frame] or [Luminescence::RLum.Results-class] object (**required**):
 #' for `data.frame`: either two columns: De (`data[,1]`) and De error
 #' (`data[,2]`), or one: De (`values[,1]`). If a single-column data frame
-#' is provided, De error is assumed to be 10^-9 for all measurements.
+#' is provided, De error is assumed to be 10^-9 for all measurements, and
+#' `y.ticks` is silently reset to `FALSE`. Rows with `NA` values will be
+#' removed prior to plotting.
 #' To plot several data sets in one plot, the data sets must be provided as
 #' `list`, e.g. `list(data.1, data.2)`.
-#'
-#' @param na.rm [logical] (*with default*):
-#' excludes `NA` values from the data set prior to any further operations.
 #'
 #' @param log.z [logical] (*with default*):
 #' Option to display the z-axis in logarithmic scale. Default is `TRUE`.
@@ -118,12 +117,15 @@
 #' @param line.label [character]:
 #' labels for the additional lines.
 #'
-#' @param ... Further plot arguments to pass. `xlab` must be a vector of
-#' length 2, specifying the upper and lower x-axes labels.
+#' @param ... further arguments and graphical parameters to control the plot
+#' output. Supported are: `main`, `sub`, `xlab`, `ylab`, `zlab`, `xlim`, `ylim`,
+#' `zlim`, `cex`, `pt.cex` (point size), `lty`, `lwd`, `pch`, `col`, `tcl`, `show`, and
+#' `fun`. `xlab` must be a vector of length 2, specifying the upper and lower
+#' x-axes labels.
 #'
 #' @return Returns a plot object.
 #'
-#' @section Function version: 0.5.11
+#' @section Function version: 0.5.12
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
@@ -264,7 +266,6 @@
 #' @export
 plot_RadialPlot <- function(
   data,
-  na.rm = TRUE,
   log.z = TRUE,
   central.value = NULL,
   centrality = c("mean.weighted", "mean.weighted", "median", "median.weighted"),
@@ -318,10 +319,10 @@ plot_RadialPlot <- function(
                         name = paste0("Input 'data[[", i, "]]'"))
 
       ## if `data[[i]]` is a single-column data frame, append a second
-      ## column with a small non-zero value (10^-9 for consistency with
-      ## what `calc_Statistics() does)
+      ## column with a small non-zero value
       if (ncol(data[[i]]) < 2) {
         data[[i]] <- data.frame(data[[i]], 10^-9)
+        y.ticks <- FALSE
       } else {
         if (ncol(data[[i]]) > 2) {
           ## keep only the first two columns
@@ -330,8 +331,9 @@ plot_RadialPlot <- function(
 
         ## if all errors are NA, we set them to 0 so we correct them in the
         ## next block
-        if (all(is.na(data[[i]][, 2]))) {
-          data[[i]][, 2] <- 0
+        na.idx <- is.na(data[[i]][, 2])
+        if (any(na.idx)) {
+          data[[i]][na.idx, 2] <- 0
         }
 
         ## don't let the error be NA or zero: we set it to the smallest between
@@ -342,29 +344,22 @@ plot_RadialPlot <- function(
           data[[i]][is.zero, 2] <- min.value
           .throw_warning("Error values cannot be zero or NA, reset to ", min.value)
         }
+
+      ## find the Inf values in each of the two columns and remove the
+      ## corresponding rows if needed
+      inf.idx <- unlist(lapply(data[[i]], function(x) which(is.infinite(x))))
+      if (length(inf.idx) > 0) {
+        inf.row <- sort(unique(inf.idx))
+        .throw_warning("Inf values found in data set ", i, ", removed")
+        data[[i]] <- data[[i]][-inf.row, ]
       }
+    }
   }
 
-  valid.pos <- c("left", "center", "right", "topleft", "top", "topright",
-                 "bottomleft", "bottom", "bottomright")
   .validate_class(summary, "character")
-  if (is.numeric(summary.pos)) {
-    .validate_length(summary.pos, 2)
-    if (anyNA(summary.pos))
-      .throw_error("'summary.pos' cannot contain missing values")
-  }
-  else {
-    summary.pos <- .validate_args(summary.pos, c("sub", valid.pos))
-  }
+  summary.pos <- .validate_position(summary.pos, sub = TRUE)
   .validate_class(legend, "character", null.ok = TRUE)
-  if (is.numeric(legend.pos)) {
-    .validate_length(legend.pos, 2)
-    if (anyNA(legend.pos))
-      .throw_error("'legend.pos' cannot contain missing values")
-  } else {
-    legend.pos <- .validate_args(legend.pos, valid.pos)
-  }
-
+  legend.pos <- .validate_position(legend.pos)
   .validate_class(stats, "character")
   .validate_logical_scalar(rug)
   .validate_positive_scalar(plot.ratio, null.ok = TRUE)
@@ -384,14 +379,11 @@ plot_RadialPlot <- function(
                    "more than one data set (group) is provided")
   }
 
-  ## optionally, remove NA-values
-  .validate_logical_scalar(na.rm)
-  if (na.rm) {
-    for(i in 1:length(data)) {
+  ## remove NA-values
+  for (i in 1:length(data)) {
       data[[i]] <- na.exclude(data[[i]])
       if (nrow(data[[i]]) == 0)
         .throw_error("After NA removal, nothing is left from data set ", i)
-    }
   }
 
   ## create preliminary global data set
@@ -492,7 +484,7 @@ plot_RadialPlot <- function(
   data.global$std.estimate.plot <- unlist(lapply(data, function(x) x[, 8]))
 
   ## print warning for too small scatter
-  if (max(abs(1 / data.global[, 6])) < 0.02) {
+  if (max(abs(1 / data.global[, 6])) < 0.02 && y.ticks) {
     .throw_message("Small standardised estimate scatter, toggle off y.ticks?",
                    error = FALSE)
   }
@@ -539,11 +531,13 @@ plot_RadialPlot <- function(
   }
 
   cex <- extraArgs$cex %||% 1
+  pt.cex <- extraArgs$pt.cex %||% 1
   lty <- extraArgs$lty %||% rep(2, length(data))
   lwd <- extraArgs$lwd %||% rep(1, length(data))
   pch <- extraArgs$pch %||% rep(1, length(data))
   col <- extraArgs$col %||% 1:length(data)
   .validate_positive_scalar(cex)
+  .validate_positive_scalar(pt.cex)
   .validate_length(lty, length(data))
   .validate_length(lwd, length(data))
   .validate_length(pch, length(data))
@@ -1033,6 +1027,7 @@ plot_RadialPlot <- function(
     for(i in 1:length(data)) {
       points(data[[i]][,6][data[[i]][,6] <= limits.x[2]],
              data[[i]][,8][data[[i]][,6] <= limits.x[2]],
+             cex = pt.cex,
              col = col[i],
              pch = pch[i])
     }

@@ -31,6 +31,14 @@ test_that("input validation", {
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                             init.values = list(p0 = 0, p1 = 1, p2 = 2, mu = 3)),
                "Missing parameters: gamma, sigma")
+  expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
+                            init.values = list(gamma = -1, sigma = 2, p0 = 3, mu = 0)),
+               "'init.values$gamma' should be a single positive value",
+               fixed = TRUE)
+  expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
+                            init.values = list(gamma = 1, sigma = 2, p0 = 3, mu = 0)),
+               "'init.values$mu' should be a single positive value",
+               fixed = TRUE)
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1, par = "error"),
                "'par' should be a single positive integer value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1, par = 2),
@@ -54,12 +62,12 @@ test_that("input validation", {
                "'bs.M' should be a single positive integer value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                             bootstrap = TRUE, bs.N = -1),
-               "'bs.N' should be a single positive integer value")
+               "'bs.N' should be a single non-negative integer value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                             bootstrap = TRUE, bs.h = -1),
                "'bs.h' should be a single positive value")
   expect_error(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
-                            cores = -1, multicore = TRUE),
+                            cores = -1),
                "'cores' should be a single positive integer value")
 })
 
@@ -78,6 +86,10 @@ test_that("check functionality", {
   ## RLum.Results object
   calc_MinDose(temp, sigmab = 0.1, verbose = FALSE, log = FALSE, par = 4,
                init.values = list(gamma = 54, sigma = 1, p0 = 0.01, mu = 70))
+
+  ## disable second-level bootstrapping
+  calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1, verbose = FALSE,
+                            bootstrap = TRUE, bs.M = 20, bs.N = 0)
 
   ## missing values
   data.na <- ExampleData.DeValues$CA1
@@ -114,38 +126,43 @@ test_that("check functionality", {
 test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  set.seed(1)
   snapshot.tolerance <- 6.5e-5 # TODO(mcol): reset to 1.5e-6 for R4.7
 
-  expect_snapshot_RLum(temp, tolerance = snapshot.tolerance)
+  expect_snapshot_RLum(temp,
+                       tolerance = snapshot.tolerance)
   SW({
   expect_snapshot_RLum(calc_MinDose(data = ExampleData.DeValues$CA1 / 100,
                                     sigmab = 0.2, gamma.upper = 4, par = 4,
                                     log.output = TRUE, plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
-  })
   expect_snapshot_RLum(calc_MinDose(data = ExampleData.DeValues$CA1,
                                     sigmab = 0.0103, log = FALSE,
-                                    verbose = FALSE, plot = FALSE),
+                                    plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
 
   ## bootstrap = TRUE
   suppressWarnings( # Not enough bootstrap replicates for loess fitting
   expect_snapshot_RLum(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                                     bootstrap = TRUE, bs.M = 10, bs.N = 5,
-                                    verbose = FALSE, plot = FALSE),
+                                    plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
   )
   expect_snapshot_RLum(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.2,
                                     invert = TRUE, bootstrap = TRUE,
                                     bs.M = 20, bs.N = 5, bs.h = 10,
-                                    verbose = FALSE, plot = FALSE),
+                                    plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
   expect_snapshot_RLum(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.09,
                                     bootstrap = TRUE, log = FALSE, par = 4,
                                     bs.M = 20, bs.N = 5, bs.h = 10,
-                                    verbose = FALSE, plot = FALSE),
+                                    plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
+  })
 })
 
 test_that("output snapshot tests", {
@@ -160,18 +177,6 @@ test_that("output snapshot tests", {
   expect_snapshot_output(res <- calc_MinDose(data = ExampleData.DeValues$CA1 / 100,
                                              sigmab = 0.2, gamma.upper = 4, par = 4,
                                              log.output = TRUE, plot = FALSE))
-  expect_snapshot_output(res <- calc_MinDose(data = ExampleData.DeValues$CA1,
-                                             sigmab = 0.0103, log = FALSE,
-                                             plot = FALSE))
-  suppressWarnings( # Not enough bootstrap replicates for loess fitting
-  expect_snapshot_output(res <- calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
-                                             bootstrap = TRUE, bs.M = 10, bs.N = 5,
-                                             plot = FALSE))
-  )
-  expect_snapshot_output(res <- calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.2,
-                                             invert = TRUE, bootstrap = TRUE,
-                                             bs.M = 20, bs.N = 5, bs.h = 10,
-                                             plot = FALSE))
   expect_snapshot_output(res <- calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.2,
                                              init.values = list(mu = 30, p0 = 0.01,
                                                                 sigma = 0.5, gamma = 30),
@@ -183,6 +188,7 @@ test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
 
+  set.seed(1)
   SW({
   vdiffr::expect_doppelganger("default",
                               calc_MinDose(ExampleData.DeValues$CA1,
@@ -194,6 +200,10 @@ test_that("graphical snapshot tests", {
   vdiffr::expect_doppelganger("small sigmab",
                               calc_MinDose(ExampleData.DeValues$CA1,
                                            sigmab = 0.009))
+  vdiffr::expect_doppelganger("classic bootstrap",
+                              calc_MinDose(ExampleData.DeValues$CA1,
+                                           sigmab = 0.1, bootstrap = TRUE,
+                                           bs.M = 10, bs.N = 0))
   })
 })
 
@@ -227,4 +237,8 @@ test_that("regression tests", {
   expect_warning(calc_MinDose(ExampleData.DeValues$CA1, sigmab = 0.1,
                               bootstrap = TRUE, bs.M = 10, bs.N = 1,
                               verbose = FALSE, plot = FALSE))
+
+  ## issue 1659
+  expect_silent(calc_MinDose(cbind(ExampleData.DeValues$CA1, NA),
+                             sigmab = 0.1, verbose = FALSE))
 })

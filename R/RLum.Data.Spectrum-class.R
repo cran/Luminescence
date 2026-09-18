@@ -75,6 +75,21 @@ setClass(
 ## as() ---------------------------------------------------------------------
 ##data.frame
 ##COERCE RLum.Data.Spectrum >> data.frame AND data.frame >> RLum.Data.Spectrum
+#' as()
+#'
+#' for `[RLum.Data.Spectrum-class]`
+#'
+#' **[Luminescence::RLum.Data.Spectrum-class]**
+#'
+#' \tabular{ll}{
+#'   **from** \tab **to**\cr
+#'   `data.frame` \tab `data.frame`\cr
+#'   `matrix` \tab `matrix` \cr
+#'   `list` \tab `list`
+#' }
+#'
+#' @name as
+#' @aliases coerce,data.frame,RLum.Data.Spectrum-method
 setAs("data.frame", "RLum.Data.Spectrum",
       function(from,to){
 

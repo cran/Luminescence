@@ -6,7 +6,6 @@
 \usage{
 plot_Histogram(
   data,
-  na.rm = TRUE,
   mtext = "",
   cex.global = 1,
   se = TRUE,
@@ -22,11 +21,9 @@ plot_Histogram(
 \arguments{
 \item{data}{\link{data.frame} or \link[=RLum.Results-class]{RLum.Results} object (\strong{required}):
 for \code{data.frame}: two columns: De (\code{data[,1]}) and De error (\code{data[,2]}).
-If the error column is missing or only contains \code{NA} values, then the error
-at each measurement is assumed to be 10^-9.}
-
-\item{na.rm}{\link{logical} (\emph{with default}):
-excludes \code{NA} values from the data set prior to any further operations.}
+If the error column is missing or only contains \code{NA} values, then \code{se} is
+set to \code{FALSE}, and the weighted statistics will match the unweighted ones.
+In any other case, rows with \code{NA} values will be removed prior to plotting.}
 
 \item{mtext}{\link{character} (\emph{optional}):
 further sample information (\link{mtext}).}
@@ -35,7 +32,9 @@ further sample information (\link{mtext}).}
 global scaling factor.}
 
 \item{se}{\link{logical} (\emph{with default}):
-plots standard error points over the histogram, default is \code{TRUE}.}
+plots standard error points over the histogram, default is \code{TRUE}. It is
+silently reset to \code{FALSE} if the error column in \code{data} is missing or only
+contains \code{NA} values.}
 
 \item{rug}{\link{logical} (\emph{with default}):
 adds rugs to the histogram, default is \code{TRUE}.}
@@ -65,11 +64,12 @@ text, normal distribution curve, standard error points
 \item{interactive}{\link{logical} (\emph{with default}):
 create an interactive histogram plot (requires the 'plotly' package)}
 
-\item{...}{further arguments and graphical parameters passed to \link{plot} or
-\link{hist}. If y-axis labels are provided, these must be specified as a vector
-of length 2 since the plot features two axes
-(e.g. \code{ylab = c("axis label 1", "axis label 2")}). Y-axes limits
-(\code{ylim}) must be provided as vector of length four, with the first two
+\item{...}{further arguments and graphical parameters to control the plot
+output (see \link{plot} and \link{hist}). Supported are: \code{main}, \code{xlab}, \code{ylab},
+\code{xlim}, \code{ylim}, \code{breaks}, \code{pch}, \code{pt.cex} (point size), and \code{fun}. If y-axis labels are
+provided, these must be specified as a vector of length 2 since the plot
+features two axes (e.g. \code{ylab = c("axis label 1", "axis label 2")}). Y-axes
+limits (\code{ylim}) must be provided as vector of length four, with the first two
 elements specifying the left axes limits and the latter two elements giving
 the right axis limits.}
 }
@@ -101,11 +101,8 @@ one or more of the following keywords:
 \item \code{"skewness"} (skewness).
 }
 }
-\note{
-The input data is not restricted to a special type.
-}
 \section{Function version}{
- 0.4.5
+ 0.4.6
 }
 
 \examples{
@@ -144,6 +141,6 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2026. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_Histogram(): Plot a histogram with separate error plot. Function version 0.4.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 

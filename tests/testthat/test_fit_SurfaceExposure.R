@@ -32,6 +32,9 @@ test_that("input validation", {
                "'plot' should be a single logical value")
   expect_error(fit_SurfaceExposure(data.frame(NA, 1:5)),
                "After NA removal, nothing is left from the data set")
+  expect_error(expect_warning(fit_SurfaceExposure(data.frame(1:5, Inf)),
+                              "Inf values found in 'data', replaced by NA"),
+               "After NA removal, nothing is left from the data set")
   expect_error(fit_SurfaceExposure(data = d1, sigmaphi = 5e-10, mu = 0.9,
                                    verbose = NULL),
                "'verbose' should be a single logical value")
@@ -41,45 +44,27 @@ test_that("input validation", {
   })
 })
 
-test_that("check values from example 1", {
+test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  fit <- fit_SurfaceExposure(data = d1, sigmaphi = 5e-10, mu = 0.9,
-                             plot = TRUE, verbose = FALSE)
+  snapshot.tolerance <- 1.5e-6
 
-  ## Example data 1
-  expect_s4_class(fit, "RLum.Results")
-  expect_equal(is(fit), c("RLum.Results", "RLum"))
-  expect_equal(length(fit), 5)
-  expect_equal(is(fit$fit), "nls")
+  expect_snapshot_RLum(fit_SurfaceExposure(data = d1, sigmaphi = 5e-10, mu = 0.9,
+                                           plot = TRUE),
+                       expect_snapshot_output = TRUE,
+                       tolerance = snapshot.tolerance)
 
-  expect_equal(round(fit$summary$age), 9893)
-  expect_equal(round(fit$summary$age_error), 369)
-})
+  expect_snapshot_RLum(fit_SurfaceExposure(data = d1, sigmaphi = 5e-10, mu = 0.9,
+                                           weights = TRUE,
+                                           plot = FALSE),
+                       expect_snapshot_output = TRUE,
+                       tolerance = snapshot.tolerance)
 
-test_that("check values from example 1 - weighted fitting", {
-  testthat::skip_on_cran()
-
-  fit <- fit_SurfaceExposure(data = d1, sigmaphi = 5e-10, mu = 0.9, weights = TRUE,
-                             plot = FALSE, verbose = FALSE)
-
-  expect_equal(round(fit$summary$age), 9624)
-  expect_equal(round(fit$summary$age_error), 273)
-})
-
-test_that("check values from example 2", {
-  testthat::skip_on_cran()
-
-  fit <- fit_SurfaceExposure(data = data.table(d2), age = 1e4,
-                             sigmaphi = 5e-10, Ddot = 2.5, D0 = 40,
-                             plot = FALSE, verbose = FALSE)
-
-  expect_equal(is(fit), c("RLum.Results", "RLum"))
-  expect_equal(length(fit), 5)
-  expect_equal(is(fit$fit), "nls")
-
-  expect_equal(round(fit$summary$mu, 3), 0.904)
-  expect_equal(round(fit$summary$mu_error, 3), 0.007)
+  expect_snapshot_RLum(fit_SurfaceExposure(data = data.table(d2), age = 1e4,
+                                           sigmaphi = 5e-10, Ddot = 2.5, D0 = 40,
+                                           plot = FALSE),
+                       expect_snapshot_output = TRUE,
+                       tolerance = snapshot.tolerance)
 })
 
 test_that("check values from example 3", {

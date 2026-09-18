@@ -1,5 +1,7 @@
 ## load data
 data(ExampleData.CW_OSL_Curve, envir = environment())
+data(ExampleData.XSYG, envir = environment())
+sar <- OSL.SARMeasurement$Sequence.Object
 
 test_that("input validation", {
   testthat::skip_on_cran()
@@ -69,6 +71,9 @@ test_that("input validation", {
                "After NA removal, nothing is left from the data set")
   expect_error(calc_FastRatio(data.frame(1:4, NA)),
                "After NA removal, nothing is left from the data set")
+  expect_error(expect_warning(calc_FastRatio(data.frame(1:4, Inf)),
+                              "Inf values found in 'object', replaced by NA"),
+               "After NA removal, nothing is left from the data set")
   expect_error(calc_FastRatio(ExampleData.CW_OSL_Curve, verbose = NA),
                "'verbose' should be a single logical value")
 
@@ -80,30 +85,33 @@ test_that("input validation", {
                                             Ch_L2 = 2000)),
                  "The calculated channel for L2 (2000) exceeds the number",
                  fixed = TRUE)
-  SW({
-  expect_warning(calc_FastRatio(ExampleData.CW_OSL_Curve,
-                                Ch_L3 = c(1000, 1000)),
-                 "The calculated channels for L3 (1000, 1000) exceed",
-                 fixed = TRUE)
-  })
 })
 
 test_that("check functionality", {
   testthat::skip_on_cran()
 
-  temp <- calc_FastRatio(ExampleData.CW_OSL_Curve, plot = FALSE,
-                         verbose = FALSE)
-  expect_s4_class(temp, "RLum.Results")
-  expect_equal(length(temp), 5)
+  snapshot.tolerance <- 1.5e-6
+
+  expect_snapshot_RLum(temp <- calc_FastRatio(ExampleData.CW_OSL_Curve,
+                                              plot = FALSE),
+                       expect_snapshot_output = TRUE,
+                       tolerance = snapshot.tolerance)
 
   ## fitCW.sigma and fitCW.curve
-  SW({
-  calc_FastRatio(ExampleData.CW_OSL_Curve, plot = FALSE,
-                 fitCW.sigma = TRUE, fitCW.curve = TRUE)
+  expect_snapshot_RLum(calc_FastRatio(ExampleData.CW_OSL_Curve, plot = FALSE,
+                                      fitCW.sigma = TRUE, fitCW.curve = TRUE),
+                       expect_snapshot_output = TRUE,
+                       tolerance = snapshot.tolerance)
 
+  ## Ch_L3 values equal to the last channel
+  expect_snapshot_RLum(calc_FastRatio(ExampleData.CW_OSL_Curve, plot = FALSE,
+                                      Ch_L3 = c(1000, 1000)),
+                       expect_snapshot_output = TRUE,
+                       tolerance = snapshot.tolerance)
+
+  SW({
   ## RLum.Analysis object
-  data(ExampleData.XSYG, envir = environment())
-  calc_FastRatio(OSL.SARMeasurement$Sequence.Object)
+  calc_FastRatio(sar)
 
   expect_warning(calc_FastRatio(get_RLum(TL.Spectrum)),
                  "L3 contains more counts (566) than L2 (562)",
@@ -117,30 +125,6 @@ test_that("check functionality", {
   curve <- set_RLum("RLum.Data.Curve", data = as.matrix(ExampleData.CW_OSL_Curve))
   expect_s4_class(calc_FastRatio(curve, plot = FALSE, verbose = FALSE),
                   "RLum.Results")
-
-  results <- get_RLum(temp)
-  expect_equal(round(results$fast.ratio, digits = 3), 405.122)
-  expect_equal(round(results$fast.ratio.se, digits = 4), 119.7442)
-  expect_equal(round(results$fast.ratio.rse, digits = 5), 29.55756)
-  expect_equal(results$channels, 1000)
-  expect_equal(round(results$channel.width, digits = 2), 0.04)
-  expect_equal(results$dead.channels.start, 0)
-  expect_equal(results$dead.channels.end, 0)
-  expect_equal(results$sigmaF, 2.6e-17)
-  expect_equal(results$sigmaM, 4.28e-18)
-  expect_equal(results$stimulation.power, 30.6)
-  expect_equal(results$wavelength, 470)
-  expect_equal(results$t_L1, 0)
-  expect_equal(round(results$t_L2, digits = 6), 2.446413)
-  expect_equal(round(results$t_L3_start, digits = 5), 14.86139)
-  expect_equal(round(results$t_L3_end, digits = 5), 22.29208)
-  expect_equal(results$Ch_L1, 1)
-  expect_equal(results$Ch_L2, 62)
-  expect_equal(results$Ch_L3_start, 373)
-  expect_equal(results$Ch_L3_end, 558)
-  expect_equal(results$Cts_L1, 11111)
-  expect_equal(results$Cts_L2, 65)
-  expect_equal(round(results$Cts_L3, digits = 5), 37.66667)
 })
 
 test_that("graphical snapshot tests", {
@@ -148,8 +132,11 @@ test_that("graphical snapshot tests", {
   testthat::skip_if_not_installed("vdiffr")
 
   SW({
-  vdiffr::expect_doppelganger("FastRatio defaults",
+  vdiffr::expect_doppelganger("defaults",
                               calc_FastRatio(ExampleData.CW_OSL_Curve))
+  vdiffr::expect_doppelganger("dead channels",
+                              calc_FastRatio(sar[[1]],
+                                             dead_channels = c(200, 250)))
   })
 })
 

@@ -1,5 +1,4 @@
 ## load data
-set.seed(1)
 data(ExampleData.BINfileData, envir = environment())
 object <- Risoe.BINfileData2RLum.Analysis(CWOSL.SAR.Data, pos = 1:2)
 decomposed <- readRDS(test_path("_data/OSLdecomposed_1.2.0.rds"))
@@ -316,7 +315,24 @@ test_that("check functionality", {
         exceed.max.regpoint = FALSE),
       plot = TRUE
     ),
-    "Recuperation reference invalid, valid values are: 'Natural', 'R1', 'R2'")
+    "Invalid 'recuperation_reference', valid values are: 'Natural', 'R1', 'R2'")
+
+  ## repeated point with highest dose
+  obj.rep <- object[[1]]
+  obj.rep@records[[14]]@info$IRR_TIME <- 2550
+  expect_warning(
+    analyse_SAR.CWOSL(
+      object = obj.rep,
+      signal_integral = 1:2,
+      background_integral = 900:1000,
+      fit.method = "LIN",
+      rejection.criteria = list(
+          recuperation.rate = 1,
+          recuperation_reference = "Rmax"),
+      plot = FALSE,
+      verbose = FALSE),
+    "'recuperation_reference = \"Rmax\"' matched multiple curve, the first will be used (R3)",
+    fixed = TRUE)
 
   expect_error(
     analyse_SAR.CWOSL(
@@ -574,6 +590,17 @@ test_that("check functionality", {
       plot = FALSE, verbose = FALSE)
   expect_equal(res$rejection.criteria$Status[1:2],
                c("OK", "OK"))
+
+  ## simulate the info object of an XSYG file (issue 1625)
+  data <- object[[1]]
+  data@records[[1]]@info[c("POSITION", "GRAIN")] <- NULL
+  data@records[[1]]@info$position <- 12
+  data@records[[1]]@info$grain <- 33
+  res <- analyse_SAR.CWOSL(data, signal_integral = 1:4,
+                           background_integral = 150:250,
+                           verbose = FALSE, plot = FALSE)
+  expect_equal(res@data$data$POS, 12)
+  expect_equal(res@data$data$GRAIN, 33)
 })
 
 test_that("advance tests run", {
@@ -870,6 +897,7 @@ test_that("graphical snapshot tests", {
                                   signal_integral = 1:2,
                                   background_integral = 900:1000,
                                   rejection.criteria = list(recycling.ratio = NA,
+                                                            recuperation_reference = "Rmax",
                                                             sn.ratio = NA,
                                                             consider.uncertainties = TRUE),
                                   plot_onePage = TRUE))
@@ -964,6 +992,17 @@ test_that("regression tests", {
 
   ## issue 1592
   expect_silent(plot_DoseResponseCurve(res.orig))
+
+  ## issue 1623
+  data <- object
+  data[[1]]@records <- lapply(data[[1]]@records, function(curve) {
+    curve@info$IRR_TIME <- 0
+    curve
+  })
+  expect_message(analyse_SAR.CWOSL(data, signal_integral = 1:4,
+                                   background_integral = 150:250,
+                                   verbose = FALSE, plot = FALSE),
+                 "Error: All points have the same dose, NULL returned")
 })
 
 test_that("deprecated arguments", {

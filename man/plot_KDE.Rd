@@ -6,7 +6,6 @@
 \usage{
 plot_KDE(
   data,
-  na.rm = TRUE,
   values.cumulative = TRUE,
   order = TRUE,
   boxplot = TRUE,
@@ -23,12 +22,10 @@ plot_KDE(
 for \code{data.frame}: either two columns: De (\code{values[,1]}) and De error
 (\code{values[,2]}), or one: De (\code{values[,1]}). If a numeric vector or a
 single-column data frame is provided, De error is assumed to be 10^-9
-for all measurements and error bars are not drawn.
+for all measurements and error bars are not drawn. Rows with \code{NA} values
+will be removed prior to plotting.
 For plotting multiple data sets, these must be provided as
 \code{list} (e.g. \code{list(dataset1, dataset2)}).}
-
-\item{na.rm}{\link{logical} (\emph{with default}):
-exclude \code{NA} values from the data set prior to any further operation.}
 
 \item{values.cumulative}{\link{logical} (\emph{with default}):
 show cumulative individual data.}
@@ -63,7 +60,10 @@ See \link{calc_Statistics} for details.}
 \item{bw}{\link{character}, \link{numeric} (\emph{with default}):
 bin-width, chose a numeric value for manual setting.}
 
-\item{...}{further arguments and graphical parameters passed to \link{plot}.}
+\item{...}{further arguments and graphical parameters to control the plot
+output (see \link{plot}). Supported are: \code{main}, \code{sub}, \code{mtext}, \code{layout}, \code{xlab},
+\code{ylab}, \code{xlim}, \code{ylim}, \code{log}, \code{cex}, \code{pt.cex} (point size), \code{lty}, \code{lwd}, \code{col}, and
+\code{fun}.}
 }
 \description{
 Plot a kernel density estimate of measurement values in combination with the
@@ -113,7 +113,7 @@ The plot output is no 'probability density' plot (cf. the discussion
 of Berger and Galbraith in Ancient TL; see references)!
 }
 \section{Function version}{
- 3.6.1
+ 3.6.2
 }
 
 \examples{
@@ -179,6 +179,6 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Dietze, M., Kreutzer, S., 2026. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Dietze, M., Kreutzer, S., 2026. plot_KDE(): Plot kernel density estimate with statistics. Function version 3.6.2. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 

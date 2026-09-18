@@ -51,7 +51,6 @@ test_that("input validation", {
 test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  set.seed(1)
   snapshot.tolerance <- 1.5e-6
 
   ## Example 1: calculation for two trap-depths with similar frequency factor
@@ -59,8 +58,8 @@ test_that("snapshot tests", {
   expect_snapshot_RLum(calc_ThermalLifetime(E = c(1.66, 1.70),
                                             s = 1e+13,
                                             T = 10:20,
-                                            output_unit = "Ma",
-                                            verbose = FALSE),
+                                            output_unit = "Ma"),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
 
   ## Example 2: profiling of thermal life time for E and s and their standard error
@@ -69,14 +68,16 @@ test_that("snapshot tests", {
                                             T = 20,
                                             profiling = TRUE,
                                             output_unit = "Ma",
-                                            verbose = FALSE,
                                             plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
 })
 
 test_that("graphical snapshot tests", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("vdiffr")
+
+  set.seed(1)
 
   SW({
   vdiffr::expect_doppelganger("profiling",

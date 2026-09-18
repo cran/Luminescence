@@ -1,8 +1,9 @@
-#' @title (Un-)logged minimum age model (MAM) after Galbraith et al. (1999)
+#' @title Apply the minimum (maximum) age model to a given De distribution
 #'
 #' @description
 #' Function to fit the (un-)logged three or four parameter minimum dose model
-#' (MAM-3/4) to De data.
+#' (MAM-3/4) and maximum dose model to De data after Galbraith et al. (1999)
+#' and Olley et al. (2006).
 #'
 #' **Parameters**
 #'
@@ -13,7 +14,7 @@
 #' `sigma`: \tab spread in ages above the minimum \cr
 #' `p0`: \tab proportion of grains at gamma \cr }
 #'
-#' If `par=3` (default) the 3-parameter minimum age model is applied,
+#' If `par=3` (default) the 3-parameter model is applied,
 #' where `gamma=mu`. For `par=4` the 4-parameter model is applied instead.
 #'
 #' **(Un-)logged model**
@@ -37,15 +38,33 @@
 #' samples containing negative, zero or near-zero De estimates (Arnold et al.
 #' 2009, p. 323).
 #'
+#' **Maximum dose model**
+#'
+#' To estimate the maximum dose population and its standard error, the minimum
+#' age model of Galbraith et al. (1999) is adapted. The measured De values are
+#' transformed as follows:
+#'
+#' 1. convert De values to natural logs
+#' 2. multiply the logged data by -1 to create a mirror image of the De distribution
+#' 3. shift De values along x-axis by the smallest x-value found to obtain only positive values
+#' 4. combine in quadrature the measurement error associated with each De value
+#' with a relative error specified by `sigmab`
+#' 5. apply the MAM to these data
+#'
+#' When all calculations are done the results are then converted back as follows:
+#' 1. subtract the x-offset
+#' 2. multiply the natural logs by -1
+#' 3. take the exponent to obtain the maximum dose estimate in Gy
+#'
+#' Only a logged maximum dose model is supported.
+#'
 #' **Initial values and boundaries**
 #'
 #' The log-likelihood calculations use the [nlminb] function for box-constrained
-#' optimisation using PORT routines.  Accordingly, initial values for the four
-#' parameters can be specified via `init.values`. If no values are
-#' provided for `init.values`, reasonable starting values are estimated
-#' from the input data.  If the final estimates of *gamma*, *mu*,
-#' *sigma* and *p0* are totally off target, consider providing custom
-#' starting values via `init.values`.
+#' optimisation using PORT routines. By default, initial values for the four
+#' parameters are estimated from the input data. If the final estimates
+#' of *gamma*, *mu*, *sigma* and *p0* are totally off target, consider
+#' providing custom starting values via `init.values`.
 #'
 #' The boundaries for individual model parameters need not be specified
 #' explicitly. To override the default boundary values, provide arguments
@@ -54,7 +73,7 @@
 #'
 #' **Bootstrap**
 #'
-#' When `bootstrap=TRUE` the function applies the bootstrapping method as
+#' When `bootstrap = TRUE` the function applies the bootstrapping method as
 #' described in Cunningham & Wallinga (2012). The minimum age model produces
 #' `bs.M` first-level bootstrap replicates (1000 by default) and `bs.N`
 #' second-level replicates (`3 * bs.M` by default), with an uncertainty
@@ -65,14 +84,18 @@
 #'
 #' \deqn{h = 2\sigma_{DE} / \sqrt{n}}
 #'
+#' **Note:** Setting `bs.N` to 0 corresponds to a classic bootstrap, which
+#' bypasses some of the computations required for the full approach by
+#' Cunningham & Wallinga (2012), such as polynomial smoothing. This may be
+#' sufficient when no subsequent Bayesian analysis is required.
+#'
 #' **Multicore support**
 #'
-#' Parallel processing can be enabled by setting `multicore = TRUE`. By default,
-#' the number of logical CPU cores is detected automatically, but it can be
-#' overridden with the `cores` argument. Multicore processing is supported
+#' Parallel processing can be enabled by setting the `cores` argument to a
+#' value greater than 1 (or to `NULL` to use all but two of the available
+#' logical CPU cores). Multicore processing is supported
 #' only when `bootstrap = TRUE`, and spawns one R process per core to compute
-#' MAM estimates for each of the `N * M` bootstrap replicates. Note that this
-#' feature is experimental and may not work on all systems. Performance gains
+#' MAM estimates for each of the `N * M` bootstrap replicates. Performance gains
 #' grow with the number of bootstrap replicates, but each additional core (R
 #' process) increases memory usage. When memory is insufficient, overall
 #' performance can degrade severely.
@@ -110,16 +133,16 @@
 #' default).
 #'
 #' @param par [numeric] (*with default*):
-#' number of parameters in the minimum age model, either 3 (default) or 4.
+#' number of parameters in the model, either 3 (default) or 4.
 #'
 #' @param bootstrap [logical] (*with default*):
 #' apply the recycled bootstrap approach of Cunningham & Wallinga 2012. See
 #' details for default values and options to modify them.
 #'
 #' @param init.values [numeric] (*optional*):
-#' a named list with starting values for `gamma`, `sigma`, `p0` and `mu`
-#' (e.g. `list(gamma=100, sigma=1.5, p0=0.1, mu=100)`). If no values are
-#' provided, reasonable values will be estimated from the data.
+#' a named list with starting positive values for `gamma`, `sigma`, `p0` and
+#' `mu` (e.g. `list(gamma=100, sigma=1.5, p0=0.1, mu=100)`). If set to `NULL`
+#' (default), reasonable values will be estimated from the data.
 #' **Note:** the initial values must always be given in the absolute units.
 #' If a logged model is applied (`log = TRUE`), the provided `init.values`
 #' are automatically log-transformed.
@@ -134,18 +157,18 @@
 #' @param plot [logical] (*with default*):
 #' enable/disable the plot output.
 #'
-#' @param multicore [logical] (*with default*):
-#' parallelize the computation of the bootstrap by creating a multicore cluster
-#' (only considered if `bootstrap = TRUE`). By default, it uses all available
-#' logical CPU cores, but this can be changed with the `cores` argument. Note
-#' that this feature is experimental and may not work on all systems.
+#' @param cores [integer], [numeric] (*with default*):
+#' number of cores allocated for parallel processing of the bootstrap step
+#' (only considered if `bootstrap = TRUE`). The default value corresponds to
+#' single-threaded computation; the recommended value is `NULL`, which assigns
+#' all but two of the available logical CPU cores.
 #'
-#' @param ... (*optional*) further arguments for bootstrapping
-#' (`bs.M`, `bs.N`, `bs.h`, `sigmab.sd`). See details for their usage.
-#' Further arguments are
-#' - `verbose`: enable/disable output to the terminal
-#' - `debug`: enable/disable extended console output
-#' - `cores`: number of cores to be used when `multicore=TRUE`
+#' @param ... Further arguments:
+#' - `bs.M`, `bs.N`, `bs.h`, `sigmab.sd`: arguments for bootstrapping, see
+#' details for their usage.
+#' - `verbose`: enable/disable output to the terminal.
+#' - `debug`: enable/disable extended console output.
+#' - all named argument of [calc_MinDose] can be passed to [calc_MaxDose].
 #'
 #' @return Returns a plot (*optional*) and terminal output. In addition an
 #' [Luminescence::RLum.Results-class] object is returned containing the
@@ -173,7 +196,7 @@
 #' model with `debug=TRUE` which provides extended console output and
 #' forwards all internal warning messages.
 #'
-#' @section Function version: 0.6.0
+#' @section Function version: 0.6.2
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany) \cr
@@ -182,8 +205,8 @@
 #' The bootstrap approach is based on a MATLAB script by Alastair Cunningham,
 #' who helped with implementation and cross-checking.
 #'
-#' @seealso [Luminescence::calc_CentralDose], [Luminescence::calc_CommonDose], [Luminescence::calc_FiniteMixture],
-#' [Luminescence::calc_FuchsLang2001], [Luminescence::calc_MaxDose]
+#' @seealso [Luminescence::calc_CentralDose], [Luminescence::calc_CommonDose],
+#' [Luminescence::calc_FiniteMixture], [Luminescence::calc_FuchsLang2001]
 #'
 #' @references
 #' Arnold, L.J., Roberts, R.G., Galbraith, R.F. & DeLong, S.B.,
@@ -320,8 +343,12 @@
 #'
 #' # Show the fitted values of the polynomials
 #' summary(bs$poly.fits$poly.three$fitted.values)
+#'
+#' # apply the maximum dose model
+#' calc_MaxDose(ExampleData.DeValues$CA1, sigmab = 0.2, par = 3)
 #' }
 #'
+#' @order 1
 #' @export
 calc_MinDose <- function(
   data,
@@ -333,7 +360,7 @@ calc_MinDose <- function(
   level = 0.95,
   log.output = FALSE,
   plot = TRUE,
-  multicore = FALSE,
+  cores = 1,
   ...
 ) {
   .set_function_name("calc_MinDose")
@@ -348,6 +375,9 @@ calc_MinDose <- function(
   if (ncol(data) < 2) {
     .throw_error("'data' should have 2 columns")
   }
+
+  ## restrict to the first two columns
+  data <- data[, 1:2]
 
   if (!all(stats::complete.cases(data))) {
     .throw_message("Warning: Input data contained NA/NaN values, ",
@@ -372,6 +402,10 @@ calc_MinDose <- function(
                    "in 'init.values'. Missing parameters: ",
                    toString(mis.names))
     }
+    .validate_positive_scalar(init.values$gamma, name = "'init.values$gamma'")
+    .validate_positive_scalar(init.values$sigma, name = "'init.values$sigma'")
+    .validate_positive_scalar(init.values$p0, name = "'init.values$p0'")
+    .validate_positive_scalar(init.values$mu, name = "'init.values$mu'")
   }
 
   ## par can only be 3 or 4
@@ -384,13 +418,18 @@ calc_MinDose <- function(
   .validate_logical_scalar(bootstrap)
   .validate_logical_scalar(log.output)
   .validate_logical_scalar(plot)
-  .validate_logical_scalar(multicore)
+  cores <- .validate_cores(cores)
 
   ##============================================================================##
   ## ... ARGUMENTS
   ##============================================================================##
 
   extraArgs <- list(...)
+
+  ## deprecated argument
+  if ("multicore" %in% ...names()) {
+    .deprecated("multicore", "cores", since = "1.3.1")
+  }
 
   ## check if this function is called by calc_MaxDose()
   if ("invert" %in% names(extraArgs)) {
@@ -420,9 +459,10 @@ calc_MinDose <- function(
 
   # second level bootstrap
   if ("bs.N" %in% names(extraArgs)) {
-    N <- .validate_positive_scalar(as.integer(extraArgs$bs.N),
-                                   int = TRUE, name= "'bs.N'")
-    N <- max(N, 2) # issue 1355
+    N <- .validate_nonnegative_scalar(as.integer(extraArgs$bs.N),
+                                      int = TRUE, name= "'bs.N'")
+    if (N > 0)
+      N <- max(N, 2) # issue 1355
   } else {
     N <- 3*M
   }
@@ -448,14 +488,8 @@ calc_MinDose <- function(
     debug <- FALSE
   }
 
-  if (multicore && "cores" %in% names(extraArgs)) {
-    cores <- .validate_positive_scalar(extraArgs$cores,
-                                       int = TRUE, name = "'cores'")
-  } else {
-    cores <- ifelse(multicore, parallel::detectCores(), 1)
-    if (multicore && verbose)
-      message("Logical CPU cores detected: ", cores) # nocov
-  }
+  if (cores > 1 && verbose)
+    .throw_message("Logical CPU cores detected: ", cores, error = FALSE)
 
   ## remove non-positive values if using log-transformation
   if (log) {
@@ -677,18 +711,17 @@ calc_MinDose <- function(
                    prof.upper = prof.upper)
   }
 
-  prof <- suppressWarnings(.fit_profile(maxsteps = 100))
-  if (!inherits(prof, "profile.mle2")) {
-    cnt <- 1
-    while (!inherits(prof, "profile.mle2")) {
-      if (cnt > 10)
-        .throw_error("Couldn't find a converging fit for the profile log-likelihood")
-      if (verbose)
-        message("## Trying to find a better fit (", cnt, "/10) ##")
-      prof <- suppressWarnings(.fit_profile(maxsteps = 100 - (cnt - 1) * 10))
-      cnt <- cnt + 1
-    }
+  max.steps <- seq(100, 10, by = -10)
+  prof <- NULL
+  for (i in seq_along(max.steps)) {
+    prof <- suppressWarnings(.fit_profile(maxsteps = max.steps[i]))
+    if (inherits(prof, "profile.mle2"))
+      break
+    if (verbose)
+      message("## Profiling attempt ", i, "/", length(max.steps), " failed ##")
   }
+  if (!inherits(prof, "profile.mle2"))
+    .throw_error("Couldn't find a converging fit for the profile log-likelihood")
 
   ## delete rows where z = -Inf/Inf or NaN
   for (p in c("gamma", "sigma", "p0", if (par == 4) "mu")) {
@@ -728,7 +761,7 @@ calc_MinDose <- function(
   ##============================================================================##
   if (bootstrap) {
 
-    # Function that produces N+M replicates from the original data set using
+    # Function that produces replicates from the original data set using
     # randomly sampled indices with replacement and adding a randomly drawn
     # sigmab error
     create_Replicates <- function(R, e) {
@@ -764,7 +797,7 @@ calc_MinDose <- function(
 
       ## fit polynomial to log(y), then exponentiate back
       fit <- stats::lm(log(y) ~ poly(x, degree, raw = TRUE), na.action = na.exclude)
-      f <- exp(predict(fit, newdata = data.frame(x)))
+      f <- exp(stats::predict(fit, newdata = data.frame(x)))
 
       ## vector of points to interpolate fit
       xi <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = 100)
@@ -781,16 +814,16 @@ calc_MinDose <- function(
     # nocov end
 
     ## START BOOTSTRAP ----
-    msg <- sprintf(paste("\n [calc_MinDose] \n\nRecycled Bootstrap",
-                         "\n\nParameters:",
+    msg <- sprintf(paste("%s bootstrap parameters:",
                          "\n M = %d",
                          "\n N = %d",
                          "\n sigmab = %.2f \U00B1 %.2f",
                          "\n h = %.2f",
                          "\n\nCreating %d bootstrap replicates..."),
+                   ifelse(N > 0, "Recycled", "Classic"),
                    M, N, sigmab, sigmab.sd, h, N+M)
     if (verbose)
-      message(msg)
+      .throw_message(msg, error = FALSE)
 
     # Draw N+M samples from a normally distributed sigmab
     sigmab.bs <- rnorm(N + M, sigmab, sigmab.sd)
@@ -811,7 +844,7 @@ calc_MinDose <- function(
               " cores, this may take a while...")
     }
 
-    if (multicore) {
+    if (cores > 1) {
       cl <- parallel::makeCluster(cores)
       mle <- parallel::parLapply(cl, replicates, Get_mle)
       parallel::stopCluster(cl)
@@ -819,7 +852,8 @@ calc_MinDose <- function(
       mle <- lapply(replicates, Get_mle)
     }
 
-    # Final bootstrap calculations
+    ## Recycled bootstrap calculations
+    if (N > 0) {
     if (verbose)
       message("Calculating likelihoods...")
 
@@ -878,6 +912,12 @@ calc_MinDose <- function(
       .throw_warning("Not enough bootstrap replicates for loess fitting, try ",
                      "increasing `bs.M`")
     }
+    } # end if (N > 0)
+    else {
+      ## classic bootstrap (N == 0)
+      theta <- sapply(mle, save_Gamma, log = log)
+      pairs <- data.frame(theta = theta)
+    }
 
     ## extract the parameters from the bootstrap replicates
     mle <- rbindlist(lapply(mle[N + 1:M], extract_estimates, log = log))
@@ -894,7 +934,6 @@ calc_MinDose <- function(
 
     ## standard deviation over the De values from the bootstrap replicates
     gamma_err <- sd(pairs[, "theta"])
-
   }#EndOf::Bootstrap
 
   ## ========================================================================
@@ -960,7 +999,7 @@ calc_MinDose <- function(
       conf_log[which(rownames(conf_log) == "p0"), ] <- "-"
       conf_print <- cbind(conf_print, conf_log)
       ncols <- ncol(conf_print) / 2
-      conf_print <- rbind(setNames(data.frame(as.list(rep("", ncols)),
+      conf_print <- rbind(stats::setNames(data.frame(as.list(rep("", ncols)),
                                               as.list(rep("(logged)", ncols)),
                                               row.names = ""),
                                    colnames(conf_print)),
@@ -990,7 +1029,7 @@ calc_MinDose <- function(
   if (invert)
     prof@profile$gamma$par.vals[ ,"gamma"] <- rev((prof@profile$gamma$par.vals[ ,"gamma"] - x.offset)*-1)
 
-  if (!bootstrap)
+  if (!bootstrap || N == 0)
     pairs <- poly.three <- poly.four <- poly.five <- poly.six <- loess <- NULL
 
   results <- set_RLum(
@@ -1010,7 +1049,7 @@ calc_MinDose <- function(
                                    poly.four = poly.four,
                                    poly.five = poly.five,
                                    poly.six = poly.six),
-                  loess.fit = loess)))
+                  loess.fit = loess %||% NA)))
 
   ##=========##
   ## PLOTTING

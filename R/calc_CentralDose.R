@@ -47,7 +47,7 @@
 #'
 #' The output should be accessed using the function [Luminescence::get_RLum].
 #'
-#' @section Function version: 1.5
+#' @section Function version: 1.6
 #'
 #' @author
 #' Christoph Burow, University of Cologne (Germany) \cr
@@ -115,20 +115,33 @@ calc_CentralDose <- function(
   }
   .validate_nonnegative_scalar(sigmab)
 
-  ##remove NA values
-  if (anyNA(data)) {
-    .throw_message(length(which(is.na(data))), " NA values removed from dataset",
-                   error = FALSE)
-    data <- na.exclude(data)
-  }
-
   ## check that we have enough data available
   if(ncol(data) < 2 || nrow(data) < 2)
     .throw_error("'data' should have at least two columns and two rows")
 
-  ##extract only the first two columns and set column names
-  data <- data[,1:2]
+  ## extract only the first two columns and set column names
+  data <- data[, 1:2]
   colnames(data) <- c("ED", "ED_Error")
+
+  ## replace infinite values
+  if (any(is.infinite(unlist(data)))) {
+    .throw_warning("Inf values found in 'data', replaced by NA")
+    for (i in 1:ncol(data)) {
+      data[is.infinite(data[, i]), i] <- NA
+    }
+  }
+
+  ## remove NA values
+  if (anyNA(data)) {
+    .throw_message(length(which(is.na(data))), " NA values removed from dataset",
+                   error = FALSE)
+    data <- na.exclude(data)
+    if (nrow(data) < 2)
+      .throw_error("After NA removal, 'data' was left with fewer than two rows")
+
+    ## drop the na.action attribute
+    attr(data, "na.action") <- NULL
+  }
 
   ## don't allow log transformation if there are non-positive values
   .validate_logical_scalar(log)
@@ -199,7 +212,7 @@ calc_CentralDose <- function(
 
     # print iterations
     if (options$trace)
-      print(round(c(delta, sigma), 4))
+      cat(sprintf("%3d %.6f %.6f\n", j, delta, sigma))
 
     ## don't let sigma become zero
     if (sigma < 1e-16)
@@ -231,21 +244,23 @@ calc_CentralDose <- function(
 
   # profile log likelihood
   Lmax <- llik
-  llik <- 0
   sig0 <- max(0, sigma - 8 * sesigma)
   sig1 <- sigma + 9.5 * sesigma
-  sig <- try(seq(sig0, sig1, sig1 / 1000), silent = TRUE)
+  sig <- tryCatch(seq(sig0, sig1, sig1 / 1000),
+                  error = function(e) NA)
 
-  if (!inherits(sig, "try-error")) {
+  if (!anyNA(sig)) {
     # TODO: rewrite this loop as a function and maximise with mle2 ll is the actual
     # log likelihood, llik is a vector of all ll
-    for (s in sig) {
-      wu <- 1 / (s^2 + su^2)
+    llik <- numeric(length(sig))
+    for (i in seq_along(sig)) {
+      wu <- 1 / (sig[i]^2 + su^2)
       mu <- sum(wu * yu)/sum(wu)
-      ll <- 0.5 * sum(log(wu)) - 0.5 * sum(wu * (yu - mu)^2)
-      llik <- c(llik, ll)
+      llik[i] <- 0.5 * sum(log(wu)) - 0.5 * sum(wu * (yu - mu)^2)
     }
-    llik <- llik[-1] - Lmax
+    llik <- llik - Lmax
+  } else {
+    llik <- 0
   }
 
   ## ============================================================================##
@@ -280,7 +295,8 @@ calc_CentralDose <- function(
   ## RETURN VALUES
   ## ============================================================================##
 
-  if(!log)  sig <- sig / delta
+  if (!log && !anyNA(sig))
+    sig <- sig / delta
 
   summary <- data.frame(
     de = out.delta,
@@ -300,7 +316,7 @@ calc_CentralDose <- function(
       data = data,
       args = args,
       profile = data.frame(
-        sig = if(!inherits(sig, "try-error")) sig else NA,
+        sig = sig,
         llik = llik)
     ),
     info = list(
@@ -309,7 +325,7 @@ calc_CentralDose <- function(
   )
 
   ## =========## PLOTTING
-  if (plot && !inherits(sig, "try-error"))
+  if (plot && !anyNA(sig))
     try(plot_RLum.Results(newRLumResults.calc_CentralDose, ...))
 
   invisible(newRLumResults.calc_CentralDose)

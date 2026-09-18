@@ -333,6 +333,7 @@ fit_LMCurve<- function(
   .validate_logical_scalar(plot.residuals)
   .validate_logical_scalar(plot.contribution)
   .validate_logical_scalar(legend)
+  legend.pos <- .validate_position(legend.pos)
   .validate_class(method_control, "list")
 
   ## remove missing values
@@ -624,7 +625,7 @@ fit_LMCurve<- function(
     rel_cs<-round(cs/cs[1],digits=4)
 
     ##coefficient of determination after law
-    RSS <- sum(residuals(fit)^2) #residual sum of squares
+    RSS <- sum(stats::residuals(fit)^2) # residual sum of squares
     TSS <- sum((values[,2] - mean(values[,2]))^2) #total sum of squares
     pR<-round(1-RSS/TSS,digits=4)
 
@@ -906,7 +907,7 @@ fit_LMCurve<- function(
       ##plot residuals
       if (plot.residuals) {
       par(mar = c(0.5, 2.5, 0, 0))
-      plot(values[,1],residuals(fit),
+      plot(values[, 1], stats::residuals(fit),
            xlim = settings$xlim,
            xlab = "",
            xaxt = "n",

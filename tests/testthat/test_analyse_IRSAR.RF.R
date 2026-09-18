@@ -87,9 +87,12 @@ test_that("input validation", {
   ## Error in `.check_ncores(length(names))`: 4 simultaneous processes spawned
   if (FALSE) {
   expect_warning(analyse_IRSAR.RF(IRSAR.RF.Data, method = "VSLIDE",
-                                  method_control = list(cores = 10000)),
+                                  cores = 10000),
                  "Number of cores limited to the maximum available")
   }
+  expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, method = "VSLIDE",
+                                cores = "4"),
+               "'cores' should be a single positive integer value or NULL")
 
   ## vslide_range
   expect_error(analyse_IRSAR.RF(IRSAR.RF.Data, method = "VSLIDE",
@@ -114,17 +117,12 @@ test_that("input validation", {
   expect_warning(analyse_IRSAR.RF(IRSAR.RF.Data, method = "VSLIDE",
                                   method_control = list(num_slide_windows = 20)),
                  "should be between 1 and 10, reset to 10")
-
-  expect_message(analyse_IRSAR.RF(IRSAR.RF.Data, method = "VSLIDE",
-                                  method_control = list(cores = "4")),
-                 "Invalid value for control argument 'cores'")
   })
 })
 
 test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  set.seed(1)
   expect_snapshot_RLum(analyse_IRSAR.RF(IRSAR.RF.Data, method = "FIT",
                                         plot = FALSE))
   SW({
@@ -170,12 +168,18 @@ test_that("graphical snapshot tests", {
   vdiffr::expect_doppelganger("vslide",
                               analyse_IRSAR.RF(IRSAR.RF.Data,
                                                method = "VSLIDE",
+                                               col_nat = "seagreen",
+                                               col_reg = "orchid",
+                                               log = "y",
+                                               pt.cex = 1.2,
+                                               yaxis_scientific = TRUE,
                                                n.MC = NULL))
   vdiffr::expect_doppelganger("none subtitle log",
                               analyse_IRSAR.RF(IRSAR.RF.Data,
                                                method = "None",
                                                mtext = "Subtitle",
                                                log = "xy",
+                                               pt.cex = 1.5,
                                                n.MC = 10,
                                                txtProgressBar = FALSE))
   })
@@ -217,20 +221,24 @@ test_that("test edge cases", {
     plot = TRUE,
     RF_reg = c(1, 400),
     txtProgressBar = FALSE),
-    "Threshold exceeded for: 'curves_bounds'")
+    "Threshold exceeded for: 'curves_bounds', see manual for details")
+
+  ## issue 1715
+  expect_warning(analyse_IRSAR.RF(object, method = "FIT"),
+                 "Threshold exceeded for: 'curves_ratio', see manual for")
 
   expect_warning(expect_s4_class(analyse_IRSAR.RF(
     list(object),
     method = "SLIDE",
     method_control = list(vslide_range = 'auto', correct_onset = FALSE,
-                          show_fit = TRUE, trace = TRUE, n.MC = 2,
-                          cores = 2),
+                          show_fit = TRUE, trace = TRUE, n.MC = 2),
     RF_nat.lim = 2,
     RF_reg.lim = 2,
     plot = TRUE,
     main = "Title",
     mtext = "Subtitle",
     log = "x",
+    cores = 2,
     txtProgressBar = FALSE),
     "RLum.Results"),
     "Threshold exceeded for: 'curves_ratio'")
@@ -238,7 +246,7 @@ test_that("test edge cases", {
 
   ## this RF_nat.lim after
   ##  'length = 2' in coercion to 'logical(1)' error
-  expect_s4_class(suppressWarnings(analyse_IRSAR.RF(
+  expect_message(expect_s4_class(suppressWarnings(analyse_IRSAR.RF(
     object,
     method = "SLIDE",
     method_control = list(vslide_range = 'auto', correct_onset = FALSE),
@@ -246,7 +254,9 @@ test_that("test edge cases", {
     #RF_reg.lim = c(),
     plot = TRUE,
     txtProgressBar = FALSE
-  )), "RLum.Results")
+  )),
+  "RLum.Results"),
+  "Using 1 core")
 
   expect_s4_class(suppressWarnings(analyse_IRSAR.RF(
     object,
@@ -314,4 +324,18 @@ test_that("regression tests", {
 
   ## issue 1055
   expect_silent(analyse_IRSAR.RF(IRSAR.RF.Data, method = "FIT", n.MC = NULL))
+
+  ## issue 1744
+  obj <- read_RF2R(system.file("extdata", "RF_file.rf", package = "Luminescence"),
+                   verbose = FALSE)[1:2]
+  expect_silent(analyse_IRSAR.RF(obj, method = "FIT",
+                                 txtProgressBar = FALSE,
+                                 plot = TRUE))
+
+  ## issue 1745
+  ## same obj as issue 1744
+  expect_silent(expect_message(analyse_IRSAR.RF(obj, method = "VSLIDE",
+                                                txtProgressBar = FALSE,
+                                                plot = FALSE),
+                               "Using 1 core ...", fixed = TRUE))
 })

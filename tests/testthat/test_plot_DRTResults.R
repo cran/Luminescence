@@ -54,7 +54,10 @@ test_that("input validation", {
   expect_error(plot_DRTResults(data.frame(NA, 1:4)),
                      "No valid records in 'object'")
   expect_error(plot_DRTResults(list(empty, empty)),
-                     "No valid records in 'object'")
+               "'object' should have 2 columns")
+  obj <- set_RLum("RLum.Results", data = list(data = data.frame(1:10)))
+  expect_error(plot_DRTResults(obj),
+               "'object' should have 2 columns")
 })
 
 test_that("check functionality", {
@@ -121,6 +124,7 @@ test_that("graphical snapshot tests", {
                                               summary = c("mean", "sd.abs")))
   vdiffr::expect_doppelganger("list sub",
                               plot_DRTResults(df.list,
+                                              pt.cex = 1.5,
                                               summary.pos = "sub",
                                               summary = c("mean", "median")))
   vdiffr::expect_doppelganger("list bottomright",
@@ -134,6 +138,8 @@ test_that("graphical snapshot tests", {
                               plot_DRTResults(list(df, rbind(df, df) * 1.05)))
   vdiffr::expect_doppelganger("errors NA",
                               plot_DRTResults(data.frame(1:5, NA)))
+  vdiffr::expect_doppelganger("infinities",
+                              plot_DRTResults(data.frame(c(1, Inf, 2, 3), Inf)))
   })
 })
 

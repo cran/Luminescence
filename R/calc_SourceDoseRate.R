@@ -24,7 +24,7 @@
 #' \tabular{rlll}{
 #'  **#** \tab **Source type** \tab **T.1/2** \tab **Reference** \cr
 #'  `[1]` \tab Sr-90 \tab 28.90 y \tab NNDC, Brookhaven National Laboratory \cr
-#'  `[2]` \tab Am-214 \tab 432.6 y \tab NNDC, Brookhaven National Laboratory \cr
+#'  `[2]` \tab Am-241 \tab 432.6 y \tab NNDC, Brookhaven National Laboratory \cr
 #'  `[3]` \tab Co-60 \tab 5.274 y \tab NNDC, Brookhaven National Laboratory \cr
 #'  `[4]` \tab Cs-137 \tab 30.08 y \tab NNDC, Brookhaven National Laboratory}
 #'
@@ -42,7 +42,7 @@
 #' error of dose rate at date of calibration Gy/s or Gy/min.
 #'
 #' @param source.type [character] (*with default*):
-#' specify irradiation source (`Sr-90`, `Co-60`, `Cs-137`, `Am-214`),
+#' specify irradiation source (`Sr-90`, `Co-60`, `Cs-137`, `Am-241`),
 #' see details for further information.
 #'
 #' @param dose.rate.unit [character] (*with default*):
@@ -138,33 +138,25 @@ calc_SourceDoseRate <- function(
   calib.date,
   calib.dose.rate,
   calib.error,
-  source.type = c("Sr-90", "Am-214", "Co-60", "Cs-137"),
+  source.type = c("Sr-90", "Am-241", "Co-60", "Cs-137"),
   dose.rate.unit = c("Gy/s", "Gy/min"),
   predict = NULL
 ) {
   .set_function_name("calc_SourceDoseRate")
   on.exit(.unset_function_name(), add = TRUE)
 
+  .as_date <- function(x) {
+    name <- .first_argument()
+    .validate_class(x, c("Date", "character"), name = name)
+    tryCatch(as.Date(x),
+             error = function(e) .throw_error(name, " could not be converted to a Date, ",
+                                              e$message))
+  }
+
   if (missing(measurement.date))
     measurement.date <- Sys.Date()
-  .validate_class(measurement.date, c("Date", "character"))
-  if (is.character(measurement.date)) {
-    measurement.date <- tryCatch(
-        as.Date(measurement.date),
-        error = function(e) {
-          .throw_error("'measurement.date' could not be converted to a Date, ",
-                       e$message)
-        })
-  }
-  .validate_class(calib.date, c("Date", "character"))
-  if (is.character(calib.date)) {
-    calib.date <- tryCatch(
-        as.Date(calib.date),
-        error = function(e) {
-          .throw_error("'calib.date' could not be converted to a Date, ",
-                       e$message)
-        })
-  }
+  measurement.date <- .as_date(measurement.date)
+  calib.date <- .as_date(calib.date)
   .validate_positive_scalar(calib.error)
   .validate_class(predict, c("integer", "numeric"), length = 1:2, null.ok = TRUE)
   if (anyNA(predict))
@@ -172,7 +164,7 @@ calc_SourceDoseRate <- function(
 
   ## source type and dose rate unit
   source.type <- .validate_args(source.type,
-                                c("Sr-90", "Am-214", "Co-60", "Cs-137"))
+                                c("Sr-90", "Am-241", "Co-60", "Cs-137"))
   dose.rate.unit <- .validate_args(dose.rate.unit, c("Gy/s", "Gy/min"))
 
   # --- if predict is set
@@ -187,10 +179,6 @@ calc_SourceDoseRate <- function(
                             seq(start.date + 1, by = 1, length = abs(predict[2]) - 1))
   }
 
-  # -- calc days since source calibration
-  decay.days <- measurement.date - calib.date
-
-
   # -- calc dose rate of source at date of measurement, considering the chosen source-type
   ##set half-life
   halflife.years  <- switch(
@@ -202,12 +190,12 @@ calc_SourceDoseRate <- function(
     )
 
   halflife.days  <- halflife.years * .const$year_d
+  decay.days <- as.numeric(measurement.date - calib.date)
 
   # N(t) = N(0)*e^((lambda * t) with lambda = log(2)/T1.2)
-  measurement.dose.rate <- (calib.dose.rate) *
-    exp((-log(2) / halflife.days) * as.numeric(decay.days))
-  measurement.dose.rate.error <- (calib.error) *
-    exp((-log(2) / halflife.days) * as.numeric(decay.days))
+  decay.factor <- exp(-log(2) / halflife.days * decay.days)
+  measurement.dose.rate <- calib.dose.rate * decay.factor
+  measurement.dose.rate.error <- calib.error * decay.factor
 
   # -- convert to input unit to [Gy/s]
   if(dose.rate.unit == "Gy/min"){

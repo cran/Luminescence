@@ -1,11 +1,12 @@
-#' @title Function to create an Abanico Plot.
+#' @title Function to create an abanico plot
 #'
-#' @description A plot is produced which allows comprehensive presentation of data precision
-#' and its dispersion around a central value as well as illustration of a
+#' @description
+#' The abanico plot provides a comprehensive presentation of data precision
+#' and its dispersion around a central value, and can also display a
 #' kernel density estimate, histogram and/or dot plot of the dose values.
 #'
 #' @details
-#' The Abanico Plot is a combination of the classic Radial Plot
+#' The abanico plot is a combination of the classic radial plot
 #' [Luminescence::plot_RadialPlot] and a kernel density estimate plot (e.g
 #' [Luminescence::plot_KDE]. It allows straightforward visualisation of data precision,
 #' error scatter around a user-defined central value and the combined
@@ -14,21 +15,26 @@
 #' Galbraith & Green (1990). The function authors are thankful for the
 #' thought-provoking figure in this article.
 #'
-#' The semi circle (z-axis) of the classic Radial Plot is bent to a straight
+#' The semi circle (z-axis) of the classic radial plot is bent to a straight
 #' line here, which actually is the basis for combining this polar (radial)
 #' part of the plot with any other Cartesian visualisation method
 #' (KDE, histogram, PDF and so on). Note that the plot allows displaying
 #' two measures of distribution. One is the 2-sigma
 #' bar, which illustrates the spread in value errors, and the other is the
-#' polygon, which stretches over both parts of the Abanico Plot (polar and
+#' polygon, which stretches over both parts of the abanico plot (polar and
 #' Cartesian) and illustrates the actual spread in the values themselves.
 #'
 #' Since the 2-sigma-bar is a polygon, it can be (and is) filled with shaded
 #' lines. To change density (lines per inch, default is 15) and angle (default
 #' is 45 degrees) of the shading lines, specify these parameters. See
-#' `?polygon()` for further help.
+#' [graphics::polygon] for further help.
 #'
-#' The Abanico Plot supports other than the weighted mean as measure of
+#' The proportion of the polar part and the cartesian part of the abanico plot
+#' can be modified for display reasons (`plot.ratio = 0.75`). By default,
+#' the polar part spreads over 75 % and leaves 25 % for the part that
+#' shows the KDE graph.
+#'
+#' The abanico plot supports other than the weighted mean as measure of
 #' centrality. When it is obvious that the data
 #' is not (log-)normally distributed, the mean (weighted or not) cannot be a
 #' valid measure of centrality and hence central dose. Accordingly, the median
@@ -37,26 +43,24 @@
 #' user-defined numeric values (e.g. from the central age model) can be used if
 #' this appears appropriate.
 #'
-#' The proportion of the polar part and the cartesian part of the Abanico Plot
-#' can be modified for display reasons (`plot.ratio = 0.75`). By default,
-#' the polar part spreads over 75 % and leaves 25 % for the part that
-#' shows the KDE graph.
-#'
+#' ## Statistics summary
 #'
 #' A statistic summary, i.e. a collection of statistic measures of
 #' centrality and dispersion (and further measures) can be added by specifying
-#' one or more of the following keywords:
+#' one or more of the following keywords in the `summary` argument:
 #'
 #' - `"n"` (number of samples)
 #' - `"mean"` (mean De value)
 #' - `"median"` (median of the De values)
-#' - `"sd.rel"` (relative standard deviation in percent)
 #' - `"sd.abs"` (absolute standard deviation)
-#' - `"se.rel"` (relative standard error)
+#' - `"sd.rel"` (relative standard deviation in percent)
 #' - `"se.abs"` (absolute standard error)
+#' - `"se.rel"` (relative standard error)
 #' - `"in.2s"` (percent of samples in 2-sigma range)
-#' - `"kurtosis"` (kurtosis)
+#' - `"q.25"` (25% percentile)
+#' - `"q.75"` (75% percentile)
 #' - `"skewness"` (skewness)
+#' - `"kurtosis"` (kurtosis)
 #'
 #' **Note:** the input data for the statistic summary is sent to the function
 #' [Luminescence::calc_Statistics] depending on the log-option for the z-scale. If
@@ -68,6 +72,8 @@
 #' `MCM-based` (i.e., based on Monte Carlo Methods). By default, the
 #' MCM-based version is used. If you wish to use another method, indicate this
 #' with the appropriate keyword using the argument `summary.method`.
+#'
+#' ## Other arguments
 #'
 #' The optional parameter `layout` allows more sophisticated ways to modify
 #' the entire plot. Each element of the plot can be addressed and its properties
@@ -85,7 +91,8 @@
 #' @param data [data.frame] or [Luminescence::RLum.Results-class] object (**required**):
 #' for `data.frame` two columns: De (`data[,1]`) and De error (`data[,2]`).
 #'  To plot several data sets in one plot the data sets must be provided as
-#'  `list`, e.g. `list(data.1, data.2)`.\cr
+#'  `list`, e.g. `list(data.1, data.2)`. Rows with `NA` values will be removed
+#' prior to plotting.\cr
 #' For some [Luminescence::RLum.Results-class] objects, one or more lines (and
 #' corresponding labels) are drawn automatically:
 #' - [Luminescence::calc_AverageDose] (ADM)
@@ -96,11 +103,9 @@
 #' Alternative labels can be set via the `line.label` option. This behaviour
 #' can be suppressed altogether by setting `line = NA`.
 #'
-#' @param na.rm [logical] (*with default*):
-#' exclude `NA` values from the data set prior to any further operations.
-#'
 #' @param log.z [logical] (*with default*):
-#' Option to display the z-axis in logarithmic scale. Default is `TRUE`.
+#' display the z-axis in logarithmic scale (`TRUE` by default). The setting is
+#' automatically reset to `FALSE` if any zero values appear in the De column.
 #'
 #' @param z.0 [character] or [numeric] (*with default*):
 #' User-defined central value used for centring of data. One of `"mean.weighted"`
@@ -108,7 +113,8 @@
 #' logarithm).
 #'
 #' @param dispersion [character] (*with default*):
-#' measure of dispersion, used for drawing the scatter polygon. One out of
+#' measure of dispersion used to draw the scatter polygon. Can be one of the
+#' following:
 #' - `"qr"` (quartile range, default)
 #' - `"sd"` (standard deviation)
 #' - `"2sd"` (2 standard deviations)
@@ -154,21 +160,25 @@
 #' for the legend to be plotted.
 #'
 #' @param stats [character]:
-#' additional labels of statistically important values in the plot.
-#' One or more out of the following:
-#' - `"min"`,
-#' - `"max"`,
-#' - `"median"`.
+#' additional labels of statistically important values in the plot. Can be one
+#' or more of the following:
+#' - `"min"`
+#' - `"max"`
+#' - `"median"`
 #'
 #' @param rug [logical] (*with default*):
 #' Option to add a rug to the KDE part, to indicate the location of individual values.
 #'
 #' @param kde [logical] (*with default*):
-#' Option to add a KDE plot to the dispersion part, default is `TRUE`.
+#' Option to add a KDE plot to the dispersion part (`TRUE` by default). The
+#' smoothing bandwidth can be controlled by setting the `bw` argument (`"SJ"`
+#' by default; see [stats::density] for details).
 #'
 #' @param hist [logical] (*with default*):
-#' Option to add a histogram to the dispersion part. Only meaningful when not
-#' more than one data set is plotted.
+#' Option to add a histogram to the dispersion part. Only meaningful when only
+#' one data set is plotted. The number of cells in the histogram can be
+#' controlled by setting the `breaks` argument (see [graphics::hist] for
+#' details).
 #'
 #' @param dots [logical] (*with default*):
 #' Option to add a dot plot to the dispersion part. If number of dots exceeds
@@ -177,16 +187,16 @@
 #' @param boxplot [logical] (*with default*):
 #' Option to add a boxplot to the dispersion part, default is `FALSE`.
 #'
-#' @param y.axis [logical] (*with default*): Option to hide standard y-axis
-#' labels and show 0 only.
-#' Useful for data with small scatter. If you want to suppress the y-axis entirely
-#' please use `yaxt == 'n'` (the standard [graphics::par] setting) instead.
+#' @param y.axis [logical] (*with default*):
+#' option to hide standard y-axis labels and show 0 only, useful for data with
+#' small scatter. To suppress the y-axis entirely, use `yaxt == 'n'` (the
+#' standard [graphics::par] setting) instead.
 #'
 #' @param error.bars [logical] (*with default*):
 #' Option to show De-errors as error bars on De-points. Useful in combination
-#' with `y.axis = FALSE, bar.col = "none"`.
+#' with `y.axis = FALSE, bar = FALSE`.
 #'
-#' @param bar [numeric] (*with default*):
+#' @param bar [numeric] or [logical] (*with default*):
 #' option to add one or more dispersion bars (i.e., bar showing the 2-sigma range)
 #' centred at the defined values. By default a bar is drawn according to `"z.0"`.
 #' To omit the bar set `"bar = FALSE"`.
@@ -217,29 +227,28 @@
 #' the z-scale). To disable grid lines use `FALSE`. Default is `"grey"`.
 #'
 #' @param frame [numeric] (*with default*):
-#' option to modify the plot frame type. Can be one out of
-#' - `0` (no frame),
-#' - `1` (frame originates at 0,0 and runs along min/max isochrons),
-#' - `2` (frame embraces the 2-sigma bar),
-#' - `3` (frame embraces the entire plot as a rectangle).
-#'
-#' Default is `1`.
-#'
-#' @param bw [character] (*with default*):
-#' bin-width for KDE, choose a numeric value for manual setting.
+#' the plot frame type, one of the following:
+#' - 0: no frame
+#' - 1: frame originates at 0,0 and runs along min/max isochrons (default)
+#' - 2: frame embraces the 2-sigma bar
+#' - 3: frame embraces the entire plot as a rectangle
 #'
 #' @param interactive [logical] (*with default*):
-#' create an interactive abanico plot (requires the `'plotly'` package)
+#' create an interactive abanico plot (requires the `'plotly'` package).
 #'
-#' @param ... Further plot arguments to pass (see [graphics::plot.default]).
-#' Supported are: `main`, `sub`, `ylab`, `xlab`, `zlab`, `zlim`, `ylim`, `cex`,
-#' `lty`, `lwd`, `pch`, `col`, `at`, `breaks`. `xlab` must be
-#' a vector of length two, specifying the upper and lower x-axis labels.
+#' @param ... further arguments and graphical parameters to control the plot
+#' output. Supported are: `main`, `sub`, `ylab`, `xlab`, `zlab`, `xlim`,
+#' `ylim`, `zlim`, `cex`, `pt.cex` (point size), `lty`, `lwd`, `pch`, `col`,
+#' `at`, `bw`, and `breaks`. `xlab` must be a vector of length two, specifying
+#' the upper and lower x-axis labels.
+#'
+#' Please note that in the interactive mode, if you are using an expression,
+#' the `zlab` must use HTML tags, such as `D<sub>e</sub>` for `D[e]`.
 #'
 #' @return
 #' Returns a plot object and, optionally, a list with plot calculus data.
 #'
-#' @section Function version: 0.1.21
+#' @section Function version: 0.1.25
 #'
 #' @author
 #' Michael Dietze, GFZ Potsdam (Germany)\cr
@@ -439,7 +448,6 @@
 #' @export
 plot_AbanicoPlot <- function(
   data,
-  na.rm = TRUE,
   log.z = TRUE,
   z.0 = c("mean.weighted", "mean", "median"),
   dispersion = c("qr", "sd", "2sd"),
@@ -468,7 +476,6 @@ plot_AbanicoPlot <- function(
   line.label = NULL,
   grid.col = NULL,
   frame = 1,
-  bw = "SJ",
   interactive = FALSE,
   ...
 ) {
@@ -514,62 +521,53 @@ plot_AbanicoPlot <- function(
       data[[i]] <- get_RLum(data[[i]], "data")
     }
 
+    ## find the Inf values in each of the two columns and remove the
+    ## corresponding rows if needed
+    inf.idx <- unlist(lapply(data[[i]], function(x) which(is.infinite(x))))
+    if (length(inf.idx) > 0) {
+      inf.row <- sort(unique(inf.idx))
+      .throw_warning("Inf values found in data set ", i, ", removed")
+      data[[i]] <- data[[i]][-inf.row, ]
+    }
+
       if (ncol(data[[i]]) < 2) {
         .throw_error("Data set ", i, " has fewer than 2 columns: data ",
                      "without errors cannot be displayed")
       }
 
       data[[i]] <- data[[i]][, 1:2]
-  }
-  if (!is.null(line.mtext) && mtext == "" && summary.pos != "sub")
-    mtext <- line.mtext
 
-  ## optionally, remove NA-values
-  .validate_logical_scalar(na.rm)
-  if (na.rm) {
-    for(i in seq_along(data)) {
-      n.NA <- sum(!stats::complete.cases(data[[i]]))
-      if (n.NA > 0) {
-        .throw_message("Data set ", i, ": ", n.NA, " NA value",
-                       ifelse(n.NA > 1, "s", ""), " excluded", error = FALSE)
-        data[[i]] <- na.exclude(data[[i]])
+    ## remove NA-values
+    n.NA <- sum(!stats::complete.cases(data[[i]]))
+    if (n.NA > 0) {
+      .throw_message("Data set ", i, ": ", n.NA, " NA value",
+                     ifelse(n.NA > 1, "s", ""), " excluded", error = FALSE)
+      data[[i]] <- na.exclude(data[[i]])
+    }
+
+    ## check for zero-error values
+    if (any(data[[i]][, 2] == 0)) {
+      data[[i]] <- data[[i]][data[[i]][, 2] > 0, ]
+      if (nrow(data[[i]]) < 1) {
+        .throw_error("Data set ", i, " contains only values with zero errors")
       }
+      .throw_warning("Values with zero errors cannot be displayed and were removed")
     }
   }
 
   ##AFTER NA removal, we should check the data set carefully again ...
-  nrows <- sapply(data, nrow)
+  nrows.zero <- sapply(data, nrow) == 0
   ##(1)
   ##check if there is still data left in the entire set
-  if (all(nrows == 0)) {
+  if (all(nrows.zero)) {
     .throw_message("'data' is empty, nothing plotted")
     return(NULL)
   }
   ##(2)
-  ##check for sets with only 1 row or 0 rows at all
-  if (any(nrows < 2)) {
-    ##select problematic sets and remove the entries from the list
-    NArm.id <- which(nrows <= 1)
-    data[NArm.id] <- NULL
-    .throw_warning("Data set ", toString(NArm.id),
-                   " empty or consisting of only 1 row, removed")
-
-    ##unfortunately, the data set might become now empty at all
-    if(length(data) == 0){
-      .throw_message("After removing invalid entries, nothing is plotted")
-      return(NULL)
-    }
-  }
-
-  ## check for zero-error values
-  for(i in 1:length(data)) {
-    if (any(data[[i]][, 2] == 0)) {
-      data[[i]] <- data[[i]][data[[i]][,2] > 0,]
-      if (nrow(data[[i]]) < 1){
-        .throw_error("Data set contains only values with zero errors")
-      }
-      .throw_warning("Values with zero errors cannot be displayed and were removed")
-    }
+  ## remove sets with 0 rows
+  if (any(nrows.zero)) {
+    data[nrows.zero] <- NULL
+    .throw_warning("Data set ", toString(which(nrows.zero)), " empty, removed")
   }
 
   ## check for 0 values in dataset for log
@@ -577,7 +575,7 @@ plot_AbanicoPlot <- function(
   if (log.z) {
     for(i in 1:length(data)) {
       if(any(data[[i]][[1]] == 0)) {
-        .throw_warning("Found zero values in x-column of dataset ", i,
+        .throw_warning("Zeros found in x-column of dataset ", i,
                        ", 'log.z' set to FALSE")
         log.z <- FALSE
       }
@@ -610,31 +608,26 @@ plot_AbanicoPlot <- function(
                                  extra = "a percentile of the form 'pNN' (e.g. 'p05')")
   .validate_length(dispersion, 1)
 
-  valid.pos <- c("left", "center", "right", "topleft", "top", "topright",
-                 "bottomleft", "bottom", "bottomright")
   .validate_class(summary, "character")
-  if (is.numeric(summary.pos)) {
-    .validate_length(summary.pos, 2)
-    if (anyNA(summary.pos))
-      .throw_error("'summary.pos' cannot contain missing values")
-  }
-  else {
-    summary.pos <- .validate_args(summary.pos, c("sub", valid.pos))
-  }
+  summary.pos <- .validate_position(summary.pos, sub = TRUE)
   .validate_class(legend, "character", null.ok = TRUE)
-  if (is.numeric(legend.pos)) {
-    .validate_length(legend.pos, 2)
-    if (anyNA(legend.pos))
-      .throw_error("'legend.pos' cannot contain missing values")
-  } else {
-    legend.pos <- .validate_args(legend.pos, valid.pos)
-  }
+  legend.pos <- .validate_position(legend.pos)
 
+  .validate_class(stats, "character", null.ok = TRUE, length = 1:3)
   summary.method <- .validate_args(summary.method, c("MCM", "weighted", "unweighted"))
   frame <- .validate_args(frame, c(0, 1, 2, 3))
 
   ## check/set layout definitions
-  layout <- get_Layout(layout = list(...)$layout %||% "default")
+  extraArgs <- list(...)
+  layout <- get_Layout(layout = extraArgs$layout %||% "default")
+
+  ## subset per-dataset arguments to account for removed datasets
+  if (any(nrows.zero)) {
+    for (arg in c("col", "lty", "lwd", "pch")) {
+      if (arg %in% names(extraArgs))
+        extraArgs[[arg]] <- extraArgs[[arg]][!nrows.zero]
+    }
+  }
 
   if (is.null(bar))
     bar <- rep(TRUE, length(data))
@@ -668,19 +661,14 @@ plot_AbanicoPlot <- function(
   ## create preliminary global data set
   De.global <- unlist(lapply(data, function(x) x[, 1]))
 
-  ## additional arguments
-  extraArgs <- list(...)
-  breaks <- extraArgs$breaks %||% "Sturges"
-  fun <- isTRUE(list(...)$fun)
-
   ## check/set bw-parameter
-  for(i in 1:length(data)) {
-    bw.test <- try(density(x = data[[i]][,1],
-                           bw = bw),
-                   silent = TRUE)
+  bw <- extraArgs$bw %||% "SJ"
+  .validate_class(bw, c("numeric", "character"))
+  if (length(De.global) > 1) {
+    bw.test <- try(density(x = De.global, bw = bw), silent = TRUE)
     if (inherits(bw.test, "try-error")) {
-      bw <- "nrd0"
-      .throw_warning("Option for 'bw' not valid, reset to 'nrd0'")
+      bw <- "SJ"
+      .throw_warning("Option for 'bw' not valid, reset to 'SJ'")
     }
   }
 
@@ -708,14 +696,18 @@ plot_AbanicoPlot <- function(
     De.global <- De.global + De.add
   }
 
+  if (!is.null(line.mtext) && mtext == "" && summary.pos != "sub")
+    mtext <- line.mtext
+
   ## calculate and append statistical measures --------------------------------
 
   ## append optional weights for KDE curve
-  use.weights <- "weights" %in% names(extraArgs) && extraArgs$weights
+  use.weights <- isTRUE(extraArgs$weights)
 
   ## compute statistics and append all additional columns
   data <- lapply(seq_along(data), function(i, De.add) {
     x <- data[[i]]
+    colnames(x) <- c("De", "De.Error")
     z <- if (log.z) log(x[, 1]) else x[, 1]
     se <- if (log.z) x[, 2] / (x[, 1] + De.add) else x[, 2]
 
@@ -740,29 +732,9 @@ plot_AbanicoPlot <- function(
   }, De.add = De.add)
 
   ## generate global data set
-  data.global <- cbind(data[[1]], 1)
-  colnames(data.global) <- rep("", 10)
-
-  if(length(data) > 1) {
-    for(i in 2:length(data)) {
-      data.add <- cbind(data[[i]], i)
-      colnames(data.add) <- rep("", 10)
-      data.global <- rbind(data.global,
-                           data.add)
-    }
-  }
-
-  ## create column names
-  colnames(data.global) <- c("De",
-                             "error",
-                             "z",
-                             "se",
-                             "z.central",
-                             "precision",
-                             "std.estimate",
-                             "std.estimate.plot",
-                             "weights",
-                             "data set")
+  data.global <- do.call(rbind, lapply(seq_along(data), function(i) {
+    cbind(data[[i]], i)
+  }))
 
   ## calculate global data statistics
   stats.global <- calc_Statistics(data = data.global[,3:4])
@@ -778,25 +750,15 @@ plot_AbanicoPlot <- function(
                                z.0)
   }
 
-  ## create column names
-  for(i in 1:length(data)) {
-    colnames(data[[i]]) <- c("De",
-                             "error",
-                             "z",
-                             "se",
-                             "z.central",
-                             "precision",
-                             "std.estimate",
-                             "std.estimate.plot",
-                             "weights")
-  }
-
   ## re-calculate standardised estimate for plotting
-  for(i in 1:length(data)) {
+  col.names <- c("De", "error", "z", "se", "z.central", "precision",
+                 "std.estimate", "std.estimate.plot", "weights")
+  for (i in seq_along(data)) {
     data[[i]][,8] <- (data[[i]][,3] - z.central.global) / data[[i]][,4]
+    colnames(data[[i]]) <- col.names
   }
-
   data.global[, 8] <- unlist(lapply(data, function(x) x[, 8]))
+  colnames(data.global) <- c(col.names, "idx.dataset")
 
   ## print message for too small scatter
   if(max(abs(1 / data.global[6])) < 0.02) {
@@ -805,8 +767,8 @@ plot_AbanicoPlot <- function(
   }
 
   ## read out additional arguments---------------------------------------------
-  extraArgs <- list(...)
 
+  breaks <- extraArgs$breaks %||% "Sturges"
   main <- extraArgs$main %||% expression(D[e] * " " * "distribution")
   sub <- extraArgs$sub %||% ""
 
@@ -831,6 +793,7 @@ plot_AbanicoPlot <- function(
   } else {
     z.span <- (mean(data.global[,1]) * 0.5) / (sd(data.global[,1]) * 100)
     z.span <- ifelse(z.span > 1, 0.9, z.span)
+    if (is.na(z.span)) z.span <- 0.5  # arbitrary value
     limits.z <- c((0.9 - z.span) * min(data.global[[1]]),
                   (1.1 + z.span) * max(data.global[[1]]))
   }
@@ -852,14 +815,15 @@ plot_AbanicoPlot <- function(
   } else {
     y.span <- (mean(data.global[,1]) * 10) / (sd(data.global[,1]) * 100)
     y.span <- ifelse(y.span > 1, 0.98, y.span)
-    limits.y <- c(-(1 + y.span) * max(abs(data.global[,7])),
-                  (1 + y.span) * max(abs(data.global[,7])))
+    if (is.na(y.span)) y.span <- 0.5  # arbitrary value
+    limits.y <- (1 + y.span) * max(abs(data.global$std.estimate)) * c(-1, 1)
   }
 
   cex <- extraArgs$cex %||% 1
   lty <- extraArgs$lty %||% rep(rep(2, length(data)), length(bar))
   lwd <- extraArgs$lwd %||% rep(rep(1, length(data)), length(bar))
   pch <- extraArgs$pch %||% rep(20, length(data))
+  fun <- isTRUE(extraArgs$fun)
 
   if("col" %in% names(extraArgs)) {
     bar.col <- extraArgs$col
@@ -873,7 +837,7 @@ plot_AbanicoPlot <- function(
   } else {
     .init_color <- function(key) {
       val <- layout$abanico$colour[[key]]
-      if (length(val) == 1) 1:length(data) else val
+      if (length(val) == 1) which(!nrows.zero) else val
     }
 
     bar.col <- .init_color("bar.fill")
@@ -993,28 +957,6 @@ plot_AbanicoPlot <- function(
   if (rotate)
     ellipse <- ellipse[, 2:1]
 
-  ## calculate statistical labels
-  stats.data <- matrix(nrow = 3, ncol = 3)
-  data.stats <- as.numeric(data.global[,1])
-
-  if ("min" %in% stats) {
-    stats.data[1, 3] <- data.stats[data.stats == min(data.stats)][1]
-    stats.data[1, 1] <- data.global[data.stats == stats.data[1, 3], 6][1]
-    stats.data[1, 2] <- data.global[data.stats == stats.data[1, 3], 8][1]
-  }
-
-  if ("max" %in% stats) {
-    stats.data[2, 3] <- data.stats[data.stats == max(data.stats)][1]
-    stats.data[2, 1] <- data.global[data.stats == stats.data[2, 3], 6][1]
-    stats.data[2, 2] <- data.global[data.stats == stats.data[2, 3], 8][1]
-  }
-
-  if ("median" %in% stats) {
-    stats.data[3, 3] <- data.stats[data.stats == quantile(data.stats, 0.5, type = 3)]
-    stats.data[3, 1] <- data.global[data.stats == stats.data[3, 3], 6][1]
-    stats.data[3, 2] <- data.global[data.stats == stats.data[3, 3], 8][1]
-  }
-
   ## index to pick according to the value of the rotate argument
   rotate.idx <- if (!rotate) 1 else 2
   min.ellipse <- min(ellipse[, rotate.idx])
@@ -1053,6 +995,7 @@ plot_AbanicoPlot <- function(
                           "q.75",
                           "skewness",
                           "kurtosis")
+  De.densities <- vector("list", length(data))
 
   ## placeholder for the summary label text
   label.text <- list()
@@ -1079,17 +1022,16 @@ plot_AbanicoPlot <- function(
       De.stats[i,2:4] <- exp(De.stats[i,2:4]) - De.add
     }
 
-    ## kdemax - here a little doubled as it appears below again
-    De.density <- try(density(x = data[[i]][,1],
+    ## kdemax
+    De.densities[[i]] <- try(density(x = data[[i]][,1],
                               kernel = "gaussian",
                               bw = bw,
                               from = limits.z[1],
                               to = limits.z[2]),
                       silent = TRUE)
 
-    De.stats[i, 4] <- NA
-    if (!inherits(De.density, "try-error")) {
-      De.stats[i, 4] <- De.density$x[which.max(De.density$y)]
+    if (!inherits(De.densities[[i]], "try-error")) {
+      De.stats[i, 4] <- De.densities[[i]]$x[which.max(De.densities[[i]]$y)]
     }
 
     ## convert to a list of lists, like the object produced by calc_Statistics
@@ -1182,12 +1124,21 @@ plot_AbanicoPlot <- function(
   KDE.bw <- numeric(length(data))
 
   for(i in 1:length(data)) {
-    KDE.i <- density(x = data[[i]][,3],
+    z.vals <- data[[i]][, 3]
+    KDE.i <- tryCatch(density(x = z.vals,
                      kernel = "gaussian",
                      bw = bw,
                      from = ellipse.values[1],
                      to = ellipse.values[2],
-                     weights = data[[i]]$weights)
+                     weights = data[[i]]$weights),
+                     error = function(e) {
+                       if (length(z.vals) < 2 && kde) {
+                         .throw_warning("Data set ", i, " contains a single point, ",
+                                        "its density curve cannot be plotted ",
+                                        "unless a numeric value for 'bw' is provided")
+                       }
+                       list(x = z.vals, y = NA, bw = NA)
+                     })
     KDE.bw[i] <- KDE.i$bw
     KDE[[i]] <- rbind(c(min(KDE.i$x), 0),
                       cbind(KDE.i$x, KDE.i$y),
@@ -1198,7 +1149,7 @@ plot_AbanicoPlot <- function(
   KDE.bw <- mean(KDE.bw, na.rm = TRUE)
 
   ## calculate KDE width
-  KDE.max <- max(vapply(KDE, function(x) max(x[, 2]), numeric(1)))
+  KDE.max <- max(vapply(KDE, function(x) max(x[, 2], na.rm = TRUE), numeric(1)))
 
   ## optionally adjust KDE width for boxplot option
   if (boxplot) {
@@ -1213,10 +1164,6 @@ plot_AbanicoPlot <- function(
   } else {
     shift.lines <- 1
   }
-
-  ## extract original plot parameters
-  bg.original <- par()$bg
-  par(bg = layout$abanico$colour$background)
 
   ## setup plot area
   par(mar = if (!rotate) c(4.5, 4.5, shift.lines + 1.5, 7) else c(4, 4, shift.lines + 5, 4),
@@ -1285,7 +1232,6 @@ plot_AbanicoPlot <- function(
     polygon.rot(x = par()$usr[2] * c(1, 1, 2, 2),
                 y = c(min(ellipse[, 2]), max(ellipse[, 2]),
                       max(ellipse[, 2]), min(ellipse[, 2])) * 2,
-            col = bg.original,
             lty = 0)
 
     ## optionally, plot dispersion polygon
@@ -1298,37 +1244,24 @@ plot_AbanicoPlot <- function(
       }
     }
 
-    ## optionally, add minor grid lines
-    if (grid.minor != "none") {
-      for (i in 1:length(tick.values.minor)) {
+    ## optionally, add minor and major grid lines
+    .add.grid <- function(tick.values, grid.col) {
+      for (i in 1:length(tick.values)) {
+        y.val <- (tick.values[i] - z.central.global) * min.ellipse
         lines.rot(x = c(limits.x[1], min.ellipse),
-              y = c(0, tick.values.minor[i] - z.central.global) *
-                min.ellipse,
-              col = grid.minor,
+              y = c(0, y.val),
+              col = grid.col,
               lwd = 1)
         lines.rot(x = c(xy.0, y.max),
-              y = c(tick.values.minor[i] - z.central.global,
-                    tick.values.minor[i] - z.central.global) * min.ellipse,
-              col = grid.minor,
+              y = c(y.val, y.val),
+              col = grid.col,
               lwd = 1)
       }
     }
-
-    ## optionally, add major grid lines
-    if (grid.major != "none") {
-      for (i in 1:length(tick.values.major)) {
-        lines.rot(x = c(limits.x[1], min.ellipse),
-              y = c(0, tick.values.major[i] - z.central.global) *
-                min.ellipse,
-              col = grid.major,
-              lwd = 1)
-        lines.rot(x = c(xy.0, y.max),
-              y = c(tick.values.major[i] - z.central.global,
-                    tick.values.major[i] - z.central.global) * min.ellipse,
-              col = grid.major,
-              lwd = 1)
-      }
-    }
+    if (grid.minor != "none")
+      .add.grid(tick.values.minor, grid.minor)
+    if (grid.major != "none")
+      .add.grid(tick.values.major, grid.major)
 
     ## optionally, plot lines for each bar
     if (lwd[1] > 0 && lty[1] > 0 && !isFALSE(bar[1])) {
@@ -1347,15 +1280,10 @@ plot_AbanicoPlot <- function(
   ## optionally add KDE plot
   if (kde) {
     ## calculate max KDE value for axis label
-    KDE.max.plot <- 0
-    for (x in data) {
-      KDE.plot <- density(x[, 1],
-                          kernel = "gaussian",
-                          bw = bw,
-                          from = limits.z[1],
-                          to = limits.z[2])
-      KDE.max.plot <- max(KDE.plot$y, KDE.max.plot)
-    }
+    KDE.max.plot <- max(vapply(De.densities, function(d) {
+      if (is.null(d) || inherits(d, "try-error")) return(NA_real_)
+      max(d$y)
+    }, numeric(1)), 0, na.rm = TRUE)
     KDE.scale <- (y.max - xy.0) / (KDE.max * 1.05)
 
     ## plot KDE lines
@@ -1662,7 +1590,7 @@ plot_AbanicoPlot <- function(
                y = data[[i]][, 8][data[[i]][, 6] <= limits.x[2]],
              col = value.dot[i],
              pch = pch[i],
-             cex = layout$abanico$dimension$pch / 100)
+             cex = extraArgs$pt.cex)
   }
 
   ## compute data for histogram and dot plot
@@ -1746,31 +1674,31 @@ plot_AbanicoPlot <- function(
   ## optionally add box plot
   if (boxplot) {
 
-    box.x <- c(min.ellipse + KDE.max * 0.85, xy.0 + KDE.max * 0.95)
+    box.x <- xy.0 + (xy.0 - min.ellipse) * c(1.7, 3)
     for (i in 1:length(data)) {
       ## calculate boxplot data without plotting
       boxplot.data <- graphics::boxplot(data[[i]][, 3], plot = FALSE)
-      stats <- (boxplot.data$stats[, 1] - z.central.global) * min.ellipse
+      stat <- (boxplot.data$stats[, 1] - z.central.global) * min.ellipse
 
       ## draw median line
       lines.rot(x = box.x,
-                y = c(stats[3], stats[3]),
+                y = c(stat[3], stat[3]),
                 lwd = 2,
                 col = kde.line[i])
 
       ## draw p25-p75-polygon
       polygon.rot(x = rep(box.x, each = 2),
-                  y = c(stats[2], stats[4], stats[4], stats[2]),
+                  y = c(stat[2], stat[4], stat[4], stat[2]),
                   border = kde.line[i])
 
       ## draw lower whisker
       lines.rot(x = c(rep(mean(box.x), 2), box.x),
-                y = c(stats[2], stats[1], stats[1], stats[1]),
+                y = c(stat[2], stat[1], stat[1], stat[1]),
                 col = kde.line[i])
 
       ## draw upper whisker
       lines.rot(x = c(rep(mean(box.x), 2), box.x),
-                y = c(stats[4], stats[5], stats[5], stats[5]),
+                y = c(stat[4], stat[5], stat[5], stat[5]),
                 col = kde.line[i])
 
       ## draw outlier points
@@ -1819,15 +1747,32 @@ plot_AbanicoPlot <- function(
   }
 
   ## optionally add stats, i.e. min, max, median sample text
-  if (length(stats) > 0) {
-    text.rot(x = stats.data[, 1],
-             y = stats.data[, 2],
-             pos = 2,
-             labels = round(stats.data[, 3], 1),
-             family = layout$abanico$font.type$stats,
-             font = .font_style(layout$abanico$font.deco$stats),
-             cex = layout$abanico$font.size$stats / 12,
-             col = layout$abanico$colour$stats)
+  if (!is.null(stats)) {
+    ## supported functions
+    label.fun <- list(min = min,
+                      max = max,
+                      median = function(x) unname(quantile(x, 0.5, type = 3)))
+    label.fun <- label.fun[names(label.fun) %in% stats]
+
+    ## calculate label positions by applying the specified function
+    stats.data <- vapply(label.fun, function(fun) {
+      value <- fun(data.global[, 1])
+      idx <- data.global[, 1] == value
+      c(x = data.global[idx, 6][1],
+        y = data.global[idx, 8][1],
+        value = value)
+    }, numeric(3))
+
+    if (ncol(stats.data) > 0) {
+      text.rot(x = stats.data["x", ],
+               y = stats.data["y", ],
+               labels = round(stats.data["value", ], 1),
+               pos = 2,
+               family = layout$abanico$font.type$stats,
+               font = .font_style(layout$abanico$font.deco$stats),
+               cex = layout$abanico$font.size$stats / 12,
+               col = layout$abanico$colour$stats)
+    }
   }
 
   ## optionally add rug
@@ -1837,7 +1782,7 @@ plot_AbanicoPlot <- function(
     for (i in 1:length(rug.y)) {
       lines.rot(x = rug.x,
                 y = rep(rug.y[i], 2),
-                col = value.rug[data.global[i, 10]])
+                col = value.rug[data.global$idx.dataset[i]])
     }
   }
 
@@ -1943,33 +1888,42 @@ plot_AbanicoPlot <- function(
   if (interactive) {
     .require_suggested_package("plotly", "The interactive abanico plot")
 
-    ## tidy data ----
+    ### tidy data ----
     data <- plot.output
     kde <- data.frame(x = data$KDE[[1]][ ,2], y = data$KDE[[1]][ ,1])
 
-    # radial scatter plot ----
+    ### radial scatter plot ----
     point.text <- paste0("Measured value:<br />",
                          data$data.global$De, " &plusmn; ",
                          data$data.global$error, "<br />",
                          "P(",format(data$data.global$precision,  digits = 2, nsmall = 1),", ",
                          format(data$data.global$std.estimate,  digits = 2, nsmall = 1),")")
-    IAP <- plotly::plot_ly(data = data$data.global,
-                           x = data$data.global$precision,
-                           y = data$data.global$std.estimate,
-                           type = "scatter", mode = "markers",
-                           hoverinfo = "text", text = point.text,
-                           name = "Points",
-                           yaxis = "y")
+    IAP <- plotly::plot_ly(
+      data = data$data.global,
+      x = data$data.global$precision,
+      y = data$data.global$std.estimate,
+      type = "scatter",
+      mode = "markers",
+      hoverinfo = "text",
+      text = point.text,
+      name = "Points",
+      yaxis = "y"
+    )
 
     ellipse <- as.data.frame(ellipse)
-    IAP <- plotly::add_trace(IAP, data = ellipse,
-                             x = ~ellipse.x, y = ~ellipse.y,
-                             type = "scatter", mode = "lines",
-                             hoverinfo = "none", text = "",
-                             name = "z-axis (left)",
-                             line = list(color = "black",
-                                         width = 1),
-                             yaxis = "y")
+    IAP <- plotly::add_trace(
+      IAP,
+      data = ellipse,
+      x = ~ ellipse.x,
+      y = ~ ellipse.y,
+      type = "scatter",
+      mode = "lines",
+      hoverinfo = "none",
+      text = "",
+      name = "z-axis (left)",
+      line = list(color = "black", width = 1),
+      yaxis = "y"
+    )
 
     ellipse.right <- ellipse
     ellipse.right$ellipse.x <- ellipse.right$ellipse.x * 1/0.75
@@ -1996,25 +1950,31 @@ plot_AbanicoPlot <- function(
     # major z-tick lines
     for (i in 1:length(major.ticks.y)) {
       major.tick <- data.frame(x = major.ticks.x, y = rep(major.ticks.y[i], 2))
-      IAP <- plotly::add_trace(IAP, data = major.tick,
-                               x = ~x, y = ~y, showlegend = FALSE,
-                               type = "scatter", mode = "lines",
-                               hoverinfo = "none", text = "",
-                               line = list(color = "black",
-                                           width = 1),
-                               yaxis = "y")
+      IAP <- plotly::add_trace(
+        IAP, data = major.tick,
+        x = ~x, y = ~y, showlegend = FALSE,
+        type = "scatter", mode = "lines",
+        hoverinfo = "none", text = "",
+        line = list(color = "black", width = 1),
+        yaxis = "y")
     }
 
     # minor z-tick lines
     for (i in 1:length(minor.ticks.y)) {
       minor.tick <- data.frame(x = minor.ticks.x, y = rep(minor.ticks.y[i], 2))
-      IAP <- plotly::add_trace(IAP, data = minor.tick,
-                               x = ~x, y = ~y, showlegend = FALSE,
-                               type = "scatter", mode = "lines",
-                               hoverinfo = "none", text = "",
-                               line = list(color = "black",
-                                           width = 1),
-                               yaxis = "y")
+      IAP <- plotly::add_trace(
+        IAP,
+        data = minor.tick,
+        x = ~ x,
+        y = ~ y,
+        showlegend = FALSE,
+        type = "scatter",
+        mode = "lines",
+        hoverinfo = "none",
+        text = "",
+        line = list(color = "black", width = 1),
+        yaxis = "y"
+      )
     }
 
     # z-tick label
@@ -2022,71 +1982,136 @@ plot_AbanicoPlot <- function(
     tick.pos <- data.frame(x = major.ticks.x[2],
                            y = major.ticks.y)
 
-    IAP <- plotly::add_trace(IAP, data = tick.pos,
-                             x = ~x, y = ~y, showlegend = FALSE,
-                             hoverinfo = "none",
-                             text = tick.text, textposition = "right",
-                             type = "scatter", mode = "text",
-                             yaxis = "y")
+    IAP <- plotly::add_trace(
+      IAP,
+      data = tick.pos,
+      x = ~ x,
+      y = ~ y,
+      showlegend = FALSE,
+      hoverinfo = "none",
+      text = tick.text,
+      textposition = "right",
+      type = "scatter",
+      mode = "text",
+      yaxis = "y"
+    )
+    ### Central Line ----
+    central.line <- data.frame(
+      x = c(-100, data$xlim[2]*1/0.75), y = c(0, 0))
+    central.line.text <- paste0(
+      "Central value: ",
+      format(exp(z.central.global), digits = 2, nsmall = 1))
+    IAP <- plotly::add_trace(
+      IAP,
+      data = central.line,
+      x = ~ x,
+      y = ~ y,
+      name = "Central line",
+      type = "scatter",
+      mode = "lines",
+      hoverinfo = "text",
+      text = central.line.text,
+      yaxis = "y",
+      line = list(
+        color = "black",
+        width = 0.5,
+        dash = 2
+      )
+    )
 
-    # Central Line ----
-    central.line <- data.frame(x = c(-100, data$xlim[2]*1/0.75), y = c(0, 0))
-    central.line.text <- paste0("Central value: ",
-                                format(exp(z.central.global), digits = 2, nsmall = 1))
-
-    IAP <- plotly::add_trace(IAP, data = central.line,
-                             x = ~x, y = ~y, name = "Central line",
-                             type = "scatter", mode = "lines",
-                             hoverinfo = "text", text = central.line.text,
-                             yaxis = "y",
-                             line = list(color = "black",
-                                         width = 0.5,
-                                         dash = 2))
-
-    # KDE plot ----
+    ### KDE plot ----
     KDE.x <- xy.0 + KDE[[1]][, 2] * KDE.scale
     KDE.y <- (KDE[[1]][ ,1] - z.central.global) * min(ellipse[,1])
     KDE.curve <- data.frame(x = KDE.x, y = KDE.y)
     KDE.curve <- KDE.curve[KDE.curve$x != xy.0, ]
-    KDE.text <- paste0("Value:",
-                       format(exp(KDE.curve$x), digits = 2, nsmall = 1), "<br />",
-                       "Density:",
-                       format(KDE.curve$y, digits = 2, nsmall = 1))
+    KDE.text <- paste0(
+      "Value:",
+       format(exp(KDE.curve$x), digits = 2, nsmall = 1), "<br />",
+        "Density:",
+       format(KDE.curve$y, digits = 2, nsmall = 1))
 
-    IAP <- plotly::add_trace(IAP, data = KDE.curve,
-                             x = ~x, y = ~y, name = "KDE",
-                             type = "scatter", mode = "lines",
-                             hoverinfo = "text",
-                             text = KDE.text,
-                             line = list(color = "red"),
-                             yaxis = "y")
-
-    # set layout ----
-    IAP <- plotly::layout(IAP,
-                          hovermode = "closest",
-                          dragmode = "pan",
-                          xaxis = list(range = c(data$xlim[1], data$xlim[2] * 1/0.65),
-                                       zeroline = FALSE,
-                                       showgrid = FALSE,
-                                       tickmode = "array",
-                                       tickvals = x.axis.ticks),
-                          yaxis = list(range = data$ylim,
-                                       zeroline = FALSE,
-                                       showline = FALSE,
-                                       showgrid = FALSE,
-                                       tickmode = "array",
-                                       tickvals = c(-2, 0, 2)),
-                          shapes = list(list(type = "rect", # 2 sigma bar
-                                             x0 = 0, y0 = -2,
-                                             x1 = bars.x[3], y1 = 2,
-                                             xref = "x", yref = "y",
-                                             fillcolor = "grey",
-                                             opacity = 0.2))
+    IAP <- plotly::add_trace(
+      IAP,
+      data = KDE.curve,
+      x = ~ x,
+      y = ~ y,
+      name = "KDE",
+      type = "scatter",
+      mode = "lines",
+      hoverinfo = "text",
+      text = KDE.text,
+      line = list(color = "red"),
+      yaxis = "y"
     )
 
-    # show and return interactive plot ----
-    #print(plotly::subplot(IAP, IAP.kde))
-    print(IAP)
+    ### set layout -----------------
+    ## fall back to character
+    zlab.text <- if (is.expression(zlab)) "D" else as.character(zlab)
+
+    ## subtitle content, one line per data set (as in the base "sub" summary)
+    summary.text <- paste(unlist(label.text), collapse = " | ")
+
+    IAP <- plotly::layout(
+      IAP,
+      title = list(
+        text = if (is.expression(main)) "D" else as.character(main)),
+      hovermode = "closest",
+      dragmode = "zoom",
+      showlegend = FALSE,
+      xaxis = list(
+        title = xlab[2],
+        range = c(data$xlim[1], data$xlim[2] * 1/0.65),
+        zeroline = FALSE,
+        showgrid = TRUE,
+        tickmode = "array",
+        tickvals = x.axis.ticks),
+      yaxis = list(
+        title = ylab,
+        range = data$ylim,
+        zeroline = FALSE,
+        showline = FALSE,
+        showgrid = FALSE,
+        tickmode = "array",
+        tickvals = c(-2, 0, 2)),
+      shapes = list(list(
+        type = "rect",
+        # 2 sigma bar
+        x0 = 0,
+        y0 = -2,
+        x1 = bars.x[3],
+        y1 = 2,
+        xref = "x",
+        yref = "y",
+        fillcolor = "grey",
+        opacity = 0.2
+      )),
+      annotations = list(
+        list(
+          x = 1.02,
+          y = 0,
+          xref = "paper",
+          yref = "y",
+          text = zlab.text,
+          showarrow = FALSE,
+          textangle = 90,
+          align = "left"),
+        list(
+          x = 0,
+          y = 1,
+          xref = "paper",
+          yref = "paper",
+          text = unlist(label.text),
+          showarrow = FALSE,
+          textangle = 0,
+          align = "center")),
+
+      showlegend = FALSE
+    )
+
+    ### show and return interactive plot ----
+    if(is.null(list(...)$.shiny))
+      print(IAP)
+
     return(IAP)
   }
 

@@ -64,15 +64,16 @@ test_that("check functionality", {
 test_that("snapshot tests", {
   skip_on_cran()
 
-  set.seed(1)
   snapshot.tolerance <- 5.0e-6
 
   SW({
   expect_snapshot_RLum(analyse_Al2O3C_ITC(data_ITC),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
   expect_snapshot_RLum(analyse_Al2O3C_ITC(list(data_ITC),
                                           signal_integral = 2,
                                           method_control = list(fit.method = "SSE")),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
   })
 })
@@ -86,5 +87,9 @@ test_that("graphical snapshot tests", {
   SW({
     vdiffr::expect_doppelganger("default",
                                 analyse_Al2O3C_ITC(data_ITC))
+    vdiffr::expect_doppelganger("signal_integral pt.cex",
+                                analyse_Al2O3C_ITC(data_ITC,
+                                                   signal_integral = 1:10,
+                                                   pt.cex = 1.5))
   })
 })

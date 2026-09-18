@@ -9,7 +9,7 @@ calc_SourceDoseRate(
   calib.date,
   calib.dose.rate,
   calib.error,
-  source.type = c("Sr-90", "Am-214", "Co-60", "Cs-137"),
+  source.type = c("Sr-90", "Am-241", "Co-60", "Cs-137"),
   dose.rate.unit = c("Gy/s", "Gy/min"),
   predict = NULL
 )
@@ -29,7 +29,7 @@ dose rate at date of calibration in Gy/s or Gy/min.}
 error of dose rate at date of calibration Gy/s or Gy/min.}
 
 \item{source.type}{\link{character} (\emph{with default}):
-specify irradiation source (\code{Sr-90}, \code{Co-60}, \code{Cs-137}, \code{Am-214}),
+specify irradiation source (\code{Sr-90}, \code{Co-60}, \code{Cs-137}, \code{Am-241}),
 see details for further information.}
 
 \item{dose.rate.unit}{\link{character} (\emph{with default}):
@@ -87,7 +87,7 @@ original .BIN file (using e.g., \code{BINfile <- Luminescence::read_BIN2R()} and
 \tabular{rlll}{
 \strong{#} \tab \strong{Source type} \tab \strong{T.1/2} \tab \strong{Reference} \cr
 \verb{[1]} \tab Sr-90 \tab 28.90 y \tab NNDC, Brookhaven National Laboratory \cr
-\verb{[2]} \tab Am-214 \tab 432.6 y \tab NNDC, Brookhaven National Laboratory \cr
+\verb{[2]} \tab Am-241 \tab 432.6 y \tab NNDC, Brookhaven National Laboratory \cr
 \verb{[3]} \tab Co-60 \tab 5.274 y \tab NNDC, Brookhaven National Laboratory \cr
 \verb{[4]} \tab Cs-137 \tab 30.08 y \tab NNDC, Brookhaven National Laboratory}
 }
@@ -140,7 +140,7 @@ xtable::xtable(get_RLum(dose.rate))
 } 
 
 \section{How to cite}{
-Fuchs, M.C., Kreutzer, S., 2026. calc_SourceDoseRate(): Calculation of the source dose rate via the date of measurement. Function version 0.3.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Fuchs, M.C., Kreutzer, S., 2026. calc_SourceDoseRate(): Calculation of the source dose rate via the date of measurement. Function version 0.3.6. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \references{

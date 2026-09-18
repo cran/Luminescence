@@ -36,6 +36,11 @@ test_that("input validation", {
                  "'na.rm' is deprecated, missing values are always")
   expect_message(calc_CentralDose(temp_NA),
                  "NA values removed from dataset")
+  expect_error(calc_CentralDose(temp_NA[1:2, ]),
+               "After NA removal, 'data' was left with fewer than two rows")
+  expect_error(expect_message(calc_CentralDose(data.frame(a = -1:1, b = Inf)),
+                              "Inf values found in 'data', replaced by NA"),
+               "After NA removal, 'data' was left with fewer than two rows")
   })
 })
 
@@ -72,12 +77,14 @@ test_that("snapshot tests", {
                        tolerance = snapshot.tolerance)
 
   expect_snapshot_RLum(calc_CentralDose(temp_NA, log = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
 
   ## more coverage
   df <- data.frame(De = c(1e-160, 1e-156, 1e-120, 4e-22),
                    De.err = c(1e5, 1e40, 1e12, 1e28))
   expect_snapshot_RLum(calc_CentralDose(df),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
   })
 })
@@ -99,4 +106,13 @@ test_that("graphical snapshot tests", {
                               calc_CentralDose(ExampleData.DeValues$CA1,
                                                sigmab = 0.3))
   })
+})
+
+test_that("regression tests", {
+  testthat::skip_on_cran()
+
+  ## issue 1628
+  expect_s4_class(calc_CentralDose(data.frame(De = rep(10, 3), err = 1:3),
+                                   log = FALSE, verbose = FALSE),
+                  "RLum.Results")
 })

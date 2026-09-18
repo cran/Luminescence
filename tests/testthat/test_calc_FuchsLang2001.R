@@ -15,6 +15,9 @@ test_that("input validation", {
                "'cvThreshold' should be a single positive value")
   expect_error(calc_FuchsLang2001(ExampleData.DeValues$BT998, startDeValue = numeric()),
                "'startDeValue' should be a single positive integer value")
+  expect_error(calc_FuchsLang2001(ExampleData.DeValues$BT998, startDeValue = 50),
+               "'startDeValue' exceeds the number of rows in 'data' (25)",
+               fixed = TRUE)
   expect_error(calc_FuchsLang2001(ExampleData.DeValues$BT998, plot = NA),
                "'plot' should be a single logical value")
   expect_error(calc_FuchsLang2001(ExampleData.DeValues$BT998, verbose = NA),
@@ -28,15 +31,20 @@ test_that("snapshot tests", {
 
   expect_snapshot_RLum(temp <- calc_FuchsLang2001(data = ExampleData.DeValues$BT998,
                                           cvThreshold = 5,
-                                          plot = FALSE,
-                                          verbose = FALSE),
+                                          plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
 
   ## using an RLum.Results object as input
   SW({
   expect_snapshot_RLum(calc_FuchsLang2001(data = temp, startDeValue = 24,
                                           plot = FALSE),
+                       expect_snapshot_output = TRUE,
                        tolerance = snapshot.tolerance)
+  expect_snapshot_output(calc_FuchsLang2001(data = temp, startDeValue = 23,
+                                            plot = FALSE)@data$usedDeValues)
+  expect_snapshot_output(calc_FuchsLang2001(data = temp, startDeValue = 25,
+                                            plot = FALSE)@data$usedDeValues)
   })
 })
 

@@ -23,7 +23,7 @@ A \link{list} with the object repeated.
 The function replicates \link[=RLum-class]{RLum} objects and returns a list of such
 objects.
 }
-\section{Functions}{
+\section{Methods (by class)}{
 \itemize{
 \item \code{replicate_RLum(RLum)}: Replication method for \link[=RLum-class]{RLum} objects.
 
@@ -40,7 +40,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. replicate_RLum(): General replication function for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. replicate_RLum(): General replication function for RLum-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

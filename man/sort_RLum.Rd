@@ -43,7 +43,7 @@ The function provides a generalised access point for specific \link[=RLum-class]
 and \link[=Risoe.BINfileData-class]{Risoe.BINfileData} objects. Depending on the input object,
 the corresponding function will be selected.
 }
-\section{Functions}{
+\section{Methods (by class)}{
 \itemize{
 \item \code{sort_RLum(list)}: Returns a list of sorted \link[=RLum-class]{RLum} objects.
 
@@ -85,7 +85,7 @@ Marco Colombo, Institute of Geography, Heidelberg University (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Colombo, M., 2026. sort_RLum(): Sort data for RLum-class and Risoe.BINfileData-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Colombo, M., 2026. sort_RLum(): Sort data for RLum-class and Risoe.BINfileData-class objects. Function version 0.1.0. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{utilities}

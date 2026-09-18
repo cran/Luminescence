@@ -4,12 +4,14 @@
 \alias{merge_RLum.Analysis}
 \title{Merge function for RLum.Analysis S4 class objects}
 \usage{
-merge_RLum.Analysis(objects)
+merge_RLum.Analysis(object, ...)
 }
 \arguments{
-\item{objects}{\link{list} of \link[=RLum.Analysis-class]{RLum.Analysis} (\strong{required}):
+\item{object}{\link{list} of \link[=RLum.Analysis-class]{RLum.Analysis} (\strong{required}):
 list of S4 objects of class \code{RLum.Analysis}. Furthermore other objects of
 class \link[=RLum-class]{RLum} can be added, see details.}
+
+\item{...}{currently not used.}
 }
 \value{
 Returns an \link[=RLum.Analysis-class]{RLum.Analysis} object ordered according to the order
@@ -29,7 +31,7 @@ The information for the slot 'protocol' is taken from the first
 least one object of type \link[=RLum.Analysis-class]{RLum.Analysis} has to be provided.
 }
 \section{Function version}{
- 0.2.1
+ 0.2.4
 }
 
 \examples{
@@ -55,7 +57,7 @@ Sebastian Kreutzer, F2.1 Geophysical Parametrisation/Regionalisation, LIAG - Ins
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., 2026. merge_RLum.Analysis(): Merge function for RLum.Analysis S4 class objects. Function version 0.2.1. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., 2026. merge_RLum.Analysis(): Merge function for RLum.Analysis S4 class objects. Function version 0.2.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
 \keyword{internal}

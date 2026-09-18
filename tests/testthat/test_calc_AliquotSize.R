@@ -85,7 +85,6 @@ test_that("check functionality", {
 test_that("snapshot tests", {
   testthat::skip_on_cran()
 
-  set.seed(1)
   snapshot.tolerance <- 1.5e-4
 
   SW({
@@ -95,6 +94,7 @@ test_that("snapshot tests", {
       MC.iter = 20,
       plot = FALSE,
       verbose = TRUE),
+      expect_snapshot_output = TRUE,
       tolerance = snapshot.tolerance)
 
   expect_message(
@@ -103,8 +103,8 @@ test_that("snapshot tests", {
       sample.diameter = 8,
       grains.counted = c(2525, 2312, 2880),
       MC.iter = 20,
-      plot = FALSE,
-      verbose = FALSE),
+      plot = FALSE),
+      expect_snapshot_output = TRUE,
       tolerance = snapshot.tolerance),
   "Monte Carlo simulation is only available for estimating the amount of")
 
@@ -115,6 +115,7 @@ test_that("snapshot tests", {
       MC.iter = 20,
       plot = FALSE,
       verbose = TRUE),
+      expect_snapshot_output = TRUE,
       tolerance = snapshot.tolerance)
 
   ## regression test - issue 1114
@@ -123,6 +124,7 @@ test_that("snapshot tests", {
       sample.diameter = 7,
       MC.iter = 10,
       plot = FALSE),
+      expect_snapshot_output = TRUE,
       tolerance = snapshot.tolerance)
   })
 })

@@ -36,9 +36,9 @@ of the natural \code{Lx/Tx} values.}
 one curve object. Large numbers slow down the plotting process and are
 usually not needed.}
 
-\item{...}{Further arguments and graphical parameters to be passed.
-In particular: \code{main}, \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{lty}, \code{lwd}, \code{pch},
-\code{col.pch}, \code{col.lty}, \code{mtext}}
+\item{...}{further arguments and graphical parameters to control the plot
+output. Supported are: \code{main}, \code{xlab}, \code{ylab}, \code{xlim}, \code{ylim}, \code{lty}, \code{lwd},
+\code{pch}, \code{col.pch}, \code{col.lty}, \code{mtext}, and \code{pt.cex} (point size).}
 }
 \value{
 An \link[=RLum.Results-class]{RLum.Results} object is returned:
@@ -73,7 +73,7 @@ use option \code{source_dose_rate} or perform your SAR analysis with the dose
 points in Gy (better axis scaling).
 }
 \section{Function version}{
- 0.2.4
+ 0.2.5
 }
 
 \examples{
@@ -105,6 +105,6 @@ Christoph Burow, University of Cologne (Germany)
 , RLum Developer Team} 
 
 \section{How to cite}{
-Kreutzer, S., Burow, C., 2026. plot_DRCSummary(): Create a Dose-Response Curve Summary Plot. Function version 0.2.4. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., Boer, A.d., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.0. https://r-lum.github.io/Luminescence/
+Kreutzer, S., Burow, C., 2026. plot_DRCSummary(): Create a Dose-Response Curve Summary Plot. Function version 0.2.5. In: Kreutzer, S., Burow, C., Dietze, M., Fuchs, M.C., Schmidt, C., Fischer, M., Friedrich, J., Mercier, N., Philippe, A., Riedesel, S., Autzen, M., Mittelstrass, D., Gray, H.J., Galharret, J., Colombo, M., Steinbuch, L., de Boer, A., Bluszcz, A., 2026. Luminescence: Comprehensive Luminescence Dating Data Analysis. R package version 1.3.1. https://r-lum.github.io/Luminescence/
 }
 
